@@ -751,6 +751,93 @@ const EN={
 };
 function objectEnglish(word){return nounEnglish(word,'acc')}
 
+const PLAIN_KHABAR=/(^|[\s:،])خَبَرٌ(?=$|[\s،.])/u;
+function appendAnalysis(target,arabic,english){
+ target.ar=`${target.ar} ${arabic}`;
+ target.en=`${target.en} ${english}`;
+}
+function phraseFrom(tokens,start,end=tokens.length){
+ return tokens.slice(start,end).map(item=>item.word).join(' ');
+}
+function isPrepositionalLead(item){
+ return item.ar.includes('حَرْفُ جَرٍّ')||item.ar.includes('ظَرْفٌ');
+}
+function completeNominalAnalysis(data){
+ if(!data||!Array.isArray(data.tokens)) throw new Error('A generated sentence has no token analysis.');
+
+ const mubtadaIndexes=data.tokens
+   .map((item,index)=>item.ar.includes('مُبْتَدَأٌ')?index:-1)
+   .filter(index=>index>=0);
+ let khabarIndexes=data.tokens
+   .map((item,index)=>PLAIN_KHABAR.test(item.ar)?index:-1)
+   .filter(index=>index>=0);
+ const ismInnaCount=data.tokens.filter(item=>item.ar.includes('اسْمُ «')).length;
+ const khabarInnaCount=data.tokens.filter(item=>item.ar.includes('خَبَرُ «')).length;
+
+ if(ismInnaCount!==khabarInnaCount){
+   throw new Error(`Unmatched ism/khabar of inna in: ${data.sentence}`);
+ }
+ if(!mubtadaIndexes.length){
+   if(khabarIndexes.length) throw new Error(`Khabar without a mubtada in: ${data.sentence}`);
+   return data;
+ }
+ if(mubtadaIndexes.length!==1){
+   throw new Error(`Expected one mubtada, found ${mubtadaIndexes.length}, in: ${data.sentence}`);
+ }
+ if(khabarIndexes.length>1){
+   throw new Error(`Expected one khabar, found ${khabarIndexes.length}, in: ${data.sentence}`);
+ }
+
+ const mubtadaIndex=mubtadaIndexes[0];
+ const mubtada=data.tokens[mubtadaIndex];
+ if(!khabarIndexes.length){
+   if(mubtada.ar.includes('مُؤَخَّرٌ')){
+     const phraseStart=data.tokens.findIndex((item,index)=>index<mubtadaIndex&&isPrepositionalLead(item));
+     if(phraseStart<0) throw new Error(`Delayed mubtada without a fronted khabar in: ${data.sentence}`);
+     const phrase=phraseFrom(data.tokens,phraseStart,mubtadaIndex);
+     appendAnalysis(
+       data.tokens[phraseStart],
+       `${phrase}: شِبْهُ جُمْلَةٍ مِنَ الْجَارِّ وَالْمَجْرُورِ فِي مَحَلِّ رَفْعٍ خَبَرٌ مُقَدَّمٌ لِلْمُبْتَدَأِ الْمُؤَخَّرِ «${mubtada.word}».`,
+       `The complete prepositional phrase “${phrase}” is the fronted khabar of the delayed mubtadaʾ “${mubtada.word}”.`
+     );
+   }else{
+     const verbIndex=data.tokens.findIndex((item,index)=>index>mubtadaIndex&&item.ar.includes('فِعْلٌ مُضَارِعٌ'));
+     if(verbIndex>=0){
+       const verb=data.tokens[verbIndex];
+       const clause=phraseFrom(data.tokens,mubtadaIndex+1);
+       const usesWaw=verb.ar.includes('وَالْوَاوُ ضَمِيرٌ مُتَّصِلٌ');
+       const linkArabic=usesWaw
+         ?`وَوَاوُ الْجَمَاعَةِ فِي الْفِعْلِ تَعُودُ عَلَى الْمُبْتَدَأِ «${mubtada.word}»، وَهِيَ الرَّابِطُ بَيْنَهُمَا.`
+         :`وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ «هُوَ» يَعُودُ عَلَى الْمُبْتَدَأِ «${mubtada.word}»، وَهُوَ الرَّابِطُ بَيْنَهُمَا.`;
+       const linkEnglish=usesWaw
+         ?`The wāw of the group is the subject and refers back to the mubtadaʾ “${mubtada.word}”, forming the required link.`
+         :`Its subject is the optionally hidden pronoun “he”, which refers back to the mubtadaʾ “${mubtada.word}” and forms the required link.`;
+       appendAnalysis(
+         verb,
+         `${linkArabic} وَالْجُمْلَةُ الْفِعْلِيَّةُ «${clause}» فِي مَحَلِّ رَفْعٍ خَبَرٌ لِلْمُبْتَدَأِ «${mubtada.word}».`,
+         `${linkEnglish} The complete verbal sentence “${clause}” is the khabar of that mubtadaʾ.`
+       );
+     }else{
+       const phraseStart=data.tokens.findIndex((item,index)=>index>mubtadaIndex&&isPrepositionalLead(item));
+       if(phraseStart<0) throw new Error(`Mubtada without a recognizable khabar in: ${data.sentence}`);
+       const phrase=phraseFrom(data.tokens,phraseStart);
+       appendAnalysis(
+         data.tokens[phraseStart],
+         `${phrase}: شِبْهُ جُمْلَةٍ مِنَ الْجَارِّ وَالْمَجْرُورِ فِي مَحَلِّ رَفْعٍ خَبَرٌ لِلْمُبْتَدَأِ «${mubtada.word}».`,
+         `The complete prepositional phrase “${phrase}” is the khabar of the mubtadaʾ “${mubtada.word}”.`
+       );
+     }
+   }
+   khabarIndexes=data.tokens
+     .map((item,index)=>PLAIN_KHABAR.test(item.ar)?index:-1)
+     .filter(index=>index>=0);
+ }
+ if(khabarIndexes.length!==mubtadaIndexes.length){
+   throw new Error(`Mubtada/khabar pairing failed in: ${data.sentence}`);
+ }
+ return data;
+}
+
 const templates=[];
 function add(starts,form,sign,build){templates.push({id:templates.length,starts,form,sign,build})}
 const VISIBLE_DAMMA='الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ';
@@ -929,7 +1016,7 @@ function generate(notice=''){
  let template;
  for(let i=0;i<80;i++){
    template=chooseTemplate(pool);
-   data=template.build();
+   data=completeNominalAnalysis(template.build());
    if(!recent.includes(data.sentence)) break;
  }
  recent.push(data.sentence); if(recent.length>HISTORY)recent.shift();

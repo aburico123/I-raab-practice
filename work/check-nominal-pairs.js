@@ -1,0 +1,292 @@
+const fs=require('node:fs');
+const vm=require('node:vm');
+const {webcrypto}=require('node:crypto');
+
+const file=process.argv[2]||'index.html';
+const durationMs=Number(process.argv[3]||0);
+const html=fs.readFileSync(file,'utf8');
+const match=html.match(/<script>([\s\S]*?)<\/script>/);
+if(!match)throw new Error('No embedded application script found');
+let script=match[1];
+const exportNeedle='window.nahwGenerate=generate;';
+if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
+script=script.replace(exportNeedle,`window.__nahwTest={
+  templates:templates.map(({id,starts,form,sign})=>({id,starts,form,sign})),
+  buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
+  completeNominalAnalysis,
+  poolFor
+};\n${exportNeedle}`);
+
+function assert(condition,message){if(!condition)throw new Error(message)}
+function element(id,value=''){
+  const classes=new Set();
+  const listeners=new Map();
+  return {
+    id,value,textContent:'',innerHTML:'',className:'',options:[],
+    classList:{
+      add:name=>classes.add(name),remove:name=>classes.delete(name),
+      contains:name=>classes.has(name),
+      toggle:name=>classes.has(name)?(classes.delete(name),false):(classes.add(name),true)
+    },
+    addEventListener(type,handler){listeners.set(type,handler)},
+    dispatch(type){const handler=listeners.get(type);if(handler)handler({target:this})}
+  };
+}
+
+const optionValues={
+  startFilter:['any','noun','verb','particle'],
+  formFilter:['any','singular','broken','dual','smp','sfp','fiveNouns','present','fiveVerbs'],
+  signFilter:['any','damma','fatha','kasra','sukun','alif','waw','ya','kasraSub','nunKept','nunDropped']
+};
+const elements={
+  startFilter:element('startFilter','any'),formFilter:element('formFilter','any'),
+  signFilter:element('signFilter','any'),sentence:element('sentence'),translation:element('translation'),
+  answers:element('answers'),answerPanel:element('answerPanel'),revealBtn:element('revealBtn'),
+  status:element('status'),newBtn:element('newBtn'),nextBtn:element('nextBtn')
+};
+for(const [id,values] of Object.entries(optionValues)){
+  elements[id].options=values.map(value=>({value,disabled:false}));
+}
+const context={
+  console,crypto:webcrypto,Uint32Array,Map,Set,Array,Object,String,Number,Math,RangeError,Error,RegExp,
+  document:{getElementById:id=>elements[id]}
+};
+context.window=context;
+context.globalThis=context;
+vm.createContext(context);
+vm.runInContext(script,context,{filename:'index.html'});
+
+const api=context.__nahwTest;
+assert(api&&typeof api.completeNominalAnalysis==='function','Nominal validator was not exported to the test harness');
+assert(elements.sentence.textContent,'The application did not generate its initial sentence');
+
+const PLAIN_KHABAR=/(^|[\s:،])خَبَرٌ(?=$|[\s،.])/u;
+const stats={
+  templates:api.templates.length,sentences:0,nominal:0,directKhabar:0,
+  verbalKhabar:0,phraseKhabar:0,frontedKhabar:0,innaPairs:0,filterStates:0
+};
+
+function countTokens(data,pattern){return data.tokens.filter(token=>pattern.test(token.ar)).length}
+function assertNominalPair(data,label){
+  assert(data&&Array.isArray(data.tokens),`${label}: invalid generated data`);
+  assert(data.sentence&&data.translation,`${label}: missing sentence or translation`);
+  assert(!data.translation.includes('undefined'),`${label}: undefined translation`);
+
+  const mubtadaIndexes=data.tokens.map((token,index)=>token.ar.includes('مُبْتَدَأٌ')?index:-1).filter(index=>index>=0);
+  const khabarIndexes=data.tokens.map((token,index)=>PLAIN_KHABAR.test(token.ar)?index:-1).filter(index=>index>=0);
+  const ismInna=countTokens(data,/اسْمُ «/u);
+  const khabarInna=countTokens(data,/خَبَرُ «/u);
+  assert(ismInna===khabarInna,`${label}: ${ismInna} ism inna but ${khabarInna} khabar inna`);
+  if(ismInna)stats.innaPairs++;
+  assert(mubtadaIndexes.length===khabarIndexes.length,
+    `${label}: ${mubtadaIndexes.length} mubtada but ${khabarIndexes.length} khabar — ${data.sentence}`);
+  assert(mubtadaIndexes.length<=1,`${label}: multiple nominal pairs need explicit metadata — ${data.sentence}`);
+  if(!mubtadaIndexes.length)return;
+
+  stats.nominal++;
+  const mubtadaIndex=mubtadaIndexes[0];
+  const mubtada=data.tokens[mubtadaIndex];
+  const khabar=data.tokens[khabarIndexes[0]];
+  const verbIndex=data.tokens.findIndex((token,index)=>index>mubtadaIndex&&token.ar.includes('فِعْلٌ مُضَارِعٌ'));
+  const delayed=mubtada.ar.includes('مُؤَخَّرٌ');
+
+  if(delayed){
+    stats.frontedKhabar++;
+    assert(khabar.ar.includes('شِبْهُ جُمْلَةٍ'),`${label}: delayed mubtada lacks phrase-like khabar`);
+    assert(khabar.ar.includes('خَبَرٌ مُقَدَّمٌ'),`${label}: delayed mubtada lacks fronted-khabar label`);
+    assert(khabar.ar.includes(`«${mubtada.word}»`),`${label}: fronted khabar does not name its delayed mubtada`);
+    const phrase=data.tokens.slice(0,mubtadaIndex).map(token=>token.word).join(' ');
+    assert(khabar.ar.includes(phrase),`${label}: fronted khabar omits the complete phrase “${phrase}”`);
+  }else if(verbIndex>=0){
+    stats.verbalKhabar++;
+    const verb=data.tokens[verbIndex];
+    const clause=data.tokens.slice(mubtadaIndex+1).map(token=>token.word).join(' ');
+    assert(khabar===verb,`${label}: verbal khabar was not attached to the verb card`);
+    assert(verb.ar.includes('الْجُمْلَةُ الْفِعْلِيَّةُ'),`${label}: missing verbal-sentence label`);
+    assert(verb.ar.includes('فِي مَحَلِّ رَفْعٍ خَبَرٌ'),`${label}: verbal sentence is not labeled as khabar`);
+    assert(verb.ar.includes(`«${clause}»`),`${label}: khabar omits the complete verbal sentence “${clause}”`);
+    assert(verb.ar.includes(`«${mubtada.word}»`),`${label}: verbal khabar does not name its mubtada`);
+    assert(verb.ar.includes('الرَّابِطُ'),`${label}: verbal khabar has no link back to its mubtada`);
+    if(verb.ar.includes('الْأَفْعَالِ الْخَمْسَةِ')){
+      assert(verb.ar.includes('وَاوُ الْجَمَاعَةِ'),`${label}: five-verb khabar lacks wāw subject/link`);
+    }else{
+      assert(verb.ar.includes('ضَمِيرٌ مُسْتَتِرٌ جَوَازًا'),`${label}: regular verbal khabar lacks hidden subject`);
+      assert(verb.ar.includes('«هُوَ»'),`${label}: hidden subject is not identified as huwa`);
+    }
+  }else if(khabar.ar.includes('شِبْهُ جُمْلَةٍ')){
+    stats.phraseKhabar++;
+    assert(khabar.ar.includes(`«${mubtada.word}»`),`${label}: phrase-like khabar does not name its mubtada`);
+    const phraseStart=data.tokens.findIndex((token,index)=>index>mubtadaIndex&&(token.ar.includes('حَرْفُ جَرٍّ')||token.ar.includes('ظَرْفٌ')));
+    assert(phraseStart>=0,`${label}: phrase-like khabar has no phrase lead`);
+    const phrase=data.tokens.slice(phraseStart).map(token=>token.word).join(' ');
+    assert(khabar.ar.includes(phrase),`${label}: phrase-like khabar omits the complete phrase “${phrase}”`);
+  }else{
+    stats.directKhabar++;
+    assert(khabar.ar.includes('خَبَرٌ مَرْفُوعٌ'),`${label}: direct khabar is not nominative`);
+  }
+}
+
+function expectThrow(name,data){
+  let threw=false;
+  try{api.completeNominalAnalysis(data)}catch(error){threw=true}
+  assert(threw,`Fault injection did not reject: ${name}`);
+}
+expectThrow('mubtada without khabar',{sentence:'زَيْدٌ',translation:'Zayd.',tokens:[{word:'زَيْدٌ',ar:'زَيْدٌ: مُبْتَدَأٌ مَرْفُوعٌ.',en:'mubtada'}]});
+expectThrow('khabar without mubtada',{sentence:'قَائِمٌ',translation:'Standing.',tokens:[{word:'قَائِمٌ',ar:'قَائِمٌ: خَبَرٌ مَرْفُوعٌ.',en:'khabar'}]});
+expectThrow('inna noun without khabar',{sentence:'إِنَّ زَيْدًا',translation:'Indeed Zayd.',tokens:[{word:'زَيْدًا',ar:'زَيْدًا: اسْمُ «إِنَّ» مَنْصُوبٌ.',en:'ism inna'}]});
+expectThrow('delayed mubtada without fronted phrase',{sentence:'زَيْدٌ',translation:'Zayd.',tokens:[{word:'زَيْدٌ',ar:'زَيْدٌ: مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ.',en:'delayed mubtada'}]});
+
+const exact=api.completeNominalAnalysis({
+  sentence:'الْخَيَّاطُ يُكْرِمُ الطَّبِيبَاتِ',translation:'The tailor honors the female doctors.',
+  tokens:[
+    {word:'الْخَيَّاطُ',ar:'الْخَيَّاطُ: مُبْتَدَأٌ مَرْفُوعٌ.',en:'mubtada'},
+    {word:'يُكْرِمُ',ar:'يُكْرِمُ: فِعْلٌ مُضَارِعٌ مَرْفُوعٌ.',en:'present verb'},
+    {word:'الطَّبِيبَاتِ',ar:'الطَّبِيبَاتِ: مَفْعُولٌ بِهِ مَنْصُوبٌ.',en:'object'}
+  ]
+});
+assertNominalPair(exact,'exact tailor/doctors case');
+assert(exact.tokens[1].ar.includes('«الْخَيَّاطُ»'),'Exact case does not link huwa back to the tailor');
+
+function runEveryTemplate(repetitions){
+  for(const template of api.templates){
+    for(let iteration=0;iteration<repetitions;iteration++){
+      const data=api.buildTemplate(template.id);
+      assertNominalPair(data,`template ${template.id} ${template.starts}/${template.form}/${template.sign} run ${iteration}`);
+      stats.sentences++;
+    }
+  }
+}
+runEveryTemplate(200);
+
+const starts=optionValues.startFilter;
+const forms=optionValues.formFilter;
+const signs=optionValues.signFilter;
+function isDisabled(id,value){
+  return elements[id].options.find(option=>option.value===value).disabled;
+}
+for(const start of starts){
+  for(const form of forms){
+    for(const sign of signs){
+      const pool=api.poolFor(start,form,sign);
+      if(!pool.length)continue;
+      stats.filterStates++;
+      elements.startFilter.value=start;
+      elements.formFilter.value=form;
+      elements.signFilter.value=sign;
+      elements.signFilter.dispatch('change');
+      assert(elements.startFilter.value===start&&elements.formFilter.value===form&&elements.signFilter.value===sign,
+        `Valid filters were reset: ${start}/${form}/${sign}`);
+      assert(elements.sentence.textContent,`No rendered sentence for ${start}/${form}/${sign}`);
+      assert((elements.answers.innerHTML.match(/class="word-card/g)||[]).length>=2,
+        `Incomplete rendered analysis for ${start}/${form}/${sign}`);
+      for(const candidate of starts){
+        assert(isDisabled('startFilter',candidate)===(api.poolFor(candidate,form,sign).length===0),
+          `Wrong start availability for ${start}/${form}/${sign} -> ${candidate}`);
+      }
+      for(const candidate of forms){
+        assert(isDisabled('formFilter',candidate)===(api.poolFor(start,candidate,sign).length===0),
+          `Wrong form availability for ${start}/${form}/${sign} -> ${candidate}`);
+      }
+      for(const candidate of signs){
+        assert(isDisabled('signFilter',candidate)===(api.poolFor(start,form,candidate).length===0),
+          `Wrong sign availability for ${start}/${form}/${sign} -> ${candidate}`);
+      }
+    }
+  }
+}
+
+elements.startFilter.value='any';
+elements.formFilter.value='any';
+elements.signFilter.value='any';
+elements.signFilter.dispatch('change');
+const randomSentences=[];
+const openingWords=new Set();
+const openingParticles=new Set();
+const particleWords=new Set(['إِنَّ','لَكِنَّ','لَعَلَّ','لَيْتَ','فِي','عَنْ','إِلَى','لَنْ','لَمْ','سَوْفَ']);
+let consecutiveRepeats=0;
+for(let iteration=0;iteration<3000;iteration++){
+  context.nahwGenerate();
+  const sentence=elements.sentence.textContent;
+  const rendered=elements.answers.innerHTML;
+  const first=sentence.split(/\s+/)[0];
+  if(randomSentences[randomSentences.length-1]===sentence)consecutiveRepeats++;
+  randomSentences.push(sentence);
+  openingWords.add(first);
+  if(particleWords.has(first))openingParticles.add(first);
+  assert((rendered.match(/class="word-card target/g)||[]).length===1,`Random run ${iteration}: wrong focus-card count`);
+  const renderedMubtada=(rendered.match(/مُبْتَدَأٌ/gu)||[]).length;
+  const renderedKhabar=(rendered.match(/خَبَرٌ(?=$|[\s،.<])/gu)||[]).length;
+  assert(renderedMubtada===renderedKhabar,
+    `Random run ${iteration}: rendered mubtada/khabar mismatch in ${sentence}`);
+}
+const uniqueRandomSentences=new Set(randomSentences).size;
+assert(consecutiveRepeats===0,'A consecutive sentence repeat was generated');
+assert(uniqueRandomSentences>=2100,`Only ${uniqueRandomSentences} unique sentences in 3000 random generations`);
+assert(openingWords.size>=60,`Only ${openingWords.size} distinct opening words appeared`);
+assert(openingParticles.size>=9,`Only ${openingParticles.size} distinct opening particles appeared`);
+
+const additionalBlock=html.match(/const additionalVerbActions=\[([\s\S]*?)\n\];/)[1];
+const additionalRecords=[...additionalBlock.matchAll(/\{past:'([^']+)',pres:'([^']+)'/g)]
+  .map(record=>({past:record[1],pres:record[2]}));
+assert(additionalRecords.length===157,`Expected 157 additional verb records, found ${additionalRecords.length}`);
+elements.startFilter.value='verb';
+elements.formFilter.value='singular';
+elements.signFilter.value='damma';
+elements.signFilter.dispatch('change');
+const pastStarts=new Set();
+for(let iteration=0;iteration<5000;iteration++){
+  context.nahwGenerate();
+  pastStarts.add(elements.sentence.textContent.split(/\s+/)[0]);
+}
+const additionalPastSeen=additionalRecords.filter(record=>pastStarts.has(record.past)).length;
+assert(additionalPastSeen===157,`Only ${additionalPastSeen} of 157 added past verbs appeared`);
+elements.startFilter.value='noun';
+elements.formFilter.value='singular';
+elements.signFilter.value='fatha';
+elements.signFilter.dispatch('change');
+const presentSentences=[];
+for(let iteration=0;iteration<5000;iteration++){
+  context.nahwGenerate();
+  presentSentences.push(elements.sentence.textContent);
+  assert(elements.answers.innerHTML.includes('الْجُمْلَةُ الْفِعْلِيَّةُ'),
+    `Focused nominal run ${iteration}: verbal khabar analysis is missing`);
+}
+const additionalPresentSeen=additionalRecords
+  .filter(record=>presentSentences.some(sentence=>sentence.includes(` ${record.pres} `))).length;
+assert(additionalPresentSeen===157,`Only ${additionalPresentSeen} of 157 added present verbs appeared`);
+
+const nounArrayNames=['singularPeople','singularThings','places','brokenHuman','brokenThings','duals','smp','sfp','fiveNouns'];
+const nounEntries=nounArrayNames.reduce((total,name)=>{
+  const block=html.match(new RegExp(`const ${name}=\\[([\\s\\S]*?)\\n\\];`))[1];
+  return total+(block.match(/\{/g)||[]).length;
+},0);
+const presentArrayNames=['verbs','additionalVerbActions','humanActions','humanPrepActions','thingActions','thingPrepActions','brokenObjectActions'];
+const uniquePresentVerbs=new Set();
+for(const name of presentArrayNames){
+  const block=html.match(new RegExp(`const ${name}=\\[([\\s\\S]*?)\\n\\];`))[1];
+  for(const verb of block.matchAll(/pres:'([^']+)'/g))uniquePresentVerbs.add(verb[1]);
+}
+const femininePastBlock=html.match(/const femininePastActions=\[([\s\S]*?)\n\];/)[1];
+const totalVerbFamilies=uniquePresentVerbs.size+(femininePastBlock.match(/\{past:'/g)||[]).length;
+assert(nounEntries===200,`Expected 200 noun entries, found ${nounEntries}`);
+assert(totalVerbFamilies===200,`Expected 200 verb families, found ${totalVerbFamilies}`);
+
+const started=Date.now();
+let nextProgress=started+30000;
+let stressPasses=0;
+while(Date.now()-started<durationMs){
+  runEveryTemplate(25);
+  stressPasses++;
+  if(Date.now()>=nextProgress){
+    console.log(`PROGRESS elapsed=${Math.round((Date.now()-started)/1000)}s sentences=${stats.sentences} passes=${stressPasses}`);
+    nextProgress+=30000;
+  }
+}
+
+console.log(JSON.stringify({
+  ...stats,nounEntries,totalVerbFamilies,stressPasses,
+  randomGenerations:randomSentences.length,uniqueRandomSentences,consecutiveRepeats,
+  distinctOpeningWords:openingWords.size,distinctOpeningParticles:openingParticles.size,
+  additionalPastSeen,additionalPresentSeen,
+  stressDurationSeconds:Math.round((Date.now()-started)/1000)
+},null,2));

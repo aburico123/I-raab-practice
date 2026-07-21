@@ -39,6 +39,25 @@ button{font-weight:850;cursor:pointer}
 .history-ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;color:var(--green);font-size:24px;font-weight:800;line-height:1.65}
 .history-en{color:var(--muted);font-size:14px;line-height:1.45}
 .history-empty{text-align:center;color:var(--muted);margin:8px 0}
+.definitions-wrap{margin-top:10px}
+#definitionsToggle{background:#fffdf8;color:var(--green-dark);border-color:var(--line);text-align:left}
+#definitionsToggle:hover,#definitionsToggle[aria-expanded="true"]{background:var(--green-soft);border-color:#a9cdb8}
+.definitions-panel{display:none;margin-top:8px;background:rgba(255,253,248,.92);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 8px 28px rgba(39,45,41,.06)}
+.definitions-panel.open{display:block}
+.definitions-intro{margin:0 0 14px;padding:11px 12px;background:var(--green-soft);border-radius:12px;color:#4f5c55;line-height:1.55;font-size:13px}
+.definitions-intro-ar{display:block;direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:17px;color:var(--green-dark);line-height:1.75}
+.definitions-intro a{color:var(--green-dark);font-weight:800}
+.definition-groups{display:grid;gap:15px;max-height:70vh;overflow:auto;padding-right:3px}
+.definition-group h3{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 8px;padding-bottom:7px;border-bottom:2px solid #e7ded0;color:var(--green-dark);font-size:16px}
+.definition-group-title-ar{direction:rtl;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:21px}
+.definition-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+.definition-card{margin:0;padding:11px 12px;background:#fff;border:1px solid #e8e0d4;border-radius:13px}
+.definition-card dt{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 7px;font-weight:900;color:var(--green-dark)}
+.definition-term-ar{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:21px;line-height:1.55}
+.definition-term-en{color:#65706a;font-size:12px;text-align:left}
+.definition-card dd{margin:0}
+.definition-ar{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:18px;line-height:1.75;color:#27332d}
+.definition-en{margin-top:5px!important;padding-top:6px;border-top:1px solid #f0e9de;color:var(--muted);font-size:13px;line-height:1.5}
 .practice{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,32px);box-shadow:0 14px 40px rgba(39,45,41,.08)}
 .eyebrow{text-align:center;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.11em}
 #sentence{direction:rtl;text-align:center;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:clamp(34px,7vw,56px);font-weight:800;line-height:1.75;color:var(--green);margin:10px 0 0}
@@ -66,7 +85,7 @@ button{font-weight:850;cursor:pointer}
 .status.notice{display:block;background:#eef7f1;border:1px solid #b9d8c5;color:var(--green-dark)}
 .status.error{display:block;background:#fff0f0;border:1px solid #e3bebe;color:var(--danger)}
 .footer{text-align:center;color:#7a817d;font-size:13px;line-height:1.5;margin:14px 0 4px}
-@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}.history-head{align-items:flex-start}}
+@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}.history-head{align-items:flex-start}.definition-grid{grid-template-columns:1fr}}
 @media(max-width:460px){.controls{grid-template-columns:1fr}#sentence{font-size:36px}.iraab{font-size:19px}}
 </style>
 </head>
@@ -147,6 +166,16 @@ button{font-weight:850;cursor:pointer}
         <p id="historyEmpty" class="history-empty">No sentences generated yet.</p>
       </div>
     </section>
+    <section class="definitions-wrap" aria-label="Simple Arabic grammar definitions">
+      <button id="definitionsToggle" type="button" aria-expanded="false" aria-controls="definitionsPanel">Simple grammar definitions</button>
+      <div id="definitionsPanel" class="definitions-panel" role="region" aria-label="Arabic and English grammar definitions">
+        <p class="definitions-intro">
+          <span class="definitions-intro-ar" lang="ar">تَعْرِيفَاتٌ تَعْلِيمِيَّةٌ مُبَسَّطَةٌ مُسْتَفَادَةٌ مِنْ أَبْوَابِ «التُّحْفَةِ السَّنِيَّةِ بِشَرْحِ الْمُقَدِّمَةِ الْآجُرُّومِيَّةِ»، وَلَيْسَتْ نَقْلًا حَرْفِيًّا.</span>
+          Beginner-friendly paraphrases adapted from <a href="https://islamhouse.com/ar/books/334271" target="_blank" rel="noopener noreferrer">Al-Tuḥfah al-Saniyyah</a>, not verbatim quotations.
+        </p>
+        <div id="definitionsList" class="definition-groups" tabindex="0"></div>
+      </div>
+    </section>
     <div id="status" class="status"></div>
     <div class="footer">Practice draws from 200 verb families and 200 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</div>
   </main>
@@ -206,6 +235,87 @@ function clearSentenceHistory(){
  sentenceHistory=[];
  saveSentenceHistory();
  renderSentenceHistory();
+}
+
+const grammarDefinitionGroups=[
+ {ar:'أُسُسُ الْكَلَامِ',en:'Foundations of speech',items:[
+  {arTerm:'الْكَلَامُ',enTerm:'Complete speech (al-kalām)',ar:'لَفْظٌ مُرَكَّبٌ يُعْطِي مَعْنًى تَامًّا يَحْسُنُ السُّكُوتُ عَلَيْهِ.',en:'A spoken expression whose parts together give a complete meaning.'},
+  {arTerm:'الْكَلِمَةُ',enTerm:'Word (kalimah)',ar:'لَفْظٌ وَاحِدٌ لَهُ مَعْنًى، وَيَكُونُ اسْمًا أَوْ فِعْلًا أَوْ حَرْفًا.',en:'One meaningful word. It is a noun, a verb, or a particle.'},
+  {arTerm:'الِاسْمُ',enTerm:'Noun (ism)',ar:'كَلِمَةٌ تَدُلُّ عَلَى مَعْنًى فِي نَفْسِهَا مِنْ غَيْرِ زَمَنٍ.',en:'A word with a meaning of its own that is not tied to a time.'},
+  {arTerm:'الْفِعْلُ',enTerm:'Verb (fiʿl)',ar:'كَلِمَةٌ تَدُلُّ عَلَى مَعْنًى فِي نَفْسِهَا وَتَدُلُّ عَلَى زَمَنٍ.',en:'A word with a meaning of its own that is also tied to a time.'},
+  {arTerm:'الْفِعْلُ الْمَاضِي',enTerm:'Past-tense verb',ar:'فِعْلٌ يَدُلُّ عَلَى حَدَثٍ وَقَعَ قَبْلَ زَمَنِ الْكَلَامِ.',en:'A verb for an action that happened before the time of speaking.'},
+  {arTerm:'الْفِعْلُ الْمُضَارِعُ',enTerm:'Present-tense verb',ar:'فِعْلٌ يَدُلُّ عَلَى حَدَثٍ يَقَعُ فِي الْحَالِ أَوِ الِاسْتِقْبَالِ.',en:'A verb for an action happening now or expected to happen later.'},
+  {arTerm:'الْحَرْفُ',enTerm:'Particle (ḥarf)',ar:'كَلِمَةٌ يَظْهَرُ مَعْنَاهَا مَعَ كَلِمَةٍ أُخْرَى.',en:'A word whose meaning becomes clear together with another word.'},
+  {arTerm:'الْجُمْلَةُ الِاسْمِيَّةُ',enTerm:'Nominal sentence',ar:'جُمْلَةٌ أَصْلُهَا مُبْتَدَأٌ وَخَبَرٌ، وَتَبْدَأُ فِي صُورَتِهَا الْأَصْلِيَّةِ بِاسْمٍ.',en:'A sentence whose basic structure is a mubtadaʾ and a khabar, normally beginning with a noun.'},
+  {arTerm:'الْجُمْلَةُ الْفِعْلِيَّةُ',enTerm:'Verbal sentence',ar:'جُمْلَةٌ تَتَكَوَّنُ مِنْ فِعْلٍ وَفَاعِلٍ، وَقَدْ يَأْتِي مَعَهَا مَفْعُولٌ بِهِ.',en:'A sentence made from a verb and its subject, sometimes with an object.'}
+ ]},
+ {ar:'صِيَغُ الْكَلِمَاتِ',en:'Word forms',items:[
+  {arTerm:'الِاسْمُ الْمُفْرَدُ',enTerm:'Singular noun',ar:'اسْمٌ يَدُلُّ عَلَى وَاحِدٍ أَوْ وَاحِدَةٍ، وَلَيْسَ مُثَنًّى وَلَا جَمْعًا.',en:'A noun that refers to one, not two and not a plural.'},
+  {arTerm:'جَمْعُ التَّكْسِيرِ',enTerm:'Broken plural',ar:'جَمْعٌ يَدُلُّ عَلَى أَكْثَرَ مِنِ اثْنَيْنِ مَعَ تَغَيُّرِ صُورَةِ مُفْرَدِهِ.',en:'A plural for more than two whose singular form changes inside the word.'},
+  {arTerm:'الْمُثَنَّى',enTerm:'Dual',ar:'اسْمٌ يَدُلُّ عَلَى اثْنَيْنِ أَوِ اثْنَتَيْنِ بِزِيَادَةِ أَلِفٍ وَنُونٍ أَوْ يَاءٍ وَنُونٍ.',en:'A noun for exactly two, formed with alif and nūn or yāʾ and nūn.'},
+  {arTerm:'جَمْعُ الْمُذَكَّرِ السَّالِمُ',enTerm:'Sound masculine plural',ar:'جَمْعٌ لِأَكْثَرَ مِنِ اثْنَيْنِ بِزِيَادَةِ وَاوٍ وَنُونٍ أَوْ يَاءٍ وَنُونٍ مَعَ سَلَامَةِ صُورَةِ الْمُفْرَدِ.',en:'A plural for more than two, formed with wāw and nūn or yāʾ and nūn while the singular shape stays sound.'},
+  {arTerm:'جَمْعُ الْمُؤَنَّثِ السَّالِمُ',enTerm:'Sound feminine plural',ar:'جَمْعٌ لِأَكْثَرَ مِنِ اثْنَتَيْنِ بِزِيَادَةِ أَلِفٍ وَتَاءٍ عَلَى الْمُفْرَدِ.',en:'A plural for more than two feminine nouns, formed by adding alif and tāʾ.'},
+  {arTerm:'الْأَسْمَاءُ الْخَمْسَةُ',enTerm:'The five nouns',ar:'هِيَ أَبُوكَ، وَأَخُوكَ، وَحَمُوكَ، وَفُوكَ، وَذُو مَالٍ؛ وَتُعْرَبُ بِالْحُرُوفِ عِنْدَ تَحَقُّقِ شُرُوطِهَا.',en:'Abūka, akhūka, ḥamūka, fūka, and dhū māl. When their conditions are met, they use letters as their iʿrāb signs.'},
+  {arTerm:'الْمُضَارِعُ الَّذِي لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ',enTerm:'Unattached present verb',ar:'فِعْلٌ مُضَارِعٌ لَمْ يَلْحَقْ آخِرَهُ ضَمِيرٌ أَوْ نُونٌ تُغَيِّرُ حُكْمَهُ.',en:'A present-tense verb with no attached ending that changes how its ending is parsed.'},
+  {arTerm:'الْأَفْعَالُ الْخَمْسَةُ',enTerm:'The five verbs',ar:'كُلُّ مُضَارِعٍ اتَّصَلَتْ بِهِ أَلِفُ الِاثْنَيْنِ، أَوْ وَاوُ الْجَمَاعَةِ، أَوْ يَاءُ الْمُخَاطَبَةِ.',en:'Every present-tense verb joined to the dual alif, plural wāw, or feminine-address yāʾ.'}
+ ]},
+ {ar:'الْإِعْرَابُ وَعَلَامَاتُهُ',en:'Iʿrāb states and signs',items:[
+  {arTerm:'الْإِعْرَابُ',enTerm:'Iʿrāb',ar:'تَغَيُّرُ حَالِ آخِرِ الْكَلِمَةِ بِسَبَبِ تَغَيُّرِ الْعَامِلِ الدَّاخِلِ عَلَيْهَا.',en:'The change at the end of a word caused by a change in what governs it.'},
+  {arTerm:'الْمُعْرَبُ',enTerm:'Inflected word',ar:'كَلِمَةٌ يَتَغَيَّرُ حَالُ آخِرِهَا بِتَغَيُّرِ مَوْقِعِهَا أَوِ الْعَامِلِ فِيهَا.',en:'A word whose ending changes when its role or governing word changes.'},
+  {arTerm:'الْبِنَاءُ',enTerm:'Fixed form (bināʾ)',ar:'لُزُومُ آخِرِ الْكَلِمَةِ حَالَةً وَاحِدَةً مَعَ تَغَيُّرِ الْعَوَامِلِ.',en:'The ending of a word staying fixed even when governing words change.'},
+  {arTerm:'عَلَامَةُ الْإِعْرَابِ',enTerm:'Iʿrāb sign',ar:'الْحَرَكَةُ أَوِ الْحَرْفُ الَّذِي يُبَيِّنُ حَالَةَ الْكَلِمَةِ.',en:'The vowel or letter that shows a word’s grammatical state.'},
+  {arTerm:'الرَّفْعُ',enTerm:'Nominative (rafʿ)',ar:'حَالَةٌ إِعْرَابِيَّةٌ عَلَامَتُهَا الْأَصْلِيَّةُ الضَّمَّةُ.',en:'An iʿrāb state whose original sign is the ḍammah.'},
+  {arTerm:'النَّصْبُ',enTerm:'Accusative (naṣb)',ar:'حَالَةٌ إِعْرَابِيَّةٌ عَلَامَتُهَا الْأَصْلِيَّةُ الْفَتْحَةُ.',en:'An iʿrāb state whose original sign is the fatḥah.'},
+  {arTerm:'الْخَفْضُ أَوِ الْجَرُّ',enTerm:'Genitive (khafḍ / jarr)',ar:'حَالَةٌ إِعْرَابِيَّةٌ فِي الْأَسْمَاءِ، وَعَلَامَتُهَا الْأَصْلِيَّةُ الْكَسْرَةُ.',en:'An iʿrāb state for nouns whose original sign is the kasrah.'},
+  {arTerm:'الْجَزْمُ',enTerm:'Jussive (jazm)',ar:'حَالَةٌ إِعْرَابِيَّةٌ فِي الْفِعْلِ الْمُضَارِعِ، وَعَلَامَتُهَا الْأَصْلِيَّةُ السُّكُونُ.',en:'An iʿrāb state for present-tense verbs whose original sign is the sukūn.'},
+  {arTerm:'الضَّمَّةُ الظَّاهِرَةُ',enTerm:'Visible ḍammah',ar:'حَرَكَةٌ تَظْهَرُ عَلَى آخِرِ الْكَلِمَةِ، وَهِيَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلرَّفْعِ.',en:'A visible ending and the original sign of the nominative state.'},
+  {arTerm:'الْفَتْحَةُ الظَّاهِرَةُ',enTerm:'Visible fatḥah',ar:'حَرَكَةٌ تَظْهَرُ عَلَى آخِرِ الْكَلِمَةِ، وَهِيَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلنَّصْبِ.',en:'A visible ending and the original sign of the accusative state.'},
+  {arTerm:'الْكَسْرَةُ الظَّاهِرَةُ',enTerm:'Visible kasrah',ar:'حَرَكَةٌ تَظْهَرُ عَلَى آخِرِ الِاسْمِ، وَهِيَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلْخَفْضِ.',en:'A visible noun ending and the original sign of the genitive state.'},
+  {arTerm:'السُّكُونُ الظَّاهِرُ',enTerm:'Visible sukūn',ar:'عَلَامَةٌ تَظْهَرُ عَلَى آخِرِ الْمُضَارِعِ، وَهِيَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلْجَزْمِ.',en:'A visible present-verb ending and the original sign of the jussive state.'},
+  {arTerm:'الْأَلِفُ',enTerm:'Alif as a sign',ar:'عَلَامَةٌ فَرْعِيَّةٌ لِرَفْعِ الْمُثَنَّى وَلِنَصْبِ الْأَسْمَاءِ الْخَمْسَةِ.',en:'A secondary sign: nominative for the dual and accusative for the five nouns.'},
+  {arTerm:'الْوَاوُ',enTerm:'Wāw as a sign',ar:'عَلَامَةٌ فَرْعِيَّةٌ لِرَفْعِ جَمْعِ الْمُذَكَّرِ السَّالِمِ وَالْأَسْمَاءِ الْخَمْسَةِ.',en:'A secondary nominative sign for the sound masculine plural and the five nouns.'},
+  {arTerm:'الْيَاءُ',enTerm:'Yāʾ as a sign',ar:'عَلَامَةٌ فَرْعِيَّةٌ لِنَصْبِ الْمُثَنَّى وَجَمْعِ الْمُذَكَّرِ السَّالِمِ وَخَفْضِهِمَا، وَلِخَفْضِ الْأَسْمَاءِ الْخَمْسَةِ.',en:'A secondary sign for the dual and sound masculine plural in the accusative or genitive, and for the five nouns in the genitive.'},
+  {arTerm:'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ',enTerm:'Kasrah replacing fatḥah',ar:'عَلَامَةُ نَصْبِ جَمْعِ الْمُؤَنَّثِ السَّالِمِ.',en:'The accusative sign of the sound feminine plural.'},
+  {arTerm:'ثُبُوتُ النُّونِ',enTerm:'Keeping the nūn',ar:'عَلَامَةُ رَفْعِ الْأَفْعَالِ الْخَمْسَةِ.',en:'The nominative sign of the five verbs.'},
+  {arTerm:'حَذْفُ النُّونِ',enTerm:'Dropping the nūn',ar:'عَلَامَةُ نَصْبِ الْأَفْعَالِ الْخَمْسَةِ وَجَزْمِهَا.',en:'The accusative and jussive sign of the five verbs.'}
+ ]},
+ {ar:'عَنَاصِرُ الْجُمْلَةِ',en:'Sentence roles',items:[
+  {arTerm:'الْمُبْتَدَأُ',enTerm:'Mubtadaʾ',ar:'اسْمٌ مَرْفُوعٌ نَتَحَدَّثُ عَنْهُ فِي الْجُمْلَةِ الِاسْمِيَّةِ، وَقَدْ يَتَقَدَّمُ أَوْ يَتَأَخَّرُ.',en:'The nominative noun being spoken about in a nominal sentence. It may come first or later.'},
+  {arTerm:'الْخَبَرُ',enTerm:'Khabar',ar:'مَا يُتِمُّ مَعْنَى الْمُبْتَدَأِ وَيُخْبِرُنَا عَنْهُ، وَيَكُونُ مَرْفُوعًا أَوْ فِي مَحَلِّ رَفْعٍ.',en:'What completes the meaning about the mubtadaʾ. It is nominative or occupies a nominative position.'},
+  {arTerm:'الْخَبَرُ الْمُقَدَّمُ',enTerm:'Fronted khabar',ar:'خَبَرٌ جَاءَ قَبْلَ مُبْتَدَئِهِ.',en:'A khabar placed before its mubtadaʾ.'},
+  {arTerm:'الْمُبْتَدَأُ الْمُؤَخَّرُ',enTerm:'Delayed mubtadaʾ',ar:'مُبْتَدَأٌ جَاءَ بَعْدَ خَبَرِهِ.',en:'A mubtadaʾ placed after its khabar.'},
+  {arTerm:'الْفَاعِلُ',enTerm:'Subject / doer (fāʿil)',ar:'اسْمٌ مَرْفُوعٌ أَوْ ضَمِيرٌ أُسْنِدَ إِلَيْهِ الْفِعْلُ.',en:'A nominative noun or pronoun to which the verb is attributed.'},
+  {arTerm:'الضَّمِيرُ الْمُسْتَتِرُ',enTerm:'Hidden pronoun',ar:'ضَمِيرٌ لَا يَظْهَرُ فِي اللَّفْظِ، وَلَكِنَّهُ يُفْهَمُ مِنَ الْفِعْلِ.',en:'A pronoun not spoken or written separately but understood from the verb.'},
+  {arTerm:'وَاوُ الْجَمَاعَةِ',enTerm:'Plural wāw',ar:'ضَمِيرٌ مُتَّصِلٌ يَدُلُّ عَلَى جَمَاعَةِ الذُّكُورِ، وَيَكُونُ فَاعِلًا فِي كَثِيرٍ مِنَ الْأَفْعَالِ.',en:'An attached pronoun for a masculine plural group, often serving as the verb’s subject.'},
+  {arTerm:'الْمَفْعُولُ بِهِ',enTerm:'Direct object',ar:'اسْمٌ مَنْصُوبٌ وَقَعَ عَلَيْهِ فِعْلُ الْفَاعِلِ.',en:'An accusative noun upon which the subject’s action falls.'},
+  {arTerm:'شِبْهُ الْجُمْلَةِ',enTerm:'Phrase-like expression',ar:'جَارٌّ وَمَجْرُورٌ أَوْ ظَرْفٌ، وَلَيْسَ جُمْلَةً كَامِلَةً وَحْدَهُ.',en:'A prepositional phrase or an adverbial expression; it is not a complete sentence by itself.'},
+  {arTerm:'الْجَارُّ وَالْمَجْرُورُ',enTerm:'Preposition and governed noun',ar:'حَرْفُ جَرٍّ مَعَ الِاسْمِ الْمَجْرُورِ بَعْدَهُ، وَهُمَا مَعًا شِبْهُ جُمْلَةٍ.',en:'A preposition together with its following genitive noun; together they form a phrase-like expression.'},
+  {arTerm:'حَرْفُ الْجَرِّ',enTerm:'Preposition',ar:'حَرْفٌ يَجْعَلُ الِاسْمَ بَعْدَهُ مَجْرُورًا.',en:'A particle that makes the noun after it genitive.'},
+  {arTerm:'الِاسْمُ الْمَجْرُورُ',enTerm:'Genitive noun',ar:'اسْمٌ دَخَلَ عَلَيْهِ حَرْفُ جَرٍّ، أَوْ جَرَّتْهُ الْإِضَافَةُ، أَوْ تَبِعَ اسْمًا مَجْرُورًا.',en:'A noun made genitive by a preposition, an iḍāfah, or agreement with another genitive noun.'},
+  {arTerm:'الظَّرْفُ',enTerm:'Adverb of time or place',ar:'اسْمٌ يَدُلُّ عَلَى زَمَانِ الْفِعْلِ أَوْ مَكَانِهِ.',en:'A noun that tells the time or place of an action.'},
+  {arTerm:'الْمُضَافُ',enTerm:'First noun of an iḍāfah',ar:'الِاسْمُ الْأَوَّلُ فِي تَرْكِيبِ الْإِضَافَةِ، وَيُنْسَبُ إِلَى الِاسْمِ بَعْدَهُ.',en:'The first noun in an iḍāfah; it is connected or related to the noun after it.'},
+  {arTerm:'الْمُضَافُ إِلَيْهِ',enTerm:'Second noun of an iḍāfah',ar:'الِاسْمُ الثَّانِي فِي تَرْكِيبِ الْإِضَافَةِ، وَهُوَ مَجْرُورٌ دَائِمًا.',en:'The second noun in an iḍāfah, and it is always genitive.'},
+  {arTerm:'الرَّابِطُ',enTerm:'Link back to the mubtadaʾ',ar:'ضَمِيرٌ أَوْ عُنْصُرٌ يَرْبِطُ جُمْلَةَ الْخَبَرِ بِالْمُبْتَدَأِ.',en:'A pronoun or other element that connects a sentence used as khabar back to its mubtadaʾ.'}
+ ]},
+ {ar:'الْعَوَامِلُ وَالْأَدَوَاتُ',en:'Governing words and particles',items:[
+  {arTerm:'الْعَامِلُ',enTerm:'Governing word',ar:'كَلِمَةٌ أَوْ مَعْنًى يُؤَثِّرُ فِي إِعْرَابِ كَلِمَةٍ أُخْرَى.',en:'A word or grammatical cause that affects the iʿrāb of another word.'},
+  {arTerm:'إِنَّ وَأَخَوَاتُهَا',enTerm:'Inna and its sisters',ar:'حُرُوفٌ تَدْخُلُ عَلَى الْمُبْتَدَأِ وَالْخَبَرِ، فَتَنْصِبُ الْمُبْتَدَأَ وَتَرْفَعُ الْخَبَرَ.',en:'Particles that enter a mubtadaʾ–khabar sentence, making the mubtadaʾ accusative and keeping the khabar nominative.'},
+  {arTerm:'اسْمُ إِنَّ',enTerm:'Ism of inna',ar:'الْمُبْتَدَأُ بَعْدَ دُخُولِ «إِنَّ» أَوْ إِحْدَى أَخَوَاتِهَا عَلَيْهِ، وَهُوَ مَنْصُوبٌ.',en:'The former mubtadaʾ after inna or one of its sisters enters; it is accusative.'},
+  {arTerm:'خَبَرُ إِنَّ',enTerm:'Khabar of inna',ar:'مَا يُتِمُّ مَعْنَى اسْمِ «إِنَّ»، وَهُوَ مَرْفُوعٌ أَوْ فِي مَحَلِّ رَفْعٍ.',en:'What completes the meaning of the ism of inna; it is nominative or occupies a nominative position.'},
+  {arTerm:'النَّاصِبُ',enTerm:'Accusative governor',ar:'أَدَاةٌ تَجْعَلُ الْفِعْلَ الْمُضَارِعَ مَنْصُوبًا، مِثْلُ «لَنْ».',en:'A particle that makes a present-tense verb accusative, such as lan.'},
+  {arTerm:'الْجَازِمُ',enTerm:'Jussive governor',ar:'أَدَاةٌ تَجْعَلُ الْفِعْلَ الْمُضَارِعَ مَجْزُومًا، مِثْلُ «لَمْ».',en:'A particle that makes a present-tense verb jussive, such as lam.'},
+  {arTerm:'لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ',enTerm:'No syntactic position',ar:'لَفْظٌ مَبْنِيٌّ لَا يَشْغَلُ مَوْضِعًا يُحْكَمُ عَلَيْهِ بِالرَّفْعِ أَوِ النَّصْبِ أَوِ الْجَرِّ أَوِ الْجَزْمِ.',en:'A fixed word that does not occupy a sentence position described as nominative, accusative, genitive, or jussive.'}
+ ]}
+];
+function renderGrammarDefinitions(){
+ const count=grammarDefinitionGroups.reduce((total,group)=>total+group.items.length,0);
+ byId('definitionsToggle').textContent=`Simple grammar definitions (${count})`;
+ byId('definitionsList').innerHTML=grammarDefinitionGroups.map(group=>`<section class="definition-group"><h3><span class="definition-group-title-ar" lang="ar">${esc(group.ar)}</span><span>${esc(group.en)}</span></h3><dl class="definition-grid">${group.items.map(item=>`<div class="definition-card"><dt><span class="definition-term-ar" lang="ar">${esc(item.arTerm)}</span><span class="definition-term-en">${esc(item.enTerm)}</span></dt><dd class="definition-ar" lang="ar">${esc(item.ar)}</dd><dd class="definition-en">${esc(item.en)}</dd></div>`).join('')}</dl></section>`).join('');
+}
+function toggleGrammarDefinitions(){
+ const panel=byId('definitionsPanel');
+ const isOpen=panel.classList.toggle('open');
+ byId('definitionsToggle').setAttribute('aria-expanded',String(isOpen));
 }
 
 const vocabularyHistory=new Map();
@@ -1113,9 +1223,11 @@ byId('nextBtn').addEventListener('click',()=>generate());
 byId('revealBtn').addEventListener('click',toggleReveal);
 byId('historyToggle').addEventListener('click',toggleSentenceHistory);
 byId('clearHistoryBtn').addEventListener('click',clearSentenceHistory);
+byId('definitionsToggle').addEventListener('click',toggleGrammarDefinitions);
 ['startFilter','formFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',handleFilterChange));
 window.nahwGenerate=generate;
 window.nahwReveal=toggleReveal;
+renderGrammarDefinitions();
 normalizeFilters('automatic');
 generate();
 })();

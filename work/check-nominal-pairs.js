@@ -8,13 +8,19 @@ const html=fs.readFileSync(file,'utf8');
 const match=html.match(/<script>([\s\S]*?)<\/script>/);
 if(!match)throw new Error('No embedded application script found');
 let script=match[1];
+const staticIds=[...html.matchAll(/\sid="([^"]+)"/g)].map(match=>match[1]);
+assert(new Set(staticIds).size===staticIds.length,'The HTML contains a duplicate id');
+for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>match[1]))){
+  assert(staticIds.includes(id),`JavaScript references missing HTML element #${id}`);
+}
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
   templates:templates.map(({id,starts,form,sign})=>({id,starts,form,sign})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
-  poolFor
+  poolFor,
+  grammarDefinitionGroups
 };\n${exportNeedle}`);
 
 function assert(condition,message){if(!condition)throw new Error(message)}
@@ -48,7 +54,8 @@ const elements={
   status:element('status'),newBtn:element('newBtn'),nextBtn:element('nextBtn'),
   historyToggle:element('historyToggle'),historyPanel:element('historyPanel'),
   historyList:element('historyList'),historyEmpty:element('historyEmpty'),
-  clearHistoryBtn:element('clearHistoryBtn')
+  clearHistoryBtn:element('clearHistoryBtn'),definitionsToggle:element('definitionsToggle'),
+  definitionsPanel:element('definitionsPanel'),definitionsList:element('definitionsList')
 };
 for(const [id,values] of Object.entries(optionValues)){
   elements[id].options=values.map(value=>({value,disabled:false}));
@@ -85,6 +92,22 @@ elements.clearHistoryBtn.dispatch('click');
 assert(elements.historyToggle.textContent==='Sentence history (0)','Clear history did not reset its count');
 assert(elements.historyList.hidden&& !elements.historyEmpty.hidden,'Clear history did not restore the empty state');
 assert(JSON.parse(storage.get('nahw-sentence-history-v1')).length===0,'Cleared history was not persisted');
+const definitionItems=api.grammarDefinitionGroups.flatMap(group=>group.items);
+assert(api.grammarDefinitionGroups.length===5,'Expected five definition groups');
+assert(definitionItems.length===58,`Expected 58 grammar definitions, found ${definitionItems.length}`);
+assert(definitionItems.every(item=>item.arTerm&&item.enTerm&&item.ar&&item.en),'A grammar definition is incomplete');
+assert(new Set(definitionItems.map(item=>item.arTerm)).size===definitionItems.length,'Two Arabic definition terms are duplicated');
+assert(new Set(definitionItems.map(item=>item.enTerm)).size===definitionItems.length,'Two English definition terms are duplicated');
+for(const required of ['Noun (ism)','Verb (fiʿl)','Particle (ḥarf)','Singular noun','Mubtadaʾ','Khabar','Direct object']){
+  assert(definitionItems.some(item=>item.enTerm===required),`Missing required definition: ${required}`);
+}
+assert(elements.definitionsToggle.textContent==='Simple grammar definitions (58)','Definition count was not rendered');
+assert((elements.definitionsList.innerHTML.match(/class="definition-card"/g)||[]).length===58,'Not every definition was rendered');
+assert(elements.definitionsList.innerHTML.includes('التُّحْفَة')===false,'Source note was unexpectedly duplicated inside the definition list');
+assert(html.includes('https://islamhouse.com/ar/books/334271'),'The Al-Tuhfah al-Saniyyah source link is missing');
+elements.definitionsToggle.dispatch('click');
+assert(elements.definitionsPanel.classList.contains('open'),'Definitions tab did not open its panel');
+assert(elements.definitionsToggle.getAttribute('aria-expanded')==='true','Definitions tab did not expose its open state');
 
 const PLAIN_KHABAR=/(^|[\s:،])خَبَرٌ(?=$|[\s،.])/u;
 const stats={
@@ -273,6 +296,9 @@ assert(elements.historyToggle.textContent==='Sentence history (1)','Reset Filter
 assert(html.indexOf('id="historyToggle"')>html.indexOf('id="answerPanel"')
   && html.indexOf('id="historyToggle"')<html.indexOf('id="status"'),
   'Sentence history is not positioned where the reset notice used to appear');
+assert(html.indexOf('id="definitionsToggle"')>html.indexOf('id="historyToggle"')
+  && html.indexOf('id="definitionsToggle"')<html.indexOf('id="status"'),
+  'Grammar definitions are not positioned beneath sentence history');
 
 elements.startFilter.value='any';
 elements.formFilter.value='any';

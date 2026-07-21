@@ -230,6 +230,20 @@ for(const start of starts){
   }
 }
 
+elements.startFilter.value='particle';
+elements.formFilter.value='fiveNouns';
+elements.signFilter.value='ya';
+elements.signFilter.dispatch('change');
+elements.newBtn.dispatch('click');
+assert(elements.startFilter.value==='any','Reset Filters did not restore Any beginning');
+assert(elements.formFilter.value==='any','Reset Filters did not restore All forms');
+assert(elements.signFilter.value==='any','Reset Filters did not restore All signs');
+assert(Object.keys(optionValues).every(id=>elements[id].options.every(option=>!option.disabled)),
+  'Reset Filters did not re-enable all compatible options');
+assert(elements.status.className.includes('notice')&&elements.status.textContent.includes('Filters reset'),
+  'Reset Filters did not show confirmation');
+assert(elements.sentence.textContent,'Reset Filters did not generate an unrestricted sentence');
+
 elements.startFilter.value='any';
 elements.formFilter.value='any';
 elements.signFilter.value='any';

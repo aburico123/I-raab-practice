@@ -102,7 +102,7 @@ button{font-weight:850;cursor:pointer}
         <option value="nunDropped">حَذْفُ النُّونِ</option>
       </select>
     </div>
-    <button id="newBtn" type="button">Generate New Sentence</button>
+    <button id="newBtn" type="button">Reset filters</button>
   </section>
 
   <main class="practice">
@@ -1027,12 +1027,19 @@ function handleFilterChange(event){
  const notice=normalizeFilters(event.target.id);
  generate(notice);
 }
+function resetFilters(){
+ byId('startFilter').value='any';
+ byId('formFilter').value='any';
+ byId('signFilter').value='any';
+ refreshDisabledOptions();
+ generate('Filters reset to Any beginning, All forms, and All signs.');
+}
 function toggleReveal(){
  const panel=byId('answerPanel');
  panel.classList.toggle('open');
  byId('revealBtn').textContent=panel.classList.contains('open')?'Hide Iʿrāb':'Reveal Full Iʿrāb';
 }
-byId('newBtn').addEventListener('click',()=>generate());
+byId('newBtn').addEventListener('click',resetFilters);
 byId('nextBtn').addEventListener('click',()=>generate());
 byId('revealBtn').addEventListener('click',toggleReveal);
 ['startFilter','formFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',handleFilterChange));

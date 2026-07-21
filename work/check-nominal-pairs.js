@@ -21,15 +21,18 @@ function assert(condition,message){if(!condition)throw new Error(message)}
 function element(id,value=''){
   const classes=new Set();
   const listeners=new Map();
+  const attributes=new Map();
   return {
-    id,value,textContent:'',innerHTML:'',className:'',options:[],
+    id,value,textContent:'',innerHTML:'',className:'',options:[],hidden:false,disabled:false,
     classList:{
       add:name=>classes.add(name),remove:name=>classes.delete(name),
       contains:name=>classes.has(name),
       toggle:name=>classes.has(name)?(classes.delete(name),false):(classes.add(name),true)
     },
     addEventListener(type,handler){listeners.set(type,handler)},
-    dispatch(type){const handler=listeners.get(type);if(handler)handler({target:this})}
+    dispatch(type){const handler=listeners.get(type);if(handler)handler({target:this})},
+    setAttribute(name,value){attributes.set(name,String(value))},
+    getAttribute(name){return attributes.get(name)??null}
   };
 }
 
@@ -42,14 +45,25 @@ const elements={
   startFilter:element('startFilter','any'),formFilter:element('formFilter','any'),
   signFilter:element('signFilter','any'),sentence:element('sentence'),translation:element('translation'),
   answers:element('answers'),answerPanel:element('answerPanel'),revealBtn:element('revealBtn'),
-  status:element('status'),newBtn:element('newBtn'),nextBtn:element('nextBtn')
+  status:element('status'),newBtn:element('newBtn'),nextBtn:element('nextBtn'),
+  historyToggle:element('historyToggle'),historyPanel:element('historyPanel'),
+  historyList:element('historyList'),historyEmpty:element('historyEmpty'),
+  clearHistoryBtn:element('clearHistoryBtn')
 };
 for(const [id,values] of Object.entries(optionValues)){
   elements[id].options=values.map(value=>({value,disabled:false}));
 }
+const storage=new Map([['nahw-sentence-history-v1',JSON.stringify([
+  {sentence:'جُمْلَةٌ سَابِقَةٌ',translation:'A previously saved sentence.'}
+])]]);
+const localStorage={
+  getItem:key=>storage.has(key)?storage.get(key):null,
+  setItem:(key,value)=>storage.set(key,String(value)),
+  removeItem:key=>storage.delete(key)
+};
 const context={
   console,crypto:webcrypto,Uint32Array,Map,Set,Array,Object,String,Number,Math,RangeError,Error,RegExp,
-  document:{getElementById:id=>elements[id]}
+  localStorage,document:{getElementById:id=>elements[id]}
 };
 context.window=context;
 context.globalThis=context;
@@ -59,6 +73,18 @@ vm.runInContext(script,context,{filename:'index.html'});
 const api=context.__nahwTest;
 assert(api&&typeof api.completeNominalAnalysis==='function','Nominal validator was not exported to the test harness');
 assert(elements.sentence.textContent,'The application did not generate its initial sentence');
+assert(elements.historyToggle.textContent==='Sentence history (2)','Saved history was not loaded before recording the initial sentence');
+assert(elements.historyList.innerHTML.includes('جُمْلَةٌ سَابِقَةٌ'),'Previously saved sentence is missing from history');
+assert(JSON.parse(storage.get('nahw-sentence-history-v1')).length===2,'Initial sentence was not persisted');
+elements.historyToggle.dispatch('click');
+assert(elements.historyPanel.classList.contains('open'),'History tab did not open its panel');
+assert(elements.historyToggle.getAttribute('aria-expanded')==='true','History tab did not expose its open state');
+elements.nextBtn.dispatch('click');
+assert(elements.historyToggle.textContent==='Sentence history (3)','New Sentence was not added to history');
+elements.clearHistoryBtn.dispatch('click');
+assert(elements.historyToggle.textContent==='Sentence history (0)','Clear history did not reset its count');
+assert(elements.historyList.hidden&& !elements.historyEmpty.hidden,'Clear history did not restore the empty state');
+assert(JSON.parse(storage.get('nahw-sentence-history-v1')).length===0,'Cleared history was not persisted');
 
 const PLAIN_KHABAR=/(^|[\s:،])خَبَرٌ(?=$|[\s،.])/u;
 const stats={
@@ -230,10 +256,10 @@ for(const start of starts){
   }
 }
 
+elements.clearHistoryBtn.dispatch('click');
 elements.startFilter.value='particle';
 elements.formFilter.value='fiveNouns';
 elements.signFilter.value='ya';
-elements.signFilter.dispatch('change');
 elements.newBtn.dispatch('click');
 assert(elements.startFilter.value==='any','Reset Filters did not restore Any beginning');
 assert(elements.formFilter.value==='any','Reset Filters did not restore All forms');
@@ -243,6 +269,7 @@ assert(Object.keys(optionValues).every(id=>elements[id].options.every(option=>!o
 assert(elements.status.className.includes('notice')&&elements.status.textContent.includes('Filters reset'),
   'Reset Filters did not show confirmation');
 assert(elements.sentence.textContent,'Reset Filters did not generate an unrestricted sentence');
+assert(elements.historyToggle.textContent==='Sentence history (1)','Reset Filters generation was not added to history');
 
 elements.startFilter.value='any';
 elements.formFilter.value='any';
@@ -273,6 +300,7 @@ assert(consecutiveRepeats===0,'A consecutive sentence repeat was generated');
 assert(uniqueRandomSentences>=2100,`Only ${uniqueRandomSentences} unique sentences in 3000 random generations`);
 assert(openingWords.size>=60,`Only ${openingWords.size} distinct opening words appeared`);
 assert(openingParticles.size>=9,`Only ${openingParticles.size} distinct opening particles appeared`);
+assert(JSON.parse(storage.get('nahw-sentence-history-v1')).length===100,'Sentence history did not enforce its 100-entry limit');
 
 const additionalBlock=html.match(/const additionalVerbActions=\[([\s\S]*?)\n\];/)[1];
 const additionalRecords=[...additionalBlock.matchAll(/\{past:'([^']+)',pres:'([^']+)'/g)]

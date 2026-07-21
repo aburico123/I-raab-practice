@@ -24,6 +24,21 @@ select:focus,button:focus{outline:3px solid rgba(31,101,75,.17);border-color:var
 button{font-weight:850;cursor:pointer}
 #newBtn{align-self:end;background:var(--button-blue);border-color:var(--button-blue);color:white}
 #newBtn:hover{background:var(--button-blue-dark);border-color:var(--button-blue-dark)}
+.history-wrap{margin-top:10px}
+#historyToggle{background:#fffdf8;color:var(--green-dark);border-color:var(--line);text-align:left}
+#historyToggle:hover,#historyToggle[aria-expanded="true"]{background:var(--green-soft);border-color:#a9cdb8}
+.history-panel{display:none;margin-top:8px;background:rgba(255,253,248,.92);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 8px 28px rgba(39,45,41,.06)}
+.history-panel.open{display:block}
+.history-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
+.history-title{font-weight:900;color:var(--green-dark)}
+.history-note{display:block;margin-top:3px;color:var(--muted);font-size:12px;font-weight:500}
+#clearHistoryBtn{width:auto;min-height:38px;padding:8px 12px;background:#fff;color:var(--danger);border-color:#dfc4c4}
+#clearHistoryBtn:disabled{opacity:.5;cursor:not-allowed}
+.history-list{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:420px;overflow:auto}
+.history-item{background:#fff;border:1px solid #e8e0d4;border-radius:13px;padding:10px 12px}
+.history-ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;color:var(--green);font-size:24px;font-weight:800;line-height:1.65}
+.history-en{color:var(--muted);font-size:14px;line-height:1.45}
+.history-empty{text-align:center;color:var(--muted);margin:8px 0}
 .practice{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,32px);box-shadow:0 14px 40px rgba(39,45,41,.08)}
 .eyebrow{text-align:center;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.11em}
 #sentence{direction:rtl;text-align:center;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:clamp(34px,7vw,56px);font-weight:800;line-height:1.75;color:var(--green);margin:10px 0 0}
@@ -51,7 +66,7 @@ button{font-weight:850;cursor:pointer}
 .status.notice{display:block;background:#eef7f1;border:1px solid #b9d8c5;color:var(--green-dark)}
 .status.error{display:block;background:#fff0f0;border:1px solid #e3bebe;color:var(--danger)}
 .footer{text-align:center;color:#7a817d;font-size:13px;line-height:1.5;margin:14px 0 4px}
-@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}}
+@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}.history-head{align-items:flex-start}}
 @media(max-width:460px){.controls{grid-template-columns:1fr}#sentence{font-size:36px}.iraab{font-size:19px}}
 </style>
 </head>
@@ -59,7 +74,7 @@ button{font-weight:850;cursor:pointer}
 <div class="wrap">
   <header>
     <h1>Nahw Iʿrāb Practice</h1>
-    <p class="subtitle">Generate varied Arabic sentences, make the full iʿrāb yourself, then reveal the iʿrāb of every word. No score or record is kept.</p>
+    <p class="subtitle">Generate varied Arabic sentences, make the full iʿrāb yourself, then reveal the iʿrāb of every word. No score is kept; sentence history stays on this device.</p>
   </header>
 
   <section class="controls" aria-label="Practice filters">
@@ -105,6 +120,21 @@ button{font-weight:850;cursor:pointer}
     <button id="newBtn" type="button">Reset filters</button>
   </section>
 
+  <section class="history-wrap" aria-label="Generated sentence history">
+    <button id="historyToggle" type="button" aria-expanded="false" aria-controls="historyPanel">Sentence history (0)</button>
+    <div id="historyPanel" class="history-panel" role="region" aria-label="Generated sentences">
+      <div class="history-head">
+        <div>
+          <div class="history-title">Generated sentences</div>
+          <span class="history-note">Newest first. The most recent 100 are saved on this device.</span>
+        </div>
+        <button id="clearHistoryBtn" type="button">Clear history</button>
+      </div>
+      <ol id="historyList" class="history-list"></ol>
+      <p id="historyEmpty" class="history-empty">No sentences generated yet.</p>
+    </div>
+  </section>
+
   <main class="practice">
     <div class="eyebrow">Practice sentence</div>
     <div id="sentence" lang="ar">الطَّالِبُ مُجْتَهِدٌ</div>
@@ -139,6 +169,45 @@ const pick=a=>a[randomInt(a.length)];
 const chance=()=>randomInt(2)===0;
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 const esc=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+
+const SENTENCE_HISTORY_KEY='nahw-sentence-history-v1';
+const SENTENCE_HISTORY_LIMIT=100;
+function loadSentenceHistory(){
+ try{
+   const saved=JSON.parse(globalThis.localStorage?.getItem(SENTENCE_HISTORY_KEY)||'[]');
+   if(!Array.isArray(saved)) return [];
+   return saved.filter(item=>item&&typeof item.sentence==='string'&&typeof item.translation==='string')
+     .slice(0,SENTENCE_HISTORY_LIMIT);
+ }catch{return []}
+}
+let sentenceHistory=loadSentenceHistory();
+function saveSentenceHistory(){
+ try{globalThis.localStorage?.setItem(SENTENCE_HISTORY_KEY,JSON.stringify(sentenceHistory))}catch{}
+}
+function renderSentenceHistory(){
+ const hasHistory=sentenceHistory.length>0;
+ byId('historyToggle').textContent=`Sentence history (${sentenceHistory.length})`;
+ byId('historyList').innerHTML=sentenceHistory.map(item=>`<li class="history-item"><div class="history-ar" lang="ar">${esc(item.sentence)}</div><div class="history-en">${esc(item.translation)}</div></li>`).join('');
+ byId('historyList').hidden=!hasHistory;
+ byId('historyEmpty').hidden=hasHistory;
+ byId('clearHistoryBtn').disabled=!hasHistory;
+}
+function recordSentence(data){
+ sentenceHistory.unshift({sentence:data.sentence,translation:data.translation});
+ if(sentenceHistory.length>SENTENCE_HISTORY_LIMIT) sentenceHistory.length=SENTENCE_HISTORY_LIMIT;
+ saveSentenceHistory();
+ renderSentenceHistory();
+}
+function toggleSentenceHistory(){
+ const panel=byId('historyPanel');
+ const isOpen=panel.classList.toggle('open');
+ byId('historyToggle').setAttribute('aria-expanded',String(isOpen));
+}
+function clearSentenceHistory(){
+ sentenceHistory=[];
+ saveSentenceHistory();
+ renderSentenceHistory();
+}
 
 const vocabularyHistory=new Map();
 function pickVaried(items,group,key=item=>JSON.stringify(item)){
@@ -1005,6 +1074,7 @@ function render(data,notice=''){
  byId('revealBtn').textContent='Reveal Full Iʿrāb';
  byId('status').className=notice?'status notice':'status';
  byId('status').textContent=notice;
+ recordSentence(data);
 }
 function generate(notice=''){
  const pool=compatible();
@@ -1042,6 +1112,8 @@ function toggleReveal(){
 byId('newBtn').addEventListener('click',resetFilters);
 byId('nextBtn').addEventListener('click',()=>generate());
 byId('revealBtn').addEventListener('click',toggleReveal);
+byId('historyToggle').addEventListener('click',toggleSentenceHistory);
+byId('clearHistoryBtn').addEventListener('click',clearSentenceHistory);
 ['startFilter','formFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',handleFilterChange));
 window.nahwGenerate=generate;
 window.nahwReveal=toggleReveal;

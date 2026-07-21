@@ -863,10 +863,17 @@ function chooseTemplate(pool){
  return pick(candidates);
 }
 function refreshDisabledOptions(){
- // Keep every option selectable. If a newly chosen pair is incompatible,
- // normalizeFilters() resets the other filter to “All” automatically.
- ['startFilter','formFilter','signFilter'].forEach(filterId=>{
-   Array.from(byId(filterId).options).forEach(option=>{ option.disabled=false; });
+ const current=selectedFilters();
+ const filters=[
+   {id:'startFilter',key:'start'},
+   {id:'formFilter',key:'form'},
+   {id:'signFilter',key:'sign'}
+ ];
+ filters.forEach(({id,key})=>{
+   Array.from(byId(id).options).forEach(option=>{
+     const trial={...current,[key]:option.value};
+     option.disabled=poolFor(trial.start,trial.form,trial.sign).length===0;
+   });
  });
 }
 function normalizeFilters(changedId){

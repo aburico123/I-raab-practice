@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nahw Iʿrāb Practice</title>
+<style>
+:root{
+  --bg:#f5f1e8; --card:#fffdf8; --ink:#1f2623; --muted:#68716c;
+  --green:#1f654b; --green-dark:#174c39; --green-soft:#eaf4ee;
+  --gold:#ba8a36; --line:#ded6c8; --danger:#8b2f2f;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#f8f5ef 0,#f2ede3 100%);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Noto Naskh Arabic",Arial,sans-serif;min-height:100vh}
+.wrap{width:min(980px,100%);margin:auto;padding:18px}
+header{text-align:center;padding:14px 8px 18px}
+h1{margin:0;font-size:clamp(28px,5vw,42px);letter-spacing:-.03em}
+.subtitle{margin:8px auto 0;max-width:720px;color:var(--muted);line-height:1.55}
+.controls{background:rgba(255,253,248,.86);border:1px solid var(--line);border-radius:20px;padding:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;box-shadow:0 8px 28px rgba(39,45,41,.06)}
+.control label{display:block;font-size:12px;font-weight:800;color:#58615c;margin:0 0 6px 3px;text-transform:uppercase;letter-spacing:.06em}
+select,button{width:100%;font:inherit;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);padding:12px 13px;min-height:48px}
+select:focus,button:focus{outline:3px solid rgba(31,101,75,.17);border-color:var(--green)}
+button{font-weight:850;cursor:pointer}
+#newBtn{align-self:end;background:var(--green);border-color:var(--green);color:white}
+#newBtn:hover{background:var(--green-dark)}
+.practice{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,32px);box-shadow:0 14px 40px rgba(39,45,41,.08)}
+.eyebrow{text-align:center;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.11em}
+#sentence{direction:rtl;text-align:center;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:clamp(34px,7vw,56px);font-weight:800;line-height:1.75;color:var(--green);margin:10px 0 0}
+#translation{text-align:center;color:var(--muted);font-size:17px;min-height:26px;margin:0 0 14px}
+.tip{text-align:center;background:#f7f5ef;border:1px dashed #d9d0c0;border-radius:13px;padding:11px;color:#59625d;line-height:1.5}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+#revealBtn{background:var(--gold);color:#fff;border-color:var(--gold)}
+#nextBtn{background:var(--green);color:#fff;border-color:var(--green)}
+#answerPanel{display:none;margin-top:18px}
+#answerPanel.open{display:block}
+.answer-title{text-align:center;font-weight:900;margin:0 0 11px;color:var(--green-dark)}
+.answers{display:grid;gap:11px}
+.word-card{border:1px solid #e6ded0;border-radius:16px;overflow:hidden;background:#fff}
+.word-card.target{border:2px solid var(--gold);box-shadow:0 0 0 3px rgba(186,138,54,.10)}
+.word-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;background:var(--green-soft)}
+.word-card.target .word-head{background:#fbf2df}
+.word-ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:29px;font-weight:900;color:var(--green);direction:rtl}
+.gloss{color:#68716c;font-size:14px;text-align:left}
+.iraab{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;padding:14px 15px;font-size:21px;line-height:1.9}
+.english{border-top:1px solid #eee7db;padding:11px 15px;color:#59625d;line-height:1.55;font-size:15px}
+.target-note{display:inline-block;margin-left:7px;background:var(--gold);color:#fff;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;vertical-align:middle}
+.status{display:none;margin-top:12px;padding:11px 13px;border-radius:12px;text-align:center;line-height:1.5}
+.status.error{display:block;background:#fff0f0;border:1px solid #e3bebe;color:var(--danger)}
+.footer{text-align:center;color:#7a817d;font-size:13px;line-height:1.5;margin:14px 0 4px}
+@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}}
+@media(max-width:460px){.controls{grid-template-columns:1fr}#sentence{font-size:36px}.iraab{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Nahw Iʿrāb Practice</h1>
+    <p class="subtitle">Generate varied Arabic sentences, make the full iʿrāb yourself, then reveal the iʿrāb of every word. No score or record is kept.</p>
+  </header>
+
+  <section class="controls" aria-label="Practice filters">
+    <div class="control">
+      <label for="startFilter">Sentence starts with</label>
+      <select id="startFilter">
+        <option value="noun" selected>اسم — Noun first</option>
+        <option value="any">Any beginning</option>
+        <option value="verb">فعل — Verb first</option>
+        <option value="particle">حرف — Particle first</option>
+      </select>
+    </div>
+    <div class="control">
+      <label for="formFilter">Word form</label>
+      <select id="formFilter">
+        <option value="any">All forms</option>
+        <option value="singular">الِاسْمُ الْمُفْرَدُ</option>
+        <option value="broken">جَمْعُ التَّكْسِيرِ</option>
+        <option value="dual">الْمُثَنَّى</option>
+        <option value="smp">جَمْعُ الْمُذَكَّرِ السَّالِمُ</option>
+        <option value="sfp">جَمْعُ الْمُؤَنَّثِ السَّالِمُ</option>
+        <option value="fiveNouns">الْأَسْمَاءُ الْخَمْسَةُ</option>
+        <option value="present">الْمُضَارِعُ الَّذِي لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ</option>
+        <option value="fiveVerbs">الْأَفْعَالُ الْخَمْسَةُ</option>
+      </select>
+    </div>
+    <div class="control">
+      <label for="signFilter">Iʿrāb sign</label>
+      <select id="signFilter">
+        <option value="any">All signs</option>
+        <option value="damma">الضَّمَّةُ الظَّاهِرَةُ</option>
+        <option value="fatha">الْفَتْحَةُ الظَّاهِرَةُ</option>
+        <option value="kasra">الْكَسْرَةُ الظَّاهِرَةُ</option>
+        <option value="sukun">السُّكُونُ الظَّاهِرُ</option>
+        <option value="alif">الْأَلِفُ</option>
+        <option value="waw">الْوَاوُ</option>
+        <option value="ya">الْيَاءُ</option>
+        <option value="kasraSub">الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ</option>
+        <option value="nunKept">ثُبُوتُ النُّونِ</option>
+        <option value="nunDropped">حَذْفُ النُّونِ</option>
+      </select>
+    </div>
+    <button id="newBtn" type="button">Generate New Sentence</button>
+  </section>
+
+  <main class="practice">
+    <div class="eyebrow">Practice sentence</div>
+    <div id="sentence" lang="ar">الطَّالِبُ مُجْتَهِدٌ</div>
+    <div id="translation">The student is hardworking.</div>
+    <div class="tip">Say the complete iʿrāb of <strong>every word</strong>. The gold card after revealing is the word that matches your selected form and sign.</div>
+    <div class="actions">
+      <button id="revealBtn" type="button">Reveal Full Iʿrāb</button>
+      <button id="nextBtn" type="button">New Sentence</button>
+    </div>
+    <section id="answerPanel" aria-live="polite">
+      <h2 class="answer-title">Full Iʿrāb</h2>
+      <div id="answers" class="answers"></div>
+    </section>
+    <div id="status" class="status"></div>
+    <div class="footer">Randomized noun-first practice is the default. Repeats are avoided across recent sentences.</div>
+  </main>
+</div>
+
+<script>
+(function(){
+'use strict';
+const byId=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const esc=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+
+const singularPeople=[
+ {nom:'الطَّالِبُ',acc:'الطَّالِبَ',gen:'الطَّالِبِ',en:'the student'},
+ {nom:'الْمُعَلِّمُ',acc:'الْمُعَلِّمَ',gen:'الْمُعَلِّمِ',en:'the teacher'},
+ {nom:'الْمُدِيرُ',acc:'الْمُدِيرَ',gen:'الْمُدِيرِ',en:'the principal'},
+ {nom:'الطَّبِيبُ',acc:'الطَّبِيبَ',gen:'الطَّبِيبِ',en:'the doctor'},
+ {nom:'التَّاجِرُ',acc:'التَّاجِرَ',gen:'التَّاجِرِ',en:'the merchant'},
+ {nom:'الْإِمَامُ',acc:'الْإِمَامَ',gen:'الْإِمَامِ',en:'the imam'},
+ {nom:'الْعَالِمُ',acc:'الْعَالِمَ',gen:'الْعَالِمِ',en:'the scholar'},
+ {nom:'الطِّفْلُ',acc:'الطِّفْلَ',gen:'الطِّفْلِ',en:'the child'},
+ {nom:'الضَّيْفُ',acc:'الضَّيْفَ',gen:'الضَّيْفِ',en:'the guest'},
+ {nom:'الْمُسْلِمُ',acc:'الْمُسْلِمَ',gen:'الْمُسْلِمِ',en:'the Muslim'}
+];
+const singularThings=[
+ {nom:'الْكِتَابُ',acc:'الْكِتَابَ',gen:'الْكِتَابِ',en:'the book'},
+ {nom:'الدَّرْسُ',acc:'الدَّرْسَ',gen:'الدَّرْسِ',en:'the lesson'},
+ {nom:'الْبَابُ',acc:'الْبَابَ',gen:'الْبَابِ',en:'the door'},
+ {nom:'الْقَلَمُ',acc:'الْقَلَمَ',gen:'الْقَلَمِ',en:'the pen'},
+ {nom:'الْوَاجِبُ',acc:'الْوَاجِبَ',gen:'الْوَاجِبِ',en:'the homework'},
+ {nom:'السُّؤَالُ',acc:'السُّؤَالَ',gen:'السُّؤَالِ',en:'the question'},
+ {nom:'الْجَوَابُ',acc:'الْجَوَابَ',gen:'الْجَوَابِ',en:'the answer'},
+ {nom:'الطَّعَامُ',acc:'الطَّعَامَ',gen:'الطَّعَامِ',en:'the food'},
+ {nom:'الْمَاءُ',acc:'الْمَاءَ',gen:'الْمَاءِ',en:'the water'},
+ {nom:'الْقُرْآنُ',acc:'الْقُرْآنَ',gen:'الْقُرْآنِ',en:'the Qurʾān'},
+ {nom:'الْحَدِيثُ',acc:'الْحَدِيثَ',gen:'الْحَدِيثِ',en:'the hadith'}
+];
+const adjectives=[
+ {nom:'مُجْتَهِدٌ',acc:'مُجْتَهِدًا',en:'hardworking'},
+ {nom:'حَاضِرٌ',acc:'حَاضِرًا',en:'present'},
+ {nom:'صَادِقٌ',acc:'صَادِقًا',en:'truthful'},
+ {nom:'كَرِيمٌ',acc:'كَرِيمًا',en:'generous'},
+ {nom:'مَسْرُورٌ',acc:'مَسْرُورًا',en:'happy'},
+ {nom:'نَشِيطٌ',acc:'نَشِيطًا',en:'active'},
+ {nom:'مَاهِرٌ',acc:'مَاهِرًا',en:'skilled'},
+ {nom:'مَرِيضٌ',acc:'مَرِيضًا',en:'sick'}
+];
+const places=[
+ {gen:'الْمَسْجِدِ',en:'the mosque'}, {gen:'الْبَيْتِ',en:'the house'},
+ {gen:'الْمَدْرَسَةِ',en:'the school'}, {gen:'السُّوقِ',en:'the market'},
+ {gen:'الْفَصْلِ',en:'the classroom'}, {gen:'الْمَكْتَبَةِ',en:'the library'},
+ {gen:'الْحَدِيقَةِ',en:'the garden'}, {gen:'الْمَطْعَمِ',en:'the restaurant'}
+];
+const brokenHuman=[
+ {nom:'الطُّلَّابُ',acc:'الطُّلَّابَ',gen:'الطُّلَّابِ',en:'the students'},
+ {nom:'الرِّجَالُ',acc:'الرِّجَالَ',gen:'الرِّجَالِ',en:'the men'},
+ {nom:'الْأَطْفَالُ',acc:'الْأَطْفَالَ',gen:'الْأَطْفَالِ',en:'the children'},
+ {nom:'الْعُلَمَاءُ',acc:'الْعُلَمَاءَ',gen:'الْعُلَمَاءِ',en:'the scholars'},
+ {nom:'الضُّيُوفُ',acc:'الضُّيُوفَ',gen:'الضُّيُوفِ',en:'the guests'},
+ {nom:'التُّجَّارُ',acc:'التُّجَّارَ',gen:'التُّجَّارِ',en:'the merchants'}
+];
+const brokenThings=[
+ {nom:'الْكُتُبُ',acc:'الْكُتُبَ',gen:'الْكُتُبِ',en:'the books'},
+ {nom:'الدُّرُوسُ',acc:'الدُّرُوسَ',gen:'الدُّرُوسِ',en:'the lessons'},
+ {nom:'الْأَقْلَامُ',acc:'الْأَقْلَامَ',gen:'الْأَقْلَامِ',en:'the pens'},
+ {nom:'الْأَبْوَابُ',acc:'الْأَبْوَابَ',gen:'الْأَبْوَابِ',en:'the doors'},
+ {nom:'الْأَسْئِلَةُ',acc:'الْأَسْئِلَةَ',gen:'الْأَسْئِلَةِ',en:'the questions'},
+ {nom:'الْأَجْوِبَةُ',acc:'الْأَجْوِبَةَ',gen:'الْأَجْوِبَةِ',en:'the answers'},
+ {nom:'الْبُيُوتُ',acc:'الْبُيُوتَ',gen:'الْبُيُوتِ',en:'the houses'},
+ {nom:'الْمَسَاجِدُ',acc:'الْمَسَاجِدَ',gen:'الْمَسَاجِدِ',en:'the mosques'}
+];
+const duals=[
+ {nom:'الطَّالِبَانِ',acc:'الطَّالِبَيْنِ',gen:'الطَّالِبَيْنِ',en:'the two students'},
+ {nom:'الْمُعَلِّمَانِ',acc:'الْمُعَلِّمَيْنِ',gen:'الْمُعَلِّمَيْنِ',en:'the two teachers'},
+ {nom:'الرَّجُلَانِ',acc:'الرَّجُلَيْنِ',gen:'الرَّجُلَيْنِ',en:'the two men'},
+ {nom:'الطَّبِيبَانِ',acc:'الطَّبِيبَيْنِ',gen:'الطَّبِيبَيْنِ',en:'the two doctors'},
+ {nom:'الْكِتَابَانِ',acc:'الْكِتَابَيْنِ',gen:'الْكِتَابَيْنِ',en:'the two books'},
+ {nom:'الْقَلَمَانِ',acc:'الْقَلَمَيْنِ',gen:'الْقَلَمَيْنِ',en:'the two pens'}
+];
+const smp=[
+ {nom:'الْمُعَلِّمُونَ',acc:'الْمُعَلِّمِينَ',gen:'الْمُعَلِّمِينَ',en:'the teachers'},
+ {nom:'الْمُسْلِمُونَ',acc:'الْمُسْلِمِينَ',gen:'الْمُسْلِمِينَ',en:'the Muslims'},
+ {nom:'الْمُجْتَهِدُونَ',acc:'الْمُجْتَهِدِينَ',gen:'الْمُجْتَهِدِينَ',en:'the hardworking men'},
+ {nom:'الصَّادِقُونَ',acc:'الصَّادِقِينَ',gen:'الصَّادِقِينَ',en:'the truthful men'},
+ {nom:'الْمُسَافِرُونَ',acc:'الْمُسَافِرِينَ',gen:'الْمُسَافِرِينَ',en:'the travelers'},
+ {nom:'الْحَاضِرُونَ',acc:'الْحَاضِرِينَ',gen:'الْحَاضِرِينَ',en:'those present'}
+];
+const sfp=[
+ {nom:'الطَّالِبَاتُ',acc:'الطَّالِبَاتِ',gen:'الطَّالِبَاتِ',en:'the female students'},
+ {nom:'الْمُعَلِّمَاتُ',acc:'الْمُعَلِّمَاتِ',gen:'الْمُعَلِّمَاتِ',en:'the female teachers'},
+ {nom:'الْمُسْلِمَاتُ',acc:'الْمُسْلِمَاتِ',gen:'الْمُسْلِمَاتِ',en:'the Muslim women'},
+ {nom:'الْمُجْتَهِدَاتُ',acc:'الْمُجْتَهِدَاتِ',gen:'الْمُجْتَهِدَاتِ',en:'the hardworking women'},
+ {nom:'الْمُسَافِرَاتُ',acc:'الْمُسَافِرَاتِ',gen:'الْمُسَافِرَاتِ',en:'the female travelers'}
+];
+const fiveNouns=[
+ {nom:'أَبُوكَ',acc:'أَبَاكَ',gen:'أَبِيكَ',en:'your father',base:'أب'},
+ {nom:'أَخُوكَ',acc:'أَخَاكَ',gen:'أَخِيكَ',en:'your brother',base:'أخ'},
+ {nom:'حَمُوكَ',acc:'حَمَاكَ',gen:'حَمِيكَ',en:'your father-in-law',base:'حم'}
+];
+const verbs=[
+ {pres:'يَكْتُبُ',acc:'يَكْتُبَ',juss:'يَكْتُبْ',five:'يَكْتُبُونَ',fiveSub:'يَكْتُبُوا',en:'write',obj:['الْوَاجِبَ','الدَّرْسَ','الْجَوَابَ']},
+ {pres:'يَقْرَأُ',acc:'يَقْرَأَ',juss:'يَقْرَأْ',five:'يَقْرَؤُونَ',fiveSub:'يَقْرَؤُوا',en:'read',obj:['الْكِتَابَ','الْقُرْآنَ','الدَّرْسَ']},
+ {pres:'يَحْفَظُ',acc:'يَحْفَظَ',juss:'يَحْفَظْ',five:'يَحْفَظُونَ',fiveSub:'يَحْفَظُوا',en:'memorize',obj:['الدَّرْسَ','الْقُرْآنَ','الْحَدِيثَ']},
+ {pres:'يَفْتَحُ',acc:'يَفْتَحَ',juss:'يَفْتَحْ',five:'يَفْتَحُونَ',fiveSub:'يَفْتَحُوا',en:'open',obj:['الْبَابَ','الْكِتَابَ']},
+ {pres:'يَشْرَبُ',acc:'يَشْرَبَ',juss:'يَشْرَبْ',five:'يَشْرَبُونَ',fiveSub:'يَشْرَبُوا',en:'drink',obj:['الْمَاءَ']},
+ {pres:'يَأْكُلُ',acc:'يَأْكُلَ',juss:'يَأْكُلْ',five:'يَأْكُلُونَ',fiveSub:'يَأْكُلُوا',en:'eat',obj:['الطَّعَامَ']}
+];
+
+function token(word,gloss,ar,en,target=false){return{word,gloss,ar,en,target}}
+const AR={
+ mubtada:(w,sign='الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ')=>`${w}: مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ ${sign}.`,
+ khabar:(w,sign='الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ')=>`${w}: خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ ${sign}.`,
+ object:(w,sign='الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ')=>`${w}: مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ ${sign}.`,
+ prep:w=>`${w}: حَرْفُ جَرٍّ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`,
+ majrur:(w,p,sign='الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ')=>`${w}: اسْمٌ مَجْرُورٌ بِـ«${p}»، وَعَلَامَةُ خَفْضِهِ ${sign}.`,
+ mudaf:w=>`${w}: مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ، وَهُوَ مُضَافٌ.`,
+ mudafIlayh:(w,sign='الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ')=>`${w}: مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ خَفْضِهِ ${sign}.`,
+ presentPred:(w,state,marker)=>`${w}: فِعْلٌ مُضَارِعٌ ${state}، وَعَلَامَةُ ${state.includes('مَرْفُوع')?'رَفْعِهِ':state.includes('مَنْصُوب')?'نَصْبِهِ':'جَزْمِهِ'} ${marker}، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ»، وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرُ الْمُبْتَدَأِ.`,
+ lan:w=>`${w}: حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`,
+ lam:w=>`${w}: حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`,
+ presentFive:(w,state,marker)=>`${w}: فِعْلٌ مُضَارِعٌ ${state}، وَعَلَامَةُ ${state.includes('مَرْفُوع')?'رَفْعِهِ':state.includes('مَنْصُوب')?'نَصْبِهِ':'جَزْمِهِ'} ${marker}؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَالْوَاوُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرُ الْمُبْتَدَأِ.`,
+ fiveNounNom:w=>`${w}: مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْوَاوُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ، وَهُوَ مُضَافٌ، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.`,
+ fiveNounAcc:w=>`${w}: مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْأَلِفُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ، وَهُوَ مُضَافٌ، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.`,
+ fiveNounGen:(w,p)=>`${w}: اسْمٌ مَجْرُورٌ بِـ«${p}»، وَعَلَامَةُ خَفْضِهِ الْيَاءُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ، وَهُوَ مُضَافٌ، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.`
+};
+const EN={
+ mubtada:'The mubtadaʾ (subject of a nominal sentence). It is nominative.',
+ khabar:'The khabar (predicate). It is nominative.',
+ object:'The direct object. It is accusative.',
+ prep:'A preposition, built and with no syntactic position.',
+ majrur:'A noun governed by a preposition. It is genitive.',
+ mudaf:'A nominative mubtadaʾ and the first term of an iḍāfah.',
+ mudafIlayh:'The second term of an iḍāfah. It is genitive.',
+ present:'A present-tense verb. Its hidden subject is “he,” and the verbal clause is the predicate of the mubtadaʾ.',
+ fiveVerb:'One of the five verbs. The wāw is its attached subject, and the verbal clause is the predicate.',
+ fiveNoun:'One of the five nouns. The attached kāf is a pronoun in the genitive position as muḍāf ilayh.'
+};
+function objectEnglish(word){return singularThings.find(x=>x.acc===word)?.en || 'the object'}
+
+const templates=[];
+function add(starts,form,sign,build){templates.push({starts,form,sign,build})}
+
+// Singular nouns
+add('noun','singular','damma',()=>{const s=pick(singularPeople),a=pick(adjectives);return{sentence:`${s.nom} ${a.nom}`,translation:`${cap(s.en)} is ${a.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
+add('noun','singular','damma',()=>{const s=pick(singularPeople),p=pick(places);return{sentence:`${s.nom} فِي ${p.gen}`,translation:`${cap(s.en)} is in ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada,true),token('فِي','in',AR.prep('فِي'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'فِي')+' وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِمَحْذُوفٍ خَبَرُ الْمُبْتَدَأِ.',EN.majrur+' The prepositional phrase functions as the predicate.')]}});
+add('noun','singular','fatha',()=>{const s=pick(singularPeople),o=pick(singularThings);return{sentence:`${s.nom} يَقْرَأُ ${o.acc}`,translation:`${cap(s.en)} reads ${o.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يَقْرَأُ','reads',AR.presentPred('يَقْرَأُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token(o.acc,o.en,AR.object(o.acc),EN.object,true)]}});
+add('noun','singular','kasra',()=>{const owner=pick(singularPeople),thing=pick(['كِتَابُ','قَلَمُ','دَرْسُ','بَابُ']);return{sentence:`${thing} ${owner.gen} جَدِيدٌ`,translation:`The ${thing==='كِتَابُ'?'book':thing==='قَلَمُ'?'pen':thing==='دَرْسُ'?'lesson':'door'} of ${owner.en.replace('the ','')} is new.`,tokens:[token(thing,'a possessed noun',AR.mudaf(thing),EN.mudaf),token(owner.gen,owner.en,AR.mudafIlayh(owner.gen),EN.mudafIlayh,true),token('جَدِيدٌ','new',AR.khabar('جَدِيدٌ'),EN.khabar)]}});
+
+// Broken plurals
+add('noun','broken','damma',()=>{const b=pick(brokenHuman),pred=pick(['حَاضِرُونَ','مُجْتَهِدُونَ','نَشِيطُونَ']);return{sentence:`${b.nom} ${pred}`,translation:`${cap(b.en)} are ${pred==='حَاضِرُونَ'?'present':pred==='مُجْتَهِدُونَ'?'hardworking':'active'}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada,true),token(pred,'predicate',AR.khabar(pred,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.khabar)]}});
+add('noun','broken','fatha',()=>{const s=pick(singularPeople),b=pick([...brokenHuman,...brokenThings]);return{sentence:`${s.nom} يَرَى ${b.acc}`,translation:`${cap(s.en)} sees ${b.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يَرَى','sees',`يَرَى: فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ»، وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرُ الْمُبْتَدَأِ.`,EN.present),token(b.acc,b.en,AR.object(b.acc),EN.object,true)]}});
+add('noun','broken','kasra',()=>{const s=pick(singularPeople),b=pick([...brokenHuman,...brokenThings]);return{sentence:`${s.nom} يَنْظُرُ إِلَى ${b.gen}`,translation:`${cap(s.en)} looks at ${b.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يَنْظُرُ','looks',AR.presentPred('يَنْظُرُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token('إِلَى','to/at',AR.prep('إِلَى'),EN.prep),token(b.gen,b.en,AR.majrur(b.gen,'إِلَى'),EN.majrur,true)]}});
+
+// Dual
+add('noun','dual','alif',()=>{const d=pick(duals),pred=pick(['حَاضِرَانِ','مُجْتَهِدَانِ','جَدِيدَانِ']);return{sentence:`${d.nom} ${pred}`,translation:`${cap(d.en)} are ${pred==='حَاضِرَانِ'?'present':pred==='مُجْتَهِدَانِ'?'hardworking':'new'}.`,tokens:[token(d.nom,d.en,AR.mubtada(d.nom,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),EN.mubtada,true),token(pred,'dual predicate',AR.khabar(pred,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),EN.khabar)]}});
+add('noun','dual','ya',()=>{const s=pick(singularPeople),d=pick(duals);return{sentence:`${s.nom} يُكَرِّمُ ${d.acc}`,translation:`${cap(s.en)} honors ${d.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يُكَرِّمُ','honors',AR.presentPred('يُكَرِّمُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token(d.acc,d.en,AR.object(d.acc,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.object,true)]}});
+add('noun','dual','ya',()=>{const s=pick(singularPeople),d=pick(duals);return{sentence:`${s.nom} يُسَلِّمُ عَلَى ${d.gen}`,translation:`${cap(s.en)} greets ${d.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يُسَلِّمُ','greets',AR.presentPred('يُسَلِّمُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token('عَلَى','on/to',AR.prep('عَلَى'),EN.prep),token(d.gen,d.en,AR.majrur(d.gen,'عَلَى','الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.majrur,true)]}});
+
+// Sound masculine plural
+add('noun','smp','waw',()=>{const p=pick(smp),pred=pick(['حَاضِرُونَ','صَادِقُونَ','نَشِيطُونَ']);return{sentence:`${p.nom} ${pred}`,translation:`${cap(p.en)} are ${pred==='حَاضِرُونَ'?'present':pred==='صَادِقُونَ'?'truthful':'active'}.`,tokens:[token(p.nom,p.en,AR.mubtada(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.mubtada,true),token(pred,'predicate',AR.khabar(pred,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.khabar)]}});
+add('noun','smp','ya',()=>{const s=pick(singularPeople),p=pick(smp);return{sentence:`${s.nom} يُكَرِّمُ ${p.acc}`,translation:`${cap(s.en)} honors ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يُكَرِّمُ','honors',AR.presentPred('يُكَرِّمُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token(p.acc,p.en,AR.object(p.acc,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.object,true)]}});
+add('noun','smp','ya',()=>{const s=pick(singularPeople),p=pick(smp);return{sentence:`${s.nom} يَتَحَدَّثُ مَعَ ${p.gen}`,translation:`${cap(s.en)} speaks with ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يَتَحَدَّثُ','speaks',AR.presentPred('يَتَحَدَّثُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token('مَعَ','with',`مَعَ: ظَرْفٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ، وَهُوَ مُضَافٌ.`, 'An adverb meaning “with”; it is accusative and is muḍāf.'),token(p.gen,p.en,AR.mudafIlayh(p.gen,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.mudafIlayh,true)]}});
+
+// Sound feminine plural
+add('noun','sfp','damma',()=>{const p=pick(sfp);return{sentence:`${p.nom} حَاضِرَاتٌ`,translation:`${cap(p.en)} are present.`,tokens:[token(p.nom,p.en,AR.mubtada(p.nom),EN.mubtada,true),token('حَاضِرَاتٌ','present',AR.khabar('حَاضِرَاتٌ'),EN.khabar)]}});
+add('noun','sfp','kasraSub',()=>{const s=pick(singularPeople),p=pick(sfp);return{sentence:`${s.nom} يُكَرِّمُ ${p.acc}`,translation:`${cap(s.en)} honors ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يُكَرِّمُ','honors',AR.presentPred('يُكَرِّمُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token(p.acc,p.en,AR.object(p.acc,'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ'),EN.object,true)]}});
+add('noun','sfp','kasra',()=>{const s=pick(singularPeople),p=pick(sfp);return{sentence:`${s.nom} يَتَحَدَّثُ مَعَ ${p.gen}`,translation:`${cap(s.en)} speaks with ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يَتَحَدَّثُ','speaks',AR.presentPred('يَتَحَدَّثُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token('مَعَ','with',`مَعَ: ظَرْفٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ، وَهُوَ مُضَافٌ.`,'An accusative adverb meaning “with”; it is muḍāf.'),token(p.gen,p.en,AR.mudafIlayh(p.gen),EN.mudafIlayh,true)]}});
+
+// Five nouns
+add('noun','fiveNouns','waw',()=>{const f=pick(fiveNouns),a=pick(adjectives);return{sentence:`${f.nom} ${a.nom}`,translation:`${cap(f.en)} is ${a.en}.`,tokens:[token(f.nom,f.en,AR.fiveNounNom(f.nom),EN.fiveNoun,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
+add('noun','fiveNouns','alif',()=>{const s=pick(singularPeople),f=pick(fiveNouns);return{sentence:`${s.nom} يَحْتَرِمُ ${f.acc}`,translation:`${cap(s.en)} respects ${f.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يَحْتَرِمُ','respects',AR.presentPred('يَحْتَرِمُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token(f.acc,f.en,AR.fiveNounAcc(f.acc),EN.fiveNoun,true)]}});
+add('noun','fiveNouns','ya',()=>{const s=pick(singularPeople),f=pick(fiveNouns);return{sentence:`${s.nom} يُسَلِّمُ عَلَى ${f.gen}`,translation:`${cap(s.en)} greets ${f.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('يُسَلِّمُ','greets',AR.presentPred('يُسَلِّمُ','مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present),token('عَلَى','to',AR.prep('عَلَى'),EN.prep),token(f.gen,f.en,AR.fiveNounGen(f.gen,'عَلَى'),EN.fiveNoun,true)]}});
+
+// Present verb not connected to an ending
+add('noun','present','damma',()=>{const s=pick(singularPeople),v=pick(verbs),o=pick(v.obj);return{sentence:`${s.nom} ${v.pres} ${o}`,translation:`${cap(s.en)} ${v.en==='write'?'writes':v.en==='read'?'reads':v.en==='memorize'?'memorizes':v.en==='open'?'opens':v.en==='drink'?'drinks':'eats'} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','present','fatha',()=>{const s=pick(singularPeople),v=pick(verbs),o=pick(v.obj);return{sentence:`${s.nom} لَنْ ${v.acc} ${o}`,translation:`${cap(s.en)} will not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»','الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','present','sukun',()=>{const s=pick(singularPeople),v=pick(verbs),o=pick(v.obj);return{sentence:`${s.nom} لَمْ ${v.juss} ${o}`,translation:`${cap(s.en)} did not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+
+// Five verbs
+add('noun','fiveVerbs','nunKept',()=>{const b=pick(brokenHuman),v=pick(verbs),o=pick(v.obj);return{sentence:`${b.nom} ${v.five} ${o}`,translation:`${cap(b.en)} ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','fiveVerbs','nunDropped',()=>{const b=pick(brokenHuman),v=pick(verbs),o=pick(v.obj),lan=Math.random()<.5;return{sentence:`${b.nom} ${lan?'لَنْ':'لَمْ'} ${v.fiveSub} ${o}`,translation:`${cap(b.en)} ${lan?'will not':'did not'} ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token(lan?'لَنْ':'لَمْ',lan?'will not':'did not',lan?AR.lan('لَنْ'):AR.lam('لَمْ'),lan?'A particle of naṣb.':'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,lan?'مَنْصُوبٌ بِـ«لَنْ»':'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+
+// A few verb-first and particle-first variants
+add('verb','singular','damma',()=>{const s=pick(singularPeople),o=pick(singularThings);return{sentence:`قَرَأَ ${s.nom} ${o.acc}`,translation:`${cap(s.en)} read ${o.en}.`,tokens:[token('قَرَأَ','read',`قَرَأَ: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.`,'A past-tense verb built on fatḥah.'),token(s.nom,s.en,`${s.nom}: فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.`,'The fāʿil, nominative with a visible ḍammah.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('particle','singular','fatha',()=>{const s=pick(singularPeople),a=pick(adjectives);return{sentence:`إِنَّ ${s.acc} ${a.nom}`,translation:`Indeed, ${s.en} is ${a.en}.`,tokens:[token('إِنَّ','indeed',`إِنَّ: حَرْفُ تَوْكِيدٍ وَنَصْبٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`,'A particle of emphasis and naṣb.'),token(s.acc,s.en,`${s.acc}: اسْمُ «إِنَّ» مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ.`,'The noun of inna, accusative with a visible fatḥah.',true),token(a.nom,a.en,`${a.nom}: خَبَرُ «إِنَّ» مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.`,'The predicate of inna, nominative with a visible ḍammah.')]}});
+add('particle','singular','kasra',()=>{const p=pick(places);return{sentence:`فِي ${p.gen} طَالِبٌ`,translation:`There is a student in ${p.en}.`,tokens:[token('فِي','in',AR.prep('فِي'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'فِي')+' وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِمَحْذُوفٍ خَبَرٌ مُقَدَّمٌ.',EN.majrur+' The prepositional phrase is the fronted predicate.',true),token('طَالِبٌ','a student',`طَالِبٌ: مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.`,'A delayed mubtadaʾ, nominative with a visible ḍammah.')]}});
+
+const recent=[]; const HISTORY=30;
+let current=null;
+function compatible(){
+ const start=byId('startFilter').value,form=byId('formFilter').value,sign=byId('signFilter').value;
+ return templates.filter(t=>(start==='any'||t.starts===start)&&(form==='any'||t.form===form)&&(sign==='any'||t.sign===sign));
+}
+function render(data){
+ current=data;
+ byId('sentence').textContent=data.sentence;
+ byId('translation').textContent=data.translation;
+ byId('answers').innerHTML=data.tokens.map(t=>`<article class="word-card${t.target?' target':''}"><div class="word-head"><span class="gloss">${t.target?'<span class="target-note">Focus word</span>':''}${esc(t.gloss)}</span><span class="word-ar" lang="ar">${esc(t.word)}</span></div><div class="iraab" lang="ar">${esc(t.ar)}</div><div class="english"><strong>English:</strong> ${esc(t.en)}</div></article>`).join('');
+ byId('answerPanel').classList.remove('open');
+ byId('revealBtn').textContent='Reveal Full Iʿrāb';
+ byId('status').className='status'; byId('status').textContent='';
+}
+function generate(){
+ const pool=compatible();
+ if(!pool.length){
+   byId('status').className='status error';
+   byId('status').textContent='That form and sign do not make a valid combination in this practice set. Choose “All signs” or another sign.';
+   return;
+ }
+ let data;
+ for(let i=0;i<50;i++){data=pick(pool).build(); if(!recent.includes(data.sentence))break;}
+ recent.push(data.sentence); if(recent.length>HISTORY)recent.shift();
+ render(data);
+}
+function toggleReveal(){
+ const panel=byId('answerPanel');
+ panel.classList.toggle('open');
+ byId('revealBtn').textContent=panel.classList.contains('open')?'Hide Iʿrāb':'Reveal Full Iʿrāb';
+}
+byId('newBtn').addEventListener('click',generate);
+byId('nextBtn').addEventListener('click',generate);
+byId('revealBtn').addEventListener('click',toggleReveal);
+['startFilter','formFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',generate));
+window.nahwGenerate=generate;
+window.nahwReveal=toggleReveal;
+generate();
+})();
+</script>
+</body>
+</html>

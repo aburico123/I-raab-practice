@@ -120,21 +120,6 @@ button{font-weight:850;cursor:pointer}
     <button id="newBtn" type="button">Reset filters</button>
   </section>
 
-  <section class="history-wrap" aria-label="Generated sentence history">
-    <button id="historyToggle" type="button" aria-expanded="false" aria-controls="historyPanel">Sentence history (0)</button>
-    <div id="historyPanel" class="history-panel" role="region" aria-label="Generated sentences">
-      <div class="history-head">
-        <div>
-          <div class="history-title">Generated sentences</div>
-          <span class="history-note">Newest first. The most recent 100 are saved on this device.</span>
-        </div>
-        <button id="clearHistoryBtn" type="button">Clear history</button>
-      </div>
-      <ol id="historyList" class="history-list"></ol>
-      <p id="historyEmpty" class="history-empty">No sentences generated yet.</p>
-    </div>
-  </section>
-
   <main class="practice">
     <div class="eyebrow">Practice sentence</div>
     <div id="sentence" lang="ar">الطَّالِبُ مُجْتَهِدٌ</div>
@@ -147,6 +132,20 @@ button{font-weight:850;cursor:pointer}
     <section id="answerPanel" aria-live="polite">
       <h2 class="answer-title">Full Iʿrāb</h2>
       <div id="answers" class="answers"></div>
+    </section>
+    <section class="history-wrap" aria-label="Generated sentence history">
+      <button id="historyToggle" type="button" aria-expanded="false" aria-controls="historyPanel">Sentence history (0)</button>
+      <div id="historyPanel" class="history-panel" role="region" aria-label="Generated sentences">
+        <div class="history-head">
+          <div>
+            <div class="history-title">Generated sentences</div>
+            <span class="history-note">Newest first. The most recent 100 are saved on this device.</span>
+          </div>
+          <button id="clearHistoryBtn" type="button">Clear history</button>
+        </div>
+        <ol id="historyList" class="history-list"></ol>
+        <p id="historyEmpty" class="history-empty">No sentences generated yet.</p>
+      </div>
     </section>
     <div id="status" class="status"></div>
     <div class="footer">Practice draws from 200 verb families and 200 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</div>
@@ -1102,7 +1101,7 @@ function resetFilters(){
  byId('formFilter').value='any';
  byId('signFilter').value='any';
  refreshDisabledOptions();
- generate('Filters reset to Any beginning, All forms, and All signs.');
+ generate();
 }
 function toggleReveal(){
  const panel=byId('answerPanel');

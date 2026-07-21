@@ -266,10 +266,13 @@ assert(elements.formFilter.value==='any','Reset Filters did not restore All form
 assert(elements.signFilter.value==='any','Reset Filters did not restore All signs');
 assert(Object.keys(optionValues).every(id=>elements[id].options.every(option=>!option.disabled)),
   'Reset Filters did not re-enable all compatible options');
-assert(elements.status.className.includes('notice')&&elements.status.textContent.includes('Filters reset'),
-  'Reset Filters did not show confirmation');
+assert(elements.status.className==='status'&&elements.status.textContent==='',
+  'Reset Filters still shows the removed confirmation notice');
 assert(elements.sentence.textContent,'Reset Filters did not generate an unrestricted sentence');
 assert(elements.historyToggle.textContent==='Sentence history (1)','Reset Filters generation was not added to history');
+assert(html.indexOf('id="historyToggle"')>html.indexOf('id="answerPanel"')
+  && html.indexOf('id="historyToggle"')<html.indexOf('id="status"'),
+  'Sentence history is not positioned where the reset notice used to appear');
 
 elements.startFilter.value='any';
 elements.formFilter.value='any';

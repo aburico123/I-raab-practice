@@ -147,6 +147,21 @@ const exact=api.completeNominalAnalysis({
 assertNominalPair(exact,'exact tailor/doctors case');
 assert(exact.tokens[1].ar.includes('«الْخَيَّاطُ»'),'Exact case does not link huwa back to the tailor');
 
+const exactFronted=api.completeNominalAnalysis({
+  sentence:'فِي السُّوقِ مُعَلِّمٌ',translation:'There is a teacher in the market.',
+  tokens:[
+    {word:'فِي',ar:'فِي: حَرْفُ جَرٍّ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'A preposition.'},
+    {word:'السُّوقِ',ar:'السُّوقِ: اسْمٌ مَجْرُورٌ بِـ«فِي»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ.',en:'A genitive noun.'},
+    {word:'مُعَلِّمٌ',ar:'مُعَلِّمٌ: مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.',en:'A delayed mubtada.'}
+  ]
+});
+assertNominalPair(exactFronted,'exact market/teacher case');
+assert(exactFronted.tokens[0].ar.startsWith('فِي: حَرْفُ جَرٍّ'),'Exact fronted case lost the individual preposition analysis');
+assert(exactFronted.tokens[0].ar.includes('فِي السُّوقِ: شِبْهُ جُمْلَةٍ'),'Exact fronted case omits the complete phrase');
+assert(exactFronted.tokens[0].ar.includes('فِي مَحَلِّ رَفْعٍ خَبَرٌ مُقَدَّمٌ'),'Exact fronted case omits the fronted khabar');
+assert(exactFronted.tokens[1].ar.includes('اسْمٌ مَجْرُورٌ بِـ«فِي»'),'Exact fronted case lost the governed noun analysis');
+assert(exactFronted.tokens[2].ar.includes('مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ'),'Exact fronted case lost the delayed mubtada analysis');
+
 function runEveryTemplate(repetitions){
   for(const template of api.templates){
     for(let iteration=0;iteration<repetitions;iteration++){
@@ -157,6 +172,26 @@ function runEveryTemplate(repetitions){
   }
 }
 runEveryTemplate(200);
+
+const marketTeacherTemplate=api.templates.find(template=>
+  template.starts==='particle'&&template.form==='singular'&&template.sign==='kasra');
+assert(marketTeacherTemplate,'The fronted singular prepositional template is missing');
+let generatedMarketTeacher=false;
+for(let iteration=0;iteration<20000;iteration++){
+  const data=api.buildTemplate(marketTeacherTemplate.id);
+  assertNominalPair(data,`fronted singular coverage run ${iteration}`);
+  stats.sentences++;
+  if(data.sentence==='فِي السُّوقِ مُعَلِّمٌ'){
+    generatedMarketTeacher=true;
+    assert(data.tokens[0].ar.includes('فِي السُّوقِ: شِبْهُ جُمْلَةٍ'),
+      'Generated market/teacher case omitted the complete phrase');
+    assert(data.tokens[0].ar.includes('فِي مَحَلِّ رَفْعٍ خَبَرٌ مُقَدَّمٌ'),
+      'Generated market/teacher case omitted the fronted khabar');
+    assert(data.tokens[2].ar.includes('مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ'),
+      'Generated market/teacher case omitted the delayed mubtada');
+  }
+}
+assert(generatedMarketTeacher,'The exact market/teacher sentence was not reached through the real template');
 
 const starts=optionValues.startFilter;
 const forms=optionValues.formFilter;

@@ -48,6 +48,17 @@ button{font-weight:850;cursor:pointer}
 .definitions-intro-ar{display:block;direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:17px;color:var(--green-dark);line-height:1.75}
 .definitions-intro a{color:var(--green-dark);font-weight:800}
 .definition-groups{display:grid;gap:15px;max-height:70vh;overflow:auto;padding-right:3px}
+.definition-chapter-intro{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:2px 2px 0}
+.definition-chapter-intro strong{color:var(--green-dark);font-size:16px}
+.definition-chapter-intro span{color:var(--muted);font-size:13px;text-align:right}
+.definition-chapter-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.definition-chapter-button{min-height:92px;padding:11px 12px;background:#fff;color:var(--green-dark);border-color:#ddd3c4;text-align:left;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:3px}
+.definition-chapter-button:hover{background:var(--green-soft);border-color:#a9cdb8;transform:none}
+.definition-chapter-button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 7px 18px rgba(34,105,75,.18)}
+.definition-chapter-button-ar{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:20px;line-height:1.45}
+.definition-chapter-button-en{font-size:13px;font-weight:900;line-height:1.35}
+.definition-chapter-count{font-size:11px;font-weight:700;opacity:.75}
+.definition-chapter-empty{padding:26px 18px;border:1px dashed #cfc4b4;border-radius:13px;background:#fffdf9;color:var(--muted);text-align:center;line-height:1.6}
 .definition-group h3{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 8px;padding-bottom:7px;border-bottom:2px solid #e7ded0;color:var(--green-dark);font-size:16px}
 .definition-group-title-ar{direction:rtl;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:21px}
 .definition-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
@@ -86,8 +97,8 @@ button{font-weight:850;cursor:pointer}
 .status.notice{display:block;background:#eef7f1;border:1px solid #b9d8c5;color:var(--green-dark)}
 .status.error{display:block;background:#fff0f0;border:1px solid #e3bebe;color:var(--danger)}
 .footer{text-align:center;color:#7a817d;font-size:13px;line-height:1.5;margin:14px 0 4px}
-@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}.history-head{align-items:flex-start}.definition-grid{grid-template-columns:1fr}}
-@media(max-width:460px){.controls{grid-template-columns:1fr}#sentence{font-size:36px}.iraab{font-size:19px}}
+@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}.history-head{align-items:flex-start}.definition-chapter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.definition-grid{grid-template-columns:1fr}}
+@media(max-width:460px){.controls{grid-template-columns:1fr}.definition-chapter-intro{align-items:flex-start;flex-direction:column;gap:3px}.definition-chapter-intro span{text-align:left}.definition-chapter-grid{grid-template-columns:1fr}.definition-chapter-button{min-height:82px}#sentence{font-size:36px}.iraab{font-size:19px}}
 </style>
 </head>
 <body>
@@ -174,7 +185,7 @@ button{font-weight:850;cursor:pointer}
           <span class="definitions-intro-ar" lang="ar">تَعْرِيفَاتٌ تَعْلِيمِيَّةٌ مُبَسَّطَةٌ مُسْتَفَادَةٌ مِنْ أَبْوَابِ «التُّحْفَةِ السَّنِيَّةِ بِشَرْحِ الْمُقَدِّمَةِ الْآجُرُّومِيَّةِ»، وَلَيْسَتْ نَقْلًا حَرْفِيًّا.</span>
           Beginner-friendly paraphrases adapted from <a href="https://islamhouse.com/ar/books/334271" target="_blank" rel="noopener noreferrer">Al-Tuḥfah al-Saniyyah</a>, not verbatim quotations.
         </p>
-        <div id="definitionsList" class="definition-groups" tabindex="0"></div>
+        <div id="definitionsList" class="definition-groups" tabindex="0" aria-live="polite"></div>
       </div>
     </section>
     <div id="status" class="status"></div>
@@ -376,10 +387,22 @@ grammarDefinitionGroups.forEach(group=>group.items.forEach(item=>{
  if(!pages)throw new Error(`Definition “${item.arTerm}” has no Al-Tuḥfah source page.`);
  item.source=Object.freeze({book:'Al-Tuḥfah al-Saniyyah bi-Sharḥ al-Muqaddimah al-Ājurrūmiyyah',pdfPages:pages});
 }));
+let activeDefinitionChapter=null;
+function renderDefinitionGroup(group,isActive){
+ return `<section class="definition-group"${isActive?'':' hidden'}><h3><span class="definition-group-title-ar" lang="ar">${esc(group.ar)}</span><span>${esc(group.en)}</span></h3><dl class="definition-grid">${group.items.map(item=>`<div class="definition-card"><dt><span class="definition-term-ar" lang="ar">${esc(item.arTerm)}</span><span class="definition-term-en">${esc(item.enTerm)}</span></dt><dd class="definition-ar" lang="ar">${esc(item.ar)}</dd><dd class="definition-en">${esc(item.en)}</dd><dd class="definition-source">Al-Tuḥfah, PDF ${item.source.pdfPages.length===1?'p.':'pp.'} ${esc(item.source.pdfPages.join(', '))}</dd></div>`).join('')}</dl></section>`;
+}
 function renderGrammarDefinitions(){
  const count=grammarDefinitionGroups.reduce((total,group)=>total+group.items.length,0);
  byId('definitionsToggle').textContent=`Simple grammar definitions (${count})`;
- byId('definitionsList').innerHTML=grammarDefinitionGroups.map(group=>`<section class="definition-group"><h3><span class="definition-group-title-ar" lang="ar">${esc(group.ar)}</span><span>${esc(group.en)}</span></h3><dl class="definition-grid">${group.items.map(item=>`<div class="definition-card"><dt><span class="definition-term-ar" lang="ar">${esc(item.arTerm)}</span><span class="definition-term-en">${esc(item.enTerm)}</span></dt><dd class="definition-ar" lang="ar">${esc(item.ar)}</dd><dd class="definition-en">${esc(item.en)}</dd><dd class="definition-source">Al-Tuḥfah, PDF ${item.source.pdfPages.length===1?'p.':'pp.'} ${esc(item.source.pdfPages.join(', '))}</dd></div>`).join('')}</dl></section>`).join('');
+ const chapter=activeDefinitionChapter===null?null:grammarDefinitionGroups[activeDefinitionChapter];
+ const chapterButtons=grammarDefinitionGroups.map((group,index)=>`<button type="button" class="definition-chapter-button" data-definition-chapter="${index}" aria-pressed="${index===activeDefinitionChapter}"><span class="definition-chapter-button-ar" lang="ar">${esc(group.ar)}</span><span class="definition-chapter-button-en">${esc(group.en)}</span><span class="definition-chapter-count">${group.items.length} terms</span></button>`).join('');
+ const chapterSections=grammarDefinitionGroups.map((group,index)=>renderDefinitionGroup(group,index===activeDefinitionChapter)).join('');
+ byId('definitionsList').innerHTML=`<div class="definition-chapter-intro"><strong>Choose a grammar chapter</strong><span>Select a chapter to see all of its terms and definitions.</span></div><div class="definition-chapter-grid" role="group" aria-label="Grammar chapters">${chapterButtons}</div>${chapter?'':'<div class="definition-chapter-empty">Choose a chapter above to begin.</div>'}${chapterSections}`;
+}
+function selectDefinitionChapter(index){
+ if(!Number.isInteger(index)||!grammarDefinitionGroups[index])return;
+ activeDefinitionChapter=index;
+ renderGrammarDefinitions();
 }
 function toggleGrammarDefinitions(){
  const panel=byId('definitionsPanel');
@@ -1884,6 +1907,10 @@ byId('revealBtn').addEventListener('click',toggleReveal);
 byId('historyToggle').addEventListener('click',toggleSentenceHistory);
 byId('clearHistoryBtn').addEventListener('click',clearSentenceHistory);
 byId('definitionsToggle').addEventListener('click',toggleGrammarDefinitions);
+byId('definitionsList').addEventListener('click',event=>{
+ const button=event.target?.closest?.('[data-definition-chapter]');
+ if(button)selectDefinitionChapter(Number(button.getAttribute('data-definition-chapter')));
+});
 ['startFilter','formFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',handleFilterChange));
 window.nahwGenerate=generate;
 window.nahwReveal=toggleReveal;

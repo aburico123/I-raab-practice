@@ -92,6 +92,9 @@ button{font-weight:850;cursor:pointer}
 .gloss{color:#68716c;font-size:14px;text-align:left}
 .iraab{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;padding:14px 15px;font-size:21px;line-height:1.9}
 .english{border-top:1px solid #eee7db;padding:11px 15px;color:#59625d;line-height:1.55;font-size:15px}
+.phrase-analysis{border-top:1px solid #d8e6dc;background:#f7fbf8}
+.phrase-analysis-ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;padding:12px 15px 8px;font-size:20px;line-height:1.9;color:var(--green-dark)}
+.phrase-analysis-en{border-top:1px solid #e5eee8;padding:9px 15px 12px;color:#59625d;line-height:1.55;font-size:15px}
 .target-note{display:inline-block;margin-left:7px;background:var(--gold);color:#fff;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;vertical-align:middle}
 .status{display:none;margin-top:12px;padding:11px 13px;border-radius:12px;text-align:center;line-height:1.5}
 .status.notice{display:block;background:#eef7f1;border:1px solid #b9d8c5;color:var(--green-dark)}
@@ -1230,7 +1233,7 @@ const AR={
 const EN={mubtada:'',khabar:'',object:'',prep:'',majrur:'',mudaf:'',mudafIlayh:'',present:'',fiveVerb:'',fiveNoun:''};
 function token(word,gloss,grammar,enHint='',target=false){
  if(!grammar||typeof grammar!=='object'||!grammar.type) throw new Error(`Token “${word}” has no structured grammar specification.`);
- return{word,surfaceHint:word,gloss,grammar:{...grammar},enHint,target,ar:'',en:'',relations:{}};
+ return{word,surfaceHint:word,gloss,grammar:{...grammar},enHint,target,ar:'',en:'',phraseAr:'',phraseEn:'',relations:{}};
 }
 function relationToken(action){
  return action.adverb
@@ -1497,16 +1500,19 @@ function renderRelationshipAnalysis(data){
    anchor.en+=` The complete verbal sentence “${phrase}” is the khabar and contains a link back to “${mubtada.word}”.`;
    }else{
     const fronted=rel.khabarKind==='frontedPhrase';
-    const attachment=anchor.grammar.particleType==='preposition'
+   const attachment=anchor.grammar.particleType==='preposition'
      ?`«${phrase}»: جَارٌّ وَمَجْرُورٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ${fronted?' مُقَدَّمٍ':''}`
      :`«${phrase}»: ظَرْفٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ${fronted?' مُقَدَّمٍ':''}`;
-    anchor.ar+=` ${attachment} لِلْمُبْتَدَأِ${fronted?' الْمُؤَخَّرِ':''} «${mubtada.word}».`;
-    anchor.en+=` The complete phrase “${phrase}” is attached to an omitted ${fronted?'fronted ':''}khabar of “${mubtada.word}”.`;
+    const phraseRecipient=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)).filter(Boolean).at(-1)||anchor;
+    phraseRecipient.phraseAr=`وَ${attachment} لِلْمُبْتَدَأِ${fronted?' الْمُؤَخَّرِ':''} «${mubtada.word}».`;
+    phraseRecipient.phraseEn=`Together, “${phrase}” is attached to an omitted ${fronted?'fronted ':''}khabar of “${mubtada.word}”.`;
   }
  });
 }
 function renderExercise(data){
  data.tokens.forEach(token=>{
+  token.phraseAr='';
+  token.phraseEn='';
   token._tokens=data.tokens;
   if(token.grammar.type==='noun')renderNounAnalysis(token);
   else if(token.grammar.type==='verb')renderVerbAnalysis(token);
@@ -1847,7 +1853,7 @@ function render(data,notice=''){
  current=data;
  byId('sentence').textContent=data.sentence;
  byId('translation').textContent=data.translation;
- byId('answers').innerHTML=data.tokens.map(t=>`<article class="word-card${t.target?' target':''}"><div class="word-head"><span class="gloss">${t.target?'<span class="target-note">Focus word</span> ':''}${esc(t.gloss)}</span><span class="word-ar" lang="ar">${esc(t.word)}</span></div><div class="iraab" lang="ar">${esc(t.ar)}</div><div class="english"><strong>English:</strong> ${esc(t.en)}</div></article>`).join('');
+ byId('answers').innerHTML=data.tokens.map(t=>`<article class="word-card${t.target?' target':''}"><div class="word-head"><span class="gloss">${t.target?'<span class="target-note">Focus word</span> ':''}${esc(t.gloss)}</span><span class="word-ar" lang="ar">${esc(t.word)}</span></div><div class="iraab" lang="ar">${esc(t.ar)}</div><div class="english"><strong>English:</strong> ${esc(t.en)}</div>${t.phraseAr?`<div class="phrase-analysis"><div class="phrase-analysis-ar" lang="ar">${esc(t.phraseAr)}</div><div class="phrase-analysis-en"><strong>Phrase:</strong> ${esc(t.phraseEn)}</div></div>`:''}</article>`).join('');
  byId('answerPanel').classList.remove('open');
  byId('revealBtn').textContent='Reveal Full Iʿrāb';
  byId('status').className=notice?'status notice':'status';

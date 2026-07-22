@@ -58,6 +58,7 @@ button{font-weight:850;cursor:pointer}
 .definition-card dd{margin:0}
 .definition-ar{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:18px;line-height:1.75;color:#27332d}
 .definition-en{margin-top:5px!important;padding-top:6px;border-top:1px solid #f0e9de;color:var(--muted);font-size:13px;line-height:1.5}
+.definition-source{margin-top:6px;color:#7b746b;font-size:11px;line-height:1.35}
 .practice{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,32px);box-shadow:0 14px 40px rgba(39,45,41,.08)}
 .eyebrow{text-align:center;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.11em}
 #sentence{direction:rtl;text-align:center;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:clamp(34px,7vw,56px);font-weight:800;line-height:1.75;color:var(--green);margin:10px 0 0}
@@ -187,6 +188,7 @@ button{font-weight:850;cursor:pointer}
 const byId=id=>document.getElementById(id);
 function randomInt(max){
  if(!Number.isInteger(max)||max<1) throw new RangeError('randomInt needs a positive integer');
+ if(max>0x100000000) throw new RangeError('randomInt does not support a max this large');
  if(!globalThis.crypto?.getRandomValues) throw new Error('Secure random generation is unavailable in this browser.');
  const limit=Math.floor(0x100000000/max)*max;
  const value=new Uint32Array(1);
@@ -263,11 +265,11 @@ const grammarDefinitionGroups=[
  {ar:'الْإِعْرَابُ وَعَلَامَاتُهُ',en:'Iʿrāb states and signs',items:[
   {arTerm:'الْإِعْرَابُ',enTerm:'Iʿrāb',ar:'تَغَيُّرُ حَالِ آخِرِ الْكَلِمَةِ بِسَبَبِ تَغَيُّرِ الْعَامِلِ الدَّاخِلِ عَلَيْهَا.',en:'The change at the end of a word caused by a change in what governs it.'},
   {arTerm:'الْمُعْرَبُ',enTerm:'Inflected word',ar:'كَلِمَةٌ يَتَغَيَّرُ حَالُ آخِرِهَا بِتَغَيُّرِ مَوْقِعِهَا أَوِ الْعَامِلِ فِيهَا.',en:'A word whose ending changes when its role or governing word changes.'},
-  {arTerm:'الْبِنَاءُ',enTerm:'Fixed form (bināʾ)',ar:'لُزُومُ آخِرِ الْكَلِمَةِ حَالَةً وَاحِدَةً مَعَ تَغَيُّرِ الْعَوَامِلِ.',en:'The ending of a word staying fixed even when governing words change.'},
+  {arTerm:'الْبِنَاءُ',enTerm:'Fixed form (bināʾ)',ar:'لُزُومُ آخِرِ الْكَلِمَةِ حَالَةً وَاحِدَةً لِغَيْرِ عَامِلٍ.',en:'The ending of a word staying fixed for a reason other than any governing word.'},
   {arTerm:'عَلَامَةُ الْإِعْرَابِ',enTerm:'Iʿrāb sign',ar:'الْحَرَكَةُ أَوِ الْحَرْفُ الَّذِي يُبَيِّنُ حَالَةَ الْكَلِمَةِ.',en:'The vowel or letter that shows a word’s grammatical state.'},
   {arTerm:'الرَّفْعُ',enTerm:'Nominative (rafʿ)',ar:'حَالَةٌ إِعْرَابِيَّةٌ عَلَامَتُهَا الْأَصْلِيَّةُ الضَّمَّةُ.',en:'An iʿrāb state whose original sign is the ḍammah.'},
   {arTerm:'النَّصْبُ',enTerm:'Accusative (naṣb)',ar:'حَالَةٌ إِعْرَابِيَّةٌ عَلَامَتُهَا الْأَصْلِيَّةُ الْفَتْحَةُ.',en:'An iʿrāb state whose original sign is the fatḥah.'},
-  {arTerm:'الْخَفْضُ أَوِ الْجَرُّ',enTerm:'Genitive (khafḍ / jarr)',ar:'حَالَةٌ إِعْرَابِيَّةٌ فِي الْأَسْمَاءِ، وَعَلَامَتُهَا الْأَصْلِيَّةُ الْكَسْرَةُ.',en:'An iʿrāb state for nouns whose original sign is the kasrah.'},
+  {arTerm:'الْخَفْضُ',enTerm:'Genitive (khafḍ)',ar:'حَالَةٌ إِعْرَابِيَّةٌ فِي الْأَسْمَاءِ، وَعَلَامَتُهَا الْأَصْلِيَّةُ الْكَسْرَةُ.',en:'An iʿrāb state for nouns whose original sign is the kasrah.'},
   {arTerm:'الْجَزْمُ',enTerm:'Jussive (jazm)',ar:'حَالَةٌ إِعْرَابِيَّةٌ فِي الْفِعْلِ الْمُضَارِعِ، وَعَلَامَتُهَا الْأَصْلِيَّةُ السُّكُونُ.',en:'An iʿrāb state for present-tense verbs whose original sign is the sukūn.'},
   {arTerm:'الضَّمَّةُ الظَّاهِرَةُ',enTerm:'Visible ḍammah',ar:'حَرَكَةٌ تَظْهَرُ عَلَى آخِرِ الْكَلِمَةِ، وَهِيَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلرَّفْعِ.',en:'A visible ending and the original sign of the nominative state.'},
   {arTerm:'الْفَتْحَةُ الظَّاهِرَةُ',enTerm:'Visible fatḥah',ar:'حَرَكَةٌ تَظْهَرُ عَلَى آخِرِ الْكَلِمَةِ، وَهِيَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلنَّصْبِ.',en:'A visible ending and the original sign of the accusative state.'},
@@ -281,24 +283,29 @@ const grammarDefinitionGroups=[
   {arTerm:'حَذْفُ النُّونِ',enTerm:'Dropping the nūn',ar:'عَلَامَةُ نَصْبِ الْأَفْعَالِ الْخَمْسَةِ وَجَزْمِهَا.',en:'The accusative and jussive sign of the five verbs.'}
  ]},
  {ar:'عَنَاصِرُ الْجُمْلَةِ',en:'Sentence roles',items:[
-  {arTerm:'الْمُبْتَدَأُ',enTerm:'Mubtadaʾ',ar:'اسْمٌ مَرْفُوعٌ نَتَحَدَّثُ عَنْهُ فِي الْجُمْلَةِ الِاسْمِيَّةِ، وَقَدْ يَتَقَدَّمُ أَوْ يَتَأَخَّرُ.',en:'The nominative noun being spoken about in a nominal sentence. It may come first or later.'},
-  {arTerm:'الْخَبَرُ',enTerm:'Khabar',ar:'مَا يُتِمُّ مَعْنَى الْمُبْتَدَأِ وَيُخْبِرُنَا عَنْهُ، وَيَكُونُ مَرْفُوعًا أَوْ فِي مَحَلِّ رَفْعٍ.',en:'What completes the meaning about the mubtadaʾ. It is nominative or occupies a nominative position.'},
+  {arTerm:'الْمُبْتَدَأُ',enTerm:'Mubtadaʾ',ar:'اسْمٌ مَرْفُوعٌ لَمْ يَسْبِقْهُ عَامِلٌ لَفْظِيٌّ، نَتَحَدَّثُ عَنْهُ فِي الْجُمْلَةِ الِاسْمِيَّةِ، وَقَدْ يَتَقَدَّمُ أَوْ يَتَأَخَّرُ.',en:'A nominative noun not preceded by any governing word; it is what a nominal sentence is speaking about, and it may come first or later.'},
+  {arTerm:'الْخَبَرُ',enTerm:'Khabar',ar:'الْجُزْءُ الَّذِي تَتِمُّ بِهِ الْفَائِدَةُ مَعَ الْمُبْتَدَأِ؛ وَقَدْ يَكُونُ مُفْرَدًا أَوْ جُمْلَةً، وَقَدْ يَتَعَلَّقُ بِمَحْذُوفٍ ظَرْفٌ أَوْ جَارٌّ وَمَجْرُورٌ.',en:'The part that completes the meaning with the mubtadaʾ. It may be one word or a sentence; a prepositional or adverbial expression may attach to an omitted khabar.'},
+  {arTerm:'الْخَبَرُ الْمُفْرَدُ',enTerm:'Single-word khabar',ar:'خَبَرٌ لَيْسَ جُمْلَةً وَلَا ظَرْفًا وَلَا جَارًّا وَمَجْرُورًا، وَهُوَ مَرْفُوعٌ.',en:'A khabar that is not a sentence or an adverbial/prepositional expression. It is nominative.'},
+  {arTerm:'خَبَرُ الْجُمْلَةِ',enTerm:'Sentence khabar',ar:'جُمْلَةٌ تَتِمُّ بِهَا الْفَائِدَةُ مَعَ الْمُبْتَدَأِ، وَتَكُونُ فِي مَحَلِّ رَفْعٍ، وَفِيهَا رَابِطٌ يَعُودُ عَلَيْهِ.',en:'A complete sentence serving as khabar. It occupies a nominative position and contains a link back to the mubtadaʾ.'},
+  {arTerm:'خَبَرُ شِبْهِ الْجُمْلَةِ',enTerm:'Phrase-like khabar construction',ar:'ظَرْفٌ أَوْ جَارٌّ وَمَجْرُورٌ يَتَعَلَّقُ بِمَحْذُوفٍ خَبَرٍ لِلْمُبْتَدَأِ.',en:'An adverbial or prepositional expression attached to an omitted khabar of the mubtadaʾ.'},
   {arTerm:'الْخَبَرُ الْمُقَدَّمُ',enTerm:'Fronted khabar',ar:'خَبَرٌ جَاءَ قَبْلَ مُبْتَدَئِهِ.',en:'A khabar placed before its mubtadaʾ.'},
   {arTerm:'الْمُبْتَدَأُ الْمُؤَخَّرُ',enTerm:'Delayed mubtadaʾ',ar:'مُبْتَدَأٌ جَاءَ بَعْدَ خَبَرِهِ.',en:'A mubtadaʾ placed after its khabar.'},
-  {arTerm:'الْفَاعِلُ',enTerm:'Subject / doer (fāʿil)',ar:'اسْمٌ مَرْفُوعٌ أَوْ ضَمِيرٌ أُسْنِدَ إِلَيْهِ الْفِعْلُ.',en:'A nominative noun or pronoun to which the verb is attributed.'},
+  {arTerm:'الْفَاعِلُ',enTerm:'Subject / doer (fāʿil)',ar:'اسْمٌ مَرْفُوعٌ أَوْ ضَمِيرٌ ذُكِرَ فِعْلُهُ قَبْلَهُ، أُسْنِدَ إِلَيْهِ الْفِعْلُ.',en:'A nominative noun or pronoun whose verb is mentioned before it, and to which the verb is attributed.'},
+  {arTerm:'الْفَاعِلُ الظَّاهِرُ',enTerm:'Explicit subject',ar:'اسْمٌ ظَاهِرٌ أُسْنِدَ إِلَيْهِ الْفِعْلُ، وَهُوَ مَرْفُوعٌ.',en:'A visibly stated noun to which the verb is attributed. It is nominative.'},
+  {arTerm:'الْفَاعِلُ الْمُضْمَرُ',enTerm:'Pronominal subject',ar:'ضَمِيرٌ أُسْنِدَ إِلَيْهِ الْفِعْلُ، وَقَدْ يَكُونُ مُتَّصِلًا أَوْ مُسْتَتِرًا.',en:'A pronoun to which the verb is attributed. It may be attached or hidden.'},
   {arTerm:'الضَّمِيرُ الْمُسْتَتِرُ',enTerm:'Hidden pronoun',ar:'ضَمِيرٌ لَا يَظْهَرُ فِي اللَّفْظِ، وَلَكِنَّهُ يُفْهَمُ مِنَ الْفِعْلِ.',en:'A pronoun not spoken or written separately but understood from the verb.'},
   {arTerm:'الضَّمِيرُ الْمُتَّصِلُ',enTerm:'Attached pronoun',ar:'ضَمِيرٌ يَتَّصِلُ بِكَلِمَةٍ وَلَا يُنْطَقُ وَحْدَهُ.',en:'A pronoun joined to another word and not spoken by itself.'},
   {arTerm:'وَاوُ الْجَمَاعَةِ',enTerm:'Plural wāw',ar:'ضَمِيرٌ مُتَّصِلٌ يَدُلُّ عَلَى جَمَاعَةِ الذُّكُورِ، وَيَكُونُ فَاعِلًا فِي كَثِيرٍ مِنَ الْأَفْعَالِ.',en:'An attached pronoun for a masculine plural group, often serving as the verb’s subject.'},
   {arTerm:'أَلِفُ الِاثْنَيْنِ',enTerm:'Dual alif',ar:'ضَمِيرٌ مُتَّصِلٌ يَدُلُّ عَلَى اثْنَيْنِ، وَيَكُونُ فَاعِلًا فِي الْفِعْلِ.',en:'An attached pronoun referring to two, serving as the verb’s subject.'},
   {arTerm:'يَاءُ الْمُخَاطَبَةِ',enTerm:'Feminine-address yāʾ',ar:'ضَمِيرٌ مُتَّصِلٌ يَدُلُّ عَلَى الْمُخَاطَبَةِ الْمُفْرَدَةِ، وَيَكُونُ فَاعِلًا فِي الْفِعْلِ.',en:'An attached pronoun for one addressed female, serving as the verb’s subject.'},
   {arTerm:'الْمَفْعُولُ بِهِ',enTerm:'Direct object',ar:'اسْمٌ مَنْصُوبٌ وَقَعَ عَلَيْهِ فِعْلُ الْفَاعِلِ.',en:'An accusative noun upon which the subject’s action falls.'},
-  {arTerm:'شِبْهُ الْجُمْلَةِ',enTerm:'Phrase-like expression',ar:'جَارٌّ وَمَجْرُورٌ أَوْ ظَرْفٌ، وَلَيْسَ جُمْلَةً كَامِلَةً وَحْدَهُ.',en:'A prepositional phrase or an adverbial expression; it is not a complete sentence by itself.'},
-  {arTerm:'الْجَارُّ وَالْمَجْرُورُ',enTerm:'Preposition and governed noun',ar:'حَرْفُ جَرٍّ مَعَ الِاسْمِ الْمَجْرُورِ بَعْدَهُ، وَهُمَا مَعًا شِبْهُ جُمْلَةٍ.',en:'A preposition together with its following genitive noun; together they form a phrase-like expression.'},
-  {arTerm:'حَرْفُ الْجَرِّ',enTerm:'Preposition',ar:'حَرْفٌ يَجْعَلُ الِاسْمَ بَعْدَهُ مَجْرُورًا.',en:'A particle that makes the noun after it genitive.'},
-  {arTerm:'الِاسْمُ الْمَجْرُورُ',enTerm:'Genitive noun',ar:'اسْمٌ دَخَلَ عَلَيْهِ حَرْفُ جَرٍّ، أَوْ جَرَّتْهُ الْإِضَافَةُ، أَوْ تَبِعَ اسْمًا مَجْرُورًا.',en:'A noun made genitive by a preposition, an iḍāfah, or agreement with another genitive noun.'},
+  {arTerm:'شِبْهُ الْجُمْلَةِ',enTerm:'Phrase-like expression',ar:'ظَرْفٌ أَوْ جَارٌّ وَمَجْرُورٌ؛ وَإِذَا وَقَعَ فِي مَوْضِعِ الْخَبَرِ تَعَلَّقَ بِخَبَرٍ مَحْذُوفٍ.',en:'An adverbial or prepositional expression. When used where a khabar is needed, it attaches to an omitted khabar.'},
+  {arTerm:'الْجَارُّ وَالْمَجْرُورُ',enTerm:'Preposition and governed noun',ar:'حَرْفُ خَفْضٍ مَعَ الِاسْمِ الْمَخْفُوضِ بَعْدَهُ، وَيُسَمَّى التَّرْكِيبُ أَيْضًا جَارًّا وَمَجْرُورًا.',en:'A preposition together with its following genitive noun; the complete expression is also called jār wa-majrūr.'},
+  {arTerm:'حَرْفُ الْخَفْضِ',enTerm:'Preposition',ar:'حَرْفٌ يَخْفِضُ الِاسْمَ بَعْدَهُ.',en:'A particle that makes the noun after it genitive.'},
+  {arTerm:'الِاسْمُ الْمَخْفُوضُ',enTerm:'Genitive noun',ar:'اسْمٌ خَفَضَهُ حَرْفُ خَفْضٍ، أَوِ الْإِضَافَةُ، أَوِ التَّبَعِيَّةُ لِمَخْفُوضٍ.',en:'A noun made genitive by a preposition, an iḍāfah, or agreement with another genitive noun.'},
   {arTerm:'الظَّرْفُ',enTerm:'Adverb of time or place',ar:'اسْمٌ يَدُلُّ عَلَى زَمَانِ الْفِعْلِ أَوْ مَكَانِهِ.',en:'A noun that tells the time or place of an action.'},
   {arTerm:'الْمُضَافُ',enTerm:'First noun of an iḍāfah',ar:'الِاسْمُ الْأَوَّلُ فِي تَرْكِيبِ الْإِضَافَةِ، وَيُنْسَبُ إِلَى الِاسْمِ بَعْدَهُ.',en:'The first noun in an iḍāfah; it is connected or related to the noun after it.'},
-  {arTerm:'الْمُضَافُ إِلَيْهِ',enTerm:'Second noun of an iḍāfah',ar:'الِاسْمُ الثَّانِي فِي تَرْكِيبِ الْإِضَافَةِ، وَهُوَ مَجْرُورٌ دَائِمًا.',en:'The second noun in an iḍāfah, and it is always genitive.'},
+  {arTerm:'الْمُضَافُ إِلَيْهِ',enTerm:'Second noun of an iḍāfah',ar:'الِاسْمُ الثَّانِي فِي تَرْكِيبِ الْإِضَافَةِ، وَهُوَ مَخْفُوضٌ بِالْإِضَافَةِ.',en:'The second noun in an iḍāfah, and it is genitive by iḍāfah.'},
   {arTerm:'الرَّابِطُ',enTerm:'Link back to the mubtadaʾ',ar:'ضَمِيرٌ أَوْ عُنْصُرٌ يَرْبِطُ جُمْلَةَ الْخَبَرِ بِالْمُبْتَدَأِ.',en:'A pronoun or other element that connects a sentence used as khabar back to its mubtadaʾ.'}
  ]},
  {ar:'الْعَوَامِلُ وَالْأَدَوَاتُ',en:'Governing words and particles',items:[
@@ -311,13 +318,68 @@ const grammarDefinitionGroups=[
   {arTerm:'خَبَرُ كَانَ',enTerm:'Khabar of kāna',ar:'مَا يُتِمُّ مَعْنَى اسْمِ «كَانَ»، وَهُوَ مَنْصُوبٌ.',en:'What completes the meaning of the ism of kāna; it is accusative.'},
   {arTerm:'النَّاصِبُ',enTerm:'Accusative governor',ar:'أَدَاةٌ تَجْعَلُ الْفِعْلَ الْمُضَارِعَ مَنْصُوبًا، مِثْلُ «لَنْ».',en:'A particle that makes a present-tense verb accusative, such as lan.'},
   {arTerm:'الْجَازِمُ',enTerm:'Jussive governor',ar:'أَدَاةٌ تَجْعَلُ الْفِعْلَ الْمُضَارِعَ مَجْزُومًا، مِثْلُ «لَمْ».',en:'A particle that makes a present-tense verb jussive, such as lam.'},
-  {arTerm:'لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ',enTerm:'No syntactic position',ar:'لَفْظٌ مَبْنِيٌّ لَا يَشْغَلُ مَوْضِعًا يُحْكَمُ عَلَيْهِ بِالرَّفْعِ أَوِ النَّصْبِ أَوِ الْجَرِّ أَوِ الْجَزْمِ.',en:'A fixed word that does not occupy a sentence position described as nominative, accusative, genitive, or jussive.'}
+  {arTerm:'لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ',enTerm:'No syntactic position',ar:'لَفْظٌ مَبْنِيٌّ لَا يَشْغَلُ مَوْضِعًا يُحْكَمُ عَلَيْهِ بِالرَّفْعِ أَوِ النَّصْبِ أَوِ الْخَفْضِ أَوِ الْجَزْمِ.',en:'A fixed word that does not occupy a sentence position described as nominative, accusative, genitive, or jussive.'}
  ]}
 ];
+const definitionSourceGroups=[
+ {pages:[7,8,9,10,11],terms:['الْكَلَامُ']},
+ {pages:[9,10,11],terms:['الْكَلِمَةُ','الِاسْمُ','الْفِعْلُ','الْفِعْلُ الْمَاضِي','الْفِعْلُ الْمُضَارِعُ','الْحَرْفُ']},
+ {pages:[105,106],terms:['الْفِعْلُ الْمَاضِي النَّاقِصُ']},
+ {pages:[99,100,101,102,103,104],terms:['الْجُمْلَةُ الِاسْمِيَّةُ']},
+ {pages:[87,88,89,90,91,92,93],terms:['الْجُمْلَةُ الْفِعْلِيَّةُ']},
+ {pages:[26],terms:['الِاسْمُ الْمُفْرَدُ']},
+ {pages:[27,28,29],terms:['جَمْعُ التَّكْسِيرِ']},
+ {pages:[31,64,65,66],terms:['الْمُثَنَّى']},
+ {pages:[31,64,65,66],terms:['جَمْعُ الْمُذَكَّرِ السَّالِمُ']},
+ {pages:[30,49,62],terms:['جَمْعُ الْمُؤَنَّثِ السَّالِمُ']},
+ {pages:[32,66,67],terms:['الْأَسْمَاءُ الْخَمْسَةُ']},
+ {pages:[26,39],terms:['الْمُضَارِعُ الَّذِي لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ']},
+ {pages:[39,67],terms:['الْأَفْعَالُ الْخَمْسَةُ']},
+ {pages:[19,20],terms:['الْإِعْرَابُ','الْمُعْرَبُ']},
+ {pages:[20,21,22],terms:['الْبِنَاءُ']},
+ {pages:[23,24,25,26,35,39,40,47,50,51,58,61,62,66,67],terms:['عَلَامَةُ الْإِعْرَابِ']},
+ {pages:[23,26,35,39],terms:['الرَّفْعُ']},
+ {pages:[23,40,47,48,49,50],terms:['النَّصْبُ']},
+ {pages:[23,61,62,66],terms:['الْخَفْضُ']},
+ {pages:[23,51,58],terms:['الْجَزْمُ']},
+ {pages:[26],terms:['الضَّمَّةُ الظَّاهِرَةُ']},
+ {pages:[48],terms:['الْفَتْحَةُ الظَّاهِرَةُ']},
+ {pages:[62],terms:['الْكَسْرَةُ الظَّاهِرَةُ']},
+ {pages:[58],terms:['السُّكُونُ الظَّاهِرُ']},
+ {pages:[35,50],terms:['الْأَلِفُ']},
+ {pages:[35,66],terms:['الْوَاوُ']},
+ {pages:[50,66],terms:['الْيَاءُ']},
+ {pages:[49],terms:['الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ']},
+ {pages:[67],terms:['ثُبُوتُ النُّونِ','حَذْفُ النُّونِ']},
+ {pages:[99,100,101,102,103,104],terms:['الْمُبْتَدَأُ','الْخَبَرُ','الْخَبَرُ الْمُفْرَدُ']},
+ {pages:[102,103,104,130],terms:['خَبَرُ الْجُمْلَةِ']},
+ {pages:[102,103,104,161],terms:['خَبَرُ شِبْهِ الْجُمْلَةِ']},
+ {pages:[161],terms:['الْخَبَرُ الْمُقَدَّمُ','الْمُبْتَدَأُ الْمُؤَخَّرُ']},
+ {pages:[87,88,89,90,91,92,93,130],terms:['الْفَاعِلُ','الْفَاعِلُ الظَّاهِرُ','الْفَاعِلُ الْمُضْمَرُ','الضَّمِيرُ الْمُسْتَتِرُ','الضَّمِيرُ الْمُتَّصِلُ','وَاوُ الْجَمَاعَةِ','أَلِفُ الِاثْنَيْنِ','يَاءُ الْمُخَاطَبَةِ']},
+ {pages:[140,141],terms:['الْمَفْعُولُ بِهِ']},
+ {pages:[103,104,161],terms:['شِبْهُ الْجُمْلَةِ']},
+ {pages:[13,103,104,174,175,176,177],terms:['الْجَارُّ وَالْمَجْرُورُ','حَرْفُ الْخَفْضِ','الِاسْمُ الْمَخْفُوضُ']},
+ {pages:[148,149,151,152,153],terms:['الظَّرْفُ']},
+ {pages:[175,177,178],terms:['الْمُضَافُ','الْمُضَافُ إِلَيْهِ']},
+ {pages:[103,104,130],terms:['الرَّابِطُ']},
+ {pages:[19],terms:['الْعَامِلُ']},
+ {pages:[105,109,110],terms:['إِنَّ وَأَخَوَاتُهَا','اسْمُ إِنَّ','خَبَرُ إِنَّ']},
+ {pages:[105,106],terms:['كَانَ وَأَخَوَاتُهَا','اسْمُ كَانَ','خَبَرُ كَانَ']},
+ {pages:[73,74],terms:['النَّاصِبُ']},
+ {pages:[79,80],terms:['الْجَازِمُ']},
+ {pages:[60],terms:['لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ']}
+];
+const definitionSourceByTerm=new Map();
+definitionSourceGroups.forEach(group=>group.terms.forEach(term=>definitionSourceByTerm.set(term,Object.freeze([...group.pages]))));
+grammarDefinitionGroups.forEach(group=>group.items.forEach(item=>{
+ const pages=definitionSourceByTerm.get(item.arTerm);
+ if(!pages)throw new Error(`Definition “${item.arTerm}” has no Al-Tuḥfah source page.`);
+ item.source=Object.freeze({book:'Al-Tuḥfah al-Saniyyah bi-Sharḥ al-Muqaddimah al-Ājurrūmiyyah',pdfPages:pages});
+}));
 function renderGrammarDefinitions(){
  const count=grammarDefinitionGroups.reduce((total,group)=>total+group.items.length,0);
  byId('definitionsToggle').textContent=`Simple grammar definitions (${count})`;
- byId('definitionsList').innerHTML=grammarDefinitionGroups.map(group=>`<section class="definition-group"><h3><span class="definition-group-title-ar" lang="ar">${esc(group.ar)}</span><span>${esc(group.en)}</span></h3><dl class="definition-grid">${group.items.map(item=>`<div class="definition-card"><dt><span class="definition-term-ar" lang="ar">${esc(item.arTerm)}</span><span class="definition-term-en">${esc(item.enTerm)}</span></dt><dd class="definition-ar" lang="ar">${esc(item.ar)}</dd><dd class="definition-en">${esc(item.en)}</dd></div>`).join('')}</dl></section>`).join('');
+ byId('definitionsList').innerHTML=grammarDefinitionGroups.map(group=>`<section class="definition-group"><h3><span class="definition-group-title-ar" lang="ar">${esc(group.ar)}</span><span>${esc(group.en)}</span></h3><dl class="definition-grid">${group.items.map(item=>`<div class="definition-card"><dt><span class="definition-term-ar" lang="ar">${esc(item.arTerm)}</span><span class="definition-term-en">${esc(item.enTerm)}</span></dt><dd class="definition-ar" lang="ar">${esc(item.ar)}</dd><dd class="definition-en">${esc(item.en)}</dd><dd class="definition-source">Al-Tuḥfah, PDF ${item.source.pdfPages.length===1?'p.':'pp.'} ${esc(item.source.pdfPages.join(', '))}</dd></div>`).join('')}</dl></section>`).join('');
 }
 function toggleGrammarDefinitions(){
  const panel=byId('definitionsPanel');
@@ -435,7 +497,7 @@ const singularThings=[
  {nom:'الْمَعْدِنُ',acc:'الْمَعْدِنَ',gen:'الْمَعْدِنِ',en:'the metal'},
  {nom:'الْقُمَاشُ',acc:'الْقُمَاشَ',gen:'الْقُمَاشِ',en:'the cloth'},
  {nom:'الْفَاكِهَةُ',acc:'الْفَاكِهَةَ',gen:'الْفَاكِهَةِ',en:'the fruit'},
- {nom:'الْخُضْرَةُ',acc:'الْخُضْرَةَ',gen:'الْخُضْرَةِ',en:'the vegetables'},
+ {nom:'الْخُضَارُ',acc:'الْخُضَارَ',gen:'الْخُضَارِ',en:'the vegetables'},
  {nom:'الْخُبْزُ',acc:'الْخُبْزَ',gen:'الْخُبْزِ',en:'the bread'},
  {nom:'الْحَلِيبُ',acc:'الْحَلِيبَ',gen:'الْحَلِيبِ',en:'the milk'},
  {nom:'الْقَهْوَةُ',acc:'الْقَهْوَةَ',gen:'الْقَهْوَةِ',en:'the coffee'},
@@ -499,11 +561,11 @@ const brokenHuman=[
  {nom:'الطُّلَّابُ',acc:'الطُّلَّابَ',gen:'الطُّلَّابِ',en:'the students'},
  {nom:'الرِّجَالُ',acc:'الرِّجَالَ',gen:'الرِّجَالِ',en:'the men'},
  {nom:'الْأَطْفَالُ',acc:'الْأَطْفَالَ',gen:'الْأَطْفَالِ',en:'the children'},
- {nom:'الْعُلَمَاءُ',acc:'الْعُلَمَاءَ',gen:'الْعُلَمَاءِ',en:'the scholars'},
+ {nom:'الْخُدَّامُ',acc:'الْخُدَّامَ',gen:'الْخُدَّامِ',en:'the servants'},
  {nom:'الضُّيُوفُ',acc:'الضُّيُوفَ',gen:'الضُّيُوفِ',en:'the guests'},
  {nom:'التُّجَّارُ',acc:'التُّجَّارَ',gen:'التُّجَّارِ',en:'the merchants'},
- {nom:'الْأَصْدِقَاءُ',acc:'الْأَصْدِقَاءَ',gen:'الْأَصْدِقَاءِ',en:'the friends'},
- {nom:'الْأَطِبَّاءُ',acc:'الْأَطِبَّاءَ',gen:'الْأَطِبَّاءِ',en:'the doctors'},
+ {nom:'الصُّنَّاعُ',acc:'الصُّنَّاعَ',gen:'الصُّنَّاعِ',en:'the craftsmen'},
+ {nom:'الْحُرَّاسُ',acc:'الْحُرَّاسَ',gen:'الْحُرَّاسِ',en:'the guards'},
  {nom:'الْجِيرَانُ',acc:'الْجِيرَانَ',gen:'الْجِيرَانِ',en:'the neighbors'},
  {nom:'الْعُمَّالُ',acc:'الْعُمَّالَ',gen:'الْعُمَّالِ',en:'the workers'},
  {nom:'الْكُتَّابُ',acc:'الْكُتَّابَ',gen:'الْكُتَّابِ',en:'the writers'}
@@ -516,19 +578,19 @@ const brokenThings=[
  {nom:'الْأَسْئِلَةُ',acc:'الْأَسْئِلَةَ',gen:'الْأَسْئِلَةِ',en:'the questions'},
  {nom:'الْأَجْوِبَةُ',acc:'الْأَجْوِبَةَ',gen:'الْأَجْوِبَةِ',en:'the answers'},
  {nom:'الْبُيُوتُ',acc:'الْبُيُوتَ',gen:'الْبُيُوتِ',en:'the houses'},
- {nom:'الْمَسَاجِدُ',acc:'الْمَسَاجِدَ',gen:'الْمَسَاجِدِ',en:'the mosques'},
- {nom:'النَّوَافِذُ',acc:'النَّوَافِذَ',gen:'النَّوَافِذِ',en:'the windows'},
- {nom:'الْحَقَائِبُ',acc:'الْحَقَائِبَ',gen:'الْحَقَائِبِ',en:'the bags'},
- {nom:'الرَّسَائِلُ',acc:'الرَّسَائِلَ',gen:'الرَّسَائِلِ',en:'the letters'},
- {nom:'الْحَدَائِقُ',acc:'الْحَدَائِقَ',gen:'الْحَدَائِقِ',en:'the gardens'},
+ {nom:'الثِّيَابُ',acc:'الثِّيَابَ',gen:'الثِّيَابِ',en:'the clothes'},
+ {nom:'الْأَكْوَابُ',acc:'الْأَكْوَابَ',gen:'الْأَكْوَابِ',en:'the cups'},
+ {nom:'الْجُدْرَانُ',acc:'الْجُدْرَانَ',gen:'الْجُدْرَانِ',en:'the walls'},
+ {nom:'السُّقُوفُ',acc:'السُّقُوفَ',gen:'السُّقُوفِ',en:'the roofs'},
+ {nom:'الْبُذُورُ',acc:'الْبُذُورَ',gen:'الْبُذُورِ',en:'the seeds'},
  {nom:'الْأَشْجَارُ',acc:'الْأَشْجَارَ',gen:'الْأَشْجَارِ',en:'the trees'},
  {nom:'الْقِصَصُ',acc:'الْقِصَصَ',gen:'الْقِصَصِ',en:'the stories'},
- {nom:'التَّقَارِيرُ',acc:'التَّقَارِيرَ',gen:'التَّقَارِيرِ',en:'the reports'},
- {nom:'الْمَشَارِيعُ',acc:'الْمَشَارِيعَ',gen:'الْمَشَارِيعِ',en:'the projects'},
- {nom:'الْمَصَانِعُ',acc:'الْمَصَانِعَ',gen:'الْمَصَانِعِ',en:'the factories'},
- {nom:'الْمَتَاحِفُ',acc:'الْمَتَاحِفَ',gen:'الْمَتَاحِفِ',en:'the museums'},
- {nom:'الْمَلَاعِبُ',acc:'الْمَلَاعِبَ',gen:'الْمَلَاعِبِ',en:'the stadiums'},
- {nom:'الْبَرَامِجُ',acc:'الْبَرَامِجَ',gen:'الْبَرَامِجِ',en:'the programs'}
+ {nom:'الزُّهُورُ',acc:'الزُّهُورَ',gen:'الزُّهُورِ',en:'the flowers'},
+ {nom:'الْأَنْهَارُ',acc:'الْأَنْهَارَ',gen:'الْأَنْهَارِ',en:'the rivers'},
+ {nom:'الْجِبَالُ',acc:'الْجِبَالَ',gen:'الْجِبَالِ',en:'the mountains'},
+ {nom:'الطُّرُقُ',acc:'الطُّرُقَ',gen:'الطُّرُقِ',en:'the roads'},
+ {nom:'الْبُلْدَانُ',acc:'الْبُلْدَانَ',gen:'الْبُلْدَانِ',en:'the countries'},
+ {nom:'الْمُدُنُ',acc:'الْمُدُنَ',gen:'الْمُدُنِ',en:'the cities'}
 ];
 const duals=[
  {nom:'الطَّالِبَانِ',acc:'الطَّالِبَيْنِ',gen:'الطَّالِبَيْنِ',en:'the two students'},
@@ -613,41 +675,41 @@ const additionalVerbActions=[
  {past:'زَيَّنَ',pres:'يُزَيِّنُ',en:'decorate',third:'decorates',pastEn:'decorated',group:'surface'},
  {past:'قَطَعَ',pres:'يَقْطَعُ',en:'cut',third:'cuts',pastEn:'cut',group:'material'},
  {past:'أَلْصَقَ',pres:'يُلْصِقُ',en:'glue',third:'glues',pastEn:'glued',group:'material'},
- {past:'نَشَرَ',pres:'يَنْشُرُ',en:'spread',third:'spreads',pastEn:'spread',group:'text'},
+ {past:'نَشَرَ',pres:'يَنْشُرُ',en:'disseminate',third:'disseminates',pastEn:'disseminated',group:'broadcast'},
  {past:'لَفَّ',pres:'يَلُفُّ',en:'wrap',third:'wraps',pastEn:'wrapped',group:'material'},
- {past:'رَبَطَ',pres:'يَرْبِطُ',en:'tie',third:'ties',pastEn:'tied',group:'tool'},
- {past:'فَكَّ',pres:'يَفُكُّ',en:'untie',third:'unties',pastEn:'untied',group:'tool'},
- {past:'رَفَعَ',pres:'يَرْفَعُ',en:'raise',third:'raises',pastEn:'raised',group:'solid'},
- {past:'خَفَضَ',pres:'يَخْفِضُ',en:'lower',third:'lowers',pastEn:'lowered',group:'solid'},
- {past:'دَفَعَ',pres:'يَدْفَعُ',en:'push',third:'pushes',pastEn:'pushed',group:'solid'},
- {past:'سَحَبَ',pres:'يَسْحَبُ',en:'pull',third:'pulls',pastEn:'pulled',group:'solid'},
- {past:'أَمْسَكَ',pres:'يُمْسِكُ',en:'hold',third:'holds',pastEn:'held',group:'solid'},
- {past:'وَضَعَ',pres:'يَضَعُ',en:'place',third:'places',pastEn:'placed',group:'household'},
- {past:'أَزَالَ',pres:'يُزِيلُ',en:'remove',third:'removes',pastEn:'removed',group:'solid'},
+ {past:'رَبَطَ',pres:'يَرْبِطُ',en:'tie',third:'ties',pastEn:'tied',group:'tieable'},
+ {past:'فَكَّ',pres:'يَفُكُّ',en:'untie',third:'unties',pastEn:'untied',group:'tieable'},
+ {past:'رَفَعَ',pres:'يَرْفَعُ',en:'raise',third:'raises',pastEn:'raised',group:'portable'},
+ {past:'خَفَضَ',pres:'يَخْفِضُ',en:'lower',third:'lowers',pastEn:'lowered',group:'portable'},
+ {past:'دَفَعَ',pres:'يَدْفَعُ',en:'push',third:'pushes',pastEn:'pushed',group:'portable'},
+ {past:'سَحَبَ',pres:'يَسْحَبُ',en:'pull',third:'pulls',pastEn:'pulled',group:'portable'},
+ {past:'أَمْسَكَ',pres:'يُمْسِكُ',en:'hold',third:'holds',pastEn:'held',group:'portable'},
+ {past:'وَضَعَ',pres:'يَضَعُ',en:'place',third:'places',pastEn:'placed',group:'portable'},
+ {past:'أَزَالَ',pres:'يُزِيلُ',en:'remove',third:'removes',pastEn:'removed',group:'portable'},
  {past:'مَلَأَ',pres:'يَمْلَأُ',en:'fill',third:'fills',pastEn:'filled',group:'container'},
  {past:'أَفْرَغَ',pres:'يُفْرِغُ',en:'empty',third:'empties',pastEn:'emptied',group:'container'},
  {past:'وَزَنَ',pres:'يَزِنُ',en:'weigh',third:'weighs',pastEn:'weighed',group:'measurable'},
  {past:'قَاسَ',pres:'يَقِيسُ',en:'measure',third:'measures',pastEn:'measured',group:'measurable'},
  {past:'عَدَّ',pres:'يَعُدُّ',en:'count',third:'counts',pastEn:'counted',group:'countable'},
  {past:'قَارَنَ',pres:'يُقَارِنُ',en:'compare',third:'compares',pastEn:'compared',group:'abstract'},
- {past:'اِخْتَارَ',pres:'يَخْتَارُ',en:'choose',third:'chooses',pastEn:'chose',group:'general'},
- {past:'بَدَّلَ',pres:'يُبَدِّلُ',en:'replace',third:'replaces',pastEn:'replaced',group:'general'},
- {past:'غَيَّرَ',pres:'يُغَيِّرُ',en:'change',third:'changes',pastEn:'changed',group:'general'},
- {past:'خَزَّنَ',pres:'يُخَزِّنُ',en:'store',third:'stores',pastEn:'stored',group:'general'},
+ {past:'اِخْتَارَ',pres:'يَخْتَارُ',en:'choose',third:'chooses',pastEn:'chose',group:'selectable'},
+ {past:'بَدَّلَ',pres:'يُبَدِّلُ',en:'replace',third:'replaces',pastEn:'replaced',group:'replaceable'},
+ {past:'غَيَّرَ',pres:'يُغَيِّرُ',en:'change',third:'changes',pastEn:'changed',group:'replaceable'},
+ {past:'خَزَّنَ',pres:'يُخَزِّنُ',en:'store',third:'stores',pastEn:'stored',group:'portable'},
  {past:'كَشَفَ',pres:'يَكْشِفُ',en:'reveal',third:'reveals',pastEn:'revealed',group:'message'},
- {past:'وَجَدَ',pres:'يَجِدُ',en:'find',third:'finds',pastEn:'found',group:'general'},
- {past:'فَقَدَ',pres:'يَفْقِدُ',en:'lose',third:'loses',pastEn:'lost',group:'general'},
- {past:'سَرَقَ',pres:'يَسْرِقُ',en:'steal',third:'steals',pastEn:'stole',group:'general'},
- {past:'أَعَادَ',pres:'يُعِيدُ',en:'return',third:'returns',pastEn:'returned',group:'general'},
+ {past:'وَجَدَ',pres:'يَجِدُ',en:'find',third:'finds',pastEn:'found',group:'portable'},
+ {past:'فَقَدَ',pres:'يَفْقِدُ',en:'lose',third:'loses',pastEn:'lost',group:'portable'},
+ {past:'سَرَقَ',pres:'يَسْرِقُ',en:'steal',third:'steals',pastEn:'stole',group:'portable'},
+ {past:'أَعَادَ',pres:'يُعِيدُ',en:'return',third:'returns',pastEn:'returned',group:'portable'},
  {past:'أَرْسَلَ',pres:'يُرْسِلُ',en:'send',third:'sends',pastEn:'sent',group:'message'},
  {past:'تَسَلَّمَ',pres:'يَتَسَلَّمُ',en:'receive',third:'receives',pastEn:'received',group:'message'},
- {past:'بَاعَ',pres:'يَبِيعُ',en:'sell',third:'sells',pastEn:'sold',group:'general'},
- {past:'اِسْتَعَارَ',pres:'يَسْتَعِيرُ',en:'borrow',third:'borrows',pastEn:'borrowed',group:'general'},
- {past:'أَقْرَضَ',pres:'يُقْرِضُ',en:'lend',third:'lends',pastEn:'lent',group:'general'},
- {past:'مَلَكَ',pres:'يَمْلِكُ',en:'own',third:'owns',pastEn:'owned',group:'general'},
+ {past:'بَاعَ',pres:'يَبِيعُ',en:'sell',third:'sells',pastEn:'sold',group:'tradable'},
+ {past:'اِسْتَعَارَ',pres:'يَسْتَعِيرُ',en:'borrow',third:'borrows',pastEn:'borrowed',group:'lendable'},
+ {past:'أَعَارَ',pres:'يُعِيرُ',en:'lend',third:'lends',pastEn:'lent',group:'lendable'},
+ {past:'مَلَكَ',pres:'يَمْلِكُ',en:'own',third:'owns',pastEn:'owned',group:'ownable'},
  {past:'اِسْتَأْجَرَ',pres:'يَسْتَأْجِرُ',en:'rent',third:'rents',pastEn:'rented',group:'rentable'},
- {past:'طَلَبَ',pres:'يَطْلُبُ',en:'request',third:'requests',pastEn:'requested',group:'general'},
- {past:'قَدَّمَ',pres:'يُقَدِّمُ',en:'offer',third:'offers',pastEn:'offered',group:'general'},
+ {past:'طَلَبَ',pres:'يَطْلُبُ',en:'request',third:'requests',pastEn:'requested',group:'requestable'},
+ {past:'قَدَّمَ',pres:'يُقَدِّمُ',en:'offer',third:'offers',pastEn:'offered',group:'offerable'},
  {past:'وَزَّعَ',pres:'يُوَزِّعُ',en:'distribute',third:'distributes',pastEn:'distributed',group:'countable'},
  {past:'عَبَّأَ',pres:'يُعَبِّئُ',en:'pack',third:'packs',pastEn:'packed',group:'container'},
  {past:'طَبَعَ',pres:'يَطْبَعُ',en:'print',third:'prints',pastEn:'printed',group:'text'},
@@ -669,19 +731,19 @@ const additionalVerbActions=[
  {past:'ذَكَرَ',pres:'يَذْكُرُ',en:'mention',third:'mentions',pastEn:'mentioned',group:'text'},
  {past:'كَرَّرَ',pres:'يُكَرِّرُ',en:'repeat',third:'repeats',pastEn:'repeated',group:'text'},
  {past:'نَطَقَ',pres:'يَنْطِقُ',en:'pronounce',third:'pronounces',pastEn:'pronounced',group:'word'},
- {past:'هَجَّأَ',pres:'يُهَجِّئُ',en:'spell',third:'spells',pastEn:'spelled',group:'word'},
+ {past:'فَسَّرَ',pres:'يُفَسِّرُ',en:'interpret',third:'interprets',pastEn:'interpreted',group:'word'},
  {past:'تَعَلَّمَ',pres:'يَتَعَلَّمُ',en:'learn',third:'learns',pastEn:'learned',group:'study'},
  {past:'عَلَّمَ',pres:'يُعَلِّمُ',en:'teach',third:'teaches',pastEn:'taught',group:'people'},
  {past:'دَرَّبَ',pres:'يُدَرِّبُ',en:'train',third:'trains',pastEn:'trained',group:'people'},
  {past:'اِخْتَبَرَ',pres:'يَخْتَبِرُ',en:'test',third:'tests',pastEn:'tested',group:'people'},
  {past:'اِمْتَحَنَ',pres:'يَمْتَحِنُ',en:'examine',third:'examines',pastEn:'examined',group:'people'},
- {past:'حَلَّ',pres:'يَحُلُّ',en:'solve',third:'solves',pastEn:'solved',group:'abstract'},
- {past:'حَسَبَ',pres:'يَحْسِبُ',en:'calculate',third:'calculates',pastEn:'calculated',group:'number'},
- {past:'أَثْبَتَ',pres:'يُثْبِتُ',en:'prove',third:'proves',pastEn:'proved',group:'abstract'},
+ {past:'حَلَّ',pres:'يَحُلُّ',en:'solve',third:'solves',pastEn:'solved',group:'solvable'},
+ {past:'حَسَبَ',pres:'يَحْسُبُ',en:'calculate',third:'calculates',pastEn:'calculated',group:'number'},
+ {past:'أَثْبَتَ',pres:'يُثْبِتُ',en:'prove',third:'proves',pastEn:'proved',group:'provable'},
  {past:'حَلَّلَ',pres:'يُحَلِّلُ',en:'analyze',third:'analyzes',pastEn:'analyzed',group:'abstract'},
- {past:'نَاقَشَ',pres:'يُنَاقِشُ',en:'discuss',third:'discusses',pastEn:'discussed',group:'abstract'},
- {past:'جَادَلَ',pres:'يُجَادِلُ',en:'debate',third:'debates',pastEn:'debated',group:'abstract'},
- {past:'رَدَّ',pres:'يَرُدُّ',en:'reply to',third:'replies to',pastEn:'replied to',group:'message'},
+ {past:'نَاقَشَ',pres:'يُنَاقِشُ',en:'discuss',third:'discusses',pastEn:'discussed',group:'discussable'},
+ {past:'جَادَلَ',pres:'يُجَادِلُ',en:'debate',third:'debates',pastEn:'debated',group:'people'},
+ {past:'رَدَّ',pres:'يَرُدُّ',en:'give back',third:'gives back',pastEn:'gave back',group:'claim'},
  {past:'أَخْبَرَ',pres:'يُخْبِرُ',en:'tell',third:'tells',pastEn:'told',group:'people'},
  {past:'أَعْلَمَ',pres:'يُعْلِمُ',en:'inform',third:'informs',pastEn:'informed',group:'people'},
  {past:'حَذَّرَ',pres:'يُحَذِّرُ',en:'warn',third:'warns',pastEn:'warned',group:'people'},
@@ -694,22 +756,22 @@ const additionalVerbActions=[
  {past:'ذَكَّرَ',pres:'يُذَكِّرُ',en:'remind',third:'reminds',pastEn:'reminded',group:'people'},
  {past:'وَعَدَ',pres:'يَعِدُ',en:'promise',third:'promises',pastEn:'promised',group:'people'},
  {past:'صَدَّقَ',pres:'يُصَدِّقُ',en:'believe',third:'believes',pastEn:'believed',group:'people'},
- {past:'أَنْكَرَ',pres:'يُنْكِرُ',en:'deny',third:'denies',pastEn:'denied',group:'message'},
- {past:'قَبِلَ',pres:'يَقْبَلُ',en:'accept',third:'accepts',pastEn:'accepted',group:'general'},
- {past:'رَفَضَ',pres:'يَرْفُضُ',en:'refuse',third:'refuses',pastEn:'refused',group:'general'},
- {past:'فَضَّلَ',pres:'يُفَضِّلُ',en:'prefer',third:'prefers',pastEn:'preferred',group:'general'},
+ {past:'أَنْكَرَ',pres:'يُنْكِرُ',en:'deny',third:'denies',pastEn:'denied',group:'claim'},
+ {past:'قَبِلَ',pres:'يَقْبَلُ',en:'accept',third:'accepts',pastEn:'accepted',group:'acceptable'},
+ {past:'رَفَضَ',pres:'يَرْفُضُ',en:'refuse',third:'refuses',pastEn:'refused',group:'acceptable'},
+ {past:'فَضَّلَ',pres:'يُفَضِّلُ',en:'prefer',third:'prefers',pastEn:'preferred',group:'desirable'},
  {past:'أَحَبَّ',pres:'يُحِبُّ',en:'love',third:'loves',pastEn:'loved',group:'people'},
  {past:'كَرِهَ',pres:'يَكْرَهُ',en:'dislike',third:'dislikes',pastEn:'disliked',group:'people'},
  {past:'تَطَلَّبَ',pres:'يَتَطَلَّبُ',en:'require',third:'requires',pastEn:'required',group:'project'},
- {past:'أَرَادَ',pres:'يُرِيدُ',en:'want',third:'wants',pastEn:'wanted',group:'general'},
+ {past:'أَرَادَ',pres:'يُرِيدُ',en:'want',third:'wants',pastEn:'wanted',group:'desirable'},
  {past:'قَصَدَ',pres:'يَقْصِدُ',en:'head for',third:'heads for',pastEn:'headed for',group:'places'},
  {past:'تَذَكَّرَ',pres:'يَتَذَكَّرُ',en:'remember',third:'remembers',pastEn:'remembered',group:'abstract'},
  {past:'فَهِمَ',pres:'يَفْهَمُ',en:'understand',third:'understands',pastEn:'understood',group:'text'},
  {past:'عَرَفَ',pres:'يَعْرِفُ',en:'know',third:'knows',pastEn:'knew',group:'known'},
- {past:'ظَنَّ',pres:'يَظُنُّ',en:'consider',third:'considers',pastEn:'considered',group:'abstract'},
+ {past:'قَيَّمَ',pres:'يُقَيِّمُ',en:'evaluate',third:'evaluates',pastEn:'evaluated',group:'evaluable'},
  {past:'تَخَيَّلَ',pres:'يَتَخَيَّلُ',en:'imagine',third:'imagines',pastEn:'imagined',group:'abstract'},
  {past:'تَوَقَّعَ',pres:'يَتَوَقَّعُ',en:'expect',third:'expects',pastEn:'expected',group:'abstract'},
- {past:'اِكْتَشَفَ',pres:'يَكْتَشِفُ',en:'discover',third:'discovers',pastEn:'discovered',group:'general'},
+ {past:'اِكْتَشَفَ',pres:'يَكْتَشِفُ',en:'discover',third:'discovers',pastEn:'discovered',group:'discoverable'},
  {past:'اِخْتَرَعَ',pres:'يَخْتَرِعُ',en:'invent',third:'invents',pastEn:'invented',group:'device'},
  {past:'صَمَّمَ',pres:'يُصَمِّمُ',en:'design',third:'designs',pastEn:'designed',group:'project'},
  {past:'خَطَّطَ',pres:'يُخَطِّطُ',en:'plan',third:'plans',pastEn:'planned',group:'project'},
@@ -723,41 +785,41 @@ const additionalVerbActions=[
  {past:'حَسَّنَ',pres:'يُحَسِّنُ',en:'improve',third:'improves',pastEn:'improved',group:'project'},
  {past:'طَوَّرَ',pres:'يُطَوِّرُ',en:'develop',third:'develops',pastEn:'developed',group:'project'},
  {past:'قَلَّلَ',pres:'يُقَلِّلُ',en:'reduce',third:'reduces',pastEn:'reduced',group:'number'},
- {past:'زَادَ',pres:'يَزِيدُ',en:'increase',third:'increases',pastEn:'increased',group:'number'},
+ {past:'ضَاعَفَ',pres:'يُضَاعِفُ',en:'double',third:'doubles',pastEn:'doubled',group:'number'},
  {past:'حَرَسَ',pres:'يَحْرُسُ',en:'guard',third:'guards',pastEn:'guarded',group:'places'},
  {past:'هَاجَمَ',pres:'يُهَاجِمُ',en:'attack',third:'attacks',pastEn:'attacked',group:'places'},
  {past:'ضَرَبَ',pres:'يَضْرِبُ',en:'hit',third:'hits',pastEn:'hit',group:'people'},
  {past:'رَكَلَ',pres:'يَرْكُلُ',en:'kick',third:'kicks',pastEn:'kicked',group:'ball'},
- {past:'لَمَسَ',pres:'يَلْمِسُ',en:'touch',third:'touches',pastEn:'touched',group:'general'},
+ {past:'لَمَسَ',pres:'يَلْمِسُ',en:'touch',third:'touches',pastEn:'touched',group:'touchable'},
  {past:'أَطْلَقَ',pres:'يُطْلِقُ',en:'release',third:'releases',pastEn:'released',group:'people'},
  {past:'تَبِعَ',pres:'يَتْبَعُ',en:'follow',third:'follows',pastEn:'followed',group:'people'},
  {past:'سَبَقَ',pres:'يَسْبِقُ',en:'precede',third:'precedes',pastEn:'preceded',group:'people'},
  {past:'بَلَغَ',pres:'يَبْلُغُ',en:'reach',third:'reaches',pastEn:'reached',group:'places'},
- {past:'عَبَرَ',pres:'يَعْبُرُ',en:'cross',third:'crosses',pastEn:'crossed',group:'places'},
+ {past:'عَبَرَ',pres:'يَعْبُرُ',en:'cross',third:'crosses',pastEn:'crossed',group:'crossable'},
  {past:'تَسَلَّقَ',pres:'يَتَسَلَّقُ',en:'climb',third:'climbs',pastEn:'climbed',group:'climbable'},
  {past:'رَكِبَ',pres:'يَرْكَبُ',en:'ride',third:'rides',pastEn:'rode',group:'vehicle'},
- {past:'رَكَّبَ',pres:'يُرَكِّبُ',en:'install',third:'installs',pastEn:'installed',group:'device'},
- {past:'فَكَّكَ',pres:'يُفَكِّكُ',en:'dismantle',third:'dismantles',pastEn:'dismantled',group:'device'},
- {past:'وَصَلَ',pres:'يَصِلُ',en:'connect',third:'connects',pastEn:'connected',group:'connectable'},
- {past:'فَصَلَ',pres:'يَفْصِلُ',en:'disconnect',third:'disconnects',pastEn:'disconnected',group:'device'},
- {past:'شَحَنَ',pres:'يَشْحَنُ',en:'charge',third:'charges',pastEn:'charged',group:'device'},
- {past:'بَرْمَجَ',pres:'يُبَرْمِجُ',en:'program',third:'programs',pastEn:'programmed',group:'device'},
- {past:'حَدَّثَ',pres:'يُحَدِّثُ',en:'update',third:'updates',pastEn:'updated',group:'device'},
- {past:'حَمَّلَ',pres:'يُحَمِّلُ',en:'download',third:'downloads',pastEn:'downloaded',group:'media'},
+ {past:'رَكَّبَ',pres:'يُرَكِّبُ',en:'install',third:'installs',pastEn:'installed',group:'installable'},
+ {past:'فَكَّكَ',pres:'يُفَكِّكُ',en:'dismantle',third:'dismantles',pastEn:'dismantled',group:'physicalDevice'},
+ {past:'وَصَّلَ',pres:'يُوَصِّلُ',en:'connect',third:'connects',pastEn:'connected',group:'connectable'},
+ {past:'فَصَلَ',pres:'يَفْصِلُ',en:'disconnect',third:'disconnects',pastEn:'disconnected',group:'physicalDevice'},
+ {past:'شَحَنَ',pres:'يَشْحَنُ',en:'charge',third:'charges',pastEn:'charged',group:'chargeable'},
+ {past:'بَرْمَجَ',pres:'يُبَرْمِجُ',en:'program',third:'programs',pastEn:'programmed',group:'programmable'},
+ {past:'حَدَّثَ',pres:'يُحَدِّثُ',en:'update',third:'updates',pastEn:'updated',group:'updatable'},
+ {past:'حَمَّلَ',pres:'يُحَمِّلُ',en:'download',third:'downloads',pastEn:'downloaded',group:'downloadable'},
  {past:'حَذَفَ',pres:'يَحْذِفُ',en:'delete',third:'deletes',pastEn:'deleted',group:'text'},
  {past:'أَشْعَلَ',pres:'يُشْعِلُ',en:'ignite',third:'ignites',pastEn:'ignited',group:'lamp'},
  {past:'أَطْفَأَ',pres:'يُطْفِئُ',en:'extinguish',third:'extinguishes',pastEn:'extinguished',group:'lamp'},
- {past:'صَوَّرَ',pres:'يُصَوِّرُ',en:'photograph',third:'photographs',pastEn:'photographed',group:'general'},
- {past:'مَسَحَ',pres:'يَمْسَحُ',en:'scan',third:'scans',pastEn:'scanned',group:'text'},
+ {past:'صَوَّرَ',pres:'يُصَوِّرُ',en:'photograph',third:'photographs',pastEn:'photographed',group:'photographable'},
+ {past:'مَسَحَ',pres:'يَمْسَحُ',en:'wipe',third:'wipes',pastEn:'wiped',group:'surface'},
  {past:'بَثَّ',pres:'يَبُثُّ',en:'broadcast',third:'broadcasts',pastEn:'broadcast',group:'broadcast'},
  {past:'عَرَضَ',pres:'يَعْرِضُ',en:'display',third:'displays',pastEn:'displayed',group:'media'},
- {past:'كَبَّرَ',pres:'يُكَبِّرُ',en:'enlarge',third:'enlarges',pastEn:'enlarged',group:'media'},
- {past:'صَغَّرَ',pres:'يُصَغِّرُ',en:'shrink',third:'shrinks',pastEn:'shrunk',group:'media'},
- {past:'دَوَّرَ',pres:'يُدَوِّرُ',en:'rotate',third:'rotates',pastEn:'rotated',group:'device'},
+ {past:'كَبَّرَ',pres:'يُكَبِّرُ',en:'enlarge',third:'enlarges',pastEn:'enlarged',group:'visualMedia'},
+ {past:'صَغَّرَ',pres:'يُصَغِّرُ',en:'shrink',third:'shrinks',pastEn:'shrunk',group:'visualMedia'},
+ {past:'دَوَّرَ',pres:'يُدَوِّرُ',en:'rotate',third:'rotates',pastEn:'rotated',group:'rotatable'},
  {past:'خَلَطَ',pres:'يَخْلِطُ',en:'mix',third:'mixes',pastEn:'mixed',group:'food'},
- {past:'أَضَافَ',pres:'يُضِيفُ',en:'add',third:'adds',pastEn:'added',group:'general'},
+ {past:'أَضَافَ',pres:'يُضِيفُ',en:'add',third:'adds',pastEn:'added',group:'addable'},
  {past:'صَبَّ',pres:'يَصُبُّ',en:'pour',third:'pours',pastEn:'poured',group:'liquid'},
- {past:'خَبَزَ',pres:'يَخْبِزُ',en:'bake',third:'bakes',pastEn:'baked',group:'food'},
+ {past:'خَبَزَ',pres:'يَخْبِزُ',en:'bake',third:'bakes',pastEn:'baked',group:'bakedGoods'},
  {past:'ذَاقَ',pres:'يَذُوقُ',en:'taste',third:'tastes',pastEn:'tasted',group:'food'},
  {past:'كَنَسَ',pres:'يَكْنُسُ',en:'sweep',third:'sweeps',pastEn:'swept',group:'floor'},
  {past:'لَمَّعَ',pres:'يُلَمِّعُ',en:'polish',third:'polishes',pastEn:'polished',group:'surface'},
@@ -797,16 +859,16 @@ const femininePastActions=[
  {past:'وَقَفَتْ',pastEn:'stood up'},{past:'سَافَرَتْ',pastEn:'traveled'}
 ];
 const brokenObjectActions=[
- {pres:'يَقْرَأُ',third:'reads',objects:['الْكُتُبَ','الدُّرُوسَ','الْأَجْوِبَةَ','الرَّسَائِلَ','الْقِصَصَ']},
- {pres:'يَفْتَحُ',third:'opens',objects:['الْأَبْوَابَ','النَّوَافِذَ','الْحَقَائِبَ']},
- {pres:'يَجْمَعُ',third:'collects',objects:['الْكُتُبَ','الْأَقْلَامَ','الرَّسَائِلَ']},
- {pres:'يُرَتِّبُ',third:'arranges',objects:['الْكُتُبَ','الْأَقْلَامَ','الْحَقَائِبَ','الرَّسَائِلَ']},
- {pres:'يَزُورُ',third:'visits',objects:['الْمَسَاجِدَ','الْبُيُوتَ','الْحَدَائِقَ']}
+ {pres:'يَقْرَأُ',third:'reads',objects:['الْكُتُبَ','الدُّرُوسَ','الْأَجْوِبَةَ','الْقِصَصَ']},
+ {pres:'يَفْتَحُ',third:'opens',objects:['الْأَبْوَابَ','الْكُتُبَ']},
+ {pres:'يَجْمَعُ',third:'collects',objects:['الْكُتُبَ','الْأَقْلَامَ','الْبُذُورَ','الزُّهُورَ']},
+ {pres:'يُرَتِّبُ',third:'arranges',objects:['الْكُتُبَ','الْأَقْلَامَ','الثِّيَابَ','الْأَكْوَابَ']},
+ {pres:'يَزُورُ',third:'visits',objects:['الْبُيُوتَ','الْمُدُنَ','الْبُلْدَانَ']}
 ];
 const innaSisters=[
  {ar:'إِنَّ',gloss:'indeed',meaning:'Indeed,',iraab:'حَرْفُ تَوْكِيدٍ وَنَصْبٍ'},
  {ar:'لَكِنَّ',gloss:'but',meaning:'But',iraab:'حَرْفُ اسْتِدْرَاكٍ وَنَصْبٍ'},
- {ar:'لَعَلَّ',gloss:'perhaps',meaning:'Perhaps',iraab:'حَرْفُ تَرَجٍّ وَنَصْبٍ'},
+ {ar:'لَعَلَّ',gloss:'perhaps',meaning:'Perhaps',iraab:'حَرْفُ تَرَجٍّ وَتَوَقُّعٍ وَنَصْبٍ'},
  {ar:'لَيْتَ',gloss:'if only',meaning:'If only',iraab:'حَرْفُ تَمَنٍّ وَنَصْبٍ'}
 ];
 const singularPredicates=[...adjectives];
@@ -850,10 +912,30 @@ const objectGroups={
  text:namedNouns(singularThings,['the book','the lesson','the homework','the question','the answer','the Qurʾān','the hadith','the notebook','the letter','the newspaper','the story','the news','the file','the report','the project','the program','the ticket','the word']),
  tool:namedNouns(singularThings,['the pen','the key','the tool','the knife','the spoon','the rope']),
  household:namedNouns(singularThings,['the door','the window','the desk','the room','the table','the chair','the wall','the roof','the floor','the lamp','the clock','the box']),
+ tieable:namedNouns(singularThings,['the garment','the bag','the cloth','the rope']),
+ portable:namedNouns(singularThings,['the book','the lesson','the pen','the homework','the question','the answer','the Qurʾān','the hadith','the notebook','the bag','the phone','the computer','the key','the map','the picture','the letter','the newspaper','the car','the garment','the cup','the seed','the sheet of paper','the story','the clock','the radio','the tool','the box','the bottle','the plate','the spoon','the knife','the rope','the cloth','the medicine','the ticket','the file','the report','the ball']),
+ selectable:namedNouns(singularThings,['the book','the lesson','the pen','the question','the answer','the notebook','the phone','the computer','the map','the picture','the newspaper','the car','the garment','the story','the medicine','the ticket','the file','the report','the project','the program','the tool']),
+ replaceable:namedNouns(singularThings,['the book','the pen','the notebook','the bag','the phone','the computer','the key','the picture','the car','the garment','the lamp','the clock','the radio','the television','the machine','the tool','the program']),
+ tradable:namedNouns(singularThings,['the book','the pen','the notebook','the bag','the phone','the computer','the car','the garment','the flower','the fruit','the bread','the milk','the coffee','the tea','the tool']),
+ ownable:namedNouns(singularThings,['the book','the pen','the notebook','the bag','the phone','the computer','the key','the map','the picture','the car','the garment','the clock','the radio','the television','the machine','the tool','the box']),
+ requestable:namedNouns(singularThings,['the book','the lesson','the pen','the answer','the food','the water','the notebook','the letter','the newspaper','the medicine','the ticket','the file','the report']),
+ acceptable:namedNouns(singularThings,['the answer','the letter','the story','the news','the medicine','the ticket','the file','the report','the project','the program']),
+ desirable:namedNouns(singularThings,['the book','the lesson','the pen','the answer','the food','the water','the notebook','the bag','the phone','the computer','the map','the picture','the letter','the newspaper','the car','the garment','the story','the medicine','the ticket','the file','the report','the project','the program','the tool']),
+ discoverable:namedNouns(singularThings,['the answer','the story','the news','the medicine','the file','the report','the project','the program']),
+ touchable:namedNouns(singularThings,['the book','the pen','the notebook','the bag','the phone','the computer','the key','the map','the picture','the car','the garment','the cup','the table','the chair','the wall','the floor','the lamp','the clock','the radio','the television','the machine','the tool','the box','the bottle','the plate','the spoon','the knife','the rope','the wood','the metal','the cloth','the ball']),
+ photographable:namedNouns(singularThings,['the book','the pen','the notebook','the bag','the phone','the computer','the key','the map','the picture','the car','the garment','the flower','the tree','the fruit','the cup','the table','the chair','the wall','the roof','the floor','the lamp','the clock','the radio','the television','the machine','the tool','the box','the bottle','the plate','the ball']),
+ addable:namedNouns(singularThings,['the answer','the food','the water','the fruit','the vegetables','the bread','the milk','the coffee','the tea','the medicine','the file','the report','the program']),
+ lendable:namedNouns(singularThings,['the book','the pen','the notebook','the bag','the phone','the computer','the key','the car','the garment','the tool']),
+ offerable:namedNouns(singularThings,['the book','the lesson','the pen','the answer','the food','the water','the notebook','the letter','the garment','the flower','the fruit','the bread','the milk','the coffee','the tea','the medicine','the report']),
  container:namedNouns(singularThings,['the bag','the cup','the box','the bottle','the plate']),
- measurable:namedNouns(singularThings,['the water','the garment','the sheet of paper','the wood','the metal','the cloth','the fruit','the vegetables','the bread','the milk','the coffee','the tea','the number']),
+ measurable:namedNouns(singularThings,['the water','the garment','the sheet of paper','the wood','the metal','the cloth','the fruit','the vegetables','the bread','the milk','the coffee','the tea']),
  countable:namedNouns(singularThings,['the book','the lesson','the pen','the question','the answer','the notebook','the letter','the ticket','the file','the report','the project','the ball','the program','the tool','the number']),
  abstract:namedNouns(singularThings,['the lesson','the question','the answer','the story','the news','the report','the project','the program','the number']),
+ solvable:namedNouns(singularThings,['the question']),
+ provable:namedNouns(singularThings,['the answer']),
+ discussable:namedNouns(singularThings,['the lesson','the question','the answer','the story','the news','the report','the project','the program']),
+ claim:namedNouns(singularThings,['the answer','the news','the report']),
+ evaluable:namedNouns(singularThings,['the answer','the report','the project','the program']),
  general:[...singularThings],
  message:namedNouns(singularThings,['the letter','the answer','the report','the file','the news']),
  rentable:[...namedNouns(singularThings,['the car','the room']),...namedNouns(places,['the house','the office','the hotel','the workshop'])],
@@ -862,17 +944,27 @@ const objectGroups={
  places:[...places],
  project:namedNouns(singularThings,['the project','the program','the report','the file']),
  device:namedNouns(singularThings,['the phone','the computer','the lamp','the clock','the radio','the television','the machine','the program']),
+ installable:namedNouns(singularThings,['the phone','the computer','the lamp','the radio','the television','the machine','the program']),
+ physicalDevice:namedNouns(singularThings,['the phone','the computer','the lamp','the clock','the radio','the television','the machine']),
+ chargeable:namedNouns(singularThings,['the phone','the computer','the radio','the machine']),
+ programmable:namedNouns(singularThings,['the phone','the computer','the machine']),
+ updatable:namedNouns(singularThings,['the phone','the computer','the program']),
  ball:namedNouns(singularThings,['the ball']),
  vehicle:namedNouns(singularThings,['the car']),
  lamp:namedNouns(singularThings,['the lamp']),
  media:namedNouns(singularThings,['the picture','the newspaper','the radio','the television','the program','the report']),
+ downloadable:namedNouns(singularThings,['the picture','the newspaper','the file','the program','the report']),
+ visualMedia:namedNouns(singularThings,['the picture','the newspaper','the program','the report']),
+ rotatable:namedNouns(singularThings,['the book','the phone','the computer','the map','the picture','the car','the cup','the clock','the radio','the television','the machine','the tool','the box','the bottle','the plate']),
  food:namedNouns(singularThings,['the food','the fruit','the vegetables','the bread','the milk','the coffee','the tea']),
+ bakedGoods:namedNouns(singularThings,['the bread']),
  liquid:namedNouns(singularThings,['the water','the milk','the coffee','the tea']),
  floor:namedNouns(singularThings,['the floor']),
  word:namedNouns(singularThings,['the word']),
  number:namedNouns(singularThings,['the number']),
  known:[...singularPeople,...namedNouns(singularThings,['the lesson','the question','the answer','the story','the news','the report','the project','the program','the number'])],
  climbable:namedNouns(singularThings,['the wall','the roof']),
+ crossable:namedNouns(places,['the market','the garden','the airport','the station','the farm','the stadium']),
  connectable:namedNouns(singularThings,['the rope','the phone','the computer','the machine','the tool']),
  broadcast:namedNouns(singularThings,['the news','the report','the program'])
 };
@@ -885,26 +977,26 @@ function nounEnglish(word,caseName='acc'){
 function pickVerb(){return pickVaried(verbs,'verbs',v=>v.pres)}
 function pickVerbObject(verb){return pickVaried(verb.obj,`objects:${verb.pres}`,String)}
 function pickGeneralVerb(){return pickVaried(generalVerbActions,'general-verbs',v=>v.pres)}
-function pickGeneralObject(verb){
+function pickGeneralObject(verb,excludeNoun){
  if(verb.obj){
    const word=pickVaried(verb.obj,`general-objects:${verb.pres}`,String);
    return{acc:word,en:objectEnglish(word)};
  }
  const pool=objectGroups[verb.group];
  if(!pool?.length) throw new Error(`Missing object group: ${verb.group}`);
- return pickVaried(pool,`general-objects:${verb.pres}`,noun=>noun.acc);
+ const candidatePool=excludeNoun?pool.filter(noun=>noun.nom!==excludeNoun.nom):pool;
+ const finalPool=candidatePool.length?candidatePool:pool;
+ return pickVaried(finalPool,`general-objects:${verb.pres}`,noun=>noun.acc);
 }
 function pickPerson(){return pickVaried(singularPeople,'people',n=>n.nom)}
-function pickThing(){return pickVaried(singularThings,'things',n=>n.nom)}
 function pickPlace(){return pickVaried(places,'places',n=>n.nom)}
 function pickInna(){return pickVaried(innaSisters,'particles',p=>p.ar)}
+function innaCopula(particle,plural){return particle.ar==='لَيْتَ'?'were':(plural?'are':'is')}
 function pickHumanAction(){return pickVaried(humanActions,'human-actions',a=>a.pres)}
 function pickHumanPrepAction(){return pickVaried(humanPrepActions,'human-prep-actions',a=>`${a.pres}:${a.prep}`)}
 function pickThingAction(){return pickVaried(thingActions,'thing-actions',a=>a.pres)}
 function pickThingPrepAction(){return pickVaried(thingPrepActions,'thing-prep-actions',a=>`${a.pres}:${a.prep}`)}
-function isHumanNoun(noun){return /(student|teacher|man|doctor|friend|traveler|child|engineer|worker|researcher|driver|woman|nurse|Muslim|present)/i.test(noun.en)}
-function isFeminineDual(noun){return /(windows|cars|bags)/i.test(noun.en)}
-const GRAMMAR_STATES=Object.freeze({RAF:'raf',NASB:'nasb',JARR:'jarr',JAZM:'jazm'});
+function isHumanNoun(noun){return /\b(student|teacher|men|man|doctor|friend|traveler|child|engineer|worker|researcher|driver|women|woman|nurse|Muslim|present)\b/i.test(noun.en)}
 const GRAMMAR_SIGNS=Object.freeze({
  damma:{id:'damma',ar:'الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ',en:'the visible ḍammah'},
  fatha:{id:'fatha',ar:'الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ',en:'the visible fatḥah'},
@@ -961,6 +1053,88 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
   'five-verb person patterns other than third-person masculine plural in random templates'
  ]
 });
+const SOURCE_STATUS=Object.freeze({
+ VERIFIED_PRIMARY:'verified-primary',
+ VERIFIED_PRIMARY_SECONDARY:'verified-primary-and-secondary',
+ DISABLED:'disabled-unverified'
+});
+const TUHFA_TITLE='Al-Tuḥfah al-Saniyyah bi-Sharḥ al-Muqaddimah al-Ājurrūmiyyah';
+const IBN_AQIL_TITLE='Sharḥ Ibn ʿAqīl ʿalā Alfiyyat Ibn Mālik';
+const sourceRule=(topic,pdfPages,conditions,secondarySources=[])=>Object.freeze({
+ topic,
+ status:secondarySources.length?SOURCE_STATUS.VERIFIED_PRIMARY_SECONDARY:SOURCE_STATUS.VERIFIED_PRIMARY,
+ productionEnabled:true,
+ primarySource:Object.freeze({book:TUHFA_TITLE,pdfPages:Object.freeze([...pdfPages])}),
+ secondarySources:Object.freeze(secondarySources.map(source=>Object.freeze({...source,pdfPages:Object.freeze([...source.pdfPages])}))),
+ conditions,
+ exceptions:'Anything outside the stated conditions is excluded from production generation.'
+});
+const disabledSourceRule=(topic,reason)=>Object.freeze({
+ topic,status:SOURCE_STATUS.DISABLED,productionEnabled:false,primarySource:null,secondarySources:Object.freeze([]),conditions:reason,exceptions:'The generic fallback may never enter production.'
+});
+const IA_NOMINAL=Object.freeze({book:IBN_AQIL_TITLE,volume:1,pdfPages:[200,201]});
+const IA_PHRASE_KHABAR=Object.freeze({book:IBN_AQIL_TITLE,volume:1,pdfPages:[200,212,214]});
+const IA_KANA=Object.freeze({book:IBN_AQIL_TITLE,volume:1,pdfPages:[262,263]});
+const IA_INNA=Object.freeze({book:IBN_AQIL_TITLE,volume:1,pdfPages:[345]});
+const SOURCE_REGISTRY=Object.freeze({
+ R_MUBTADA_RAF:sourceRule('The mubtadaʾ is nominative by ibtidāʾ.',[85,86,99,100],'Only an explicit nominal-sentence mubtadaʾ, including a delayed mubtadaʾ.',[IA_NOMINAL]),
+ R_KHABAR_RAF:sourceRule('A single-word khabar is nominative by the mubtadaʾ.',[85,86,99,100,101],'Only a directly inflected, single-word khabar.',[IA_NOMINAL]),
+ R_FAIL_RAF:sourceRule('The subject to which a verb is ascribed is nominative.',[87,88,89,90,91,92,93,97],'Explicit noun subjects use noun inflection; attached or hidden pronouns are built forms.'),
+ R_MAFUL_NASB:sourceRule('A direct object is accusative when the subject’s action is connected to it.',[140,141],'Only objects of lexically transitive verbs generated by the app.'),
+ R_HARF_JARR:sourceRule('A noun after a verified preposition is khafḍ (genitive).',[13,174,175,176,177],'The internal legacy ID says JARR; displayed terminology follows Al-Tuḥfah and says khafḍ.'),
+ R_MUDAF_ILAYH:sourceRule('A muḍāf ilayh is khafḍ by iḍāfah.',[174,175,177,178],'The immediately following second noun, or an attached pronoun, completes the iḍāfah.'),
+ R_ISM_INNA_NASB:sourceRule('Inna and its sisters make their noun accusative.',[105,109,110],'Only the four explicitly generated sisters and a visible single noun.'),
+ R_KHABAR_INNA_RAF:sourceRule('Inna and its sisters make their khabar nominative.',[105,109,110],'Only a visible single-word khabar in the generated templates.'),
+ R_ISM_KANA_RAF:sourceRule('Kāna raises its noun.',[105,106],'Only kāna with a visible single noun.' ,[IA_KANA]),
+ R_KHABAR_KANA_NASB:sourceRule('Kāna makes its khabar accusative.',[105,106],'Only kāna with a visible single-word khabar.',[IA_KANA]),
+ R_ZARF_NASB:sourceRule('A time/place adverb used as mafʿūl fīh is accusative.',[148,149,151,152,153],'Only verified adverb lexemes used with a meaning of fī.'),
+
+ R_SINGULAR_RAF_DAMMA:sourceRule('Visible ḍammah raises a regular singular noun.',[26],'Only nouns whose ending accepts a visible ḍammah.'),
+ R_SINGULAR_NASB_FATHA:sourceRule('Visible fatḥah makes a regular singular noun accusative.',[48],'Only nouns whose ending accepts a visible fatḥah.'),
+ R_SINGULAR_JARR_KASRA:sourceRule('Visible kasrah makes a regular singular noun khafḍ.',[62],'Only nouns whose ending accepts a visible kasrah.'),
+ R_BROKEN_RAF_DAMMA:sourceRule('Visible ḍammah raises a regular broken plural.',[26,27,28],'Only fully declinable broken plurals; diptotes are excluded.'),
+ R_BROKEN_NASB_FATHA:sourceRule('Visible fatḥah makes a regular broken plural accusative.',[48],'Only fully declinable broken plurals; diptotes are excluded.'),
+ R_BROKEN_JARR_KASRA:sourceRule('Visible kasrah makes a regular broken plural khafḍ.',[62],'Only fully declinable broken plurals; diptotes are excluded.'),
+ R_DUAL_RAF_ALIF:sourceRule('Alif is the nominative sign of the dual.',[35,64,65],'The noun is a true dual and is not in iḍāfah unless its nūn is removed.'),
+ R_DUAL_NASB_YA:sourceRule('Yāʾ is the accusative sign of the dual.',[50,64,65],'The noun is a true dual.'),
+ R_DUAL_JARR_YA:sourceRule('Yāʾ is the khafḍ sign of the dual.',[66],'The noun is a true dual.'),
+ R_SMP_RAF_WAW:sourceRule('Wāw is the nominative sign of the sound masculine plural.',[35,64,65],'Only verified sound masculine plural entries.'),
+ R_SMP_NASB_YA:sourceRule('Yāʾ is the accusative sign of the sound masculine plural.',[50,64,65],'Only verified sound masculine plural entries.'),
+ R_SMP_JARR_YA:sourceRule('Yāʾ is the khafḍ sign of the sound masculine plural.',[66],'Only verified sound masculine plural entries.'),
+ R_SFP_RAF_DAMMA:sourceRule('Ḍammah is the nominative sign of the sound feminine plural.',[26,30],'Only verified sound feminine plural entries.'),
+ R_SFP_NASB_KASRA:sourceRule('Kasrah substitutes for fatḥah in the accusative sound feminine plural.',[49,69],'Only verified sound feminine plural entries.'),
+ R_SFP_JARR_KASRA:sourceRule('Kasrah is the khafḍ sign of the sound feminine plural.',[62],'Only verified sound feminine plural entries.'),
+ R_FIVE_NOUNS_RAF_WAW:sourceRule('Wāw is the nominative sign of the five nouns.',[32,35,66,67],'Only singular, non-diminutive forms in iḍāfah to something other than yāʾ al-mutakallim.'),
+ R_FIVE_NOUNS_NASB_ALIF:sourceRule('Alif is the accusative sign of the five nouns.',[32,50,66,67],'Only singular, non-diminutive forms in iḍāfah to something other than yāʾ al-mutakallim.'),
+ R_FIVE_NOUNS_JARR_YA:sourceRule('Yāʾ is the khafḍ sign of the five nouns.',[32,66,67],'Only singular, non-diminutive forms in iḍāfah to something other than yāʾ al-mutakallim.'),
+
+ R_MUDARI_RAF_DAMMA:sourceRule('A regular present verb free of a nāṣib or jāzim is raised with visible ḍammah.',[39,70,72],'Only sound-final present verbs with a visible ending and no attached five-verb ending.'),
+ R_MUDARI_NASB_FATHA:sourceRule('A regular sound-final present verb after lan is accusative with visible fatḥah.',[47,73,74],'Only the explicitly stored lan forms.'),
+ R_MUDARI_JAZM_SUKUN:sourceRule('A regular sound-final present verb after lam is jussive with visible sukūn.',[58,79,80],'Only the explicitly stored lam forms.'),
+ R_AFAL5_RAF_NUN:sourceRule('Retention of nūn is the nominative sign of the five verbs.',[39,67,72],'Production currently generates the third-person masculine plural pattern only.'),
+ R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74],'Only after the visible nāṣib lan.'),
+ R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80],'Only after the visible jāzim lam.'),
+ R_PAST_BUILT_FATHA:sourceRule('The generated past form is built on fatḥah.',[60,71,72],'Only bare third-person masculine forms or forms with feminine tāʾ; attached subject suffix paradigms are excluded.'),
+ R_KANA_PAST_DEFICIENT:sourceRule('Kāna is a deficient past verb that raises its noun and makes its khabar accusative.',[105,106],'Only the surface كَانَ and the app’s single-noun/single-khabar template.',[IA_KANA]),
+
+ G_LAN_NASB:sourceRule('Lan is a particle of negation, naṣb, and future meaning.',[73,74],'It must be immediately followed by the present verb it governs.'),
+ G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs.'),
+ G_SAWFA_FUTURE:sourceRule('Sawfa marks future meaning and enters only on the present verb.',[14,15,16],'It does not change the indicative mood in the generated construction.'),
+ R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'Generated set: inna, lakinna, laʿalla, layta.',[IA_INNA]),
+ R_PARTICLE:disabledSourceRule('Generic particle fallback','No generic particle is authorized. Every generated particle must have a specific verified rule ID.'),
+
+ RL_PREPOSITION_GOVERNS_JARR:sourceRule('A preposition governs khafḍ in the immediately following noun.',[13,174,175,176,177],'The internal legacy ID says JARR; output uses Al-Tuḥfah’s term khafḍ.'),
+ RL_IDAFA_GOVERNS_JARR:sourceRule('Iḍāfah governs khafḍ in the second noun.',[174,175,177,178],'The internal legacy ID says JARR; output uses Al-Tuḥfah’s term khafḍ.'),
+ RL_VERB_REQUIRES_SUBJECT:sourceRule('Every generated verb has an explicit, attached, or permitted hidden subject.',[87,88,89,90,91,92,93,97],'Hidden huwa is used only for supported third-person masculine singular forms.'),
+ RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
+ RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
+ RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
+ RL_KANA_NOUN_KHABAR:sourceRule('Kāna requires a linked noun and khabar with their governed states.',[105,106],'Only complete, ordered three-token nominal structures.',[IA_KANA])
+});
+function isSourceAuthorized(ruleId){
+ const source=SOURCE_REGISTRY[ruleId];
+ return Boolean(source?.productionEnabled&&(source.status===SOURCE_STATUS.VERIFIED_PRIMARY||source.status===SOURCE_STATUS.VERIFIED_PRIMARY_SECONDARY));
+}
 const nounFormIndex=new Map();
 const verbFormIndex=new Map();
 function registerNounSet(items,inflection){
@@ -1041,7 +1215,7 @@ function relationToken(action){
   :token(action.prep,action.prepEn,AR.prep(action.prep),'');
 }
 function objectEnglish(word){return nounEnglish(word,'acc')}
-function stateArabic(state){return{raf:'مَرْفُوعٌ',nasb:'مَنْصُوبٌ',jarr:'مَجْرُورٌ',jazm:'مَجْزُومٌ'}[state]}
+function stateArabic(state){return{raf:'مَرْفُوعٌ',nasb:'مَنْصُوبٌ',jarr:'مَخْفُوضٌ',jazm:'مَجْزُومٌ'}[state]}
 function signActionArabic(state){return{raf:'رَفْعِهِ',nasb:'نَصْبِهِ',jarr:'خَفْضِهِ',jazm:'جَزْمِهِ'}[state]}
 function inflectionReasonArabic(inflection){
  return{dual:'؛ لِأَنَّهُ مُثَنًّى',smp:'؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ',sfp:'؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ',fiveNouns:'؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ'}[inflection]||'';
@@ -1142,7 +1316,6 @@ function addRelationship(data,type,fields){
  data.relationships.push(relationship);
  return relationship;
 }
-function phraseFrom(tokens,start,end=tokens.length){return tokens.slice(start,end).map(item=>item.word).join(' ')}
 function resolveRelationships(data){
  const tokens=data.tokens;
  data.relationships=[];
@@ -1229,16 +1402,16 @@ function resolveRelationships(data){
 }
 function nounRoleArabic(token){
  const role=token.grammar.role;
- if(role==='mubtada')return token.grammar.delayed?'مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ':'مُبْتَدَأٌ مَرْفُوعٌ';
- if(role==='khabar')return'خَبَرٌ مَرْفُوعٌ';
+ if(role==='mubtada')return token.grammar.delayed?'مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ بِالِابْتِدَاءِ':'مُبْتَدَأٌ مَرْفُوعٌ بِالِابْتِدَاءِ';
+ if(role==='khabar')return'خَبَرٌ مَرْفُوعٌ بِالْمُبْتَدَأِ';
  if(role==='faail')return'فَاعِلٌ مَرْفُوعٌ';
- if(role==='object')return'مَفْعُولٌ بِهِ مَنْصُوبٌ';
- if(role==='majrur')return`اسْمٌ مَجْرُورٌ بِـ«${token.grammar.governorWord}»`;
- if(role==='mudafIlayh')return'مُضَافٌ إِلَيْهِ مَجْرُورٌ';
- if(role==='ismInna')return`اسْمُ «${token.grammar.governorWord}» مَنْصُوبٌ`;
- if(role==='khabarInna')return`خَبَرُ «${token.grammar.governorWord}» مَرْفُوعٌ`;
- if(role==='ismKana')return'اسْمُ «كَانَ» مَرْفُوعٌ';
- if(role==='khabarKana')return'خَبَرُ «كَانَ» مَنْصُوبٌ';
+ if(role==='object')return'مَفْعُولٌ بِهِ مَنْصُوبٌ بِالْفِعْلِ';
+ if(role==='majrur')return`اسْمٌ مَخْفُوضٌ بِـ«${token.grammar.governorWord}»`;
+ if(role==='mudafIlayh')return'مُضَافٌ إِلَيْهِ مَخْفُوضٌ بِالْإِضَافَةِ';
+ if(role==='ismInna')return`اسْمُ «${token.grammar.governorWord}» مَنْصُوبٌ بِهِ`;
+ if(role==='khabarInna')return`خَبَرُ «${token.grammar.governorWord}» مَرْفُوعٌ بِهِ`;
+ if(role==='ismKana')return'اسْمُ «كَانَ» مَرْفُوعٌ بِهَا';
+ if(role==='khabarKana')return'خَبَرُ «كَانَ» مَنْصُوبٌ بِهَا';
  if(role==='adverb')return'ظَرْفٌ مَنْصُوبٌ';
  throw new Error(`Unknown noun role: ${role}`);
 }
@@ -1247,19 +1420,19 @@ function renderNounAnalysis(token){
  const reason=inflectionReasonArabic(token.inflection);
  let arabic=`${token.word}: ${nounRoleArabic(token)}، وَعَلَامَةُ ${signActionArabic(token.state)} ${token.sign.ar}${reason}`;
  if(token.grammar.isMudaf)arabic+='، وَهُوَ مُضَافٌ';
- if(token.grammar.attachedKaf)arabic+='، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ';
+ if(token.grammar.attachedKaf)arabic+='، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ';
  token.ar=`${arabic}.`;
  token.en=`${roleRule.en} Its sign is ${token.sign.en}.`;
 }
 function renderVerbAnalysis(token){
  if(token.tense==='past'){
-  token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.`;
-  token.en='A past-tense verb built on fatḥah.';
+  token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
+  token.en='A past-tense verb built on fatḥah, with no syntactic position of its own.';
   return;
  }
  if(token.tense==='kana'){
-  token.ar=`${token.word}: فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ.`;
-  token.en='A deficient past-tense verb built on fatḥah.';
+  token.ar=`${token.word}: فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
+  token.en='A deficient past-tense verb built on fatḥah, with no syntactic position of its own.';
   return;
  }
  const governor=token.governorId?token._tokens.find(item=>item.id===token.governorId):null;
@@ -1278,7 +1451,7 @@ function renderVerbAnalysis(token){
 }
 function renderParticleAnalysis(token){
  const type=token.grammar.particleType;
- if(type==='preposition'){token.ar=`${token.word}: حَرْفُ جَرٍّ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A preposition, built and with no syntactic position.';return}
+ if(type==='preposition'){token.ar=`${token.word}: حَرْفُ خَفْضٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A preposition, built and with no syntactic position.';return}
  if(type==='inna'){token.ar=`${token.word}: ${token.grammar.particleIraab} مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle that governs its noun and khabar.';return}
  if(type==='lan'){token.ar=`${token.word}: حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of negation, future meaning, and naṣb.';return}
  if(type==='lam'){token.ar=`${token.word}: حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of negation and jazm that gives past meaning.';return}
@@ -1299,10 +1472,13 @@ function renderRelationshipAnalysis(data){
    const linkAr=attached?`وَ${AFAL5_PERSONS[anchor.grammar.person].subjectAr} تَعُودُ عَلَى الْمُبْتَدَأِ «${mubtada.word}»، وَهِيَ الرَّابِطُ بَيْنَهُمَا.`:`وَالضَّمِيرُ الْمُسْتَتِرُ «هُوَ» يَعُودُ عَلَى الْمُبْتَدَأِ «${mubtada.word}»، وَهُوَ الرَّابِطُ بَيْنَهُمَا.`;
    anchor.ar+=` ${linkAr} وَالْجُمْلَةُ الْفِعْلِيَّةُ «${phrase}» فِي مَحَلِّ رَفْعٍ خَبَرٌ لِلْمُبْتَدَأِ «${mubtada.word}».`;
    anchor.en+=` The complete verbal sentence “${phrase}” is the khabar and contains a link back to “${mubtada.word}”.`;
-  }else{
-   const fronted=rel.khabarKind==='frontedPhrase';
-   anchor.ar+=` ${phrase}: شِبْهُ جُمْلَةٍ فِي مَحَلِّ رَفْعٍ خَبَرٌ${fronted?' مُقَدَّمٌ':''} لِلْمُبْتَدَأِ${fronted?' الْمُؤَخَّرِ':''} «${mubtada.word}».`;
-   anchor.en+=` The complete phrase “${phrase}” is the ${fronted?'fronted ':''}khabar of “${mubtada.word}”.`;
+   }else{
+    const fronted=rel.khabarKind==='frontedPhrase';
+    const attachment=anchor.grammar.particleType==='preposition'
+     ?`«${phrase}»: جَارٌّ وَمَجْرُورٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ${fronted?' مُقَدَّمٍ':''}`
+     :`«${phrase}»: ظَرْفٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ${fronted?' مُقَدَّمٍ':''}`;
+    anchor.ar+=` ${attachment} لِلْمُبْتَدَأِ${fronted?' الْمُؤَخَّرِ':''} «${mubtada.word}».`;
+    anchor.en+=` The complete phrase “${phrase}” is attached to an omitted ${fronted?'fronted ':''}khabar of “${mubtada.word}”.`;
   }
  });
 }
@@ -1340,7 +1516,7 @@ function validateExercise(data){
   const governor=token?.governorId?tokenById.get(token.governorId):null;
   const expectedState=token?.grammar?.type==='noun'?GRAMMAR_RULES.roles[token.grammar.role]?.state:token?.tense==='present'?(governor?GRAMMAR_RULES.governors[governor.grammar.particleType]?.mood:'raf'):'';
   const expectedSignId=token?.grammar?.type==='noun'?GRAMMAR_RULES.nounInflection[token.inflection]?.[expectedState]?.[0]:token?.tense==='present'?GRAMMAR_RULES.presentVerb[token.inflection]?.[expectedState]?.[0]:'';
-  failures.push({code,message,templateId:data.templateId,word:token?.word||'',lemma:token?.lexeme?.past||token?.lexeme?.nom||'',surfaceHint:token?.surfaceHint||'',expectedSurface:token?.expectedSurface||'',actualSurface:token?.word||'',role:token?.grammar?.role||'',expectedState:expectedState||'',actualState:token?.state||'',expectedSign:expectedSignId||'',actualSign:token?.sign?.id||'',governorId:token?.governorId||'',governorSurface:governor?.word||'',ruleId:token?.ruleId||''});
+  failures.push({code,message,templateId:data.templateId,word:token?.word||'',lemma:token?.lexeme?.past||token?.lexeme?.nom||'',surfaceHint:token?.surfaceHint||'',expectedSurface:token?.expectedSurface||'',actualSurface:token?.word||'',role:token?.grammar?.role||'',expectedState:expectedState||'',actualState:token?.state||'',expectedSign:expectedSignId||'',actualSign:token?.sign?.id||'',governorId:token?.governorId||'',governorSurface:governor?.word||'',ruleId:token?.ruleId||'',sourceStatus:SOURCE_REGISTRY[token?.ruleId]?.status||''});
  };
  if(!data.templateId)fail('E_TEMPLATE_ID','Exercise has no stable template ID.');
  if(!['nominal','nominalWithInna','nominalWithKana','verbal','phrase'].includes(data.sentenceType))fail('E_SENTENCE_TYPE','Exercise has no recognized sentence type.');
@@ -1350,6 +1526,9 @@ function validateExercise(data){
  data.tokens.forEach(token=>{
   if(!['noun','verb','particle'].includes(token.grammar?.type))fail('E_GRAMMAR_TYPE','Token has an unknown grammar type.',token);
   if(!token.id||!token.ruleId||!token.ar||!token.en)fail('E_TOKEN_INCOMPLETE','Token metadata or explanation is incomplete.',token);
+  [token.ruleId,token.signRuleId].filter(Boolean).forEach(ruleId=>{
+   if(!isSourceAuthorized(ruleId))fail('E_SOURCE_UNVERIFIED',`Rule ${ruleId} is missing, disabled, or not source-verified.`,token);
+  });
   if(token.expectedSurface&&token.word!==token.expectedSurface)fail('E_SURFACE_FORM','Surface form disagrees with the grammar structure.',token);
   if(token.grammar.type==='noun'){
    const roleRule=GRAMMAR_RULES.roles[token.grammar.role];
@@ -1394,6 +1573,7 @@ function validateExercise(data){
  if(new Set(data.tokens.map(item=>item.id)).size!==data.tokens.length)fail('E_TOKEN_ID_DUPLICATE','Token IDs are not unique.');
  relationships.forEach(rel=>{
   if(!rel.ruleId||rel.ruleId!==RELATIONSHIP_RULE_IDS[rel.type])fail('E_RELATION_RULE','Relationship is missing its governing rule ID.');
+  if(rel.ruleId&&!isSourceAuthorized(rel.ruleId))fail('E_SOURCE_UNVERIFIED',`Relationship rule ${rel.ruleId} is missing, disabled, or not source-verified.`);
   const ids=Object.entries(rel).filter(([key])=>key!=='ruleId'&&key!=='id'&&/(?:Id|Ids)$/.test(key)).flatMap(([,value])=>Array.isArray(value)?value:[value]).filter(Boolean);
   ids.forEach(id=>{if(!tokenById.has(id)&&!String(id).includes(':R'))fail('E_RELATION_TOKEN','Relationship points to a missing token.');});
  });
@@ -1489,8 +1669,8 @@ const VISIBLE_KASRA='الْكَسْرَةُ الظَّاهِرَةُ عَلَى 
 // Singular nouns
 add('noun','singular','damma',()=>{const s=pickPerson(),a=pickVaried(singularPredicates,'singular-predicates',x=>x.nom);return{sentence:`${s.nom} ${a.nom}`,translation:`${cap(s.en)} is ${a.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
 add('noun','singular','damma',()=>{const s=pickPerson(),p=pickPlace();return{sentence:`${s.nom} فِي ${p.gen}`,translation:`${cap(s.en)} is in ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada,true),token('فِي','in',AR.prep('فِي'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'فِي'),EN.majrur)]}});
-add('noun','singular','fatha',()=>{const s=pickPerson(),v=pickGeneralVerb(),o=pickGeneralObject(v);return{sentence:`${s.nom} ${v.pres} ${o.acc}`,translation:`${cap(s.en)} ${v.third} ${o.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(v.pres,v.third,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(o.acc,o.en,AR.object(o.acc),EN.object,true)]}});
-add('noun','singular','kasra',()=>{const owner=pickPerson(),thing=pickVaried(ownedNouns,'owned-nouns',x=>x.nom),predicatePool=thing.gender==='f'?feminineThingPredicates:masculineThingPredicates,a=pickVaried(predicatePool,`idafa-predicates:${thing.gender}`,x=>x.nom);return{sentence:`${thing.nom} ${owner.gen} ${a.nom}`,translation:`The ${thing.en} of ${owner.en.replace('the ','')} is ${a.en}.`,tokens:[token(thing.nom,thing.en,AR.mudaf(thing.nom),EN.mudaf),token(owner.gen,owner.en,AR.mudafIlayh(owner.gen),EN.mudafIlayh,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
+add('noun','singular','fatha',()=>{const s=pickPerson(),v=pickGeneralVerb(),o=pickGeneralObject(v,s);return{sentence:`${s.nom} ${v.pres} ${o.acc}`,translation:`${cap(s.en)} ${v.third} ${o.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(v.pres,v.third,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(o.acc,o.en,AR.object(o.acc),EN.object,true)]}});
+add('noun','singular','kasra',()=>{const owner=pickPerson(),thing=pickVaried(ownedNouns,'owned-nouns',x=>x.nom),predicatePool=thing.gender==='f'?feminineThingPredicates:masculineThingPredicates,a=pickVaried(predicatePool,`idafa-predicates:${thing.gender}`,x=>x.nom);return{sentence:`${thing.nom} ${owner.gen} ${a.nom}`,translation:`The ${thing.en} of ${owner.en} is ${a.en}.`,tokens:[token(thing.nom,thing.en,AR.mudaf(thing.nom),EN.mudaf),token(owner.gen,owner.en,AR.mudafIlayh(owner.gen),EN.mudafIlayh,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
 
 // Broken plurals
 add('noun','broken','damma',()=>{const b=pickVaried(brokenHuman,'broken-human-nom',x=>x.nom),p=pickVaried(masculinePluralPredicates,'broken-predicates',x=>x.nom);return{sentence:`${b.nom} ${p.nom}`,translation:`${cap(b.en)} are ${p.en}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada,true),token(p.nom,p.en,AR.khabar(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.khabar)]}});
@@ -1527,27 +1707,27 @@ add('noun','fiveVerbs','nunKept',()=>{const b=pickVaried(brokenHuman,'five-verb-
 add('noun','fiveVerbs','nunDropped',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects-sub',x=>x.nom),v=pickVerb(),o=pickVerbObject(v),lan=chance();return{sentence:`${b.nom} ${lan?'لَنْ':'لَمْ'} ${v.fiveSub} ${o}`,translation:`${cap(b.en)} ${lan?'will not':'did not'} ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token(lan?'لَنْ':'لَمْ',lan?'will not':'did not',lan?AR.lan('لَنْ'):AR.lam('لَمْ'),lan?'A particle of naṣb.':'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,lan?'مَنْصُوبٌ بِـ«لَنْ»':'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
 
 // Verb-first practice
-add('verb','singular','damma',()=>{const v=pickGeneralVerb(),s=pickPerson(),o=pickGeneralObject(v);return{sentence:`${v.past} ${s.nom} ${o.acc}`,translation:`${cap(s.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
-add('verb','singular','fatha',()=>{const v=pickGeneralVerb(),s=pickPerson(),o=pickGeneralObject(v);return{sentence:`${v.past} ${s.nom} ${o.acc}`,translation:`${cap(s.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o.acc,o.en,AR.object(o.acc),EN.object,true)]}});
-add('verb','broken','damma',()=>{const v=pickGeneralVerb(),b=pickVaried(brokenHuman,'verb-broken-subjects',x=>x.nom),o=pickGeneralObject(v);return{sentence:`${v.past} ${b.nom} ${o.acc}`,translation:`${cap(b.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(b.nom,b.en,AR.faail(b.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','singular','damma',()=>{const v=pickGeneralVerb(),s=pickPerson(),o=pickGeneralObject(v,s);return{sentence:`${v.past} ${s.nom} ${o.acc}`,translation:`${cap(s.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','singular','fatha',()=>{const v=pickGeneralVerb(),s=pickPerson(),o=pickGeneralObject(v,s);return{sentence:`${v.past} ${s.nom} ${o.acc}`,translation:`${cap(s.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o.acc,o.en,AR.object(o.acc),EN.object,true)]}});
+add('verb','broken','damma',()=>{const v=pickGeneralVerb(),b=pickVaried(brokenHuman,'verb-broken-subjects',x=>x.nom),o=pickGeneralObject(v,b);return{sentence:`${v.past} ${b.nom} ${o.acc}`,translation:`${cap(b.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(b.nom,b.en,AR.faail(b.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
 add('verb','broken','fatha',()=>{const a=pickVaried(brokenObjectActions,'verb-broken-actions',x=>x.pres),s=pickPerson(),o=pickVaried(a.objects,`verb-broken-objects:${a.pres}`,String);return{sentence:`${a.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${a.third} ${nounEnglish(o,'acc')}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,nounEnglish(o,'acc'),AR.object(o),EN.object,true)]}});
-add('verb','dual','alif',()=>{const v=pickGeneralVerb(),d=pickVaried(duals.filter(isHumanNoun),'verb-dual-subjects',x=>x.nom),o=pickGeneralObject(v);return{sentence:`${v.past} ${d.nom} ${o.acc}`,translation:`${cap(d.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(d.nom,d.en,AR.faail(d.nom,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),'The dual subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','dual','alif',()=>{const v=pickGeneralVerb(),d=pickVaried(duals.filter(isHumanNoun),'verb-dual-subjects',x=>x.nom),o=pickGeneralObject(v,d);return{sentence:`${v.past} ${d.nom} ${o.acc}`,translation:`${cap(d.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(d.nom,d.en,AR.faail(d.nom,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),'The dual subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
 add('verb','dual','ya',()=>{const s=pickPerson(),d=pickVaried(duals,'verb-dual-objects',x=>x.acc),a=isHumanNoun(d)?pickHumanAction():pickThingAction();return{sentence:`${a.pres} ${s.nom} ${d.acc}`,translation:`${cap(s.en)} ${a.third} ${d.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(d.acc,d.en,AR.object(d.acc,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.object,true)]}});
-add('verb','smp','waw',()=>{const v=pickGeneralVerb(),p=pickVaried(smp,'verb-smp-subjects',x=>x.nom),o=pickGeneralObject(v);return{sentence:`${v.past} ${p.nom} ${o.acc}`,translation:`${cap(p.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(p.nom,p.en,AR.faail(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),'The sound masculine plural subject; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','smp','waw',()=>{const v=pickGeneralVerb(),p=pickVaried(smp,'verb-smp-subjects',x=>x.nom),o=pickGeneralObject(v,p);return{sentence:`${v.past} ${p.nom} ${o.acc}`,translation:`${cap(p.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(p.nom,p.en,AR.faail(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),'The sound masculine plural subject; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
 add('verb','smp','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'verb-smp-objects',x=>x.acc),a=pickHumanAction();return{sentence:`${a.pres} ${s.nom} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(p.acc,p.en,AR.object(p.acc,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.object,true)]}});
 add('verb','sfp','damma',()=>{const a=pickVaried(femininePastActions,'feminine-past-actions',x=>x.past),p=pickVaried(sfp,'verb-sfp-subjects',x=>x.nom);return{sentence:`${a.past} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(a.past,a.pastEn,AR.past(a.past),'A past-tense verb; the final tāʾ marks feminine gender.'),token(p.nom,p.en,AR.faail(p.nom),'The sound feminine plural subject; nominative.',true)]}});
-add('verb','fiveNouns','waw',()=>{const v=pickGeneralVerb(),f=pickVaried(fiveNouns,'verb-five-noun-subjects',x=>x.nom),o=pickGeneralObject(v);return{sentence:`${v.past} ${f.nom} ${o.acc}`,translation:`${cap(f.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(f.nom,f.en,AR.faail(f.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','fiveNouns','waw',()=>{const v=pickGeneralVerb(),f=pickVaried(fiveNouns,'verb-five-noun-subjects',x=>x.nom),o=pickGeneralObject(v,f);return{sentence:`${v.past} ${f.nom} ${o.acc}`,translation:`${cap(f.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(f.nom,f.en,AR.faail(f.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
 add('verb','singular','fatha',()=>{const s=pickPerson(),a=pickVaried(singularPredicates,'kana-predicates',x=>x.acc);return{sentence:`كَانَ ${s.nom} ${a.acc}`,translation:`${cap(s.en)} was ${a.en}.`,tokens:[token('كَانَ','was',AR.kana('كَانَ'),'A deficient past-tense verb.'),token(s.nom,s.en,AR.ismKana(s.nom),'The noun of kāna; nominative.'),token(a.acc,a.en,AR.khabarKana(a.acc),'The khabar of kāna; accusative.',true)]}});
 add('verb','present','damma',()=>{const v=pickVerb(),s=pickPerson(),o=pickVerbObject(v);return{sentence:`${v.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
 add('verb','fiveVerbs','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${v.five} ${o}`,translation:`They ${v.en} ${objectEnglish(o)}.`,tokens:[token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
 
 // Particle-first practice
-add('particle','singular','fatha',()=>{const p=pickInna(),s=pickPerson(),a=pickVaried(singularPredicates,'inna-singular-predicates',x=>x.nom);return{sentence:`${p.ar} ${s.acc} ${a.nom}`,translation:`${p.meaning} ${s.en} is ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(s.acc,s.en,AR.ismInna(s.acc,p.ar),`The noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
-add('particle','broken','fatha',()=>{const p=pickInna(),b=pickVaried(brokenHuman,'inna-broken-nouns',x=>x.acc),a=pickVaried(masculinePluralPredicates,'inna-broken-predicates',x=>x.nom);return{sentence:`${p.ar} ${b.acc} ${a.nom}`,translation:`${p.meaning} ${b.en} are ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(b.acc,b.en,AR.ismInna(b.acc,p.ar),`The noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The predicate of ${p.ar}; nominative.`)]}});
-add('particle','dual','ya',()=>{const p=pickInna(),d=pickVaried(duals.filter(isHumanNoun),'inna-dual-nouns',x=>x.acc),a=pickVaried(dualPredicates,'inna-dual-predicates',x=>x.nom);return{sentence:`${p.ar} ${d.acc} ${a.nom}`,translation:`${p.meaning} ${d.en} are ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(d.acc,d.en,AR.ismInna(d.acc,p.ar,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),`The dual noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),`The dual predicate of ${p.ar}; nominative.`)]}});
-add('particle','smp','ya',()=>{const p=pickInna(),n=pickVaried(smp,'inna-smp-nouns',x=>x.acc),a=pickVaried(masculinePluralPredicates,'inna-smp-predicates',x=>x.nom);return{sentence:`${p.ar} ${n.acc} ${a.nom}`,translation:`${p.meaning} ${n.en} are ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(n.acc,n.en,AR.ismInna(n.acc,p.ar,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The sound masculine plural noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The predicate of ${p.ar}; nominative.`)]}});
-add('particle','sfp','kasraSub',()=>{const p=pickInna(),n=pickVaried(sfp,'inna-sfp-nouns',x=>x.acc),a=pickVaried(femininePluralPredicates,'inna-sfp-predicates',x=>x.nom);return{sentence:`${p.ar} ${n.acc} ${a.nom}`,translation:`${p.meaning} ${n.en} are ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(n.acc,n.en,AR.ismInna(n.acc,p.ar,'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ'),`The sound feminine plural noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
-add('particle','fiveNouns','alif',()=>{const p=pickInna(),f=pickVaried(fiveNouns,'inna-five-nouns',x=>x.acc),a=pickVaried(singularPredicates,'inna-five-noun-predicates',x=>x.nom);return{sentence:`${p.ar} ${f.acc} ${a.nom}`,translation:`${p.meaning} ${f.en} is ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(f.acc,f.en,AR.ismInna(f.acc,p.ar,'الْأَلِفُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ'),`The noun of ${p.ar}; accusative with alif.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','singular','fatha',()=>{const p=pickInna(),s=pickPerson(),a=pickVaried(singularPredicates,'inna-singular-predicates',x=>x.nom);return{sentence:`${p.ar} ${s.acc} ${a.nom}`,translation:`${p.meaning} ${s.en} ${innaCopula(p,false)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(s.acc,s.en,AR.ismInna(s.acc,p.ar),`The noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','broken','fatha',()=>{const p=pickInna(),b=pickVaried(brokenHuman,'inna-broken-nouns',x=>x.acc),a=pickVaried(masculinePluralPredicates,'inna-broken-predicates',x=>x.nom);return{sentence:`${p.ar} ${b.acc} ${a.nom}`,translation:`${p.meaning} ${b.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(b.acc,b.en,AR.ismInna(b.acc,p.ar),`The noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','dual','ya',()=>{const p=pickInna(),d=pickVaried(duals.filter(isHumanNoun),'inna-dual-nouns',x=>x.acc),a=pickVaried(dualPredicates,'inna-dual-predicates',x=>x.nom);return{sentence:`${p.ar} ${d.acc} ${a.nom}`,translation:`${p.meaning} ${d.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(d.acc,d.en,AR.ismInna(d.acc,p.ar,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),`The dual noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),`The dual predicate of ${p.ar}; nominative.`)]}});
+add('particle','smp','ya',()=>{const p=pickInna(),n=pickVaried(smp,'inna-smp-nouns',x=>x.acc),a=pickVaried(masculinePluralPredicates,'inna-smp-predicates',x=>x.nom);return{sentence:`${p.ar} ${n.acc} ${a.nom}`,translation:`${p.meaning} ${n.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(n.acc,n.en,AR.ismInna(n.acc,p.ar,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The sound masculine plural noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','sfp','kasraSub',()=>{const p=pickInna(),n=pickVaried(sfp,'inna-sfp-nouns',x=>x.acc),a=pickVaried(femininePluralPredicates,'inna-sfp-predicates',x=>x.nom);return{sentence:`${p.ar} ${n.acc} ${a.nom}`,translation:`${p.meaning} ${n.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(n.acc,n.en,AR.ismInna(n.acc,p.ar,'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ'),`The sound feminine plural noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','fiveNouns','alif',()=>{const p=pickInna(),f=pickVaried(fiveNouns,'inna-five-nouns',x=>x.acc),a=pickVaried(singularPredicates,'inna-five-noun-predicates',x=>x.nom);return{sentence:`${p.ar} ${f.acc} ${a.nom}`,translation:`${p.meaning} ${f.en} ${innaCopula(p,false)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(f.acc,f.en,AR.ismInna(f.acc,p.ar,'الْأَلِفُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ'),`The noun of ${p.ar}; accusative with alif.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
 add('particle','singular','kasra',()=>{const p=pickPlace(),d=pickVaried([{ar:'طَالِبٌ',en:'a student'},{ar:'كِتَابٌ',en:'a book'},{ar:'ضَيْفٌ',en:'a guest'},{ar:'مُعَلِّمٌ',en:'a teacher'}],'delayed-subjects',x=>x.ar);return{sentence:`فِي ${p.gen} ${d.ar}`,translation:`There is ${d.en} in ${p.en}.`,tokens:[token('فِي','in',AR.prep('فِي'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'فِي'),EN.majrur,true),token(d.ar,d.en,AR.delayedMubtada(d.ar),'A delayed mubtadaʾ; nominative.')]}});
 add('particle','broken','kasra',()=>{const b=pickVaried(brokenThings,'particle-broken-gen',x=>x.gen);return{sentence:`عَنْ ${b.gen} سُؤَالٌ`,translation:`There is a question about ${b.en}.`,tokens:[token('عَنْ','about',AR.prep('عَنْ'),EN.prep),token(b.gen,b.en,AR.majrur(b.gen,'عَنْ'),EN.majrur,true),token('سُؤَالٌ','a question',AR.delayedMubtada('سُؤَالٌ'),'A delayed mubtadaʾ; nominative.')]}});
 add('particle','dual','ya',()=>{const d=pickVaried(duals.filter(isHumanNoun),'particle-dual-gen',x=>x.gen);return{sentence:`إِلَى ${d.gen} رِسَالَةٌ`,translation:`There is a letter for ${d.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(d.gen,d.en,AR.majrur(d.gen,'إِلَى','الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
@@ -1644,7 +1824,7 @@ function render(data,notice=''){
  current=data;
  byId('sentence').textContent=data.sentence;
  byId('translation').textContent=data.translation;
- byId('answers').innerHTML=data.tokens.map(t=>`<article class="word-card${t.target?' target':''}"><div class="word-head"><span class="gloss">${t.target?'<span class="target-note">Focus word</span>':''}${esc(t.gloss)}</span><span class="word-ar" lang="ar">${esc(t.word)}</span></div><div class="iraab" lang="ar">${esc(t.ar)}</div><div class="english"><strong>English:</strong> ${esc(t.en)}</div></article>`).join('');
+ byId('answers').innerHTML=data.tokens.map(t=>`<article class="word-card${t.target?' target':''}"><div class="word-head"><span class="gloss">${t.target?'<span class="target-note">Focus word</span> ':''}${esc(t.gloss)}</span><span class="word-ar" lang="ar">${esc(t.word)}</span></div><div class="iraab" lang="ar">${esc(t.ar)}</div><div class="english"><strong>English:</strong> ${esc(t.en)}</div></article>`).join('');
  byId('answerPanel').classList.remove('open');
  byId('revealBtn').textContent='Reveal Full Iʿrāb';
  byId('status').className=notice?'status notice':'status';

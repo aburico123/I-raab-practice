@@ -1,0 +1,70 @@
+type,array,arabic_nominative,arabic_accusative,arabic_genitive_or_predicate_acc,english,semantic_category,source_or_group,notes
+noun,singularPeople,الْحَلَّاقُ,الْحَلَّاقَ,الْحَلَّاقِ,the barber,people/profession,verified standard vocabulary,sound triptote noun
+noun,singularPeople,السَّبَّاكُ,السَّبَّاكَ,السَّبَّاكِ,the plumber,people/profession,verified standard vocabulary,sound triptote noun
+noun,singularPeople,الْكَهْرَبَائِيُّ,الْكَهْرَبَائِيَّ,الْكَهْرَبَائِيِّ,the electrician,people/profession,verified standard vocabulary,nisba noun (same pattern as existing الْبُسْتَانِيُّ)
+noun,singularPeople,الصَّيْدَلِيُّ,الصَّيْدَلِيَّ,الصَّيْدَلِيِّ,the pharmacist,people/profession,verified standard vocabulary,nisba noun
+noun,singularPeople,الْجُنْدِيُّ,الْجُنْدِيَّ,الْجُنْدِيِّ,the soldier,people/profession,verified standard vocabulary,nisba noun
+noun,singularPeople,الشُّرْطِيُّ,الشُّرْطِيَّ,الشُّرْطِيِّ,the police officer,people/profession,verified standard vocabulary,nisba noun
+noun,singularPeople,الْحَدَّادُ,الْحَدَّادَ,الْحَدَّادِ,the blacksmith,people/profession,verified standard vocabulary,sound triptote noun
+noun,singularPeople,الْجَزَّارُ,الْجَزَّارَ,الْجَزَّارِ,the butcher,people/profession,verified standard vocabulary,sound triptote noun
+noun,singularPeople,الْمُوَظَّفُ,الْمُوَظَّفَ,الْمُوَظَّفِ,the employee,people/profession,verified standard vocabulary,sound triptote noun
+noun,singularPeople,الْقَارِئُ,الْقَارِئَ,الْقَارِئِ,the reader,people/profession,verified standard vocabulary,sound triptote noun with medial hamza (not defective)
+noun,singularThings,الْفُرْشَاةُ,الْفُرْشَاةَ,الْفُرْشَاةِ,the brush,household,verified standard vocabulary,sound feminine triptote noun
+noun,singularThings,الْمِرْآةُ,الْمِرْآةَ,الْمِرْآةِ,the mirror,household,verified standard vocabulary,sound feminine triptote noun
+noun,singularThings,الْوِسَادَةُ,الْوِسَادَةَ,الْوِسَادَةِ,the pillow,household,verified standard vocabulary,sound feminine triptote noun
+noun,singularThings,الْبَطَّانِيَّةُ,الْبَطَّانِيَّةَ,الْبَطَّانِيَّةِ,the blanket,household,verified standard vocabulary,sound feminine triptote noun
+noun,singularThings,السَّرِيرُ,السَّرِيرَ,السَّرِيرِ,the bed,household,verified standard vocabulary,sound masculine triptote noun
+noun,singularThings,الْخِزَانَةُ,الْخِزَانَةَ,الْخِزَانَةِ,the cabinet,household,verified standard vocabulary,sound feminine triptote noun
+noun,singularThings,الْمِنْشَفَةُ,الْمِنْشَفَةَ,الْمِنْشَفَةِ,the towel,household,verified standard vocabulary,sound feminine triptote noun
+noun,singularThings,الصَّابُونُ,الصَّابُونَ,الصَّابُونِ,the soap,household,verified standard vocabulary,sound masculine triptote noun
+noun,singularThings,الْفُرْنُ,الْفُرْنَ,الْفُرْنِ,the oven,household,verified standard vocabulary,sound masculine triptote noun
+noun,singularThings,الثَّلَّاجَةُ,الثَّلَّاجَةَ,الثَّلَّاجَةِ,the refrigerator,household,verified standard vocabulary,sound feminine triptote noun
+noun,singularThings,الْحَوْضُ,الْحَوْضَ,الْحَوْضِ,the basin,household,verified standard vocabulary,sound masculine triptote noun
+noun,singularThings,الْقُفَّازُ,الْقُفَّازَ,الْقُفَّازِ,the glove,clothing,verified standard vocabulary,sound masculine triptote noun
+noun,singularThings,الْحِذَاءُ,الْحِذَاءَ,الْحِذَاءِ,the shoe,clothing,verified standard vocabulary,sound masculine triptote noun with medial hamza (not defective; same pattern as existing الْمَاءُ)
+noun,singularThings,الْقُبَّعَةُ,الْقُبَّعَةَ,الْقُبَّعَةِ,the hat,clothing,verified standard vocabulary,sound feminine triptote noun
+noun,singularThings,الْجَوْرَبُ,الْجَوْرَبَ,الْجَوْرَبِ,the sock,clothing,verified standard vocabulary,sound masculine triptote noun
+noun,singularThings,الْحِزَامُ,الْحِزَامَ,الْحِزَامِ,the belt,clothing,verified standard vocabulary,sound masculine triptote noun
+noun,singularThings,الْأُرْزُ,الْأُرْزَ,الْأُرْزِ,the rice,food/drink,verified standard vocabulary,sound masculine triptote noun (mass noun)
+noun,singularThings,السُّكَّرُ,السُّكَّرَ,السُّكَّرِ,the sugar,food/drink,verified standard vocabulary,sound masculine triptote noun (mass noun)
+noun,singularThings,الْمِلْحُ,الْمِلْحَ,الْمِلْحِ,the salt,food/drink,verified standard vocabulary,sound masculine triptote noun (mass noun)
+noun,singularThings,الدَّرَّاجَةُ,الدَّرَّاجَةَ,الدَّرَّاجَةِ,the bicycle,transportation,verified standard vocabulary,sound feminine triptote noun
+noun,places,الْحَمَّامُ,الْحَمَّامَ,الْحَمَّامِ,the bathroom,places,verified standard vocabulary,sound masculine triptote noun
+noun,places,الْمَخْبَزُ,الْمَخْبَزَ,الْمَخْبَزِ,the bakery,places,verified standard vocabulary,sound masculine triptote noun
+noun,places,الصَّيْدَلِيَّةُ,الصَّيْدَلِيَّةَ,الصَّيْدَلِيَّةِ,the pharmacy,places,verified standard vocabulary,sound feminine triptote noun
+noun,places,السَّاحَةُ,السَّاحَةَ,السَّاحَةِ,the square,places,verified standard vocabulary,sound feminine triptote noun
+noun,places,الْحَيُّ,الْحَيَّ,الْحَيِّ,the neighborhood,places,verified standard vocabulary,sound masculine triptote noun (geminate root)
+noun,places,الشَّارِعُ,الشَّارِعَ,الشَّارِعِ,the street,places,verified standard vocabulary,sound masculine triptote noun
+noun,places,الْمَرْكَزُ,الْمَرْكَزَ,الْمَرْكَزِ,the center,places,verified standard vocabulary,sound masculine triptote noun
+noun,places,الْمُخَيَّمُ,الْمُخَيَّمَ,الْمُخَيَّمِ,the camp,places,verified standard vocabulary,sound masculine triptote noun
+noun,places,السِّجْنُ,السِّجْنَ,السِّجْنِ,the prison,places,verified standard vocabulary,sound masculine triptote noun
+noun,places,الْقَصْرُ,الْقَصْرَ,الْقَصْرِ,the palace,places,verified standard vocabulary,sound masculine triptote noun
+adjective,adjectives,عَادِلٌ,عَادِلًا,,fair,agreement: masculine sound; used as singular predicate/khabar,verified standard vocabulary,matches existing adjective pattern
+adjective,adjectives,كَسُولٌ,كَسُولًا,,lazy,agreement: masculine sound,verified standard vocabulary,matches existing adjective pattern
+adjective,adjectives,نَظِيفٌ,نَظِيفًا,,clean,agreement: masculine sound,verified standard vocabulary,matches existing adjective pattern
+adjective,adjectives,وَسِيمٌ,وَسِيمًا,,handsome,agreement: masculine sound,verified standard vocabulary,matches existing adjective pattern
+adjective,adjectives,طَوِيلٌ,طَوِيلًا,,tall,agreement: masculine sound,verified standard vocabulary,matches existing adjective pattern
+adjective,adjectives,قَصِيرٌ,قَصِيرًا,,short,agreement: masculine sound,verified standard vocabulary,matches existing adjective pattern
+adjective,adjectives,غَنِيٌّ,غَنِيًّا,,rich,agreement: masculine sound (nisba-pattern spelling),verified standard vocabulary,matches existing قَوِيٌّ pattern
+adjective,adjectives,فَقِيرٌ,فَقِيرًا,,poor,agreement: masculine sound,verified standard vocabulary,matches existing adjective pattern
+adjective,adjectives,لَطِيفٌ,لَطِيفًا,,kind,agreement: masculine sound,verified standard vocabulary,matches existing adjective pattern
+adjective,adjectives,ذَكِيٌّ,ذَكِيًّا,,intelligent,agreement: masculine sound (nisba-pattern spelling),verified standard vocabulary,matches existing قَوِيٌّ pattern
+verb,additionalVerbActions,past:خَاطَ,present:يَخِيطُ,third:sews,sew,transitive; no preposition,sewable (the garment; the cloth),hollow Form I verb; present visibly ends ḍammah, matches array's supported morphology
+verb,additionalVerbActions,past:طَحَنَ,present:يَطْحَنُ,third:grinds,grind,transitive; no preposition,grindable (the coffee; the tea; the rice; the sugar),sound Form I verb
+verb,additionalVerbActions,past:قَشَّرَ,present:يُقَشِّرُ,third:peels,peel,transitive; no preposition,peelable (the fruit; the vegetables),sound Form II verb
+verb,additionalVerbActions,past:عَلَّقَ,present:يُعَلِّقُ,third:hangs,hang,transitive; no preposition,hangable (the picture; the garment; the map),sound Form II verb
+verb,additionalVerbActions,past:ثَقَبَ,present:يَثْقُبُ,third:drills,drill,transitive; no preposition,drillable (the wood; the metal),sound Form I verb
+verb,additionalVerbActions,past:طَرَقَ,present:يَطْرُقُ,third:knocks on,knock on,transitive (no preposition in Arabic; طرق الباب),knockable (the door; the window),sound Form I verb
+verb,additionalVerbActions,past:حَاكَ,present:يَحِيكُ,third:weaves,weave,transitive; no preposition,weavable (the cloth),hollow Form I verb; present visibly ends ḍammah
+verb,additionalVerbActions,past:دَهَنَ,present:يَدْهُنُ,third:greases,grease,transitive; no preposition,greasable (the machine),sound Form I verb
+verb,additionalVerbActions,past:نَشَّفَ,present:يُنَشِّفُ,third:dries,dry,transitive; no preposition,dryable (the towel; the garment; the cloth),sound Form II verb (causative of نشف)
+verb,additionalVerbActions,past:رَشَّ,present:يَرُشُّ,third:sprays,spray,transitive; no preposition,sprayable (the water),geminate Form I verb
+verb,additionalVerbActions,past:عَصَرَ,present:يَعْصِرُ,third:squeezes,squeeze,transitive; no preposition,squeezable (the fruit; the vegetables),sound Form I verb
+verb,additionalVerbActions,past:أَنَارَ,present:يُنِيرُ,third:illuminates,illuminate,transitive; no preposition,illuminable (the room),hollow Form IV verb
+verb,additionalVerbActions,past:بَرَّدَ,present:يُبَرِّدُ,third:cools,cool,transitive; no preposition,liquid (the water; the milk; the coffee; the tea),sound Form II verb
+verb,additionalVerbActions,past:سَخَّنَ,present:يُسَخِّنُ,third:heats,heat,transitive; no preposition,food (the food; the fruit; the vegetables; the bread; the milk; the coffee; the tea),sound Form II verb
+verb,additionalVerbActions,past:قَصَّ,present:يَقُصُّ,third:trims,trim,transitive; no preposition,trimmable (the sheet of paper; the cloth; the garment; the rope),geminate Form I verb
+verb,additionalVerbActions,past:طَرَّزَ,present:يُطَرِّزُ,third:embroiders,embroider,transitive; no preposition,sewable (the garment; the cloth),sound Form II verb
+verb,additionalVerbActions,past:لَحَمَ,present:يَلْحُمُ,third:welds,weld,transitive; no preposition,weldable (the metal),sound Form I verb
+verb,additionalVerbActions,past:أَذَابَ,present:يُذِيبُ,third:melts,melt,transitive; no preposition,meltable (the sugar),hollow Form IV verb
+verb,additionalVerbActions,past:حَرَّكَ,present:يُحَرِّكُ,third:stirs,stir,transitive; no preposition,stirrable (the food; the milk; the coffee; the tea),sound Form II verb

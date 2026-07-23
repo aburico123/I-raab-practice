@@ -192,7 +192,7 @@ button{font-weight:850;cursor:pointer}
       </div>
     </section>
     <div id="status" class="status"></div>
-    <div class="footer">Practice draws from 200 verb families and 200 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</div>
+    <div class="footer">Practice draws from 219 verb families and 240 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</div>
   </main>
 </div>
 
@@ -465,7 +465,17 @@ const singularPeople=[
  {nom:'الْمُنْشِدُ',acc:'الْمُنْشِدَ',gen:'الْمُنْشِدِ',en:'the chanter'},
  {nom:'الصَّانِعُ',acc:'الصَّانِعَ',gen:'الصَّانِعِ',en:'the craftsman'},
  {nom:'الْمُشْرِفُ',acc:'الْمُشْرِفَ',gen:'الْمُشْرِفِ',en:'the supervisor'},
- {nom:'الْمُخْتَرِعُ',acc:'الْمُخْتَرِعَ',gen:'الْمُخْتَرِعِ',en:'the inventor'}
+ {nom:'الْمُخْتَرِعُ',acc:'الْمُخْتَرِعَ',gen:'الْمُخْتَرِعِ',en:'the inventor'},
+ {nom:'الْحَلَّاقُ',acc:'الْحَلَّاقَ',gen:'الْحَلَّاقِ',en:'the barber'},
+ {nom:'السَّبَّاكُ',acc:'السَّبَّاكَ',gen:'السَّبَّاكِ',en:'the plumber'},
+ {nom:'الْكَهْرَبَائِيُّ',acc:'الْكَهْرَبَائِيَّ',gen:'الْكَهْرَبَائِيِّ',en:'the electrician'},
+ {nom:'الصَّيْدَلِيُّ',acc:'الصَّيْدَلِيَّ',gen:'الصَّيْدَلِيِّ',en:'the pharmacist'},
+ {nom:'الْجُنْدِيُّ',acc:'الْجُنْدِيَّ',gen:'الْجُنْدِيِّ',en:'the soldier'},
+ {nom:'الشُّرْطِيُّ',acc:'الشُّرْطِيَّ',gen:'الشُّرْطِيِّ',en:'the police officer'},
+ {nom:'الْحَدَّادُ',acc:'الْحَدَّادَ',gen:'الْحَدَّادِ',en:'the blacksmith'},
+ {nom:'الْجَزَّارُ',acc:'الْجَزَّارَ',gen:'الْجَزَّارِ',en:'the butcher'},
+ {nom:'الْمُوَظَّفُ',acc:'الْمُوَظَّفَ',gen:'الْمُوَظَّفِ',en:'the employee'},
+ {nom:'الْقَارِئُ',acc:'الْقَارِئَ',gen:'الْقَارِئِ',en:'the reader'}
 ];
 const singularThings=[
  {nom:'الْكِتَابُ',acc:'الْكِتَابَ',gen:'الْكِتَابِ',en:'the book'},
@@ -535,7 +545,27 @@ const singularThings=[
  {nom:'التَّقْرِيرُ',acc:'التَّقْرِيرَ',gen:'التَّقْرِيرِ',en:'the report'},
  {nom:'الْمَشْرُوعُ',acc:'الْمَشْرُوعَ',gen:'الْمَشْرُوعِ',en:'the project'},
  {nom:'الْكُرَةُ',acc:'الْكُرَةَ',gen:'الْكُرَةِ',en:'the ball'},
- {nom:'الْبَرْنَامَجُ',acc:'الْبَرْنَامَجَ',gen:'الْبَرْنَامَجِ',en:'the program'}
+ {nom:'الْبَرْنَامَجُ',acc:'الْبَرْنَامَجَ',gen:'الْبَرْنَامَجِ',en:'the program'},
+ {nom:'الْفُرْشَاةُ',acc:'الْفُرْشَاةَ',gen:'الْفُرْشَاةِ',en:'the brush'},
+ {nom:'الْمِرْآةُ',acc:'الْمِرْآةَ',gen:'الْمِرْآةِ',en:'the mirror'},
+ {nom:'الْوِسَادَةُ',acc:'الْوِسَادَةَ',gen:'الْوِسَادَةِ',en:'the pillow'},
+ {nom:'الْبَطَّانِيَّةُ',acc:'الْبَطَّانِيَّةَ',gen:'الْبَطَّانِيَّةِ',en:'the blanket'},
+ {nom:'السَّرِيرُ',acc:'السَّرِيرَ',gen:'السَّرِيرِ',en:'the bed'},
+ {nom:'الْخِزَانَةُ',acc:'الْخِزَانَةَ',gen:'الْخِزَانَةِ',en:'the cabinet'},
+ {nom:'الْمِنْشَفَةُ',acc:'الْمِنْشَفَةَ',gen:'الْمِنْشَفَةِ',en:'the towel'},
+ {nom:'الصَّابُونُ',acc:'الصَّابُونَ',gen:'الصَّابُونِ',en:'the soap'},
+ {nom:'الْفُرْنُ',acc:'الْفُرْنَ',gen:'الْفُرْنِ',en:'the oven'},
+ {nom:'الثَّلَّاجَةُ',acc:'الثَّلَّاجَةَ',gen:'الثَّلَّاجَةِ',en:'the refrigerator'},
+ {nom:'الْحَوْضُ',acc:'الْحَوْضَ',gen:'الْحَوْضِ',en:'the basin'},
+ {nom:'الْقُفَّازُ',acc:'الْقُفَّازَ',gen:'الْقُفَّازِ',en:'the glove'},
+ {nom:'الْحِذَاءُ',acc:'الْحِذَاءَ',gen:'الْحِذَاءِ',en:'the shoe'},
+ {nom:'الْقُبَّعَةُ',acc:'الْقُبَّعَةَ',gen:'الْقُبَّعَةِ',en:'the hat'},
+ {nom:'الْجَوْرَبُ',acc:'الْجَوْرَبَ',gen:'الْجَوْرَبِ',en:'the sock'},
+ {nom:'الْحِزَامُ',acc:'الْحِزَامَ',gen:'الْحِزَامِ',en:'the belt'},
+ {nom:'الْأُرْزُ',acc:'الْأُرْزَ',gen:'الْأُرْزِ',en:'the rice'},
+ {nom:'السُّكَّرُ',acc:'السُّكَّرَ',gen:'السُّكَّرِ',en:'the sugar'},
+ {nom:'الْمِلْحُ',acc:'الْمِلْحَ',gen:'الْمِلْحِ',en:'the salt'},
+ {nom:'الدَّرَّاجَةُ',acc:'الدَّرَّاجَةَ',gen:'الدَّرَّاجَةِ',en:'the bicycle'}
 ];
 const adjectives=[
  {nom:'مُجْتَهِدٌ',acc:'مُجْتَهِدًا',en:'hardworking'},
@@ -555,7 +585,17 @@ const adjectives=[
  {nom:'مُسْتَعِدٌّ',acc:'مُسْتَعِدًّا',en:'ready'},
  {nom:'مَحْبُوبٌ',acc:'مَحْبُوبًا',en:'well-liked'},
  {nom:'مُنَظَّمٌ',acc:'مُنَظَّمًا',en:'organized'},
- {nom:'قَوِيٌّ',acc:'قَوِيًّا',en:'strong'}
+ {nom:'قَوِيٌّ',acc:'قَوِيًّا',en:'strong'},
+ {nom:'عَادِلٌ',acc:'عَادِلًا',en:'fair'},
+ {nom:'كَسُولٌ',acc:'كَسُولًا',en:'lazy'},
+ {nom:'نَظِيفٌ',acc:'نَظِيفًا',en:'clean'},
+ {nom:'وَسِيمٌ',acc:'وَسِيمًا',en:'handsome'},
+ {nom:'طَوِيلٌ',acc:'طَوِيلًا',en:'tall'},
+ {nom:'قَصِيرٌ',acc:'قَصِيرًا',en:'short'},
+ {nom:'غَنِيٌّ',acc:'غَنِيًّا',en:'rich'},
+ {nom:'فَقِيرٌ',acc:'فَقِيرًا',en:'poor'},
+ {nom:'لَطِيفٌ',acc:'لَطِيفًا',en:'kind'},
+ {nom:'ذَكِيٌّ',acc:'ذَكِيًّا',en:'intelligent'}
 ];
 const places=[
  {nom:'الْمَسْجِدُ',acc:'الْمَسْجِدَ',gen:'الْمَسْجِدِ',en:'the mosque'},
@@ -581,7 +621,17 @@ const places=[
  {nom:'الْمَتْحَفُ',acc:'الْمَتْحَفَ',gen:'الْمَتْحَفِ',en:'the museum'},
  {nom:'الْمَسْرَحُ',acc:'الْمَسْرَحَ',gen:'الْمَسْرَحِ',en:'the theater'},
  {nom:'الْمَلْعَبُ',acc:'الْمَلْعَبَ',gen:'الْمَلْعَبِ',en:'the stadium'},
- {nom:'الْمُخْتَبَرُ',acc:'الْمُخْتَبَرَ',gen:'الْمُخْتَبَرِ',en:'the laboratory'}
+ {nom:'الْمُخْتَبَرُ',acc:'الْمُخْتَبَرَ',gen:'الْمُخْتَبَرِ',en:'the laboratory'},
+ {nom:'الْحَمَّامُ',acc:'الْحَمَّامَ',gen:'الْحَمَّامِ',en:'the bathroom'},
+ {nom:'الْمَخْبَزُ',acc:'الْمَخْبَزَ',gen:'الْمَخْبَزِ',en:'the bakery'},
+ {nom:'الصَّيْدَلِيَّةُ',acc:'الصَّيْدَلِيَّةَ',gen:'الصَّيْدَلِيَّةِ',en:'the pharmacy'},
+ {nom:'السَّاحَةُ',acc:'السَّاحَةَ',gen:'السَّاحَةِ',en:'the square'},
+ {nom:'الْحَيُّ',acc:'الْحَيَّ',gen:'الْحَيِّ',en:'the neighborhood'},
+ {nom:'الشَّارِعُ',acc:'الشَّارِعَ',gen:'الشَّارِعِ',en:'the street'},
+ {nom:'الْمَرْكَزُ',acc:'الْمَرْكَزَ',gen:'الْمَرْكَزِ',en:'the center'},
+ {nom:'الْمُخَيَّمُ',acc:'الْمُخَيَّمَ',gen:'الْمُخَيَّمِ',en:'the camp'},
+ {nom:'السِّجْنُ',acc:'السِّجْنَ',gen:'السِّجْنِ',en:'the prison'},
+ {nom:'الْقَصْرُ',acc:'الْقَصْرَ',gen:'الْقَصْرِ',en:'the palace'}
 ];
 const brokenHuman=[
  {nom:'الطُّلَّابُ',acc:'الطُّلَّابَ',gen:'الطُّلَّابِ',en:'the students'},
@@ -690,7 +740,7 @@ const verbs=[
 ];
 
 // Extra transitive verbs used by the general noun-first and verb-first templates.
-// These expand the app to 200 genuinely different verb families overall.
+// These expand the app to 219 genuinely different verb families overall.
 const additionalVerbActions=[
  {past:'أَغْلَقَ',pres:'يُغْلِقُ',en:'close',third:'closes',pastEn:'closed',group:'secure'},
  {past:'قَفَلَ',pres:'يَقْفِلُ',en:'lock',third:'locks',pastEn:'locked',group:'secure'},
@@ -849,6 +899,25 @@ const additionalVerbActions=[
  {past:'ذَاقَ',pres:'يَذُوقُ',en:'taste',third:'tastes',pastEn:'tasted',group:'food'},
  {past:'كَنَسَ',pres:'يَكْنُسُ',en:'sweep',third:'sweeps',pastEn:'swept',group:'floor'},
  {past:'لَمَّعَ',pres:'يُلَمِّعُ',en:'polish',third:'polishes',pastEn:'polished',group:'surface'},
+ {past:'خَاطَ',pres:'يَخِيطُ',en:'sew',third:'sews',pastEn:'sewed',group:'sewable'},
+ {past:'طَحَنَ',pres:'يَطْحَنُ',en:'grind',third:'grinds',pastEn:'ground',group:'grindable'},
+ {past:'قَشَّرَ',pres:'يُقَشِّرُ',en:'peel',third:'peels',pastEn:'peeled',group:'peelable'},
+ {past:'عَلَّقَ',pres:'يُعَلِّقُ',en:'hang',third:'hangs',pastEn:'hung',group:'hangable'},
+ {past:'ثَقَبَ',pres:'يَثْقُبُ',en:'drill',third:'drills',pastEn:'drilled',group:'drillable'},
+ {past:'طَرَقَ',pres:'يَطْرُقُ',en:'knock on',third:'knocks on',pastEn:'knocked on',group:'knockable'},
+ {past:'حَاكَ',pres:'يَحِيكُ',en:'weave',third:'weaves',pastEn:'wove',group:'weavable'},
+ {past:'دَهَنَ',pres:'يَدْهُنُ',en:'grease',third:'greases',pastEn:'greased',group:'greasable'},
+ {past:'نَشَّفَ',pres:'يُنَشِّفُ',en:'dry',third:'dries',pastEn:'dried',group:'dryable'},
+ {past:'رَشَّ',pres:'يَرُشُّ',en:'spray',third:'sprays',pastEn:'sprayed',group:'sprayable'},
+ {past:'عَصَرَ',pres:'يَعْصِرُ',en:'squeeze',third:'squeezes',pastEn:'squeezed',group:'squeezable'},
+ {past:'أَنَارَ',pres:'يُنِيرُ',en:'illuminate',third:'illuminates',pastEn:'illuminated',group:'illuminable'},
+ {past:'بَرَّدَ',pres:'يُبَرِّدُ',en:'cool',third:'cools',pastEn:'cooled',group:'liquid'},
+ {past:'سَخَّنَ',pres:'يُسَخِّنُ',en:'heat',third:'heats',pastEn:'heated',group:'food'},
+ {past:'قَصَّ',pres:'يَقُصُّ',en:'trim',third:'trims',pastEn:'trimmed',group:'trimmable'},
+ {past:'طَرَّزَ',pres:'يُطَرِّزُ',en:'embroider',third:'embroiders',pastEn:'embroidered',group:'sewable'},
+ {past:'لَحَمَ',pres:'يَلْحُمُ',en:'weld',third:'welds',pastEn:'welded',group:'weldable'},
+ {past:'أَذَابَ',pres:'يُذِيبُ',en:'melt',third:'melts',pastEn:'melted',group:'meltable'},
+ {past:'حَرَّكَ',pres:'يُحَرِّكُ',en:'stir',third:'stirs',pastEn:'stirred',group:'stirrable'},
 ];
 
 const humanActions=[
@@ -992,7 +1061,23 @@ const objectGroups={
  climbable:namedNouns(singularThings,['the wall','the roof']),
  crossable:namedNouns(places,['the market','the garden','the airport','the station','the farm','the stadium']),
  connectable:namedNouns(singularThings,['the rope','the phone','the computer','the machine','the tool']),
- broadcast:namedNouns(singularThings,['the news','the report','the program'])
+  broadcast:namedNouns(singularThings,['the news','the report','the program']),
+ sewable:namedNouns(singularThings,['the garment','the cloth']),
+ hangable:namedNouns(singularThings,['the picture','the garment','the map']),
+ knockable:namedNouns(singularThings,['the door','the window']),
+ greasable:namedNouns(singularThings,['the machine']),
+  dryable:namedNouns(singularThings,['the towel','the garment','the cloth']),
+ grindable:namedNouns(singularThings,['the coffee','the tea','the rice','the sugar']),
+ peelable:namedNouns(singularThings,['the fruit','the vegetables']),
+ weavable:namedNouns(singularThings,['the cloth']),
+ squeezable:namedNouns(singularThings,['the fruit','the vegetables']),
+ illuminable:namedNouns(singularThings,['the room']),
+ trimmable:namedNouns(singularThings,['the sheet of paper','the cloth','the garment','the rope']),
+ weldable:namedNouns(singularThings,['the metal']),
+ meltable:namedNouns(singularThings,['the sugar']),
+ sprayable:namedNouns(singularThings,['the water']),
+ stirrable:namedNouns(singularThings,['the food','the milk','the coffee','the tea']),
+ drillable:namedNouns(singularThings,['the wood','the metal'])
 };
 const generalVerbActions=[...verbs,...additionalVerbActions];
 

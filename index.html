@@ -102,18 +102,59 @@ button{font-weight:850;cursor:pointer}
 .footer{text-align:center;color:#7a817d;font-size:13px;line-height:1.5;margin:14px 0 4px}
 @media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.controls #newBtn{grid-column:1/-1}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}.history-head{align-items:flex-start}.definition-chapter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.definition-grid{grid-template-columns:1fr}}
 @media(max-width:460px){.controls{grid-template-columns:1fr}.definition-chapter-intro{align-items:flex-start;flex-direction:column;gap:3px}.definition-chapter-intro span{text-align:left}.definition-chapter-grid{grid-template-columns:1fr}.definition-chapter-button{min-height:82px}#sentence{font-size:36px}.iraab{font-size:19px}}
+/* ---- Language mode (presentation only) ---- */
+.ar-only{display:none}
+body.lang-arabic .ar-only{display:revert}
+body.lang-arabic .en-only{display:none}
+body.lang-arabic #translation{display:none}
+.langbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:9px 12px;background:rgba(255,253,248,.72);border:1px solid var(--line);border-radius:14px}
+.langbar-label{font-size:12px;font-weight:800;color:#58615c;text-transform:uppercase;letter-spacing:.06em}
+.langbar-seg{display:inline-flex;background:#efeadf;border:1px solid var(--line);border-radius:999px;padding:3px;gap:3px}
+.langbtn{width:auto;min-height:38px;padding:7px 15px;border:1px solid transparent;border-radius:999px;background:transparent;color:var(--green-dark);font-weight:800;font-size:14px}
+.langbtn:hover{background:rgba(31,101,75,.08)}
+.langbtn[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 4px 12px rgba(34,105,75,.18)}
+.langbtn[lang="ar"]{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:17px}
+/* ---- Definition expanders ---- */
+.definition-expanders{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px!important;padding-top:9px;border-top:1px solid #f0e9de}
+.def-expand{width:auto;min-height:36px;padding:6px 12px;background:#fff;color:var(--green-dark);border:1px solid #d6ecdd;border-radius:999px;font-weight:800;font-size:13px}
+.def-expand:hover{background:var(--green-soft);border-color:#a9cdb8}
+.def-expand[aria-expanded="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.definition-region{margin-top:9px!important;background:#f7fbf8;border:1px solid #dcebe1;border-radius:12px;padding:11px 12px}
+.definition-region[hidden]{display:none}
+.def-example{padding:8px 0}
+.def-example+.def-example{border-top:1px dashed #d8e6dc;margin-top:8px}
+.def-example-ar{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:20px;line-height:1.7;color:var(--green)}
+.def-example-en{color:var(--muted);font-size:13px;line-height:1.45;margin-top:2px}
+.def-example-focus{margin-top:5px;font-size:14px;color:#4f5c55}
+.def-example-focus .def-focus-word{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;color:var(--gold);font-weight:900;font-size:19px}
+.def-example-iraab{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:17px;line-height:1.75;color:#27332d;margin-top:4px}
+.def-example-iraab-en{color:var(--muted);font-size:13px;line-height:1.5;margin-top:3px}
+.def-example-note{margin-top:4px;font-size:13px;line-height:1.5;color:#6d675e}
+.def-example-note[lang="ar"]{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:15px}
+.definition-details-ar{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:17px;line-height:1.85;color:#27332d}
+.definition-details-en{margin-top:7px;color:#59625d;font-size:13.5px;line-height:1.6}
+@media(prefers-reduced-motion:no-preference){.def-expand,.langbtn{transition:background .15s ease,color .15s ease,border-color .15s ease}}
+@media(max-width:460px){.langbar{gap:8px}.langbar-seg{width:100%}.langbtn{flex:1}}
 </style>
 </head>
-<body>
+<body class="lang-mixed">
 <div class="wrap">
   <header>
     <h1>Nahw Iʿrāb Practice</h1>
-    <p class="subtitle">Generate varied Arabic sentences, make the full iʿrāb yourself, then reveal the iʿrāb of every word. No score is kept; sentence history stays on this device.</p>
+    <p id="subtitle" class="subtitle">Generate varied Arabic sentences, make the full iʿrāb yourself, then reveal the iʿrāb of every word. No score is kept; sentence history stays on this device.</p>
   </header>
+
+  <section class="langbar" aria-label="Language">
+    <span class="langbar-label"><span class="en-only">Language</span><span class="ar-only" lang="ar">اللُّغَةُ</span></span>
+    <div class="langbar-seg" role="group" aria-label="Choose language">
+      <button id="langMixed" type="button" class="langbtn" aria-pressed="true">Arabic + English</button>
+      <button id="langArabic" type="button" class="langbtn" lang="ar" aria-pressed="false">الْعَرَبِيَّةُ فَقَطْ</button>
+    </div>
+  </section>
 
   <section class="controls" aria-label="Practice filters">
     <div class="control">
-      <label for="startFilter">Sentence starts with</label>
+      <label id="startLabel" for="startFilter">Sentence starts with</label>
       <select id="startFilter">
         <option value="noun">اسم — Noun first</option>
         <option value="any" selected>Any beginning</option>
@@ -122,7 +163,7 @@ button{font-weight:850;cursor:pointer}
       </select>
     </div>
     <div class="control">
-      <label for="formFilter">Word form</label>
+      <label id="formLabel" for="formFilter">Word form</label>
       <select id="formFilter">
         <option value="any">All forms</option>
         <option value="singular">الِاسْمُ الْمُفْرَدُ</option>
@@ -136,7 +177,7 @@ button{font-weight:850;cursor:pointer}
       </select>
     </div>
     <div class="control">
-      <label for="stateFilter">Iʿrāb state</label>
+      <label id="stateLabel" for="stateFilter">Iʿrāb state</label>
       <select id="stateFilter">
         <option value="any">All states</option>
         <option value="raf">الرَّفْعُ</option>
@@ -146,7 +187,7 @@ button{font-weight:850;cursor:pointer}
       </select>
     </div>
     <div class="control">
-      <label for="signFilter">Iʿrāb sign</label>
+      <label id="signLabel" for="signFilter">Iʿrāb sign</label>
       <select id="signFilter">
         <option value="any">All signs</option>
         <option value="damma">الضَّمَّةُ الظَّاهِرَةُ</option>
@@ -165,16 +206,16 @@ button{font-weight:850;cursor:pointer}
   </section>
 
   <main class="practice">
-    <div class="eyebrow">Practice sentence</div>
+    <div id="practiceEyebrow" class="eyebrow">Practice sentence</div>
     <div id="sentence" lang="ar">الطَّالِبُ مُجْتَهِدٌ</div>
     <div id="translation">The student is hardworking.</div>
-    <div class="tip">Say the complete iʿrāb of <strong>every word</strong>. The gold card after revealing is the word that matches your selected form, state, and sign.</div>
+    <div id="practiceTip" class="tip">Say the complete iʿrāb of every word. The gold card after revealing is the word that matches your selected form, state, and sign.</div>
     <div class="actions">
       <button id="revealBtn" type="button">Reveal Full Iʿrāb</button>
       <button id="nextBtn" type="button">New Sentence</button>
     </div>
     <section id="answerPanel" aria-live="polite">
-      <h2 class="answer-title">Full Iʿrāb</h2>
+      <h2 id="answerTitle" class="answer-title">Full Iʿrāb</h2>
       <div id="answers" class="answers"></div>
     </section>
     <section class="history-wrap" aria-label="Generated sentence history">
@@ -182,8 +223,8 @@ button{font-weight:850;cursor:pointer}
       <div id="historyPanel" class="history-panel" role="region" aria-label="Generated sentences">
         <div class="history-head">
           <div>
-            <div class="history-title">Generated sentences</div>
-            <span class="history-note">Newest first. The most recent 100 are saved on this device.</span>
+            <div id="historyTitle" class="history-title">Generated sentences</div>
+            <span id="historyNote" class="history-note">Newest first. The most recent 100 are saved on this device.</span>
           </div>
           <button id="clearHistoryBtn" type="button">Clear history</button>
         </div>
@@ -196,13 +237,13 @@ button{font-weight:850;cursor:pointer}
       <div id="definitionsPanel" class="definitions-panel" role="region" aria-label="Arabic and English grammar definitions">
         <p class="definitions-intro">
           <span class="definitions-intro-ar" lang="ar">تَعْرِيفَاتٌ تَعْلِيمِيَّةٌ مُبَسَّطَةٌ مُسْتَفَادَةٌ مِنْ أَبْوَابِ «التُّحْفَةِ السَّنِيَّةِ بِشَرْحِ الْمُقَدِّمَةِ الْآجُرُّومِيَّةِ»، وَلَيْسَتْ نَقْلًا حَرْفِيًّا.</span>
-          Beginner-friendly paraphrases adapted from <a href="https://islamhouse.com/ar/books/334271" target="_blank" rel="noopener noreferrer">Al-Tuḥfah al-Saniyyah</a>, not verbatim quotations.
+          <span class="en-only">Beginner-friendly paraphrases adapted from <a href="https://islamhouse.com/ar/books/334271" target="_blank" rel="noopener noreferrer">Al-Tuḥfah al-Saniyyah</a>, not verbatim quotations.</span>
         </p>
         <div id="definitionsList" class="definition-groups" tabindex="0" aria-live="polite"></div>
       </div>
     </section>
     <div id="status" class="status"></div>
-    <div class="footer">Practice draws from 219 verb families and 240 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</div>
+    <div class="footer"><span class="en-only">Practice draws from 219 verb families and 240 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</span><span class="ar-only" lang="ar">يَعْتَمِدُ التَّدْرِيبُ عَلَى ٢١٩ أُسْرَةً فِعْلِيَّةً وَ٢٤٠ اسْمًا. وَكُلُّ اخْتِيَارٍ مُتَوَافِقٍ يُخْتَارُ عَشْوَائِيًّا مَعَ تَجَنُّبِ التَّكْرَارِ الْقَرِيبِ.</span></div>
   </main>
 </div>
 
@@ -224,6 +265,86 @@ const chance=()=>randomInt(2)===0;
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 const esc=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
+/* ===== Language mode (presentation only — never touches grammar/generation) ===== */
+const LANGUAGE_KEY='nahw-language-mode-v1';
+function loadLanguageMode(){try{return globalThis.localStorage?.getItem(LANGUAGE_KEY)==='arabic'?'arabic':'mixed'}catch{return 'mixed'}}
+let languageMode=loadLanguageMode();
+function saveLanguageMode(){try{globalThis.localStorage?.setItem(LANGUAGE_KEY,languageMode)}catch{}}
+const UI_TEXT={
+ mixed:{
+  subtitle:'Generate varied Arabic sentences, make the full iʿrāb yourself, then reveal the iʿrāb of every word. No score is kept; sentence history stays on this device.',
+  langLabel:'Language',
+  tip:'Say the complete iʿrāb of every word. The gold card after revealing is the word that matches your selected form, state, and sign.',
+  eyebrow:'Practice sentence',
+  answerTitle:'Full Iʿrāb',
+  reveal:'Reveal Full Iʿrāb',hide:'Hide Iʿrāb',next:'New Sentence',reset:'Reset filters',
+  startLabel:'Sentence starts with',formLabel:'Word form',stateLabel:'Iʿrāb state',signLabel:'Iʿrāb sign',
+  historyTitle:'Generated sentences',historyNote:'Newest first. The most recent 100 are saved on this device.',
+  historyEmpty:'No sentences generated yet.',clearHistory:'Clear history',
+  historyToggle:n=>`Sentence history (${n})`,
+  definitionsToggle:n=>`Simple grammar definitions (${n})`,
+  chapterChoose:'Choose a grammar chapter',chapterHint:'Select a chapter to see all of its terms and definitions.',
+  chapterEmpty:'Choose a chapter above to begin.',
+  start:{any:'Any beginning',noun:'اسم — Noun first',verb:'فعل — Verb first',particle:'حرف — Particle first'},
+  anyForm:'All forms',anyState:'All states',anySign:'All signs'
+ },
+ arabic:{
+  subtitle:'وَلِّدْ جُمَلًا عَرَبِيَّةً مُتَنَوِّعَةً، وَأَعْرِبْ كُلَّ كَلِمَةٍ بِنَفْسِكَ، ثُمَّ أَظْهِرِ الْإِعْرَابَ الْكَامِلَ. لَا تُحْفَظُ دَرَجَةٌ، وَسِجِلُّ الْجُمَلِ يَبْقَى عَلَى هَذَا الْجِهَازِ.',
+  langLabel:'اللُّغَةُ',
+  tip:'أَعْرِبْ كُلَّ كَلِمَةٍ إِعْرَابًا كَامِلًا. الْبِطَاقَةُ الذَّهَبِيَّةُ بَعْدَ الْإِظْهَارِ هِيَ الْكَلِمَةُ الْمُطَابِقَةُ لِلصِّيغَةِ وَالْحَالَةِ وَالْعَلَامَةِ الْمُخْتَارَةِ.',
+  eyebrow:'جُمْلَةُ التَّدْرِيبِ',
+  answerTitle:'الْإِعْرَابُ الْكَامِلُ',
+  reveal:'أَظْهِرِ الْإِعْرَابَ الْكَامِلَ',hide:'أَخْفِ الْإِعْرَابَ',next:'جُمْلَةٌ جَدِيدَةٌ',reset:'إِعَادَةُ ضَبْطِ الْخِيَارَاتِ',
+  startLabel:'بِدَايَةُ الْجُمْلَةِ',formLabel:'صِيغَةُ الْكَلِمَةِ',stateLabel:'حَالَةُ الْإِعْرَابِ',signLabel:'عَلَامَةُ الْإِعْرَابِ',
+  historyTitle:'الْجُمَلُ الْمُوَلَّدَةُ',historyNote:'الْأَحْدَثُ أَوَّلًا. تُحْفَظُ آخِرُ مِئَةِ جُمْلَةٍ عَلَى هَذَا الْجِهَازِ.',
+  historyEmpty:'لَمْ تُوَلَّدْ أَيُّ جُمْلَةٍ بَعْدُ.',clearHistory:'مَسْحُ السِّجِلِّ',
+  historyToggle:n=>`سِجِلُّ الْجُمَلِ (${n})`,
+  definitionsToggle:n=>`تَعْرِيفَاتٌ نَحْوِيَّةٌ مُبَسَّطَةٌ (${n})`,
+  chapterChoose:'اِخْتَرْ بَابًا نَحْوِيًّا',chapterHint:'اِخْتَرْ بَابًا لِتَرَى كُلَّ مُصْطَلَحَاتِهِ وَتَعْرِيفَاتِهَا.',
+  chapterEmpty:'اِخْتَرْ بَابًا مِنَ الْأَعْلَى لِتَبْدَأَ.',
+  start:{any:'أَيُّ بِدَايَةٍ',noun:'يَبْدَأُ بِاسْمٍ',verb:'يَبْدَأُ بِفِعْلٍ',particle:'يَبْدَأُ بِحَرْفٍ'},
+  anyForm:'جَمِيعُ الصِّيَغِ',anyState:'جَمِيعُ الْحَالَاتِ',anySign:'جَمِيعُ الْعَلَامَاتِ'
+ }
+};
+function t(key){return UI_TEXT[languageMode][key]}
+function revealButtonLabel(){return byId('answerPanel').classList.contains('open')?t('hide'):t('reveal')}
+function setOptionLabel(selectId,value,text){
+ const option=Array.from(byId(selectId).options).find(o=>o.value===value);
+ if(option)option.textContent=text;
+}
+function applyLanguageMode(){
+ document.body.classList.toggle('lang-arabic',languageMode==='arabic');
+ document.body.classList.toggle('lang-mixed',languageMode!=='arabic');
+ byId('langMixed').setAttribute('aria-pressed',String(languageMode!=='arabic'));
+ byId('langArabic').setAttribute('aria-pressed',String(languageMode==='arabic'));
+ byId('subtitle').textContent=t('subtitle');
+ byId('practiceTip').textContent=t('tip');
+ byId('practiceEyebrow').textContent=t('eyebrow');
+ byId('answerTitle').textContent=t('answerTitle');
+ byId('startLabel').textContent=t('startLabel');
+ byId('formLabel').textContent=t('formLabel');
+ byId('stateLabel').textContent=t('stateLabel');
+ byId('signLabel').textContent=t('signLabel');
+ byId('newBtn').textContent=t('reset');
+ byId('nextBtn').textContent=t('next');
+ byId('revealBtn').textContent=revealButtonLabel();
+ const s=t('start');
+ setOptionLabel('startFilter','any',s.any);setOptionLabel('startFilter','noun',s.noun);
+ setOptionLabel('startFilter','verb',s.verb);setOptionLabel('startFilter','particle',s.particle);
+ setOptionLabel('formFilter','any',t('anyForm'));
+ setOptionLabel('stateFilter','any',t('anyState'));
+ setOptionLabel('signFilter','any',t('anySign'));
+ renderSentenceHistory();
+ byId('definitionsToggle').textContent=t('definitionsToggle')(grammarDefinitionCount());
+}
+function setLanguageMode(mode){
+ const next=mode==='arabic'?'arabic':'mixed';
+ if(next===languageMode){applyLanguageMode();return}
+ languageMode=next;
+ saveLanguageMode();
+ applyLanguageMode();
+}
+
 const SENTENCE_HISTORY_KEY='nahw-sentence-history-v1';
 const SENTENCE_HISTORY_LIMIT=100;
 function loadSentenceHistory(){
@@ -240,8 +361,12 @@ function saveSentenceHistory(){
 }
 function renderSentenceHistory(){
  const hasHistory=sentenceHistory.length>0;
- byId('historyToggle').textContent=`Sentence history (${sentenceHistory.length})`;
- byId('historyList').innerHTML=sentenceHistory.map(item=>`<li class="history-item"><div class="history-ar" lang="ar">${esc(item.sentence)}</div><div class="history-en">${esc(item.translation)}</div></li>`).join('');
+ byId('historyToggle').textContent=t('historyToggle')(sentenceHistory.length);
+ byId('historyTitle').textContent=t('historyTitle');
+ byId('historyNote').textContent=t('historyNote');
+ byId('historyEmpty').textContent=t('historyEmpty');
+ byId('clearHistoryBtn').textContent=t('clearHistory');
+ byId('historyList').innerHTML=sentenceHistory.map(item=>`<li class="history-item"><div class="history-ar" lang="ar">${esc(item.sentence)}</div><div class="history-en en-only">${esc(item.translation)}</div></li>`).join('');
  byId('historyList').hidden=!hasHistory;
  byId('historyEmpty').hidden=hasHistory;
  byId('clearHistoryBtn').disabled=!hasHistory;
@@ -290,7 +415,7 @@ const grammarDefinitionGroups=[
   {arTerm:'الْإِعْرَابُ',enTerm:'Iʿrāb',ar:'تَغَيُّرُ حَالِ آخِرِ الْكَلِمَةِ بِسَبَبِ تَغَيُّرِ الْعَامِلِ الدَّاخِلِ عَلَيْهَا.',en:'The change at the end of a word caused by a change in what governs it.'},
   {arTerm:'الْمُعْرَبُ',enTerm:'Inflected word',ar:'كَلِمَةٌ يَتَغَيَّرُ حَالُ آخِرِهَا بِتَغَيُّرِ مَوْقِعِهَا أَوِ الْعَامِلِ فِيهَا.',en:'A word whose ending changes when its role or governing word changes.'},
   {arTerm:'الْبِنَاءُ',enTerm:'Fixed form (bināʾ)',ar:'لُزُومُ آخِرِ الْكَلِمَةِ حَالَةً وَاحِدَةً لِغَيْرِ عَامِلٍ.',en:'The ending of a word staying fixed for a reason other than any governing word.'},
-  {arTerm:'عَلَامَةُ الْإِعْرَابِ',enTerm:'Iʿrāb sign',ar:'الْحَرَكَةُ أَوِ الْحَرْفُ الَّذِي يُبَيِّنُ حَالَةَ الْكَلِمَةِ.',en:'The vowel or letter that shows a word’s grammatical state.'},
+  {arTerm:'عَلَامَةُ الْإِعْرَابِ',enTerm:'Iʿrāb sign',ar:'عَلَامَةُ الْإِعْرَابِ هِيَ مَا يَدُلُّ عَلَى حَالَةِ الْكَلِمَةِ مِنْ حَرَكَةٍ أَوْ حَرْفٍ أَوْ ثُبُوتٍ أَوْ حَذْفٍ.',en:'The iʿrāb sign is what indicates a word’s grammatical state, whether it is a vowel, a letter, retention, or deletion.'},
   {arTerm:'الرَّفْعُ',enTerm:'Nominative (rafʿ)',ar:'حَالَةٌ إِعْرَابِيَّةٌ عَلَامَتُهَا الْأَصْلِيَّةُ الضَّمَّةُ.',en:'An iʿrāb state whose original sign is the ḍammah.'},
   {arTerm:'النَّصْبُ',enTerm:'Accusative (naṣb)',ar:'حَالَةٌ إِعْرَابِيَّةٌ عَلَامَتُهَا الْأَصْلِيَّةُ الْفَتْحَةُ.',en:'An iʿrāb state whose original sign is the fatḥah.'},
   {arTerm:'الْخَفْضُ',enTerm:'Genitive (khafḍ)',ar:'حَالَةٌ إِعْرَابِيَّةٌ فِي الْأَسْمَاءِ، وَعَلَامَتُهَا الْأَصْلِيَّةُ الْكَسْرَةُ.',en:'An iʿrāb state for nouns whose original sign is the kasrah.'},
@@ -400,17 +525,557 @@ grammarDefinitionGroups.forEach(group=>group.items.forEach(item=>{
  if(!pages)throw new Error(`Definition “${item.arTerm}” has no Al-Tuḥfah source page.`);
  item.source=Object.freeze({book:'Al-Tuḥfah al-Saniyyah bi-Sharḥ al-Muqaddimah al-Ājurrūmiyyah',pdfPages:pages});
 }));
+const definitionEnrichment=[
+// ---------- Group 0: Foundations of speech ----------
+{term:'Complete speech (al-kalām)',
+ examples:[
+  {ar:'زَيْدٌ مُجْتَهِدٌ',en:'Zayd is hardworking.',focus:'زَيْدٌ مُجْتَهِدٌ',iraabAr:'كَلَامٌ تَامٌّ؛ لِأَنَّهُ أَفَادَ مَعْنًى يَحْسُنُ السُّكُوتُ عَلَيْهِ.',iraabEn:'Complete speech: the two words together give a full, self-standing meaning.'},
+  {ar:'إِنْ قَامَ زَيْدٌ',en:'If Zayd stood…',focus:'إِنْ قَامَ زَيْدٌ',iraabAr:'لَيْسَ كَلَامًا تَامًّا؛ لِأَنَّ السَّامِعَ يَنْتَظِرُ تَمَامَ الْفَائِدَةِ.',iraabEn:'Not complete speech: the listener is still waiting for the rest.'}
+ ],
+ detailsAr:'الْكَلَامُ عِنْدَ النُّحَاةِ هُوَ اللَّفْظُ الْمُرَكَّبُ الْمُفِيدُ بِالْوَضْعِ. فَلَا بُدَّ أَنْ يَكُونَ لَفْظًا مَسْمُوعًا، مُرَكَّبًا مِنْ كَلِمَتَيْنِ فَأَكْثَرَ، مُفِيدًا فَائِدَةً يَحْسُنُ السُّكُوتُ عَلَيْهَا.',
+ detailsEn:'For the grammarians, kalām is a spoken, composed expression that conveys a complete benefit. It must be audible, made of two or more words, and give a meaning the listener can rest upon.'},
+
+{term:'Word (kalimah)',
+ examples:[
+  {ar:'كِتَابٌ',en:'a book (a noun)',focus:'كِتَابٌ',iraabAr:'كَلِمَةٌ وَاحِدَةٌ، وَهِيَ اسْمٌ.',iraabEn:'A single word — here a noun.'},
+  {ar:'كَتَبَ',en:'he wrote (a verb)',focus:'كَتَبَ',iraabAr:'كَلِمَةٌ وَاحِدَةٌ، وَهِيَ فِعْلٌ.',iraabEn:'A single word — here a verb.'},
+  {ar:'فِي',en:'in (a particle)',focus:'فِي',iraabAr:'كَلِمَةٌ وَاحِدَةٌ، وَهِيَ حَرْفٌ.',iraabEn:'A single word — here a particle.'}
+ ],
+ detailsAr:'الْكَلِمَةُ لَفْظٌ مُفْرَدٌ لَهُ مَعْنًى، وَأَقْسَامُهَا ثَلَاثَةٌ لَا رَابِعَ لَهَا: اسْمٌ، وَفِعْلٌ، وَحَرْفٌ.',
+ detailsEn:'A kalimah is a single meaningful word. It is one of exactly three kinds: a noun (ism), a verb (fiʿl), or a particle (ḥarf).'},
+
+{term:'Noun (ism)',
+ examples:[
+  {ar:'زَيْدٌ',en:'Zayd (a name)',focus:'زَيْدٌ',iraabAr:'اسْمٌ يَدُلُّ عَلَى مُسَمًّى مِنْ غَيْرِ اقْتِرَانٍ بِزَمَنٍ.',iraabEn:'A noun: it names something without being tied to a time.'},
+  {ar:'الْكِتَابُ',en:'the book',focus:'الْكِتَابُ',iraabAr:'اسْمٌ؛ لِقَبُولِهِ «أَلْ» وَدَلَالَتِهِ عَلَى ذَاتٍ.',iraabEn:'A noun: it accepts al- and names a thing.'}
+ ],
+ detailsAr:'الِاسْمُ يُعْرَفُ بِعَلَامَاتٍ، مِنْهَا: قَبُولُ «أَلْ»، وَدُخُولُ حَرْفِ الْخَفْضِ عَلَيْهِ، وَالتَّنْوِينُ، وَالنِّدَاءُ. وَهُوَ لَا يَدُلُّ عَلَى زَمَنٍ.',
+ detailsEn:'A noun is recognized by signs such as accepting al-, being preceded by a preposition, taking tanwīn, or being called upon. Unlike a verb, it carries no tense.'},
+
+{term:'Verb (fiʿl)',
+ examples:[
+  {ar:'كَتَبَ',en:'he wrote (past)',focus:'كَتَبَ',iraabAr:'فِعْلٌ مَاضٍ يَدُلُّ عَلَى حَدَثٍ وَزَمَنٍ مَضَى.',iraabEn:'A past-tense verb: an event with a past time.'},
+  {ar:'يَكْتُبُ',en:'he writes (present)',focus:'يَكْتُبُ',iraabAr:'فِعْلٌ مُضَارِعٌ يَدُلُّ عَلَى حَدَثٍ وَزَمَنٍ حَاضِرٍ أَوْ مُسْتَقْبَلٍ.',iraabEn:'A present-tense verb: an event now or later.'}
+ ],
+ detailsAr:'الْفِعْلُ كَلِمَةٌ تَدُلُّ عَلَى حَدَثٍ مُقْتَرِنٍ بِزَمَنٍ. وَأَزْمِنَتُهُ ثَلَاثَةٌ: الْمَاضِي، وَالْحَاضِرُ، وَالْمُسْتَقْبَلُ.',
+ detailsEn:'A verb names an event tied to a time. Its times are three: past, present, and future.'},
+
+{term:'Past-tense verb',
+ examples:[
+  {ar:'كَتَبَ زَيْدٌ الدَّرْسَ',en:'Zayd wrote the lesson.',focus:'كَتَبَ',iraabAr:'فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.',iraabEn:'A past-tense verb, fixed on fatḥah.'}
+ ],
+ detailsAr:'الْفِعْلُ الْمَاضِي يَدُلُّ عَلَى حَدَثٍ وَقَعَ قَبْلَ زَمَنِ التَّكَلُّمِ، وَهُوَ مَبْنِيٌّ دَائِمًا، وَأَصْلُ بِنَائِهِ عَلَى الْفَتْحِ.',
+ detailsEn:'The past verb denotes an action before the moment of speaking. It is always mabnī (fixed), and its basic build is on fatḥah.'},
+
+{term:'Deficient past-tense verb',
+ examples:[
+  {ar:'كَانَ الطَّالِبُ مُجْتَهِدًا',en:'The student was hardworking.',focus:'كَانَ',iraabAr:'فِعْلٌ مَاضٍ نَاقِصٌ، رَفَعَ الِاسْمَ «الطَّالِبُ» وَنَصَبَ الْخَبَرَ «مُجْتَهِدًا».',iraabEn:'A deficient past verb: it raised its noun (al-ṭālib) and made its khabar accusative (mujtahidan).'}
+ ],
+ detailsAr:'كَانَ وَأَخَوَاتُهَا أَفْعَالٌ نَاقِصَةٌ تَدْخُلُ عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَتَرْفَعُ الْمُبْتَدَأَ وَيُسَمَّى اسْمَهَا، وَتَنْصِبُ الْخَبَرَ وَيُسَمَّى خَبَرَهَا.',
+ detailsEn:'Kāna and its sisters are “deficient” verbs that enter a nominal sentence: they keep the former mubtadaʾ nominative (their ism) and make the khabar accusative (their khabar).'},
+
+{term:'Present-tense verb',
+ examples:[
+  {ar:'يَكْتُبُ زَيْدٌ الدَّرْسَ',en:'Zayd writes the lesson.',focus:'يَكْتُبُ',iraabAr:'فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'A present-tense verb, nominative, its sign the visible ḍammah.'}
+ ],
+ detailsAr:'الْفِعْلُ الْمُضَارِعُ يَبْدَأُ بِأَحَدِ حُرُوفِ (أَنَيْتُ)، وَيَكُونُ مَرْفُوعًا مَا لَمْ يَدْخُلْ عَلَيْهِ نَاصِبٌ أَوْ جَازِمٌ. وَهُوَ مُعْرَبٌ فِي الْأَصْلِ.',
+ detailsEn:'A present verb begins with one of the letters of (a-n-y-t). It is nominative unless a naṣb- or jazm-particle governs it, and it is inflected (muʿrab) by default.'},
+
+{term:'Particle (ḥarf)',
+ examples:[
+  {ar:'الْكِتَابُ فِي الْبَيْتِ',en:'The book is in the house.',focus:'فِي',iraabAr:'حَرْفُ خَفْضٍ مَبْنِيٌّ، لَا يَظْهَرُ مَعْنَاهُ إِلَّا مَعَ غَيْرِهِ.',iraabEn:'A preposition (fixed word); its meaning appears only together with another word.'},
+  {ar:'ذَهَبَ مِنَ الْبَيْتِ',en:'He went from the house.',focus:'مِنْ',iraabAr:'حَرْفُ خَفْضٍ يَدُلُّ عَلَى الِابْتِدَاءِ.',iraabEn:'A preposition indicating starting-point.'}
+ ],
+ detailsAr:'الْحَرْفُ كَلِمَةٌ لَا يَظْهَرُ مَعْنَاهَا كَامِلًا إِلَّا مَعَ غَيْرِهَا، وَلَا تَقْبَلُ عَلَامَاتِ الِاسْمِ وَلَا عَلَامَاتِ الْفِعْلِ. وَالْحُرُوفُ كُلُّهَا مَبْنِيَّةٌ.',
+ detailsEn:'A particle’s full meaning shows only with another word; it accepts neither the signs of nouns nor those of verbs. All particles are mabnī (fixed).'},
+
+{term:'Nominal sentence',
+ examples:[
+  {ar:'الطَّالِبُ مُجْتَهِدٌ',en:'The student is hardworking.',focus:'الطَّالِبُ',iraabAr:'مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَخَبَرُهُ «مُجْتَهِدٌ».',iraabEn:'A nominal sentence beginning with a mubtadaʾ (nominative) followed by its khabar.'}
+ ],
+ detailsAr:'الْجُمْلَةُ الِاسْمِيَّةُ تَبْدَأُ فِي أَصْلِهَا بِاسْمٍ، وَتَتَكَوَّنُ مِنْ مُبْتَدَأٍ وَخَبَرٍ، وَكِلَاهُمَا مَرْفُوعٌ فِي الْأَصْلِ.',
+ detailsEn:'A nominal sentence begins (originally) with a noun and is made of a mubtadaʾ and a khabar, both nominative by default.'},
+
+{term:'Verbal sentence',
+ examples:[
+  {ar:'كَتَبَ زَيْدٌ الدَّرْسَ',en:'Zayd wrote the lesson.',focus:'كَتَبَ زَيْدٌ',iraabAr:'جُمْلَةٌ فِعْلِيَّةٌ: فِعْلٌ «كَتَبَ» وَفَاعِلٌ «زَيْدٌ»، ثُمَّ مَفْعُولٌ بِهِ «الدَّرْسَ».',iraabEn:'A verbal sentence: verb (kataba) + subject (Zayd), then object (al-dars).'}
+ ],
+ detailsAr:'الْجُمْلَةُ الْفِعْلِيَّةُ تَبْدَأُ بِفِعْلٍ، وَتَتَكَوَّنُ مِنْ فِعْلٍ وَفَاعِلٍ، وَقَدْ يَأْتِي بَعْدَهُمَا مَفْعُولٌ بِهِ أَوْ أَكْثَرُ.',
+ detailsEn:'A verbal sentence begins with a verb and is made of a verb and its subject, sometimes followed by one or more objects.'},
+
+// ---------- Group 1: Word forms ----------
+{term:'Singular noun',
+ examples:[
+  {ar:'جَاءَ الطَّالِبُ',en:'The student came.',focus:'الطَّالِبُ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ؛ لِأَنَّهُ اسْمٌ مُفْرَدٌ.',iraabEn:'A subject, nominative by the visible ḍammah, because it is a singular noun.'}
+ ],
+ detailsAr:'الِاسْمُ الْمُفْرَدُ مَا دَلَّ عَلَى وَاحِدٍ، وَتُعْرَبُ حَالَاتُهُ بِالْحَرَكَاتِ الظَّاهِرَةِ: الضَّمَّةُ رَفْعًا، وَالْفَتْحَةُ نَصْبًا، وَالْكَسْرَةُ خَفْضًا.',
+ detailsEn:'A singular noun denotes one. Its states use visible short vowels: ḍammah for rafʿ, fatḥah for naṣb, kasrah for khafḍ.'},
+
+{term:'Broken plural',
+ examples:[
+  {ar:'حَضَرَ الرِّجَالُ',en:'The men came.',focus:'الرِّجَالُ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ؛ وَهُوَ جَمْعُ تَكْسِيرٍ.',iraabEn:'A subject, nominative by the visible ḍammah; it is a broken plural.'}
+ ],
+ detailsAr:'جَمْعُ التَّكْسِيرِ يَتَغَيَّرُ فِيهِ بِنَاءُ مُفْرَدِهِ، وَيُعْرَبُ بِالْحَرَكَاتِ الظَّاهِرَةِ كَالِاسْمِ الْمُفْرَدِ إِذَا كَانَ مُنْصَرِفًا.',
+ detailsEn:'A broken plural changes its singular’s internal shape. When fully declinable it inflects with visible short vowels, like a singular noun.'},
+
+{term:'Dual',
+ examples:[
+  {ar:'جَاءَ الْمُعَلِّمَانِ',en:'The two teachers came.',focus:'الْمُعَلِّمَانِ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.',iraabEn:'Subject, nominative; its sign is the alif because it is dual.'},
+  {ar:'رَأَيْتُ الْمُعَلِّمَيْنِ',en:'I saw the two teachers.',focus:'الْمُعَلِّمَيْنِ',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.',iraabEn:'Object, accusative; its sign is the yāʾ because it is dual.'}
+ ],
+ detailsAr:'الْمُثَنَّى يُرْفَعُ بِالْأَلِفِ، وَيُنْصَبُ وَيُخْفَضُ بِالْيَاءِ. فَالْأَلِفُ عَلَامَةُ رَفْعِهِ، وَالْيَاءُ عَلَامَةُ نَصْبِهِ وَخَفْضِهِ.',
+ detailsEn:'The dual is raised with alif and made accusative or genitive with yāʾ. So alif marks its rafʿ, and yāʾ marks both its naṣb and its khafḍ.'},
+
+{term:'Sound masculine plural',
+ examples:[
+  {ar:'فَازَ الْمُسْلِمُونَ',en:'The Muslims won.',focus:'الْمُسْلِمُونَ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.',iraabEn:'Subject, nominative; its sign is the wāw because it is a sound masculine plural.'},
+  {ar:'رَأَيْتُ الْمُسْلِمِينَ',en:'I saw the Muslims.',focus:'الْمُسْلِمِينَ',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.',iraabEn:'Object, accusative; its sign is the yāʾ because it is a sound masculine plural.'}
+ ],
+ detailsAr:'جَمْعُ الْمُذَكَّرِ السَّالِمِ يُرْفَعُ بِالْوَاوِ، وَيُنْصَبُ وَيُخْفَضُ بِالْيَاءِ، مَعَ سَلَامَةِ بِنَاءِ مُفْرَدِهِ.',
+ detailsEn:'The sound masculine plural is raised with wāw and made accusative or genitive with yāʾ, while its singular shape stays intact.'},
+
+{term:'Sound feminine plural',
+ examples:[
+  {ar:'جَاءَتِ الْمُسْلِمَاتُ',en:'The Muslim women came.',focus:'الْمُسْلِمَاتُ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ.',iraabEn:'Subject, nominative by the visible ḍammah; a sound feminine plural.'},
+  {ar:'رَأَيْتُ الْمُسْلِمَاتِ',en:'I saw the Muslim women.',focus:'الْمُسْلِمَاتِ',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ.',iraabEn:'Object, accusative; its sign is kasrah standing in for fatḥah, because it is a sound feminine plural.'}
+ ],
+ detailsAr:'جَمْعُ الْمُؤَنَّثِ السَّالِمِ يُرْفَعُ بِالضَّمَّةِ، وَيُخْفَضُ بِالْكَسْرَةِ، وَيُنْصَبُ بِالْكَسْرَةِ نِيَابَةً عَنِ الْفَتْحَةِ. وَهَذِهِ نُقْطَةٌ مُهِمَّةٌ لِلْمُبْتَدِئِ.',
+ detailsEn:'The sound feminine plural is raised with ḍammah and made genitive with kasrah, and in the accusative it takes kasrah in place of fatḥah — an important point for beginners.'},
+
+{term:'The five nouns',
+ examples:[
+  {ar:'جَاءَ أَبُوكَ',en:'Your father came.',focus:'أَبُوكَ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْوَاوُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ.',iraabEn:'Subject, nominative; its sign is wāw because it is one of the five nouns.'},
+  {ar:'رَأَيْتُ أَبَاكَ',en:'I saw your father.',focus:'أَبَاكَ',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْأَلِفُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ.',iraabEn:'Object, accusative; its sign is alif because it is one of the five nouns.'},
+  {ar:'سَلَّمْتُ عَلَى أَبِيكَ',en:'I greeted your father.',focus:'أَبِيكَ',iraabAr:'اسْمٌ مَخْفُوضٌ، وَعَلَامَةُ خَفْضِهِ الْيَاءُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ.',iraabEn:'A genitive noun; its sign is yāʾ because it is one of the five nouns.'}
+ ],
+ detailsAr:'الْأَسْمَاءُ الْخَمْسَةُ: أَبُوكَ، وَأَخُوكَ، وَحَمُوكَ، وَفُوكَ، وَذُو مَالٍ. تُرْفَعُ بِالْوَاوِ، وَتُنْصَبُ بِالْأَلِفِ، وَتُخْفَضُ بِالْيَاءِ، بِشُرُوطٍ مِنْهَا الْإِفْرَادُ وَالْإِضَافَةُ لِغَيْرِ يَاءِ الْمُتَكَلِّمِ.',
+ detailsEn:'The five nouns (abūka, akhūka, ḥamūka, fūka, dhū māl) take wāw for rafʿ, alif for naṣb, and yāʾ for khafḍ — under conditions such as being singular and joined to something other than the speaker’s yāʾ.'},
+
+{term:'Unattached present verb',
+ examples:[
+  {ar:'يَكْتُبُ الطَّالِبُ',en:'The student writes.',focus:'يَكْتُبُ',iraabAr:'فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ؛ لِأَنَّهُ لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ.',iraabEn:'A present verb, nominative by the visible ḍammah, because nothing is attached to its end.'}
+ ],
+ detailsAr:'الْمُضَارِعُ الصَّحِيحُ الْآخِرِ الَّذِي لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ يُرْفَعُ بِالضَّمَّةِ الظَّاهِرَةِ، وَيُنْصَبُ بِالْفَتْحَةِ الظَّاهِرَةِ، وَيُجْزَمُ بِالسُّكُونِ الظَّاهِرِ. فَإِنْ كَانَ مُعْتَلَّ الْآخِرِ فَلَهُ أَحْكَامٌ أُخْرَى.',
+ detailsEn:'A sound-ended present verb (ṣaḥīḥ al-ākhir) with nothing attached to its end takes a visible ḍammah for rafʿ, a visible fatḥah for naṣb, and a visible sukūn for jazm. A weak-ended verb follows other rulings.'},
+
+{term:'The five verbs',
+ examples:[
+  {ar:'الطُّلَّابُ يَكْتُبُونَ',en:'The students write.',focus:'يَكْتُبُونَ',iraabAr:'فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ ثُبُوتُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.',iraabEn:'A present verb, nominative; its sign is keeping the nūn, as one of the five verbs.'},
+  {ar:'لَنْ يَكْتُبُوا',en:'They will not write.',focus:'يَكْتُبُوا',iraabAr:'فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِـ«لَنْ»، وَعَلَامَةُ نَصْبِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.',iraabEn:'Accusative by lan; its sign is dropping the nūn, as one of the five verbs.'},
+  {ar:'لَمْ يَكْتُبُوا',en:'They did not write.',focus:'يَكْتُبُوا',iraabAr:'فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَمْ»، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.',iraabEn:'Jussive by lam; its sign is dropping the nūn, as one of the five verbs.'}
+ ],
+ detailsAr:'الْأَفْعَالُ الْخَمْسَةُ كُلُّ مُضَارِعٍ اتَّصَلَتْ بِهِ أَلِفُ الِاثْنَيْنِ أَوْ وَاوُ الْجَمَاعَةِ أَوْ يَاءُ الْمُخَاطَبَةِ. تُرْفَعُ بِثُبُوتِ النُّونِ، وَتُنْصَبُ وَتُجْزَمُ بِحَذْفِهَا.',
+ detailsEn:'The five verbs are any present verb joined to the dual alif, the plural wāw, or the feminine-address yāʾ. They are raised by keeping the nūn and made accusative or jussive by dropping it.'},
+
+// ---------- Group 2: Iʿrāb states and signs ----------
+{term:'Iʿrāb',
+ examples:[
+  {ar:'جَاءَ زَيْدٌ — رَأَيْتُ زَيْدًا — مَرَرْتُ بِزَيْدٍ',en:'Zayd came — I saw Zayd — I passed by Zayd.',focus:'زَيْدٌ',iraabAr:'تَغَيَّرَ آخِرُ «زَيْدٍ» بَيْنَ الرَّفْعِ وَالنَّصْبِ وَالْخَفْضِ بِتَغَيُّرِ الْعَامِلِ؛ وَهَذَا هُوَ الْإِعْرَابُ.',iraabEn:'The ending of “Zayd” changes across rafʿ, naṣb, and khafḍ as its governor changes — that change is iʿrāb.'}
+ ],
+ detailsAr:'الْإِعْرَابُ تَغْيِيرُ أَوَاخِرِ الْكَلِمِ لِاخْتِلَافِ الْعَوَامِلِ الدَّاخِلَةِ عَلَيْهَا، لَفْظًا أَوْ تَقْدِيرًا. وَأَقْسَامُهُ: رَفْعٌ، وَنَصْبٌ، وَخَفْضٌ، وَجَزْمٌ.',
+ detailsEn:'Iʿrāb is the change at the ends of words due to the differing governors acting on them, whether shown or estimated. Its kinds are rafʿ, naṣb, khafḍ, and jazm.'},
+
+{term:'Inflected word',
+ examples:[
+  {ar:'الْكِتَابُ / الْكِتَابَ / الْكِتَابِ',en:'the book (raised / accusative / genitive)',focus:'الْكِتَابُ',iraabAr:'اسْمٌ مُعْرَبٌ؛ يَتَغَيَّرُ آخِرُهُ بِتَغَيُّرِ الْعَامِلِ وَالْمَوْقِعِ.',iraabEn:'An inflected noun: its ending changes with its governor and position.'}
+ ],
+ detailsAr:'الْمُعْرَبُ مَا يَتَغَيَّرُ آخِرُهُ بِتَغَيُّرِ الْعَوَامِلِ. وَأَكْثَرُ الْأَسْمَاءِ مُعْرَبَةٌ، وَكَذَلِكَ الْفِعْلُ الْمُضَارِعُ مَا لَمْ تَتَّصِلْ بِهِ نُونُ التَّوْكِيدِ أَوْ نُونُ النِّسْوَةِ.',
+ detailsEn:'A muʿrab word changes its ending as governors change. Most nouns are muʿrab, as is the present verb unless the emphatic nūn or the feminine nūn attaches to it.'},
+
+{term:'Fixed form (bināʾ)',
+ examples:[
+  {ar:'هَؤُلَاءِ طُلَّابٌ',en:'These are students.',focus:'هَؤُلَاءِ',iraabAr:'اسْمُ إِشَارَةٍ مَبْنِيٌّ لَا يَتَغَيَّرُ آخِرُهُ بِتَغَيُّرِ الْعَامِلِ.',iraabEn:'A demonstrative — mabnī: its ending does not change with the governor.'}
+ ],
+ detailsAr:'الْبِنَاءُ لُزُومُ آخِرِ الْكَلِمَةِ حَالَةً وَاحِدَةً لَا تَتَغَيَّرُ بِتَغَيُّرِ الْعَوَامِلِ. وَمِنَ الْمَبْنِيَّاتِ: الْحُرُوفُ، وَالضَّمَائِرُ، وَأَكْثَرُ أَسْمَاءِ الْإِشَارَةِ (وَأَمَّا مُثَنَّاهَا كَـ«هَذَانِ» وَ«هَاتَانِ» فَمُعْرَبٌ)، وَالْفِعْلُ الْمَاضِي، وَفِعْلُ الْأَمْرِ.',
+ detailsEn:'Bināʾ is a word keeping one fixed ending regardless of governors. Fixed words include particles, pronouns, and most demonstratives (though the dual ones, such as hādhāni and hātāni, are inflected), as well as the past verb and the imperative.'},
+
+{term:'Iʿrāb sign',
+ examples:[
+  {ar:'نَجَحَ الطَّالِبُ',en:'The student succeeded.',focus:'الطَّالِبُ',iraabAr:'الضَّمَّةُ فِي آخِرِ «الطَّالِبُ» عَلَامَةُ إِعْرَابٍ تُبَيِّنُ أَنَّهُ مَرْفُوعٌ.',iraabEn:'The ḍammah at the end of al-ṭālib is the iʿrāb sign showing it is nominative.'}
+ ],
+ detailsAr:'عَلَامَةُ الْإِعْرَابِ هِيَ مَا يَدُلُّ عَلَى حَالَةِ الْكَلِمَةِ. فَالْعَلَامَاتُ الْأَصْلِيَّةُ حَرَكَاتٌ: الضَّمَّةُ، وَالْفَتْحَةُ، وَالْكَسْرَةُ، وَالسُّكُونُ. وَالْعَلَامَاتُ الْفَرْعِيَّةُ أَنْوَاعٌ: حُرُوفٌ كَالْأَلِفِ وَالْوَاوِ وَالْيَاءِ؛ وَثُبُوتُ النُّونِ فِي رَفْعِ الْأَفْعَالِ الْخَمْسَةِ؛ وَحَرَكَةٌ تَنُوبُ عَنْ حَرَكَةٍ أُخْرَى، كَالْكَسْرَةِ نِيَابَةً عَنِ الْفَتْحَةِ فِي نَصْبِ جَمْعِ الْمُؤَنَّثِ السَّالِمِ؛ وَالْحَذْفُ، كَحَذْفِ النُّونِ وَحَذْفِ حَرْفِ الْعِلَّةِ.',
+ detailsEn:'An iʿrāb sign is what indicates a word’s state. The original signs are short vowels: the ḍammah, the fatḥah, the kasrah, and the sukūn. The secondary signs are of several kinds: letters, such as the alif, wāw, and yāʾ; retention of the nūn in the nominative of the five verbs; a vowel standing in for another vowel, such as the kasrah in place of the fatḥah in the accusative of the sound feminine plural; and deletion, such as dropping the nūn or deleting a weak final letter.'},
+
+{term:'Nominative (rafʿ)',
+ examples:[
+  {ar:'قَامَ زَيْدٌ',en:'Zayd stood.',focus:'زَيْدٌ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'A subject, nominative; its sign is the visible ḍammah.'}
+ ],
+ detailsAr:'الرَّفْعُ حَالَةٌ إِعْرَابِيَّةٌ تَكُونُ فِي الِاسْمِ وَالْفِعْلِ الْمُضَارِعِ، وَعَلَامَتُهَا الْأَصْلِيَّةُ الضَّمَّةُ، وَتَنُوبُ عَنْهَا الْأَلِفُ وَالْوَاوُ وَثُبُوتُ النُّونِ فِي مَوَاضِعِهَا.',
+ detailsEn:'Rafʿ is a state occurring in nouns and present verbs. Its original sign is ḍammah; alif, wāw, and keeping the nūn stand in for it in their places.'},
+
+{term:'Accusative (naṣb)',
+ examples:[
+  {ar:'رَأَيْتُ زَيْدًا',en:'I saw Zayd.',focus:'زَيْدًا',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.',iraabEn:'An object, accusative; its sign is the visible fatḥah.'}
+ ],
+ detailsAr:'النَّصْبُ حَالَةٌ إِعْرَابِيَّةٌ تَكُونُ فِي الِاسْمِ وَالْفِعْلِ الْمُضَارِعِ، وَعَلَامَتُهَا الْأَصْلِيَّةُ الْفَتْحَةُ، وَتَنُوبُ عَنْهَا الْأَلِفُ وَالْيَاءُ وَالْكَسْرَةُ وَحَذْفُ النُّونِ.',
+ detailsEn:'Naṣb is a state in nouns and present verbs. Its original sign is fatḥah; alif, yāʾ, kasrah, and dropping the nūn stand in for it in their places.'},
+
+{term:'Genitive (khafḍ)',
+ examples:[
+  {ar:'مَرَرْتُ بِزَيْدٍ',en:'I passed by Zayd.',focus:'زَيْدٍ',iraabAr:'اسْمٌ مَخْفُوضٌ بِـ«الْبَاءِ»، وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ الظَّاهِرَةُ.',iraabEn:'A genitive noun (by the preposition bi-); its sign is the visible kasrah.'}
+ ],
+ detailsAr:'الْخَفْضُ حَالَةٌ إِعْرَابِيَّةٌ خَاصَّةٌ بِالْأَسْمَاءِ لَا تَدْخُلُ الْفِعْلَ، وَعَلَامَتُهَا الْأَصْلِيَّةُ الْكَسْرَةُ، وَتَنُوبُ عَنْهَا الْيَاءُ وَالْفَتْحَةُ فِي مَوَاضِعِهَا. وَأَسْبَابُهُ: حَرْفُ الْخَفْضِ، وَالْإِضَافَةُ، وَالتَّبَعِيَّةُ.',
+ detailsEn:'Khafḍ is a state exclusive to nouns; it never enters a verb. Its original sign is kasrah, with yāʾ and fatḥah standing in where due. Its causes are a preposition, an iḍāfah, or following another genitive.'},
+
+{term:'Jussive (jazm)',
+ examples:[
+  {ar:'لَمْ يَكْتُبْ',en:'He did not write.',focus:'يَكْتُبْ',iraabAr:'فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَمْ»، وَعَلَامَةُ جَزْمِهِ السُّكُونُ الظَّاهِرُ.',iraabEn:'A present verb, jussive by lam; its sign is the visible sukūn.'}
+ ],
+ detailsAr:'الْجَزْمُ حَالَةٌ إِعْرَابِيَّةٌ خَاصَّةٌ بِالْفِعْلِ الْمُضَارِعِ، وَعَلَامَتُهُ الْأَصْلِيَّةُ السُّكُونُ، وَيَنُوبُ عَنْهُ حَذْفُ النُّونِ وَحَذْفُ حَرْفِ الْعِلَّةِ.',
+ detailsEn:'Jazm is a state exclusive to the present verb. Its original sign is sukūn, with dropping the nūn or dropping a weak final letter standing in for it.'},
+
+{term:'Visible ḍammah',
+ examples:[
+  {ar:'الْبَيْتُ كَبِيرٌ',en:'The house is big.',focus:'الْبَيْتُ',iraabAr:'مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'A mubtadaʾ, nominative; its sign is the visible ḍammah.'}
+ ],
+ detailsAr:'الضَّمَّةُ الظَّاهِرَةُ هِيَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلرَّفْعِ، تَظْهَرُ فِي الِاسْمِ الْمُفْرَدِ، وَجَمْعِ التَّكْسِيرِ، وَجَمْعِ الْمُؤَنَّثِ السَّالِمِ، وَالْمُضَارِعِ الصَّحِيحِ الْآخِرِ.',
+ detailsEn:'The visible ḍammah is the original sign of rafʿ. It appears on singular nouns, broken plurals, sound feminine plurals, and sound-ended present verbs.'},
+
+{term:'Visible fatḥah',
+ examples:[
+  {ar:'قَرَأْتُ الْكِتَابَ',en:'I read the book.',focus:'الْكِتَابَ',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.',iraabEn:'An object, accusative; its sign is the visible fatḥah.'}
+ ],
+ detailsAr:'الْفَتْحَةُ الظَّاهِرَةُ هِيَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلنَّصْبِ، تَظْهَرُ فِي الِاسْمِ الْمُفْرَدِ، وَجَمْعِ التَّكْسِيرِ، وَالْمُضَارِعِ الْمَنْصُوبِ الصَّحِيحِ الْآخِرِ.',
+ detailsEn:'The visible fatḥah is the original sign of naṣb. It appears on singular nouns, broken plurals, and sound-ended present verbs in the accusative.'},
+
+{term:'Visible kasrah',
+ examples:[
+  {ar:'ذَهَبْتُ إِلَى الْبَيْتِ',en:'I went to the house.',focus:'الْبَيْتِ',iraabAr:'اسْمٌ مَخْفُوضٌ بِـ«إِلَى»، وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ الظَّاهِرَةُ.',iraabEn:'A genitive noun (by ilā); its sign is the visible kasrah.'}
+ ],
+ detailsAr:'الْكَسْرَةُ الظَّاهِرَةُ هِيَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلْخَفْضِ، تَظْهَرُ فِي الِاسْمِ الْمُفْرَدِ الْمُنْصَرِفِ، وَجَمْعِ التَّكْسِيرِ الْمُنْصَرِفِ، وَجَمْعِ الْمُؤَنَّثِ السَّالِمِ.',
+ detailsEn:'The visible kasrah is the original sign of khafḍ. It appears on fully declinable singular nouns, fully declinable broken plurals, and sound feminine plurals.'},
+
+{term:'Visible sukūn',
+ examples:[
+  {ar:'لَمْ يَذْهَبْ',en:'He did not go.',focus:'يَذْهَبْ',iraabAr:'فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَمْ»، وَعَلَامَةُ جَزْمِهِ السُّكُونُ الظَّاهِرُ.',iraabEn:'A present verb, jussive by lam; its sign is the visible sukūn.'}
+ ],
+ detailsAr:'السُّكُونُ الظَّاهِرُ هُوَ الْعَلَامَةُ الْأَصْلِيَّةُ لِلْجَزْمِ، وَيَكُونُ فِي الْفِعْلِ الْمُضَارِعِ الصَّحِيحِ الْآخِرِ إِذَا دَخَلَ عَلَيْهِ جَازِمٌ.',
+ detailsEn:'The visible sukūn is the original sign of jazm, appearing on a sound-ended present verb when a jazm-particle governs it.'},
+
+{term:'Alif as a sign',
+ examples:[
+  {ar:'جَاءَ الطَّالِبَانِ',en:'The two students came.',focus:'الطَّالِبَانِ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.',iraabEn:'Subject, nominative; alif is its sign because it is dual.'},
+  {ar:'رَأَيْتُ أَخَاكَ',en:'I saw your brother.',focus:'أَخَاكَ',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْأَلِفُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ.',iraabEn:'Object, accusative; alif is its sign as one of the five nouns.'}
+ ],
+ detailsAr:'الْأَلِفُ عَلَامَةٌ فَرْعِيَّةٌ: تَكُونُ عَلَامَةَ رَفْعٍ فِي الْمُثَنَّى، وَعَلَامَةَ نَصْبٍ فِي الْأَسْمَاءِ الْخَمْسَةِ.',
+ detailsEn:'The alif is a secondary sign: it marks rafʿ in the dual and naṣb in the five nouns.'},
+
+{term:'Wāw as a sign',
+ examples:[
+  {ar:'فَازَ الْمُؤْمِنُونَ',en:'The believers succeeded.',focus:'الْمُؤْمِنُونَ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.',iraabEn:'Subject, nominative; wāw is its sign as a sound masculine plural.'},
+  {ar:'جَاءَ أَخُوكَ',en:'Your brother came.',focus:'أَخُوكَ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْوَاوُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ.',iraabEn:'Subject, nominative; wāw is its sign as one of the five nouns.'}
+ ],
+ detailsAr:'الْوَاوُ عَلَامَةٌ فَرْعِيَّةٌ لِلرَّفْعِ فِي جَمْعِ الْمُذَكَّرِ السَّالِمِ وَفِي الْأَسْمَاءِ الْخَمْسَةِ.',
+ detailsEn:'The wāw is a secondary sign of rafʿ in the sound masculine plural and in the five nouns.'},
+
+{term:'Yāʾ as a sign',
+ examples:[
+  {ar:'رَأَيْتُ الطَّالِبَيْنِ',en:'I saw the two students.',focus:'الطَّالِبَيْنِ',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.',iraabEn:'Object, accusative; yāʾ is its sign because it is dual.'},
+  {ar:'مَرَرْتُ بِالطَّالِبَيْنِ',en:'I passed by the two students.',focus:'الطَّالِبَيْنِ',iraabAr:'اسْمٌ مَخْفُوضٌ، وَعَلَامَةُ خَفْضِهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.',iraabEn:'A genitive noun; yāʾ is its sign because it is dual.'},
+  {ar:'سَلَّمْتُ عَلَى الْمُعَلِّمِينَ',en:'I greeted the teachers.',focus:'الْمُعَلِّمِينَ',iraabAr:'اسْمٌ مَخْفُوضٌ، وَعَلَامَةُ خَفْضِهِ الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.',iraabEn:'A genitive noun; yāʾ is its sign as a sound masculine plural.'}
+ ],
+ detailsAr:'الْيَاءُ عَلَامَةٌ فَرْعِيَّةٌ وَاحِدَةٌ تُسْتَعْمَلُ فِي حَالَاتٍ مُخْتَلِفَةٍ: نَصْبِ وَخَفْضِ الْمُثَنَّى وَجَمْعِ الْمُذَكَّرِ السَّالِمِ، وَخَفْضِ الْأَسْمَاءِ الْخَمْسَةِ. فَلَا تُعْرَفُ الْحَالَةُ مِنَ الْعَلَامَةِ وَحْدَهَا.',
+ detailsEn:'The yāʾ is a single secondary sign used in several situations: naṣb and khafḍ of the dual and the sound masculine plural, and khafḍ of the five nouns. So the sign alone does not tell you the state.'},
+
+{term:'Kasrah replacing fatḥah',
+ examples:[
+  {ar:'كَرَّمْتُ الْمُعَلِّمَاتِ',en:'I honored the female teachers.',focus:'الْمُعَلِّمَاتِ',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ.',iraabEn:'An object, accusative; its sign is kasrah in place of fatḥah, as a sound feminine plural.'}
+ ],
+ detailsAr:'جَمْعُ الْمُؤَنَّثِ السَّالِمِ إِذَا نُصِبَ لَمْ تَظْهَرْ عَلَيْهِ الْفَتْحَةُ، بَلْ تَنُوبُ عَنْهَا الْكَسْرَةُ، فَيَكُونُ مَنْصُوبًا وَعَلَامَةُ نَصْبِهِ الْكَسْرَةُ.',
+ detailsEn:'When a sound feminine plural is made accusative, fatḥah does not appear; kasrah stands in for it — so it is manṣūb with kasrah as its naṣb-sign.'},
+
+{term:'Keeping the nūn',
+ examples:[
+  {ar:'الْمُعَلِّمَانِ يَشْرَحَانِ',en:'The two teachers explain.',focus:'يَشْرَحَانِ',iraabAr:'فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ ثُبُوتُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.',iraabEn:'A present verb, nominative; keeping the nūn is its sign as one of the five verbs.'}
+ ],
+ detailsAr:'ثُبُوتُ النُّونِ عَلَامَةُ رَفْعِ الْأَفْعَالِ الْخَمْسَةِ. فَإِذَا بَقِيَتِ النُّونُ فِي آخِرِهَا فَهِيَ مَرْفُوعَةٌ.',
+ detailsEn:'Keeping the nūn is the rafʿ-sign of the five verbs: when the final nūn stays, the verb is nominative.'},
+
+{term:'Dropping the nūn',
+ examples:[
+  {ar:'لَنْ يَذْهَبُوا',en:'They will not go.',focus:'يَذْهَبُوا',iraabAr:'فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِـ«لَنْ»، وَعَلَامَةُ نَصْبِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.',iraabEn:'Accusative by lan; dropping the nūn is its sign, as one of the five verbs.'},
+  {ar:'لَمْ يَذْهَبُوا',en:'They did not go.',focus:'يَذْهَبُوا',iraabAr:'فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَمْ»، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.',iraabEn:'Jussive by lam; dropping the nūn is its sign, as one of the five verbs.'}
+ ],
+ detailsAr:'حَذْفُ النُّونِ عَلَامَةُ نَصْبِ الْأَفْعَالِ الْخَمْسَةِ وَجَزْمِهَا مَعًا. فَالْعَلَامَةُ وَاحِدَةٌ، وَتُعْرَفُ الْحَالَةُ مِنَ الْعَامِلِ: «لَنْ» نَاصِبَةٌ وَ«لَمْ» جَازِمَةٌ.',
+ detailsEn:'Dropping the nūn is the sign of BOTH the naṣb and the jazm of the five verbs. The sign is one; the state is known from the governor: lan makes accusative, lam makes jussive.'},
+
+// ---------- Group 3: Sentence roles ----------
+{term:'Mubtadaʾ',
+ examples:[
+  {ar:'زَيْدٌ مُجْتَهِدٌ',en:'Zayd is hardworking.',focus:'زَيْدٌ',iraabAr:'مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'A mubtadaʾ, nominative; its sign is the visible ḍammah.'}
+ ],
+ detailsAr:'الْمُبْتَدَأُ اسْمٌ مَرْفُوعٌ يُبْتَدَأُ بِهِ الْكَلَامُ، وَلَمْ يَسْبِقْهُ عَامِلٌ لَفْظِيٌّ. وَيَحْتَاجُ إِلَى خَبَرٍ تَتِمُّ بِهِ الْفَائِدَةُ، وَقَدْ يَتَأَخَّرُ عَنْ خَبَرِهِ.',
+ detailsEn:'The mubtadaʾ is a nominative noun that a sentence starts with, not preceded by a governing word. It needs a khabar to complete the meaning, and it may come after its khabar.'},
+
+{term:'Khabar',
+ examples:[
+  {ar:'زَيْدٌ مُجْتَهِدٌ',en:'Zayd is hardworking.',focus:'مُجْتَهِدٌ',iraabAr:'خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'A khabar, nominative; its sign is the visible ḍammah.'}
+ ],
+ detailsAr:'الْخَبَرُ هُوَ الْجُزْءُ الَّذِي تَتِمُّ بِهِ الْفَائِدَةُ مَعَ الْمُبْتَدَأِ، وَهُوَ مَرْفُوعٌ فِي الْأَصْلِ. وَقَدْ يَكُونُ مُفْرَدًا، أَوْ جُمْلَةً، أَوْ شِبْهَ جُمْلَةٍ.',
+ detailsEn:'The khabar is the part that completes the benefit with the mubtadaʾ; it is nominative by default. It may be a single word, a sentence, or a phrase-like expression.'},
+
+{term:'Single-word khabar',
+ examples:[
+  {ar:'الْعِلْمُ نَافِعٌ',en:'Knowledge is beneficial.',focus:'نَافِعٌ',iraabAr:'خَبَرٌ مُفْرَدٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'A single-word khabar, nominative by the visible ḍammah.'}
+ ],
+ detailsAr:'الْخَبَرُ الْمُفْرَدُ مَا لَيْسَ جُمْلَةً وَلَا شِبْهَ جُمْلَةٍ، وَهُوَ مَرْفُوعٌ وَيُطَابِقُ مُبْتَدَأَهُ فِي الْإِفْرَادِ وَالتَّذْكِيرِ وَنَحْوِهِمَا.',
+ detailsEn:'A single-word khabar is neither a sentence nor a phrase-like expression. It is nominative and agrees with its mubtadaʾ in number, gender, and so on.'},
+
+{term:'Sentence khabar',
+ examples:[
+  {ar:'زَيْدٌ يَكْتُبُ الدَّرْسَ',en:'Zayd is writing the lesson.',focus:'يَكْتُبُ الدَّرْسَ',iraabAr:'جُمْلَةٌ فِعْلِيَّةٌ فِي مَحَلِّ رَفْعٍ خَبَرٌ لِلْمُبْتَدَأِ «زَيْدٌ»، وَالرَّابِطُ الضَّمِيرُ الْمُسْتَتِرُ فِي الْفِعْلِ.',iraabEn:'A verbal sentence in a nominative position as khabar of “Zayd”; the link is the hidden pronoun in the verb.'}
+ ],
+ detailsAr:'خَبَرُ الْجُمْلَةِ جُمْلَةٌ اسْمِيَّةٌ أَوْ فِعْلِيَّةٌ تَقَعُ خَبَرًا، وَتَكُونُ فِي مَحَلِّ رَفْعٍ، وَلَا بُدَّ فِيهَا مِنْ رَابِطٍ يَعُودُ عَلَى الْمُبْتَدَأِ.',
+ detailsEn:'A sentence khabar is a nominal or verbal sentence serving as khabar, occupying a nominative position, and requiring a link that refers back to the mubtadaʾ.'},
+
+{term:'Phrase-like khabar construction',
+ examples:[
+  {ar:'الْكِتَابُ فِي الْحَقِيبَةِ',en:'The book is in the bag.',focus:'فِي الْحَقِيبَةِ',iraabAr:'جَارٌّ وَمَجْرُورٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ لِلْمُبْتَدَأِ «الْكِتَابُ».',iraabEn:'A preposition + genitive attached to an omitted khabar of the mubtadaʾ (al-kitāb).'}
+ ],
+ detailsAr:'خَبَرُ شِبْهِ الْجُمْلَةِ ظَرْفٌ أَوْ جَارٌّ وَمَجْرُورٌ يَقَعُ مَوْقِعَ الْخَبَرِ، وَالتَّحْقِيقُ أَنَّهُ مُتَعَلِّقٌ بِخَبَرٍ مَحْذُوفٍ تَقْدِيرُهُ «كَائِنٌ» أَوْ «مَوْجُودٌ».',
+ detailsEn:'A phrase-like khabar is an adverbial or prepositional expression standing where the khabar goes; precisely, it attaches to an omitted khabar understood as “is/exists.”'},
+
+{term:'Fronted khabar',
+ examples:[
+  {ar:'فِي الدَّارِ رَجُلٌ',en:'In the house is a man.',focus:'فِي الدَّارِ',iraabAr:'جَارٌّ وَمَجْرُورٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ مُقَدَّمٍ، وَالْمُبْتَدَأُ «رَجُلٌ» مُؤَخَّرٌ.',iraabEn:'A preposition + genitive attached to an omitted fronted khabar; the mubtadaʾ (rajul) is delayed.'}
+ ],
+ detailsAr:'الْخَبَرُ الْمُقَدَّمُ خَبَرٌ جَاءَ قَبْلَ مُبْتَدَئِهِ، وَيَكْثُرُ ذَلِكَ إِذَا كَانَ الْخَبَرُ شِبْهَ جُمْلَةٍ وَالْمُبْتَدَأُ نَكِرَةً.',
+ detailsEn:'A fronted khabar comes before its mubtadaʾ, which is common when the khabar is a phrase-like expression and the mubtadaʾ is indefinite.'},
+
+{term:'Delayed mubtadaʾ',
+ examples:[
+  {ar:'فِي الدَّارِ رَجُلٌ',en:'In the house is a man.',focus:'رَجُلٌ',iraabAr:'مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'A delayed mubtadaʾ, nominative by the visible ḍammah.'}
+ ],
+ detailsAr:'الْمُبْتَدَأُ الْمُؤَخَّرُ مُبْتَدَأٌ جَاءَ بَعْدَ خَبَرِهِ، وَيَبْقَى مَرْفُوعًا وَإِنْ تَأَخَّرَ.',
+ detailsEn:'A delayed mubtadaʾ comes after its khabar and stays nominative even though it is postponed.'},
+
+{term:'Subject / doer (fāʿil)',
+ examples:[
+  {ar:'كَتَبَ زَيْدٌ الدَّرْسَ',en:'Zayd wrote the lesson.',focus:'زَيْدٌ',iraabAr:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'A subject, nominative by the visible ḍammah.'}
+ ],
+ detailsAr:'الْفَاعِلُ اسْمٌ مَرْفُوعٌ تَقَدَّمَهُ فِعْلٌ، وَأُسْنِدَ إِلَيْهِ الْفِعْلُ عَلَى جِهَةِ قِيَامِهِ بِهِ. وَهُوَ مَرْفُوعٌ دَائِمًا، وَقَدْ يَكُونُ ظَاهِرًا أَوْ ضَمِيرًا.',
+ detailsEn:'The fāʿil is a nominative noun preceded by a verb, to which the verb is attributed as its doer. It is always nominative and may be an explicit noun or a pronoun.'},
+
+{term:'Explicit subject',
+ examples:[
+  {ar:'نَجَحَ الطَّالِبُ',en:'The student succeeded.',focus:'الطَّالِبُ',iraabAr:'فَاعِلٌ ظَاهِرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'An explicit subject, nominative by the visible ḍammah.'}
+ ],
+ detailsAr:'الْفَاعِلُ الظَّاهِرُ اسْمٌ صَرِيحٌ مَذْكُورٌ فِي اللَّفْظِ، أُسْنِدَ إِلَيْهِ الْفِعْلُ، وَهُوَ مَرْفُوعٌ.',
+ detailsEn:'An explicit subject is a clearly stated noun to which the verb is attributed; it is nominative.'},
+
+{term:'Pronominal subject',
+ examples:[
+  {ar:'كَتَبُوا الدَّرْسَ',en:'They wrote the lesson.',focus:'كَتَبُوا',iraabAr:'الْفَاعِلُ وَاوُ الْجَمَاعَةِ، ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',iraabEn:'The subject is the plural wāw: an attached pronoun (fixed) in a nominative position as subject.'}
+ ],
+ detailsAr:'الْفَاعِلُ الْمُضْمَرُ ضَمِيرٌ أُسْنِدَ إِلَيْهِ الْفِعْلُ، وَيَكُونُ مُتَّصِلًا كَوَاوِ الْجَمَاعَةِ، أَوْ مُسْتَتِرًا كَـ«هُوَ» فِي «كَتَبَ».',
+ detailsEn:'A pronominal subject is a pronoun the verb is attributed to; it may be attached (like the plural wāw) or hidden (like “he” in kataba).'},
+
+{term:'Hidden pronoun',
+ examples:[
+  {ar:'زَيْدٌ كَتَبَ',en:'Zayd wrote.',focus:'كَتَبَ',iraabAr:'فَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ «هُوَ» يَعُودُ عَلَى «زَيْدٍ».',iraabEn:'Its subject is a hidden pronoun (understood as “he”) referring to Zayd.'}
+ ],
+ detailsAr:'الضَّمِيرُ الْمُسْتَتِرُ ضَمِيرٌ لَا صُورَةَ لَهُ فِي اللَّفْظِ، وَلَكِنَّهُ يُفْهَمُ مِنَ الْفِعْلِ. وَقَدْ يَكُونُ اسْتِتَارُهُ وَاجِبًا أَوْ جَائِزًا.',
+ detailsEn:'A hidden pronoun has no spoken form but is understood from the verb. Its hiddenness may be obligatory or permissible.'},
+
+{term:'Attached pronoun',
+ examples:[
+  {ar:'كِتَابُكَ جَدِيدٌ',en:'Your book is new.',focus:'كَ',iraabAr:'الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ.',iraabEn:'The kāf is an attached pronoun (fixed) in a genitive position as muḍāf ilayh.'}
+ ],
+ detailsAr:'الضَّمِيرُ الْمُتَّصِلُ ضَمِيرٌ يَتَّصِلُ بِآخِرِ الْكَلِمَةِ وَلَا يُنْطَقُ وَحْدَهُ، وَيَقَعُ فَاعِلًا، أَوْ مَفْعُولًا، أَوْ مُضَافًا إِلَيْهِ بِحَسَبِ مَوْقِعِهِ.',
+ detailsEn:'An attached pronoun joins the end of a word and is not spoken alone; by position it may be subject, object, or muḍāf ilayh.'},
+
+{term:'Plural wāw',
+ examples:[
+  {ar:'الطُّلَّابُ نَجَحُوا',en:'The students succeeded.',focus:'نَجَحُوا',iraabAr:'وَاوُ الْجَمَاعَةِ فِي «نَجَحُوا» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',iraabEn:'The plural wāw in najaḥū: an attached pronoun (fixed) in a nominative position as subject.'}
+ ],
+ detailsAr:'وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ يَدُلُّ عَلَى جَمَاعَةِ الذُّكُورِ، وَيَكُونُ فَاعِلًا فِي مَحَلِّ رَفْعٍ. وَإِذَا اتَّصَلَتْ بِالْفِعْلِ الْمُضَارِعِ كَانَ مِنَ الْأَفْعَالِ الْخَمْسَةِ، أَمَّا اتِّصَالُهَا بِالْمَاضِي كَـ«نَجَحُوا» فَلَا يَجْعَلُهُ مِنْهَا.',
+ detailsEn:'The plural wāw is an attached pronoun for a group of males, serving as subject in a nominative position. When it joins a present-tense verb, that verb becomes one of the five verbs; joining a past verb (as in najaḥū) does not.'},
+
+{term:'Dual alif',
+ examples:[
+  {ar:'الطَّالِبَانِ يَكْتُبَانِ',en:'The two students write.',focus:'يَكْتُبَانِ',iraabAr:'أَلِفُ الِاثْنَيْنِ فِي «يَكْتُبَانِ» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',iraabEn:'The dual alif in yaktubāni: an attached pronoun (fixed) in a nominative position as subject.'}
+ ],
+ detailsAr:'أَلِفُ الِاثْنَيْنِ ضَمِيرٌ مُتَّصِلٌ يَدُلُّ عَلَى اثْنَيْنِ، وَيَكُونُ فَاعِلًا فِي مَحَلِّ رَفْعٍ. وَإِذَا اتَّصَلَتْ بِالْفِعْلِ الْمُضَارِعِ كَانَ مِنَ الْأَفْعَالِ الْخَمْسَةِ، أَمَّا اتِّصَالُهَا بِالْمَاضِي كَـ«كَتَبَا» فَلَا يَجْعَلُهُ مِنْهَا.',
+ detailsEn:'The dual alif is an attached pronoun for two, serving as subject in a nominative position. When it joins a present-tense verb, that verb becomes one of the five verbs; joining a past verb (as in katabā) does not.'},
+
+{term:'Feminine-address yāʾ',
+ examples:[
+  {ar:'أَنْتِ تَكْتُبِينَ',en:'You (f.) write.',focus:'تَكْتُبِينَ',iraabAr:'يَاءُ الْمُخَاطَبَةِ فِي «تَكْتُبِينَ» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',iraabEn:'The feminine-address yāʾ in taktubīna: an attached pronoun (fixed) in a nominative position as subject.'}
+ ],
+ detailsAr:'يَاءُ الْمُخَاطَبَةِ ضَمِيرٌ مُتَّصِلٌ يَدُلُّ عَلَى الْمُخَاطَبَةِ الْمُفْرَدَةِ، وَيَكُونُ فَاعِلًا فِي مَحَلِّ رَفْعٍ. وَإِذَا اتَّصَلَتْ بِالْفِعْلِ الْمُضَارِعِ كَانَ مِنَ الْأَفْعَالِ الْخَمْسَةِ، أَمَّا اتِّصَالُهَا بِفِعْلِ الْأَمْرِ كَـ«اكْتُبِي» فَلَا يَجْعَلُهُ مِنْهَا.',
+ detailsEn:'The feminine-address yāʾ is an attached pronoun for one addressed female, serving as subject in a nominative position. When it joins a present-tense verb, that verb becomes one of the five verbs; joining an imperative (as in uktubī) does not.'},
+
+{term:'Direct object',
+ examples:[
+  {ar:'قَرَأَ زَيْدٌ الْكِتَابَ',en:'Zayd read the book.',focus:'الْكِتَابَ',iraabAr:'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.',iraabEn:'A direct object, accusative by the visible fatḥah.'}
+ ],
+ detailsAr:'الْمَفْعُولُ بِهِ اسْمٌ مَنْصُوبٌ وَقَعَ عَلَيْهِ فِعْلُ الْفَاعِلِ. وَلَا تَخْلِطْ بَيْنَهُ وَبَيْنَ الْفَاعِلِ: الْفَاعِلُ مَرْفُوعٌ وَهُوَ الَّذِي فَعَلَ، وَالْمَفْعُولُ بِهِ مَنْصُوبٌ وَهُوَ الَّذِي وَقَعَ عَلَيْهِ الْفِعْلُ.',
+ detailsEn:'A direct object is an accusative noun upon which the subject’s action falls. Do not confuse it with the fāʿil: the subject is nominative and does the action; the object is accusative and receives it.'},
+
+{term:'Phrase-like expression',
+ examples:[
+  {ar:'الْمَاءُ فِي الْكُوبِ',en:'The water is in the cup.',focus:'فِي الْكُوبِ',iraabAr:'شِبْهُ جُمْلَةٍ (جَارٌّ وَمَجْرُورٌ)، وَقَعَ خَبَرًا فَتَعَلَّقَ بِمَحْذُوفٍ خَبَرٍ.',iraabEn:'A phrase-like expression (preposition + genitive) used as khabar, attached to an omitted khabar.'}
+ ],
+ detailsAr:'شِبْهُ الْجُمْلَةِ هُوَ الظَّرْفُ أَوِ الْجَارُّ وَالْمَجْرُورُ. وَإِذَا وَقَعَ مَوْقِعَ الْخَبَرِ تَعَلَّقَ بِخَبَرٍ مَحْذُوفٍ، وَلَيْسَ هُوَ الْخَبَرَ نَفْسَهُ فِي التَّحْقِيقِ.',
+ detailsEn:'A phrase-like expression is an adverb or a preposition-plus-genitive. When it stands where a khabar goes, it attaches to an omitted khabar; strictly it is not the khabar itself.'},
+
+{term:'Preposition and governed noun',
+ examples:[
+  {ar:'خَرَجْتُ مِنَ الْبَيْتِ',en:'I went out of the house.',focus:'مِنَ الْبَيْتِ',iraabAr:'«مِنْ» حَرْفُ خَفْضٍ، وَ«الْبَيْتِ» اسْمٌ مَخْفُوضٌ، وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ؛ وَالتَّرْكِيبُ جَارٌّ وَمَجْرُورٌ.',iraabEn:'Min is a preposition and al-bayt is a genitive noun (kasrah); together they are a jār wa-majrūr.'}
+ ],
+ detailsAr:'الْجَارُّ وَالْمَجْرُورُ تَرْكِيبٌ مِنْ حَرْفِ خَفْضٍ وَالِاسْمِ الْمَخْفُوضِ بَعْدَهُ، وَلَا بُدَّ لَهُ مِنْ مُتَعَلَّقٍ يَتِمُّ بِهِ الْمَعْنَى (فِعْلٍ أَوْ شِبْهِهِ).',
+ detailsEn:'A jār wa-majrūr is a preposition with the genitive noun after it. It needs something to attach to (a verb or the like) for the meaning to complete.'},
+
+{term:'Preposition',
+ examples:[
+  {ar:'الْقَلَمُ عَلَى الْمَكْتَبِ',en:'The pen is on the desk.',focus:'عَلَى',iraabAr:'حَرْفُ خَفْضٍ مَبْنِيٌّ، خَفَضَ الِاسْمَ بَعْدَهُ «الْمَكْتَبِ».',iraabEn:'A preposition (fixed) that made the following noun (al-maktab) genitive.'}
+ ],
+ detailsAr:'حَرْفُ الْخَفْضِ حَرْفٌ يَخْفِضُ الِاسْمَ بَعْدَهُ، وَمِنْهُ: مِنْ، وَإِلَى، وَعَنْ، وَعَلَى، وَفِي، وَالْبَاءُ، وَاللَّامُ، وَغَيْرُهَا. وَالْحُرُوفُ كُلُّهَا مَبْنِيَّةٌ.',
+ detailsEn:'A preposition makes the noun after it genitive. Examples include min, ilā, ʿan, ʿalā, fī, bi-, and li-. All particles are fixed (mabnī).'},
+
+{term:'Genitive noun',
+ examples:[
+  {ar:'جَلَسْتُ فِي الْمَسْجِدِ',en:'I sat in the mosque.',focus:'الْمَسْجِدِ',iraabAr:'اسْمٌ مَخْفُوضٌ بِـ«فِي»، وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ الظَّاهِرَةُ.',iraabEn:'A genitive noun (by fī); its sign is the visible kasrah.'}
+ ],
+ detailsAr:'الِاسْمُ الْمَخْفُوضُ اسْمٌ دَخَلَ عَلَيْهِ سَبَبٌ مِنْ أَسْبَابِ الْخَفْضِ الثَّلَاثَةِ: حَرْفُ الْخَفْضِ، أَوِ الْإِضَافَةُ، أَوِ التَّبَعِيَّةُ لِمَخْفُوضٍ.',
+ detailsEn:'A genitive noun is one affected by one of the three causes of khafḍ: a preposition, an iḍāfah, or agreement with another genitive.'},
+
+{term:'Adverb of time or place',
+ examples:[
+  {ar:'جَلَسْتُ أَمَامَ الْبَيْتِ',en:'I sat in front of the house.',focus:'أَمَامَ',iraabAr:'ظَرْفُ مَكَانٍ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.',iraabEn:'An adverb of place, accusative by the visible fatḥah, and it is a muḍāf.'}
+ ],
+ detailsAr:'الظَّرْفُ اسْمٌ مَنْصُوبٌ يَدُلُّ عَلَى زَمَانِ الْفِعْلِ أَوْ مَكَانِهِ عَلَى تَقْدِيرِ «فِي». وَهُوَ مِنَ الْمَنْصُوبَاتِ.',
+ detailsEn:'An adverb is an accusative noun giving the time or place of an action, carrying the meaning of “in.” It is among the accusatives.'},
+
+{term:'First noun of an iḍāfah',
+ examples:[
+  {ar:'كِتَابُ الطَّالِبِ جَدِيدٌ',en:'The student’s book is new.',focus:'كِتَابُ',iraabAr:'مُضَافٌ، وَهُوَ هُنَا مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ؛ وَحُذِفَ تَنْوِينُهُ لِلْإِضَافَةِ.',iraabEn:'A muḍāf — here a mubtadaʾ, nominative by ḍammah; its tanwīn is dropped because of the iḍāfah.'}
+ ],
+ detailsAr:'الْمُضَافُ هُوَ الِاسْمُ الْأَوَّلُ فِي تَرْكِيبِ الْإِضَافَةِ، وَيُعْرَبُ بِحَسَبِ مَوْقِعِهِ فِي الْجُمْلَةِ، وَيُحْذَفُ تَنْوِينُهُ أَوْ نُونُهُ لِلْإِضَافَةِ.',
+ detailsEn:'The muḍāf is the first noun of an iḍāfah. It is parsed according to its role in the sentence, and it drops its tanwīn or nūn because of the iḍāfah.'},
+
+{term:'Second noun of an iḍāfah',
+ examples:[
+  {ar:'كِتَابُ الطَّالِبِ جَدِيدٌ',en:'The student’s book is new.',focus:'الطَّالِبِ',iraabAr:'مُضَافٌ إِلَيْهِ مَخْفُوضٌ، وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ الظَّاهِرَةُ.',iraabEn:'A muḍāf ilayh, genitive by the visible kasrah.'}
+ ],
+ detailsAr:'الْمُضَافُ إِلَيْهِ هُوَ الِاسْمُ الثَّانِي فِي الْإِضَافَةِ، وَهُوَ مَخْفُوضٌ دَائِمًا بِالْإِضَافَةِ.',
+ detailsEn:'The muḍāf ilayh is the second noun of an iḍāfah; it is always genitive by iḍāfah.'},
+
+{term:'Link back to the mubtadaʾ',
+ examples:[
+  {ar:'الطَّالِبُ كِتَابُهُ جَدِيدٌ',en:'The student — his book is new.',focus:'هُ',iraabAr:'الْهَاءُ فِي «كِتَابُهُ» ضَمِيرٌ يَرْبِطُ جُمْلَةَ الْخَبَرِ بِالْمُبْتَدَأِ «الطَّالِبُ».',iraabEn:'The hāʾ in “kitābuhu” is the pronoun linking the khabar-sentence back to the mubtadaʾ (al-ṭālib).'}
+ ],
+ detailsAr:'الرَّابِطُ ضَمِيرٌ أَوْ نَحْوُهُ يَرْبِطُ جُمْلَةَ الْخَبَرِ بِالْمُبْتَدَأِ، وَلَا تَصِحُّ جُمْلَةُ الْخَبَرِ بِلَا رَابِطٍ يَعُودُ عَلَى الْمُبْتَدَأِ.',
+ detailsEn:'A rābiṭ is a pronoun (or the like) linking a khabar-sentence to the mubtadaʾ; a sentence khabar is invalid without a link referring back to the mubtadaʾ.'},
+
+// ---------- Group 4: Governing words and particles ----------
+{term:'Governing word',
+ examples:[
+  {ar:'إِنَّ زَيْدًا قَائِمٌ',en:'Indeed Zayd is standing.',focus:'إِنَّ',iraabAr:'«إِنَّ» عَامِلٌ (حَرْفُ تَوْكِيدٍ وَنَصْبٍ) نَصَبَ الِاسْمَ «زَيْدًا» وَرَفَعَ الْخَبَرَ «قَائِمٌ».',iraabEn:'Inna is a governor (particle of emphasis and naṣb): it made the noun accusative and kept the khabar nominative.'}
+ ],
+ detailsAr:'الْعَامِلُ مَا أَثَّرَ فِي إِعْرَابِ غَيْرِهِ فَأَحْدَثَ فِيهِ رَفْعًا أَوْ نَصْبًا أَوْ خَفْضًا أَوْ جَزْمًا. وَهُوَ لَفْظِيٌّ كَالْحُرُوفِ وَالْأَفْعَالِ، أَوْ مَعْنَوِيٌّ كَالِابْتِدَاءِ.',
+ detailsEn:'A governor is what affects another word’s iʿrāb, producing rafʿ, naṣb, khafḍ, or jazm in it. It may be a word (like particles and verbs) or a meaning (like ibtidāʾ).'},
+
+{term:'Inna and its sisters',
+ examples:[
+  {ar:'إِنَّ الطَّالِبَ مُجْتَهِدٌ',en:'Indeed the student is hardworking.',focus:'الطَّالِبَ',iraabAr:'اسْمُ «إِنَّ» مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَخَبَرُهَا «مُجْتَهِدٌ» مَرْفُوعٌ.',iraabEn:'The ism of inna, accusative by the visible fatḥah; its khabar (mujtahid) is nominative.'}
+ ],
+ detailsAr:'إِنَّ وَأَخَوَاتُهَا (إِنَّ، أَنَّ، كَأَنَّ، لَكِنَّ، لَيْتَ، لَعَلَّ) حُرُوفٌ تَنْصِبُ الْمُبْتَدَأَ وَيُسَمَّى اسْمَهَا، وَتَرْفَعُ الْخَبَرَ وَيُسَمَّى خَبَرَهَا.',
+ detailsEn:'Inna and its sisters (inna, anna, kaʾanna, lākinna, layta, laʿalla) make the mubtadaʾ accusative (their ism) and keep the khabar nominative (their khabar).'},
+
+{term:'Ism of inna',
+ examples:[
+  {ar:'لَعَلَّ الْبَابَ مَفْتُوحٌ',en:'Perhaps the door is open.',focus:'الْبَابَ',iraabAr:'اسْمُ «لَعَلَّ» مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.',iraabEn:'The ism of laʿalla, accusative by the visible fatḥah.'}
+ ],
+ detailsAr:'اسْمُ إِنَّ هُوَ الْمُبْتَدَأُ بَعْدَ دُخُولِ «إِنَّ» أَوْ إِحْدَى أَخَوَاتِهَا، وَحُكْمُهُ النَّصْبُ.',
+ detailsEn:'The ism of inna is the former mubtadaʾ after inna or a sister enters; its ruling is naṣb.'},
+
+{term:'Khabar of inna',
+ examples:[
+  {ar:'إِنَّ الطَّالِبَ مُجْتَهِدٌ',en:'Indeed the student is hardworking.',focus:'مُجْتَهِدٌ',iraabAr:'خَبَرُ «إِنَّ» مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'The khabar of inna, nominative by the visible ḍammah.'}
+ ],
+ detailsAr:'خَبَرُ إِنَّ هُوَ مَا يُتِمُّ مَعْنَى اسْمِهَا، وَحُكْمُهُ الرَّفْعُ، وَيَبْقَى مَرْفُوعًا كَمَا كَانَ خَبَرًا لِلْمُبْتَدَأِ.',
+ detailsEn:'The khabar of inna completes the meaning of its ism; its ruling is rafʿ, staying nominative as it was as the khabar of the mubtadaʾ.'},
+
+{term:'Kāna and its sisters',
+ examples:[
+  {ar:'كَانَ الْجَوُّ جَمِيلًا',en:'The weather was beautiful.',focus:'الْجَوُّ',iraabAr:'اسْمُ «كَانَ» مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَخَبَرُهَا «جَمِيلًا» مَنْصُوبٌ.',iraabEn:'The ism of kāna, nominative by the visible ḍammah; its khabar (jamīlan) is accusative.'}
+ ],
+ detailsAr:'كَانَ وَأَخَوَاتُهَا أَفْعَالٌ نَاقِصَةٌ تَرْفَعُ الْمُبْتَدَأَ وَيُسَمَّى اسْمَهَا، وَتَنْصِبُ الْخَبَرَ وَيُسَمَّى خَبَرَهَا. وَمِنْهَا: كَانَ، وَأَصْبَحَ، وَصَارَ، وَلَيْسَ.',
+ detailsEn:'Kāna and its sisters are deficient verbs that keep the mubtadaʾ nominative (their ism) and make the khabar accusative (their khabar). They include kāna, aṣbaḥa, ṣāra, and laysa.'},
+
+{term:'Ism of kāna',
+ examples:[
+  {ar:'كَانَ الطَّالِبُ حَاضِرًا',en:'The student was present.',focus:'الطَّالِبُ',iraabAr:'اسْمُ «كَانَ» مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.',iraabEn:'The ism of kāna, nominative by the visible ḍammah.'}
+ ],
+ detailsAr:'اسْمُ كَانَ هُوَ الْمُبْتَدَأُ بَعْدَ دُخُولِ «كَانَ» أَوْ إِحْدَى أَخَوَاتِهَا، وَحُكْمُهُ الرَّفْعُ.',
+ detailsEn:'The ism of kāna is the former mubtadaʾ after kāna or a sister enters; its ruling is rafʿ.'},
+
+{term:'Khabar of kāna',
+ examples:[
+  {ar:'كَانَ الطَّالِبُ حَاضِرًا',en:'The student was present.',focus:'حَاضِرًا',iraabAr:'خَبَرُ «كَانَ» مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.',iraabEn:'The khabar of kāna, accusative by the visible fatḥah.'}
+ ],
+ detailsAr:'خَبَرُ كَانَ هُوَ مَا يُتِمُّ مَعْنَى اسْمِهَا، وَحُكْمُهُ النَّصْبُ.',
+ detailsEn:'The khabar of kāna completes the meaning of its ism; its ruling is naṣb.'},
+
+{term:'Accusative governor',
+ examples:[
+  {ar:'لَنْ يَغِيبَ زَيْدٌ',en:'Zayd will not be absent.',focus:'لَنْ',iraabAr:'«لَنْ» حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ، نَصَبَ الْمُضَارِعَ «يَغِيبَ».',iraabEn:'Lan is a particle of negation, naṣb, and futurity; it made the present verb (yaghība) accusative.'}
+ ],
+ detailsAr:'النَّاصِبُ أَدَاةٌ تَجْعَلُ الْفِعْلَ الْمُضَارِعَ مَنْصُوبًا، مِثْلُ: أَنْ، وَلَنْ، وَكَيْ، وَإِذَنْ. وَعَمَلُهَا يَظْهَرُ فِي آخِرِ الْمُضَارِعِ.',
+ detailsEn:'A naṣb-governor is a particle that makes the present verb accusative, such as an, lan, kay, and idhan. Its effect shows on the end of the present verb.'},
+
+{term:'Jussive governor',
+ examples:[
+  {ar:'لَمْ يَغِبْ زَيْدٌ',en:'Zayd was not absent.',focus:'لَمْ',iraabAr:'«لَمْ» حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ، جَزَمَ الْمُضَارِعَ «يَغِبْ».',iraabEn:'Lam is a particle of negation, jazm, and conversion to past; it made the present verb (yaghib) jussive.'}
+ ],
+ detailsAr:'الْجَازِمُ أَدَاةٌ تَجْعَلُ الْفِعْلَ الْمُضَارِعَ مَجْزُومًا، مِثْلُ: لَمْ، وَلَمَّا، وَلَامِ الْأَمْرِ، وَلَا النَّاهِيَةِ. وَعَمَلُهَا يَظْهَرُ فِي آخِرِ الْمُضَارِعِ.',
+ detailsEn:'A jazm-governor is a particle that makes the present verb jussive, such as lam, lammā, the lām of command, and the prohibitive lā. Its effect shows on the end of the present verb.'},
+
+{term:'No syntactic position',
+ examples:[
+  {ar:'هَلْ نَجَحَ زَيْدٌ؟',en:'Did Zayd succeed?',focus:'هَلْ',iraabAr:'«هَلْ» حَرْفُ اسْتِفْهَامٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',iraabEn:'Hal is a fixed interrogative particle with no position in iʿrāb.'}
+ ],
+ detailsAr:'«لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ» وَصْفٌ لِلْمَبْنِيِّ الَّذِي لَا يَقَعُ مَوْقِعًا يُحْكَمُ عَلَيْهِ بِرَفْعٍ أَوْ نَصْبٍ أَوْ خَفْضٍ أَوْ جَزْمٍ، كَأَكْثَرِ الْحُرُوفِ.',
+ detailsEn:'“No position in iʿrāb” describes a fixed word that does not fall into a slot judged as nominative, accusative, genitive, or jussive — like most particles.'}
+];
+let __defIndex=0;
+grammarDefinitionGroups.forEach((group,gi)=>group.items.forEach((item,ii)=>{
+ const enrich=definitionEnrichment[__defIndex];
+ if(!enrich||enrich.term!==item.enTerm)throw new Error(`Definition enrichment misaligned at ${item.enTerm}`);
+ item.examples=Object.freeze((enrich.examples||[]).map(ex=>Object.freeze({...ex})));
+ item.detailsAr=enrich.detailsAr||'';
+ item.detailsEn=enrich.detailsEn||'';
+ item.defId=`def-${gi}-${ii}`;
+ __defIndex++;
+}));
+if(__defIndex!==definitionEnrichment.length)throw new Error('Definition enrichment count mismatch');
+function grammarDefinitionCount(){return grammarDefinitionGroups.reduce((total,group)=>total+group.items.length,0)}
 let activeDefinitionChapter=null;
+function definitionExampleHtml(ex){
+ return `<div class="def-example"><div class="def-example-ar" lang="ar">${esc(ex.ar)}</div><div class="def-example-en en-only">${esc(ex.en)}</div><div class="def-example-focus"><span class="en-only">Focus: </span><span class="ar-only" lang="ar">الْكَلِمَةُ: </span><span class="def-focus-word" lang="ar">${esc(ex.focus)}</span></div><div class="def-example-iraab" lang="ar">${esc(ex.iraabAr)}</div><div class="def-example-iraab-en en-only">${esc(ex.iraabEn)}</div>${ex.noteAr?`<div class="def-example-note" lang="ar">${esc(ex.noteAr)}</div>`:''}${ex.noteEn?`<div class="def-example-note en-only">${esc(ex.noteEn)}</div>`:''}</div>`;
+}
+function definitionCardHtml(item){
+ const id=item.defId,p=item.source.pdfPages,pages=esc(p.join(', '));
+ const hasEx=item.examples&&item.examples.length;
+ const hasMore=Boolean(item.detailsAr&&item.detailsAr.length);
+ const buttons=[];
+ if(hasEx)buttons.push(`<button class="def-expand" type="button" aria-expanded="false" aria-controls="${id}-ex"><span class="en-only">Examples (${item.examples.length})</span><span class="ar-only" lang="ar">أَمْثِلَةٌ (${item.examples.length})</span></button>`);
+ if(hasMore)buttons.push(`<button class="def-expand" type="button" aria-expanded="false" aria-controls="${id}-more"><span class="en-only">Learn more</span><span class="ar-only" lang="ar">شَرْحٌ أَوْسَعُ</span></button>`);
+ const expandersRow=buttons.length?`<dd class="definition-expanders">${buttons.join('')}</dd>`:'';
+ const exRegion=hasEx?`<dd class="definition-region" id="${id}-ex" hidden>${item.examples.map(definitionExampleHtml).join('')}</dd>`:'';
+ const moreRegion=hasMore?`<dd class="definition-region" id="${id}-more" hidden><div class="definition-details-ar" lang="ar">${esc(item.detailsAr)}</div>${item.detailsEn?`<div class="definition-details-en en-only">${esc(item.detailsEn)}</div>`:''}</dd>`:'';
+ return `<div class="definition-card" id="${id}"><dt><span class="definition-term-ar" lang="ar">${esc(item.arTerm)}</span><span class="definition-term-en en-only">${esc(item.enTerm)}</span></dt><dd class="definition-ar" lang="ar">${esc(item.ar)}</dd><dd class="definition-en en-only">${esc(item.en)}</dd>${expandersRow}${exRegion}${moreRegion}<dd class="definition-source"><span class="en-only">Al-Tuḥfah, PDF ${p.length===1?'p.':'pp.'} ${pages}</span><span class="ar-only" lang="ar">التُّحْفَةُ السَّنِيَّةُ، ص ${pages}</span></dd></div>`;
+}
 function renderDefinitionGroup(group,isActive){
- return `<section class="definition-group"${isActive?'':' hidden'}><h3><span class="definition-group-title-ar" lang="ar">${esc(group.ar)}</span><span>${esc(group.en)}</span></h3><dl class="definition-grid">${group.items.map(item=>`<div class="definition-card"><dt><span class="definition-term-ar" lang="ar">${esc(item.arTerm)}</span><span class="definition-term-en">${esc(item.enTerm)}</span></dt><dd class="definition-ar" lang="ar">${esc(item.ar)}</dd><dd class="definition-en">${esc(item.en)}</dd><dd class="definition-source">Al-Tuḥfah, PDF ${item.source.pdfPages.length===1?'p.':'pp.'} ${esc(item.source.pdfPages.join(', '))}</dd></div>`).join('')}</dl></section>`;
+ return `<section class="definition-group"${isActive?'':' hidden'}><h3><span class="definition-group-title-ar" lang="ar">${esc(group.ar)}</span><span class="en-only">${esc(group.en)}</span></h3><dl class="definition-grid">${group.items.map(definitionCardHtml).join('')}</dl></section>`;
 }
 function renderGrammarDefinitions(){
- const count=grammarDefinitionGroups.reduce((total,group)=>total+group.items.length,0);
- byId('definitionsToggle').textContent=`Simple grammar definitions (${count})`;
+ byId('definitionsToggle').textContent=t('definitionsToggle')(grammarDefinitionCount());
  const chapter=activeDefinitionChapter===null?null:grammarDefinitionGroups[activeDefinitionChapter];
- const chapterButtons=grammarDefinitionGroups.map((group,index)=>`<button type="button" class="definition-chapter-button" data-definition-chapter="${index}" aria-pressed="${index===activeDefinitionChapter}"><span class="definition-chapter-button-ar" lang="ar">${esc(group.ar)}</span><span class="definition-chapter-button-en">${esc(group.en)}</span><span class="definition-chapter-count">${group.items.length} terms</span></button>`).join('');
+ const chapterButtons=grammarDefinitionGroups.map((group,index)=>`<button type="button" class="definition-chapter-button" data-definition-chapter="${index}" aria-pressed="${index===activeDefinitionChapter}"><span class="definition-chapter-button-ar" lang="ar">${esc(group.ar)}</span><span class="definition-chapter-button-en en-only">${esc(group.en)}</span><span class="definition-chapter-count"><span class="en-only">${group.items.length} terms</span><span class="ar-only" lang="ar">${group.items.length} مُصْطَلَحًا</span></span></button>`).join('');
  const chapterSections=grammarDefinitionGroups.map((group,index)=>renderDefinitionGroup(group,index===activeDefinitionChapter)).join('');
- byId('definitionsList').innerHTML=`<div class="definition-chapter-intro"><strong>Choose a grammar chapter</strong><span>Select a chapter to see all of its terms and definitions.</span></div><div class="definition-chapter-grid" role="group" aria-label="Grammar chapters">${chapterButtons}</div>${chapter?'':'<div class="definition-chapter-empty">Choose a chapter above to begin.</div>'}${chapterSections}`;
+ byId('definitionsList').innerHTML=`<div class="definition-chapter-intro"><strong><span class="en-only">Choose a grammar chapter</span><span class="ar-only" lang="ar">اِخْتَرْ بَابًا نَحْوِيًّا</span></strong><span><span class="en-only">Select a chapter to see all of its terms and definitions.</span><span class="ar-only" lang="ar">اِخْتَرْ بَابًا لِتَرَى كُلَّ مُصْطَلَحَاتِهِ وَتَعْرِيفَاتِهِ.</span></span></div><div class="definition-chapter-grid" role="group" aria-label="Grammar chapters">${chapterButtons}</div>${chapter?'':`<div class="definition-chapter-empty"><span class="en-only">Choose a chapter above to begin.</span><span class="ar-only" lang="ar">اِخْتَرْ بَابًا مِنَ الْأَعْلَى لِتَبْدَأَ.</span></div>`}${chapterSections}`;
 }
 function selectDefinitionChapter(index){
  if(!Number.isInteger(index)||!grammarDefinitionGroups[index])return;
@@ -1971,9 +2636,9 @@ function render(data,notice=''){
  current=data;
  byId('sentence').textContent=data.sentence;
  byId('translation').textContent=data.translation;
- byId('answers').innerHTML=data.tokens.map(t=>`<article class="word-card${t.target?' target':''}"><div class="word-head"><span class="gloss">${t.target?'<span class="target-note">Focus word</span> ':''}${esc(t.gloss)}</span><span class="word-ar" lang="ar">${esc(t.word)}</span></div><div class="iraab" lang="ar">${esc(t.ar)}</div><div class="english"><strong>English:</strong> ${esc(t.en)}</div>${t.phraseAr?`<div class="phrase-analysis"><div class="phrase-analysis-ar" lang="ar">${esc(t.phraseAr)}</div><div class="phrase-analysis-en"><strong>${esc(t.phraseLabel||'Phrase')}:</strong> ${esc(t.phraseEn)}</div></div>`:''}</article>`).join('');
+ byId('answers').innerHTML=data.tokens.map(tok=>`<article class="word-card${tok.target?' target':''}"><div class="word-head"><span class="gloss">${tok.target?'<span class="target-note en-only">Focus word</span><span class="target-note ar-only" lang="ar">الْكَلِمَةُ الْمُسْتَهْدَفَةُ</span> ':''}<span class="gloss-en en-only">${esc(tok.gloss)}</span></span><span class="word-ar" lang="ar">${esc(tok.word)}</span></div><div class="iraab" lang="ar">${esc(tok.ar)}</div><div class="english en-only"><strong>English:</strong> ${esc(tok.en)}</div>${tok.phraseAr?`<div class="phrase-analysis"><div class="phrase-analysis-ar" lang="ar">${esc(tok.phraseAr)}</div><div class="phrase-analysis-en en-only"><strong>${esc(tok.phraseLabel||'Phrase')}:</strong> ${esc(tok.phraseEn)}</div></div>`:''}</article>`).join('');
  byId('answerPanel').classList.remove('open');
- byId('revealBtn').textContent='Reveal Full Iʿrāb';
+ byId('revealBtn').textContent=revealButtonLabel();
  byId('status').className=notice?'status notice':'status';
  byId('status').textContent=notice;
  recordSentence(data);
@@ -2024,7 +2689,7 @@ function resetFilters(){
 function toggleReveal(){
  const panel=byId('answerPanel');
  panel.classList.toggle('open');
- byId('revealBtn').textContent=panel.classList.contains('open')?'Hide Iʿrāb':'Reveal Full Iʿrāb';
+ byId('revealBtn').textContent=revealButtonLabel();
 }
 byId('newBtn').addEventListener('click',resetFilters);
 byId('nextBtn').addEventListener('click',()=>generate());
@@ -2033,15 +2698,26 @@ byId('historyToggle').addEventListener('click',toggleSentenceHistory);
 byId('clearHistoryBtn').addEventListener('click',clearSentenceHistory);
 byId('definitionsToggle').addEventListener('click',toggleGrammarDefinitions);
 byId('definitionsList').addEventListener('click',event=>{
- const button=event.target?.closest?.('[data-definition-chapter]');
- if(button)selectDefinitionChapter(Number(button.getAttribute('data-definition-chapter')));
+ const chapterBtn=event.target?.closest?.('[data-definition-chapter]');
+ if(chapterBtn){selectDefinitionChapter(Number(chapterBtn.getAttribute('data-definition-chapter')));return}
+ const expandBtn=event.target?.closest?.('.def-expand');
+ if(expandBtn){
+  const region=byId(expandBtn.getAttribute('aria-controls'));
+  const open=expandBtn.getAttribute('aria-expanded')==='true';
+  expandBtn.setAttribute('aria-expanded',String(!open));
+  if(region)region.hidden=open;
+ }
 });
+byId('langMixed').addEventListener('click',()=>setLanguageMode('mixed'));
+byId('langArabic').addEventListener('click',()=>setLanguageMode('arabic'));
 ['startFilter','formFilter','stateFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',handleFilterChange));
 window.nahwGenerate=generate;
 window.nahwReveal=toggleReveal;
+window.nahwSetLanguage=setLanguageMode;
 renderGrammarDefinitions();
 normalizeFilters('automatic');
 generate();
+applyLanguageMode();
 })();
 </script>
 </body>

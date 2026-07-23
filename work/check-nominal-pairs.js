@@ -37,7 +37,12 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   generalVerbActions,
   nounLexicons:{singularPeople,singularThings,places,brokenHuman,brokenThings,duals,smp,sfp,fiveNouns,singularPredicates,dualPredicates,masculinePluralPredicates,femininePluralPredicates,masculineThingPredicates,feminineThingPredicates,ownedNouns},
   verbLexicons:{verbs,additionalVerbActions,humanActions,humanPrepActions,thingActions,thingPrepActions,femininePastActions,brokenObjectActions},
-  objectGroups
+  objectGroups,
+  currentExercise:()=>current,
+  getLanguageMode:()=>languageMode,
+  setLanguageMode,
+  selectDefinitionChapter,
+  UI_TEXT
 };\n${exportNeedle}`);
 
 function assert(condition,message){if(!condition)throw new Error(message)}
@@ -50,10 +55,20 @@ function element(id,value=''){
     classList:{
       add:name=>classes.add(name),remove:name=>classes.delete(name),
       contains:name=>classes.has(name),
-      toggle:name=>classes.has(name)?(classes.delete(name),false):(classes.add(name),true)
+      toggle:(name,force)=>{
+        if(force===true){classes.add(name);return true}
+        if(force===false){classes.delete(name);return false}
+        return classes.has(name)?(classes.delete(name),false):(classes.add(name),true);
+      }
     },
     addEventListener(type,handler){listeners.set(type,handler)},
-    dispatch(type){const handler=listeners.get(type);if(handler)handler({target:this})},
+    dispatch(type,target){const handler=listeners.get(type);if(handler)handler({target:target||this})},
+    closest(selector){
+      if(selector.startsWith('.'))return classes.has(selector.slice(1))?this:null;
+      if(selector.startsWith('#'))return id===selector.slice(1)?this:null;
+      if(selector.startsWith('['))return attributes.has(selector.slice(1,-1).split(/[=\]]/)[0])?this:null;
+      return null;
+    },
     setAttribute(name,value){attributes.set(name,String(value))},
     getAttribute(name){return attributes.get(name)??null}
   };
@@ -74,8 +89,14 @@ const elements={
   historyToggle:element('historyToggle'),historyPanel:element('historyPanel'),
   historyList:element('historyList'),historyEmpty:element('historyEmpty'),
   clearHistoryBtn:element('clearHistoryBtn'),definitionsToggle:element('definitionsToggle'),
-  definitionsPanel:element('definitionsPanel'),definitionsList:element('definitionsList')
+  definitionsPanel:element('definitionsPanel'),definitionsList:element('definitionsList'),
+  langMixed:element('langMixed'),langArabic:element('langArabic'),
+  subtitle:element('subtitle'),practiceTip:element('practiceTip'),practiceEyebrow:element('practiceEyebrow'),
+  answerTitle:element('answerTitle'),startLabel:element('startLabel'),formLabel:element('formLabel'),
+  stateLabel:element('stateLabel'),signLabel:element('signLabel'),
+  historyTitle:element('historyTitle'),historyNote:element('historyNote')
 };
+const bodyElement=element('body');
 for(const [id,values] of Object.entries(optionValues)){
   elements[id].options=values.map(value=>({value,disabled:false}));
 }
@@ -89,7 +110,7 @@ const localStorage={
 };
 const context={
   console,crypto:webcrypto,Uint32Array,Map,Set,Array,Object,String,Number,Math,RangeError,Error,RegExp,
-  localStorage,document:{getElementById:id=>elements[id]}
+  localStorage,document:{getElementById:id=>elements[id],body:bodyElement}
 };
 context.window=context;
 context.globalThis=context;
@@ -334,7 +355,7 @@ api.render(exact);
 const exactVerbalCards=elements.answers.innerHTML.split('<article').slice(1);
 assert(!exactVerbalCards[1].includes('phrase-analysis'),'Rendered verb card contains combined khabar analysis before its object');
 assert(exactVerbalCards[2].includes('مَفْعُولٌ بِهِ مَنْصُوبٌ'),'Rendered object card lost its individual iʿrāb');
-assert(exactVerbalCards[2].indexOf('class="english"')<exactVerbalCards[2].indexOf('class="phrase-analysis"'),'Rendered verbal-sentence analysis does not follow the object’s individual Arabic and English');
+assert(exactVerbalCards[2].indexOf('class="english en-only"')<exactVerbalCards[2].indexOf('class="phrase-analysis"'),'Rendered verbal-sentence analysis does not follow the object’s individual Arabic and English');
 assert(exactVerbalCards[2].includes('<strong>Sentence:</strong>'),'Rendered verbal construction is not labeled as a sentence');
 
 const exactFronted=api.completeNominalAnalysis({
@@ -361,8 +382,8 @@ const exactFrontedCards=elements.answers.innerHTML.split('<article').slice(1);
 assert(!exactFrontedCards[0].includes('phrase-analysis'),'Rendered preposition card contains combined phrase analysis');
 assert(exactFrontedCards[1].includes('اسْمٌ مَخْفُوضٌ بِـ«فِي»'),'Rendered governed noun card does not begin with its individual analysis');
 assert(exactFrontedCards[1].indexOf('class="iraab"')<exactFrontedCards[1].indexOf('class="phrase-analysis"'),'Rendered combined phrase does not follow the noun analysis');
-assert(exactFrontedCards[1].indexOf('class="english"')<exactFrontedCards[1].indexOf('class="phrase-analysis"'),'Rendered combined phrase does not follow the noun English explanation');
-assert(exactFrontedCards[1].includes('class="phrase-analysis-ar"')&&exactFrontedCards[1].includes('class="phrase-analysis-en"'),'Rendered noun card does not separate Arabic and English phrase analysis');
+assert(exactFrontedCards[1].indexOf('class="english en-only"')<exactFrontedCards[1].indexOf('class="phrase-analysis"'),'Rendered combined phrase does not follow the noun English explanation');
+assert(exactFrontedCards[1].includes('class="phrase-analysis-ar"')&&exactFrontedCards[1].includes('class="phrase-analysis-en en-only"'),'Rendered noun card does not separate Arabic and English phrase analysis');
 
 const exactAdverbPhrase=api.completeNominalAnalysis({
   templateId:'TEST_EXACT_ADVERB_PHRASE',sentence:'زَيْدٌ أَمَامَ الْبَيْتِ',translation:'Zayd is in front of the house.',
@@ -520,7 +541,7 @@ const deferredLamCards=elements.answers.innerHTML.split('<article').slice(1);
 assert(!deferredLamCards[1].includes('phrase-analysis'),'Rendered lam card contains combined sentence analysis');
 assert(!deferredLamCards[2].includes('phrase-analysis'),'Rendered five-verb card contains combined analysis before its object');
 assert(deferredLamCards[3].includes('مَفْعُولٌ بِهِ مَنْصُوبٌ'),'Rendered lam example object lost its individual iʿrāb');
-assert(deferredLamCards[3].indexOf('class="english"')<deferredLamCards[3].indexOf('class="phrase-analysis"'),'Rendered lam example combined analysis does not follow the object’s individual analysis');
+assert(deferredLamCards[3].indexOf('class="english en-only"')<deferredLamCards[3].indexOf('class="phrase-analysis"'),'Rendered lam example combined analysis does not follow the object’s individual analysis');
 assert(deferredLamCards[3].includes('<strong>Sentence:</strong>'),'Rendered lam example is not labeled as a sentence-level analysis');
 
 for(const verb of api.verbs){
@@ -1160,6 +1181,207 @@ assert(api.grammarDiagnostics.rejected===rejectedBeforeState,
 // Restore an unrestricted selection for the remaining audit.
 setFilters('any','any','any','any');elements.signFilter.dispatch('change');
 console.log(`Iʿrāb-state-filter audit passed: 56 templates, ${validMatrix.length} valid matrix cells, ${validTuples.length} valid filter tuples, ${stateFilterCases} checks.`);
+
+// ===================================================================================
+// Language-mode audit (presentation only — must NOT touch grammar/generation state).
+// ===================================================================================
+let languageCases=0;
+const historyKey='nahw-sentence-history-v1';
+const langKey='nahw-language-mode-v1';
+const histLen=()=>JSON.parse(storage.get(historyKey)||'[]').length;
+function snapshotState(){
+  const ex=api.currentExercise();
+  return {
+    templateId:ex&&ex.templateId,
+    sentence:elements.sentence.textContent,
+    target:ex&&(ex.tokens.find(t=>t.target)||{}).word,
+    start:elements.startFilter.value,form:elements.formFilter.value,
+    state:elements.stateFilter.value,sign:elements.signFilter.value,
+    history:histLen(),reveal:elements.answerPanel.classList.contains('open'),
+    defsOpen:elements.definitionsPanel.classList.contains('open')
+  };
+}
+// 1-2: both language values exist; default is mixed.
+assert(api.UI_TEXT.mixed&&api.UI_TEXT.arabic,'UI_TEXT is missing a language mode');
+assert(api.getLanguageMode()==='mixed','Default language mode is not mixed');
+languageCases++;
+// Generate a fresh exercise, open reveal + definitions + expand one definition to set up state.
+elements.startFilter.value='any';elements.formFilter.value='any';elements.stateFilter.value='any';elements.signFilter.value='any';
+elements.signFilter.dispatch('change');
+if(!elements.answerPanel.classList.contains('open'))elements.revealBtn.dispatch('click');
+if(!elements.definitionsPanel.classList.contains('open'))elements.definitionsToggle.dispatch('click');
+api.selectDefinitionChapter(0);
+const before=snapshotState();
+assert(before.reveal===true,'Reveal panel was not open before the language switch');
+assert(before.defsOpen===true,'Definitions panel was not open before the language switch');
+// 4-12: mixed -> arabic must not regenerate or change any grammar/app state.
+api.setLanguageMode('arabic');
+const afterAr=snapshotState();
+assert(api.getLanguageMode()==='arabic','Language did not switch to arabic');
+assert(storage.get(langKey)==='arabic','Arabic language choice was not persisted to localStorage');
+['templateId','sentence','target','start','form','state','sign','history','reveal','defsOpen'].forEach(k=>
+  assert(before[k]===afterAr[k],`Language switch mixed->arabic changed ${k}: ${before[k]} -> ${afterAr[k]}`));
+languageCases++;
+// 13-15,17: Arabic-only removes English learning text (via en-only wrapping + swapped labels).
+assert(bodyElement.classList.contains('lang-arabic')&&!bodyElement.classList.contains('lang-mixed'),'Body did not enter lang-arabic');
+assert(elements.answers.innerHTML.includes('class="english en-only"'),'Word iʿrāb English is not wrapped for hiding in Arabic mode');
+assert(elements.answers.innerHTML.includes('class="gloss-en en-only"'),'Word gloss English is not wrapped for hiding in Arabic mode');
+assert(/body\.lang-arabic \.en-only\{display:none\}/.test(html),'CSS does not hide .en-only in Arabic mode');
+assert(/body\.lang-arabic #translation\{display:none\}/.test(html),'CSS does not hide the English sentence translation in Arabic mode');
+assert(elements.revealBtn.textContent===api.UI_TEXT.arabic.reveal||elements.revealBtn.textContent===api.UI_TEXT.arabic.hide,'Reveal button label is not Arabic in Arabic mode');
+assert(elements.newBtn.textContent===api.UI_TEXT.arabic.reset,'Reset button label is not Arabic in Arabic mode');
+assert(elements.startLabel.textContent===api.UI_TEXT.arabic.startLabel&&elements.signLabel.textContent===api.UI_TEXT.arabic.signLabel,'Filter labels are not Arabic in Arabic mode');
+assert(!/[A-Za-z]/.test(elements.newBtn.textContent+elements.startLabel.textContent+elements.stateLabel.textContent),'Arabic-mode control labels still contain Latin letters');
+languageCases++;
+// 16: mixed restores English content/labels.
+api.setLanguageMode('mixed');
+const afterMix=snapshotState();
+['templateId','sentence','target','start','form','state','sign','history','reveal','defsOpen'].forEach(k=>
+  assert(before[k]===afterMix[k],`Language switch arabic->mixed changed ${k}`));
+assert(storage.get(langKey)==='mixed','Mixed language choice was not persisted');
+assert(elements.revealBtn.textContent===api.UI_TEXT.mixed.hide||elements.revealBtn.textContent===api.UI_TEXT.mixed.reveal,'Reveal button did not restore English label');
+assert(elements.newBtn.textContent==='Reset filters','Reset button did not restore English label');
+assert(bodyElement.classList.contains('lang-mixed'),'Body did not return to lang-mixed');
+languageCases++;
+// 10: switching language must not add a history entry.
+assert(before.history===afterAr.history&&afterAr.history===afterMix.history,'Language switching changed the sentence-history length');
+languageCases++;
+console.log(`Language-mode audit passed: ${languageCases} groups, reveal/definitions/filters/target/history all preserved across switches.`);
+
+// ===================================================================================
+// Definitions audit (examples + expanded explanations + accessible expanders).
+// ===================================================================================
+let definitionCases=0;
+const allDefs=api.grammarDefinitionGroups.flatMap(g=>g.items);
+assert(allDefs.length===70,`Expected 70 definitions, found ${allDefs.length}`);
+const stripDia=s=>s.replace(/[ـً-ْٰ]/g,'');
+let totalExamples=0,defsWithDetails=0;
+for(const item of allDefs){
+  assert(item.source&&Array.isArray(item.source.pdfPages)&&item.source.pdfPages.length,`${item.enTerm}: missing source pages`);
+  assert(Array.isArray(item.examples)&&item.examples.length>=1,`${item.enTerm}: has no example`);
+  assert(typeof item.detailsAr==='string'&&item.detailsAr.trim().length>0,`${item.enTerm}: missing detailsAr`);
+  assert(typeof item.detailsEn==='string'&&item.detailsEn.trim().length>0,`${item.enTerm}: missing detailsEn`);
+  assert(typeof item.defId==='string'&&/^def-\d+-\d+$/.test(item.defId),`${item.enTerm}: bad defId`);
+  if(item.detailsAr)defsWithDetails++;
+  for(const ex of item.examples){
+    totalExamples++;
+    ['ar','en','focus','iraabAr','iraabEn'].forEach(k=>assert(ex[k]&&String(ex[k]).trim(),`${item.enTerm}: example missing ${k}`));
+    assert(ex.ar.includes(ex.focus)||stripDia(ex.ar).includes(stripDia(ex.focus)),`${item.enTerm}: focus «${ex.focus}» not in example «${ex.ar}»`);
+  }
+}
+assert(defsWithDetails===70,'Not every definition has an expanded explanation');
+// No duplicate accidental example (ar + iʿrāb) reused across different definitions.
+const exSeen=new Set();
+for(const item of allDefs)for(const ex of item.examples){
+  const key=ex.ar+'||'+ex.iraabAr;
+  assert(!exSeen.has(key),`Duplicate example reused: «${ex.ar}»`);
+  exSeen.add(key);
+}
+definitionCases++;
+// -------------------------------------------------------------------------------------------------
+// Content-accuracy locks (final-perfection audit). These protect corrected TEACHING FACTS, not exact
+// wording. Needles are undiacritized and compared with stripDia() so they are robust to ḥarakāt.
+// -------------------------------------------------------------------------------------------------
+const defByEn=en=>{const d=allDefs.find(x=>x.enTerm===en);assert(d,`Content lock: missing definition «${en}»`);return d;};
+// (1–3) The five verbs are formed only from the PRESENT verb. The waw/alif/yaa cards must tie the rule
+// to al-muḍāriʿ and must not keep the old overbroad claim «…يتكون فعل من الأفعال الخمسة» for any attachment.
+for(const en of ['Plural wāw','Dual alif','Feminine-address yāʾ']){
+  const d=defByEn(en);
+  const bareAr=stripDia(d.detailsAr);
+  assert(bareAr.includes('المضارع'),`Content lock: «${en}» expanded explanation must tie the five verbs to the present verb (al-muḍāriʿ)`);
+  assert(!bareAr.includes('يتكون'),`Content lock: «${en}» still uses the overbroad «يتكون فعل من الأفعال الخمسة» wording`);
+  assert(/present-tense verb/.test(d.detailsEn),`Content lock: «${en}» English explanation must reference the present-tense verb`);
+}
+// (4) Iʿrāb sign: the four secondary-sign kinds must be represented as DISTINCT categories —
+// a vowel, a letter, RETENTION (ثبوت النون), and deletion — plus a substitute vowel (kasrah for
+// fatḥah). The key regression this guards: ثبوت النون must be its own concept, NOT lumped inside
+// the list of letters (the old wording «حروف: …والياء وثبوت النون»). Wording-robust via stripDia.
+{
+  const d=defByEn('Iʿrāb sign');
+  const norm=x=>stripDia(x).replace(/[أإآٱ]/g,'ا'); // also fold hamza-alif to bare alif so needles are robust
+  const bareSimple=norm(d.ar);
+  const bareAr=norm(d.detailsAr);
+  // (a) the SIMPLE definition recognizes retention (ثبوت) as one of the kinds of sign.
+  assert(bareSimple.includes('ثبوت'),'Content lock: Iʿrāb-sign simple definition must recognize retention (ثبوت)');
+  // (b) the expanded explanation names all four secondary kinds (letters / retention / substitute vowel / deletion).
+  for(const kw of ['حروف','ثبوت النون','نيابة','حذف'])
+    assert(bareAr.includes(kw),`Content lock: Iʿrāb-sign explanation must mention «${kw}»`);
+  assert(!bareAr.includes('الفرعية حروف او حذف'),'Content lock: Iʿrāb-sign explanation must not reduce secondary signs to letters-or-deletion');
+  // (c) retention stands as ITS OWN category tied to the rafʿ of the five verbs (not a letter).
+  assert(/ثبوت النون[^.؛]*الافعال الخمسة/.test(bareAr),'Content lock: retention (ثبوت النون) must be its own category for the rafʿ of the five verbs, not one of the letters');
+  // (d) the letters category enumerates alif/wāw/yāʾ and does NOT append ثبوت النون to that list.
+  assert(bareAr.includes('الالف')&&bareAr.includes('الواو')&&bareAr.includes('الياء'),'Content lock: the letters category must list alif, wāw, and yāʾ');
+  assert(!/الياء\s*وثبوت/.test(bareAr),'Content lock: ثبوت النون is wrongly grouped inside the letters (…والياء وثبوت النون)');
+}
+// (5) Bināʾ: must not flatly list demonstratives as mabnī; the dual (هذان/هاتان) is muʿrab.
+{
+  const d=defByEn('Fixed form (bināʾ)');
+  const bareAr=stripDia(d.detailsAr);
+  assert(bareAr.includes('اكثر اسماء الاشارة')||bareAr.includes('هذان'),'Content lock: Bināʾ explanation must qualify demonstratives (dual هذان/هاتان are muʿrab)');
+}
+// (6) Unattached present verb: the visible-ending rule must be limited to the sound-final (صحيح الآخر) class.
+{
+  const d=defByEn('Unattached present verb');
+  assert(stripDia(d.detailsAr).includes('الصحيح'),'Content lock: unattached-present explanation must be limited to ṣaḥīḥ al-ākhir');
+}
+definitionCases++;
+// Rendered markup: expanders, aria attributes, unique ids, hidden regions.
+api.selectDefinitionChapter(2);
+const defsHtml=elements.definitionsList.innerHTML;
+assert((defsHtml.match(/class="definition-card"/g)||[]).length===70,'Not all 70 definition cards rendered');
+assert((defsHtml.match(/class="def-expand"/g)||[]).length>=70,'Expander buttons are missing');
+assert((defsHtml.match(/aria-expanded="false"/g)||[]).length>=70,'Expander aria-expanded attributes are missing');
+assert((defsHtml.match(/aria-controls="def-\d+-\d+-(?:ex|more)"/g)||[]).length>=70,'Expander aria-controls are missing/malformed');
+const idMatches=[...defsHtml.matchAll(/\sid="([^"]+)"/g)].map(m=>m[1]);
+assert(new Set(idMatches).size===idMatches.length,'Rendered definitions contain duplicate DOM ids');
+assert(defsHtml.includes('class="definition-region"')&&/class="definition-region" id="def-\d+-\d+-ex" hidden/.test(defsHtml),'Example regions are not present/hidden by default');
+definitionCases++;
+// Expander toggle behaviour + isolation from grammar (via the real click handler).
+const preExpand=snapshotState();
+const region=element('def-2-0-ex');region.hidden=true;elements['def-2-0-ex']=region;
+const exBtn=element('exBtn');exBtn.classList.add('def-expand');exBtn.setAttribute('aria-controls','def-2-0-ex');exBtn.setAttribute('aria-expanded','false');
+elements.definitionsList.dispatch('click',exBtn);
+assert(exBtn.getAttribute('aria-expanded')==='true'&&region.hidden===false,'Expander did not open its region');
+elements.definitionsList.dispatch('click',exBtn);
+assert(exBtn.getAttribute('aria-expanded')==='false'&&region.hidden===true,'Expander did not close its region');
+const postExpand=snapshotState();
+['sentence','target','start','form','state','sign','history'].forEach(k=>
+  assert(preExpand[k]===postExpand[k],`Expanding a definition changed grammar state ${k}`));
+delete elements['def-2-0-ex'];
+definitionCases++;
+console.log(`Definitions audit passed: 70 definitions, ${totalExamples} examples, ${defsWithDetails} expanded explanations, ${definitionCases} groups.`);
+
+// ===================================================================================
+// Terminology audit — enforce the project's beginner khafḍ terminology everywhere.
+// ===================================================================================
+let terminologyCases=0;
+const forbiddenJarrSign=/عَلَامَةُ جَرّ|جَرِّهِ/;
+function checkTerminology(text,label,requireAgreement){
+  if(forbiddenJarrSign.test(text))throw new Error(`Terminology: ${label} uses جَرّ sign-wording (project uses خفض)`);
+  // Remove the construction name «جار ومجرور» in any case ending before checking for a bare مجرور case-label.
+  const bare=stripDia(text).replace(/(?:ال)?جارا?\s*و(?:ال)?مجرورا?/g,'');
+  if(/مجرور/.test(bare))throw new Error(`Terminology: ${label} uses مجرور as a case label (project uses مخفوض)`);
+  if(requireAgreement){
+    for(const [sign,state] of [['رَفْعِهِ','مَرْفُوع'],['نَصْبِهِ','مَنْصُوب'],['خَفْضِهِ','مَخْفُوض'],['جَزْمِهِ','مَجْزُوم']]){
+      if(text.includes('عَلَامَةُ '+sign))assert(text.includes(state),`Terminology: ${label} has «علامة ${sign}» without matching state «${state}»`);
+    }
+  }
+}
+// Definition simple text + expanded text + example iʿrāb.
+for(const item of allDefs){
+  checkTerminology(item.ar,`def «${item.enTerm}» ar`,false);
+  checkTerminology(item.detailsAr,`def «${item.enTerm}» detailsAr`,false);
+  for(const ex of item.examples){checkTerminology(ex.iraabAr,`def «${item.enTerm}» example iʿrāb`,true);terminologyCases++;}
+}
+// A sample of production exercises' rendered Arabic iʿrāb.
+elements.startFilter.value='any';elements.formFilter.value='any';elements.stateFilter.value='any';elements.signFilter.value='any';
+for(let i=0;i<400;i++){
+  context.nahwGenerate();
+  const ex=api.currentExercise();
+  for(const tk of ex.tokens){checkTerminology(tk.ar,`exercise token`,false);if(tk.phraseAr)checkTerminology(tk.phraseAr,'exercise phrase',false);}
+  terminologyCases++;
+}
+console.log(`Terminology audit passed: ${terminologyCases} checks over definitions, examples, and production exercises.`);
 
 const started=Date.now();
 let nextProgress=started+30000;

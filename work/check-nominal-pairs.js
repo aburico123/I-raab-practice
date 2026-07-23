@@ -42,7 +42,12 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   getLanguageMode:()=>languageMode,
   setLanguageMode,
   selectDefinitionChapter,
-  UI_TEXT
+  UI_TEXT,
+  setAppearanceMode,
+  getAppearanceMode:()=>appearanceMode,
+  loadAppearanceMode,
+  effectiveTheme,
+  applyAppearanceMode
 };\n${exportNeedle}`);
 
 function assert(condition,message){if(!condition)throw new Error(message)}
@@ -94,11 +99,32 @@ const elements={
   subtitle:element('subtitle'),practiceTip:element('practiceTip'),practiceEyebrow:element('practiceEyebrow'),
   answerTitle:element('answerTitle'),startLabel:element('startLabel'),formLabel:element('formLabel'),
   stateLabel:element('stateLabel'),signLabel:element('signLabel'),
-  historyTitle:element('historyTitle'),historyNote:element('historyNote')
+  historyTitle:element('historyTitle'),historyNote:element('historyNote'),
+  apprSystem:element('apprSystem'),apprLight:element('apprLight'),apprDark:element('apprDark')
 };
 const bodyElement=element('body');
+const documentElement=element('documentElement');
+elements.apprSystem.setAttribute('data-appearance','system');
+elements.apprLight.setAttribute('data-appearance','light');
+elements.apprDark.setAttribute('data-appearance','dark');
 for(const [id,values] of Object.entries(optionValues)){
   elements[id].options=values.map(value=>({value,disabled:false}));
+}
+// Controllable matchMedia mock for appearance-mode tests (prefers-color-scheme: dark).
+let __systemPrefersDark=false;
+const __mediaListeners=new Set();
+const __darkMedia={
+  media:'(prefers-color-scheme: dark)',
+  get matches(){return __systemPrefersDark},
+  addEventListener(type,fn){if(type==='change')__mediaListeners.add(fn)},
+  removeEventListener(type,fn){__mediaListeners.delete(fn)},
+  addListener(fn){__mediaListeners.add(fn)},
+  removeListener(fn){__mediaListeners.delete(fn)}
+};
+function matchMedia(query){return __darkMedia}
+function setSystemPrefersDark(value){
+  __systemPrefersDark=!!value;
+  for(const fn of __mediaListeners)fn({matches:__systemPrefersDark,media:'(prefers-color-scheme: dark)'});
 }
 const storage=new Map([['nahw-sentence-history-v1',JSON.stringify([
   {sentence:'جُمْلَةٌ سَابِقَةٌ',translation:'A previously saved sentence.'}
@@ -110,7 +136,7 @@ const localStorage={
 };
 const context={
   console,crypto:webcrypto,Uint32Array,Map,Set,Array,Object,String,Number,Math,RangeError,Error,RegExp,
-  localStorage,document:{getElementById:id=>elements[id],body:bodyElement}
+  localStorage,matchMedia,document:{getElementById:id=>elements[id],body:bodyElement,documentElement}
 };
 context.window=context;
 context.globalThis=context;
@@ -1247,6 +1273,73 @@ languageCases++;
 assert(before.history===afterAr.history&&afterAr.history===afterMix.history,'Language switching changed the sentence-history length');
 languageCases++;
 console.log(`Language-mode audit passed: ${languageCases} groups, reveal/definitions/filters/target/history all preserved across switches.`);
+
+// ===================================================================================
+// Appearance-mode audit — presentation only; must never touch grammar/generation state.
+// ===================================================================================
+let appearanceCases=0;
+const apprKey='nahw-appearance-mode-v1';
+const themeAttr=()=>documentElement.getAttribute('data-theme');
+const apprPressed=id=>elements[id].getAttribute('aria-pressed');
+// 1-2: three valid modes; default is system with its button pressed.
+assert(typeof api.setAppearanceMode==='function'&&typeof api.effectiveTheme==='function','Appearance API was not exported');
+assert(api.getAppearanceMode()==='system','Default appearance mode is not system');
+assert(apprPressed('apprSystem')==='true'&&apprPressed('apprLight')==='false'&&apprPressed('apprDark')==='false','System button is not pressed by default');
+appearanceCases++;
+// 7 + 8: System resolves via matchMedia and reacts LIVE to a simulated OS change (no regenerate).
+setSystemPrefersDark(false);api.setAppearanceMode('system');
+assert(api.effectiveTheme()==='light'&&themeAttr()==='light','System mode with a light OS did not resolve to light');
+setSystemPrefersDark(true);
+assert(api.effectiveTheme()==='dark'&&themeAttr()==='dark','System mode did not follow the OS change to dark');
+setSystemPrefersDark(false);
+assert(api.effectiveTheme()==='light'&&themeAttr()==='light','System mode did not follow the OS change back to light');
+appearanceCases++;
+// 5 + 10: explicit light applies, persists, and ignores a later OS change.
+api.setAppearanceMode('light');
+assert(api.getAppearanceMode()==='light'&&api.effectiveTheme()==='light'&&themeAttr()==='light','Explicit light did not apply');
+assert(storage.get(apprKey)==='light','Light appearance was not persisted');
+assert(apprPressed('apprLight')==='true'&&apprPressed('apprSystem')==='false','Light button is not pressed');
+setSystemPrefersDark(true);
+assert(api.effectiveTheme()==='light'&&themeAttr()==='light','Explicit light was wrongly overridden by an OS change');
+appearanceCases++;
+// 6 + 9: explicit dark applies, persists, and ignores a later OS change.
+api.setAppearanceMode('dark');
+assert(api.getAppearanceMode()==='dark'&&api.effectiveTheme()==='dark'&&themeAttr()==='dark','Explicit dark did not apply');
+assert(storage.get(apprKey)==='dark','Dark appearance was not persisted');
+assert(apprPressed('apprDark')==='true','Dark button is not pressed');
+setSystemPrefersDark(false);
+assert(api.effectiveTheme()==='dark'&&themeAttr()==='dark','Explicit dark was wrongly overridden by an OS change');
+appearanceCases++;
+// 11-23: appearance switching must NOT regenerate or change any grammar/app/language/definition state.
+setSystemPrefersDark(false);api.setAppearanceMode('system');
+const apprLangBefore=api.getLanguageMode();
+const apprDefsBefore=elements.definitionsList.innerHTML;
+const apprStateBefore=snapshotState();
+for(const mode of ['dark','light','system']){
+  api.setAppearanceMode(mode);
+  const s=snapshotState();
+  ['templateId','sentence','target','start','form','state','sign','history','reveal','defsOpen'].forEach(k=>
+    assert(apprStateBefore[k]===s[k],`Appearance switch ->${mode} changed ${k}: ${apprStateBefore[k]} -> ${s[k]}`));
+  assert(api.getLanguageMode()===apprLangBefore,`Appearance switch ->${mode} changed the language mode`);
+  assert(elements.definitionsList.innerHTML===apprDefsBefore,`Appearance switch ->${mode} re-rendered the definitions panel`);
+}
+appearanceCases++;
+// 4: invalid stored/selected value falls back to system.
+api.setAppearanceMode('neon-glow');
+assert(api.getAppearanceMode()==='system','An invalid appearance value did not fall back to system');
+// 24: preference (and safe fallback) survive a simulated reload via the real loader.
+storage.set(apprKey,'dark');assert(api.loadAppearanceMode()==='dark','Saved dark preference did not survive a simulated reload');
+storage.set(apprKey,'garbage');assert(api.loadAppearanceMode()==='system','Corrupted stored value did not fall back to system on reload');
+storage.delete(apprKey);assert(api.loadAppearanceMode()==='system','Missing stored value did not default to system');
+appearanceCases++;
+// 25-26: language and appearance are independent — neither switch resets the other.
+api.setAppearanceMode('dark');api.setLanguageMode('arabic');
+assert(api.getAppearanceMode()==='dark'&&themeAttr()==='dark','Switching language reset the appearance mode');
+api.setAppearanceMode('light');
+assert(api.getLanguageMode()==='arabic','Switching appearance reset the language mode');
+api.setLanguageMode('mixed');api.setAppearanceMode('system');setSystemPrefersDark(false);api.applyAppearanceMode();
+appearanceCases++;
+console.log(`Appearance-mode audit passed: ${appearanceCases} groups; system/light/dark, live OS-change reactions, persistence, and zero state change all verified.`);
 
 // ===================================================================================
 // Definitions audit (examples + expanded explanations + accessible expanders).

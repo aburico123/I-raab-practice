@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nahw Iʿrāb Practice</title>
+<script id="theme-init">
+/* Resolve the saved appearance preference and apply the effective theme before first paint
+   (prevents a bright flash for users who chose dark). Presentation only. */
+(function(){try{
+  var m=localStorage.getItem('nahw-appearance-mode-v1');
+  if(m!=='light'&&m!=='dark'&&m!=='system')m='system';
+  var dark=m==='dark'||(m==='system'&&typeof matchMedia==='function'&&matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
+</script>
 <style>
 :root{
   --bg:#f5f1e8; --card:#fffdf8; --ink:#1f2623; --muted:#68716c;
@@ -135,6 +145,68 @@ body.lang-arabic #translation{display:none}
 .definition-details-en{margin-top:7px;color:#59625d;font-size:13.5px;line-height:1.6}
 @media(prefers-reduced-motion:no-preference){.def-expand,.langbtn{transition:background .15s ease,color .15s ease,border-color .15s ease}}
 @media(max-width:460px){.langbar{gap:8px}.langbar-seg{width:100%}.langbtn{flex:1}}
+/* ---- Appearance control (presentation only) ---- */
+.apprbtn{gap:0}
+.apprbtn .ar-only[lang="ar"]{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:16px}
+@media(prefers-reduced-motion:no-preference){body,.controls,.practice,.word-card,.definition-card,.history-item,.definition-region,select,.langbar,.langbar-seg,.status,.tip{transition:background-color .18s ease,color .18s ease,border-color .18s ease}}
+/* ---- Dark appearance (presentation only — overrides; light rules above are unchanged) ---- */
+:root[data-theme="dark"]{
+  --bg:#191b16; --card:#25271f; --ink:#ece6d8; --muted:#a6a89b;
+  --green:#2f9268; --green-dark:#8ad4ac; --green-soft:#20302a;
+  --gold:#d8a951; --button-blue:#3b82f6; --button-blue-dark:#2f6fd6;
+  --button-yellow:#e6c765; --button-yellow-dark:#d4b552; --line:#3c3f36; --danger:#e98d8d;
+  --surface-raised:#2c2e25; --input-bg:#20221b; --shadow-color:rgba(0,0,0,.42);
+}
+[data-theme="dark"] body{background:linear-gradient(180deg,#1b1d16 0,#15170f 100%)}
+[data-theme="dark"] .controls{background:rgba(37,39,31,.86);box-shadow:0 8px 28px var(--shadow-color)}
+[data-theme="dark"] .control label,[data-theme="dark"] .langbar-label{color:#9ba398}
+[data-theme="dark"] select{background:var(--input-bg);color:var(--ink);border-color:var(--line)}
+[data-theme="dark"] select option{background:#20221b;color:var(--ink)}
+[data-theme="dark"] select option:disabled{color:#6b6f64}
+[data-theme="dark"] select:focus,[data-theme="dark"] button:focus{outline-color:rgba(138,212,172,.4)}
+[data-theme="dark"] #historyToggle,[data-theme="dark"] #definitionsToggle{background:#23251e}
+[data-theme="dark"] #historyToggle:hover,[data-theme="dark"] #historyToggle[aria-expanded="true"],[data-theme="dark"] #definitionsToggle:hover,[data-theme="dark"] #definitionsToggle[aria-expanded="true"]{background:var(--green-soft);border-color:#3f6a52}
+[data-theme="dark"] .history-panel,[data-theme="dark"] .definitions-panel{background:rgba(34,36,28,.92);box-shadow:0 8px 28px var(--shadow-color)}
+[data-theme="dark"] #clearHistoryBtn{background:#2a1e1e;color:#e79a9a;border-color:#5b3a3a}
+[data-theme="dark"] .history-item{background:var(--surface-raised);border-color:#3a3d34}
+[data-theme="dark"] .definitions-intro{background:var(--green-soft);color:#cdd4cb}
+[data-theme="dark"] .definition-chapter-button{background:var(--surface-raised);color:var(--green-dark);border-color:#3d4037}
+[data-theme="dark"] .definition-chapter-button:hover{background:var(--green-soft);border-color:#3f6a52}
+[data-theme="dark"] .definition-chapter-empty{background:#20221b;border-color:#45483d;color:var(--muted)}
+[data-theme="dark"] .definition-group h3{border-bottom-color:#3d4037}
+[data-theme="dark"] .definition-card{background:var(--surface-raised);border-color:#3a3d34}
+[data-theme="dark"] .definition-term-en{color:#99a299}
+[data-theme="dark"] .definition-ar,[data-theme="dark"] .definition-details-ar,[data-theme="dark"] .def-example-iraab{color:#e6e9de}
+[data-theme="dark"] .definition-en{border-top-color:#3a3d34}
+[data-theme="dark"] .definition-source{color:#989188}
+[data-theme="dark"] .tip{background:#20221b;border-color:#474c3e;color:#b7bfb4}
+[data-theme="dark"] #sentence,[data-theme="dark"] .word-ar{color:#63c79c}
+[data-theme="dark"] .word-card{background:var(--surface-raised);border-color:#3a3d34}
+[data-theme="dark"] .word-card.target{box-shadow:0 0 0 3px rgba(216,169,81,.18)}
+[data-theme="dark"] .word-card.target .word-head{background:#332a12}
+[data-theme="dark"] .gloss{color:#a6a89b}
+[data-theme="dark"] .english{border-top-color:#3a3d34;color:#b7bfb4}
+[data-theme="dark"] .phrase-analysis{border-top-color:#2f4b3c;background:#1c2822}
+[data-theme="dark"] .phrase-analysis-en{border-top-color:#2f4b3c;color:#b7bfb4}
+[data-theme="dark"] .target-note{color:#2a2205}
+[data-theme="dark"] .status.notice{background:#17271e;border-color:#2f5b41;color:#9ad9b4}
+[data-theme="dark"] .status.error{background:#2a1616;border-color:#5b3a3a;color:#eba3a3}
+[data-theme="dark"] .footer{color:#8d938a}
+[data-theme="dark"] .langbar{background:rgba(34,36,28,.72)}
+[data-theme="dark"] .langbar-seg{background:#20221b}
+[data-theme="dark"] .langbtn:hover{background:rgba(138,212,172,.12)}
+[data-theme="dark"] .practice{box-shadow:0 14px 40px var(--shadow-color)}
+[data-theme="dark"] .definition-expanders{border-top-color:#3a3d34}
+[data-theme="dark"] .def-expand{background:var(--surface-raised);color:var(--green-dark);border-color:#365043}
+[data-theme="dark"] .def-expand:hover{background:var(--green-soft);border-color:#3f6a52}
+[data-theme="dark"] .definition-region{background:#1c2822;border-color:#2f4b3c}
+[data-theme="dark"] .def-example+.def-example{border-top-color:#2f4b3c}
+[data-theme="dark"] .def-example-ar{color:#8ad4ac}
+[data-theme="dark"] .def-example-focus{color:#b7bfb4}
+[data-theme="dark"] .def-example-en,[data-theme="dark"] .def-example-note{color:#a6a89b}
+[data-theme="dark"] .definition-details-en{color:#b7bfb4}
+/* re-assert active/pressed states so the base dark rules above never override them */
+[data-theme="dark"] .definition-chapter-button[aria-pressed="true"],[data-theme="dark"] .def-expand[aria-expanded="true"]{background:var(--green);border-color:var(--green);color:#fff}
 </style>
 </head>
 <body class="lang-mixed">
@@ -149,6 +221,15 @@ body.lang-arabic #translation{display:none}
     <div class="langbar-seg" role="group" aria-label="Choose language">
       <button id="langMixed" type="button" class="langbtn" aria-pressed="true">Arabic + English</button>
       <button id="langArabic" type="button" class="langbtn" lang="ar" aria-pressed="false">الْعَرَبِيَّةُ فَقَطْ</button>
+    </div>
+  </section>
+
+  <section class="langbar apprbar" aria-label="Appearance">
+    <span class="langbar-label"><span class="en-only">Appearance</span><span class="ar-only" lang="ar">الْمَظْهَرُ</span></span>
+    <div class="langbar-seg" role="group" aria-label="Choose appearance">
+      <button id="apprSystem" type="button" class="langbtn apprbtn" data-appearance="system" aria-pressed="true"><span class="en-only">System</span><span class="ar-only" lang="ar">النِّظَامُ</span></button>
+      <button id="apprLight" type="button" class="langbtn apprbtn" data-appearance="light" aria-pressed="false"><span class="en-only">Light</span><span class="ar-only" lang="ar">فَاتِحٌ</span></button>
+      <button id="apprDark" type="button" class="langbtn apprbtn" data-appearance="dark" aria-pressed="false"><span class="en-only">Dark</span><span class="ar-only" lang="ar">دَاكِنٌ</span></button>
     </div>
   </section>
 
@@ -343,6 +424,35 @@ function setLanguageMode(mode){
  languageMode=next;
  saveLanguageMode();
  applyLanguageMode();
+}
+
+/* ===== Appearance mode (presentation only — never touches grammar/generation) =====
+   Two concepts: the stored PREFERENCE (system/light/dark) and the EFFECTIVE theme (light/dark).
+   System resolves via prefers-color-scheme and reacts to live OS changes; explicit light/dark ignore the OS. */
+const APPEARANCE_KEY='nahw-appearance-mode-v1';
+const APPEARANCE_VALUES=['system','light','dark'];
+function loadAppearanceMode(){try{const v=globalThis.localStorage?.getItem(APPEARANCE_KEY);return APPEARANCE_VALUES.includes(v)?v:'system'}catch{return 'system'}}
+let appearanceMode=loadAppearanceMode();
+function saveAppearanceMode(){try{globalThis.localStorage?.setItem(APPEARANCE_KEY,appearanceMode)}catch{}}
+const darkMediaQuery=(typeof globalThis.matchMedia==='function')?globalThis.matchMedia('(prefers-color-scheme: dark)'):null;
+function systemPrefersDark(){return darkMediaQuery?!!darkMediaQuery.matches:false}
+function effectiveTheme(){return appearanceMode==='system'?(systemPrefersDark()?'dark':'light'):appearanceMode}
+function applyAppearanceMode(){
+ document.documentElement.setAttribute('data-theme',effectiveTheme());
+ for(const id of ['apprSystem','apprLight','apprDark']){
+  const el=byId(id);
+  if(el)el.setAttribute('aria-pressed',String(el.getAttribute('data-appearance')===appearanceMode));
+ }
+}
+function setAppearanceMode(mode){
+ appearanceMode=APPEARANCE_VALUES.includes(mode)?mode:'system';
+ saveAppearanceMode();
+ applyAppearanceMode();
+}
+if(darkMediaQuery){
+ const onSystemThemeChange=()=>{if(appearanceMode==='system')applyAppearanceMode()};
+ if(typeof darkMediaQuery.addEventListener==='function')darkMediaQuery.addEventListener('change',onSystemThemeChange);
+ else if(typeof darkMediaQuery.addListener==='function')darkMediaQuery.addListener(onSystemThemeChange);
 }
 
 const SENTENCE_HISTORY_KEY='nahw-sentence-history-v1';
@@ -2710,14 +2820,19 @@ byId('definitionsList').addEventListener('click',event=>{
 });
 byId('langMixed').addEventListener('click',()=>setLanguageMode('mixed'));
 byId('langArabic').addEventListener('click',()=>setLanguageMode('arabic'));
+byId('apprSystem').addEventListener('click',()=>setAppearanceMode('system'));
+byId('apprLight').addEventListener('click',()=>setAppearanceMode('light'));
+byId('apprDark').addEventListener('click',()=>setAppearanceMode('dark'));
 ['startFilter','formFilter','stateFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',handleFilterChange));
 window.nahwGenerate=generate;
 window.nahwReveal=toggleReveal;
 window.nahwSetLanguage=setLanguageMode;
+window.nahwSetAppearance=setAppearanceMode;
 renderGrammarDefinitions();
 normalizeFilters('automatic');
 generate();
 applyLanguageMode();
+applyAppearanceMode();
 })();
 </script>
 </body>

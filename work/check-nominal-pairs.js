@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,sign})=>({id,stableId,starts,form,sign})),
+  templates:templates.map(({id,stableId,starts,form,state,sign})=>({id,stableId,starts,form,state,sign})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   poolFor,
@@ -62,10 +62,12 @@ function element(id,value=''){
 const optionValues={
   startFilter:['any','noun','verb','particle'],
   formFilter:['any','singular','broken','dual','smp','sfp','fiveNouns','present','fiveVerbs'],
+  stateFilter:['any','raf','nasb','jarr','jazm'],
   signFilter:['any','damma','fatha','kasra','sukun','alif','waw','ya','kasraSub','nunKept','nunDropped']
 };
 const elements={
   startFilter:element('startFilter','any'),formFilter:element('formFilter','any'),
+  stateFilter:element('stateFilter','any'),
   signFilter:element('signFilter','any'),sentence:element('sentence'),translation:element('translation'),
   answers:element('answers'),answerPanel:element('answerPanel'),revealBtn:element('revealBtn'),
   status:element('status'),newBtn:element('newBtn'),nextBtn:element('nextBtn'),
@@ -714,7 +716,7 @@ function runEveryTemplate(repetitions){
   for(const template of api.templates){
     for(let iteration=0;iteration<repetitions;iteration++){
       const data=api.buildTemplate(template.id);
-      assertNominalPair(data,`template ${template.id} ${template.starts}/${template.form}/${template.sign} run ${iteration}`);
+      assertNominalPair(data,`template ${template.id} ${template.starts}/${template.form}/${template.state}/${template.sign} run ${iteration}`);
       stats.sentences++;
     }
   }
@@ -770,36 +772,44 @@ assert(generatedMarketTeacher,'The exact market/teacher sentence was not reached
 
 const starts=optionValues.startFilter;
 const forms=optionValues.formFilter;
+const statesOpt=optionValues.stateFilter;
 const signs=optionValues.signFilter;
 function isDisabled(id,value){
   return elements[id].options.find(option=>option.value===value).disabled;
 }
 for(const start of starts){
   for(const form of forms){
-    for(const sign of signs){
-      const pool=api.poolFor(start,form,sign);
-      if(!pool.length)continue;
-      stats.filterStates++;
-      elements.startFilter.value=start;
-      elements.formFilter.value=form;
-      elements.signFilter.value=sign;
-      elements.signFilter.dispatch('change');
-      assert(elements.startFilter.value===start&&elements.formFilter.value===form&&elements.signFilter.value===sign,
-        `Valid filters were reset: ${start}/${form}/${sign}`);
-      assert(elements.sentence.textContent,`No rendered sentence for ${start}/${form}/${sign}`);
-      assert((elements.answers.innerHTML.match(/class="word-card/g)||[]).length>=2,
-        `Incomplete rendered analysis for ${start}/${form}/${sign}`);
-      for(const candidate of starts){
-        assert(isDisabled('startFilter',candidate)===(api.poolFor(candidate,form,sign).length===0),
-          `Wrong start availability for ${start}/${form}/${sign} -> ${candidate}`);
-      }
-      for(const candidate of forms){
-        assert(isDisabled('formFilter',candidate)===(api.poolFor(start,candidate,sign).length===0),
-          `Wrong form availability for ${start}/${form}/${sign} -> ${candidate}`);
-      }
-      for(const candidate of signs){
-        assert(isDisabled('signFilter',candidate)===(api.poolFor(start,form,candidate).length===0),
-          `Wrong sign availability for ${start}/${form}/${sign} -> ${candidate}`);
+    for(const state of statesOpt){
+      for(const sign of signs){
+        const pool=api.poolFor(start,form,state,sign);
+        if(!pool.length)continue;
+        stats.filterStates++;
+        elements.startFilter.value=start;
+        elements.formFilter.value=form;
+        elements.stateFilter.value=state;
+        elements.signFilter.value=sign;
+        elements.signFilter.dispatch('change');
+        assert(elements.startFilter.value===start&&elements.formFilter.value===form&&elements.stateFilter.value===state&&elements.signFilter.value===sign,
+          `Valid filters were reset: ${start}/${form}/${state}/${sign}`);
+        assert(elements.sentence.textContent,`No rendered sentence for ${start}/${form}/${state}/${sign}`);
+        assert((elements.answers.innerHTML.match(/class="word-card/g)||[]).length>=2,
+          `Incomplete rendered analysis for ${start}/${form}/${state}/${sign}`);
+        for(const candidate of starts){
+          assert(isDisabled('startFilter',candidate)===(api.poolFor(candidate,form,state,sign).length===0),
+            `Wrong start availability for ${start}/${form}/${state}/${sign} -> ${candidate}`);
+        }
+        for(const candidate of forms){
+          assert(isDisabled('formFilter',candidate)===(api.poolFor(start,candidate,state,sign).length===0),
+            `Wrong form availability for ${start}/${form}/${state}/${sign} -> ${candidate}`);
+        }
+        for(const candidate of statesOpt){
+          assert(isDisabled('stateFilter',candidate)===(api.poolFor(start,form,candidate,sign).length===0),
+            `Wrong state availability for ${start}/${form}/${state}/${sign} -> ${candidate}`);
+        }
+        for(const candidate of signs){
+          assert(isDisabled('signFilter',candidate)===(api.poolFor(start,form,state,candidate).length===0),
+            `Wrong sign availability for ${start}/${form}/${state}/${sign} -> ${candidate}`);
+        }
       }
     }
   }
@@ -808,10 +818,12 @@ for(const start of starts){
 elements.clearHistoryBtn.dispatch('click');
 elements.startFilter.value='particle';
 elements.formFilter.value='fiveNouns';
-elements.signFilter.value='ya';
+elements.stateFilter.value='nasb';
+elements.signFilter.value='alif';
 elements.newBtn.dispatch('click');
 assert(elements.startFilter.value==='any','Reset Filters did not restore Any beginning');
 assert(elements.formFilter.value==='any','Reset Filters did not restore All forms');
+assert(elements.stateFilter.value==='any','Reset Filters did not restore All states');
 assert(elements.signFilter.value==='any','Reset Filters did not restore All signs');
 assert(Object.keys(optionValues).every(id=>elements[id].options.every(option=>!option.disabled)),
   'Reset Filters did not re-enable all compatible options');
@@ -828,6 +840,7 @@ assert(html.indexOf('id="definitionsToggle"')>html.indexOf('id="historyToggle"')
 
 elements.startFilter.value='any';
 elements.formFilter.value='any';
+elements.stateFilter.value='any';
 elements.signFilter.value='any';
 elements.signFilter.dispatch('change');
 const rejectedBeforeRandom=api.grammarDiagnostics.rejected;
@@ -869,6 +882,7 @@ const additionalRecords=[...additionalBlock.matchAll(/\{past:'([^']+)',pres:'([^
 assert(additionalRecords.length===176,`Expected 176 additional verb records, found ${additionalRecords.length}`);
 elements.startFilter.value='verb';
 elements.formFilter.value='singular';
+elements.stateFilter.value='any';
 elements.signFilter.value='damma';
 elements.signFilter.dispatch('change');
 const pastStarts=new Set();
@@ -880,6 +894,7 @@ const additionalPastSeen=additionalRecords.filter(record=>pastStarts.has(record.
 assert(additionalPastSeen===176,`Only ${additionalPastSeen} of 176 added past verbs appeared`);
 elements.startFilter.value='noun';
 elements.formFilter.value='singular';
+elements.stateFilter.value='any';
 elements.signFilter.value='fatha';
 elements.signFilter.dispatch('change');
 const presentSentences=[];
@@ -960,6 +975,191 @@ for(const noun of addedNounEntries){
   assert(reachableNounSurfaces.has(noun.nom),`${noun.en}: newly added noun is not reachable through any generation pool`);
 }
 console.log(`Vocabulary-expansion lexical audit passed: ${addedNounEntries.length} nouns, ${addedAdjectives.length} adjectives, ${addedVerbLexemes.length} verb families checked.`);
+
+// ===================================================================================
+// Iʿrāb-state-filter audit (added with the state filter). The word-level filters
+// form/state/sign must all describe the SAME single focus token; state is taken from
+// the token's real grammatical structure and is never inferred from the sign.
+// ===================================================================================
+function focusFormOf(tk){return tk.grammar&&tk.grammar.type==='verb'?(tk.inflection==='afalKhamsa'?'fiveVerbs':'present'):tk.inflection}
+function setFilters(start,form,state,sign){
+  elements.startFilter.value=start;elements.formFilter.value=form;
+  elements.stateFilter.value=state;elements.signFilter.value=sign;
+}
+let stateFilterCases=0;
+
+// --- Test A: the state filter offers exactly the five intended options, in order. ---
+assert(JSON.stringify(optionValues.stateFilter)===JSON.stringify(['any','raf','nasb','jarr','jazm']),
+  'stateFilter option set is not exactly any/raf/nasb/jarr/jazm');
+const stateSelectBlock=html.match(/<select id="stateFilter">([\s\S]*?)<\/select>/);
+assert(stateSelectBlock,'The stateFilter select is missing from the HTML');
+const stateOptionValues=[...stateSelectBlock[1].matchAll(/value="([^"]+)"/g)].map(m=>m[1]);
+assert(JSON.stringify(stateOptionValues)===JSON.stringify(['any','raf','nasb','jarr','jazm']),
+  'The HTML stateFilter options are not exactly any/raf/nasb/jarr/jazm in order');
+['الرَّفْعُ','النَّصْبُ','الْخَفْضُ','الْجَزْمُ'].forEach(label=>
+  assert(stateSelectBlock[1].includes(label),`stateFilter is missing the Arabic label ${label}`));
+stateFilterCases++;
+
+// --- Test B: poolFor(start,form,state,sign) — every returned template satisfies all four dimensions. ---
+for(const start of optionValues.startFilter){
+  for(const form of optionValues.formFilter){
+    for(const state of optionValues.stateFilter){
+      for(const sign of optionValues.signFilter){
+        for(const t of api.poolFor(start,form,state,sign)){
+          assert((start==='any'||t.starts===start)&&(form==='any'||t.form===form)&&(state==='any'||t.state===state)&&(sign==='any'||t.sign===sign),
+            `poolFor(${start},${form},${state},${sign}) returned a non-matching template ${t.stableId}`);
+          stateFilterCases++;
+        }
+      }
+    }
+  }
+}
+
+// --- Test C: every production template has exactly one target whose real form/state/sign
+//     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
+assert(api.templates.length===56,`Expected 56 production templates, found ${api.templates.length}`);
+for(const t of api.templates){
+  for(let i=0;i<40;i++){
+    const data=api.buildTemplate(t.id);
+    const targets=data.tokens.filter(tok=>tok.target);
+    assert(targets.length===1,`Template ${t.stableId} does not have exactly one target`);
+    const tk=targets[0];
+    assert(focusFormOf(tk)===t.form,`Template ${t.stableId}: target form ${focusFormOf(tk)} != metadata ${t.form}`);
+    assert(tk.state===t.state,`Template ${t.stableId}: target state ${tk.state} != metadata ${t.state}`);
+    assert(tk.sign.id===t.sign,`Template ${t.stableId}: target sign ${tk.sign.id} != metadata ${t.sign}`);
+    stateFilterCases++;
+  }
+}
+
+// --- Test C (negative): corrupted template metadata must be rejected even when the
+//     surface sign is unchanged (e.g. a genuine dual naṣb target relabelled as khafḍ). ---
+const genuineDualNasb=api.buildTemplate(api.poolFor('any','dual','nasb','ya')[0].id);
+assert(api.validateExercise(genuineDualNasb).length===0,'A genuine dual/nasb/ya exercise did not validate cleanly');
+assert(api.validateExercise({...genuineDualNasb,templateState:'jarr'}).some(f=>f.code==='E_TARGET_STATE'),
+  'Metadata state nasb->jarr (same yāʾ sign) was not rejected by E_TARGET_STATE');
+assert(api.validateExercise({...genuineDualNasb,templateSign:'alif'}).some(f=>f.code==='E_TARGET_SIGN'),
+  'Metadata sign ya->alif was not rejected by E_TARGET_SIGN');
+assert(api.validateExercise({...genuineDualNasb,templateForm:'singular'}).some(f=>f.code==='E_TARGET_FORM'),
+  'Metadata form dual->singular was not rejected by E_TARGET_FORM');
+stateFilterCases+=4;
+
+// --- Test D: same sign, different state, must stay distinct template identities. ---
+function soleTargetState(pool){
+  assert(pool.length>=1,'Expected at least one template for a same-sign/different-state case');
+  const data=api.buildTemplate(pool[0].id);
+  const tk=data.tokens.find(tok=>tok.target);
+  return {state:tk.state,sign:tk.sign.id};
+}
+const dualNasbYa=soleTargetState(api.poolFor('any','dual','nasb','ya'));
+const dualJarrYa=soleTargetState(api.poolFor('any','dual','jarr','ya'));
+assert(dualNasbYa.sign==='ya'&&dualJarrYa.sign==='ya'&&dualNasbYa.state==='nasb'&&dualJarrYa.state==='jarr',
+  'Dual nasb+ya and jarr+ya are not distinct accusative/genitive targets');
+const smpNasbYa=soleTargetState(api.poolFor('any','smp','nasb','ya'));
+const smpJarrYa=soleTargetState(api.poolFor('any','smp','jarr','ya'));
+assert(smpNasbYa.state==='nasb'&&smpJarrYa.state==='jarr','SMP nasb+ya and jarr+ya are not distinct');
+const fvNasb=soleTargetState(api.poolFor('any','fiveVerbs','nasb','nunDropped'));
+const fvJazm=soleTargetState(api.poolFor('any','fiveVerbs','jazm','nunDropped'));
+assert(fvNasb.sign==='nunDropped'&&fvJazm.sign==='nunDropped'&&fvNasb.state==='nasb'&&fvJazm.state==='jazm',
+  'Five-verb nasb+nunDropped and jazm+nunDropped are not distinct');
+stateFilterCases+=3;
+
+// --- Test E: grammatically impossible combinations must return no templates. ---
+const impossible=[
+  ['any','singular','jazm','any'],['any','broken','jazm','any'],['any','dual','jazm','any'],
+  ['any','smp','jazm','any'],['any','sfp','jazm','any'],['any','fiveNouns','jazm','any'],
+  ['any','present','jarr','any'],['any','fiveVerbs','jarr','any'],
+  // invalid form/sign pairings
+  ['any','singular','any','ya'],['any','dual','any','damma'],['any','present','any','ya'],
+  ['any','fiveVerbs','any','damma'],['any','sfp','nasb','fatha'],['any','dual','raf','ya']
+];
+for(const [s,f,st,sg] of impossible){
+  assert(api.poolFor(s,f,st,sg).length===0,`Impossible combination produced templates: ${f}/${st}/${sg}`);
+  stateFilterCases++;
+}
+
+// --- Test F: every intended valid matrix cell has at least one production template. ---
+const validMatrix=[
+  ['singular','raf','damma'],['singular','nasb','fatha'],['singular','jarr','kasra'],
+  ['broken','raf','damma'],['broken','nasb','fatha'],['broken','jarr','kasra'],
+  ['dual','raf','alif'],['dual','nasb','ya'],['dual','jarr','ya'],
+  ['smp','raf','waw'],['smp','nasb','ya'],['smp','jarr','ya'],
+  ['sfp','raf','damma'],['sfp','nasb','kasraSub'],['sfp','jarr','kasra'],
+  ['fiveNouns','raf','waw'],['fiveNouns','nasb','alif'],['fiveNouns','jarr','ya'],
+  ['present','raf','damma'],['present','nasb','fatha'],['present','jazm','sukun'],
+  ['fiveVerbs','raf','nunKept'],['fiveVerbs','nasb','nunDropped'],['fiveVerbs','jazm','nunDropped']
+];
+for(const [f,st,sg] of validMatrix){
+  assert(api.poolFor('any',f,st,sg).length>=1,`Missing production template for valid cell ${f}/${st}/${sg}`);
+  stateFilterCases++;
+}
+
+// --- Test G: representative selections disable exactly the impossible dependent options. ---
+function refreshVia(start,form,state,sign){setFilters(start,form,state,sign);elements.signFilter.dispatch('change');}
+refreshVia('any','any','jazm','any');
+['singular','broken','dual','smp','sfp','fiveNouns'].forEach(f=>
+  assert(isDisabled('formFilter',f),`state=jazm did not disable noun form ${f}`));
+['present','fiveVerbs'].forEach(f=>assert(!isDisabled('formFilter',f),`state=jazm wrongly disabled verb form ${f}`));
+refreshVia('any','dual','raf','any');
+assert(isDisabled('signFilter','ya'),'dual+raf did not disable sign ya');
+assert(!isDisabled('signFilter','alif'),'dual+raf wrongly disabled sign alif');
+refreshVia('any','dual','nasb','any');
+assert(!isDisabled('signFilter','ya'),'dual+nasb wrongly disabled sign ya');
+assert(isDisabled('signFilter','alif'),'dual+nasb did not disable sign alif');
+refreshVia('any','fiveVerbs','jazm','any');
+assert(!isDisabled('signFilter','nunDropped'),'fiveVerbs+jazm wrongly disabled nunDropped');
+assert(isDisabled('signFilter','nunKept'),'fiveVerbs+jazm did not disable nunKept');
+stateFilterCases++;
+
+// --- Test H: changing one filter resets only the incompatible dependent value(s). ---
+// Change state on a dual/nasb/ya selection to raf -> keep form+state, reset only the sign.
+setFilters('any','dual','nasb','ya');elements.stateFilter.value='raf';elements.stateFilter.dispatch('change');
+assert(elements.formFilter.value==='dual'&&elements.stateFilter.value==='raf'&&elements.signFilter.value==='any',
+  `Changing state did not minimally reset: got form=${elements.formFilter.value} state=${elements.stateFilter.value} sign=${elements.signFilter.value}`);
+assert(/Iʿrāb sign/.test(elements.status.textContent),'The state-change reset notice did not name the Iʿrāb sign');
+// Change sign on a dual/nasb/ya selection to alif -> keep form+sign, reset only the state.
+setFilters('any','dual','nasb','ya');elements.signFilter.value='alif';elements.signFilter.dispatch('change');
+assert(elements.formFilter.value==='dual'&&elements.signFilter.value==='alif'&&elements.stateFilter.value==='any',
+  `Changing sign did not minimally reset: got form=${elements.formFilter.value} state=${elements.stateFilter.value} sign=${elements.signFilter.value}`);
+// Change form on a dual/raf/alif selection to singular -> keep form+state, reset only the sign.
+setFilters('any','dual','raf','alif');elements.formFilter.value='singular';elements.formFilter.dispatch('change');
+assert(elements.formFilter.value==='singular'&&elements.stateFilter.value==='raf'&&elements.signFilter.value==='any',
+  `Changing form did not minimally reset: got form=${elements.formFilter.value} state=${elements.stateFilter.value} sign=${elements.signFilter.value}`);
+// Unrelated start filter must be preserved across a word-level reset.
+setFilters('noun','dual','nasb','ya');elements.stateFilter.value='raf';elements.stateFilter.dispatch('change');
+assert(elements.startFilter.value==='noun','A word-level reset wrongly wiped the sentence-start filter');
+stateFilterCases++;
+
+// --- Test I: randomized generation with state filters set never violates the filters. ---
+const validTuples=[];
+for(const start of optionValues.startFilter)for(const form of optionValues.formFilter)
+  for(const state of optionValues.stateFilter)for(const sign of optionValues.signFilter)
+    if(api.poolFor(start,form,state,sign).length)validTuples.push([start,form,state,sign]);
+const rejectedBeforeState=api.grammarDiagnostics.rejected;
+for(let iteration=0;iteration<400;iteration++){
+  const [start,form,state,sign]=validTuples[Math.floor(Math.random()*validTuples.length)];
+  setFilters(start,form,state,sign);
+  elements.signFilter.dispatch('change');
+  assert(elements.sentence.textContent,`No sentence for state-filtered selection ${start}/${form}/${state}/${sign}`);
+  // Selected filters must be preserved (this tuple is valid, so nothing should reset).
+  assert(elements.startFilter.value===start&&elements.formFilter.value===form&&elements.stateFilter.value===state&&elements.signFilter.value===sign,
+    `A valid state-filtered selection was reset: ${start}/${form}/${state}/${sign}`);
+  // Structural guarantee: every template that could have produced it satisfies the tuple.
+  for(const t of api.poolFor(start,form,state,sign)){
+    const data=api.buildTemplate(t.id);
+    const tgts=data.tokens.filter(tok=>tok.target);
+    assert(tgts.length===1,`State-filtered template ${t.stableId} lacks a unique target`);
+    const tk=tgts[0];
+    assert(form==='any'||focusFormOf(tk)===form,`Target form violates filter for ${t.stableId}`);
+    assert(state==='any'||tk.state===state,`Target state violates filter for ${t.stableId}`);
+    assert(sign==='any'||tk.sign.id===sign,`Target sign violates filter for ${t.stableId}`);
+  }
+  stateFilterCases++;
+}
+assert(api.grammarDiagnostics.rejected===rejectedBeforeState,
+  `State-filtered generation produced ${api.grammarDiagnostics.rejected-rejectedBeforeState} validation rejections`);
+// Restore an unrestricted selection for the remaining audit.
+setFilters('any','any','any','any');elements.signFilter.dispatch('change');
+console.log(`Iʿrāb-state-filter audit passed: 56 templates, ${validMatrix.length} valid matrix cells, ${validTuples.length} valid filter tuples, ${stateFilterCases} checks.`);
 
 const started=Date.now();
 let nextProgress=started+30000;

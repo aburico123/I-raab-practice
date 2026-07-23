@@ -17,7 +17,7 @@ body{margin:0;background:linear-gradient(180deg,#f8f5ef 0,#f2ede3 100%);color:va
 header{text-align:center;padding:14px 8px 18px}
 h1{margin:0;font-size:clamp(28px,5vw,42px);letter-spacing:-.03em}
 .subtitle{margin:8px auto 0;max-width:720px;color:var(--muted);line-height:1.55}
-.controls{background:rgba(255,253,248,.86);border:1px solid var(--line);border-radius:20px;padding:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;box-shadow:0 8px 28px rgba(39,45,41,.06)}
+.controls{background:rgba(255,253,248,.86);border:1px solid var(--line);border-radius:20px;padding:14px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;box-shadow:0 8px 28px rgba(39,45,41,.06)}
 .control label{display:block;font-size:12px;font-weight:800;color:#58615c;margin:0 0 6px 3px;text-transform:uppercase;letter-spacing:.06em}
 select,button{width:100%;font:inherit;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);padding:12px 13px;min-height:48px}
 select:focus,button:focus{outline:3px solid rgba(31,101,75,.17);border-color:var(--green)}
@@ -100,7 +100,7 @@ button{font-weight:850;cursor:pointer}
 .status.notice{display:block;background:#eef7f1;border:1px solid #b9d8c5;color:var(--green-dark)}
 .status.error{display:block;background:#fff0f0;border:1px solid #e3bebe;color:var(--danger)}
 .footer{text-align:center;color:#7a817d;font-size:13px;line-height:1.5;margin:14px 0 4px}
-@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}.history-head{align-items:flex-start}.definition-chapter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.definition-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.controls #newBtn{grid-column:1/-1}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}.history-head{align-items:flex-start}.definition-chapter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.definition-grid{grid-template-columns:1fr}}
 @media(max-width:460px){.controls{grid-template-columns:1fr}.definition-chapter-intro{align-items:flex-start;flex-direction:column;gap:3px}.definition-chapter-intro span{text-align:left}.definition-chapter-grid{grid-template-columns:1fr}.definition-chapter-button{min-height:82px}#sentence{font-size:36px}.iraab{font-size:19px}}
 </style>
 </head>
@@ -136,6 +136,16 @@ button{font-weight:850;cursor:pointer}
       </select>
     </div>
     <div class="control">
+      <label for="stateFilter">Iʿrāb state</label>
+      <select id="stateFilter">
+        <option value="any">All states</option>
+        <option value="raf">الرَّفْعُ</option>
+        <option value="nasb">النَّصْبُ</option>
+        <option value="jarr">الْخَفْضُ</option>
+        <option value="jazm">الْجَزْمُ</option>
+      </select>
+    </div>
+    <div class="control">
       <label for="signFilter">Iʿrāb sign</label>
       <select id="signFilter">
         <option value="any">All signs</option>
@@ -158,7 +168,7 @@ button{font-weight:850;cursor:pointer}
     <div class="eyebrow">Practice sentence</div>
     <div id="sentence" lang="ar">الطَّالِبُ مُجْتَهِدٌ</div>
     <div id="translation">The student is hardworking.</div>
-    <div class="tip">Say the complete iʿrāb of <strong>every word</strong>. The gold card after revealing is the word that matches your selected form and sign.</div>
+    <div class="tip">Say the complete iʿrāb of <strong>every word</strong>. The gold card after revealing is the word that matches your selected form, state, and sign.</div>
     <div class="actions">
       <button id="revealBtn" type="button">Reveal Full Iʿrāb</button>
       <button id="nextBtn" type="button">New Sentence</button>
@@ -1641,6 +1651,16 @@ function validateExercise(data){
  if(!data.translation||data.translation.includes('undefined'))fail('E_TRANSLATION','Exercise has no valid English translation.');
  if(data.sentence!==data.tokens.map(item=>item.word).join(' '))fail('E_SENTENCE_SURFACE','Displayed sentence does not match its token surfaces.');
  if(data.tokens.filter(item=>item.target).length!==1)fail('E_FOCUS_COUNT','Exercise must contain exactly one focus token.');
+ // The word-level filters (form/state/sign) must all describe the SAME single focus token.
+ // The state is taken from the token's actual grammatical structure, never inferred from the sign.
+ const focusTokens=data.tokens.filter(item=>item.target);
+ if(focusTokens.length===1&&(data.templateForm||data.templateState||data.templateSign)){
+  const focus=focusTokens[0];
+  const focusForm=focus.grammar?.type==='verb'?(focus.inflection==='afalKhamsa'?'fiveVerbs':'present'):focus.inflection;
+  if(data.templateForm&&focusForm!==data.templateForm)fail('E_TARGET_FORM',`Focus form ${focusForm} disagrees with the template's declared form ${data.templateForm}.`,focus);
+  if(data.templateState&&focus.state!==data.templateState)fail('E_TARGET_STATE',`Focus state ${focus.state} disagrees with the template's declared state ${data.templateState}.`,focus);
+  if(data.templateSign&&focus.sign?.id!==data.templateSign)fail('E_TARGET_SIGN',`Focus sign ${focus.sign?.id} disagrees with the template's declared sign ${data.templateSign}.`,focus);
+ }
  data.tokens.forEach(token=>{
   if(!['noun','verb','particle'].includes(token.grammar?.type))fail('E_GRAMMAR_TYPE','Token has an unknown grammar type.',token);
   if(!token.id||!token.ruleId||!token.ar||!token.en)fail('E_TOKEN_INCOMPLETE','Token metadata or explanation is incomplete.',token);
@@ -1766,8 +1786,8 @@ function completeNominalAnalysis(data){
 
 const templates=[];
 const templateIdCounts=new Map();
-function add(starts,form,sign,build){
- const family=`${starts}_${form}_${sign}`.toUpperCase().replace(/[^A-Z0-9]+/g,'_');
+function add(starts,form,state,sign,build){
+ const family=`${starts}_${form}_${state}_${sign}`.toUpperCase().replace(/[^A-Z0-9]+/g,'_');
  const ordinal=(templateIdCounts.get(family)||0)+1;
  templateIdCounts.set(family,ordinal);
  const stableId=`T_${family}_${String(ordinal).padStart(2,'0')}`;
@@ -1776,8 +1796,9 @@ function add(starts,form,sign,build){
   stableId,
   starts,
   form,
+  state,
   sign,
-  build(){return{...build(),templateId:stableId}}
+  build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
 }
 const VISIBLE_DAMMA='الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ';
@@ -1785,78 +1806,80 @@ const VISIBLE_FATHA='الْفَتْحَةُ الظَّاهِرَةُ عَلَى 
 const VISIBLE_KASRA='الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ';
 
 // Singular nouns
-add('noun','singular','damma',()=>{const s=pickPerson(),a=pickVaried(singularPredicates,'singular-predicates',x=>x.nom);return{sentence:`${s.nom} ${a.nom}`,translation:`${cap(s.en)} is ${a.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
-add('noun','singular','damma',()=>{const s=pickPerson(),p=pickPlace();return{sentence:`${s.nom} فِي ${p.gen}`,translation:`${cap(s.en)} is in ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada,true),token('فِي','in',AR.prep('فِي'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'فِي'),EN.majrur)]}});
-add('noun','singular','fatha',()=>{const s=pickPerson(),v=pickGeneralVerb(),o=pickGeneralObject(v,s);return{sentence:`${s.nom} ${v.pres} ${o.acc}`,translation:`${cap(s.en)} ${v.third} ${o.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(v.pres,v.third,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(o.acc,o.en,AR.object(o.acc),EN.object,true)]}});
-add('noun','singular','kasra',()=>{const owner=pickPerson(),thing=pickVaried(ownedNouns,'owned-nouns',x=>x.nom),predicatePool=thing.gender==='f'?feminineThingPredicates:masculineThingPredicates,a=pickVaried(predicatePool,`idafa-predicates:${thing.gender}`,x=>x.nom);return{sentence:`${thing.nom} ${owner.gen} ${a.nom}`,translation:`The ${thing.en} of ${owner.en} is ${a.en}.`,tokens:[token(thing.nom,thing.en,AR.mudaf(thing.nom),EN.mudaf),token(owner.gen,owner.en,AR.mudafIlayh(owner.gen),EN.mudafIlayh,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
+add('noun','singular','raf','damma',()=>{const s=pickPerson(),a=pickVaried(singularPredicates,'singular-predicates',x=>x.nom);return{sentence:`${s.nom} ${a.nom}`,translation:`${cap(s.en)} is ${a.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
+add('noun','singular','raf','damma',()=>{const s=pickPerson(),p=pickPlace();return{sentence:`${s.nom} فِي ${p.gen}`,translation:`${cap(s.en)} is in ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada,true),token('فِي','in',AR.prep('فِي'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'فِي'),EN.majrur)]}});
+add('noun','singular','nasb','fatha',()=>{const s=pickPerson(),v=pickGeneralVerb(),o=pickGeneralObject(v,s);return{sentence:`${s.nom} ${v.pres} ${o.acc}`,translation:`${cap(s.en)} ${v.third} ${o.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(v.pres,v.third,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(o.acc,o.en,AR.object(o.acc),EN.object,true)]}});
+add('noun','singular','jarr','kasra',()=>{const owner=pickPerson(),thing=pickVaried(ownedNouns,'owned-nouns',x=>x.nom),predicatePool=thing.gender==='f'?feminineThingPredicates:masculineThingPredicates,a=pickVaried(predicatePool,`idafa-predicates:${thing.gender}`,x=>x.nom);return{sentence:`${thing.nom} ${owner.gen} ${a.nom}`,translation:`The ${thing.en} of ${owner.en} is ${a.en}.`,tokens:[token(thing.nom,thing.en,AR.mudaf(thing.nom),EN.mudaf),token(owner.gen,owner.en,AR.mudafIlayh(owner.gen),EN.mudafIlayh,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
 
 // Broken plurals
-add('noun','broken','damma',()=>{const b=pickVaried(brokenHuman,'broken-human-nom',x=>x.nom),p=pickVaried(masculinePluralPredicates,'broken-predicates',x=>x.nom);return{sentence:`${b.nom} ${p.nom}`,translation:`${cap(b.en)} are ${p.en}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada,true),token(p.nom,p.en,AR.khabar(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.khabar)]}});
-add('noun','broken','fatha',()=>{const s=pickPerson(),a=pickVaried(brokenObjectActions,'broken-object-actions',x=>x.pres),o=pickVaried(a.objects,`broken-objects:${a.pres}`,String);return{sentence:`${s.nom} ${a.pres} ${o}`,translation:`${cap(s.en)} ${a.third} ${nounEnglish(o,'acc')}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(o,nounEnglish(o,'acc'),AR.object(o),EN.object,true)]}});
-add('noun','broken','kasra',()=>{const s=pickPerson(),human=chance(),b=pickVaried(human?brokenHuman:brokenThings,human?'broken-human-gen':'broken-thing-gen',x=>x.gen),a=human?pickHumanPrepAction():pickThingPrepAction(),targetAr=a.adverb?AR.mudafIlayh(b.gen):AR.majrur(b.gen,a.prep);return{sentence:`${s.nom} ${a.pres} ${a.prep} ${b.gen}`,translation:`${cap(s.en)} ${a.third} ${b.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(b.gen,b.en,targetAr,a.adverb?EN.mudafIlayh:EN.majrur,true)]}});
+add('noun','broken','raf','damma',()=>{const b=pickVaried(brokenHuman,'broken-human-nom',x=>x.nom),p=pickVaried(masculinePluralPredicates,'broken-predicates',x=>x.nom);return{sentence:`${b.nom} ${p.nom}`,translation:`${cap(b.en)} are ${p.en}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada,true),token(p.nom,p.en,AR.khabar(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.khabar)]}});
+add('noun','broken','nasb','fatha',()=>{const s=pickPerson(),a=pickVaried(brokenObjectActions,'broken-object-actions',x=>x.pres),o=pickVaried(a.objects,`broken-objects:${a.pres}`,String);return{sentence:`${s.nom} ${a.pres} ${o}`,translation:`${cap(s.en)} ${a.third} ${nounEnglish(o,'acc')}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(o,nounEnglish(o,'acc'),AR.object(o),EN.object,true)]}});
+add('noun','broken','jarr','kasra',()=>{const s=pickPerson(),human=chance(),b=pickVaried(human?brokenHuman:brokenThings,human?'broken-human-gen':'broken-thing-gen',x=>x.gen),a=human?pickHumanPrepAction():pickThingPrepAction(),targetAr=a.adverb?AR.mudafIlayh(b.gen):AR.majrur(b.gen,a.prep);return{sentence:`${s.nom} ${a.pres} ${a.prep} ${b.gen}`,translation:`${cap(s.en)} ${a.third} ${b.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(b.gen,b.en,targetAr,a.adverb?EN.mudafIlayh:EN.majrur,true)]}});
 
 // Dual
-add('noun','dual','alif',()=>{const d=pickVaried(duals.filter(isHumanNoun),'dual-nom',x=>x.nom),p=pickVaried(dualPredicates,'dual-predicates',x=>x.nom);return{sentence:`${d.nom} ${p.nom}`,translation:`${cap(d.en)} are ${p.en}.`,tokens:[token(d.nom,d.en,AR.mubtada(d.nom,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),EN.mubtada,true),token(p.nom,p.en,AR.khabar(p.nom,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),EN.khabar)]}});
-add('noun','dual','ya',()=>{const s=pickPerson(),d=pickVaried(duals,'dual-acc',x=>x.acc),a=isHumanNoun(d)?pickHumanAction():pickThingAction();return{sentence:`${s.nom} ${a.pres} ${d.acc}`,translation:`${cap(s.en)} ${a.third} ${d.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(d.acc,d.en,AR.object(d.acc,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.object,true)]}});
-add('noun','dual','ya',()=>{const s=pickPerson(),d=pickVaried(duals,'dual-gen',x=>x.gen),a=isHumanNoun(d)?pickHumanPrepAction():pickThingPrepAction(),targetAr=a.adverb?AR.mudafIlayh(d.gen,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'):AR.majrur(d.gen,a.prep,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى');return{sentence:`${s.nom} ${a.pres} ${a.prep} ${d.gen}`,translation:`${cap(s.en)} ${a.third} ${d.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(d.gen,d.en,targetAr,a.adverb?EN.mudafIlayh:EN.majrur,true)]}});
+add('noun','dual','raf','alif',()=>{const d=pickVaried(duals.filter(isHumanNoun),'dual-nom',x=>x.nom),p=pickVaried(dualPredicates,'dual-predicates',x=>x.nom);return{sentence:`${d.nom} ${p.nom}`,translation:`${cap(d.en)} are ${p.en}.`,tokens:[token(d.nom,d.en,AR.mubtada(d.nom,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),EN.mubtada,true),token(p.nom,p.en,AR.khabar(p.nom,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),EN.khabar)]}});
+add('noun','dual','nasb','ya',()=>{const s=pickPerson(),d=pickVaried(duals,'dual-acc',x=>x.acc),a=isHumanNoun(d)?pickHumanAction():pickThingAction();return{sentence:`${s.nom} ${a.pres} ${d.acc}`,translation:`${cap(s.en)} ${a.third} ${d.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(d.acc,d.en,AR.object(d.acc,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.object,true)]}});
+add('noun','dual','jarr','ya',()=>{const s=pickPerson(),d=pickVaried(duals,'dual-gen',x=>x.gen),a=isHumanNoun(d)?pickHumanPrepAction():pickThingPrepAction(),targetAr=a.adverb?AR.mudafIlayh(d.gen,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'):AR.majrur(d.gen,a.prep,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى');return{sentence:`${s.nom} ${a.pres} ${a.prep} ${d.gen}`,translation:`${cap(s.en)} ${a.third} ${d.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(d.gen,d.en,targetAr,a.adverb?EN.mudafIlayh:EN.majrur,true)]}});
 
 // Sound masculine plural
-add('noun','smp','waw',()=>{const p=pickVaried(smp,'smp-nom',x=>x.nom),a=pickVaried(masculinePluralPredicates,'smp-predicates',x=>x.nom);return{sentence:`${p.nom} ${a.nom}`,translation:`${cap(p.en)} are ${a.en}.`,tokens:[token(p.nom,p.en,AR.mubtada(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.mubtada,true),token(a.nom,a.en,AR.khabar(a.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.khabar)]}});
-add('noun','smp','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'smp-acc',x=>x.acc),a=pickHumanAction();return{sentence:`${s.nom} ${a.pres} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(p.acc,p.en,AR.object(p.acc,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.object,true)]}});
-add('noun','smp','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'smp-gen',x=>x.gen),a=pickHumanPrepAction(),targetAr=a.adverb?AR.mudafIlayh(p.gen,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'):AR.majrur(p.gen,a.prep,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ');return{sentence:`${s.nom} ${a.pres} ${a.prep} ${p.gen}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(p.gen,p.en,targetAr,a.adverb?EN.mudafIlayh:EN.majrur,true)]}});
+add('noun','smp','raf','waw',()=>{const p=pickVaried(smp,'smp-nom',x=>x.nom),a=pickVaried(masculinePluralPredicates,'smp-predicates',x=>x.nom);return{sentence:`${p.nom} ${a.nom}`,translation:`${cap(p.en)} are ${a.en}.`,tokens:[token(p.nom,p.en,AR.mubtada(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.mubtada,true),token(a.nom,a.en,AR.khabar(a.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.khabar)]}});
+add('noun','smp','nasb','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'smp-acc',x=>x.acc),a=pickHumanAction();return{sentence:`${s.nom} ${a.pres} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(p.acc,p.en,AR.object(p.acc,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.object,true)]}});
+add('noun','smp','jarr','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'smp-gen',x=>x.gen),a=pickHumanPrepAction(),targetAr=a.adverb?AR.mudafIlayh(p.gen,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'):AR.majrur(p.gen,a.prep,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ');return{sentence:`${s.nom} ${a.pres} ${a.prep} ${p.gen}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(p.gen,p.en,targetAr,a.adverb?EN.mudafIlayh:EN.majrur,true)]}});
 
 // Sound feminine plural
-add('noun','sfp','damma',()=>{const p=pickVaried(sfp,'sfp-nom',x=>x.nom),a=pickVaried(femininePluralPredicates,'sfp-predicates',x=>x.nom);return{sentence:`${p.nom} ${a.nom}`,translation:`${cap(p.en)} are ${a.en}.`,tokens:[token(p.nom,p.en,AR.mubtada(p.nom),EN.mubtada,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
-add('noun','sfp','kasraSub',()=>{const s=pickPerson(),p=pickVaried(sfp,'sfp-acc',x=>x.acc),a=pickHumanAction();return{sentence:`${s.nom} ${a.pres} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(p.acc,p.en,AR.object(p.acc,'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ'),EN.object,true)]}});
-add('noun','sfp','kasra',()=>{const s=pickPerson(),p=pickVaried(sfp,'sfp-gen',x=>x.gen),a=pickHumanPrepAction(),targetAr=a.adverb?AR.mudafIlayh(p.gen):AR.majrur(p.gen,a.prep);return{sentence:`${s.nom} ${a.pres} ${a.prep} ${p.gen}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(p.gen,p.en,targetAr,a.adverb?EN.mudafIlayh:EN.majrur,true)]}});
+add('noun','sfp','raf','damma',()=>{const p=pickVaried(sfp,'sfp-nom',x=>x.nom),a=pickVaried(femininePluralPredicates,'sfp-predicates',x=>x.nom);return{sentence:`${p.nom} ${a.nom}`,translation:`${cap(p.en)} are ${a.en}.`,tokens:[token(p.nom,p.en,AR.mubtada(p.nom),EN.mubtada,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
+add('noun','sfp','nasb','kasraSub',()=>{const s=pickPerson(),p=pickVaried(sfp,'sfp-acc',x=>x.acc),a=pickHumanAction();return{sentence:`${s.nom} ${a.pres} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(p.acc,p.en,AR.object(p.acc,'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ'),EN.object,true)]}});
+add('noun','sfp','jarr','kasra',()=>{const s=pickPerson(),p=pickVaried(sfp,'sfp-gen',x=>x.gen),a=pickHumanPrepAction(),targetAr=a.adverb?AR.mudafIlayh(p.gen):AR.majrur(p.gen,a.prep);return{sentence:`${s.nom} ${a.pres} ${a.prep} ${p.gen}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(p.gen,p.en,targetAr,a.adverb?EN.mudafIlayh:EN.majrur,true)]}});
 
 // Five nouns
-add('noun','fiveNouns','waw',()=>{const f=pickVaried(fiveNouns,'five-nouns-nom',x=>x.nom),a=pickVaried(singularPredicates,'five-noun-predicates',x=>x.nom);return{sentence:`${f.nom} ${a.nom}`,translation:`${cap(f.en)} is ${a.en}.`,tokens:[token(f.nom,f.en,AR.fiveNounNom(f.nom),EN.fiveNoun,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
-add('noun','fiveNouns','alif',()=>{const s=pickPerson(),f=pickVaried(fiveNouns,'five-nouns-acc',x=>x.acc),a=pickHumanAction();return{sentence:`${s.nom} ${a.pres} ${f.acc}`,translation:`${cap(s.en)} ${a.third} ${f.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(f.acc,f.en,AR.fiveNounAcc(f.acc),EN.fiveNoun,true)]}});
-add('noun','fiveNouns','ya',()=>{const s=pickPerson(),f=pickVaried(fiveNouns,'five-nouns-gen',x=>x.gen),a=pickHumanPrepAction();return{sentence:`${s.nom} ${a.pres} ${a.prep} ${f.gen}`,translation:`${cap(s.en)} ${a.third} ${f.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(f.gen,f.en,a.adverb?AR.mudafIlayh(f.gen,'الْيَاءُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ'):AR.fiveNounGen(f.gen,a.prep),EN.fiveNoun,true)]}});
+add('noun','fiveNouns','raf','waw',()=>{const f=pickVaried(fiveNouns,'five-nouns-nom',x=>x.nom),a=pickVaried(singularPredicates,'five-noun-predicates',x=>x.nom);return{sentence:`${f.nom} ${a.nom}`,translation:`${cap(f.en)} is ${a.en}.`,tokens:[token(f.nom,f.en,AR.fiveNounNom(f.nom),EN.fiveNoun,true),token(a.nom,a.en,AR.khabar(a.nom),EN.khabar)]}});
+add('noun','fiveNouns','nasb','alif',()=>{const s=pickPerson(),f=pickVaried(fiveNouns,'five-nouns-acc',x=>x.acc),a=pickHumanAction();return{sentence:`${s.nom} ${a.pres} ${f.acc}`,translation:`${cap(s.en)} ${a.third} ${f.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(f.acc,f.en,AR.fiveNounAcc(f.acc),EN.fiveNoun,true)]}});
+add('noun','fiveNouns','jarr','ya',()=>{const s=pickPerson(),f=pickVaried(fiveNouns,'five-nouns-gen',x=>x.gen),a=pickHumanPrepAction();return{sentence:`${s.nom} ${a.pres} ${a.prep} ${f.gen}`,translation:`${cap(s.en)} ${a.third} ${f.en}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),relationToken(a),token(f.gen,f.en,a.adverb?AR.mudafIlayh(f.gen,'الْيَاءُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ'):AR.fiveNounGen(f.gen,a.prep),EN.fiveNoun,true)]}});
 
 // Present verb not connected to an ending
-add('noun','present','damma',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} ${v.pres} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('noun','present','fatha',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} لَنْ ${v.acc} ${o}`,translation:`${cap(s.en)} will not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»',VISIBLE_FATHA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('noun','present','sukun',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} لَمْ ${v.juss} ${o}`,translation:`${cap(s.en)} did not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','present','raf','damma',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} ${v.pres} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','present','nasb','fatha',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} لَنْ ${v.acc} ${o}`,translation:`${cap(s.en)} will not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»',VISIBLE_FATHA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','present','jazm','sukun',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} لَمْ ${v.juss} ${o}`,translation:`${cap(s.en)} did not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
 
 // Five verbs
-add('noun','fiveVerbs','nunKept',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects',x=>x.nom),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${b.nom} ${v.five} ${o}`,translation:`${cap(b.en)} ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('noun','fiveVerbs','nunDropped',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects-sub',x=>x.nom),v=pickVerb(),o=pickVerbObject(v),lan=chance();return{sentence:`${b.nom} ${lan?'لَنْ':'لَمْ'} ${v.fiveSub} ${o}`,translation:`${cap(b.en)} ${lan?'will not':'did not'} ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token(lan?'لَنْ':'لَمْ',lan?'will not':'did not',lan?AR.lan('لَنْ'):AR.lam('لَمْ'),lan?'A particle of naṣb.':'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,lan?'مَنْصُوبٌ بِـ«لَنْ»':'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','fiveVerbs','raf','nunKept',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects',x=>x.nom),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${b.nom} ${v.five} ${o}`,translation:`${cap(b.en)} ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','fiveVerbs','nasb','nunDropped',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects-sub',x=>x.nom),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${b.nom} لَنْ ${v.fiveSub} ${o}`,translation:`${cap(b.en)} will not ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token('لَنْ','will not',AR.lan('لَنْ'),'A particle of naṣb.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَنْصُوبٌ بِـ«لَنْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','fiveVerbs','jazm','nunDropped',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects-sub',x=>x.nom),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${b.nom} لَمْ ${v.fiveSub} ${o}`,translation:`${cap(b.en)} did not ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token('لَمْ','did not',AR.lam('لَمْ'),'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
 
 // Verb-first practice
-add('verb','singular','damma',()=>{const v=pickGeneralVerb(),s=pickPerson(),o=pickGeneralObject(v,s);return{sentence:`${v.past} ${s.nom} ${o.acc}`,translation:`${cap(s.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
-add('verb','singular','fatha',()=>{const v=pickGeneralVerb(),s=pickPerson(),o=pickGeneralObject(v,s);return{sentence:`${v.past} ${s.nom} ${o.acc}`,translation:`${cap(s.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o.acc,o.en,AR.object(o.acc),EN.object,true)]}});
-add('verb','broken','damma',()=>{const v=pickGeneralVerb(),b=pickVaried(brokenHuman,'verb-broken-subjects',x=>x.nom),o=pickGeneralObject(v,b);return{sentence:`${v.past} ${b.nom} ${o.acc}`,translation:`${cap(b.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(b.nom,b.en,AR.faail(b.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
-add('verb','broken','fatha',()=>{const a=pickVaried(brokenObjectActions,'verb-broken-actions',x=>x.pres),s=pickPerson(),o=pickVaried(a.objects,`verb-broken-objects:${a.pres}`,String);return{sentence:`${a.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${a.third} ${nounEnglish(o,'acc')}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,nounEnglish(o,'acc'),AR.object(o),EN.object,true)]}});
-add('verb','dual','alif',()=>{const v=pickGeneralVerb(),d=pickVaried(duals.filter(isHumanNoun),'verb-dual-subjects',x=>x.nom),o=pickGeneralObject(v,d);return{sentence:`${v.past} ${d.nom} ${o.acc}`,translation:`${cap(d.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(d.nom,d.en,AR.faail(d.nom,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),'The dual subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
-add('verb','dual','ya',()=>{const s=pickPerson(),d=pickVaried(duals,'verb-dual-objects',x=>x.acc),a=isHumanNoun(d)?pickHumanAction():pickThingAction();return{sentence:`${a.pres} ${s.nom} ${d.acc}`,translation:`${cap(s.en)} ${a.third} ${d.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(d.acc,d.en,AR.object(d.acc,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.object,true)]}});
-add('verb','smp','waw',()=>{const v=pickGeneralVerb(),p=pickVaried(smp,'verb-smp-subjects',x=>x.nom),o=pickGeneralObject(v,p);return{sentence:`${v.past} ${p.nom} ${o.acc}`,translation:`${cap(p.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(p.nom,p.en,AR.faail(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),'The sound masculine plural subject; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
-add('verb','smp','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'verb-smp-objects',x=>x.acc),a=pickHumanAction();return{sentence:`${a.pres} ${s.nom} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(p.acc,p.en,AR.object(p.acc,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.object,true)]}});
-add('verb','sfp','damma',()=>{const a=pickVaried(femininePastActions,'feminine-past-actions',x=>x.past),p=pickVaried(sfp,'verb-sfp-subjects',x=>x.nom);return{sentence:`${a.past} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(a.past,a.pastEn,AR.past(a.past),'A past-tense verb; the final tāʾ marks feminine gender.'),token(p.nom,p.en,AR.faail(p.nom),'The sound feminine plural subject; nominative.',true)]}});
-add('verb','fiveNouns','waw',()=>{const v=pickGeneralVerb(),f=pickVaried(fiveNouns,'verb-five-noun-subjects',x=>x.nom),o=pickGeneralObject(v,f);return{sentence:`${v.past} ${f.nom} ${o.acc}`,translation:`${cap(f.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(f.nom,f.en,AR.faail(f.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
-add('verb','singular','fatha',()=>{const s=pickPerson(),a=pickVaried(singularPredicates,'kana-predicates',x=>x.acc);return{sentence:`كَانَ ${s.nom} ${a.acc}`,translation:`${cap(s.en)} was ${a.en}.`,tokens:[token('كَانَ','was',AR.kana('كَانَ'),'A deficient past-tense verb.'),token(s.nom,s.en,AR.ismKana(s.nom),'The noun of kāna; nominative.'),token(a.acc,a.en,AR.khabarKana(a.acc),'The khabar of kāna; accusative.',true)]}});
-add('verb','present','damma',()=>{const v=pickVerb(),s=pickPerson(),o=pickVerbObject(v);return{sentence:`${v.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('verb','fiveVerbs','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${v.five} ${o}`,translation:`They ${v.en} ${objectEnglish(o)}.`,tokens:[token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('verb','singular','raf','damma',()=>{const v=pickGeneralVerb(),s=pickPerson(),o=pickGeneralObject(v,s);return{sentence:`${v.past} ${s.nom} ${o.acc}`,translation:`${cap(s.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','singular','nasb','fatha',()=>{const v=pickGeneralVerb(),s=pickPerson(),o=pickGeneralObject(v,s);return{sentence:`${v.past} ${s.nom} ${o.acc}`,translation:`${cap(s.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o.acc,o.en,AR.object(o.acc),EN.object,true)]}});
+add('verb','broken','raf','damma',()=>{const v=pickGeneralVerb(),b=pickVaried(brokenHuman,'verb-broken-subjects',x=>x.nom),o=pickGeneralObject(v,b);return{sentence:`${v.past} ${b.nom} ${o.acc}`,translation:`${cap(b.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(b.nom,b.en,AR.faail(b.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','broken','nasb','fatha',()=>{const a=pickVaried(brokenObjectActions,'verb-broken-actions',x=>x.pres),s=pickPerson(),o=pickVaried(a.objects,`verb-broken-objects:${a.pres}`,String);return{sentence:`${a.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${a.third} ${nounEnglish(o,'acc')}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,nounEnglish(o,'acc'),AR.object(o),EN.object,true)]}});
+add('verb','dual','raf','alif',()=>{const v=pickGeneralVerb(),d=pickVaried(duals.filter(isHumanNoun),'verb-dual-subjects',x=>x.nom),o=pickGeneralObject(v,d);return{sentence:`${v.past} ${d.nom} ${o.acc}`,translation:`${cap(d.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(d.nom,d.en,AR.faail(d.nom,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),'The dual subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','dual','nasb','ya',()=>{const s=pickPerson(),d=pickVaried(duals,'verb-dual-objects',x=>x.acc),a=isHumanNoun(d)?pickHumanAction():pickThingAction();return{sentence:`${a.pres} ${s.nom} ${d.acc}`,translation:`${cap(s.en)} ${a.third} ${d.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(d.acc,d.en,AR.object(d.acc,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.object,true)]}});
+add('verb','smp','raf','waw',()=>{const v=pickGeneralVerb(),p=pickVaried(smp,'verb-smp-subjects',x=>x.nom),o=pickGeneralObject(v,p);return{sentence:`${v.past} ${p.nom} ${o.acc}`,translation:`${cap(p.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(p.nom,p.en,AR.faail(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),'The sound masculine plural subject; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','smp','nasb','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'verb-smp-objects',x=>x.acc),a=pickHumanAction();return{sentence:`${a.pres} ${s.nom} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(p.acc,p.en,AR.object(p.acc,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.object,true)]}});
+add('verb','sfp','raf','damma',()=>{const a=pickVaried(femininePastActions,'feminine-past-actions',x=>x.past),p=pickVaried(sfp,'verb-sfp-subjects',x=>x.nom);return{sentence:`${a.past} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(a.past,a.pastEn,AR.past(a.past),'A past-tense verb; the final tāʾ marks feminine gender.'),token(p.nom,p.en,AR.faail(p.nom),'The sound feminine plural subject; nominative.',true)]}});
+add('verb','fiveNouns','raf','waw',()=>{const v=pickGeneralVerb(),f=pickVaried(fiveNouns,'verb-five-noun-subjects',x=>x.nom),o=pickGeneralObject(v,f);return{sentence:`${v.past} ${f.nom} ${o.acc}`,translation:`${cap(f.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(f.nom,f.en,AR.faail(f.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
+add('verb','singular','nasb','fatha',()=>{const s=pickPerson(),a=pickVaried(singularPredicates,'kana-predicates',x=>x.acc);return{sentence:`كَانَ ${s.nom} ${a.acc}`,translation:`${cap(s.en)} was ${a.en}.`,tokens:[token('كَانَ','was',AR.kana('كَانَ'),'A deficient past-tense verb.'),token(s.nom,s.en,AR.ismKana(s.nom),'The noun of kāna; nominative.'),token(a.acc,a.en,AR.khabarKana(a.acc),'The khabar of kāna; accusative.',true)]}});
+add('verb','present','raf','damma',()=>{const v=pickVerb(),s=pickPerson(),o=pickVerbObject(v);return{sentence:`${v.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('verb','fiveVerbs','raf','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${v.five} ${o}`,translation:`They ${v.en} ${objectEnglish(o)}.`,tokens:[token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
 
 // Particle-first practice
-add('particle','singular','fatha',()=>{const p=pickInna(),s=pickPerson(),a=pickVaried(singularPredicates,'inna-singular-predicates',x=>x.nom);return{sentence:`${p.ar} ${s.acc} ${a.nom}`,translation:`${p.meaning} ${s.en} ${innaCopula(p,false)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(s.acc,s.en,AR.ismInna(s.acc,p.ar),`The noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
-add('particle','broken','fatha',()=>{const p=pickInna(),b=pickVaried(brokenHuman,'inna-broken-nouns',x=>x.acc),a=pickVaried(masculinePluralPredicates,'inna-broken-predicates',x=>x.nom);return{sentence:`${p.ar} ${b.acc} ${a.nom}`,translation:`${p.meaning} ${b.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(b.acc,b.en,AR.ismInna(b.acc,p.ar),`The noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The predicate of ${p.ar}; nominative.`)]}});
-add('particle','dual','ya',()=>{const p=pickInna(),d=pickVaried(duals.filter(isHumanNoun),'inna-dual-nouns',x=>x.acc),a=pickVaried(dualPredicates,'inna-dual-predicates',x=>x.nom);return{sentence:`${p.ar} ${d.acc} ${a.nom}`,translation:`${p.meaning} ${d.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(d.acc,d.en,AR.ismInna(d.acc,p.ar,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),`The dual noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),`The dual predicate of ${p.ar}; nominative.`)]}});
-add('particle','smp','ya',()=>{const p=pickInna(),n=pickVaried(smp,'inna-smp-nouns',x=>x.acc),a=pickVaried(masculinePluralPredicates,'inna-smp-predicates',x=>x.nom);return{sentence:`${p.ar} ${n.acc} ${a.nom}`,translation:`${p.meaning} ${n.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(n.acc,n.en,AR.ismInna(n.acc,p.ar,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The sound masculine plural noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The predicate of ${p.ar}; nominative.`)]}});
-add('particle','sfp','kasraSub',()=>{const p=pickInna(),n=pickVaried(sfp,'inna-sfp-nouns',x=>x.acc),a=pickVaried(femininePluralPredicates,'inna-sfp-predicates',x=>x.nom);return{sentence:`${p.ar} ${n.acc} ${a.nom}`,translation:`${p.meaning} ${n.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(n.acc,n.en,AR.ismInna(n.acc,p.ar,'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ'),`The sound feminine plural noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
-add('particle','fiveNouns','alif',()=>{const p=pickInna(),f=pickVaried(fiveNouns,'inna-five-nouns',x=>x.acc),a=pickVaried(singularPredicates,'inna-five-noun-predicates',x=>x.nom);return{sentence:`${p.ar} ${f.acc} ${a.nom}`,translation:`${p.meaning} ${f.en} ${innaCopula(p,false)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(f.acc,f.en,AR.ismInna(f.acc,p.ar,'الْأَلِفُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ'),`The noun of ${p.ar}; accusative with alif.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
-add('particle','singular','kasra',()=>{const p=pickPlace(),d=pickVaried([{ar:'طَالِبٌ',en:'a student'},{ar:'كِتَابٌ',en:'a book'},{ar:'ضَيْفٌ',en:'a guest'},{ar:'مُعَلِّمٌ',en:'a teacher'}],'delayed-subjects',x=>x.ar);return{sentence:`فِي ${p.gen} ${d.ar}`,translation:`There is ${d.en} in ${p.en}.`,tokens:[token('فِي','in',AR.prep('فِي'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'فِي'),EN.majrur,true),token(d.ar,d.en,AR.delayedMubtada(d.ar),'A delayed mubtadaʾ; nominative.')]}});
-add('particle','broken','kasra',()=>{const b=pickVaried(brokenThings,'particle-broken-gen',x=>x.gen);return{sentence:`عَنْ ${b.gen} سُؤَالٌ`,translation:`There is a question about ${b.en}.`,tokens:[token('عَنْ','about',AR.prep('عَنْ'),EN.prep),token(b.gen,b.en,AR.majrur(b.gen,'عَنْ'),EN.majrur,true),token('سُؤَالٌ','a question',AR.delayedMubtada('سُؤَالٌ'),'A delayed mubtadaʾ; nominative.')]}});
-add('particle','dual','ya',()=>{const d=pickVaried(duals.filter(isHumanNoun),'particle-dual-gen',x=>x.gen);return{sentence:`إِلَى ${d.gen} رِسَالَةٌ`,translation:`There is a letter for ${d.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(d.gen,d.en,AR.majrur(d.gen,'إِلَى','الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
-add('particle','smp','ya',()=>{const p=pickVaried(smp,'particle-smp-gen',x=>x.gen);return{sentence:`إِلَى ${p.gen} رِسَالَةٌ`,translation:`There is a letter for ${p.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'إِلَى','الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
-add('particle','sfp','kasra',()=>{const p=pickVaried(sfp,'particle-sfp-gen',x=>x.gen);return{sentence:`إِلَى ${p.gen} رِسَالَةٌ`,translation:`There is a letter for ${p.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'إِلَى'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
-add('particle','fiveNouns','ya',()=>{const f=pickVaried(fiveNouns,'particle-five-noun-gen',x=>x.gen);return{sentence:`إِلَى ${f.gen} رِسَالَةٌ`,translation:`There is a letter for ${f.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(f.gen,f.en,AR.fiveNounGen(f.gen,'إِلَى'),EN.fiveNoun,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
-add('particle','present','fatha',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَنْ ${v.acc} ${o}`,translation:`He will not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»',VISIBLE_FATHA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('particle','present','sukun',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَمْ ${v.juss} ${o}`,translation:`He did not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('particle','present','damma',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`سَوْفَ ${v.pres} ${o}`,translation:`He will ${v.en} ${objectEnglish(o)}.`,tokens:[token('سَوْفَ','will',AR.future('سَوْفَ'),'A particle marking the future.'),token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('particle','fiveVerbs','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v),lan=chance();return{sentence:`${lan?'لَنْ':'لَمْ'} ${v.fiveSub} ${o}`,translation:`They ${lan?'will not':'did not'} ${v.en} ${objectEnglish(o)}.`,tokens:[token(lan?'لَنْ':'لَمْ',lan?'will not':'did not',lan?AR.lan('لَنْ'):AR.lam('لَمْ'),lan?'A particle of naṣb.':'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,lan?'مَنْصُوبٌ بِـ«لَنْ»':'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('particle','fiveVerbs','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`سَوْفَ ${v.five} ${o}`,translation:`They will ${v.en} ${objectEnglish(o)}.`,tokens:[token('سَوْفَ','will',AR.future('سَوْفَ'),'A particle marking the future.'),token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('particle','singular','nasb','fatha',()=>{const p=pickInna(),s=pickPerson(),a=pickVaried(singularPredicates,'inna-singular-predicates',x=>x.nom);return{sentence:`${p.ar} ${s.acc} ${a.nom}`,translation:`${p.meaning} ${s.en} ${innaCopula(p,false)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(s.acc,s.en,AR.ismInna(s.acc,p.ar),`The noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','broken','nasb','fatha',()=>{const p=pickInna(),b=pickVaried(brokenHuman,'inna-broken-nouns',x=>x.acc),a=pickVaried(masculinePluralPredicates,'inna-broken-predicates',x=>x.nom);return{sentence:`${p.ar} ${b.acc} ${a.nom}`,translation:`${p.meaning} ${b.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(b.acc,b.en,AR.ismInna(b.acc,p.ar),`The noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','dual','nasb','ya',()=>{const p=pickInna(),d=pickVaried(duals.filter(isHumanNoun),'inna-dual-nouns',x=>x.acc),a=pickVaried(dualPredicates,'inna-dual-predicates',x=>x.nom);return{sentence:`${p.ar} ${d.acc} ${a.nom}`,translation:`${p.meaning} ${d.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(d.acc,d.en,AR.ismInna(d.acc,p.ar,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),`The dual noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى'),`The dual predicate of ${p.ar}; nominative.`)]}});
+add('particle','smp','nasb','ya',()=>{const p=pickInna(),n=pickVaried(smp,'inna-smp-nouns',x=>x.acc),a=pickVaried(masculinePluralPredicates,'inna-smp-predicates',x=>x.nom);return{sentence:`${p.ar} ${n.acc} ${a.nom}`,translation:`${p.meaning} ${n.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(n.acc,n.en,AR.ismInna(n.acc,p.ar,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The sound masculine plural noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','sfp','nasb','kasraSub',()=>{const p=pickInna(),n=pickVaried(sfp,'inna-sfp-nouns',x=>x.acc),a=pickVaried(femininePluralPredicates,'inna-sfp-predicates',x=>x.nom);return{sentence:`${p.ar} ${n.acc} ${a.nom}`,translation:`${p.meaning} ${n.en} ${innaCopula(p,true)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(n.acc,n.en,AR.ismInna(n.acc,p.ar,'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ'),`The sound feminine plural noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','fiveNouns','nasb','alif',()=>{const p=pickInna(),f=pickVaried(fiveNouns,'inna-five-nouns',x=>x.acc),a=pickVaried(singularPredicates,'inna-five-noun-predicates',x=>x.nom);return{sentence:`${p.ar} ${f.acc} ${a.nom}`,translation:`${p.meaning} ${f.en} ${innaCopula(p,false)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(f.acc,f.en,AR.ismInna(f.acc,p.ar,'الْأَلِفُ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ'),`The noun of ${p.ar}; accusative with alif.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});
+add('particle','singular','jarr','kasra',()=>{const p=pickPlace(),d=pickVaried([{ar:'طَالِبٌ',en:'a student'},{ar:'كِتَابٌ',en:'a book'},{ar:'ضَيْفٌ',en:'a guest'},{ar:'مُعَلِّمٌ',en:'a teacher'}],'delayed-subjects',x=>x.ar);return{sentence:`فِي ${p.gen} ${d.ar}`,translation:`There is ${d.en} in ${p.en}.`,tokens:[token('فِي','in',AR.prep('فِي'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'فِي'),EN.majrur,true),token(d.ar,d.en,AR.delayedMubtada(d.ar),'A delayed mubtadaʾ; nominative.')]}});
+add('particle','broken','jarr','kasra',()=>{const b=pickVaried(brokenThings,'particle-broken-gen',x=>x.gen);return{sentence:`عَنْ ${b.gen} سُؤَالٌ`,translation:`There is a question about ${b.en}.`,tokens:[token('عَنْ','about',AR.prep('عَنْ'),EN.prep),token(b.gen,b.en,AR.majrur(b.gen,'عَنْ'),EN.majrur,true),token('سُؤَالٌ','a question',AR.delayedMubtada('سُؤَالٌ'),'A delayed mubtadaʾ; nominative.')]}});
+add('particle','dual','jarr','ya',()=>{const d=pickVaried(duals.filter(isHumanNoun),'particle-dual-gen',x=>x.gen);return{sentence:`إِلَى ${d.gen} رِسَالَةٌ`,translation:`There is a letter for ${d.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(d.gen,d.en,AR.majrur(d.gen,'إِلَى','الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
+add('particle','smp','jarr','ya',()=>{const p=pickVaried(smp,'particle-smp-gen',x=>x.gen);return{sentence:`إِلَى ${p.gen} رِسَالَةٌ`,translation:`There is a letter for ${p.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'إِلَى','الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
+add('particle','sfp','jarr','kasra',()=>{const p=pickVaried(sfp,'particle-sfp-gen',x=>x.gen);return{sentence:`إِلَى ${p.gen} رِسَالَةٌ`,translation:`There is a letter for ${p.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'إِلَى'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
+add('particle','fiveNouns','jarr','ya',()=>{const f=pickVaried(fiveNouns,'particle-five-noun-gen',x=>x.gen);return{sentence:`إِلَى ${f.gen} رِسَالَةٌ`,translation:`There is a letter for ${f.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(f.gen,f.en,AR.fiveNounGen(f.gen,'إِلَى'),EN.fiveNoun,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
+add('particle','present','nasb','fatha',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَنْ ${v.acc} ${o}`,translation:`He will not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»',VISIBLE_FATHA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('particle','present','jazm','sukun',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَمْ ${v.juss} ${o}`,translation:`He did not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('particle','present','raf','damma',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`سَوْفَ ${v.pres} ${o}`,translation:`He will ${v.en} ${objectEnglish(o)}.`,tokens:[token('سَوْفَ','will',AR.future('سَوْفَ'),'A particle marking the future.'),token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('particle','fiveVerbs','nasb','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَنْ ${v.fiveSub} ${o}`,translation:`They will not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَنْ','will not',AR.lan('لَنْ'),'A particle of naṣb.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَنْصُوبٌ بِـ«لَنْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('particle','fiveVerbs','jazm','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَمْ ${v.fiveSub} ${o}`,translation:`They did not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَمْ','did not',AR.lam('لَمْ'),'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('particle','fiveVerbs','raf','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`سَوْفَ ${v.five} ${o}`,translation:`They will ${v.en} ${objectEnglish(o)}.`,tokens:[token('سَوْفَ','will',AR.future('سَوْفَ'),'A particle marking the future.'),token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;
@@ -1866,26 +1889,28 @@ function selectedFilters(){
  return {
    start:byId('startFilter').value,
    form:byId('formFilter').value,
+   state:byId('stateFilter').value,
    sign:byId('signFilter').value
  };
 }
-function matchesTemplate(t,start,form,sign){
+function matchesTemplate(t,start,form,state,sign){
  return (start==='any'||t.starts===start)
    && (form==='any'||t.form===form)
+   && (state==='any'||t.state===state)
    && (sign==='any'||t.sign===sign);
 }
-function poolFor(start,form,sign){
- return templates.filter(t=>matchesTemplate(t,start,form,sign));
+function poolFor(start,form,state,sign){
+ return templates.filter(t=>matchesTemplate(t,start,form,state,sign));
 }
 function compatible(){
- const {start,form,sign}=selectedFilters();
- return poolFor(start,form,sign);
+ const {start,form,state,sign}=selectedFilters();
+ return poolFor(start,form,state,sign);
 }
 function chooseTemplate(pool){
  let candidates=pool.filter(template=>!recentTemplates.includes(template.id));
  if(!candidates.length) candidates=pool;
  const filters=selectedFilters();
- for(const [filterName,templateKey] of [['start','starts'],['form','form'],['sign','sign']]){
+ for(const [filterName,templateKey] of [['start','starts'],['form','form'],['state','state'],['sign','sign']]){
    if(filters[filterName]!=='any') continue;
    const choices=[...new Set(candidates.map(template=>template[templateKey]))];
    const chosen=pick(choices);
@@ -1893,49 +1918,53 @@ function chooseTemplate(pool){
  }
  return pick(candidates);
 }
+// Each filter's dropdown id, state key, human label, and its "Any" option label.
+const FILTER_META=[
+  {id:'startFilter',key:'start',label:'Sentence starts with',anyLabel:'Any beginning'},
+  {id:'formFilter',key:'form',label:'Word form',anyLabel:'All forms'},
+  {id:'stateFilter',key:'state',label:'Iʿrāb state',anyLabel:'All states'},
+  {id:'signFilter',key:'sign',label:'Iʿrāb sign',anyLabel:'All signs'}
+];
+function poolCountFor(sel){return poolFor(sel.start,sel.form,sel.state,sel.sign).length}
 function refreshDisabledOptions(){
  const current=selectedFilters();
- const filters=[
-   {id:'startFilter',key:'start'},
-   {id:'formFilter',key:'form'},
-   {id:'signFilter',key:'sign'}
- ];
- filters.forEach(({id,key})=>{
+ FILTER_META.forEach(({id,key})=>{
    Array.from(byId(id).options).forEach(option=>{
      const trial={...current,[key]:option.value};
-     option.disabled=poolFor(trial.start,trial.form,trial.sign).length===0;
+     option.disabled=poolCountFor(trial)===0;
    });
  });
 }
+// Relax the most-derived incompatible filter first, preserving the filter the user
+// just changed. Sign depends on form+state, so it is dropped before state, then form,
+// then start. Only the filters that are actually causing an empty pool are reset.
+const RELAX_PRIORITY=['signFilter','stateFilter','formFilter','startFilter'];
 function normalizeFilters(changedId){
- let {start,form,sign}=selectedFilters();
- if(poolFor(start,form,sign).length){
+ if(poolCountFor(selectedFilters())){
    refreshDisabledOptions();
    return '';
  }
-
- let notice='';
- if(changedId==='formFilter'){
-   byId('signFilter').value='any';
-   notice='The Iʿrāb sign was reset to “All signs” because that word form does not use the previously selected sign.';
- }else if(changedId==='signFilter'){
-   byId('formFilter').value='any';
-   notice='The word form was reset to “All forms” because it does not use the selected Iʿrāb sign.';
- }else{
-   byId('signFilter').value='any';
-   if(!compatible().length) byId('formFilter').value='any';
-   notice='An incompatible filter was reset automatically so practice can continue.';
+ const reset=[];
+ const dropTo=(id)=>{if(byId(id).value!=='any'){byId(id).value='any';if(!reset.includes(id))reset.push(id);}};
+ // 1) Preserve the changed filter; relax the other filters, most-derived first,
+ //    stopping as soon as a valid template pool exists.
+ for(const id of RELAX_PRIORITY){
+   if(poolCountFor(selectedFilters()))break;
+   if(id===changedId)continue;
+   dropTo(id);
  }
-
- if(!compatible().length){
-   byId('startFilter').value='any';
- }
- if(!compatible().length){
-   byId('formFilter').value='any';
-   byId('signFilter').value='any';
- }
+ // 2) Last resort: if the changed filter itself has no templates at all, relax it too.
+ if(!poolCountFor(selectedFilters())&&changedId&&FILTER_META.some(f=>f.id===changedId))dropTo(changedId);
+ // 3) Absolute safety net: never leave an empty pool.
+ if(!poolCountFor(selectedFilters()))RELAX_PRIORITY.forEach(dropTo);
  refreshDisabledOptions();
- return notice;
+ if(!reset.length)return '';
+ const labelFor=id=>FILTER_META.find(f=>f.id===id);
+ if(reset.length===1){
+   const f=labelFor(reset[0]);
+   return `${f.label} was reset to “${f.anyLabel}” because it was incompatible with your other selections.`;
+ }
+ return `These filters were reset to stay compatible: ${reset.map(id=>labelFor(id).label).join(', ')}.`;
 }
 function render(data,notice=''){
  if(!data?.validated)throw new Error('Refusing to display an exercise that has not passed grammar validation.');
@@ -1987,6 +2016,7 @@ function handleFilterChange(event){
 function resetFilters(){
  byId('startFilter').value='any';
  byId('formFilter').value='any';
+ byId('stateFilter').value='any';
  byId('signFilter').value='any';
  refreshDisabledOptions();
  generate();
@@ -2006,7 +2036,7 @@ byId('definitionsList').addEventListener('click',event=>{
  const button=event.target?.closest?.('[data-definition-chapter]');
  if(button)selectDefinitionChapter(Number(button.getAttribute('data-definition-chapter')));
 });
-['startFilter','formFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',handleFilterChange));
+['startFilter','formFilter','stateFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',handleFilterChange));
 window.nahwGenerate=generate;
 window.nahwReveal=toggleReveal;
 renderGrammarDefinitions();

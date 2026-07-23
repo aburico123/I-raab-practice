@@ -39,6 +39,10 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   verbLexicons:{verbs,additionalVerbActions,humanActions,humanPrepActions,thingActions,thingPrepActions,femininePastActions,brokenObjectActions},
   objectGroups,
   currentExercise:()=>current,
+  sentenceHistory:()=>sentenceHistory,
+  reviewSentenceFromHistory,
+  createExerciseSnapshot,
+  restoreExerciseSnapshot,
   getLanguageMode:()=>languageMode,
   setLanguageMode,
   selectDefinitionChapter,
@@ -146,14 +150,65 @@ vm.runInContext(script,context,{filename:'index.html'});
 const api=context.__nahwTest;
 assert(api&&typeof api.completeNominalAnalysis==='function','Nominal validator was not exported to the test harness');
 assert(elements.sentence.textContent,'The application did not generate its initial sentence');
-assert(elements.historyToggle.textContent==='Sentence history (2)','Saved history was not loaded before recording the initial sentence');
-assert(elements.historyList.innerHTML.includes('جُمْلَةٌ سَابِقَةٌ'),'Previously saved sentence is missing from history');
-assert(JSON.parse(storage.get('nahw-sentence-history-v1')).length===2,'Initial sentence was not persisted');
+assert(elements.historyToggle.textContent==='Sentence history (1)','The initial exercise was not added to clean snapshot history');
+assert(!elements.historyList.innerHTML.includes('جُمْلَةٌ سَابِقَةٌ'),'Legacy text-only history must not be treated as a reviewable exercise');
+let savedHistory=JSON.parse(storage.get('nahw-sentence-history-v1'));
+assert(savedHistory.length===1,'The initial exercise snapshot was not persisted');
+assert(savedHistory[0].schemaVersion===1&&savedHistory[0].templateId&&savedHistory[0].tokens.length,
+  'History did not persist a versioned structured exercise snapshot');
+assert(!Object.hasOwn(savedHistory[0],'validated'),'History snapshots must be revalidated instead of trusting a stored flag');
+assert(elements.historyList.innerHTML.includes('<button type="button" class="history-item"')
+  &&elements.historyList.innerHTML.includes('data-history-index="0"'),
+  'History rows are not native keyboard-accessible buttons');
 elements.historyToggle.dispatch('click');
 assert(elements.historyPanel.classList.contains('open'),'History tab did not open its panel');
 assert(elements.historyToggle.getAttribute('aria-expanded')==='true','History tab did not expose its open state');
+const originalExerciseSnapshot=JSON.parse(JSON.stringify(savedHistory[0]));
 elements.nextBtn.dispatch('click');
-assert(elements.historyToggle.textContent==='Sentence history (3)','New Sentence was not added to history');
+assert(elements.historyToggle.textContent==='Sentence history (2)','New Sentence was not added to history');
+const generatedAfterOriginal=api.currentExercise();
+assert(generatedAfterOriginal.sentence!==originalExerciseSnapshot.sentence,'History review setup unexpectedly generated the same sentence twice');
+elements.startFilter.value='particle';
+elements.formFilter.value='fiveVerbs';
+elements.stateFilter.value='nasb';
+elements.signFilter.value='nunDropped';
+const filtersBeforeReview=JSON.stringify([
+  elements.startFilter.value,elements.formFilter.value,elements.stateFilter.value,elements.signFilter.value
+]);
+const storedBeforeReview=storage.get('nahw-sentence-history-v1');
+const reviewButton=element('historyReview');
+reviewButton.setAttribute('data-history-index','1');
+elements.historyList.dispatch('click',reviewButton);
+const reviewed=api.currentExercise();
+assert(reviewed!==generatedAfterOriginal,'Opening history did not replace the current exercise');
+assert(reviewed.templateId===originalExerciseSnapshot.templateId
+  &&reviewed.sentence===originalExerciseSnapshot.sentence
+  &&reviewed.translation===originalExerciseSnapshot.translation,
+  'History review did not restore the exact saved exercise');
+assert(JSON.stringify(reviewed.tokens)===JSON.stringify(originalExerciseSnapshot.tokens)
+  &&JSON.stringify(reviewed.relationships)===JSON.stringify(originalExerciseSnapshot.relationships),
+  'History review did not preserve the original token and relationship grammar data');
+const reviewedFocus=reviewed.tokens.find(token=>token.target);
+const savedFocus=originalExerciseSnapshot.tokens.find(token=>token.target);
+assert(reviewedFocus.word===savedFocus.word&&reviewedFocus.inflection===savedFocus.inflection
+  &&reviewedFocus.state===savedFocus.state&&reviewedFocus.sign.id===savedFocus.sign.id,
+  'History review did not restore the saved focus word, form, state, and sign');
+assert(JSON.stringify([
+  elements.startFilter.value,elements.formFilter.value,elements.stateFilter.value,elements.signFilter.value
+])===filtersBeforeReview,'Reviewing history changed the active filters');
+assert(storage.get('nahw-sentence-history-v1')===storedBeforeReview
+  &&elements.historyToggle.textContent==='Sentence history (2)',
+  'Reviewing history duplicated or rewrote the saved sentence');
+assert(!elements.answerPanel.classList.contains('open'),'A reviewed exercise should load with its answer hidden');
+elements.revealBtn.dispatch('click');
+assert(elements.answerPanel.classList.contains('open')
+  &&elements.answers.innerHTML.includes(savedFocus.ar),
+  'Reveal did not show the restored exercise iʿrāb');
+elements.revealBtn.dispatch('click');
+elements.startFilter.value='any';
+elements.formFilter.value='any';
+elements.stateFilter.value='any';
+elements.signFilter.value='any';
 elements.clearHistoryBtn.dispatch('click');
 assert(elements.historyToggle.textContent==='Sentence history (0)','Clear history did not reset its count');
 assert(elements.historyList.hidden&& !elements.historyEmpty.hidden,'Clear history did not restore the empty state');

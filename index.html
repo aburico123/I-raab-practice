@@ -45,9 +45,10 @@ button{font-weight:850;cursor:pointer}
 #clearHistoryBtn{width:auto;min-height:38px;padding:8px 12px;background:#fff;color:var(--danger);border-color:#dfc4c4}
 #clearHistoryBtn:disabled{opacity:.5;cursor:not-allowed}
 .history-list{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:420px;overflow:auto}
-.history-item{background:#fff;border:1px solid #e8e0d4;border-radius:13px;padding:10px 12px}
-.history-ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;color:var(--green);font-size:24px;font-weight:800;line-height:1.65}
-.history-en{color:var(--muted);font-size:14px;line-height:1.45}
+.history-item{display:block;width:100%;min-height:0;background:#fff;border:1px solid #e8e0d4;border-radius:13px;padding:10px 12px;text-align:left;font-weight:inherit}
+.history-item:hover{background:var(--green-soft);border-color:#a9cdb8}
+.history-ar{display:block;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;color:var(--green);font-size:24px;font-weight:800;line-height:1.65}
+.history-en{display:block;color:var(--muted);font-size:14px;line-height:1.45}
 .history-empty{text-align:center;color:var(--muted);margin:8px 0}
 .definitions-wrap{margin-top:10px}
 #definitionsToggle{background:#fffdf8;color:var(--green-dark);border-color:var(--line);text-align:left}
@@ -169,6 +170,7 @@ body.lang-arabic #translation{display:none}
 [data-theme="dark"] .history-panel,[data-theme="dark"] .definitions-panel{background:rgba(34,36,28,.92);box-shadow:0 8px 28px var(--shadow-color)}
 [data-theme="dark"] #clearHistoryBtn{background:#2a1e1e;color:#e79a9a;border-color:#5b3a3a}
 [data-theme="dark"] .history-item{background:var(--surface-raised);border-color:#3a3d34}
+[data-theme="dark"] .history-item:hover{background:var(--green-soft);border-color:#3f6a52}
 [data-theme="dark"] .definitions-intro{background:var(--green-soft);color:#cdd4cb}
 [data-theme="dark"] .definition-chapter-button{background:var(--surface-raised);color:var(--green-dark);border-color:#3d4037}
 [data-theme="dark"] .definition-chapter-button:hover{background:var(--green-soft);border-color:#3f6a52}
@@ -362,6 +364,8 @@ const UI_TEXT={
   startLabel:'Sentence starts with',formLabel:'Word form',stateLabel:'Iʿrāb state',signLabel:'Iʿrāb sign',
   historyTitle:'Generated sentences',historyNote:'Newest first. The most recent 100 are saved on this device.',
   historyEmpty:'No sentences generated yet.',clearHistory:'Clear history',
+  historyReviewLabel:sentence=>`Review saved exercise: ${sentence}`,
+  historyInvalid:'This saved exercise could not be reviewed because its grammar snapshot is invalid.',
   historyToggle:n=>`Sentence history (${n})`,
   definitionsToggle:n=>`Simple grammar definitions (${n})`,
   chapterChoose:'Choose a grammar chapter',chapterHint:'Select a chapter to see all of its terms and definitions.',
@@ -379,6 +383,8 @@ const UI_TEXT={
   startLabel:'بِدَايَةُ الْجُمْلَةِ',formLabel:'صِيغَةُ الْكَلِمَةِ',stateLabel:'حَالَةُ الْإِعْرَابِ',signLabel:'عَلَامَةُ الْإِعْرَابِ',
   historyTitle:'الْجُمَلُ الْمُوَلَّدَةُ',historyNote:'الْأَحْدَثُ أَوَّلًا. تُحْفَظُ آخِرُ مِئَةِ جُمْلَةٍ عَلَى هَذَا الْجِهَازِ.',
   historyEmpty:'لَمْ تُوَلَّدْ أَيُّ جُمْلَةٍ بَعْدُ.',clearHistory:'مَسْحُ السِّجِلِّ',
+  historyReviewLabel:sentence=>`مُرَاجَعَةُ التَّمْرِينِ الْمَحْفُوظِ: ${sentence}`,
+  historyInvalid:'تَعَذَّرَتْ مُرَاجَعَةُ هَذَا التَّمْرِينِ لِأَنَّ بَيَانَاتِهِ النَّحْوِيَّةَ الْمَحْفُوظَةَ غَيْرُ صَالِحَةٍ.',
   historyToggle:n=>`سِجِلُّ الْجُمَلِ (${n})`,
   definitionsToggle:n=>`تَعْرِيفَاتٌ نَحْوِيَّةٌ مُبَسَّطَةٌ (${n})`,
   chapterChoose:'اِخْتَرْ بَابًا نَحْوِيًّا',chapterHint:'اِخْتَرْ بَابًا لِتَرَى كُلَّ مُصْطَلَحَاتِهِ وَتَعْرِيفَاتِهَا.',
@@ -457,12 +463,56 @@ if(darkMediaQuery){
 
 const SENTENCE_HISTORY_KEY='nahw-sentence-history-v1';
 const SENTENCE_HISTORY_LIMIT=100;
+const SENTENCE_HISTORY_SNAPSHOT_VERSION=1;
+function cloneSerializable(value){
+ return JSON.parse(JSON.stringify(value,(key,item)=>key==='_tokens'?undefined:item));
+}
+function isExerciseSnapshot(snapshot){
+ if(!snapshot||snapshot.schemaVersion!==SENTENCE_HISTORY_SNAPSHOT_VERSION)return false;
+ if(typeof snapshot.templateId!=='string'||typeof snapshot.templateStarts!=='string'
+   ||typeof snapshot.templateForm!=='string'||typeof snapshot.templateState!=='string'
+   ||typeof snapshot.templateSign!=='string'||typeof snapshot.sentenceType!=='string'
+   ||typeof snapshot.sentence!=='string'||typeof snapshot.translation!=='string')return false;
+ if(!Array.isArray(snapshot.tokens)||!snapshot.tokens.length||!Array.isArray(snapshot.relationships))return false;
+ if(snapshot.sentence!==snapshot.tokens.map(item=>item?.word).join(' '))return false;
+ if(snapshot.tokens.filter(item=>item?.target===true).length!==1)return false;
+ return snapshot.tokens.every(item=>item&&typeof item.id==='string'&&typeof item.word==='string'
+   &&typeof item.gloss==='string'&&typeof item.ar==='string'&&typeof item.en==='string'
+   &&item.grammar&&typeof item.grammar==='object'&&item.relations&&typeof item.relations==='object')
+   &&snapshot.relationships.every(item=>item&&typeof item==='object');
+}
+function createExerciseSnapshot(data){
+ if(!data?.validated||validateExercise(data).length)return null;
+ const snapshot={
+  schemaVersion:SENTENCE_HISTORY_SNAPSHOT_VERSION,
+  templateId:data.templateId,
+  templateStarts:data.templateStarts,
+  templateForm:data.templateForm,
+  templateState:data.templateState,
+  templateSign:data.templateSign,
+  sentenceType:data.sentenceType,
+  sentence:data.sentence,
+  translation:data.translation,
+  tokens:cloneSerializable(data.tokens),
+  relationships:cloneSerializable(data.relationships)
+ };
+ return isExerciseSnapshot(snapshot)?snapshot:null;
+}
+function restoreExerciseSnapshot(snapshot){
+ if(!isExerciseSnapshot(snapshot))return null;
+ try{
+  const data=cloneSerializable(snapshot);
+  delete data.schemaVersion;
+  if(validateExercise(data).length)return null;
+  data.validated=true;
+  return data;
+ }catch{return null}
+}
 function loadSentenceHistory(){
  try{
    const saved=JSON.parse(globalThis.localStorage?.getItem(SENTENCE_HISTORY_KEY)||'[]');
    if(!Array.isArray(saved)) return [];
-   return saved.filter(item=>item&&typeof item.sentence==='string'&&typeof item.translation==='string')
-     .slice(0,SENTENCE_HISTORY_LIMIT);
+   return saved.filter(isExerciseSnapshot).slice(0,SENTENCE_HISTORY_LIMIT);
  }catch{return []}
 }
 let sentenceHistory=loadSentenceHistory();
@@ -476,16 +526,28 @@ function renderSentenceHistory(){
  byId('historyNote').textContent=t('historyNote');
  byId('historyEmpty').textContent=t('historyEmpty');
  byId('clearHistoryBtn').textContent=t('clearHistory');
- byId('historyList').innerHTML=sentenceHistory.map(item=>`<li class="history-item"><div class="history-ar" lang="ar">${esc(item.sentence)}</div><div class="history-en en-only">${esc(item.translation)}</div></li>`).join('');
+ byId('historyList').innerHTML=sentenceHistory.map((item,index)=>`<li><button type="button" class="history-item" data-history-index="${index}" aria-label="${esc(t('historyReviewLabel')(item.sentence))}"><span class="history-ar" lang="ar">${esc(item.sentence)}</span><span class="history-en en-only">${esc(item.translation)}</span></button></li>`).join('');
  byId('historyList').hidden=!hasHistory;
  byId('historyEmpty').hidden=hasHistory;
  byId('clearHistoryBtn').disabled=!hasHistory;
 }
 function recordSentence(data){
- sentenceHistory.unshift({sentence:data.sentence,translation:data.translation});
+ const snapshot=createExerciseSnapshot(data);
+ if(!snapshot)return;
+ sentenceHistory.unshift(snapshot);
  if(sentenceHistory.length>SENTENCE_HISTORY_LIMIT) sentenceHistory.length=SENTENCE_HISTORY_LIMIT;
  saveSentenceHistory();
  renderSentenceHistory();
+}
+function reviewSentenceFromHistory(index){
+ const data=restoreExerciseSnapshot(sentenceHistory[index]);
+ if(!data){
+  byId('status').className='status error';
+  byId('status').textContent=t('historyInvalid');
+  return false;
+ }
+ render(data,'',false);
+ return true;
 }
 function toggleSentenceHistory(){
  const panel=byId('historyPanel');
@@ -2741,7 +2803,7 @@ function normalizeFilters(changedId){
  }
  return `These filters were reset to stay compatible: ${reset.map(id=>labelFor(id).label).join(', ')}.`;
 }
-function render(data,notice=''){
+function render(data,notice='',shouldRecord=true){
  if(!data?.validated)throw new Error('Refusing to display an exercise that has not passed grammar validation.');
  current=data;
  byId('sentence').textContent=data.sentence;
@@ -2751,7 +2813,7 @@ function render(data,notice=''){
  byId('revealBtn').textContent=revealButtonLabel();
  byId('status').className=notice?'status notice':'status';
  byId('status').textContent=notice;
- recordSentence(data);
+ if(shouldRecord)recordSentence(data);
 }
 function generate(notice=''){
  const pool=compatible();
@@ -2806,6 +2868,10 @@ byId('nextBtn').addEventListener('click',()=>generate());
 byId('revealBtn').addEventListener('click',toggleReveal);
 byId('historyToggle').addEventListener('click',toggleSentenceHistory);
 byId('clearHistoryBtn').addEventListener('click',clearSentenceHistory);
+byId('historyList').addEventListener('click',event=>{
+ const reviewButton=event.target?.closest?.('[data-history-index]');
+ if(reviewButton)reviewSentenceFromHistory(Number(reviewButton.getAttribute('data-history-index')));
+});
 byId('definitionsToggle').addEventListener('click',toggleGrammarDefinitions);
 byId('definitionsList').addEventListener('click',event=>{
  const chapterBtn=event.target?.closest?.('[data-definition-chapter]');

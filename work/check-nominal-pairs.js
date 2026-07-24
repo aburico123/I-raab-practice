@@ -325,9 +325,9 @@ assert(elements.definitionsToggle.getAttribute('aria-expanded')==='true','Defini
 
 const mainNounKinds=['singularPeople','singularThings','places','brokenHuman','brokenThings','duals','smp','sfp','fiveNouns'];
 const mainNounEntries=mainNounKinds.flatMap(name=>api.nounLexicons[name]);
-assert(mainNounEntries.length===240,`Structured noun audit found ${mainNounEntries.length} entries instead of 240`);
+assert(mainNounEntries.length===302,`Structured noun audit found ${mainNounEntries.length} entries instead of 302`);
 const repeatedNounMeanings=[...new Set(mainNounEntries.map(item=>item.en).filter((meaning,index,all)=>all.indexOf(meaning)!==index))];
-assert(repeatedNounMeanings.length===0,`The 240 main noun entries repeat: ${repeatedNounMeanings.join(', ')}`);
+assert(repeatedNounMeanings.length===0,`The ${mainNounEntries.length} main noun entries repeat: ${repeatedNounMeanings.join(', ')}`);
 for(const name of ['singularPeople','singularThings','places','brokenHuman','brokenThings']){
   for(const noun of api.nounLexicons[name]){
     assert(noun.nom.endsWith('ُ'),`${name}/${noun.en}: nominative form lacks ḍammah`);
@@ -401,7 +401,7 @@ for(const list of [api.verbLexicons.verbs,api.verbLexicons.additionalVerbActions
 const verbMeaningKeys=[...uniquePresentRecords.values()].map(verb=>(verb.en||verb.third).toLowerCase());
 const repeatedVerbMeanings=[...new Set(verbMeaningKeys.filter((meaning,index,all)=>all.indexOf(meaning)!==index))];
 assert(repeatedVerbMeanings.length===0,`Distinct Arabic verb families repeat English meanings: ${repeatedVerbMeanings.join(', ')}`);
-assert(uniquePresentRecords.size+api.verbLexicons.femininePastActions.length===219,'The structured vocabulary does not contain 200 unique verb families');
+assert(uniquePresentRecords.size+api.verbLexicons.femininePastActions.length===239,'The structured vocabulary does not contain 239 unique verb families');
 
 const PLAIN_KHABAR=/(^|[\s:،])خَبَر[ٌٍ](?=$|[\s،.])/u;
 const stats={
@@ -1076,7 +1076,7 @@ assert(JSON.parse(storage.get('nahw-sentence-history-v1')).length===100,'Sentenc
 const additionalBlock=html.match(/const additionalVerbActions=\[([\s\S]*?)\n\];/)[1];
 const additionalRecords=[...additionalBlock.matchAll(/\{past:'([^']+)',pres:'([^']+)'/g)]
   .map(record=>({past:record[1],pres:record[2]}));
-assert(additionalRecords.length===176,`Expected 176 additional verb records, found ${additionalRecords.length}`);
+assert(additionalRecords.length===196,`Expected 196 additional verb records, found ${additionalRecords.length}`);
 elements.startFilter.value='verb';
 elements.formFilter.value='singular';
 elements.stateFilter.value='any';
@@ -1088,7 +1088,7 @@ for(let iteration=0;iteration<5000;iteration++){
   pastStarts.add(elements.sentence.textContent.split(/\s+/)[0]);
 }
 const additionalPastSeen=additionalRecords.filter(record=>pastStarts.has(record.past)).length;
-assert(additionalPastSeen===176,`Only ${additionalPastSeen} of 176 added past verbs appeared`);
+assert(additionalPastSeen===196,`Only ${additionalPastSeen} of 196 added past verbs appeared`);
 elements.startFilter.value='noun';
 elements.formFilter.value='singular';
 elements.stateFilter.value='any';
@@ -1103,7 +1103,7 @@ for(let iteration=0;iteration<5000;iteration++){
 }
 const additionalPresentSeen=additionalRecords
   .filter(record=>presentSentences.some(sentence=>sentence.includes(` ${record.pres} `))).length;
-assert(additionalPresentSeen===176,`Only ${additionalPresentSeen} of 176 added present verbs appeared`);
+assert(additionalPresentSeen===196,`Only ${additionalPresentSeen} of 196 added present verbs appeared`);
 
 const nounArrayNames=['singularPeople','singularThings','places','brokenHuman','brokenThings','duals','smp','sfp','fiveNouns'];
 const nounEntries=nounArrayNames.reduce((total,name)=>{
@@ -1118,8 +1118,19 @@ for(const name of presentArrayNames){
 }
 const femininePastBlock=html.match(/const femininePastActions=\[([\s\S]*?)\n\];/)[1];
 const totalVerbFamilies=uniquePresentVerbs.size+(femininePastBlock.match(/\{past:'/g)||[]).length;
-assert(nounEntries===240,`Expected 240 noun entries, found ${nounEntries}`);
-assert(totalVerbFamilies===219,`Expected 219 verb families, found ${totalVerbFamilies}`);
+assert(nounEntries===302,`Expected 302 noun entries, found ${nounEntries}`);
+assert(totalVerbFamilies===239,`Expected 239 verb families, found ${totalVerbFamilies}`);
+// The learner-facing footer must advertise the real, current totals in both English and Arabic-Indic
+// digits, so a future vocabulary change cannot update the engine counts while leaving the UI stale.
+const toArabicDigits=n=>String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[+d]);
+const footerHtml=(html.match(/<div class="footer">([\s\S]*?)<\/div>/)||[])[1];
+assert(footerHtml,'The learner-facing footer div was not found');
+const footerEn=(footerHtml.match(/<span class="en-only">([\s\S]*?)<\/span>/)||[])[1]||'';
+const footerAr=(footerHtml.match(/<span class="ar-only"[^>]*>([\s\S]*?)<\/span>/)||[])[1]||'';
+assert(footerEn.includes(`${totalVerbFamilies} verb families and ${nounEntries} noun entries`),
+  `Footer (English) must state “${totalVerbFamilies} verb families and ${nounEntries} noun entries”`);
+assert(footerAr.includes(toArabicDigits(totalVerbFamilies))&&footerAr.includes(toArabicDigits(nounEntries)),
+  `Footer (Arabic) ar-only span must state ${toArabicDigits(totalVerbFamilies)} and ${toArabicDigits(nounEntries)}`);
 
 // --- Vocabulary-expansion lexical audit (added with the 2026-07 vocabulary expansion) ---
 const addedNounEntries=[
@@ -1172,6 +1183,183 @@ for(const noun of addedNounEntries){
   assert(reachableNounSurfaces.has(noun.nom),`${noun.en}: newly added noun is not reachable through any generation pool`);
 }
 console.log(`Vocabulary-expansion lexical audit passed: ${addedNounEntries.length} nouns, ${addedAdjectives.length} adjectives, ${addedVerbLexemes.length} verb families checked.`);
+
+// --- Book-vocabulary expansion audit (2026-07-24) -----------------------------------
+// Validates every lexical item added on top of the f0305bc production baseline by
+// diffing the live lexicon against work/index-pre-book-vocab-expansion-backup.html.
+// Every candidate must be a fully declinable sound word that slots into an existing
+// engine class; nothing here expands the engine to fit a word.
+const bookBaseline=fs.readFileSync('work/index-pre-book-vocab-expansion-backup.html','utf8');
+const bookBaselineNoms=new Set(bookBaseline.match(/nom:'([^']+)'/g).map(m=>m.slice(5,-1)));
+const bookBaselinePasts=new Set([...bookBaseline.matchAll(/past:'([^']+)'/g)].map(m=>m[1]));
+const bookAddedPeople=api.nounLexicons.singularPeople.filter(n=>!bookBaselineNoms.has(n.nom));
+const bookAddedThings=api.nounLexicons.singularThings.filter(n=>!bookBaselineNoms.has(n.nom));
+const bookAddedPlaces=api.nounLexicons.places.filter(n=>!bookBaselineNoms.has(n.nom));
+const bookAddedAdjectives=api.nounLexicons.singularPredicates.filter(a=>!bookBaselineNoms.has(a.nom));
+const bookAddedVerbs=api.verbLexicons.additionalVerbActions.filter(v=>!bookBaselinePasts.has(v.past));
+assert(bookAddedPeople.length===8,`Expected 8 added book people, found ${bookAddedPeople.length}`);
+assert(bookAddedThings.length===50,`Expected 50 added book/study nouns, found ${bookAddedThings.length}`);
+assert(bookAddedPlaces.length===4,`Expected 4 added places, found ${bookAddedPlaces.length}`);
+assert(bookAddedAdjectives.length===10,`Expected 10 added adjectives, found ${bookAddedAdjectives.length}`);
+assert(bookAddedVerbs.length===20,`Expected 20 added verb families, found ${bookAddedVerbs.length}`);
+const bookAddedNouns=[...bookAddedPeople,...bookAddedThings,...bookAddedPlaces];
+// Morphology: sound triptote declension, no diptote/manqūṣ/maqṣūr, no accidental tanwīn on a definite noun.
+for(const noun of bookAddedNouns){
+  assert(noun.nom.endsWith('ُ')||/[ٌّ]$/u.test(noun.nom),`${noun.en}: added noun nominative has an unsupported ending`);
+  assert(noun.acc.endsWith('َ')||/[ًّ]$/u.test(noun.acc),`${noun.en}: added noun accusative has an unsupported ending`);
+  assert(noun.gen.endsWith('ِ')||/[ٍّ]$/u.test(noun.gen),`${noun.en}: added noun genitive has an unsupported ending`);
+  assert(!/[ىأإ]$/u.test(noun.nom.replace(/[ً-ْ]/gu,'')),`${noun.en}: added noun looks defective (منقوص/مقصور), an unsupported morphology`);
+  assert(noun.nom.startsWith('ال')&&!/[ًٌٍ]/u.test(`${noun.nom}${noun.acc}${noun.gen}`),`${noun.en}: definite noun carries tanwīn`);
+}
+// Global uniqueness of every added Arabic surface and English gloss across the main noun pools.
+const bookMainNounKinds=['singularPeople','singularThings','places','brokenHuman','brokenThings','duals','smp','sfp','fiveNouns'];
+const bookAllNouns=bookMainNounKinds.flatMap(name=>api.nounLexicons[name]);
+for(const noun of bookAddedNouns){
+  assert(bookAllNouns.filter(n=>n.nom===noun.nom).length===1,`${noun.en}: added noun surface “${noun.nom}” collides with an existing noun`);
+  assert(bookAllNouns.filter(n=>n.en===noun.en).length===1,`${noun.en}: added noun gloss collides with an existing noun gloss`);
+}
+// Added adjectives: predicate shape {nom,acc}, unique surface and gloss.
+for(const adj of bookAddedAdjectives){
+  assert(adj.nom&&adj.acc,`${adj.en}: added adjective is missing a nominative or accusative form`);
+  assert(api.nounLexicons.singularPredicates.filter(a=>a.nom===adj.nom).length===1,`${adj.en}: added adjective surface collides`);
+  assert(api.nounLexicons.singularPredicates.filter(a=>a.en===adj.en).length===1,`${adj.en}: added adjective gloss collides`);
+}
+// Added verbs: only past+present 3ms are needed; the surface must carry visible signs and a real object group.
+const bookAllPresent=new Set([...api.verbLexicons.verbs,...api.verbLexicons.additionalVerbActions,...api.verbLexicons.humanActions,...api.verbLexicons.humanPrepActions,...api.verbLexicons.thingActions,...api.verbLexicons.thingPrepActions,...api.verbLexicons.brokenObjectActions].map(v=>v.pres));
+for(const verb of bookAddedVerbs){
+  for(const field of ['past','pres','en','third','pastEn','group'])assert(verb[field],`${verb.past||verb.en}: added verb is missing ${field}`);
+  assert(verb.past.endsWith('َ'),`${verb.past}: added past is not built on visible fatḥah`);
+  assert(verb.pres.endsWith('ُ'),`${verb.past}: added present lacks the visible ḍammah (would need an estimated sign)`);
+  const group=api.objectGroups[verb.group];
+  assert(Array.isArray(group)&&group.length>0,`${verb.past}: object group “${verb.group}” is missing or empty`);
+  assert(group.every(noun=>noun&&noun.acc&&noun.en),`${verb.past}: object group “${verb.group}” has a malformed member`);
+}
+assert(new Set(bookAddedVerbs.map(v=>v.past)).size===bookAddedVerbs.length,'Added book verbs contain a duplicate past form');
+assert(new Set(bookAddedVerbs.map(v=>v.pres)).size===bookAddedVerbs.length,'Added book verbs contain a duplicate present form');
+for(const verb of bookAddedVerbs){
+  assert([...api.verbLexicons.verbs,...api.verbLexicons.additionalVerbActions,...api.verbLexicons.humanActions,...api.verbLexicons.humanPrepActions,...api.verbLexicons.thingActions,...api.verbLexicons.thingPrepActions,...api.verbLexicons.brokenObjectActions].filter(v=>v.pres===verb.pres).length===1,`${verb.past}: present form “${verb.pres}” duplicates an existing verb`);
+}
+// The curated singularThings-backed object groups introduced for the book verbs must be non-empty
+// and drawn only from singularThings (enterablePlaces is a places-backed group, validated separately below).
+const bookNewGroupNames=['explainable','dividable','includable','authoredText','reflectable','confirmable','derivable','extractable','addressable','citable','specifiable','noticeable','watchable','manufacturable','takeable'];
+for(const name of bookNewGroupNames){
+  assert(Array.isArray(api.objectGroups[name])&&api.objectGroups[name].length>0,`New object group “${name}” is empty or missing`);
+  assert(api.objectGroups[name].every(noun=>api.nounLexicons.singularThings.includes(noun)),`New object group “${name}” references a noun outside singularThings`);
+}
+// enterablePlaces is drawn from the places lexicon (for دَخَلَ), so it is validated against places.
+assert(Array.isArray(api.objectGroups.enterablePlaces)&&api.objectGroups.enterablePlaces.length>0,'New object group “enterablePlaces” is empty or missing');
+assert(api.objectGroups.enterablePlaces.every(noun=>api.nounLexicons.places.includes(noun)),'New object group “enterablePlaces” references a place outside the places lexicon');
+// Reachability: every added object-noun is producible as a person, a place, or a member of some object group.
+const bookReachable=new Set([
+  ...api.nounLexicons.singularPeople.map(n=>n.nom),
+  ...api.nounLexicons.places.map(n=>n.nom),
+  ...api.nounLexicons.singularThings.map(n=>n.nom),
+  ...Object.values(api.objectGroups).flat().map(n=>n.nom)
+]);
+for(const noun of bookAddedNouns){
+  assert(bookReachable.has(noun.nom),`${noun.en}: added noun is not reachable through any generation pool`);
+}
+// Every added thing must actually sit in at least one object group (general included) so a learner can meet it.
+for(const thing of bookAddedThings){
+  assert(Object.values(api.objectGroups).some(group=>group.includes(thing)),`${thing.en}: added thing is not wired into any object group`);
+}
+console.log(`Book-vocabulary expansion audit passed: ${bookAddedPeople.length} people, ${bookAddedThings.length} book/study nouns, ${bookAddedPlaces.length} places, ${bookAddedAdjectives.length} adjectives, ${bookAddedVerbs.length} verbs, and ${bookNewGroupNames.length+1} curated object groups verified against the f0305bc baseline.`);
+
+// --- Book-verb semantic lock (2026-07-24 naturalness audit) -------------------------
+// Each new verb is pinned to a reviewed object group and English gloss, and every group's
+// exact membership is locked, so no future edit can broaden a group into unnatural or
+// religiously misleading verb-object pairings. Enumerated pairings were reviewed by hand.
+const bookVerbSpec={
+  'بَيَّنَ':{group:'explainable',en:'clarify'},
+  'وَضَّحَ':{group:'explainable',en:'make clear'},
+  'قَسَّمَ':{group:'dividable',en:'divide'},
+  'أَدْرَجَ':{group:'includable',en:'include'},
+  'أَلَّفَ':{group:'authoredText',en:'author'},
+  'تَدَبَّرَ':{group:'reflectable',en:'reflect on'},
+  'أَكَّدَ':{group:'confirmable',en:'confirm'},
+  'وَافَقَ':{group:'people',en:'agree with'},
+  'خَالَفَ':{group:'people',en:'disagree with'},
+  'اِسْتَنْبَطَ':{group:'derivable',en:'derive'},
+  'اِسْتَخْرَجَ':{group:'extractable',en:'extract'},
+  'تَنَاوَلَ':{group:'addressable',en:'address'},
+  'أَوْرَدَ':{group:'citable',en:'cite'},
+  'حَدَّدَ':{group:'specifiable',en:'specify'},
+  'لَاحَظَ':{group:'noticeable',en:'notice'},
+  'شَاهَدَ':{group:'watchable',en:'watch'},
+  'دَخَلَ':{group:'enterablePlaces',en:'enter'},
+  'غَادَرَ':{group:'places',en:'leave'},
+  'أَخَذَ':{group:'takeable',en:'take'},
+  'صَنَعَ':{group:'manufacturable',en:'make'}
+};
+// The stored lexicon orders a geminated letter's shadda before its vowel; normalize both sides
+// to that order so Arabic keys compare reliably regardless of how the mark pair was typed.
+const sf=s=>s.replace(/([ً-ِ])ّ/gu,(m,v)=>'ّ'+v);
+const bookVerbSpecN={}; for(const [k,val] of Object.entries(bookVerbSpec))bookVerbSpecN[sf(k)]=val;
+assert(Object.keys(bookVerbSpecN).length===20,'The semantic lock must cover exactly the 20 new verbs');
+assert(new Set(bookAddedVerbs.map(v=>sf(v.past))).size===20&&bookAddedVerbs.every(v=>bookVerbSpecN[sf(v.past)]),
+  'The 20 detected new verbs do not match the semantic-lock roster');
+// شَمِلَ was rejected (unnatural with a human subject in this generator) and replaced by أَدْرَجَ.
+assert(!api.verbLexicons.additionalVerbActions.some(v=>v.past==='شَمِلَ'),'شَمِلَ must not be present; it was replaced by أَدْرَجَ');
+assert(api.verbLexicons.additionalVerbActions.some(v=>v.past==='أَدْرَجَ'&&v.group==='includable'),'أَدْرَجَ (include → includable) is missing');
+for(const [pastN,spec] of Object.entries(bookVerbSpecN)){
+  const rec=api.verbLexicons.additionalVerbActions.find(v=>sf(v.past)===pastN);
+  assert(rec,`Semantic lock: new verb ${pastN} is missing`);
+  assert(rec.group===spec.group,`Semantic lock: ${rec.past} must use group ${spec.group}, found ${rec.group}`);
+  assert(rec.en===spec.en,`Semantic lock: ${rec.past} must gloss “${spec.en}”, found “${rec.en}”`);
+}
+// Lock the exact reviewed membership of every curated group (glosses, order-independent).
+const bookGroupMembers={
+  explainable:['the rule','the ruling','the issue','the matter','the difference','the reason','the cause','the condition','the sign','the definition','the intended meaning','the answer','the question','the topic','the statement','the evidence','the proof','the verse','the hadith'],
+  dividable:['the book','the lesson','the text','the topic','the section','the number'],
+  includable:['the example','the definition','the question','the answer','the section','the topic','the evidence','the rule','the report'],
+  authoredText:['the book','the explanation','the introduction','the report','the story'],
+  reflectable:['the Qurʾān','the verse','the sūrah','the hadith','the narration','the text','the intended meaning'],
+  confirmable:['the ruling','the rule','the statement','the opinion','the evidence','the proof','the news','the report','the answer','the truth','the matter','the intended meaning'],
+  derivable:['the ruling','the rule','the intended meaning','the answer','the cause'],
+  extractable:['the ruling','the rule','the intended meaning','the evidence','the proof','the answer'],
+  addressable:['the topic','the issue','the matter','the question','the rule','the ruling','the difference','the reason'],
+  citable:['the evidence','the proof','the example','the statement','the narration','the hadith','the verse','the opinion'],
+  specifiable:['the condition','the reason','the cause','the intended meaning','the ruling','the rule','the sign','the type','the number','the topic'],
+  noticeable:['the difference','the sign','the reason','the matter','the type','the condition'],
+  watchable:['the television','the program','the news'],
+  manufacturable:['the tool','the machine','the chair','the table','the box','the garment','the rope'],
+  takeable:['the book','the pen','the notebook','the bag','the phone','the computer','the key','the map','the picture','the letter','the newspaper','the car','the garment','the cup','the sheet of paper','the clock','the tool','the box','the bottle','the plate','the spoon','the knife','the rope','the cloth','the medicine','the ticket','the file','the report','the ball'],
+  enterablePlaces:['the mosque','the house','the school','the market','the classroom','the library','the garden','the restaurant','the institute','the university','the office','the airport','the station','the farm','the workshop','the hotel','the clinic','the factory','the bank','the post office','the museum','the theater','the stadium','the laboratory','the bathroom','the bakery','the pharmacy','the camp','the prison','the palace','the country','the city','the village']
+};
+for(const [name,glosses] of Object.entries(bookGroupMembers)){
+  const actual=api.objectGroups[name].map(n=>n.en).sort();
+  const expected=[...glosses].sort();
+  assert(actual.length===expected.length&&actual.every((g,i)=>g===expected[i]),
+    `Semantic lock: group ${name} membership drifted → [${actual.join(', ')}]`);
+}
+// Forbidden pairings can never be generated (the object simply is not in the verb's group).
+const forbidden={
+  authoredText:['the Qurʾān','the hadith','the verse','the sūrah','the Sunnah'],
+  derivable:['the Sunnah','the obligation'],
+  dividable:['the Qurʾān','the hadith','the verse','the sūrah','the Sunnah'],
+  watchable:['the newspaper','the picture'],
+  reflectable:['the Sunnah']
+};
+for(const [name,bad] of Object.entries(forbidden)){
+  const glosses=new Set(api.objectGroups[name].map(n=>n.en));
+  for(const g of bad)assert(!glosses.has(g),`Forbidden pairing: “${g}” must never be an object of group ${name}`);
+}
+// Religious nouns may only be objects of an approved set of NEW verbs.
+const approvedReligiousVerbs={
+  'the Qurʾān':new Set(['تَدَبَّرَ']),
+  'the hadith':new Set(['بَيَّنَ','وَضَّحَ','تَدَبَّرَ','أَوْرَدَ']),
+  'the verse':new Set(['بَيَّنَ','وَضَّحَ','تَدَبَّرَ','أَوْرَدَ']),
+  'the sūrah':new Set(['تَدَبَّرَ']),
+  'the Sunnah':new Set([])
+};
+for(const k in approvedReligiousVerbs)approvedReligiousVerbs[k]=new Set([...approvedReligiousVerbs[k]].map(sf));
+for(const [gloss,approved] of Object.entries(approvedReligiousVerbs)){
+  for(const v of bookAddedVerbs){
+    const takesIt=(api.objectGroups[v.group]||[]).some(n=>n.en===gloss);
+    if(takesIt)assert(approved.has(sf(v.past)),`Religious safety: new verb ${v.past} (“${v.en}”) must not take “${gloss}”`);
+  }
+}
+console.log(`Book-verb semantic lock passed: 20 verbs pinned to reviewed groups/glosses, ${Object.keys(bookGroupMembers).length} group memberships locked, forbidden and religious-safety pairings verified.`);
 
 // ===================================================================================
 // Iʿrāb-state-filter audit (added with the state filter). The word-level filters
@@ -1597,7 +1785,10 @@ const goldens=[
  ['five nouns rafʿ',t=>t.inflection==='fiveNouns'&&t.state==='raf',['WHY_SIGN_FIVENOUNS_RAF','WHY_MUDAF_ATTACHED_KAF']],
  ['five nouns naṣb',t=>t.inflection==='fiveNouns'&&t.state==='nasb',['WHY_SIGN_FIVENOUNS_NASB']],
  ['five nouns khafḍ',t=>t.inflection==='fiveNouns'&&t.state==='jarr',['WHY_SIGN_FIVENOUNS_JARR']],
- ['present rafʿ',t=>t.tense==='present'&&t.inflection==='regular'&&t.state==='raf',['WHY_STATE_VERB_FREE','WHY_SIGN_MUDARI_RAF']],
+ // The free present and the سوف future are both present/regular/rafʿ; this golden targets the free
+// variant (سوف is covered by the deterministic golden above), so exclude the future-particle case
+// to keep the check order-independent regardless of the random generation sequence.
+ ['present rafʿ',t=>t.tense==='present'&&t.inflection==='regular'&&t.state==='raf'&&!(t.why&&t.why.ids.includes('WHY_STATE_VERB_SAWFA')),['WHY_STATE_VERB_FREE','WHY_SIGN_MUDARI_RAF']],
  ['present after lan',t=>t.tense==='present'&&t.inflection==='regular'&&t.state==='nasb',['WHY_STATE_VERB_LAN','WHY_SIGN_MUDARI_NASB']],
  ['present after lam',t=>t.tense==='present'&&t.inflection==='regular'&&t.state==='jazm',['WHY_STATE_VERB_LAM','WHY_SIGN_MUDARI_JAZM']],
  ['five verbs rafʿ / ثبوت النون',t=>t.inflection==='afalKhamsa'&&t.state==='raf',['WHY_SIGN_AFAL5_RAF','WHY_SUBJECT_ATTACHED']],

@@ -345,7 +345,7 @@ body.lang-arabic #translation{display:none}
       </div>
     </section>
     <div id="status" class="status"></div>
-    <div class="footer"><span class="en-only">Practice draws from 239 verb families and 302 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</span><span class="ar-only" lang="ar">يَعْتَمِدُ التَّدْرِيبُ عَلَى ٢٣٩ أُسْرَةً فِعْلِيَّةً وَ٣٠٢ اسْمًا. وَكُلُّ اخْتِيَارٍ مُتَوَافِقٍ يُخْتَارُ عَشْوَائِيًّا مَعَ تَجَنُّبِ التَّكْرَارِ الْقَرِيبِ.</span></div>
+    <div class="footer"><span class="en-only">Practice draws from 219 verb families and 240 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</span><span class="ar-only" lang="ar">يَعْتَمِدُ التَّدْرِيبُ عَلَى ٢١٩ أُسْرَةً فِعْلِيَّةً وَ٢٤٠ اسْمًا. وَكُلُّ اخْتِيَارٍ مُتَوَافِقٍ يُخْتَارُ عَشْوَائِيًّا مَعَ تَجَنُّبِ التَّكْرَارِ الْقَرِيبِ.</span></div>
   </main>
 </div>
 
@@ -1345,15 +1345,7 @@ const singularPeople=[
  {nom:'الْحَدَّادُ',acc:'الْحَدَّادَ',gen:'الْحَدَّادِ',en:'the blacksmith'},
  {nom:'الْجَزَّارُ',acc:'الْجَزَّارَ',gen:'الْجَزَّارِ',en:'the butcher'},
  {nom:'الْمُوَظَّفُ',acc:'الْمُوَظَّفَ',gen:'الْمُوَظَّفِ',en:'the employee'},
- {nom:'الْقَارِئُ',acc:'الْقَارِئَ',gen:'الْقَارِئِ',en:'the reader'},
- {nom:'الْمُؤَلِّفُ',acc:'الْمُؤَلِّفَ',gen:'الْمُؤَلِّفِ',en:'the author'},
- {nom:'الْفَقِيهُ',acc:'الْفَقِيهَ',gen:'الْفَقِيهِ',en:'the jurist'},
- {nom:'الْمُفَسِّرُ',acc:'الْمُفَسِّرَ',gen:'الْمُفَسِّرِ',en:'the exegete'},
- {nom:'الْمُحَدِّثُ',acc:'الْمُحَدِّثَ',gen:'الْمُحَدِّثِ',en:'the hadith scholar'},
- {nom:'الشَّيْخُ',acc:'الشَّيْخَ',gen:'الشَّيْخِ',en:'the shaykh'},
- {nom:'الْمُؤْمِنُ',acc:'الْمُؤْمِنَ',gen:'الْمُؤْمِنِ',en:'the believer'},
- {nom:'الصَّحَابِيُّ',acc:'الصَّحَابِيَّ',gen:'الصَّحَابِيِّ',en:'the companion'},
- {nom:'الْحَافِظُ',acc:'الْحَافِظَ',gen:'الْحَافِظِ',en:'the memorizer'},
+ {nom:'الْقَارِئُ',acc:'الْقَارِئَ',gen:'الْقَارِئِ',en:'the reader'}
 ];
 const singularThings=[
  {nom:'الْكِتَابُ',acc:'الْكِتَابَ',gen:'الْكِتَابِ',en:'the book'},
@@ -1443,57 +1435,7 @@ const singularThings=[
  {nom:'الْأُرْزُ',acc:'الْأُرْزَ',gen:'الْأُرْزِ',en:'the rice'},
  {nom:'السُّكَّرُ',acc:'السُّكَّرَ',gen:'السُّكَّرِ',en:'the sugar'},
  {nom:'الْمِلْحُ',acc:'الْمِلْحَ',gen:'الْمِلْحِ',en:'the salt'},
- {nom:'الدَّرَّاجَةُ',acc:'الدَّرَّاجَةَ',gen:'الدَّرَّاجَةِ',en:'the bicycle'},
- {nom:'الْجُمْلَةُ',acc:'الْجُمْلَةَ',gen:'الْجُمْلَةِ',en:'the sentence'},
- {nom:'الْعِبَارَةُ',acc:'الْعِبَارَةَ',gen:'الْعِبَارَةِ',en:'the phrase'},
- {nom:'الصَّفْحَةُ',acc:'الصَّفْحَةَ',gen:'الصَّفْحَةِ',en:'the page'},
- {nom:'الْمَبْحَثُ',acc:'الْمَبْحَثَ',gen:'الْمَبْحَثِ',en:'the section'},
- {nom:'الْقِسْمُ',acc:'الْقِسْمَ',gen:'الْقِسْمِ',en:'the division'},
- {nom:'التَّعْرِيفُ',acc:'التَّعْرِيفَ',gen:'التَّعْرِيفِ',en:'the definition'},
- {nom:'الْمِثَالُ',acc:'الْمِثَالَ',gen:'الْمِثَالِ',en:'the example'},
- {nom:'الْقَاعِدَةُ',acc:'الْقَاعِدَةَ',gen:'الْقَاعِدَةِ',en:'the rule'},
- {nom:'الْحُكْمُ',acc:'الْحُكْمَ',gen:'الْحُكْمِ',en:'the ruling'},
- {nom:'الْمَسْأَلَةُ',acc:'الْمَسْأَلَةَ',gen:'الْمَسْأَلَةِ',en:'the issue'},
- {nom:'الشَّرْطُ',acc:'الشَّرْطَ',gen:'الشَّرْطِ',en:'the condition'},
- {nom:'السَّبَبُ',acc:'السَّبَبَ',gen:'السَّبَبِ',en:'the reason'},
- {nom:'الْعِلَّةُ',acc:'الْعِلَّةَ',gen:'الْعِلَّةِ',en:'the cause'},
- {nom:'الْعَلَامَةُ',acc:'الْعَلَامَةَ',gen:'الْعَلَامَةِ',en:'the sign'},
- {nom:'النَّوْعُ',acc:'النَّوْعَ',gen:'النَّوْعِ',en:'the type'},
- {nom:'الْجُزْءُ',acc:'الْجُزْءَ',gen:'الْجُزْءِ',en:'the part'},
- {nom:'الْفَرْقُ',acc:'الْفَرْقَ',gen:'الْفَرْقِ',en:'the difference'},
- {nom:'الْإِجْمَاعُ',acc:'الْإِجْمَاعَ',gen:'الْإِجْمَاعِ',en:'the consensus'},
- {nom:'الْقَوْلُ',acc:'الْقَوْلَ',gen:'الْقَوْلِ',en:'the statement'},
- {nom:'الرَّأْيُ',acc:'الرَّأْيَ',gen:'الرَّأْيِ',en:'the opinion'},
- {nom:'الدَّلِيلُ',acc:'الدَّلِيلَ',gen:'الدَّلِيلِ',en:'the evidence'},
- {nom:'الْحُجَّةُ',acc:'الْحُجَّةَ',gen:'الْحُجَّةِ',en:'the proof'},
- {nom:'الْعِلْمُ',acc:'الْعِلْمَ',gen:'الْعِلْمِ',en:'the knowledge'},
- {nom:'الْفَهْمُ',acc:'الْفَهْمَ',gen:'الْفَهْمِ',en:'the understanding'},
- {nom:'الشَّرْحُ',acc:'الشَّرْحَ',gen:'الشَّرْحِ',en:'the explanation'},
- {nom:'الرِّوَايَةُ',acc:'الرِّوَايَةَ',gen:'الرِّوَايَةِ',en:'the narration'},
- {nom:'النَّصُّ',acc:'النَّصَّ',gen:'النَّصِّ',en:'the text'},
- {nom:'اللُّغَةُ',acc:'اللُّغَةَ',gen:'اللُّغَةِ',en:'the language'},
- {nom:'الْمَوْضُوعُ',acc:'الْمَوْضُوعَ',gen:'الْمَوْضُوعِ',en:'the topic'},
- {nom:'الْمُقَدِّمَةُ',acc:'الْمُقَدِّمَةَ',gen:'الْمُقَدِّمَةِ',en:'the introduction'},
- {nom:'الْبِدَايَةُ',acc:'الْبِدَايَةَ',gen:'الْبِدَايَةِ',en:'the beginning'},
- {nom:'النِّهَايَةُ',acc:'النِّهَايَةَ',gen:'النِّهَايَةِ',en:'the end'},
- {nom:'الْكَلَامُ',acc:'الْكَلَامَ',gen:'الْكَلَامِ',en:'the speech'},
- {nom:'الِاسْمُ',acc:'الِاسْمَ',gen:'الِاسْمِ',en:'the noun'},
- {nom:'الْفِعْلُ',acc:'الْفِعْلَ',gen:'الْفِعْلِ',en:'the verb'},
- {nom:'الْحَرْفُ',acc:'الْحَرْفَ',gen:'الْحَرْفِ',en:'the particle'},
- {nom:'الْأَمْرُ',acc:'الْأَمْرَ',gen:'الْأَمْرِ',en:'the matter'},
- {nom:'الْحَقُّ',acc:'الْحَقَّ',gen:'الْحَقِّ',en:'the truth'},
- {nom:'الْمُرَادُ',acc:'الْمُرَادَ',gen:'الْمُرَادِ',en:'the intended meaning'},
- {nom:'الصَّلَاةُ',acc:'الصَّلَاةَ',gen:'الصَّلَاةِ',en:'the prayer'},
- {nom:'الصَّوْمُ',acc:'الصَّوْمَ',gen:'الصَّوْمِ',en:'the fasting'},
- {nom:'الطَّهَارَةُ',acc:'الطَّهَارَةَ',gen:'الطَّهَارَةِ',en:'the purification'},
- {nom:'الْعِبَادَةُ',acc:'الْعِبَادَةَ',gen:'الْعِبَادَةِ',en:'the worship'},
- {nom:'النِّيَّةُ',acc:'النِّيَّةَ',gen:'النِّيَّةِ',en:'the intention'},
- {nom:'الْفَرْضُ',acc:'الْفَرْضَ',gen:'الْفَرْضِ',en:'the obligation'},
- {nom:'السُّنَّةُ',acc:'السُّنَّةَ',gen:'السُّنَّةِ',en:'the Sunnah'},
- {nom:'السُّورَةُ',acc:'السُّورَةَ',gen:'السُّورَةِ',en:'the sūrah'},
- {nom:'الْآيَةُ',acc:'الْآيَةَ',gen:'الْآيَةِ',en:'the verse'},
- {nom:'الدِّينُ',acc:'الدِّينَ',gen:'الدِّينِ',en:'the religion'},
- {nom:'الْإِيمَانُ',acc:'الْإِيمَانَ',gen:'الْإِيمَانِ',en:'the faith'},
+ {nom:'الدَّرَّاجَةُ',acc:'الدَّرَّاجَةَ',gen:'الدَّرَّاجَةِ',en:'the bicycle'}
 ];
 const adjectives=[
  {nom:'مُجْتَهِدٌ',acc:'مُجْتَهِدًا',en:'hardworking'},
@@ -1523,17 +1465,7 @@ const adjectives=[
  {nom:'غَنِيٌّ',acc:'غَنِيًّا',en:'rich'},
  {nom:'فَقِيرٌ',acc:'فَقِيرًا',en:'poor'},
  {nom:'لَطِيفٌ',acc:'لَطِيفًا',en:'kind'},
- {nom:'ذَكِيٌّ',acc:'ذَكِيًّا',en:'intelligent'},
- {nom:'مَشْهُورٌ',acc:'مَشْهُورًا',en:'famous'},
- {nom:'صَالِحٌ',acc:'صَالِحًا',en:'righteous'},
- {nom:'تَقِيٌّ',acc:'تَقِيًّا',en:'pious'},
- {nom:'صَابِرٌ',acc:'صَابِرًا',en:'patient'},
- {nom:'مُخْلِصٌ',acc:'مُخْلِصًا',en:'sincere'},
- {nom:'حَكِيمٌ',acc:'حَكِيمًا',en:'wise'},
- {nom:'فَصِيحٌ',acc:'فَصِيحًا',en:'eloquent'},
- {nom:'أَمِينٌ',acc:'أَمِينًا',en:'trustworthy'},
- {nom:'مُتَوَاضِعٌ',acc:'مُتَوَاضِعًا',en:'humble'},
- {nom:'شَاكِرٌ',acc:'شَاكِرًا',en:'grateful'},
+ {nom:'ذَكِيٌّ',acc:'ذَكِيًّا',en:'intelligent'}
 ];
 const places=[
  {nom:'الْمَسْجِدُ',acc:'الْمَسْجِدَ',gen:'الْمَسْجِدِ',en:'the mosque'},
@@ -1569,11 +1501,7 @@ const places=[
  {nom:'الْمَرْكَزُ',acc:'الْمَرْكَزَ',gen:'الْمَرْكَزِ',en:'the center'},
  {nom:'الْمُخَيَّمُ',acc:'الْمُخَيَّمَ',gen:'الْمُخَيَّمِ',en:'the camp'},
  {nom:'السِّجْنُ',acc:'السِّجْنَ',gen:'السِّجْنِ',en:'the prison'},
- {nom:'الْقَصْرُ',acc:'الْقَصْرَ',gen:'الْقَصْرِ',en:'the palace'},
- {nom:'الْبَلَدُ',acc:'الْبَلَدَ',gen:'الْبَلَدِ',en:'the country'},
- {nom:'الْمَدِينَةُ',acc:'الْمَدِينَةَ',gen:'الْمَدِينَةِ',en:'the city'},
- {nom:'الْقَرْيَةُ',acc:'الْقَرْيَةَ',gen:'الْقَرْيَةِ',en:'the village'},
- {nom:'الطَّرِيقُ',acc:'الطَّرِيقَ',gen:'الطَّرِيقِ',en:'the road'},
+ {nom:'الْقَصْرُ',acc:'الْقَصْرَ',gen:'الْقَصْرِ',en:'the palace'}
 ];
 const brokenHuman=[
  {nom:'الطُّلَّابُ',acc:'الطُّلَّابَ',gen:'الطُّلَّابِ',en:'the students'},
@@ -1682,7 +1610,7 @@ const verbs=[
 ];
 
 // Extra transitive verbs used by the general noun-first and verb-first templates.
-// These expand the app to 239 genuinely different verb families overall.
+// These expand the app to 219 genuinely different verb families overall.
 const additionalVerbActions=[
  {past:'أَغْلَقَ',pres:'يُغْلِقُ',en:'close',third:'closes',pastEn:'closed',group:'secure'},
  {past:'قَفَلَ',pres:'يَقْفِلُ',en:'lock',third:'locks',pastEn:'locked',group:'secure'},
@@ -1860,26 +1788,6 @@ const additionalVerbActions=[
  {past:'لَحَمَ',pres:'يَلْحُمُ',en:'weld',third:'welds',pastEn:'welded',group:'weldable'},
  {past:'أَذَابَ',pres:'يُذِيبُ',en:'melt',third:'melts',pastEn:'melted',group:'meltable'},
  {past:'حَرَّكَ',pres:'يُحَرِّكُ',en:'stir',third:'stirs',pastEn:'stirred',group:'stirrable'},
- {past:'بَيَّنَ',pres:'يُبَيِّنُ',en:'clarify',third:'clarifies',pastEn:'clarified',group:'explainable'},
- {past:'وَضَّحَ',pres:'يُوَضِّحُ',en:'make clear',third:'makes clear',pastEn:'made clear',group:'explainable'},
- {past:'قَسَّمَ',pres:'يُقَسِّمُ',en:'divide',third:'divides',pastEn:'divided',group:'dividable'},
- {past:'أَدْرَجَ',pres:'يُدْرِجُ',en:'include',third:'includes',pastEn:'included',group:'includable'},
- {past:'أَلَّفَ',pres:'يُؤَلِّفُ',en:'author',third:'authors',pastEn:'authored',group:'authoredText'},
- {past:'تَدَبَّرَ',pres:'يَتَدَبَّرُ',en:'reflect on',third:'reflects on',pastEn:'reflected on',group:'reflectable'},
- {past:'أَكَّدَ',pres:'يُؤَكِّدُ',en:'confirm',third:'confirms',pastEn:'confirmed',group:'confirmable'},
- {past:'وَافَقَ',pres:'يُوَافِقُ',en:'agree with',third:'agrees with',pastEn:'agreed with',group:'people'},
- {past:'خَالَفَ',pres:'يُخَالِفُ',en:'disagree with',third:'disagrees with',pastEn:'disagreed with',group:'people'},
- {past:'اِسْتَنْبَطَ',pres:'يَسْتَنْبِطُ',en:'derive',third:'derives',pastEn:'derived',group:'derivable'},
- {past:'اِسْتَخْرَجَ',pres:'يَسْتَخْرِجُ',en:'extract',third:'extracts',pastEn:'extracted',group:'extractable'},
- {past:'تَنَاوَلَ',pres:'يَتَنَاوَلُ',en:'address',third:'addresses',pastEn:'addressed',group:'addressable'},
- {past:'أَوْرَدَ',pres:'يُورِدُ',en:'cite',third:'cites',pastEn:'cited',group:'citable'},
- {past:'حَدَّدَ',pres:'يُحَدِّدُ',en:'specify',third:'specifies',pastEn:'specified',group:'specifiable'},
- {past:'لَاحَظَ',pres:'يُلَاحِظُ',en:'notice',third:'notices',pastEn:'noticed',group:'noticeable'},
- {past:'شَاهَدَ',pres:'يُشَاهِدُ',en:'watch',third:'watches',pastEn:'watched',group:'watchable'},
- {past:'دَخَلَ',pres:'يَدْخُلُ',en:'enter',third:'enters',pastEn:'entered',group:'enterablePlaces'},
- {past:'غَادَرَ',pres:'يُغَادِرُ',en:'leave',third:'leaves',pastEn:'left',group:'places'},
- {past:'أَخَذَ',pres:'يَأْخُذُ',en:'take',third:'takes',pastEn:'took',group:'takeable'},
- {past:'صَنَعَ',pres:'يَصْنَعُ',en:'make',third:'makes',pastEn:'made',group:'manufacturable'},
 ];
 
 const humanActions=[
@@ -2039,23 +1947,7 @@ const objectGroups={
  meltable:namedNouns(singularThings,['the sugar']),
  sprayable:namedNouns(singularThings,['the water']),
  stirrable:namedNouns(singularThings,['the food','the milk','the coffee','the tea']),
- drillable:namedNouns(singularThings,['the wood','the metal']),
- explainable:namedNouns(singularThings,['the rule','the ruling','the issue','the matter','the difference','the reason','the cause','the condition','the sign','the definition','the intended meaning','the answer','the question','the topic','the statement','the evidence','the proof','the verse','the hadith']),
- dividable:namedNouns(singularThings,['the book','the lesson','the text','the topic','the section','the number']),
- includable:namedNouns(singularThings,['the example','the definition','the question','the answer','the section','the topic','the evidence','the rule','the report']),
- authoredText:namedNouns(singularThings,['the book','the explanation','the introduction','the report','the story']),
- reflectable:namedNouns(singularThings,['the Qurʾān','the verse','the sūrah','the hadith','the narration','the text','the intended meaning']),
- confirmable:namedNouns(singularThings,['the ruling','the rule','the statement','the opinion','the evidence','the proof','the news','the report','the answer','the truth','the matter','the intended meaning']),
- derivable:namedNouns(singularThings,['the ruling','the rule','the intended meaning','the answer','the cause']),
- extractable:namedNouns(singularThings,['the ruling','the rule','the intended meaning','the evidence','the proof','the answer']),
- addressable:namedNouns(singularThings,['the topic','the issue','the matter','the question','the rule','the ruling','the difference','the reason']),
- citable:namedNouns(singularThings,['the evidence','the proof','the example','the statement','the narration','the hadith','the verse','the opinion']),
- specifiable:namedNouns(singularThings,['the condition','the reason','the cause','the intended meaning','the ruling','the rule','the sign','the type','the number','the topic']),
- noticeable:namedNouns(singularThings,['the difference','the sign','the reason','the matter','the type','the condition']),
- watchable:namedNouns(singularThings,['the television','the program','the news']),
- manufacturable:namedNouns(singularThings,['the tool','the machine','the chair','the table','the box','the garment','the rope']),
- takeable:namedNouns(singularThings,['the book','the pen','the notebook','the bag','the phone','the computer','the key','the map','the picture','the letter','the newspaper','the car','the garment','the cup','the sheet of paper','the clock','the tool','the box','the bottle','the plate','the spoon','the knife','the rope','the cloth','the medicine','the ticket','the file','the report','the ball']),
- enterablePlaces:namedNouns(places,['the mosque','the house','the school','the market','the classroom','the library','the garden','the restaurant','the institute','the university','the office','the airport','the station','the farm','the workshop','the hotel','the clinic','the factory','the bank','the post office','the museum','the theater','the stadium','the laboratory','the bathroom','the bakery','the pharmacy','the camp','the prison','the palace','the country','the city','the village'])
+ drillable:namedNouns(singularThings,['the wood','the metal'])
 };
 const generalVerbActions=[...verbs,...additionalVerbActions];
 

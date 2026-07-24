@@ -20,6 +20,9 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   templates:templates.map(({id,stableId,starts,form,state,sign})=>({id,stableId,starts,form,state,sign})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
+  renderExercise,
+  buildTokenWhy,
+  buildRelationshipWhy,
   poolFor,
   grammarDefinitionGroups,
   GRAMMAR_RULES,
@@ -213,6 +216,95 @@ elements.clearHistoryBtn.dispatch('click');
 assert(elements.historyToggle.textContent==='Sentence history (0)','Clear history did not reset its count');
 assert(elements.historyList.hidden&& !elements.historyEmpty.hidden,'Clear history did not restore the empty state');
 assert(JSON.parse(storage.get('nahw-sentence-history-v1')).length===0,'Cleared history was not persisted');
+
+// ===================================================================================
+// COMBINED History + Why integration — a restored exercise must carry correct, non-fallback
+// Why explanations rebuilt deterministically from its structured data (even legacy snapshots
+// that predate the Why feature), while grammar/identity/filters restore exactly.
+// ===================================================================================
+const bareWhy=s=>s.replace(/[ـً-ْٰ]/g,'').replace(/[أإآٱ]/g,'ا');
+function whyTokenOk(tok,label){
+  assert(tok.why&&Array.isArray(tok.why.ar)&&tok.why.ar.length,`${label}: restored token has no Why`);
+  assert(tok.why.ar.length===tok.why.en.length&&tok.why.ar.length===tok.why.ids.length,`${label}: restored Why ar/en/id mismatch`);
+  tok.why.ar.concat(tok.why.en).forEach(l=>assert(l&&l.trim()&&!/undefined|null|\[object Object\]/.test(l),`${label}: bad restored Why line`));
+  tok.why.ids.forEach(id=>assert(id&&!/FALLBACK|UNKNOWN|GENERIC/i.test(id),`${label}: restored Why fallback id ${id}`));
+}
+function genUntil(pred,tries=4000){
+  elements.startFilter.value='any';elements.formFilter.value='any';elements.stateFilter.value='any';elements.signFilter.value='any';
+  for(let i=0;i<tries;i++){context.nahwGenerate();const ex=api.currentExercise();if(pred(ex))return ex;}
+  return null;
+}
+// (a) LEGACY snapshot (no persisted Why) restores with Why re-attached — the core integration point.
+{
+  const ex=genUntil(()=>true);
+  const snap=api.createExerciseSnapshot(ex);
+  assert(snap&&snap.schemaVersion===1,'Could not create a versioned snapshot');
+  const legacy=JSON.parse(JSON.stringify(snap));
+  legacy.tokens.forEach(t=>{delete t.why;delete t.phraseWhy;});         // simulate a pre-Why snapshot
+  const restored=api.restoreExerciseSnapshot(legacy);
+  assert(restored,'A legacy (pre-Why) snapshot failed to restore');
+  assert(restored.sentence===snap.sentence&&restored.translation===snap.translation&&restored.templateId===snap.templateId,'Legacy restore changed the exercise identity');
+  restored.tokens.forEach((t,i)=>{
+    whyTokenOk(t,`legacy token ${i}`);
+    if(t.phraseAr)assert(t.phraseWhy&&t.phraseWhy.ar.length,`legacy construction ${i}: phraseWhy not rebuilt`);
+  });
+}
+// (b) End-to-end via the real click handler: restore, then Reveal, then the rendered answers must
+//     contain working Why controls (real buttons, hidden regions, resolvable aria-controls).
+{
+  elements.clearHistoryBtn.dispatch('click');
+  const a=genUntil(()=>true); const aSnap=JSON.parse(JSON.stringify(api.createExerciseSnapshot(a)));
+  const b=genUntil(ex=>ex.sentence!==a.sentence);
+  assert(b,'Could not generate a distinct second exercise');
+  elements.startFilter.value='particle';elements.formFilter.value='fiveVerbs';elements.stateFilter.value='nasb';elements.signFilter.value='nunDropped';
+  const filtersBefore=[elements.startFilter.value,elements.formFilter.value,elements.stateFilter.value,elements.signFilter.value].join('|');
+  const historyBefore=storage.get('nahw-sentence-history-v1');
+  const rb=element('historyReview');rb.setAttribute('data-history-index','1');   // index 1 = exercise a (newest-first)
+  elements.historyList.dispatch('click',rb);
+  const restored=api.currentExercise();
+  assert(restored.sentence===aSnap.sentence&&restored.templateId===aSnap.templateId,'Click-restore did not restore the exact exercise');
+  const rf=restored.tokens.find(t=>t.target),sf=aSnap.tokens.find(t=>t.target);
+  assert(rf.word===sf.word&&rf.inflection===sf.inflection&&rf.state===sf.state&&rf.sign.id===sf.sign.id,'Click-restore lost the focus word / form / state / sign');
+  restored.tokens.forEach((t,i)=>whyTokenOk(t,`click-restored token ${i}`));
+  assert([elements.startFilter.value,elements.formFilter.value,elements.stateFilter.value,elements.signFilter.value].join('|')===filtersBefore,'Restore changed the active filters');
+  assert(storage.get('nahw-sentence-history-v1')===historyBefore&&elements.historyToggle.textContent==='Sentence history (2)','Restore duplicated or rewrote history');
+  assert(!elements.answerPanel.classList.contains('open'),'Restored exercise should load with iʿrāb hidden');
+  elements.revealBtn.dispatch('click');
+  const html=elements.answers.innerHTML;
+  assert((html.match(/class="why-toggle"/g)||[]).length>=1,'Restored + revealed exercise has no Why controls');
+  assert(/<div class="why-region" id="why-[tp]\d+" hidden>/.test(html),'Restored Why regions are not hidden by default');
+  const wIds=[...html.matchAll(/<div class="why-region" id="([^"]+)"/g)].map(m=>m[1]);
+  assert(new Set(wIds).size===wIds.length,'Restored exercise has duplicate Why region ids');
+  [...html.matchAll(/aria-controls="(why-[^"]+)"/g)].forEach(m=>assert(wIds.includes(m[1]),`Restored aria-controls points at a missing region: ${m[1]}`));
+  // sacred order on any restored construction card
+  const card=html.split('<article').find(p=>p.includes('phrase-analysis'));
+  if(card){const i1=card.indexOf('class="iraab"'),i2=card.indexOf('class="why-wrap"'),i3=card.indexOf('class="phrase-analysis"');
+    assert(i1>=0&&i2>=0&&i3>=0&&i1<i2&&i2<i3,'Restored card broke the individual-iʿrāb → Why → construction order');}
+  elements.revealBtn.dispatch('click');
+}
+// (c) Specific restored structures carry their exact Why rule.
+const structGoldens=[
+  ['five-noun attached kāf',ex=>ex.tokens.find(t=>t.grammar.isMudaf&&t.grammar.attachedKaf),'WHY_MUDAF_ATTACHED_KAF'],
+  ['five verbs',ex=>ex.tokens.find(t=>t.inflection==='afalKhamsa'),null,t=>t.why.ids.some(id=>/WHY_SIGN_AFAL5_/.test(id))],
+  ['verbal-sentence khabar',ex=>ex.tokens.find(t=>t.phraseWhy&&t.phraseWhy.ids.includes('WHY_REL_VERBAL_KHABAR')),null,null,'WHY_REL_VERBAL_KHABAR'],
+  ['fronted phrase khabar',ex=>ex.tokens.find(t=>t.phraseWhy&&t.phraseWhy.ids.includes('WHY_REL_FRONTED_KHABAR')),null,null,'WHY_REL_FRONTED_KHABAR']
+];
+for(const [name,find,tokenId,tokenPred,relId] of structGoldens){
+  const ex=genUntil(e=>Boolean(find(e)));
+  assert(ex,`Combined restore golden never generated: ${name}`);
+  const snap=api.createExerciseSnapshot(ex);
+  const legacy=JSON.parse(JSON.stringify(snap));legacy.tokens.forEach(t=>{delete t.why;delete t.phraseWhy;});
+  const restored=api.restoreExerciseSnapshot(legacy);
+  const tok=find(restored);
+  assert(tok,`${name}: target token vanished after restore`);
+  if(tokenId)assert(tok.why.ids.includes(tokenId),`${name}: restored token missing rule ${tokenId}`);
+  if(tokenPred)assert(tokenPred(tok),`${name}: restored token predicate failed`);
+  if(relId)assert(tok.phraseWhy.ids.includes(relId),`${name}: restored construction missing rule ${relId}`);
+}
+elements.clearHistoryBtn.dispatch('click');
+elements.startFilter.value='any';elements.formFilter.value='any';elements.stateFilter.value='any';elements.signFilter.value='any';
+console.log('Combined History+Why audit passed: legacy-snapshot Why rebuild, click-restore Why UI, and restored five-noun kāf / five-verb / verbal-khabar / fronted-khabar rules all verified.');
+
 const definitionItems=api.grammarDefinitionGroups.flatMap(group=>group.items);
 assert(api.grammarDefinitionGroups.length===5,'Expected five definition groups');
 assert(definitionItems.length===70,`Expected 70 grammar definitions, found ${definitionItems.length}`);
@@ -956,14 +1048,17 @@ for(let iteration=0;iteration<3000;iteration++){
   context.nahwGenerate();
   const sentence=elements.sentence.textContent;
   const rendered=elements.answers.innerHTML;
+  // The mubtadaʾ/khabar balance below measures the GRAMMAR ANALYSIS, not the “Why?” prose,
+  // so strip the explanation lines first. (Same assertion, scoped to its original subject.)
+  const analysisOnly=rendered.replace(/<p class="why-line[^"]*"[^>]*>[\s\S]*?<\/p>/g,'');
   const first=sentence.split(/\s+/)[0];
   if(randomSentences[randomSentences.length-1]===sentence)consecutiveRepeats++;
   randomSentences.push(sentence);
   openingWords.add(first);
   if(particleWords.has(first))openingParticles.add(first);
   assert((rendered.match(/class="word-card target/g)||[]).length===1,`Random run ${iteration}: wrong focus-card count`);
-  const renderedMubtada=(rendered.match(/مُبْتَدَأٌ/gu)||[]).length;
-  const renderedKhabar=(rendered.match(/خَبَر[ٌٍ](?=$|[\s،.<])/gu)||[]).length;
+  const renderedMubtada=(analysisOnly.match(/مُبْتَدَأٌ/gu)||[]).length;
+  const renderedKhabar=(analysisOnly.match(/خَبَر[ٌٍ](?=$|[\s،.<])/gu)||[]).length;
   assert(renderedMubtada===renderedKhabar,
     `Random run ${iteration}: rendered mubtada/khabar mismatch in ${sentence}`);
 }
@@ -1397,6 +1492,254 @@ appearanceCases++;
 console.log(`Appearance-mode audit passed: ${appearanceCases} groups; system/light/dark, live OS-change reactions, persistence, and zero state change all verified.`);
 
 // ===================================================================================
+// “Why this iʿrāb?” explanation audit — complete coverage over every production path.
+// Explanations must be deterministic, structured-metadata driven, concise, and correct.
+// ===================================================================================
+let whyCases=0;
+const bareAr=s=>s.replace(/[ـً-ْٰ]/g,'').replace(/[أإآٱ]/g,'ا');
+const WHY_ROLE_STATE={mubtada:'raf',khabar:'raf',faail:'raf',object:'nasb',majrur:'jarr',mudafIlayh:'jarr',ismInna:'nasb',khabarInna:'raf',ismKana:'raf',khabarKana:'nasb',adverb:'nasb'};
+const whyRuleIds=new Set();
+let whyTokens=0,whyRels=0,whyFallbacks=0;
+function auditWhy(why,label,{max=4}={}){
+  assert(why&&Array.isArray(why.ar)&&why.ar.length,`${label}: missing/empty why explanation`);
+  assert(why.ar.length===why.en.length&&why.ar.length===why.ids.length,`${label}: ar/en/id count mismatch`);
+  assert(why.ar.length<=max,`${label}: ${why.ar.length} statements (max ${max})`);
+  why.ar.concat(why.en).forEach(line=>{
+    assert(line&&String(line).trim(),`${label}: empty statement`);
+    assert(!/undefined|null|\[object Object\]/.test(line),`${label}: bad text “${line}”`);
+  });
+  why.ids.forEach(id=>{
+    assert(id&&!/FALLBACK|UNKNOWN|GENERIC/i.test(id),`${label}: fallback/generic rule id “${id}”`);
+    whyRuleIds.add(id);
+  });
+}
+function auditTokenWhy(tok,label){
+  auditWhy(tok.why,label);
+  whyTokens++;
+  const ar=bareAr(tok.why.ar.join(' '));
+  if(tok.grammar.type==='noun'){
+    assert(tok.state===WHY_ROLE_STATE[tok.grammar.role],`${label}: role/state mismatch`);
+    assert(tok.state!=='jazm'&&!ar.includes('مجزوم'),`${label}: noun described with jazm`);
+    const signRule=`WHY_SIGN_${tok.inflection.toUpperCase()}_${tok.state.toUpperCase()}`;
+    assert(tok.why.ids.includes(signRule),`${label}: missing sign rule ${signRule}`);
+    assert(tok.sign.id===api.GRAMMAR_RULES.nounInflection[tok.inflection][tok.state][0],`${label}: sign != declared sign`);
+    if(tok.sign.id==='ya')assert(ar.includes(tok.state==='nasb'?'نصبه':'خفضه'),`${label}: yāʾ does not name ${tok.state}`);
+    if(tok.inflection==='sfp'&&tok.state==='nasb')assert(ar.includes('نيابة عن الفتحة'),`${label}: SFP naṣb misses kasrah substitution`);
+  }else if(tok.grammar.type==='verb'){
+    assert(tok.state!=='jarr'&&!ar.includes('مخفوض'),`${label}: verb described with khafḍ`);
+    if(tok.tense==='present'){
+      const signRule=tok.inflection==='afalKhamsa'?`WHY_SIGN_AFAL5_${tok.state.toUpperCase()}`:`WHY_SIGN_MUDARI_${tok.state.toUpperCase()}`;
+      assert(tok.why.ids.includes(signRule),`${label}: missing ${signRule}`);
+      assert(tok.sign.id===api.GRAMMAR_RULES.presentVerb[tok.inflection][tok.state][0],`${label}: verb sign != declared`);
+      if(tok.sign.id==='nunDropped')assert(ar.includes(tok.state==='nasb'?'تنصب بحذف النون':'تجزم بحذف النون'),`${label}: nūn-deletion does not distinguish ${tok.state}`);
+    }else{
+      assert(ar.includes('مبني'),`${label}: mabnī verb not described as mabnī`);
+      assert(!/مرفوع|منصوب|مجزوم/.test(ar),`${label}: mabnī verb given an iʿrāb state`);
+    }
+  }else{
+    assert(ar.includes('مبني'),`${label}: particle not described as mabnī`);
+  }
+  assert(!(ar.includes('ثبوت النون')&&/حرف |حروف/.test(ar)),`${label}: retention of nūn classified as a letter`);
+}
+// A) Every one of the 56 production templates, many samples: full token + construction coverage.
+for(let tid=0;tid<api.templates.length;tid++){
+  for(let rep=0;rep<12;rep++){
+    const data=api.buildTemplate(tid);
+    api.renderExercise(data);
+    data.tokens.forEach(tok=>{
+      auditTokenWhy(tok,`tpl${tid} «${tok.word}»`);
+      if(tok.phraseAr){auditWhy(tok.phraseWhy,`tpl${tid} phrase «${tok.word}»`,{max:3});whyRels++;}
+      else assert(!tok.phraseWhy,`tpl${tid}: construction why without a construction analysis`);
+    });
+  }
+}
+whyCases++;
+// B) Every valid filter tuple through the real production path (generate()).
+let tupleRuns=0;
+for(const [tStart,tForm,tState,tSign] of validTuples){
+  elements.startFilter.value=tStart;elements.formFilter.value=tForm;
+  elements.stateFilter.value=tState;elements.signFilter.value=tSign;
+  context.nahwGenerate();
+  const ex=api.currentExercise();
+  ex.tokens.forEach(tok=>{
+    auditTokenWhy(tok,`tuple ${tStart}/${tForm}/${tState}/${tSign} «${tok.word}»`);
+    if(tok.phraseAr)auditWhy(tok.phraseWhy,`tuple phrase «${tok.word}»`,{max:3});
+  });
+  tupleRuns++;
+}
+assert(tupleRuns===validTuples.length,'Not every valid filter tuple was explained');
+whyCases++;
+// C) Golden checks: representative structures produce the right explanation rules.
+function goldenFind(predicate,attempts=4000){
+  elements.startFilter.value='any';elements.formFilter.value='any';elements.stateFilter.value='any';elements.signFilter.value='any';
+  for(let i=0;i<attempts;i++){
+    context.nahwGenerate();
+    const ex=api.currentExercise();
+    for(const tok of ex.tokens){const hit=predicate(tok,ex);if(hit)return{tok,ex};}
+  }
+  return null;
+}
+const goldens=[
+ ['singular fāʿil / ḍammah',t=>t.grammar.role==='faail'&&t.inflection==='singular',['WHY_ROLE_FAIL','WHY_STATE_FAIL','WHY_SIGN_SINGULAR_RAF']],
+ ['singular object / fatḥah',t=>t.grammar.role==='object'&&t.inflection==='singular',['WHY_ROLE_OBJECT','WHY_STATE_OBJECT','WHY_SIGN_SINGULAR_NASB']],
+ ['mubtadaʾ',t=>t.grammar.role==='mubtada'&&!t.grammar.delayed,['WHY_ROLE_MUBTADA','WHY_STATE_MUBTADA']],
+ ['delayed mubtadaʾ',t=>t.grammar.role==='mubtada'&&t.grammar.delayed,['WHY_ROLE_MUBTADA_DELAYED']],
+ ['direct khabar',t=>t.grammar.role==='khabar',['WHY_ROLE_KHABAR','WHY_STATE_KHABAR']],
+ ['dual rafʿ / alif',t=>t.inflection==='dual'&&t.state==='raf',['WHY_SIGN_DUAL_RAF']],
+ ['dual naṣb / yāʾ',t=>t.inflection==='dual'&&t.state==='nasb',['WHY_SIGN_DUAL_NASB']],
+ ['dual khafḍ / yāʾ',t=>t.inflection==='dual'&&t.state==='jarr',['WHY_SIGN_DUAL_JARR']],
+ ['SMP rafʿ / wāw',t=>t.inflection==='smp'&&t.state==='raf',['WHY_SIGN_SMP_RAF']],
+ ['SMP naṣb / yāʾ',t=>t.inflection==='smp'&&t.state==='nasb',['WHY_SIGN_SMP_NASB']],
+ ['SMP khafḍ / yāʾ',t=>t.inflection==='smp'&&t.state==='jarr',['WHY_SIGN_SMP_JARR']],
+ ['SFP rafʿ / ḍammah',t=>t.inflection==='sfp'&&t.state==='raf',['WHY_SIGN_SFP_RAF']],
+ ['SFP naṣb / substitute kasrah',t=>t.inflection==='sfp'&&t.state==='nasb',['WHY_SIGN_SFP_NASB']],
+ ['SFP khafḍ / kasrah',t=>t.inflection==='sfp'&&t.state==='jarr',['WHY_SIGN_SFP_JARR']],
+ ['five nouns rafʿ',t=>t.inflection==='fiveNouns'&&t.state==='raf',['WHY_SIGN_FIVENOUNS_RAF','WHY_MUDAF_ATTACHED_KAF']],
+ ['five nouns naṣb',t=>t.inflection==='fiveNouns'&&t.state==='nasb',['WHY_SIGN_FIVENOUNS_NASB']],
+ ['five nouns khafḍ',t=>t.inflection==='fiveNouns'&&t.state==='jarr',['WHY_SIGN_FIVENOUNS_JARR']],
+ ['present rafʿ',t=>t.tense==='present'&&t.inflection==='regular'&&t.state==='raf',['WHY_STATE_VERB_FREE','WHY_SIGN_MUDARI_RAF']],
+ ['present after lan',t=>t.tense==='present'&&t.inflection==='regular'&&t.state==='nasb',['WHY_STATE_VERB_LAN','WHY_SIGN_MUDARI_NASB']],
+ ['present after lam',t=>t.tense==='present'&&t.inflection==='regular'&&t.state==='jazm',['WHY_STATE_VERB_LAM','WHY_SIGN_MUDARI_JAZM']],
+ ['five verbs rafʿ / ثبوت النون',t=>t.inflection==='afalKhamsa'&&t.state==='raf',['WHY_SIGN_AFAL5_RAF','WHY_SUBJECT_ATTACHED']],
+ ['five verbs naṣb / حذف النون',t=>t.inflection==='afalKhamsa'&&t.state==='nasb',['WHY_STATE_VERB_LAN','WHY_SIGN_AFAL5_NASB']],
+ ['five verbs jazm / حذف النون',t=>t.inflection==='afalKhamsa'&&t.state==='jazm',['WHY_STATE_VERB_LAM','WHY_SIGN_AFAL5_JAZM']],
+ ['ism inna',t=>t.grammar.role==='ismInna',['WHY_ROLE_ISM_INNA','WHY_STATE_ISM_INNA']],
+ ['khabar inna',t=>t.grammar.role==='khabarInna',['WHY_ROLE_KHABAR_INNA','WHY_STATE_KHABAR_INNA']],
+ ['ism kāna',t=>t.grammar.role==='ismKana',['WHY_ROLE_ISM_KANA','WHY_STATE_ISM_KANA']],
+ ['khabar kāna',t=>t.grammar.role==='khabarKana',['WHY_ROLE_KHABAR_KANA','WHY_STATE_KHABAR_KANA']],
+ ['muḍāf ilayh',t=>t.grammar.role==='mudafIlayh',['WHY_ROLE_MUDAF_ILAYH','WHY_STATE_MUDAF_ILAYH']],
+ ['preposition + governed noun',t=>t.grammar.role==='majrur',['WHY_ROLE_MAJRUR','WHY_STATE_MAJRUR']],
+ ['past verb (mabnī)',t=>t.tense==='past',['WHY_PAST_VERB','WHY_MABNI_PAST']],
+ ['kāna (mabnī)',t=>t.tense==='kana',['WHY_KANA','WHY_MABNI_KANA']],
+ ['mabnī particle',t=>t.grammar.type==='particle',['WHY_MABNI_PARTICLE']],
+ ['hidden subject',t=>t.tense==='present'&&t.relations&&t.relations.subjectType==='implicit',['WHY_SUBJECT_HIDDEN']],
+ ['ẓarf',t=>t.grammar.role==='adverb',['WHY_ROLE_ZARF','WHY_STATE_ZARF']]
+];
+for(const [name,pred,expectIds] of goldens){
+  const hit=goldenFind(pred);
+  assert(hit,`Golden why case never generated: ${name}`);
+  expectIds.forEach(id=>assert(hit.tok.why.ids.includes(id),`Golden “${name}”: expected rule ${id}, got ${hit.tok.why.ids.join(',')}`));
+  whyCases++;
+}
+// D) Construction goldens: jār-majrūr khabar, fronted khabar, verbal-sentence khabar (hidden + attached link).
+const relGoldens=[
+ ['jār wa-majrūr khabar',t=>t.phraseWhy&&t.phraseWhy.ids.includes('WHY_REL_PHRASE_KHABAR'),['WHY_REL_JARR_MAJRUR','WHY_REL_ATTACHED_TO_OMITTED']],
+ ['fronted khabar + delayed mubtadaʾ',t=>t.phraseWhy&&t.phraseWhy.ids.includes('WHY_REL_FRONTED_KHABAR'),['WHY_REL_JARR_MAJRUR']],
+ ['verbal khabar, hidden link',t=>t.phraseWhy&&t.phraseWhy.ids.includes('WHY_REL_LINK_HIDDEN'),['WHY_REL_VERBAL_KHABAR','WHY_REL_KHABAR_POSITION']],
+ ['verbal khabar, attached link',t=>t.phraseWhy&&t.phraseWhy.ids.includes('WHY_REL_LINK_ATTACHED'),['WHY_REL_VERBAL_KHABAR','WHY_REL_KHABAR_POSITION']]
+];
+for(const [name,pred,expectIds] of relGoldens){
+  const hit=goldenFind(pred);
+  assert(hit,`Golden construction why never generated: ${name}`);
+  expectIds.forEach(id=>assert(hit.tok.phraseWhy.ids.includes(id),`Golden “${name}”: expected ${id}`));
+  whyCases++;
+}
+// D2) Independent-review corrections.
+{ // (1a) five noun with an attached kāf must use the attached-kāf muḍāf explanation
+  const kaf=goldenFind(t=>t.grammar.isMudaf&&t.grammar.attachedKaf);
+  assert(kaf,'No attached-kāf five noun was generated');
+  const kw=kaf.tok.why,kAr=bareAr(kw.ar.join(' ')),kEn=kw.en.join(' ');
+  assert(kw.ids.includes('WHY_MUDAF_ATTACHED_KAF'),'Attached-kāf five noun does not use the attached-kāf muḍāf rule');
+  assert(!kw.ids.includes('WHY_MUDAF'),'Attached-kāf five noun still uses the generic muḍāf rule');
+  assert(kAr.includes('مضاف')&&kAr.includes('الكاف')&&kAr.includes('مضاف اليه'),'Attached-kāf Arabic must name the kāf as the muḍāf ilayh');
+  assert(!kAr.includes('الى ما بعده'),'Attached-kāf must not say “joined to what follows it” (Arabic)');
+  assert(!/what follows it/.test(kEn),'Attached-kāf must not say “joined to what follows it” (English)');
+  assert(/كَاف/.test(kEn),'Attached-kāf English must mention the kāf');
+  assert(/الْكَافُ/.test(kaf.tok.ar),'The displayed five-noun iʿrāb lost its kāf clause (grammar must be untouched)');
+  whyCases++;
+}
+{ // (1b) ordinary token-to-token iḍāfah keeps the ordinary wording
+  const mudaf=goldenFind(t=>t.grammar.isMudaf&&!t.grammar.attachedKaf);
+  assert(mudaf,'No ordinary muḍāf was generated');
+  assert(mudaf.tok.why.ids.includes('WHY_MUDAF'),'Ordinary muḍāf lost the ordinary muḍāf explanation');
+  assert(!mudaf.tok.why.ids.includes('WHY_MUDAF_ATTACHED_KAF'),'Ordinary muḍāf wrongly uses the attached-kāf rule');
+  const mi=goldenFind(t=>t.grammar.role==='mudafIlayh');
+  assert(mi&&mi.tok.why.ids.includes('WHY_ROLE_MUDAF_ILAYH')&&mi.tok.why.ids.includes('WHY_STATE_MUDAF_ILAYH'),'muḍāf ilayh explanation missing');
+  whyCases++;
+}
+{ // (2) mabnī particle: direct statement, never the false causal universal
+  const p=goldenFind(t=>t.grammar.type==='particle');
+  const pAr=bareAr(p.tok.why.ar.join(' ')),pEn=p.tok.why.en.join(' ');
+  assert(pAr.includes('حرف مبني')&&pAr.includes('لا محل له من الاعراب'),'Particle why must state it is a mabnī particle with no position in iʿrāb');
+  assert(!pAr.includes('والحروف كلها مبنية'),'Particle why still teaches the causal universal «وَالْحُرُوفُ كُلُّهَا مَبْنِيَّةٌ، فَـ…»');
+  assert(!/All particles are built/.test(pEn),'Particle English why still teaches the causal universal');
+  assert(/مَبْنِيٌّ/.test(pEn),'Particle English why should use the Arabic term mabnī');
+  whyCases++;
+}
+{ // (3) English Why must carry the real Arabic Nahw role/state vocabulary, not only transliterations
+  const need=[
+    ['fāʿil',t=>t.grammar.role==='faail',['فاعل','مرفوع']],
+    ['mafʿūl bihi',t=>t.grammar.role==='object',['مفعول','منصوب']],
+    ['mubtadaʾ',t=>t.grammar.role==='mubtada'&&!t.grammar.delayed,['مبتدا','مرفوع']],
+    ['khabar',t=>t.grammar.role==='khabar',['خبر','مرفوع']],
+    ['muḍāf ilayh',t=>t.grammar.role==='mudafIlayh',['مضاف اليه','مخفوض']],
+    ['majrūr',t=>t.grammar.role==='majrur',['مخفوض']],
+    ['ism inna',t=>t.grammar.role==='ismInna',['اسم','منصوب']],
+    ['khabar kāna',t=>t.grammar.role==='khabarKana',['خبر','منصوب']],
+    ['present after lam',t=>t.tense==='present'&&t.inflection==='regular'&&t.state==='jazm',['مجزوم']],
+    ['five verbs rafʿ',t=>t.inflection==='afalKhamsa'&&t.state==='raf',['الافعال الخمسة','ثبوت النون']],
+    ['dual naṣb',t=>t.inflection==='dual'&&t.state==='nasb',['ياء']]
+  ];
+  for(const [name,pred,terms] of need){
+    const hit=goldenFind(pred);
+    assert(hit,`English-vocabulary golden never generated: ${name}`);
+    const en=bareAr(hit.tok.why.en.join(' '));
+    terms.forEach(term=>assert(en.includes(term),`English Why for ${name} must contain the Arabic term «${term}» — got: ${hit.tok.why.en.join(' ')}`));
+  }
+  whyCases++;
+}
+// E) Rendered UI: Why controls are real buttons with unique ids, closed by default, and the
+//    individual why always precedes the combined analysis (sacred ordering).
+context.nahwGenerate();
+const whyHtml=elements.answers.innerHTML;
+assert((whyHtml.match(/class="why-toggle"/g)||[]).length>=1,'No Why controls rendered');
+assert((whyHtml.match(/aria-expanded="false"/g)||[]).length>=1,'Why controls are not closed by default');
+assert(/<div class="why-region" id="why-[tp]\d+" hidden>/.test(whyHtml),'Why regions are not hidden by default');
+const whyIds=[...whyHtml.matchAll(/<div class="why-region" id="([^"]+)"/g)].map(m=>m[1]);
+assert(new Set(whyIds).size===whyIds.length,'Duplicate Why region ids');
+[...whyHtml.matchAll(/aria-controls="(why-[^"]+)"/g)].forEach(m=>assert(whyIds.includes(m[1]),`aria-controls points at a missing region: ${m[1]}`));
+assert(whyHtml.includes('class="why-en en-only"'),'English why is not wrapped for Arabic-only hiding');
+whyCases++;
+// Ordering: within any card carrying a construction, individual why comes before the construction.
+{
+  const hit=goldenFind(t=>Boolean(t.phraseWhy));
+  assert(hit,'No construction card generated for the ordering check');
+  const card=elements.answers.innerHTML.split('<article').find(part=>part.includes('phrase-analysis'));
+  const iIraab=card.indexOf('class="iraab"'),iWhy=card.indexOf('class="why-wrap"'),iPhrase=card.indexOf('class="phrase-analysis"');
+  assert(iIraab>=0&&iWhy>=0&&iPhrase>=0,'Ordering check could not locate all sections');
+  assert(iIraab<iWhy&&iWhy<iPhrase,`Sacred ordering broken: iraab=${iIraab} why=${iWhy} phrase=${iPhrase}`);
+  whyCases++;
+}
+// F) Why expansion is LOCAL UI state: language and appearance switches must preserve it,
+//    must not regenerate, and must not touch grammar state. New Sentence resets it (by design).
+{
+  context.nahwGenerate();
+  const region=element('why-t0');region.hidden=true;elements['why-t0']=region;
+  const btn=element('whyBtn');btn.classList.add('why-toggle');
+  btn.setAttribute('aria-controls','why-t0');btn.setAttribute('aria-expanded','false');
+  const beforeWhy=snapshotState();
+  elements.answers.dispatch('click',btn);
+  assert(btn.getAttribute('aria-expanded')==='true'&&region.hidden===false,'Why control did not open its region');
+  api.setLanguageMode('arabic');
+  assert(btn.getAttribute('aria-expanded')==='true'&&region.hidden===false,'Language switch collapsed an open Why region');
+  api.setLanguageMode('mixed');
+  api.setAppearanceMode('dark');api.setAppearanceMode('system');
+  assert(btn.getAttribute('aria-expanded')==='true'&&region.hidden===false,'Appearance switch collapsed an open Why region');
+  const afterWhy=snapshotState();
+  ['templateId','sentence','target','start','form','state','sign','history','reveal','defsOpen'].forEach(k=>
+    assert(beforeWhy[k]===afterWhy[k],`Opening a Why region / switching language or appearance changed ${k}`));
+  elements.answers.dispatch('click',btn);
+  assert(btn.getAttribute('aria-expanded')==='false'&&region.hidden===true,'Why control did not close its region');
+  delete elements['why-t0'];
+  whyCases++;
+}
+// G) A new sentence re-renders the answers, so Why regions come back closed.
+context.nahwGenerate();
+assert(!/class="why-region"[^>]*id="[^"]+"(?![^>]*hidden)/.test(elements.answers.innerHTML),'A Why region rendered open after New Sentence');
+whyCases++;
+console.log(`Why-explanation audit passed: ${whyCases} groups; ${whyTokens} token explanations, ${whyRels} construction explanations, ${whyRuleIds.size} unique rules, ${whyFallbacks} fallbacks, ${tupleRuns} filter tuples.`);
+
+// ===================================================================================
 // Definitions audit (examples + expanded explanations + accessible expanders).
 // ===================================================================================
 let definitionCases=0;
@@ -1529,7 +1872,20 @@ for(let i=0;i<400;i++){
   for(const tk of ex.tokens){checkTerminology(tk.ar,`exercise token`,false);if(tk.phraseAr)checkTerminology(tk.phraseAr,'exercise phrase',false);}
   terminologyCases++;
 }
-console.log(`Terminology audit passed: ${terminologyCases} checks over definitions, examples, and production exercises.`);
+// The “Why?” explanations are learner-facing too, so they obey the same khafḍ terminology:
+// never مجرور as a case label, never عَلَامَةُ جَرِّهِ. «جَارٌّ وَمَجْرُورٌ» stays valid as a construction name.
+elements.startFilter.value='any';elements.formFilter.value='any';elements.stateFilter.value='any';elements.signFilter.value='any';
+let whyTerminologyLines=0;
+for(let i=0;i<400;i++){
+  context.nahwGenerate();
+  const ex=api.currentExercise();
+  for(const tk of ex.tokens){
+    tk.why.ar.forEach(line=>{checkTerminology(line,`why «${tk.word}»`,false);whyTerminologyLines++;});
+    if(tk.phraseWhy)tk.phraseWhy.ar.forEach(line=>{checkTerminology(line,`construction why «${tk.word}»`,false);whyTerminologyLines++;});
+  }
+  terminologyCases++;
+}
+console.log(`Terminology audit passed: ${terminologyCases} checks over definitions, examples, production exercises, and ${whyTerminologyLines} Why-explanation lines.`);
 
 const started=Date.now();
 let nextProgress=started+30000;

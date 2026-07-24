@@ -146,6 +146,19 @@ body.lang-arabic #translation{display:none}
 .definition-details-en{margin-top:7px;color:#59625d;font-size:13.5px;line-height:1.6}
 @media(prefers-reduced-motion:no-preference){.def-expand,.langbtn{transition:background .15s ease,color .15s ease,border-color .15s ease}}
 @media(max-width:460px){.langbar{gap:8px}.langbar-seg{width:100%}.langbtn{flex:1}}
+/* ---- “Why this iʿrāb?” explanations (presentation only) ---- */
+.why-wrap{padding:0 15px 11px}
+.phrase-analysis .why-wrap{padding:0 15px 12px}
+.why-toggle{width:auto;min-height:32px;padding:4px 12px;background:transparent;color:var(--green-dark);border:1px dashed #c9d8ce;border-radius:999px;font-weight:800;font-size:12.5px}
+.why-toggle:hover,.why-toggle[aria-expanded="true"]{background:var(--green-soft);border-style:solid;border-color:#a9cdb8}
+.why-region{margin-top:8px;background:#fbfaf6;border:1px solid #e8e0d4;border-radius:11px;padding:9px 11px}
+.why-region[hidden]{display:none}
+.why-line{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:17px;line-height:1.85;margin:0 0 5px;color:#27332d}
+.why-line:last-child{margin-bottom:0}
+.why-en{margin-top:7px;padding-top:7px;border-top:1px solid #efe8dc}
+.why-line-en{margin:0 0 3px;font-size:13px;line-height:1.5;color:#59625d}
+.why-line-en:last-child{margin-bottom:0}
+@media(max-width:460px){.why-wrap,.phrase-analysis .why-wrap{padding-left:12px;padding-right:12px}.why-line{font-size:16px}}
 /* ---- Appearance control (presentation only) ---- */
 .apprbtn{gap:0}
 .apprbtn .ar-only[lang="ar"]{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:16px}
@@ -207,6 +220,12 @@ body.lang-arabic #translation{display:none}
 [data-theme="dark"] .def-example-focus{color:#b7bfb4}
 [data-theme="dark"] .def-example-en,[data-theme="dark"] .def-example-note{color:#a6a89b}
 [data-theme="dark"] .definition-details-en{color:#b7bfb4}
+[data-theme="dark"] .why-toggle{color:var(--green-dark);border-color:#415a4b}
+[data-theme="dark"] .why-toggle:hover,[data-theme="dark"] .why-toggle[aria-expanded="true"]{background:var(--green-soft);border-color:#3f6a52}
+[data-theme="dark"] .why-region{background:#232620;border-color:#3a3d34}
+[data-theme="dark"] .why-line{color:#e6e9de}
+[data-theme="dark"] .why-line-en{color:#b7bfb4}
+[data-theme="dark"] .why-en{border-top-color:#3a3d34}
 /* re-assert active/pressed states so the base dark rules above never override them */
 [data-theme="dark"] .definition-chapter-button[aria-pressed="true"],[data-theme="dark"] .def-expand[aria-expanded="true"]{background:var(--green);border-color:var(--green);color:#fff}
 </style>
@@ -505,6 +524,10 @@ function restoreExerciseSnapshot(snapshot){
   delete data.schemaVersion;
   if(validateExercise(data).length)return null;
   data.validated=true;
+  // Snapshots store the structured grammar analysis but not the “Why?” explanations (they may
+  // predate that feature). Rebuild them deterministically from the restored structured data —
+  // never from the rendered Arabic — so a restored exercise behaves exactly like a fresh one.
+  attachWhyExplanations(data);
   return data;
  }catch{return null}
 }
@@ -2416,6 +2439,222 @@ function renderParticleAnalysis(token){
  if(type==='sawfa'){token.ar=`${token.word}: حَرْفُ اسْتِقْبَالٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle marking the future.';return}
  throw new Error(`Unknown particle type: ${type}`);
 }
+/* ===== “Why this iʿrāb?” explanation engine (presentation only) =====================
+   Deterministic and registry-driven. It consumes ONLY structured grammar metadata
+   (grammar.role, state, sign.id, inflection, governor token, relationship kind) and
+   never inspects rendered Arabic strings. It explains the existing analysis; it never
+   changes it. Every statement carries an internal rule id so coverage can be audited. */
+const WHY_FORM=Object.freeze({
+ singular:{ar:'اسْمٌ مُفْرَدٌ',en:'a singular noun'},
+ broken:{ar:'جَمْعُ تَكْسِيرٍ',en:'a broken plural'},
+ dual:{ar:'مُثَنًّى',en:'dual'},
+ smp:{ar:'جَمْعُ مُذَكَّرٍ سَالِمٌ',en:'a sound masculine plural'},
+ sfp:{ar:'جَمْعُ مُؤَنَّثٍ سَالِمٌ',en:'a sound feminine plural'},
+ fiveNouns:{ar:'مِنَ الْأَسْمَاءِ الْخَمْسَةِ',en:'one of الْأَسْمَاءُ الْخَمْسَةُ'}
+});
+/* English keeps the familiar transliterated state words (rafʿ/naṣb/khafḍ/jazm) but names the
+   SIGN itself in Arabic, so the learner keeps meeting the real iʿrāb vocabulary. */
+const WHY_SIGN_NAME=Object.freeze({
+ damma:{ar:'الضَّمَّةُ',en:'the ضَمَّةُ'},fatha:{ar:'الْفَتْحَةُ',en:'the فَتْحَةُ'},
+ kasra:{ar:'الْكَسْرَةُ',en:'the كَسْرَةُ'},sukun:{ar:'السُّكُونُ',en:'the سُكُونُ'},
+ alif:{ar:'الْأَلِفُ',en:'the أَلِفُ'},waw:{ar:'الْوَاوُ',en:'the وَاوُ'},ya:{ar:'الْيَاءُ',en:'the يَاءُ'},
+ kasraSub:{ar:'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ',en:'the كَسْرَة in place of the فَتْحَة'},
+ nunKept:{ar:'ثُبُوتُ النُّونِ',en:'ثُبُوتُ النُّونِ'},
+ nunDropped:{ar:'حَذْفُ النُّونِ',en:'حَذْفُ النُّونِ'}
+});
+const WHY_STATE=Object.freeze({
+ raf:{ar:'مَرْفُوعٌ',sign:'رَفْعِهِ',en:'nominative',signEn:'rafʿ'},
+ nasb:{ar:'مَنْصُوبٌ',sign:'نَصْبِهِ',en:'accusative',signEn:'naṣb'},
+ jarr:{ar:'مَخْفُوضٌ',sign:'خَفْضِهِ',en:'genitive',signEn:'khafḍ'},
+ jazm:{ar:'مَجْزُومٌ',sign:'جَزْمِهِ',en:'jussive',signEn:'jazm'}
+});
+const wq=w=>`«${w}»`,eq=w=>`“${w}”`;
+/* Each ẓarf actually generated gets its own accurate sense. The generic place/time wording
+   below is a defensive default only; the harness proves production never falls back to it. */
+const WHY_ZARF_SENSE=Object.freeze({
+ 'مَعَ':{ar:'يَدُلُّ عَلَى مُصَاحَبَةِ الْفِعْلِ',en:'shows accompaniment with the action'}
+});
+function whyZarfSense(t){return WHY_ZARF_SENSE[t.word]||{ar:'يُبَيِّنُ زَمَانَ الْفِعْلِ أَوْ مَكَانَهُ',en:'tells when or where the action happens'}}
+/* Role registry: why the word holds this role, and why that role fixes this state. */
+const WHY_ROLE=Object.freeze({
+ mubtada:{
+  id:t=>t.grammar.delayed?'WHY_ROLE_MUBTADA_DELAYED':'WHY_ROLE_MUBTADA',
+  ar:t=>t.grammar.delayed?`${wq(t.word)} هُوَ الْمُحَدَّثُ عَنْهُ، وَقَدْ تَأَخَّرَ بَعْدَ الْخَبَرِ الْمُقَدَّمِ، فَهُوَ مُبْتَدَأٌ مُؤَخَّرٌ.`:`${wq(t.word)} هُوَ الْمُحَدَّثُ عَنْهُ فِي الْجُمْلَةِ الِاسْمِيَّةِ، فَهُوَ الْمُبْتَدَأُ.`,
+  en:t=>t.grammar.delayed?`${eq(t.word)} is what is being spoken about, and it comes after the fronted khabar, so it is a مُبْتَدَأٌ مُؤَخَّرٌ.`:`${eq(t.word)} is what the nominal sentence is speaking about, so it is the مُبْتَدَأٌ.`,
+  stateId:()=>'WHY_STATE_MUBTADA',stateAr:()=>'وَالْمُبْتَدَأُ مَرْفُوعٌ.',stateEn:()=>'The مُبْتَدَأٌ is مَرْفُوعٌ.'},
+ khabar:{
+  id:()=>'WHY_ROLE_KHABAR',
+  ar:t=>`${wq(t.word)} أَخْبَرَ عَنِ الْمُبْتَدَأِ وَتَمَّتْ بِهِ الْفَائِدَةُ، فَهُوَ الْخَبَرُ.`,
+  en:t=>`${eq(t.word)} gives information about the mubtadaʾ, so it is the خَبَرٌ.`,
+  stateId:()=>'WHY_STATE_KHABAR',stateAr:()=>'وَالْخَبَرُ مَرْفُوعٌ.',stateEn:()=>'The خَبَرٌ is مَرْفُوعٌ.'},
+ faail:{
+  id:()=>'WHY_ROLE_FAIL',
+  ar:t=>`${wq(t.word)} هُوَ الَّذِي أُسْنِدَ إِلَيْهِ الْفِعْلُ، فَهُوَ الْفَاعِلُ.`,
+  en:t=>`${eq(t.word)} is the doer of the action, so it is the فَاعِلٌ.`,
+  stateId:()=>'WHY_STATE_FAIL',stateAr:()=>'وَالْفَاعِلُ مَرْفُوعٌ.',stateEn:()=>'The فَاعِلٌ is مَرْفُوعٌ.'},
+ object:{
+  id:()=>'WHY_ROLE_OBJECT',
+  ar:t=>`${wq(t.word)} وَقَعَ عَلَيْهِ فِعْلُ الْفَاعِلِ، فَهُوَ الْمَفْعُولُ بِهِ.`,
+  en:t=>`${eq(t.word)} receives the action, so it is the مَفْعُولٌ بِهِ.`,
+  stateId:()=>'WHY_STATE_OBJECT',stateAr:()=>'وَالْمَفْعُولُ بِهِ مَنْصُوبٌ.',stateEn:()=>'The مَفْعُولُ بِهِ is مَنْصُوبٌ.'},
+ majrur:{
+  id:()=>'WHY_ROLE_MAJRUR',
+  ar:t=>`${wq(t.word)} جَاءَ بَعْدَ حَرْفِ الْخَفْضِ ${wq(t.grammar.governorWord)}.`,
+  en:t=>`${eq(t.word)} comes after the particle of khafḍ ${eq(t.grammar.governorWord)}.`,
+  stateId:()=>'WHY_STATE_MAJRUR',stateAr:()=>'وَالِاسْمُ بَعْدَ حَرْفِ الْخَفْضِ مَخْفُوضٌ.',stateEn:()=>'A noun after a particle of khafḍ is مَخْفُوضٌ.'},
+ mudafIlayh:{
+  id:()=>'WHY_ROLE_MUDAF_ILAYH',
+  ar:t=>`${wq(t.word)} أُضِيفَ إِلَيْهِ الِاسْمُ الَّذِي قَبْلَهُ، فَهُوَ مُضَافٌ إِلَيْهِ.`,
+  en:t=>`The noun before it is annexed to ${eq(t.word)}, so it is the مُضَافٌ إِلَيْهِ.`,
+  stateId:()=>'WHY_STATE_MUDAF_ILAYH',stateAr:()=>'وَالْمُضَافُ إِلَيْهِ مَخْفُوضٌ بِالْإِضَافَةِ.',stateEn:()=>'The مُضَافُ إِلَيْهِ is مَخْفُوضٌ by the iḍāfah.'},
+ ismInna:{
+  id:()=>'WHY_ROLE_ISM_INNA',
+  ar:t=>`دَخَلَتْ ${wq(t.grammar.governorWord)} عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَـ${wq(t.word)} اسْمُهَا.`,
+  en:t=>`${eq(t.grammar.governorWord)} entered upon the nominal sentence, so ${eq(t.word)} is its اسْم.`,
+  stateId:()=>'WHY_STATE_ISM_INNA',
+  stateAr:t=>`وَاسْمُ ${wq(t.grammar.governorWord)} مَنْصُوبٌ.`,
+  stateEn:t=>`اسْمُ ${eq(t.grammar.governorWord)} is مَنْصُوبٌ.`},
+ khabarInna:{
+  id:()=>'WHY_ROLE_KHABAR_INNA',
+  ar:t=>`${wq(t.word)} أَخْبَرَ عَنِ اسْمِ ${wq(t.grammar.governorWord)}، فَهُوَ خَبَرُهَا.`,
+  en:t=>`${eq(t.word)} gives information about اسْم ${eq(t.grammar.governorWord)}, so it is its خَبَر.`,
+  stateId:()=>'WHY_STATE_KHABAR_INNA',
+  stateAr:t=>`وَخَبَرُ ${wq(t.grammar.governorWord)} مَرْفُوعٌ.`,
+  stateEn:t=>`خَبَرُ ${eq(t.grammar.governorWord)} is مَرْفُوعٌ.`},
+ ismKana:{
+  id:()=>'WHY_ROLE_ISM_KANA',
+  ar:t=>`دَخَلَتْ «كَانَ» عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَـ${wq(t.word)} اسْمُهَا.`,
+  en:t=>`Kāna entered upon the nominal sentence, so ${eq(t.word)} is its اسْم.`,
+  stateId:()=>'WHY_STATE_ISM_KANA',stateAr:()=>'وَاسْمُ «كَانَ» مَرْفُوعٌ.',stateEn:()=>'اسْمُ «كَانَ» is مَرْفُوعٌ.'},
+ khabarKana:{
+  id:()=>'WHY_ROLE_KHABAR_KANA',
+  ar:t=>`${wq(t.word)} أَخْبَرَ عَنِ اسْمِ «كَانَ»، فَهُوَ خَبَرُهَا.`,
+  en:t=>`${eq(t.word)} gives information about اسْم «كَانَ», so it is its خَبَر.`,
+  stateId:()=>'WHY_STATE_KHABAR_KANA',stateAr:()=>'وَخَبَرُ «كَانَ» مَنْصُوبٌ.',stateEn:()=>'خَبَرُ «كَانَ» is مَنْصُوبٌ.'},
+ adverb:{
+  id:t=>WHY_ZARF_SENSE[t.word]?'WHY_ROLE_ZARF':'WHY_ROLE_ZARF_GENERIC',
+  ar:t=>`${wq(t.word)} ظَرْفٌ ${whyZarfSense(t).ar}.`,
+  en:t=>`${eq(t.word)} is a ظَرْفٌ that ${whyZarfSense(t).en}.`,
+  stateId:()=>'WHY_STATE_ZARF',stateAr:()=>'وَالظَّرْفُ مَنْصُوبٌ.',stateEn:()=>'The ظَرْفٌ is مَنْصُوبٌ.'}
+});
+function whySignNoun(t){
+ const form=WHY_FORM[t.inflection],sign=WHY_SIGN_NAME[t.sign.id],st=WHY_STATE[t.state];
+ if(!form||!sign||!st)throw new Error(`Missing why sign data for ${t.inflection}/${t.state}/${t.sign&&t.sign.id}`);
+ const id=`WHY_SIGN_${t.inflection.toUpperCase()}_${t.state.toUpperCase()}`;
+ if(t.inflection==='sfp'&&t.state==='nasb')return{id,
+  ar:`وَ${wq(t.word)} ${form.ar}، وَهُوَ يُنْصَبُ بِالْكَسْرَةِ نِيَابَةً عَنِ الْفَتْحَةِ.`,
+  en:`${eq(t.word)} is ${form.en}, and it takes the كَسْرَة in place of the فَتْحَة for naṣb.`};
+ return{id,
+  ar:`وَ${wq(t.word)} ${form.ar}، فَعَلَامَةُ ${st.sign} ${sign.ar}.`,
+  en:`${eq(t.word)} is ${form.en}, so its sign of ${st.signEn} is ${sign.en}.`};
+}
+function whyStateVerb(t,data){
+ const gov=t.governorId?data.tokens.find(x=>x.id===t.governorId):null;
+ const type=gov&&gov.grammar.particleType;
+ if(type==='lan')return{id:'WHY_STATE_VERB_LAN',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ نَصْبٍ، فَهُوَ مَنْصُوبٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of naṣb, so it is مَنْصُوبٌ.`};
+ if(type==='lam')return{id:'WHY_STATE_VERB_LAM',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ جَزْمٍ، فَهُوَ مَجْزُومٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of jazm, so it is مَجْزُومٌ.`};
+ if(type==='sawfa')return{id:'WHY_STATE_VERB_SAWFA',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} لِلِاسْتِقْبَالِ، وَهُوَ لَا يَنْصِبُ وَلَا يَجْزِمُ، فَبَقِيَ مَرْفُوعًا.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, which marks the future and neither makes it مَنْصُوبٌ nor مَجْزُومٌ, so it stays مَرْفُوعٌ.`};
+ return{id:'WHY_STATE_VERB_FREE',ar:`${wq(t.word)} فِعْلٌ مُضَارِعٌ لَمْ يَسْبِقْهُ نَاصِبٌ وَلَا جَازِمٌ، فَهُوَ مَرْفُوعٌ.`,en:`${eq(t.word)} is a present-tense verb with no nāṣib or jāzim before it, so it is مَرْفُوعٌ.`};
+}
+function whySignVerb(t){
+ const st=WHY_STATE[t.state],sign=WHY_SIGN_NAME[t.sign.id];
+ if(t.inflection==='afalKhamsa'){
+  const tail=t.state==='raf'?{ar:'وَالْأَفْعَالُ الْخَمْسَةُ تُرْفَعُ بِثُبُوتِ النُّونِ',en:'its sign of rafʿ is ثُبُوتُ النُّونِ'}
+   :t.state==='nasb'?{ar:'وَالْأَفْعَالُ الْخَمْسَةُ تُنْصَبُ بِحَذْفِ النُّونِ',en:'its sign of naṣb is حَذْفُ النُّونِ'}
+   :{ar:'وَالْأَفْعَالُ الْخَمْسَةُ تُجْزَمُ بِحَذْفِ النُّونِ',en:'its sign of jazm is حَذْفُ النُّونِ'};
+  return{id:`WHY_SIGN_AFAL5_${t.state.toUpperCase()}`,ar:`وَهُوَ مِنَ الْأَفْعَالِ الْخَمْسَةِ، ${tail.ar}.`,en:`It is one of الْأَفْعَالُ الْخَمْسَةُ, and ${tail.en}.`};
+ }
+ return{id:`WHY_SIGN_MUDARI_${t.state.toUpperCase()}`,
+  ar:`وَهُوَ مُضَارِعٌ صَحِيحُ الْآخِرِ لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ، فَعَلَامَةُ ${st.sign} ${sign.ar}.`,
+  en:`It is a sound-ended present verb with nothing attached to its end, so its sign of ${st.signEn} is ${sign.en}.`};
+}
+function whyVerbSubject(t){
+ if(t.inflection==='afalKhamsa'){
+  const s=AFAL5_PERSONS[t.grammar.person];
+  return{id:'WHY_SUBJECT_ATTACHED',ar:`وَ${s.subjectAr} ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.`,en:`${cap(s.subjectEn)} is attached to it and is its فَاعِل.`};
+ }
+ if(t.relations&&t.relations.subjectType==='implicit')return{id:'WHY_SUBJECT_HIDDEN',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ».',en:'Its فَاعِل is a hidden pronoun understood as «هُوَ».'};
+ return null;
+}
+const WHY_PARTICLE=Object.freeze({
+ preposition:t=>({id:'WHY_PARTICLE_PREPOSITION',ar:`${wq(t.word)} حَرْفٌ مِنْ حُرُوفِ الْخَفْضِ، يَخْفِضُ الِاسْمَ بَعْدَهُ.`,en:`${eq(t.word)} is one of حُرُوفُ الْخَفْضِ; it makes the noun after it مَخْفُوضٌ.`}),
+ inna:t=>({id:'WHY_PARTICLE_INNA',ar:`${wq(t.word)} مِنْ «إِنَّ» وَأَخَوَاتِهَا، تَنْصِبُ الِاسْمَ وَتَرْفَعُ الْخَبَرَ.`,en:`${eq(t.word)} is one of «إِنَّ» and its sisters: it makes the اسْم مَنْصُوبٌ and the خَبَر مَرْفُوعٌ.`}),
+ lan:t=>({id:'WHY_PARTICLE_LAN',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ، يَنْصِبُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is a particle of negation, naṣb, and future meaning; it makes the present verb مَنْصُوبٌ.`}),
+ lam:t=>({id:'WHY_PARTICLE_LAM',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ، يَجْزِمُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is a particle of negation, jazm, and past meaning; it makes the present verb مَجْزُومٌ.`}),
+ sawfa:t=>({id:'WHY_PARTICLE_SAWFA',ar:`${wq(t.word)} حَرْفُ اسْتِقْبَالٍ يَدْخُلُ عَلَى الْمُضَارِعِ وَلَا يُغَيِّرُ إِعْرَابَهُ.`,en:`${eq(t.word)} is a particle of futurity that enters on the present verb without changing its iʿrāb.`})
+});
+const WHY_MABNI_PARTICLE=Object.freeze({id:'WHY_MABNI_PARTICLE',ar:'وَهُوَ حَرْفٌ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'It is a مَبْنِيٌّ particle and has no position in iʿrāb.'});
+function buildTokenWhy(token,data){
+ const ids=[],ar=[],en=[];
+ const push=s=>{if(s){ids.push(s.id);ar.push(s.ar);en.push(s.en)}};
+ const type=token.grammar.type;
+ if(type==='noun'){
+  const role=WHY_ROLE[token.grammar.role];
+  if(!role)throw new Error(`WHY: no rule for noun role “${token.grammar.role}”`);
+  push({id:role.id(token),ar:role.ar(token),en:role.en(token)});
+  push({id:role.stateId(token),ar:role.stateAr(token),en:role.stateEn(token)});
+  push(whySignNoun(token));
+  // The five nouns carry their muḍāf ilayh as an attached kāf, so the generic “joined to what
+  // follows it” wording would be wrong for them; the engine already flags this via attachedKaf.
+  if(token.grammar.isMudaf)push(token.grammar.attachedKaf
+   ?{id:'WHY_MUDAF_ATTACHED_KAF',ar:'وَهُوَ مُضَافٌ، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ.',en:'It is a مُضَافٌ, and the attached كَاف is its مُضَافٌ إِلَيْهِ.'}
+   :{id:'WHY_MUDAF',ar:'وَهُوَ مُضَافٌ إِلَى مَا بَعْدَهُ.',en:'It is also a مُضَافٌ joined to what follows it.'});
+ }else if(type==='verb'){
+  if(token.tense==='past'){
+   push({id:'WHY_PAST_VERB',ar:`${wq(token.word)} فِعْلٌ مَاضٍ.`,en:`${eq(token.word)} is a past-tense verb.`});
+   push({id:'WHY_MABNI_PAST',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ، وَهُوَ هُنَا مَبْنِيٌّ عَلَى الْفَتْحِ.',en:'The past verb is مَبْنِيٌّ, and here it is built on the فَتْحَة.'});
+   push(whyVerbSubject(token));
+  }else if(token.tense==='kana'){
+   push({id:'WHY_KANA',ar:'«كَانَ» فِعْلٌ مَاضٍ نَاقِصٌ يَدْخُلُ عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَيَرْفَعُ اسْمَهُ وَيَنْصِبُ خَبَرَهُ.',en:'«كَانَ» is a deficient past verb that enters a nominal sentence: its اسْم is مَرْفُوعٌ and its خَبَر is مَنْصُوبٌ.'});
+   push({id:'WHY_MABNI_KANA',ar:'وَهُوَ مَبْنِيٌّ عَلَى الْفَتْحِ.',en:'It is مَبْنِيٌّ on the فَتْحَة.'});
+  }else{
+   push(whyStateVerb(token,data));
+   push(whySignVerb(token));
+   push(whyVerbSubject(token));
+  }
+ }else if(type==='particle'){
+  const make=WHY_PARTICLE[token.grammar.particleType];
+  if(!make)throw new Error(`WHY: no rule for particle type “${token.grammar.particleType}”`);
+  push(make(token));
+  push(WHY_MABNI_PARTICLE);
+ }else throw new Error(`WHY: no rule for token type “${type}”`);
+ return{ids,ar,en};
+}
+function buildRelationshipWhy(rel,data){
+ const ids=[],ar=[],en=[];
+ const push=s=>{ids.push(s.id);ar.push(s.ar);en.push(s.en)};
+ const mubtada=data.tokens.find(item=>item.id===rel.mubtadaId);
+ const anchor=data.tokens.find(item=>item.id===(rel.khabarId||rel.anchorId));
+ const phrase=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)?.word).filter(Boolean).join(' ');
+ if(rel.khabarKind==='verbalSentence'){
+  push({id:'WHY_REL_VERBAL_KHABAR',ar:`${wq(phrase)} جُمْلَةٌ فِعْلِيَّةٌ أَخْبَرَتْ عَنِ الْمُبْتَدَأِ ${wq(mubtada.word)}.`,en:`${eq(phrase)} is a verbal sentence that gives information about the مُبْتَدَأ ${eq(mubtada.word)}.`});
+  const attached=anchor.inflection==='afalKhamsa';
+  const link=attached?AFAL5_PERSONS[anchor.grammar.person]:null;
+  push(attached
+   ?{id:'WHY_REL_LINK_ATTACHED',ar:`وَفِيهَا ${link.subjectAr} تَعُودُ عَلَى الْمُبْتَدَأِ، وَهِيَ الرَّابِطُ.`,en:`Inside it is ${link.subjectEn}, which refers back to the مُبْتَدَأ; that is the رَابِط.`}
+   :{id:'WHY_REL_LINK_HIDDEN',ar:'وَفِيهَا ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ» يَعُودُ عَلَى الْمُبْتَدَأِ، وَهُوَ الرَّابِطُ.',en:'Inside it is a hidden pronoun understood as «هُوَ» that refers back to the مُبْتَدَأ; that is the رَابِط.'});
+  push({id:'WHY_REL_KHABAR_POSITION',ar:'فَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.',en:'So the sentence is in the position of rafʿ as the خَبَر.'});
+ }else{
+  const fronted=rel.khabarKind==='frontedPhrase';
+  const isPrep=anchor.grammar.particleType==='preposition';
+  push(isPrep
+   ?{id:'WHY_REL_JARR_MAJRUR',ar:`${wq(phrase)} حَرْفُ خَفْضٍ مَعَ الِاسْمِ الْمَخْفُوضِ بَعْدَهُ، فَهُمَا جَارٌّ وَمَجْرُورٌ.`,en:`${eq(phrase)} is a particle of khafḍ together with the noun it governs, so the two form a جَارٌّ وَمَجْرُورٌ.`}
+   :{id:'WHY_REL_ZARF_PHRASE',ar:`${wq(phrase)} ظَرْفٌ مَعَ مَا أُضِيفَ إِلَيْهِ، فَهُوَ شِبْهُ جُمْلَةٍ.`,en:`${eq(phrase)} is a ظَرْف with the noun annexed to it, so it is a شِبْهُ جُمْلَةٍ.`});
+  push({id:'WHY_REL_ATTACHED_TO_OMITTED',ar:'وَشِبْهُ الْجُمْلَةِ لَا يَكُونُ خَبَرًا بِنَفْسِهِ، بَلْ يَتَعَلَّقُ بِخَبَرٍ مَحْذُوفٍ.',en:'A شِبْهُ جُمْلَةٍ is not itself the خَبَر; it attaches to an omitted خَبَر.'});
+  push(fronted
+   ?{id:'WHY_REL_FRONTED_KHABAR',ar:`وَهَذَا الْخَبَرُ الْمَحْذُوفُ مُقَدَّمٌ، وَالْمُبْتَدَأُ ${wq(mubtada.word)} مُؤَخَّرٌ.`,en:`That omitted خَبَر is مُقَدَّم, and the مُبْتَدَأ ${eq(mubtada.word)} is مُؤَخَّر.`}
+   :{id:'WHY_REL_PHRASE_KHABAR',ar:`وَهَذَا الْخَبَرُ الْمَحْذُوفُ يُخْبِرُ عَنِ الْمُبْتَدَأِ ${wq(mubtada.word)}.`,en:`That omitted خَبَر gives information about the مُبْتَدَأ ${eq(mubtada.word)}.`});
+ }
+ return{ids,ar,en};
+}
+function attachWhyExplanations(data){
+ data.tokens.forEach(token=>{token.why=buildTokenWhy(token,data)});
+ data.relationships.forEach(rel=>{
+  if(rel.type!=='mubtadaKhabar'||rel.khabarKind==='single')return;
+  const recipient=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)).filter(Boolean).at(-1);
+  if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+ });
+}
 function renderRelationshipAnalysis(data){
  data.relationships.filter(rel=>rel.type==='mubtadaKhabar').forEach(rel=>{
   const mubtada=data.tokens.find(item=>item.id===rel.mubtadaId);
@@ -2449,6 +2688,8 @@ function renderExercise(data){
   token.phraseAr='';
   token.phraseEn='';
   token.phraseLabel='';
+  token.why=null;
+  token.phraseWhy=null;
   token._tokens=data.tokens;
   if(token.grammar.type==='noun')renderNounAnalysis(token);
   else if(token.grammar.type==='verb')renderVerbAnalysis(token);
@@ -2456,6 +2697,7 @@ function renderExercise(data){
   delete token._tokens;
  });
  renderRelationshipAnalysis(data);
+ attachWhyExplanations(data);
  data.sentence=data.tokens.map(item=>item.word).join(' ');
 }
 function classifySentence(data){
@@ -2803,12 +3045,20 @@ function normalizeFilters(changedId){
  }
  return `These filters were reset to stay compatible: ${reset.map(id=>labelFor(id).label).join(', ')}.`;
 }
+function whyBlockHtml(why,regionId,kind){
+ if(!why||!why.ar||!why.ar.length)return'';
+ const labelEn=kind==='phrase'?'Why this construction?':'Why?';
+ const labelAr=kind==='phrase'?'لِمَاذَا هَذَا التَّرْكِيبُ؟':'لِمَاذَا؟';
+ const arLines=why.ar.map(line=>`<p class="why-line" lang="ar">${esc(line)}</p>`).join('');
+ const enLines=why.en.map(line=>`<p class="why-line-en">${esc(line)}</p>`).join('');
+ return `<div class="why-wrap"><button class="why-toggle" type="button" aria-expanded="false" aria-controls="${regionId}"><span class="en-only">${labelEn}</span><span class="ar-only" lang="ar">${labelAr}</span></button><div class="why-region" id="${regionId}" hidden><div class="why-ar">${arLines}</div><div class="why-en en-only">${enLines}</div></div></div>`;
+}
 function render(data,notice='',shouldRecord=true){
  if(!data?.validated)throw new Error('Refusing to display an exercise that has not passed grammar validation.');
  current=data;
  byId('sentence').textContent=data.sentence;
  byId('translation').textContent=data.translation;
- byId('answers').innerHTML=data.tokens.map(tok=>`<article class="word-card${tok.target?' target':''}"><div class="word-head"><span class="gloss">${tok.target?'<span class="target-note en-only">Focus word</span><span class="target-note ar-only" lang="ar">الْكَلِمَةُ الْمُسْتَهْدَفَةُ</span> ':''}<span class="gloss-en en-only">${esc(tok.gloss)}</span></span><span class="word-ar" lang="ar">${esc(tok.word)}</span></div><div class="iraab" lang="ar">${esc(tok.ar)}</div><div class="english en-only"><strong>English:</strong> ${esc(tok.en)}</div>${tok.phraseAr?`<div class="phrase-analysis"><div class="phrase-analysis-ar" lang="ar">${esc(tok.phraseAr)}</div><div class="phrase-analysis-en en-only"><strong>${esc(tok.phraseLabel||'Phrase')}:</strong> ${esc(tok.phraseEn)}</div></div>`:''}</article>`).join('');
+ byId('answers').innerHTML=data.tokens.map((tok,index)=>`<article class="word-card${tok.target?' target':''}"><div class="word-head"><span class="gloss">${tok.target?'<span class="target-note en-only">Focus word</span><span class="target-note ar-only" lang="ar">الْكَلِمَةُ الْمُسْتَهْدَفَةُ</span> ':''}<span class="gloss-en en-only">${esc(tok.gloss)}</span></span><span class="word-ar" lang="ar">${esc(tok.word)}</span></div><div class="iraab" lang="ar">${esc(tok.ar)}</div><div class="english en-only"><strong>English:</strong> ${esc(tok.en)}</div>${whyBlockHtml(tok.why,`why-t${index}`,'token')}${tok.phraseAr?`<div class="phrase-analysis"><div class="phrase-analysis-ar" lang="ar">${esc(tok.phraseAr)}</div><div class="phrase-analysis-en en-only"><strong>${esc(tok.phraseLabel||'Phrase')}:</strong> ${esc(tok.phraseEn)}</div>${whyBlockHtml(tok.phraseWhy,`why-p${index}`,'phrase')}</div>`:''}</article>`).join('');
  byId('answerPanel').classList.remove('open');
  byId('revealBtn').textContent=revealButtonLabel();
  byId('status').className=notice?'status notice':'status';
@@ -2883,6 +3133,14 @@ byId('definitionsList').addEventListener('click',event=>{
   expandBtn.setAttribute('aria-expanded',String(!open));
   if(region)region.hidden=open;
  }
+});
+byId('answers').addEventListener('click',event=>{
+ const whyBtn=event.target?.closest?.('.why-toggle');
+ if(!whyBtn)return;
+ const region=byId(whyBtn.getAttribute('aria-controls'));
+ const open=whyBtn.getAttribute('aria-expanded')==='true';
+ whyBtn.setAttribute('aria-expanded',String(!open));
+ if(region)region.hidden=open;
 });
 byId('langMixed').addEventListener('click',()=>setLanguageMode('mixed'));
 byId('langArabic').addEventListener('click',()=>setLanguageMode('arabic'));

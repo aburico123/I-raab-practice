@@ -103,11 +103,14 @@ const elements={
   clearHistoryBtn:element('clearHistoryBtn'),definitionsToggle:element('definitionsToggle'),
   definitionsPanel:element('definitionsPanel'),definitionsList:element('definitionsList'),
   langMixed:element('langMixed'),langArabic:element('langArabic'),
-  subtitle:element('subtitle'),practiceTip:element('practiceTip'),practiceEyebrow:element('practiceEyebrow'),
+  langMenuBtn:element('langMenuBtn'),langMenu:element('langMenu'),
+  apprMenuBtn:element('apprMenuBtn'),apprMenu:element('apprMenu'),
+  practiceTip:element('practiceTip'),practiceEyebrow:element('practiceEyebrow'),
   answerTitle:element('answerTitle'),startLabel:element('startLabel'),formLabel:element('formLabel'),
   stateLabel:element('stateLabel'),signLabel:element('signLabel'),
   historyTitle:element('historyTitle'),historyNote:element('historyNote'),
-  apprSystem:element('apprSystem'),apprLight:element('apprLight'),apprDark:element('apprDark')
+  apprSystem:element('apprSystem'),apprLight:element('apprLight'),apprDark:element('apprDark'),
+  filtersToggle:element('filtersToggle'),filtersPanel:element('filtersPanel')
 };
 const bodyElement=element('body');
 const documentElement=element('documentElement');
@@ -1618,7 +1621,7 @@ console.log(`Language-mode audit passed: ${languageCases} groups, reveal/definit
 let appearanceCases=0;
 const apprKey='nahw-appearance-mode-v1';
 const themeAttr=()=>documentElement.getAttribute('data-theme');
-const apprPressed=id=>elements[id].getAttribute('aria-pressed');
+const apprPressed=id=>elements[id].getAttribute('aria-checked');
 // 1-2: three valid modes; default is system with its button pressed.
 assert(typeof api.setAppearanceMode==='function'&&typeof api.effectiveTheme==='function','Appearance API was not exported');
 assert(api.getAppearanceMode()==='system','Default appearance mode is not system');

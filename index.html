@@ -105,6 +105,9 @@ button{font-weight:850;cursor:pointer}
 .gloss{color:#68716c;font-size:14px;text-align:left}
 .iraab{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;padding:14px 15px;font-size:21px;line-height:1.9}
 .english{border-top:1px solid #eee7db;padding:11px 15px;color:#59625d;line-height:1.55;font-size:15px}
+.component-analysis{border-top:1px dashed #d8e0d2;padding:9px 15px;display:grid;gap:7px}
+.component-iraab{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;font-size:18px;line-height:1.85;color:#33463b}
+.component-iraab-en{color:var(--muted);font-size:13.5px;line-height:1.5}
 .phrase-analysis{border-top:1px solid #d8e6dc;background:#f7fbf8}
 .phrase-analysis-ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;padding:12px 15px 8px;font-size:20px;line-height:1.9;color:var(--green-dark)}
 .phrase-analysis-en{border-top:1px solid #e5eee8;padding:9px 15px 12px;color:#59625d;line-height:1.55;font-size:15px}
@@ -230,6 +233,9 @@ body.lang-arabic .icon-popover{direction:rtl}
 [data-theme="dark"] .word-card.target .word-head{background:#332a12}
 [data-theme="dark"] .gloss{color:#a6a89b}
 [data-theme="dark"] .english{border-top-color:#3a3d34;color:#b7bfb4}
+[data-theme="dark"] .component-analysis{border-top-color:#3a3d34}
+[data-theme="dark"] .component-iraab{color:#cfe6d8}
+[data-theme="dark"] .component-iraab-en{color:#a6a89b}
 [data-theme="dark"] .phrase-analysis{border-top-color:#2f4b3c;background:#1c2822}
 [data-theme="dark"] .phrase-analysis-en{border-top-color:#2f4b3c;color:#b7bfb4}
 [data-theme="dark"] .target-note{color:#2a2205}
@@ -570,6 +576,9 @@ function restoreExerciseSnapshot(snapshot){
  try{
   const data=cloneSerializable(snapshot);
   delete data.schemaVersion;
+  // Rebuild internal components deterministically from structural metadata (like the Why
+  // rebuild below) so restores never trust stored morphology and legacy snapshots upgrade.
+  materializeComponents(data);
   if(validateExercise(data).length)return null;
   data.validated=true;
   // Snapshots store the structured grammar analysis but not the “Why?” explanations (they may
@@ -2146,6 +2155,82 @@ const GRAMMAR_SIGNS=Object.freeze({
  nunKept:{id:'nunKept',ar:'ثُبُوتُ النُّونِ',en:'retention of the nūn'},
  nunDropped:{id:'nunDropped',ar:'حَذْفُ النُّونِ',en:'deletion of the nūn'}
 });
+/* ===== Word-internal components (Phase 0 infrastructure) ==========================
+   A grammatically meaningful element written INSIDE one visible verb word (e.g. واو
+   الجماعة, تاء التأنيث الساكنة). The visible token is NEVER split; components are
+   analysis-only records. category / syntacticRole / mahall are EXPLICIT data taken
+   from this registry — rendering and validation read the fields and never infer the
+   grammar from a component's kind/name. New kinds stay gated until their exact bināʾ
+   is source-verified (نونا التوكيد are intentionally absent for that reason). */
+const COMPONENT_REGISTRY=Object.freeze({
+ 'waw-jamaaah':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'sukun',letterAr:'الْوَاوُ',nameAr:'وَاوُ الْجَمَاعَةِ',nameEn:'the plural wāw (wāw al-jamāʿah)',ruleId:'C_WAW_JAMAAH_FAIL'}),
+ 'taa-taniith-sakina':Object.freeze({category:'particle',syntacticRole:'none',mahall:'none',binaaSign:'sukun',letterAr:'التَّاءُ',nameAr:'تَاءُ التَّأْنِيثِ السَّاكِنَةُ',nameEn:'the sākinah feminine tāʾ',ruleId:'C_TAA_TANIITH_SAKINA'}),
+ 'alif-fariqa':Object.freeze({category:'orthographic',syntacticRole:'notApplicable',mahall:'notApplicable',binaaSign:null,letterAr:'الْأَلِفُ',nameAr:'الْأَلِفُ الْفَارِقَةُ',nameEn:'the differentiating alif (alif fāriqah)',ruleId:'C_ALIF_FARIQA'})
+});
+const COMPONENT_CATEGORIES=Object.freeze({pronoun:1,particle:1,orthographic:1});
+const COMPONENT_ROLE_AR=Object.freeze({fail:'فَاعِلٌ'});
+const COMPONENT_ROLE_EN=Object.freeze({fail:'fāʿil'});
+const COMPONENT_MAHALL_AR=Object.freeze({raf:'رَفْعٍ',nasb:'نَصْبٍ',jarr:'خَفْضٍ'});
+const COMPONENT_MAHALL_EN=Object.freeze({raf:'rafʿ',nasb:'naṣb',jarr:'khafḍ'});
+const COMPONENT_BINAA_AR=Object.freeze({sukun:'السُّكُونِ',fatha:'الْفَتْحِ',damma:'الضَّمِّ',kasra:'الْكَسْرِ'});
+const COMPONENT_BINAA_EN=Object.freeze({sukun:'a sukūn',fatha:'a fatḥah',damma:'a ḍammah',kasra:'a kasrah'});
+/* A registry entry must itself satisfy the category invariants. */
+function componentRegistryError(reg){
+ if(!COMPONENT_CATEGORIES[reg.category])return `unknown category ${reg.category}`;
+ if(reg.category==='orthographic'&&(reg.syntacticRole!=='notApplicable'||reg.mahall!=='notApplicable'||reg.binaaSign!==null))return 'orthographic component must be notApplicable/notApplicable/null';
+ if(reg.category==='particle'&&(reg.syntacticRole!=='none'||reg.mahall!=='none'))return 'particle component must be none/none';
+ if(reg.category==='pronoun'&&(!COMPONENT_ROLE_AR[reg.syntacticRole]||!COMPONENT_MAHALL_AR[reg.mahall]))return 'pronoun component must carry a real role and maḥall';
+ return null;
+}
+Object.entries(COMPONENT_REGISTRY).forEach(([kind,reg])=>{const e=componentRegistryError(reg);if(e)throw new Error(`COMPONENT_REGISTRY[${kind}] is invalid: ${e}`)});
+function renderComponentAnalysis(c){
+ if(c.category==='pronoun'){
+  c.ar=`«${c.letterAr}» ${c.nameAr}: ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى ${COMPONENT_BINAA_AR[c.binaaSign]} فِي مَحَلِّ ${COMPONENT_MAHALL_AR[c.mahall]} ${COMPONENT_ROLE_AR[c.syntacticRole]}.`;
+  c.en=`${cap(c.nameEn)} is a connected pronoun, built on ${COMPONENT_BINAA_EN[c.binaaSign]}, in the position of ${COMPONENT_MAHALL_EN[c.mahall]} as the ${COMPONENT_ROLE_EN[c.syntacticRole]}.`;
+ }else if(c.category==='particle'){
+  c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ مَبْنِيٌّ عَلَى ${COMPONENT_BINAA_AR[c.binaaSign]} لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَ فَاعِلًا.`;
+  c.en=`${cap(c.nameEn)} is a particle built on ${COMPONENT_BINAA_EN[c.binaaSign]}; it has no position in iʿrāb and is not the fāʿil.`;
+ }else{
+  c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ زَائِدٌ لِلتَّفْرِيقِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
+  c.en=`${cap(c.nameEn)} is an orthographic addition for differentiation; it has no position in iʿrāb.`;
+ }
+}
+function makeComponent(kind,ownerId,index){
+ const reg=COMPONENT_REGISTRY[kind];
+ if(!reg)throw new Error(`Unknown internal-component kind: ${kind}`);
+ const c={id:`${ownerId}:C${index}`,kind,category:reg.category,syntacticRole:reg.syntacticRole,mahall:reg.mahall,binaaSign:reg.binaaSign,letterAr:reg.letterAr,nameAr:reg.nameAr,nameEn:reg.nameEn,ruleId:reg.ruleId,ar:'',en:''};
+ renderComponentAnalysis(c);
+ return c;
+}
+function componentInstanceError(c){
+ const reg=COMPONENT_REGISTRY[c.kind];
+ if(!reg)return `unknown component kind ${c.kind}`;
+ for(const key of ['category','syntacticRole','mahall','binaaSign','ruleId']){
+  if(c[key]!==reg[key])return `component ${c.kind} field ${key} (${c[key]}) disagrees with the registry (${reg[key]})`;
+ }
+ return componentRegistryError(reg);
+}
+/* Which internal components a verb token carries — derived ONLY from structural
+   metadata, never from the surface string: five-verbs from person+state, past verbs
+   from their explicitly declared grammar.componentKinds. */
+function verbComponentKinds(token){
+ if(!token||token.grammar.type!=='verb')return [];
+ if(token.tense==='present'&&token.inflection==='afalKhamsa'){
+  const subjectKind={'3mp':'waw-jamaaah','2mp':'waw-jamaaah'}[token.grammar.person];
+  if(!subjectKind)return [];
+  const kinds=[subjectKind];
+  if(token.state==='nasb'||token.state==='jazm')kinds.push('alif-fariqa');
+  return kinds;
+ }
+ if(Array.isArray(token.grammar.componentKinds))return [...token.grammar.componentKinds];
+ return [];
+}
+function materializeComponents(data){
+ data.tokens.forEach(token=>{
+  const kinds=verbComponentKinds(token);
+  token.components=kinds.map((kind,i)=>makeComponent(kind,token.id,i+1));
+ });
+}
 const GRAMMAR_RULES=Object.freeze({
  roles:{
   mubtada:{state:'raf',ruleId:'R_MUBTADA_RAF',en:'The mubtadaʾ; nominative.'},
@@ -2209,6 +2294,21 @@ const sourceRule=(topic,pdfPages,conditions,secondarySources=[])=>Object.freeze(
 const disabledSourceRule=(topic,reason)=>Object.freeze({
  topic,status:SOURCE_STATUS.DISABLED,productionEnabled:false,primarySource:null,secondarySources:Object.freeze([]),conditions:reason,exceptions:'The generic fallback may never enter production.'
 });
+// An ORTHOGRAPHIC (rasm/imlāʾ) convention — NOT a nahw ruling. Al-Tuḥfah may WRITE the form
+// (so pdfPages attest where it appears) but does not teach the orthographic rule; the `basis`
+// and `orthographicSource` fields keep that distinction explicit and honest.
+const ORTHOGRAPHY_CONVENTION='Standard Arabic orthography (rasm / imlāʾ) convention';
+const orthographyRule=(topic,pdfPages,conditions)=>Object.freeze({
+ topic,
+ status:SOURCE_STATUS.VERIFIED_PRIMARY,
+ productionEnabled:true,
+ basis:'orthographic-convention',
+ primarySource:Object.freeze({book:TUHFA_TITLE,pdfPages:Object.freeze([...pdfPages]),attests:'form-only'}),
+ orthographicSource:ORTHOGRAPHY_CONVENTION,
+ secondarySources:Object.freeze([]),
+ conditions,
+ exceptions:'Orthographic convention only; it carries no grammatical role and no place in iʿrāb.'
+});
 const IA_NOMINAL=Object.freeze({book:IBN_AQIL_TITLE,volume:1,pdfPages:[200,201]});
 const IA_PHRASE_KHABAR=Object.freeze({book:IBN_AQIL_TITLE,volume:1,pdfPages:[200,212,214]});
 const IA_KANA=Object.freeze({book:IBN_AQIL_TITLE,volume:1,pdfPages:[262,263]});
@@ -2252,6 +2352,9 @@ const SOURCE_REGISTRY=Object.freeze({
  R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74],'Only after the visible nāṣib lan.'),
  R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80],'Only after the visible jāzim lam.'),
  R_PAST_BUILT_FATHA:sourceRule('The generated past form is built on fatḥah.',[60,71,72],'Only bare third-person masculine forms or forms with feminine tāʾ; attached subject suffix paradigms are excluded.'),
+ C_WAW_JAMAAH_FAIL:sourceRule('Wāw al-jamāʿah is a connected pronoun built on sukūn, in the place of rafʿ as the fāʿil.',[67,88,91],'Al-Tuḥfah states the five-verb attached pronoun is «ضَمِيرٌ ... مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ» (p.67) and lists «ضَرَبُوا» among the twelve fāʿil-pronoun (مُضْمَر) forms (pp.88–91).'),
+ C_TAA_TANIITH_SAKINA:sourceRule('The sākinah tāʾ of the past verb is a ḥarf that marks its subject noun as feminine; it is not the fāʿil and has no place in iʿrāb.',[15,16,88,91],'Al-Tuḥfah: the sākinah tāʾ enters only the past verb and marks «the noun to which the verb is attributed» as feminine — e.g. «قَالَتْ عَائِشَةُ», where عَائِشَةُ is the fāʿil, not the tāʾ (pp.15–16); it is originally sākinah, i.e. built on sukūn (p.16).'),
+ C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) written after wāw al-jamāʿah has no grammatical role and no place in iʿrāb.',[91],'Al-Tuḥfah writes wāw-al-jamāʿah forms with this alif — e.g. «ضَرَبُوا» (p.91) — but does not name or parse it. The differentiating alif is a standard Arabic orthographic (rasm) convention, not a nahw ruling; it appears only after wāw al-jamāʿah in the naṣb/jazm five-verb forms.'),
  R_KANA_PAST_DEFICIENT:sourceRule('Kāna is a deficient past verb that raises its noun and makes its khabar accusative.',[105,106],'Only the surface كَانَ and the app’s single-noun/single-khabar template.',[IA_KANA]),
 
  G_LAN_NASB:sourceRule('Lan is a particle of negation, naṣb, and future meaning.',[73,74],'It must be immediately followed by the present verb it governs.'),
@@ -2324,7 +2427,7 @@ const AR={
  mudaf:w=>grammarSpec('noun','mubtada',{isMudaf:true}),
  mudafIlayh:(w)=>grammarSpec('noun','mudafIlayh'),
  presentPred:(w)=>grammarSpec('verb','present',{conjugation:'regular',person:'3ms'}),
- past:w=>grammarSpec('verb','past',{person:'3ms'}),
+ past:(w,opts={})=>grammarSpec('verb','past',{person:opts.person||'3ms',componentKinds:opts.componentKinds||[]}),
  faail:(w)=>grammarSpec('noun','faail'),
  particle:p=>grammarSpec('particle','particle',{particleType:'inna',particleWord:p.ar,particleIraab:p.iraab}),
  ismInna:(w,p)=>grammarSpec('noun','ismInna',{governorWord:p}),
@@ -2576,8 +2679,7 @@ function renderVerbAnalysis(token){
  const cause=governor?.grammar.particleType==='lan'?' بِـ«لَنْ»':governor?.grammar.particleType==='lam'?' بِـ«لَمْ»':'';
  let arabic=`${token.word}: فِعْلٌ مُضَارِعٌ ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${token.sign.ar}`;
  if(token.inflection==='afalKhamsa'){
-  const subject=AFAL5_PERSONS[token.grammar.person];
-  arabic+=`؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَ${subject.subjectAr} ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ`;
+  arabic+=`؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ`;
  }else if(token.relations.subjectType==='implicit'){
   arabic+='، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ «هُوَ»';
  }
@@ -2925,6 +3027,28 @@ function validateExercise(data){
    if(!subjectRel)fail('E_VERB_NO_SUBJECT','Verb has no explicit, attached, or implicit subject relationship.',token);
    if(token.inflection==='afalKhamsa'&&(subjectRel?.subjectType!=='attached'||subjectRel.pronoun!==AFAL5_PERSONS[token.grammar.person]?.subjectAr))fail('E_ATTACHED_SUBJECT','Five-verb attached subject does not match its person pattern.',token);
   }
+  // Word-internal components (Phase 0): only verbs carry them; each must match the registry,
+  // be source-verified, and the set must equal what the structural metadata expects.
+  if(token.grammar.type!=='verb'&&token.components&&token.components.length)fail('E_COMPONENT_OWNER','Only verbs carry internal components.',token);
+  if(token.grammar.type==='verb'){
+   const expectedKinds=verbComponentKinds(token);
+   const actualKinds=(token.components||[]).map(component=>component.kind);
+   if(expectedKinds.join('|')!==actualKinds.join('|'))fail('E_COMPONENT_SET',`Verb components [${actualKinds.join(',')}] disagree with the structural expectation [${expectedKinds.join(',')}].`,token);
+   (token.components||[]).forEach(component=>{
+    if(!component.id||!component.ar||!component.en)fail('E_COMPONENT_INCOMPLETE','Internal component is missing its id or analysis.',token);
+    const componentError=componentInstanceError(component);
+    if(componentError)fail('E_COMPONENT_INVARIANT',componentError,token);
+    if(!isSourceAuthorized(component.ruleId))fail('E_SOURCE_UNVERIFIED',`Component rule ${component.ruleId} is missing, disabled, or not source-verified.`,token);
+   });
+   // Whichever pronoun subject IS represented as a component must agree with the verb's
+   // subject relationship. (E_COMPONENT_SET already forces the correct set per person;
+   // persons not yet retrofitted simply carry no component and keep the relationship subject.)
+   const subjectComponent=(token.components||[]).find(component=>component.syntacticRole==='fail');
+   if(subjectComponent){
+    const attachedRel=relationships.find(rel=>rel.type==='verbSubject'&&rel.verbId===token.id);
+    if(attachedRel&&attachedRel.pronoun&&attachedRel.pronoun!==subjectComponent.nameAr)fail('E_COMPONENT_SUBJECT','Subject component and its relationship disagree.',token);
+   }
+  }
   if(token.grammar.type==='particle'&&token.expectedSurface!==token.word)fail('E_PARTICLE_SURFACE','Particle surface disagrees with its grammatical identity.',token);
   if(['lan','lam','sawfa'].includes(token.grammar.particleType)){
    const governed=token.relations.governsId&&tokenById.get(token.relations.governsId);
@@ -2996,6 +3120,7 @@ function completeNominalAnalysis(data){
    else if(item.grammar.type==='verb')inflectVerb(item,data.tokens,index);
    else configureParticle(item);
   });
+  materializeComponents(data);
   resolveRelationships(data);
   data.sentenceType=classifySentence(data);
   renderExercise(data);
@@ -3090,7 +3215,7 @@ add('verb','dual','raf','alif',()=>{const v=pickGeneralVerb(),d=pickVaried(duals
 add('verb','dual','nasb','ya',()=>{const s=pickPerson(),d=pickVaried(duals,'verb-dual-objects',x=>x.acc),a=isHumanNoun(d)?pickHumanAction():pickThingAction();return{sentence:`${a.pres} ${s.nom} ${d.acc}`,translation:`${cap(s.en)} ${a.third} ${d.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(d.acc,d.en,AR.object(d.acc,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.object,true)]}});
 add('verb','smp','raf','waw',()=>{const v=pickGeneralVerb(),p=pickVaried(smp,'verb-smp-subjects',x=>x.nom),o=pickGeneralObject(v,p);return{sentence:`${v.past} ${p.nom} ${o.acc}`,translation:`${cap(p.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(p.nom,p.en,AR.faail(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),'The sound masculine plural subject; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
 add('verb','smp','nasb','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'verb-smp-objects',x=>x.acc),a=pickHumanAction();return{sentence:`${a.pres} ${s.nom} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(p.acc,p.en,AR.object(p.acc,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.object,true)]}});
-add('verb','sfp','raf','damma',()=>{const a=pickVaried(femininePastActions,'feminine-past-actions',x=>x.past),p=pickVaried(sfp,'verb-sfp-subjects',x=>x.nom);return{sentence:`${a.past} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(a.past,a.pastEn,AR.past(a.past),'A past-tense verb; the final tāʾ marks feminine gender.'),token(p.nom,p.en,AR.faail(p.nom),'The sound feminine plural subject; nominative.',true)]}});
+add('verb','sfp','raf','damma',()=>{const a=pickVaried(femininePastActions,'feminine-past-actions',x=>x.past),p=pickVaried(sfp,'verb-sfp-subjects',x=>x.nom);return{sentence:`${a.past} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(a.past,a.pastEn,AR.past(a.past,{componentKinds:['taa-taniith-sakina']}),'A past-tense verb; the final tāʾ marks feminine gender.'),token(p.nom,p.en,AR.faail(p.nom),'The sound feminine plural subject; nominative.',true)]}});
 add('verb','fiveNouns','raf','waw',()=>{const v=pickGeneralVerb(),f=pickVaried(fiveNouns,'verb-five-noun-subjects',x=>x.nom),o=pickGeneralObject(v,f);return{sentence:`${v.past} ${f.nom} ${o.acc}`,translation:`${cap(f.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(f.nom,f.en,AR.faail(f.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}});
 add('verb','singular','nasb','fatha',()=>{const s=pickPerson(),a=pickVaried(singularPredicates,'kana-predicates',x=>x.acc);return{sentence:`كَانَ ${s.nom} ${a.acc}`,translation:`${cap(s.en)} was ${a.en}.`,tokens:[token('كَانَ','was',AR.kana('كَانَ'),'A deficient past-tense verb.'),token(s.nom,s.en,AR.ismKana(s.nom),'The noun of kāna; nominative.'),token(a.acc,a.en,AR.khabarKana(a.acc),'The khabar of kāna; accusative.',true)]}});
 add('verb','present','raf','damma',()=>{const v=pickVerb(),s=pickPerson(),o=pickVerbObject(v);return{sentence:`${v.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
@@ -3214,7 +3339,7 @@ function render(data,notice='',shouldRecord=true){
  current=data;
  byId('sentence').textContent=data.sentence;
  byId('translation').textContent=data.translation;
- byId('answers').innerHTML=data.tokens.map((tok,index)=>`<article class="word-card${tok.target?' target':''}"><div class="word-head"><span class="gloss">${tok.target?'<span class="target-note en-only">Focus word</span><span class="target-note ar-only" lang="ar">الْكَلِمَةُ الْمُسْتَهْدَفَةُ</span> ':''}<span class="gloss-en en-only">${esc(tok.gloss)}</span></span><span class="word-ar" lang="ar">${esc(tok.word)}</span></div><div class="iraab" lang="ar">${esc(tok.ar)}</div><div class="english en-only"><strong>English:</strong> ${esc(tok.en)}</div>${whyBlockHtml(tok.why,`why-t${index}`,'token')}${tok.phraseAr?`<div class="phrase-analysis"><div class="phrase-analysis-ar" lang="ar">${esc(tok.phraseAr)}</div><div class="phrase-analysis-en en-only"><strong>${esc(tok.phraseLabel||'Phrase')}:</strong> ${esc(tok.phraseEn)}</div>${whyBlockHtml(tok.phraseWhy,`why-p${index}`,'phrase')}</div>`:''}</article>`).join('');
+ byId('answers').innerHTML=data.tokens.map((tok,index)=>`<article class="word-card${tok.target?' target':''}"><div class="word-head"><span class="gloss">${tok.target?'<span class="target-note en-only">Focus word</span><span class="target-note ar-only" lang="ar">الْكَلِمَةُ الْمُسْتَهْدَفَةُ</span> ':''}<span class="gloss-en en-only">${esc(tok.gloss)}</span></span><span class="word-ar" lang="ar">${esc(tok.word)}</span></div><div class="iraab" lang="ar">${esc(tok.ar)}</div><div class="english en-only"><strong>English:</strong> ${esc(tok.en)}</div>${(tok.components&&tok.components.length)?`<div class="component-analysis">`+tok.components.map(component=>`<div class="component-iraab" lang="ar">${esc(component.ar)}</div><div class="component-iraab-en en-only">${esc(component.en)}</div>`).join('')+`</div>`:''}${whyBlockHtml(tok.why,`why-t${index}`,'token')}${tok.phraseAr?`<div class="phrase-analysis"><div class="phrase-analysis-ar" lang="ar">${esc(tok.phraseAr)}</div><div class="phrase-analysis-en en-only"><strong>${esc(tok.phraseLabel||'Phrase')}:</strong> ${esc(tok.phraseEn)}</div>${whyBlockHtml(tok.phraseWhy,`why-p${index}`,'phrase')}</div>`:''}</article>`).join('');
  byId('answerPanel').classList.remove('open');
  byId('revealBtn').textContent=revealButtonLabel();
  byId('status').className=notice?'status notice':'status';

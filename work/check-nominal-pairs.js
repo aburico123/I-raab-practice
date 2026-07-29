@@ -482,7 +482,7 @@ function assertNominalPair(data,label){
     assert(constructionEnd.phraseEn.startsWith('Together,'),`${label}: verbal-sentence English is not a separate combined analysis`);
     if(constructionEnd!==verb)assert(!verb.phraseAr&&!verb.phraseEn,`${label}: verb card contains combined analysis before a later component`);
     if(verb.ar.includes('الْأَفْعَالِ الْخَمْسَةِ')){
-      assert(verb.ar.includes('وَاوُ الْجَمَاعَةِ'),`${label}: five-verb individual analysis lacks its attached subject`);
+      const wawComponent=(verb.components||[]).find(component=>component.kind==='waw-jamaaah');assert(wawComponent&&wawComponent.category==='pronoun'&&wawComponent.syntacticRole==='fail'&&wawComponent.mahall==='raf',`${label}: five-verb lacks its structured waw al-jamaaah subject component`);
       assert(constructionEnd.phraseAr.includes('وَاوُ الْجَمَاعَةِ'),`${label}: five-verb khabar lacks wāw link`);
     }else{
       assert(verb.ar.includes('ضَمِيرٌ مُسْتَتِرٌ جَوَازًا'),`${label}: regular verbal khabar lacks hidden subject`);
@@ -581,9 +581,14 @@ assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===6,'The noun declen
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.regular).join(',')==='raf,nasb,jazm','Regular present moods are incomplete');
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.afalKhamsa).join(',')==='raf,nasb,jazm','Five-verb moods are incomplete');
 assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),'Unsupported diptotes are not recorded in the coverage matrix');
-assert(Object.keys(api.SOURCE_REGISTRY).length===49,`Expected 49 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===52,`Expected 52 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(api.SOURCE_REGISTRY.R_PARTICLE.status===api.SOURCE_STATUS.DISABLED&&!api.SOURCE_REGISTRY.R_PARTICLE.productionEnabled,'Generic particle fallback is not disabled');
 assert(Object.entries(api.SOURCE_REGISTRY).filter(([id])=>id!=='R_PARTICLE').every(([id,entry])=>api.isSourceAuthorized(id)&&entry.primarySource?.pdfPages?.length), 'An enabled grammar rule lacks a primary-source page');
+// Phase-0 component source rules must honestly distinguish Al-Tuḥfah-grounded nahw rulings
+// (تاء التأنيث, واو الجماعة) from the orthographic-only ألف الفارقة convention.
+assert(!api.SOURCE_REGISTRY.C_WAW_JAMAAH_FAIL.basis&&!api.SOURCE_REGISTRY.C_TAA_TANIITH_SAKINA.basis,'Al-Tuḥfah-grounded component rules must not be flagged as orthographic conventions');
+assert(api.SOURCE_REGISTRY.C_ALIF_FARIQA.basis==='orthographic-convention'&&api.SOURCE_REGISTRY.C_ALIF_FARIQA.orthographicSource,'الألف الفارقة must be marked as an orthographic convention with a named orthographic source');
+assert(api.SOURCE_REGISTRY.C_ALIF_FARIQA.primarySource.attests==='form-only','الألف الفارقة Al-Tuḥfah citation must attest the written form only, not the orthographic rule');
 
 function structuredCase(templateId,translation,tokens){
   const data=api.completeNominalAnalysis({templateId,sentence:'',translation,tokens});
@@ -908,6 +913,116 @@ const badLanTranslation=structuredCase('TEST_LAN_TRANSLATION_BASE','They will no
 ]);
 badLanTranslation.translation='They arrange the book.';
 assertFailureCode('lan translation lost negation',badLanTranslation,'E_LAN_TRANSLATION');validatorFaultCases++;
+
+// ===================================================================================
+// Phase 0 — word-internal component infrastructure (adds NO new generated grammar).
+// Retrofits the existing واو الجماعة (five verbs) and تاء التأنيث الساكنة (feminine past)
+// as structured components; proves the schema, invariants, render order, snapshot/restore.
+// Assertions use structured fields + ASCII English so they never depend on Arabic
+// diacritic normalisation; Arabic surfaces come only from the lexemes themselves.
+// ===================================================================================
+let componentCases=0;
+const object0=write.obj[0];                      // reuse the existing كَتَبَ lexeme (five/fiveSub/obj)
+
+// (1) Five-verb rafʿ → exactly one waw-jamaaah pronoun component; no alif fāriqah.
+const fiveRaf=structuredCase('TEST_PH0_FIVE_RAF','They write the assigned work.',[
+  api.makeToken(write.five,'write',{...api.specs.presentFive(write.five),person:'3mp'},'',true),
+  api.makeToken(object0,'the assigned work',api.specs.object(object0))
+]);
+const fiveVerbRaf=fiveRaf.tokens[0];
+assert(Array.isArray(fiveVerbRaf.components)&&fiveVerbRaf.components.length===1,'Five-verb rafʿ must carry exactly one internal component');
+const waw=fiveVerbRaf.components[0];
+assert(waw.kind==='waw-jamaaah'&&waw.category==='pronoun'&&waw.syntacticRole==='fail'&&waw.mahall==='raf'&&waw.binaaSign==='sukun','wāw al-jamāʿah component fields are wrong');
+assert(waw.ar&&waw.ar.includes(waw.nameAr),'wāw component Arabic analysis was not rendered');
+assert(!fiveVerbRaf.ar.includes(waw.nameAr),'Five-verb whole-word iʿrāb must no longer inline the wāw subject');
+componentCases++;
+
+// (2) Five-verb naṣb → waw-jamaaah + alif-fariqa (orthographic, no maḥall).
+const fiveNasb=structuredCase('TEST_PH0_FIVE_NASB','They will not write the assigned work.',[
+  api.makeToken('لَنْ','will not',api.specs.lan('لَنْ')),
+  api.makeToken(write.fiveSub,'write',{...api.specs.presentFive(write.fiveSub),person:'3mp'},'',true),
+  api.makeToken(object0,'the assigned work',api.specs.object(object0))
+]);
+const nasbKinds=fiveNasb.tokens[1].components.map(component=>component.kind);
+assert(nasbKinds.join(',')==='waw-jamaaah,alif-fariqa',`Five-verb naṣb components wrong: ${nasbKinds.join(',')}`);
+const alif=fiveNasb.tokens[1].components[1];
+assert(alif.category==='orthographic'&&alif.syntacticRole==='notApplicable'&&alif.mahall==='notApplicable'&&alif.binaaSign===null,'alif fāriqah must be orthographic/notApplicable/null');
+assert(alif.en.includes('orthographic'),'alif fāriqah English analysis is wrong');
+componentCases++;
+
+// (3) Five-verb jazm → same two components.
+const fiveJazm=structuredCase('TEST_PH0_FIVE_JAZM','They did not write the assigned work.',[
+  api.makeToken('لَمْ','did not',api.specs.lam('لَمْ')),
+  api.makeToken(write.fiveSub,'write',{...api.specs.presentFive(write.fiveSub),person:'3mp'},'',true),
+  api.makeToken(object0,'the assigned work',api.specs.object(object0))
+]);
+assert(fiveJazm.tokens[1].components.map(component=>component.kind).join(',')==='waw-jamaaah,alif-fariqa','Five-verb jazm components wrong');
+componentCases++;
+
+// (4) Feminine past تاء التأنيث الساكنة: a particle with no maḥall — NOT the fāʿil.
+const sfpSubject=api.nounLexicons.sfp[0];
+const feminine=api.verbLexicons.femininePastActions[0];
+const femPast=structuredCase('TEST_PH0_FEM_PAST',`${sfpSubject.en} ${feminine.pastEn}.`,[
+  api.makeToken(feminine.past,feminine.pastEn,api.specs.past(feminine.past,{componentKinds:['taa-taniith-sakina']})),
+  api.makeToken(sfpSubject.nom,sfpSubject.en,api.specs.faail(sfpSubject.nom),'',true)
+]);
+const pastVerb=femPast.tokens[0];
+assert(pastVerb.components.length===1&&pastVerb.components[0].kind==='taa-taniith-sakina','Feminine past must carry the tāʾ al-taʾnīth component');
+const taa=pastVerb.components[0];
+assert(taa.category==='particle'&&taa.syntacticRole==='none'&&taa.mahall==='none','tāʾ al-taʾnīth must be particle/none/none');
+assert(taa.en.includes('not the')&&taa.en.includes('no position'),'tāʾ English analysis must state it is not the fāʿil and has no position');
+assert(femPast.tokens[1].grammar.role==='faail','The following noun — not the tāʾ — must be the fāʿil');
+componentCases++;
+
+// (5) Sacred render order: whole-word iʿrāb → component iʿrāb → individual Why → phrase → phrase Why.
+api.render(fiveRaf,'',false);
+const renderedHtml=elements.answers.innerHTML;
+const posIraab=renderedHtml.indexOf('class="iraab"');
+const posComponent=renderedHtml.indexOf('class="component-iraab"');
+const posWhy=renderedHtml.indexOf('class="why-toggle"');
+assert(posIraab>=0&&posComponent>=0&&posWhy>=0,'Rendered card is missing the iʿrāb / component / why blocks');
+assert(posIraab<posComponent&&posComponent<posWhy,`Sacred order violated: iraab=${posIraab} component=${posComponent} why=${posWhy}`);
+componentCases++;
+
+// (6) Snapshot round-trip rebuilds components deterministically. Snapshots need the full
+// template metadata, so these use real production templates (not the structuredCase stubs).
+const structuredSignature=data=>data.tokens.map(token=>(token.components||[]).map(component=>`${component.kind}:${component.category}:${component.syntacticRole}:${component.mahall}:${component.binaaSign}`).join('|')).join('||');
+const fiveNasbTemplate=api.templates.find(template=>template.form==='fiveVerbs'&&template.state==='nasb');
+const femPastTemplate=api.templates.find(template=>template.starts==='verb'&&template.form==='sfp');
+assert(fiveNasbTemplate&&femPastTemplate,'Phase-0 snapshot templates were not found');
+for(const [label,template] of [['five-verb naṣb',fiveNasbTemplate],['feminine past',femPastTemplate]]){
+  const exercise=api.buildTemplate(template.id);
+  const snapshot=api.createExerciseSnapshot(exercise);
+  assert(snapshot,`${label}: snapshot could not be created`);
+  const restored=api.restoreExerciseSnapshot(snapshot);
+  assert(restored,`${label}: snapshot could not be restored`);
+  assert(structuredSignature(exercise)===structuredSignature(restored),`${label}: restored components differ from the original`);
+  componentCases++;
+}
+
+// (7) Legacy (component-less) snapshot still restores; the five-verb wāw is re-derived.
+const legacyBase=api.buildTemplate(fiveNasbTemplate.id);
+const legacySnapshot=clone(api.createExerciseSnapshot(legacyBase));
+legacySnapshot.tokens.forEach(token=>delete token.components);
+const legacyRestored=api.restoreExerciseSnapshot(legacySnapshot);
+assert(legacyRestored,'Legacy component-less snapshot failed to restore');
+const restoredFiveVerb=legacyRestored.tokens.find(token=>token.inflection==='afalKhamsa');
+assert(restoredFiveVerb&&restoredFiveVerb.components.some(component=>component.kind==='waw-jamaaah'),'Legacy five-verb did not re-derive its wāw component');
+componentCases++;
+
+// (8) Validator invariants: illegal component states are impossible.
+const tamperRole=clone(fiveRaf);tamperRole.tokens[0].components[0].syntacticRole='none';
+assertFailureCode('wāw pronoun downgraded to role none',tamperRole,'E_COMPONENT_INVARIANT');componentCases++;
+const tamperTaa=clone(femPast);tamperTaa.tokens[0].components[0].syntacticRole='fail';tamperTaa.tokens[0].components[0].mahall='raf';
+assertFailureCode('tāʾ al-taʾnīth made the fāʿil',tamperTaa,'E_COMPONENT_INVARIANT');componentCases++;
+const tamperOwner=clone(fiveRaf);tamperOwner.tokens[1].components=[clone(fiveRaf.tokens[0].components[0])];
+assertFailureCode('noun given a verb component',tamperOwner,'E_COMPONENT_OWNER');componentCases++;
+const tamperSet=clone(fiveRaf);tamperSet.tokens[0].components=[];
+assertFailureCode('five-verb stripped of its subject component',tamperSet,'E_COMPONENT_SET');componentCases++;
+const tamperAlif=clone(fiveNasb);tamperAlif.tokens[1].components[1].mahall='raf';
+assertFailureCode('alif fāriqah given a maḥall',tamperAlif,'E_COMPONENT_INVARIANT');componentCases++;
+
+console.log(`Phase-0 internal-component audit passed: ${componentCases} checks; wāw al-jamāʿah + tāʾ al-taʾnīth retrofitted, schema/invariants/render-order/snapshot verified.`);
 
 function runEveryTemplate(repetitions){
   for(const template of api.templates){

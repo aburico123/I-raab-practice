@@ -2316,12 +2316,15 @@ const SOURCE_STATUS=Object.freeze({
 });
 const TUHFA_TITLE='Al-Tuḥfah al-Saniyyah bi-Sharḥ al-Muqaddimah al-Ājurrūmiyyah';
 const TUHFA_AUTHOR='Muḥammad Muḥyī al-Dīn ʿAbd al-Ḥamīd';
-const TUHFA_EDITION='IslamHouse scan: ar_Explanation_alagormiah_AbdulHamid.pdf';
-const TUHFA_PDF_URL='https://d1.islamhouse.com/data/ar/ih_books/single3/ar_Explanation_alagormiah_AbdulHamid.pdf';
-const TUHFA_SOURCE_ID='islamhouse:334271/ar_Explanation_alagormiah_AbdulHamid.pdf';
+// The pdfPages in this registry are numbered against the ACTUAL workspace scan (title page
+// verified: Qatar Ministry of Awqaf print of Al-Tuḥfah by ʿAbd al-Ḥamīd). It is identified by
+// its file name and SHA-256, not by any other public edition whose pagination we cannot prove.
+const TUHFA_EDITION='Qatar Ministry of Awqaf and Islamic Affairs print (وزارة الأوقاف والشؤون الإسلامية، دولة قطر)';
+const TUHFA_WORKSPACE_FILE='tuhfa newer.pdf';
+const TUHFA_SOURCE_ID='sha256:e07c666e36985e9e123e4bd0fb8f6e48207ad81ee60952e7ff4f51f3a58823e8';
 const IBN_AQIL_TITLE='Sharḥ Ibn ʿAqīl ʿalā Alfiyyat Ibn Mālik';
 const tuhfaEvidence=(pdfPages,evidenceType='rule-support',extra={})=>Object.freeze({
- book:TUHFA_TITLE,author:TUHFA_AUTHOR,edition:TUHFA_EDITION,url:TUHFA_PDF_URL,
+ book:TUHFA_TITLE,author:TUHFA_AUTHOR,edition:TUHFA_EDITION,workspaceFile:TUHFA_WORKSPACE_FILE,
  stableIdentifier:TUHFA_SOURCE_ID,pdfPages:Object.freeze([...pdfPages]),evidenceType,...extra
 });
 const sourceRule=(topic,pdfPages,conditions,secondarySources=[])=>Object.freeze({
@@ -2342,7 +2345,8 @@ const ALJAZEERA_ALIF_FARIQA_AUTHORITY=Object.freeze({
  title:'الألف الفارقة',
  url:'https://learning.aljazeera.net/ar/node/562',
  stableIdentifier:'aljazeera-learning-arabic:node/562',
- relevantLocation:'Section «الألف الفارقة», rule paragraph and examples كتبوا / لم يكتبوا / اكتبوا',
+ relevantLocation:'Article «الألف الفارقة», rule paragraph and examples كَتَبُوا / لم يكتُبُوا / اكْتُبُوا',
+ exactClaim:'وَتُسَمَّى هَذِهِ الْأَلِفُ «الْأَلِفَ الْفَارِقَةَ»؛ لِأَنَّهَا تُوضَعُ بَعْدَ وَاوِ الْجَمَاعَةِ فِي الْفِعْلِ ... لِلتَّفْرِيقِ بَيْنَهُ وَبَيْنَ الْوَاوِ الْأَصْلِيَّةِ.',
  verificationStatus:'verified-direct'
 });
 // Orthographic authorization comes only from the identified orthography authority.
@@ -2401,9 +2405,9 @@ const SOURCE_REGISTRY=Object.freeze({
  R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74],'Only after the visible nāṣib lan.'),
  R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80],'Only after the visible jāzim lam.'),
  R_PAST_BUILT_FATHA:sourceRule('The generated past form is built on fatḥah.',[60,71,72],'Only bare third-person masculine forms or forms with feminine tāʾ; attached subject suffix paradigms are excluded.'),
- C_WAW_JAMAAH_FAIL:sourceRule('Wāw al-jamāʿah is a connected pronoun built on sukūn, in the place of rafʿ as the fāʿil.',[41],'Exact PDF page 41 parses the wāw in the cited five-verb examples as «وَاوُ الْجَمَاعَةِ فَاعِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ».'),
- C_TAA_TANIITH_SAKINA:sourceRule('The sākinah feminine tāʾ is a mark identifying a word as a verb; in the cited feminine examples the following noun is the explicit fāʿil.',[14,15,76,77,78],'Exact PDF pages 14–15 identify تَاءُ التَّأْنِيثِ السَّاكِنَةُ as a verb marker. Pages 76–78 define the explicit fāʿil and give feminine-verb examples such as «قَامَتْ هِنْدٌ»; the claim is limited to what those pages jointly establish.'),
- C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from other wāws; it has no grammatical role.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[81],'Al Jazeera Learning Arabic explicitly names the rule and gives كتبوا / لم يكتبوا / اكتبوا. Exact Al-Tuḥfah PDF page 81 separately attests the spelling «ضَرَبُوا» only; that attestation does not authorize this rule.'),
+ C_WAW_JAMAAH_FAIL:sourceRule('Wāw al-jamāʿah is a connected pronoun built on sukūn, in the place of rafʿ as the fāʿil.',[67,91],'Workspace scan: the attached pronoun of the five verbs is «فَاعِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ» (p.67), and «ضَرَبُوا» is listed among the twelve pronoun-fāʿil (مُضْمَر) forms (p.91).'),
+ C_TAA_TANIITH_SAKINA:sourceRule('The sākinah tāʾ of the past verb is a ḥarf that marks its subject noun as feminine; it is not the fāʿil and has no place in iʿrāb.',[15,16,88,91],'Workspace scan: the sākinah tāʾ enters only the past verb and marks «the noun to which the verb is attributed» as feminine — «قَالَتْ عَائِشَةُ», where عَائِشَةُ is the fāʿil, not the tāʾ (p.15); it is sākinah in its original form (p.16). The explicit feminine fāʿil is a following noun, «حَضَرَتْ هِنْدٌ» (p.88), while «ضَرَبَتْ» is the هي form whose subject is a hidden pronoun, not the tāʾ (p.91).'),
+ C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from the original wāw; it has no grammatical role and no place in iʿrāb.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[91],'Al Jazeera Learning Arabic («الألف الفارقة») names the rule and gives كَتَبُوا / لم يكتُبُوا / اكْتُبُوا. Workspace scan separately attests the written spelling «ضَرَبُوا» (p.91) as form-only; that attestation does not authorize this rule.'),
  R_KANA_PAST_DEFICIENT:sourceRule('Kāna is a deficient past verb that raises its noun and makes its khabar accusative.',[105,106],'Only the surface كَانَ and the app’s single-noun/single-khabar template.',[IA_KANA]),
 
  G_LAN_NASB:sourceRule('Lan is a particle of negation, naṣb, and future meaning.',[73,74],'It must be immediately followed by the present verb it governs.'),

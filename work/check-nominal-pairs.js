@@ -30,6 +30,7 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   SOURCE_STATUS,
   SOURCE_REGISTRY,
   isSourceAuthorized,
+  isSourceRecordAuthorized,
   grammarDiagnostics,
   validateExercise,
   render,
@@ -160,7 +161,7 @@ assert(elements.historyToggle.textContent==='Sentence history (1)','The initial 
 assert(!elements.historyList.innerHTML.includes('جُمْلَةٌ سَابِقَةٌ'),'Legacy text-only history must not be treated as a reviewable exercise');
 let savedHistory=JSON.parse(storage.get('nahw-sentence-history-v1'));
 assert(savedHistory.length===1,'The initial exercise snapshot was not persisted');
-assert(savedHistory[0].schemaVersion===1&&savedHistory[0].templateId&&savedHistory[0].tokens.length,
+assert(savedHistory[0].schemaVersion===2&&savedHistory[0].templateId&&savedHistory[0].tokens.length,
   'History did not persist a versioned structured exercise snapshot');
 assert(!Object.hasOwn(savedHistory[0],'validated'),'History snapshots must be revalidated instead of trusting a stored flag');
 assert(elements.historyList.innerHTML.includes('<button type="button" class="history-item"')
@@ -241,7 +242,7 @@ function genUntil(pred,tries=4000){
 {
   const ex=genUntil(()=>true);
   const snap=api.createExerciseSnapshot(ex);
-  assert(snap&&snap.schemaVersion===1,'Could not create a versioned snapshot');
+  assert(snap&&snap.schemaVersion===2,'Could not create a versioned snapshot');
   const legacy=JSON.parse(JSON.stringify(snap));
   legacy.tokens.forEach(t=>{delete t.why;delete t.phraseWhy;});         // simulate a pre-Why snapshot
   const restored=api.restoreExerciseSnapshot(legacy);
@@ -583,12 +584,23 @@ assert(Object.keys(api.GRAMMAR_RULES.presentVerb.afalKhamsa).join(',')==='raf,na
 assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),'Unsupported diptotes are not recorded in the coverage matrix');
 assert(Object.keys(api.SOURCE_REGISTRY).length===52,`Expected 52 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(api.SOURCE_REGISTRY.R_PARTICLE.status===api.SOURCE_STATUS.DISABLED&&!api.SOURCE_REGISTRY.R_PARTICLE.productionEnabled,'Generic particle fallback is not disabled');
-assert(Object.entries(api.SOURCE_REGISTRY).filter(([id])=>id!=='R_PARTICLE').every(([id,entry])=>api.isSourceAuthorized(id)&&entry.primarySource?.pdfPages?.length), 'An enabled grammar rule lacks a primary-source page');
+assert(Object.entries(api.SOURCE_REGISTRY).filter(([id])=>id!=='R_PARTICLE').every(([id])=>api.isSourceAuthorized(id)), 'An enabled rule is not authorized by its basis-specific source gate');
+assert(Object.entries(api.SOURCE_REGISTRY).filter(([,entry])=>entry.basis==='nahw-rule').every(([,entry])=>entry.primarySource?.pdfPages?.length&&entry.primarySource?.edition&&entry.primarySource?.url), 'An enabled nahw rule lacks exact-edition source identity');
 // Phase-0 component source rules must honestly distinguish Al-Tuḥfah-grounded nahw rulings
 // (تاء التأنيث, واو الجماعة) from the orthographic-only ألف الفارقة convention.
-assert(!api.SOURCE_REGISTRY.C_WAW_JAMAAH_FAIL.basis&&!api.SOURCE_REGISTRY.C_TAA_TANIITH_SAKINA.basis,'Al-Tuḥfah-grounded component rules must not be flagged as orthographic conventions');
-assert(api.SOURCE_REGISTRY.C_ALIF_FARIQA.basis==='orthographic-convention'&&api.SOURCE_REGISTRY.C_ALIF_FARIQA.orthographicSource,'الألف الفارقة must be marked as an orthographic convention with a named orthographic source');
-assert(api.SOURCE_REGISTRY.C_ALIF_FARIQA.primarySource.attests==='form-only','الألف الفارقة Al-Tuḥfah citation must attest the written form only, not the orthographic rule');
+assert(api.SOURCE_REGISTRY.C_WAW_JAMAAH_FAIL.basis==='nahw-rule'&&api.SOURCE_REGISTRY.C_TAA_TANIITH_SAKINA.basis==='nahw-rule','Al-Tuḥfah-grounded component rules must be identified as nahw rules');
+assert(api.SOURCE_REGISTRY.C_WAW_JAMAAH_FAIL.primarySource.pdfPages.join(',')==='41','Wāw source metadata does not point to exact PDF page 41');
+assert(api.SOURCE_REGISTRY.C_TAA_TANIITH_SAKINA.primarySource.pdfPages.join(',')==='14,15,76,77,78','Feminine tāʾ source metadata does not match the exact-file joint evidence');
+const alifSource=api.SOURCE_REGISTRY.C_ALIF_FARIQA;
+assert(alifSource.basis==='orthographic-rule'&&alifSource.status===api.SOURCE_STATUS.VERIFIED_ORTHOGRAPHIC,'الألف الفارقة must use the distinct verified-orthographic source class');
+assert(alifSource.orthographicAuthority?.name==='Al Jazeera Learning Arabic'&&alifSource.orthographicAuthority?.url==='https://learning.aljazeera.net/ar/node/562','الألف الفارقة lacks its identified orthographic authority');
+assert(alifSource.attestation?.evidenceType==='form-only'&&alifSource.attestation?.source?.evidenceType==='form-only','Al-Tuḥfah spelling evidence must remain form-only attestation');
+const genericOrthographyConvention={basis:'orthographic-rule',status:api.SOURCE_STATUS.VERIFIED_ORTHOGRAPHIC,productionEnabled:true,orthographicAuthority:'Standard Arabic orthography'};
+assert(!api.isSourceRecordAuthorized(genericOrthographyConvention),'A generic orthography string was incorrectly authorized');
+const formOnlyTuhfah={basis:'nahw-rule',status:api.SOURCE_STATUS.VERIFIED_PRIMARY,productionEnabled:true,primarySource:{book:'Al-Tuḥfah',author:'known',edition:'scan',url:'https://example.invalid/scan.pdf',pdfPages:[81],evidenceType:'form-only'}};
+assert(!api.isSourceRecordAuthorized(formOnlyTuhfah),'Form-only Al-Tuḥfah evidence incorrectly authorized a production rule');
+assert(api.isSourceRecordAuthorized(alifSource),'The properly identified verified orthographic authority was rejected');
+assert(api.isSourceAuthorized('R_MUBTADA_RAF'),'A normal verified nahw rule was rejected');
 
 function structuredCase(templateId,translation,tokens){
   const data=api.completeNominalAnalysis({templateId,sentence:'',translation,tokens});
@@ -963,7 +975,7 @@ componentCases++;
 const sfpSubject=api.nounLexicons.sfp[0];
 const feminine=api.verbLexicons.femininePastActions[0];
 const femPast=structuredCase('TEST_PH0_FEM_PAST',`${sfpSubject.en} ${feminine.pastEn}.`,[
-  api.makeToken(feminine.past,feminine.pastEn,api.specs.past(feminine.past,{componentKinds:['taa-taniith-sakina']})),
+  api.makeToken(feminine.past,feminine.pastEn,api.specs.past(feminine.past)),
   api.makeToken(sfpSubject.nom,sfpSubject.en,api.specs.faail(sfpSubject.nom),'',true)
 ]);
 const pastVerb=femPast.tokens[0];
@@ -1010,7 +1022,58 @@ const restoredFiveVerb=legacyRestored.tokens.find(token=>token.inflection==='afa
 assert(restoredFiveVerb&&restoredFiveVerb.components.some(component=>component.kind==='waw-jamaaah'),'Legacy five-verb did not re-derive its wāw component');
 componentCases++;
 
-// (8) Validator invariants: illegal component states are impossible.
+// (8) Snapshot morphology is not self-authorizing. Injection, suppression, true-v1
+// migration, and corrupt stored records all rebuild from registered production structure.
+const masculinePastTemplate=api.templates.find(template=>template.starts==='verb'&&template.form==='singular'&&template.state==='raf');
+assert(masculinePastTemplate,'Masculine past template was not found');
+const masculineSnapshot=clone(api.createExerciseSnapshot(api.buildTemplate(masculinePastTemplate.id)));
+const masculineVerbSnapshot=masculineSnapshot.tokens.find(token=>token.grammar.type==='verb'&&token.tense==='past');
+masculineVerbSnapshot.grammar.componentKinds=['taa-taniith-sakina'];
+masculineVerbSnapshot.grammar.morphology={feminineTaa:true};
+masculineVerbSnapshot.components=[clone(taa)];
+const masculineRestored=api.restoreExerciseSnapshot(masculineSnapshot);
+assert(masculineRestored,'Masculine snapshot with injected feminine declarations did not fail safely');
+const masculineRestoredVerb=masculineRestored.tokens.find(token=>token.grammar.type==='verb'&&token.tense==='past');
+assert(masculineRestoredVerb.grammar.morphology.feminineTaa===false&&masculineRestoredVerb.components.length===0,'Injected feminine tāʾ metadata manufactured false grammar');
+componentCases++;
+
+const feminineSnapshot=clone(api.createExerciseSnapshot(api.buildTemplate(femPastTemplate.id)));
+const feminineVerbSnapshot=feminineSnapshot.tokens.find(token=>token.grammar.type==='verb'&&token.tense==='past');
+feminineVerbSnapshot.grammar.componentKinds=[];
+feminineVerbSnapshot.grammar.morphology={feminineTaa:false};
+feminineVerbSnapshot.components=[];
+const feminineRestored=api.restoreExerciseSnapshot(feminineSnapshot);
+assert(feminineRestored,'Feminine snapshot with suppressed declarations did not restore');
+const feminineRestoredVerb=feminineRestored.tokens.find(token=>token.grammar.type==='verb'&&token.tense==='past');
+assert(feminineRestoredVerb.grammar.morphology.feminineTaa===true&&feminineRestoredVerb.components.map(component=>component.kind).join(',')==='taa-taniith-sakina','Suppressed feminine tāʾ metadata hid authoritative morphology');
+componentCases++;
+
+const trueLegacyFeminine=clone(api.createExerciseSnapshot(api.buildTemplate(femPastTemplate.id)));
+trueLegacyFeminine.schemaVersion=1;
+trueLegacyFeminine.tokens.forEach(token=>{
+  delete token.components;
+  delete token.grammar.componentKinds;
+  delete token.grammar.morphology;
+});
+const trueLegacyRestored=api.restoreExerciseSnapshot(trueLegacyFeminine);
+assert(trueLegacyRestored,'True pre-Phase-0 feminine snapshot failed v1→v2 migration');
+const trueLegacyVerb=trueLegacyRestored.tokens.find(token=>token.grammar.type==='verb'&&token.tense==='past');
+assert(trueLegacyVerb.grammar.morphology.feminineTaa===true&&trueLegacyVerb.components[0]?.kind==='taa-taniith-sakina','True legacy feminine snapshot lost its tāʾ analysis');
+componentCases++;
+
+const corruptStoredSnapshot=clone(api.createExerciseSnapshot(api.buildTemplate(femPastTemplate.id)));
+const corruptStoredComponent=corruptStoredSnapshot.tokens.find(token=>token.components?.length).components[0];
+Object.assign(corruptStoredComponent,{id:'FOREIGN:C99',ar:'زُوِّرَ',en:'forged',letterAr:'غ',nameAr:'اسْمٌ مُزَوَّرٌ',nameEn:'forged name'});
+const repairedStored=api.restoreExerciseSnapshot(corruptStoredSnapshot);
+assert(repairedStored,'Snapshot with corrupt stored component records did not rebuild safely');
+const repairedComponent=repairedStored.tokens.find(token=>token.components?.length).components[0];
+assert(repairedComponent.id.endsWith(':C1')&&repairedComponent.ar!==corruptStoredComponent.ar&&repairedComponent.en!==corruptStoredComponent.en
+  &&repairedComponent.letterAr!==corruptStoredComponent.letterAr&&repairedComponent.nameAr!==corruptStoredComponent.nameAr&&repairedComponent.nameEn!==corruptStoredComponent.nameEn,
+  'Corrupt stored component identity/presentation reached restored learner-facing output');
+componentCases++;
+
+// (9) Validator invariants: structural identity, global uniqueness, canonical order,
+// registry-backed grammar, and canonical presentation are all enforced.
 const tamperRole=clone(fiveRaf);tamperRole.tokens[0].components[0].syntacticRole='none';
 assertFailureCode('wāw pronoun downgraded to role none',tamperRole,'E_COMPONENT_INVARIANT');componentCases++;
 const tamperTaa=clone(femPast);tamperTaa.tokens[0].components[0].syntacticRole='fail';tamperTaa.tokens[0].components[0].mahall='raf';
@@ -1021,6 +1084,19 @@ const tamperSet=clone(fiveRaf);tamperSet.tokens[0].components=[];
 assertFailureCode('five-verb stripped of its subject component',tamperSet,'E_COMPONENT_SET');componentCases++;
 const tamperAlif=clone(fiveNasb);tamperAlif.tokens[1].components[1].mahall='raf';
 assertFailureCode('alif fāriqah given a maḥall',tamperAlif,'E_COMPONENT_INVARIANT');componentCases++;
+
+const wrongOwnerId=clone(fiveRaf);wrongOwnerId.tokens[0].components[0].id='WRONG:T1:C1';
+assertFailureCode('component given wrong owner-formatted id',wrongOwnerId,'E_COMPONENT_ID');componentCases++;
+const duplicateIds=clone(fiveNasb);duplicateIds.tokens[1].components[1].id=duplicateIds.tokens[1].components[0].id;
+assertFailureCode('duplicate component ids',duplicateIds,'E_COMPONENT_ID_DUPLICATE');componentCases++;
+const copiedComponent=clone(fiveRaf);copiedComponent.tokens[0].components[0]=clone(fiveNasb.tokens[1].components[0]);
+assertFailureCode('component copied from another verb',copiedComponent,'E_COMPONENT_ID');componentCases++;
+const wrongOrder=clone(fiveNasb);wrongOrder.tokens[1].components.reverse();
+assertFailureCode('component order reversed',wrongOrder,'E_COMPONENT_SET');componentCases++;
+for(const [field,value] of [['ar','زُوِّرَ'],['en','forged English'],['nameAr','اسْمٌ مُزَوَّرٌ'],['nameEn','forged name'],['letterAr','غ']]){
+  const forged=clone(fiveRaf);forged.tokens[0].components[0][field]=value;
+  assertFailureCode(`forged component ${field}`,forged,'E_COMPONENT_PRESENTATION');componentCases++;
+}
 
 console.log(`Phase-0 internal-component audit passed: ${componentCases} checks; wāw al-jamāʿah + tāʾ al-taʾnīth retrofitted, schema/invariants/render-order/snapshot verified.`);
 

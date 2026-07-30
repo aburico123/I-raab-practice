@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -30,6 +30,14 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   COMPONENT_REGISTRY,
   PAST_MORPHOLOGY,
   PAST_BINAA_RULE_IDS,
+  PRESENT_MORPHOLOGY,
+  PRESENT_ENDING_COMPONENTS,
+  PRESENT_HIDDEN_SUBJECTS,
+  authoritativeVerbMorphology,
+  verbFormIndex,
+  nounFormIndex,
+  canonicalExerciseIdentityV3Phase1,
+  isPhase1V3IdentityCandidate,
   REVIEWED_SOURCE_AUTHORITIES,
   REVIEWED_SOURCE_EVIDENCE,
   SOURCE_STATUS,
@@ -46,7 +54,7 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   verbs,
   generalVerbActions,
   nounLexicons:{singularPeople,singularThings,places,brokenHuman,brokenThings,duals,smp,sfp,fiveNouns,singularPredicates,dualPredicates,masculinePluralPredicates,femininePluralPredicates,masculineThingPredicates,feminineThingPredicates,ownedNouns},
-  verbLexicons:{verbs,additionalVerbActions,humanActions,humanPrepActions,thingActions,thingPrepActions,femininePastActions,advancedPastActions,brokenObjectActions},
+  verbLexicons:{verbs,additionalVerbActions,humanActions,humanPrepActions,thingActions,thingPrepActions,femininePastActions,advancedPastActions,advancedPresentActions,brokenObjectActions},
   objectGroups,
   currentExercise:()=>current,
   sentenceHistory:()=>sentenceHistory,
@@ -524,10 +532,10 @@ expectThrow('delayed mubtada without fronted phrase',{templateId:'FAULT_DELAYED'
 
 const exact=api.completeNominalAnalysis({
   templateId:'TEST_EXACT_TAILOR',
-  sentence:'الْخَيَّاطُ يُكْرِمُ الطَّبِيبَاتِ',translation:'The tailor honors the female doctors.',
+  sentence:'الْخَيَّاطُ يَزُورُ الطَّبِيبَاتِ',translation:'The tailor visits the female doctors.',
   tokens:[
     api.makeToken('الْخَيَّاطُ','the tailor',api.specs.mubtada('الْخَيَّاطُ')),
-    api.makeToken('يُكْرِمُ','honors',api.specs.presentPred('يُكْرِمُ')),
+    api.makeToken('يَزُورُ','visits',api.specs.presentPred('يَزُورُ')),
     api.makeToken('الطَّبِيبَاتِ','the female doctors',api.specs.object('الطَّبِيبَاتِ'),'',true)
   ]
 });
@@ -535,7 +543,7 @@ assertNominalPair(exact,'exact tailor/doctors case');
 assert(!exact.tokens[1].phraseAr,'Exact case put the verbal-sentence khabar on the verb before its object');
 assert(exact.tokens[2].ar.startsWith('الطَّبِيبَاتِ: مَفْعُولٌ بِهِ مَنْصُوبٌ'),'Exact object lost its individual iʿrāb');
 assert(exact.tokens[2].phraseAr.includes('«الْخَيَّاطُ»'),'Exact combined analysis does not link huwa back to the tailor');
-assert(exact.tokens[2].phraseAr.includes('«يُكْرِمُ الطَّبِيبَاتِ»'),'Exact combined analysis omits the complete verbal sentence');
+assert(exact.tokens[2].phraseAr.includes('«يَزُورُ الطَّبِيبَاتِ»'),'Exact combined analysis omits the complete verbal sentence');
 
 api.render(exact);
 const exactVerbalCards=elements.answers.innerHTML.split('<article').slice(1);
@@ -591,7 +599,7 @@ assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===6,'The noun declen
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.regular).join(',')==='raf,nasb,jazm','Regular present moods are incomplete');
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.afalKhamsa).join(',')==='raf,nasb,jazm','Five-verb moods are incomplete');
 assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),'Unsupported diptotes are not recorded in the coverage matrix');
-assert(Object.keys(api.SOURCE_REGISTRY).length===60,`Expected 60 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===61,`Expected 61 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -616,7 +624,8 @@ assert(api.isSourceRecordAuthorized('C_ALIF_FARIQA',alifSource),'The properly id
 assert(api.isSourceAuthorized('R_MUBTADA_RAF'),'A normal verified nahw rule was rejected');
 for(const ruleId of [
   'R_PAST_FATH_VISIBLE','R_PAST_FATH_EST_MUNASABAH','R_PAST_FATH_EST_INCIDENTAL_SUKUN',
-  'C_TAA_FAIL_1S','C_TAA_FAIL_2MS','C_TAA_FAIL_2FS','C_NAA_FAILIN','C_ALIF_ITHNAIN','C_NUUN_NISWAH'
+  'C_TAA_FAIL_1S','C_TAA_FAIL_2MS','C_TAA_FAIL_2FS','C_NAA_FAILIN','C_ALIF_ITHNAIN','C_NUUN_NISWAH',
+  'C_YAA_MUKHATABA'
 ]){
   assert(api.isSourceAuthorized(ruleId),`Phase-1 source rule ${ruleId} is not authorized`);
 }
@@ -727,6 +736,9 @@ for(const [person,forms] of Object.entries(fiveVerbExpected)){
     const expected=forms[mood];
     assert(api.inflectFiveVerb(arrange,person,mood)===expected,`${person}/${mood}: expected ${expected}`);
     fiveVerbFormCases++;
+    // Non-3mp derived forms remain a harness-only legacy helper. Phase 2 production
+    // deliberately does not authorize those surfaces, especially outside rafʿ.
+    if(person!=='3mp')continue;
     const governor=moodGovernors[mood];
     const verbSpec={...api.specs.presentFive(arrange.pres),person};
     const tokens=[];
@@ -1547,6 +1559,489 @@ assertFailureCode('unregistered Phase-1 surface',forgedPastSurface,'E_PAST_SURFA
 
 console.log(`Phase-1 advanced-past audit passed: ${pastVerbCases} positive checks and ${pastAdversarialCases} adversarial checks.`);
 
+// ===================================================================================
+// PHASE 2 CORE — exact, surface-unambiguous present persons in rafʿ
+// ===================================================================================
+const PRESENT_EXPECTED=Object.freeze({
+ 'كَتَبَ':Object.freeze({'3ms':'يَكْتُبُ','1s':'أَكْتُبُ','1p':'نَكْتُبُ','3md':'يَكْتُبَانِ','3mp':'يَكْتُبُونَ','2mp':'تَكْتُبُونَ','2fs':'تَكْتُبِينَ'}),
+ 'فَتَحَ':Object.freeze({'3ms':'يَفْتَحُ','1s':'أَفْتَحُ','1p':'نَفْتَحُ','3md':'يَفْتَحَانِ','3mp':'يَفْتَحُونَ','2mp':'تَفْتَحُونَ','2fs':'تَفْتَحِينَ'}),
+ 'دَرَسَ':Object.freeze({'3ms':'يَدْرُسُ','1s':'أَدْرُسُ','1p':'نَدْرُسُ','3md':'يَدْرُسَانِ','3mp':'يَدْرُسُونَ','2mp':'تَدْرُسُونَ','2fs':'تَدْرُسِينَ'})
+});
+const PRESENT_PERSONS=['1s','1p','3ms','3md','3mp','2mp','2fs'];
+const PRESENT_MODES=Object.freeze({'1s':'implicit','1p':'implicit','3ms':'explicit','3md':'attached','3mp':'attached','2mp':'attached','2fs':'attached'});
+const PRESENT_COMPONENTS=Object.freeze({'3md':'alif-ithnain','3mp':'waw-jamaaah','2mp':'waw-jamaaah','2fs':'yaa-mukhataba'});
+const presentTemplates=Object.fromEntries(PRESENT_PERSONS.map(person=>[
+  person,api.templates.find(template=>template.presentPerson===person)
+]));
+for(const person of PRESENT_PERSONS){
+  const template=presentTemplates[person];
+  assert(template,`Phase-2 present template metadata is missing for ${person}`);
+  const morphology=api.PRESENT_MORPHOLOGY[person];
+  assert(template.presentCapabilities.length===1,`${person}: template does not have exactly one present capability`);
+  assert(JSON.stringify(template.presentCapabilities[0])===JSON.stringify({
+    person,subjectMode:PRESENT_MODES[person],formClass:morphology.formClass,endingClass:morphology.endingClass
+  }),`${person}: template present capability is not canonical`);
+}
+
+let presentVerbCases=0;
+let presentAdversarialCases=0;
+let presentHistoryCases=0;
+let presentPresentationRepairCases=0;
+let unsafeDerivedGuardCases=0;
+let legacyV3PositiveCases=0;
+let legacyV3AdversarialCases=0;
+let legacyV3RepersistenceCases=0;
+let phase2CoordinatedHistoryCases=0;
+let phase2DowngradeAttackCases=0;
+const presentProductionCases={};
+const surfaceToPerson=new Map();
+
+// Every one of the 21 approved forms must be a unique exact registry entry.
+for(const [lemma,forms] of Object.entries(PRESENT_EXPECTED)){
+  for(const [person,surface] of Object.entries(forms)){
+    assert(!surfaceToPerson.has(surface),`${surface}: advanced-present surface is ambiguous`);
+    surfaceToPerson.set(surface,person);
+    const registered=api.verbFormIndex.get(surface);
+    assert(registered?.form==='presentRaf'&&registered.surface===surface,`${lemma}/${person}: exact rafʿ surface is not registered`);
+    assert(registered.lexeme?.past===lemma&&registered.morphology?.presentPerson===person
+      &&registered.morphology?.exactPresentRaf===true,`${lemma}/${person}: exact surface is not bound to its authoritative lemma/person`);
+    assert(registered.lexeme.presentForms?.[person]===surface,`${lemma}/${person}: lexeme registry does not reproduce its exact stored surface`);
+    presentVerbCases++;
+  }
+}
+assert(surfaceToPerson.size===21,'The Phase-2 exact registry does not contain exactly 21 unique surfaces');
+
+// Exercise each approved lexeme through each enabled production person.
+for(const person of PRESENT_PERSONS){
+  const wanted=new Set(Object.values(PRESENT_EXPECTED).map(forms=>forms[person]));
+  const found=new Map();
+  for(let i=0;i<240&&found.size<wanted.size;i++){
+    const data=api.buildTemplate(presentTemplates[person].id);
+    const verb=data.tokens.find(token=>token.tense==='present');
+    if(wanted.has(verb.word))found.set(verb.word,data);
+  }
+  assert(found.size===3,`${person}: production did not reach all three approved exact surfaces`);
+  for(const [surface,data] of found){
+    const verb=data.tokens.find(token=>token.tense==='present');
+    const object=data.tokens.find(token=>token.grammar.role==='object');
+    const morphology=verb.grammar.morphology;
+    const expectedForm=PRESENT_COMPONENTS[person]?'afalKhamsa':'ordinary';
+    const expectedEnding=PRESENT_COMPONENTS[person]||'none';
+    assert(morphology.registered===true&&morphology.tense==='present'&&morphology.person===person
+      &&morphology.subjectMode===PRESENT_MODES[person]&&morphology.formClass===expectedForm
+      &&morphology.endingClass===expectedEnding,`${surface}: authoritative present morphology is wrong`);
+    assert(verb.state==='raf',`${surface}: advanced present form is not in rafʿ`);
+    assert(verb.sign.id===(expectedForm==='afalKhamsa'?'nunKept':'damma'),`${surface}: whole-word rafʿ sign is wrong`);
+    assert(verb.ruleId===(expectedForm==='afalKhamsa'?'R_AFAL5_RAF_NUN':'R_MUDARI_RAF_DAMMA'),`${surface}: whole-word source rule is wrong`);
+    assert(verb.ar.includes('فِعْلٌ مُضَارِعٌ مَرْفُوعٌ'),`${surface}: whole-word iʿrāb does not state present rafʿ`);
+    const rel=data.relationships.find(item=>item.type==='verbSubject'&&item.verbId===verb.id);
+    assert(rel?.subjectType===PRESENT_MODES[person],`${surface}: subject relationship mode is wrong`);
+    if(PRESENT_MODES[person]==='implicit'){
+      assert(rel.pronoun===api.PRESENT_HIDDEN_SUBJECTS[person],`${surface}: hidden subject does not match its person`);
+      assert(verb.why.ids.includes(person==='1s'?'WHY_SUBJECT_HIDDEN_ANA':'WHY_SUBJECT_HIDDEN_NAHNU'),`${surface}: person-aware hidden-subject Why is missing`);
+    }else if(PRESENT_MODES[person]==='explicit'){
+      assert(rel.subjectId&&data.tokens.some(token=>token.id===rel.subjectId&&token.grammar.role==='faail'),`${surface}: explicit 3ms fāʿil is missing`);
+      assert(verb.components.length===0,`${surface}: ordinary present prefix was incorrectly componentized`);
+    }else{
+      assert(verb.components.map(component=>component.kind).join('|')===PRESENT_COMPONENTS[person],`${surface}: attached component set is wrong`);
+      const component=verb.components[0];
+      assert(component.category==='pronoun'&&component.syntacticRole==='fail'&&component.mahall==='raf'
+        &&component.binaaSign==='sukun'&&api.isSourceAuthorized(component.ruleId),`${surface}: attached component grammar/source is wrong`);
+      assert(rel.pronoun===component.nameAr&&verb.why.ids.includes('WHY_SUBJECT_ATTACHED'),`${surface}: attached subject relationship/Why is wrong`);
+      assert(!verb.components.some(component=>component.kind==='alif-fariqa'),`${surface}: rafʿ form incorrectly materialized alif fāriqah`);
+    }
+    if(person!=='3ms'&&person!=='3mp')assert(object?.target===true,`${surface}: new person-bound template does not keep the object as focus`);
+    assert(verb.why.ids.includes('WHY_STATE_VERB_FREE')
+      &&verb.why.ids.includes(expectedForm==='afalKhamsa'?'WHY_SIGN_AFAL5_RAF':'WHY_SIGN_MUDARI_RAF'),`${surface}: canonical state/sign Why is missing`);
+    const snapshot=api.createExerciseSnapshot(data);
+    const restored=api.restoreExerciseSnapshot(clone(snapshot));
+    assert(snapshot?.schemaVersion===3&&snapshot.exerciseIdentity===api.canonicalExerciseIdentity(data),`${surface}: schema-v3 identity is missing or noncanonical`);
+    assert(restored&&restored.tokens.find(token=>token.tense==='present')?.grammar.morphology.person===person,`${surface}: legitimate History snapshot did not restore`);
+    assert(api.createExerciseSnapshot(restored)?.exerciseIdentity===snapshot.exerciseIdentity,`${surface}: restored identity is not stable`);
+    presentProductionCases[`${person}:${surface}`]=data;
+    presentHistoryCases++;
+    presentVerbCases++;
+  }
+}
+
+function phase2Case(person,lemma='كَتَبَ'){
+  return presentProductionCases[`${person}:${PRESENT_EXPECTED[lemma][person]}`];
+}
+function mutatePresentVerb(data,mutator){
+  const attack=clone(data);
+  const verb=attack.tokens.find(token=>token.tense==='present');
+  mutator(verb,attack);
+  return attack;
+}
+function assertPhase2Failure(name,data,...codes){
+  const actual=api.validateExercise(data).map(failure=>failure.code);
+  assert(codes.some(code=>actual.includes(code)),`${name}: expected one of ${codes.join(', ')}, received ${actual.join(', ')||'no failures'}`);
+  presentAdversarialCases++;
+}
+
+// Direct validator attacks: person/form/state/sign/component/source/subject authority.
+assertPhase2Failure('1s stored as 1p',mutatePresentVerb(phase2Case('1s'),verb=>{verb.grammar.person='1p'}),'E_PRESENT_PERSON');
+assertPhase2Failure('3md stored as 3mp',mutatePresentVerb(phase2Case('3md'),verb=>{verb.grammar.person='3mp'}),'E_PRESENT_PERSON');
+assertPhase2Failure('3mp stored as 2mp',mutatePresentVerb(phase2Case('3mp'),verb=>{verb.grammar.person='2mp'}),'E_PRESENT_PERSON');
+assertPhase2Failure('2mp stored as 2fs',mutatePresentVerb(phase2Case('2mp'),verb=>{verb.grammar.person='2fs'}),'E_PRESENT_PERSON');
+assertPhase2Failure('forged present morphology',mutatePresentVerb(phase2Case('1s'),verb=>{verb.grammar.morphology.subjectMode='attached'}),'E_VERB_MORPHOLOGY');
+assertPhase2Failure('forged present form class',mutatePresentVerb(phase2Case('1s'),verb=>{verb.grammar.morphology.formClass='afalKhamsa'}),'E_VERB_MORPHOLOGY');
+assertPhase2Failure('forged present ending class',mutatePresentVerb(phase2Case('3md'),verb=>{verb.grammar.morphology.endingClass='waw-jamaaah'}),'E_VERB_MORPHOLOGY');
+assertPhase2Failure('present assigned khafḍ',mutatePresentVerb(phase2Case('1s'),verb=>{verb.state='jarr'}),'E_PRESENT_KHAFD');
+assertPhase2Failure('ordinary rafʿ assigned nunKept',mutatePresentVerb(phase2Case('1s'),verb=>{verb.sign={id:'nunKept'}}),'E_VERB_SIGN','E_PRESENT_ORDINARY_NUN');
+assertPhase2Failure('five-verb rafʿ assigned nunDropped',mutatePresentVerb(phase2Case('3mp'),verb=>{verb.sign={id:'nunDropped'}}),'E_VERB_SIGN','E_AFAL5_RAF_SIGN');
+assertPhase2Failure('wrong present source rule',mutatePresentVerb(phase2Case('1s'),verb=>{verb.ruleId='R_MUDARI_NASB_FATHA'}),'E_VERB_RULE');
+assertPhase2Failure('unregistered present surface',mutatePresentVerb(phase2Case('1s'),(verb,data)=>{
+  verb.word=verb.surfaceHint=verb.expectedSurface='يُكْرِمُ';data.sentence=data.tokens.map(token=>token.word).join(' ');
+}),'E_PRESENT_SURFACE');
+assertPhase2Failure('rafʿ five verb without retained nūn',mutatePresentVerb(phase2Case('3md'),(verb,data)=>{
+  verb.word=verb.surfaceHint=verb.expectedSurface='يَكْتُبَا';data.sentence=data.tokens.map(token=>token.word).join(' ');
+}),'E_AFAL5_RAF_NUN');
+assertPhase2Failure('3md missing alif component',mutatePresentVerb(phase2Case('3md'),verb=>{verb.components=[]}),'E_COMPONENT_SET');
+assertPhase2Failure('3md given wāw component',mutatePresentVerb(phase2Case('3md'),verb=>{verb.components=[clone(phase2Case('3mp').tokens[0].components[0])]}),'E_COMPONENT_SET');
+assertPhase2Failure('2fs given wāw component',mutatePresentVerb(phase2Case('2fs'),verb=>{verb.components=[clone(phase2Case('2mp').tokens[0].components[0])]}),'E_COMPONENT_SET');
+assertPhase2Failure('2mp missing wāw component',mutatePresentVerb(phase2Case('2mp'),verb=>{verb.components=[]}),'E_COMPONENT_SET');
+assertPhase2Failure('rafʿ wāw given alif fāriqah',mutatePresentVerb(phase2Case('3mp'),verb=>{verb.components.push(clone(phase1Cases['3mp'].tokens[0].components[1]))}),'E_COMPONENT_SET');
+assertPhase2Failure('component wrong owner',mutatePresentVerb(phase2Case('2fs'),verb=>{verb.components[0].id='OTHER:T1:C1'}),'E_COMPONENT_ID');
+assertPhase2Failure('component wrong rule',mutatePresentVerb(phase2Case('2fs'),verb=>{verb.components[0].ruleId='C_WAW_JAMAAH_FAIL'}),'E_COMPONENT_INVARIANT');
+assertPhase2Failure('component wrong bināʾ',mutatePresentVerb(phase2Case('2fs'),verb=>{verb.components[0].binaaSign='fatha'}),'E_COMPONENT_INVARIANT');
+assertPhase2Failure('forged present Why',mutatePresentVerb(phase2Case('1p'),verb=>{verb.why.ids[2]='FORGED_WHY'}),'E_WHY_CANONICAL');
+assertPhase2Failure('1s wrong hidden subject',mutatePresentVerb(phase2Case('1s'),(verb,data)=>{
+  const rel=data.relationships.find(item=>item.type==='verbSubject'&&item.verbId===verb.id);rel.pronoun='هُوَ';verb.relations.subjectPronoun='هُوَ';
+}),'E_PRESENT_IMPLICIT_SUBJECT');
+assertPhase2Failure('attached present with competing explicit fāʿil',mutatePresentVerb(phase2Case('2mp'),(verb,data)=>{
+  const faail=clone(phase2Case('3ms').tokens.find(token=>token.grammar.role==='faail'));
+  faail.id=`${data.templateId}:T99`;faail.relations={};data.tokens.push(faail);data.sentence=data.tokens.map(token=>token.word).join(' ');
+}),'E_PRESENT_COMPETING_SUBJECT');
+
+let unsafeThrew=false;
+try{api.inflectFiveVerb(arrange,'3md','raf',false)}catch{unsafeThrew=true}
+assert(unsafeThrew,'Production-safe five-verb resolution allowed the derived string-surgery fallback');
+unsafeDerivedGuardCases++;
+
+// History attacks for every enabled person. Structural identity mutations reject;
+// presentation/component/Why caches are repaired from canonical authority.
+for(const person of PRESENT_PERSONS){
+  const base=phase2Case(person);
+  const snapshot=api.createExerciseSnapshot(base);
+  const verbIndex=snapshot.tokens.findIndex(token=>token.tense==='present');
+  const objectIndex=snapshot.tokens.findIndex(token=>token.grammar.role==='object');
+  const otherPerson=PRESENT_PERSONS.find(candidate=>candidate!==person);
+  const otherTemplate=presentTemplates[otherPerson];
+  const attacks=[
+    ['person',s=>{s.tokens[verbIndex].grammar.person=otherPerson}],
+    ['subjectMode',s=>{s.tokens[verbIndex].grammar.morphology.subjectMode='forged'}],
+    ['formClass',s=>{s.tokens[verbIndex].grammar.morphology.formClass='forged'}],
+    ['endingClass',s=>{s.tokens[verbIndex].grammar.morphology.endingClass='forged'}],
+    ['state',s=>{s.tokens[verbIndex].state='nasb'}],
+    ['sign',s=>{s.tokens[verbIndex].sign={id:'forged'}}],
+    ['exerciseIdentity',s=>{s.exerciseIdentity+='FORGED'}],
+    ['template',s=>{s.templateId=otherTemplate.stableId;s.templateStarts=otherTemplate.starts;s.templateForm=otherTemplate.form;s.templateState=otherTemplate.state;s.templateSign=otherTemplate.sign}],
+    ['cross-person surface',s=>{
+      const surface=PRESENT_EXPECTED['كَتَبَ'][otherPerson];
+      s.tokens[verbIndex].word=s.tokens[verbIndex].surfaceHint=s.tokens[verbIndex].expectedSurface=surface;
+      s.sentence=s.tokens.map(token=>token.word).join(' ');
+    }],
+    ['same-person lexeme',s=>{
+      const current=s.tokens[verbIndex].word;
+      const surface=Object.values(PRESENT_EXPECTED).map(forms=>forms[person]).find(item=>item!==current);
+      s.tokens[verbIndex].word=s.tokens[verbIndex].surfaceHint=s.tokens[verbIndex].expectedSurface=surface;
+      s.sentence=s.tokens.map(token=>token.word).join(' ');
+    }],
+    ['object swap',s=>{
+      const replacement=s.tokens[objectIndex].word==='الْكِتَابَ'?'الدَّرْسَ':'الْكِتَابَ';
+      s.tokens[objectIndex].word=s.tokens[objectIndex].surfaceHint=s.tokens[objectIndex].expectedSurface=replacement;
+      s.sentence=s.tokens.map(token=>token.word).join(' ');
+    }]
+  ];
+  for(const [name,mutate] of attacks){
+    const attack=clone(snapshot);mutate(attack);
+    assert(api.restoreExerciseSnapshot(attack)===null,`${person} History ${name} attack was accepted`);
+    presentAdversarialCases++;
+    presentHistoryCases++;
+  }
+  const stale=clone(snapshot);
+  stale.translation='FORGED PERSON PRESENTATION.';
+  stale.tokens[verbIndex].gloss='forged person gloss';
+  stale.tokens[verbIndex].why.ids[0]='FORGED_WHY';
+  if(stale.tokens[verbIndex].components?.length)stale.tokens[verbIndex].components[0].nameAr='مُزَوَّرٌ';
+  const repaired=api.restoreExerciseSnapshot(stale);
+  assert(repaired&&repaired.translation===base.translation
+    &&repaired.tokens.find(token=>token.tense==='present').gloss!=='forged person gloss'
+    &&repaired.tokens.find(token=>token.tense==='present').why.ids[0]!=='FORGED_WHY'
+    &&!(repaired.tokens.find(token=>token.tense==='present').components||[]).some(component=>component.nameAr==='مُزَوَّرٌ'),
+    `${person}: stale/forged History presentation caches were not canonically rebuilt`);
+  presentPresentationRepairCases++;
+  presentHistoryCases++;
+}
+
+// Reproduce the exact public identity emitted by the approved Phase-1 checkpoint.
+// This test-local copy is intentionally independent of both production identity
+// functions so a regression in production cannot manufacture its own fixture.
+function checkpointPhase1VerbIdentityRecord(word){
+  const record=api.verbFormIndex.get(word);
+  if(record?.form!=='presentRaf')return record;
+  if(word===record.lexeme?.pres)return{...record,form:'pres'};
+  if(word===record.lexeme?.five)return{...record,form:'five'};
+  return null;
+}
+function checkpointPhase1V3Identity(data){
+  const tokens=data.tokens.map(token=>{
+    const verbRecord=token.grammar?.type==='verb'?checkpointPhase1VerbIdentityRecord(token.word):null;
+    const nounRecord=token.grammar?.type==='noun'?api.nounFormIndex.get(token.word):null;
+    const morphology=token.tense==='past'?token.grammar?.morphology:null;
+    return[
+      token.id,
+      token.word,
+      token.target===true,
+      token.grammar?.type||'',
+      token.grammar?.role||'',
+      token.grammar?.person||'',
+      token.grammar?.conjugation||'',
+      token.grammar?.particleType||'',
+      token.grammar?.particleWord||'',
+      token.grammar?.governorWord||'',
+      token.grammar?.isMudaf===true,
+      token.grammar?.attachedKaf===true,
+      token.grammar?.delayed===true,
+      token.tense||'',
+      token.inflection||'',
+      token.state||'',
+      token.sign?.id||'',
+      verbRecord?.form||'',
+      verbRecord?.surface||'',
+      verbRecord?.lexeme?.past||'',
+      verbRecord?.lexeme?.pres||'',
+      nounRecord?.lexeme?.nom||'',
+      nounRecord?.lexeme?.acc||'',
+      nounRecord?.lexeme?.gen||'',
+      morphology?.person||'',
+      morphology?.subjectMode||'',
+      morphology?.endingClass||'',
+      morphology?.binaaClass||''
+    ];
+  });
+  return'nahw-exercise-v1:'+JSON.stringify([
+    data.templateId,
+    data.templateStarts,
+    data.templateForm,
+    data.templateState,
+    data.templateSign,
+    tokens
+  ]);
+}
+function checkpointPhase1V3Fixture(currentSnapshot){
+  const fixture=clone(currentSnapshot);
+  for(const token of fixture.tokens){
+    if(token?.grammar?.type!=='verb'||token.tense!=='present')continue;
+    token.grammar.morphology={feminineTaa:false};
+    const historicalLexeme=api.verbs.find(lexeme=>lexeme.past===token.lexeme?.past);
+    assert(historicalLexeme,`${token.word}: historical present lexeme could not be reconstructed`);
+    token.lexeme=clone(historicalLexeme);
+  }
+  fixture.exerciseIdentity=checkpointPhase1V3Identity(fixture);
+  assert(fixture.exerciseIdentity===api.canonicalExerciseIdentityV3Phase1(fixture),
+    `${fixture.templateId}: production and independent Phase-1 identity canonicalizers disagree`);
+  assert(fixture.exerciseIdentity!==api.canonicalExerciseIdentity(fixture),
+    `${fixture.templateId}: historical and current v3 identities unexpectedly match`);
+  assert(api.isPhase1V3IdentityCandidate(fixture,api.templates.find(template=>template.stableId===fixture.templateId)),
+    `${fixture.templateId}: genuine historical fixture was not classified as a Phase-1 candidate`);
+  return fixture;
+}
+function findPureNominalSnapshot(){
+  for(const template of api.templates.filter(candidate=>candidate.starts==='noun')){
+    const data=api.buildTemplate(template.id);
+    if(!data.tokens.some(token=>token.grammar.type==='verb'))return api.createExerciseSnapshot(data);
+  }
+  return null;
+}
+
+const nominalLegacySource=findPureNominalSnapshot();
+assert(nominalLegacySource,'Could not construct a pure nominal schema-v3 checkpoint fixture');
+const legacyV3Fixtures=Object.freeze({
+  attachedPast:checkpointPhase1V3Fixture(identitySource),
+  nominal:checkpointPhase1V3Fixture(nominalLegacySource),
+  ordinaryPresent:checkpointPhase1V3Fixture(api.createExerciseSnapshot(phase2Case('3ms','كَتَبَ'))),
+  fiveVerb:checkpointPhase1V3Fixture(api.createExerciseSnapshot(phase2Case('3mp','كَتَبَ')))
+});
+
+// Positive restoration, canonical cache repair, migration-on-repersist, and a
+// stable second restore for each real checkpoint-shaped fixture.
+const restoredLegacyFixtures={};
+for(const [name,fixture] of Object.entries(legacyV3Fixtures)){
+  const canonical=api.restoreExerciseSnapshot(clone(fixture));
+  assert(canonical,`${name}: exact Phase-1 schema-v3 fixture did not restore`);
+  assert(api.validateExercise(canonical).length===0,`${name}: restored legacy fixture is not valid under current rules`);
+
+  const stale=clone(fixture);
+  stale.relationships=[{type:'forged-cache'}];
+  for(const token of stale.tokens){
+    token.ar='مُزَوَّرٌ';
+    token.en='forged analysis';
+    token.relations={forged:true};
+    token.why={ids:['FORGED_WHY'],ar:['مُزَوَّرٌ'],en:['forged Why']};
+    if(token.grammar.type==='verb')token.components=[{id:`${token.id}:FORGED`,kind:'forged'}];
+  }
+  if(name!=='nominal'){
+    stale.translation='FORGED TRANSLATION.';
+    stale.tokens[0].gloss='forged gloss';
+  }
+  const repaired=api.restoreExerciseSnapshot(stale);
+  assert(repaired,`${name}: presentation/cache-only corruption was not canonically repairable`);
+  assert(JSON.stringify(repaired.relationships)===JSON.stringify(canonical.relationships),
+    `${name}: relationships were not rebuilt canonically`);
+  repaired.tokens.forEach((token,index)=>{
+    const expected=canonical.tokens[index];
+    assert(token.ar===expected.ar&&token.en===expected.en,`${name}/${index}: token presentation retained forged cache data`);
+    assert(JSON.stringify(token.relations)===JSON.stringify(expected.relations),`${name}/${index}: token relationships retained forged cache data`);
+    assert(JSON.stringify(token.why)===JSON.stringify(expected.why),`${name}/${index}: token Why retained forged cache data`);
+    assert(JSON.stringify(token.components||[])===JSON.stringify(expected.components||[]),`${name}/${index}: token components retained forged cache data`);
+  });
+  if(name!=='nominal')assert(repaired.translation===canonical.translation&&repaired.tokens[0].gloss===canonical.tokens[0].gloss,
+    `${name}: supported History presentation was not rebuilt canonically`);
+
+  const current=api.createExerciseSnapshot(repaired);
+  assert(current?.schemaVersion===3,`${name}: repersisted legacy fixture did not remain schema version 3`);
+  assert(current.exerciseIdentity===api.canonicalExerciseIdentity(repaired),
+    `${name}: repersisted fixture did not receive the current-v3 identity`);
+  assert(current.exerciseIdentity!==fixture.exerciseIdentity,
+    `${name}: repersisted fixture retained its historical identity`);
+  const second=api.restoreExerciseSnapshot(clone(current));
+  assert(second&&api.createExerciseSnapshot(second)?.exerciseIdentity===current.exerciseIdentity,
+    `${name}: current-v3 second restore was not stable`);
+  restoredLegacyFixtures[name]=canonical;
+  legacyV3PositiveCases++;
+  legacyV3RepersistenceCases++;
+}
+
+function assertLegacyIdentityReject(name,fixture,mutate){
+  const attack=clone(fixture);
+  mutate(attack);
+  assert(api.restoreExerciseSnapshot(attack)===null,`${name}: legacy-v3 identity mutation was accepted`);
+  legacyV3AdversarialCases++;
+}
+const alternateNounSurface=[...api.nounFormIndex.keys()].find(word=>
+  !legacyV3Fixtures.nominal.tokens.some(token=>token.word===word));
+assert(alternateNounSurface,'Could not find an alternate registered noun for legacy attacks');
+
+// Every fixture rejects unknown templates, surface changes, and state/sign
+// changes while retaining its original historical identity.
+for(const [name,fixture] of Object.entries(legacyV3Fixtures)){
+  assertLegacyIdentityReject(`${name} unknown template`,fixture,attack=>{attack.templateId='T_FORGED_UNKNOWN_01'});
+  assertLegacyIdentityReject(`${name} surface`,fixture,attack=>{
+    const index=attack.tokens.findIndex(token=>token.grammar.type==='verb'||token.grammar.type==='noun');
+    const token=attack.tokens[index];
+    if(token.tense==='past'){
+      token.word=token.surfaceHint=token.expectedSurface=writeAdvanced.forms['2ms'];
+    }else if(token.tense==='present'){
+      const person=token.grammar.person==='3ms'?'3mp':'3ms';
+      token.word=token.surfaceHint=token.expectedSurface=PRESENT_EXPECTED['كَتَبَ'][person];
+    }else{
+      token.word=token.surfaceHint=token.expectedSurface=alternateNounSurface;
+    }
+    attack.sentence=attack.tokens.map(item=>item.word).join(' ');
+  });
+  assertLegacyIdentityReject(`${name} state`,fixture,attack=>{
+    const token=attack.tokens.find(item=>item.grammar.type==='verb'||item.grammar.type==='noun');
+    token.state=token.state==='raf'?'nasb':'raf';
+  });
+  assertLegacyIdentityReject(`${name} sign`,fixture,attack=>{
+    const token=attack.tokens.find(item=>item.grammar.type==='verb'||item.grammar.type==='noun');
+    token.sign={id:token.sign?.id==='damma'?'fatha':'damma'};
+  });
+}
+
+// Required coordinated identity attacks: all stored canonical layers move to a
+// different valid exercise, but the original historical identity stays behind.
+const legacy2ms=checkpointPhase1V3Fixture(phase1ProductionSnapshots['2ms']);
+const pastPersonRewrite=clone(legacy2ms);
+pastPersonRewrite.exerciseIdentity=legacyV3Fixtures.attachedPast.exerciseIdentity;
+assert(api.restoreExerciseSnapshot(pastPersonRewrite)===null,
+  'Phase-1 legacy 1s identity accepted a coordinated rewrite to 2ms');
+legacyV3AdversarialCases++;
+
+const presentPersonRewrite=clone(legacyV3Fixtures.fiveVerb);
+presentPersonRewrite.exerciseIdentity=legacyV3Fixtures.ordinaryPresent.exerciseIdentity;
+assert(api.restoreExerciseSnapshot(presentPersonRewrite)===null,
+  'Legacy ordinary 3ms identity accepted a coordinated rewrite to 3mp');
+legacyV3AdversarialCases++;
+
+assertLegacyIdentityReject('legacy five-verb raf to dropped-nun structure',legacyV3Fixtures.fiveVerb,attack=>{
+  const verb=attack.tokens.find(token=>token.tense==='present');
+  verb.word=verb.surfaceHint=verb.expectedSurface=verb.lexeme.fiveSub;
+  verb.state='nasb';
+  verb.sign={id:'nunDropped'};
+  attack.sentence=attack.tokens.map(token=>token.word).join(' ');
+});
+
+const alternateNominalSource=findPureNominalSnapshot();
+assert(alternateNominalSource,'Could not construct an alternate nominal checkpoint fixture');
+const nominalReplacement=checkpointPhase1V3Fixture(alternateNominalSource);
+nominalReplacement.exerciseIdentity=legacyV3Fixtures.nominal.exerciseIdentity;
+if(checkpointPhase1V3Identity(nominalReplacement)===legacyV3Fixtures.nominal.exerciseIdentity){
+  const noun=nominalReplacement.tokens.find(token=>token.grammar.type==='noun');
+  noun.word=noun.surfaceHint=noun.expectedSurface=alternateNounSurface;
+  nominalReplacement.sentence=nominalReplacement.tokens.map(token=>token.word).join(' ');
+}
+assert(api.restoreExerciseSnapshot(nominalReplacement)===null,
+  'Legacy nominal identity accepted a coordinated noun replacement');
+legacyV3AdversarialCases++;
+
+const legacyDifferentLexeme=checkpointPhase1V3Fixture(differentLexeme);
+legacyDifferentLexeme.exerciseIdentity=legacyV3Fixtures.attachedPast.exerciseIdentity;
+assert(api.restoreExerciseSnapshot(legacyDifferentLexeme)===null,
+  'Legacy past identity accepted a same-person different-lexeme rewrite');
+legacyV3AdversarialCases++;
+const legacyDifferentObject=checkpointPhase1V3Fixture(differentObject);
+legacyDifferentObject.exerciseIdentity=legacyV3Fixtures.attachedPast.exerciseIdentity;
+assert(api.restoreExerciseSnapshot(legacyDifferentObject)===null,
+  'Legacy past identity accepted a different-object rewrite');
+legacyV3AdversarialCases++;
+
+// The complete 7×6 coordinated current-v3 person matrix remains strict.
+const currentPresentSnapshots=Object.fromEntries(PRESENT_PERSONS.map(person=>[
+  person,api.createExerciseSnapshot(phase2Case(person,'كَتَبَ'))
+]));
+for(const sourcePerson of PRESENT_PERSONS){
+  for(const targetPerson of PRESENT_PERSONS.filter(person=>person!==sourcePerson)){
+    const attack=clone(currentPresentSnapshots[targetPerson]);
+    attack.exerciseIdentity=currentPresentSnapshots[sourcePerson].exerciseIdentity;
+    assert(api.restoreExerciseSnapshot(attack)===null,
+      `Current Phase-2 ${sourcePerson} identity accepted a coordinated rewrite to ${targetPerson}`);
+    phase2CoordinatedHistoryCases++;
+    presentAdversarialCases++;
+    presentHistoryCases++;
+  }
+}
+assert(phase2CoordinatedHistoryCases===42,'The coordinated Phase-2 7×6 History matrix was not completed');
+
+// A current Phase-2 snapshot carrying its current morphology and lexeme caches
+// cannot opt into the historical path merely by receiving a computed old-format ID.
+for(const person of PRESENT_PERSONS){
+  const attack=clone(currentPresentSnapshots[person]);
+  const verb=attack.tokens.find(token=>token.tense==='present');
+  attack.exerciseIdentity=checkpointPhase1V3Identity(attack);
+  verb.grammar.morphology.formClass='forged-downgrade';
+  assert(api.restoreExerciseSnapshot(attack)===null,
+    `${person}: corrupted current-v3 snapshot downgraded into the Phase-1 identity path`);
+  phase2DowngradeAttackCases++;
+  presentAdversarialCases++;
+  presentHistoryCases++;
+}
+
+// Phase-2 boundary: no ambiguous تـ person, present nūn al-niswah, or nūn al-tawkīd
+// may appear in exact production registration.
+for(const deferred of ['تَكْتُبُ','تَفْتَحُ','تَدْرُسُ','تَكْتُبَانِ','تَفْتَحَانِ','تَدْرُسَانِ',
+  'يَكْتُبْنَ','تَكْتُبْنَ','يَكْتُبَنَّ','يَكْتُبَنْ']){
+  assert(!api.verbFormIndex.has(deferred),`Deferred present surface entered authority: ${deferred}`);
+}
+assert(api.COMPONENT_REGISTRY['yaa-mukhataba']?.ruleId==='C_YAA_MUKHATABA'
+  &&api.SOURCE_REGISTRY.C_YAA_MUKHATABA.primarySource.pdfPages.includes(38),
+  'Canonical yāʾ al-mukhāṭabah component/source evidence is missing');
+
+console.log(`Phase-2 present-raf audit passed: ${presentVerbCases} positive checks, ${presentAdversarialCases} adversarial checks, ${presentHistoryCases} History checks, and ${presentPresentationRepairCases} presentation repairs.`);
+console.log(`Legacy Phase-1 schema-v3 audit passed: ${legacyV3PositiveCases} positive restores, ${legacyV3AdversarialCases} identity attacks, ${legacyV3RepersistenceCases} current-v3 repersistence checks, ${phase2CoordinatedHistoryCases} current coordinated attacks, and ${phase2DowngradeAttackCases} downgrade attacks.`);
+
 function runEveryTemplate(repetitions){
   for(const template of api.templates){
     for(let iteration=0;iteration<repetitions;iteration++){
@@ -2043,7 +2538,7 @@ for(const start of optionValues.startFilter){
 
 // --- Test C: every production template has exactly one target whose real form/state/sign
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
-assert(api.templates.length===63,`Expected 63 production templates, found ${api.templates.length}`);
+assert(api.templates.length===68,`Expected 68 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -2185,7 +2680,7 @@ assert(api.grammarDiagnostics.rejected===rejectedBeforeState,
   `State-filtered generation produced ${api.grammarDiagnostics.rejected-rejectedBeforeState} validation rejections`);
 // Restore an unrestricted selection for the remaining audit.
 setFilters('any','any','any','any');elements.signFilter.dispatch('change');
-console.log(`Iʿrāb-state-filter audit passed: 63 templates, ${validMatrix.length} valid matrix cells, ${validTuples.length} valid filter tuples, ${stateFilterCases} checks.`);
+console.log(`Iʿrāb-state-filter audit passed: 68 templates, ${validMatrix.length} valid matrix cells, ${validTuples.length} valid filter tuples, ${stateFilterCases} checks.`);
 
 // ===================================================================================
 // Language-mode audit (presentation only — must NOT touch grammar/generation state).
@@ -2748,7 +3243,9 @@ const finalResults={
   ...stats,nounEntries,totalVerbFamilies,stressPasses,
   fiveVerbFormCases,fiveVerbExerciseCases,regularVerbMoodCases,nounDeclensionCases,
   deterministicStructureCases:deterministicStructures.length,validatorFaultCases,sourceAuthorizationAttackCases,
-  pastVerbCases,pastAdversarialCases,coordinatedHistoryAttackCases,samePersonIdentityAttackCases,presentationRepairCases,semanticCompatibilityCases,
+  pastVerbCases,pastAdversarialCases,presentVerbCases,presentAdversarialCases,presentHistoryCases,presentPresentationRepairCases,unsafeDerivedGuardCases,
+  legacyV3PositiveCases,legacyV3AdversarialCases,legacyV3RepersistenceCases,phase2CoordinatedHistoryCases,phase2DowngradeAttackCases,
+  coordinatedHistoryAttackCases,samePersonIdentityAttackCases,presentationRepairCases,semanticCompatibilityCases,
   randomGenerations:randomSentences.length,uniqueRandomSentences,consecutiveRepeats,
   runtimeRejectedCandidates,runtimeRejectionReasons,
   distinctOpeningWords:openingWords.size,distinctOpeningParticles:openingParticles.size,

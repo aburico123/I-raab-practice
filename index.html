@@ -549,6 +549,67 @@ function canonicalExerciseIdentity(data){
  const tokens=data.tokens.map(token=>{
   const verbRecord=token.grammar?.type==='verb'?verbFormIndex.get(token.word):null;
   const nounRecord=token.grammar?.type==='noun'?nounFormIndex.get(token.word):null;
+  const morphology=token.tense==='past'||token.tense==='present'?token.grammar?.morphology:null;
+  return[
+   token.id,
+   token.word,
+   token.target===true,
+   token.grammar?.type||'',
+   token.grammar?.role||'',
+   token.grammar?.person||'',
+   token.grammar?.conjugation||'',
+   token.grammar?.particleType||'',
+   token.grammar?.particleWord||'',
+   token.grammar?.governorWord||'',
+   token.grammar?.isMudaf===true,
+   token.grammar?.attachedKaf===true,
+   token.grammar?.delayed===true,
+   token.tense||'',
+   token.inflection||'',
+   token.state||'',
+   token.sign?.id||'',
+   verbRecord?.form||'',
+   verbRecord?.surface||'',
+   verbRecord?.lexeme?.past||'',
+   verbRecord?.lexeme?.pres||'',
+   nounRecord?.lexeme?.nom||'',
+   nounRecord?.lexeme?.acc||'',
+   nounRecord?.lexeme?.gen||'',
+   morphology?.person||'',
+   morphology?.subjectMode||'',
+   morphology?.formClass||'',
+   morphology?.endingClass||'',
+   morphology?.binaaClass||''
+  ];
+ });
+ return EXERCISE_IDENTITY_PREFIX+JSON.stringify([
+  data.templateId,
+  data.templateStarts,
+  data.templateForm,
+  data.templateState,
+  data.templateSign,
+  tokens
+ ]);
+}
+/* Exact identity format emitted by the approved Phase-1 schema-v3 checkpoint
+   (07a738b75f023777e051309db36be39f00a0d482). That checkpoint:
+   - consulted morphology only for past verbs;
+   - serialized no present formClass slot; and
+   - knew the overlapping 3ms/3mp surfaces as pres/five, before Phase 2
+     re-registered them as exact presentRaf records.
+   This canonicalizer is compatibility-only; current snapshots always use
+   canonicalExerciseIdentity(). */
+function phase1V3VerbIdentityRecord(word){
+ const record=verbFormIndex.get(word);
+ if(record?.form!=='presentRaf')return record;
+ if(word===record.lexeme?.pres)return{...record,form:'pres'};
+ if(word===record.lexeme?.five)return{...record,form:'five'};
+ return null;
+}
+function canonicalExerciseIdentityV3Phase1(data){
+ const tokens=data.tokens.map(token=>{
+  const verbRecord=token.grammar?.type==='verb'?phase1V3VerbIdentityRecord(token.word):null;
+  const nounRecord=token.grammar?.type==='noun'?nounFormIndex.get(token.word):null;
   const morphology=token.tense==='past'?token.grammar?.morphology:null;
   return[
    token.id,
@@ -589,6 +650,37 @@ function canonicalExerciseIdentity(data){
   data.templateSign,
   tokens
  ]);
+}
+function isPhase1V3IdentityCandidate(data,template){
+ // The five genuinely new Phase-2 templates never existed at the Phase-1
+ // checkpoint and therefore cannot enter the compatibility path.
+ if(template?.presentPerson&&!['3ms','3mp'].includes(template.presentPerson))return false;
+ return data.tokens.every(token=>{
+  if(token?.grammar?.type!=='verb'||token.tense!=='present')return true;
+  // A genuine Phase-1 present snapshot carried only the old non-past
+  // morphology cache and the pre-Phase-2 lexeme shape. Current Phase-2
+  // morphology/lexeme caches cannot be downgraded merely by replacing their
+  // exerciseIdentity with a historical-format string.
+  const morphology=token.grammar?.morphology;
+  return Boolean(phase1V3VerbIdentityRecord(token.word)
+   &&morphology?.feminineTaa===false
+   &&Object.keys(morphology).length===1
+   &&token.lexeme
+   &&!Object.prototype.hasOwnProperty.call(token.lexeme,'presentForms'));
+  });
+}
+function canonicalHistoryIdentityInput(data){
+ // Past morphology was already a derived, repairable cache when schema v3 was
+ // introduced. Normalize only that cache before comparing either v3 identity.
+ // Current Phase-2 present morphology and grammar.person remain identity-bound.
+ const normalized=cloneSerializable(data);
+ normalized.tokens.forEach(token=>{
+  if(token?.grammar?.type!=='verb'||token.tense!=='past')return;
+  delete token.grammar.componentKinds;
+  token.grammar.morphology=authoritativeVerbMorphology(token,normalized);
+  if(token.grammar.morphology.registered)token.grammar.person=token.grammar.morphology.person;
+ });
+ return normalized;
 }
 function isExerciseSnapshot(snapshot){
  if(!snapshot||!SENTENCE_HISTORY_SUPPORTED_VERSIONS.includes(snapshot.schemaVersion))return false;
@@ -650,24 +742,54 @@ function templateAuthorizesPastMorphology(template,morphology){
  return Boolean(template?.pastCapabilities?.some(capability=>
   capability.person===morphology?.person&&capability.subjectMode===morphology?.subjectMode));
 }
+function templateAuthorizesPresentMorphology(template,morphology){
+ return Boolean(template?.presentCapabilities?.some(capability=>
+  capability.person===morphology?.person
+  &&capability.subjectMode===morphology?.subjectMode
+  &&capability.formClass===morphology?.formClass
+  &&capability.endingClass===morphology?.endingClass));
+}
 function rebuildCanonicalHistoryPresentation(data,template){
- if(!template?.pastPerson)return;
- const verb=data.tokens.find(token=>token?.grammar?.type==='verb'&&token.tense==='past');
+ if(template?.pastPerson){
+  const verb=data.tokens.find(token=>token?.grammar?.type==='verb'&&token.tense==='past');
+  const object=data.tokens.find(token=>token?.grammar?.role==='object');
+  const registered=verbFormIndex.get(verb?.word);
+  const person=verb?.grammar?.morphology?.person;
+  const subject=ADVANCED_PAST_SUBJECT_EN[person];
+  if(!verb||!object||!registered?.lexeme?.forms?.[person]||registered.surface!==verb.word||!subject){
+   throw new Error('Cannot rebuild canonical advanced-past presentation.');
+  }
+  const objectEn=nounEnglish(object.word,'acc');
+  verb.lexeme=registered.lexeme;
+  verb.surfaceHint=registered.surface;
+  verb.expectedSurface=registered.surface;
+  verb.gloss=`${subject.toLowerCase()} ${registered.lexeme.pastEn}`;
+  verb.enHint='An explicitly registered advanced past form.';
+  object.gloss=objectEn;
+  data.translation=`${subject} ${registered.lexeme.pastEn} ${objectEn}.`;
+  return;
+ }
+ if(!template?.presentPerson)return;
+ const verb=data.tokens.find(token=>token?.grammar?.type==='verb'&&token.tense==='present');
  const object=data.tokens.find(token=>token?.grammar?.role==='object');
+ const explicit=data.tokens.find(token=>token?.grammar?.role==='faail');
  const registered=verbFormIndex.get(verb?.word);
- const person=verb?.grammar?.morphology?.person;
- const subject=ADVANCED_PAST_SUBJECT_EN[person];
- if(!verb||!object||!registered?.lexeme?.forms?.[person]||registered.surface!==verb.word||!subject){
-  throw new Error('Cannot rebuild canonical advanced-past presentation.');
+ const morphology=authoritativeVerbMorphology(verb,data);
+ const subject=morphology.subjectMode==='explicit'
+  ?cap(nounEnglish(explicit?.word,'nom'))
+  :ADVANCED_PRESENT_SUBJECT_EN[morphology.person];
+ if(!verb||!object||!registered?.lexeme||registered.surface!==verb.word||!subject
+   ||morphology.person!==template.presentPerson){
+  throw new Error('Cannot rebuild canonical advanced-present presentation.');
  }
  const objectEn=nounEnglish(object.word,'acc');
  verb.lexeme=registered.lexeme;
  verb.surfaceHint=registered.surface;
  verb.expectedSurface=registered.surface;
- verb.gloss=`${subject.toLowerCase()} ${registered.lexeme.pastEn}`;
- verb.enHint='An explicitly registered advanced past form.';
+ verb.gloss=`${subject.toLowerCase()} ${morphology.person==='3ms'?registered.lexeme.third:registered.lexeme.en}`;
+ verb.enHint='An exact registered person-bound present form.';
  object.gloss=objectEn;
- data.translation=`${subject} ${registered.lexeme.pastEn} ${objectEn}.`;
+ data.translation=`${subject} ${morphology.person==='3ms'?registered.lexeme.third:registered.lexeme.en} ${objectEn}.`;
 }
 function restoreExerciseSnapshot(snapshot){
  if(!isExerciseSnapshot(snapshot))return null;
@@ -677,6 +799,15 @@ function restoreExerciseSnapshot(snapshot){
    const storedExerciseIdentity=data.exerciseIdentity;
    const template=resolveHistoryTemplate(data);
    if(!template)return null;
+   let identityFormat='';
+   if(snapshotVersion===SENTENCE_HISTORY_SNAPSHOT_VERSION){
+    const legacyCandidate=isPhase1V3IdentityCandidate(data,template);
+    const identityInput=canonicalHistoryIdentityInput(data);
+    if(canonicalExerciseIdentity(identityInput)===storedExerciseIdentity)identityFormat='current-v3';
+    else if(legacyCandidate
+      &&canonicalExerciseIdentityV3Phase1(identityInput)===storedExerciseIdentity)identityFormat='phase1-v3';
+    else return null;
+   }
    delete data.schemaVersion;
    delete data.exerciseIdentity;
    // Stored declarations, relationships, components, and presentation are caches, never
@@ -684,8 +815,8 @@ function restoreExerciseSnapshot(snapshot){
    materializeAuthoritativeMorphology(data);
    if(data.tokens.some(token=>token?.grammar?.type==='verb'&&token.tense==='past'
      &&!templateAuthorizesPastMorphology(template,token.grammar.morphology)))return null;
-   if(snapshotVersion===SENTENCE_HISTORY_SNAPSHOT_VERSION
-     &&canonicalExerciseIdentity(data)!==storedExerciseIdentity)return null;
+   if(template.presentCapabilities.length&&data.tokens.some(token=>token?.grammar?.type==='verb'&&token.tense==='present'
+     &&!templateAuthorizesPresentMorphology(template,token.grammar.morphology)))return null;
    rebuildCanonicalHistoryPresentation(data,template);
    materializeComponents(data);
   resolveRelationships(data);
@@ -2094,6 +2225,19 @@ const advancedPastActions=[
   '1s':'دَرَسْتُ','2ms':'دَرَسْتَ','2fs':'دَرَسْتِ','1p':'دَرَسْنَا','3md':'دَرَسَا','3mp':'دَرَسُوا','3fp':'دَرَسْنَ'
  }}
 ];
+/* Phase 2 core keeps an exact, reviewed rafʿ registry for only the
+   surface-unambiguous present persons. No prefix or suffix surgery is authority. */
+const advancedPresentActions=[
+ {past:'كَتَبَ',en:'write',third:'writes',obj:['الْوَاجِبَ','الدَّرْسَ','الْجَوَابَ','الرِّسَالَةَ','الْقِصَّةَ'],forms:{
+  '3ms':'يَكْتُبُ','1s':'أَكْتُبُ','1p':'نَكْتُبُ','3md':'يَكْتُبَانِ','3mp':'يَكْتُبُونَ','2mp':'تَكْتُبُونَ','2fs':'تَكْتُبِينَ'
+ }},
+ {past:'فَتَحَ',en:'open',third:'opens',obj:['الْبَابَ','الْكِتَابَ','النَّافِذَةَ','الْحَقِيبَةَ'],forms:{
+  '3ms':'يَفْتَحُ','1s':'أَفْتَحُ','1p':'نَفْتَحُ','3md':'يَفْتَحَانِ','3mp':'يَفْتَحُونَ','2mp':'تَفْتَحُونَ','2fs':'تَفْتَحِينَ'
+ }},
+ {past:'دَرَسَ',en:'study',third:'studies',obj:['الدَّرْسَ'],forms:{
+  '3ms':'يَدْرُسُ','1s':'أَدْرُسُ','1p':'نَدْرُسُ','3md':'يَدْرُسَانِ','3mp':'يَدْرُسُونَ','2mp':'تَدْرُسُونَ','2fs':'تَدْرُسِينَ'
+ }}
+];
 const brokenObjectActions=[
  {pres:'يَقْرَأُ',third:'reads',objects:['الْكُتُبَ','الدُّرُوسَ','الْأَجْوِبَةَ','الْقِصَصَ']},
  {pres:'يَفْتَحُ',third:'opens',objects:['الْأَبْوَابَ','الْكُتُبَ']},
@@ -2295,7 +2439,8 @@ const COMPONENT_REGISTRY=Object.freeze({
  'taa-fail-2fs':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'kasra',letterAr:'تِ',nameAr:'تَاءُ الْفَاعِلِ',nameEn:'the subject tāʾ (tāʾ al-fāʿil, feminine addressee)',ruleId:'C_TAA_FAIL_2FS'}),
  'naa-failin':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'sukun',letterAr:'نَا',nameAr:'نَا الْفَاعِلِينَ',nameEn:'nā al-fāʿilīn (the “we” subject pronoun)',ruleId:'C_NAA_FAILIN'}),
  'alif-ithnain':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'sukun',letterAr:'ا',nameAr:'أَلِفُ الِاثْنَيْنِ',nameEn:'the dual alif (alif al-ithnayn)',ruleId:'C_ALIF_ITHNAIN'}),
- 'nuun-niswah':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'fatha',letterAr:'نَ',nameAr:'نُونُ النِّسْوَةِ',nameEn:'nūn al-niswah (the feminine-plural subject nūn)',ruleId:'C_NUUN_NISWAH'})
+ 'nuun-niswah':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'fatha',letterAr:'نَ',nameAr:'نُونُ النِّسْوَةِ',nameEn:'nūn al-niswah (the feminine-plural subject nūn)',ruleId:'C_NUUN_NISWAH'}),
+ 'yaa-mukhataba':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'sukun',letterAr:'ي',nameAr:'يَاءُ الْمُخَاطَبَةِ',nameEn:'the feminine-address yāʾ (yāʾ al-mukhāṭabah)',ruleId:'C_YAA_MUKHATABA'})
 });
 const COMPONENT_CATEGORIES=Object.freeze({pronoun:1,particle:1,orthographic:1});
 const COMPONENT_ROLE_AR=Object.freeze({fail:'فَاعِلٌ'});
@@ -2372,23 +2517,51 @@ const PAST_BINAA_RULE_IDS=Object.freeze({
  'estimated-fath-munasabah':'R_PAST_FATH_EST_MUNASABAH',
  'estimated-fath-incidental-sukun':'R_PAST_FATH_EST_INCIDENTAL_SUKUN'
 });
+const PRESENT_MORPHOLOGY=Object.freeze({
+ '3ms':Object.freeze({tense:'present',person:'3ms',subjectMode:'contextual',formClass:'ordinary',endingClass:'none'}),
+ '1s':Object.freeze({tense:'present',person:'1s',subjectMode:'implicit',formClass:'ordinary',endingClass:'none'}),
+ '1p':Object.freeze({tense:'present',person:'1p',subjectMode:'implicit',formClass:'ordinary',endingClass:'none'}),
+ '3md':Object.freeze({tense:'present',person:'3md',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'alif-ithnain'}),
+ '3mp':Object.freeze({tense:'present',person:'3mp',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'waw-jamaaah'}),
+ '2mp':Object.freeze({tense:'present',person:'2mp',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'waw-jamaaah'}),
+ '2fs':Object.freeze({tense:'present',person:'2fs',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'yaa-mukhataba'})
+});
+const PRESENT_ENDING_COMPONENTS=Object.freeze({
+ 'none':Object.freeze([]),
+ 'alif-ithnain':Object.freeze(['alif-ithnain']),
+ 'waw-jamaaah':Object.freeze(['waw-jamaaah']),
+ 'yaa-mukhataba':Object.freeze(['yaa-mukhataba'])
+});
+const PRESENT_HIDDEN_SUBJECTS=Object.freeze({'1s':'أَنَا','1p':'نَحْنُ','3ms':'هُوَ'});
 /* Which internal components a verb token carries — derived ONLY from structural
    morphology. A stored componentKinds array is never consulted. */
 function verbComponentKinds(token){
  if(!token||token.grammar.type!=='verb')return [];
- if(token.tense==='present'&&token.inflection==='afalKhamsa'){
-  const subjectKind={'3mp':'waw-jamaaah','2mp':'waw-jamaaah'}[token.grammar.person];
-  if(!subjectKind)return [];
-  const kinds=[subjectKind];
-  if(token.state==='nasb'||token.state==='jazm')kinds.push('alif-fariqa');
-  return kinds;
- }
  const morphology=authoritativeVerbMorphology(token);
  if(token.tense==='past')return[...(PAST_ENDING_COMPONENTS[morphology.endingClass]||[])];
+ if(token.tense==='present'){
+  const kinds=[...(PRESENT_ENDING_COMPONENTS[morphology.endingClass]||[])];
+  if(morphology.endingClass==='waw-jamaaah'&&(token.state==='nasb'||token.state==='jazm'))kinds.push('alif-fariqa');
+  return kinds;
+ }
  return [];
 }
 function authoritativeVerbMorphology(token,data=null){
  const registered=token?.grammar?.type==='verb'?verbFormIndex.get(token.word):null;
+ if(token?.tense==='present'){
+  const legacyPerson={pres:'3ms',acc:'3ms',juss:'3ms',five:'3mp',fiveSub:'3mp'}[registered?.form];
+  const person=registered?.morphology?.presentPerson||legacyPerson;
+  const base=PRESENT_MORPHOLOGY[person];
+  if(!base)return{registered:false,feminineTaa:false};
+  const result={...base,registered:true,feminineTaa:false};
+  if(person==='3ms'){
+   const tokens=data?.tokens||[];
+   const index=tokens.indexOf(token);
+   const explicit=index>=0&&tokens.slice(index+1).some(candidate=>candidate?.grammar?.role==='faail');
+   result.subjectMode=explicit?'explicit':'implicit';
+  }
+  return result;
+ }
  if(token?.tense!=='past')return{feminineTaa:false};
  if(registered?.form!=='past')return{registered:false,feminineTaa:false};
  const person=registered.morphology?.pastPerson||'3ms';
@@ -2411,6 +2584,9 @@ function materializeAuthoritativeMorphology(data){
   if(token.tense==='past'&&token.grammar.morphology.registered){
    token.grammar.person=token.grammar.morphology.person;
    token.ruleId=PAST_BINAA_RULE_IDS[token.grammar.morphology.binaaClass];
+  }
+  if(token.tense==='present'&&token.grammar.morphology.registered){
+   token.grammar.person=token.grammar.morphology.person;
   }
  });
 }
@@ -2599,16 +2775,16 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_FIVE_NOUNS_NASB_ALIF:sourceRule('Alif is the accusative sign of the five nouns.',[32,50,66,67],'Only singular, non-diminutive forms in iḍāfah to something other than yāʾ al-mutakallim.'),
  R_FIVE_NOUNS_JARR_YA:sourceRule('Yāʾ is the khafḍ sign of the five nouns.',[32,66,67],'Only singular, non-diminutive forms in iḍāfah to something other than yāʾ al-mutakallim.'),
 
- R_MUDARI_RAF_DAMMA:sourceRule('A regular present verb free of a nāṣib or jāzim is raised with visible ḍammah.',[39,70,72],'Only sound-final present verbs with a visible ending and no attached five-verb ending.'),
+ R_MUDARI_RAF_DAMMA:sourceRule('A regular present verb free of a nāṣib or jāzim is raised with visible ḍammah.',[39,70,71,72],'Only sound-final present verbs with a visible ending and no attached five-verb ending.'),
  R_MUDARI_NASB_FATHA:sourceRule('A regular sound-final present verb after lan is accusative with visible fatḥah.',[47,73,74],'Only the explicitly stored lan forms.'),
  R_MUDARI_JAZM_SUKUN:sourceRule('A regular sound-final present verb after lam is jussive with visible sukūn.',[58,79,80],'Only the explicitly stored lam forms.'),
- R_AFAL5_RAF_NUN:sourceRule('Retention of nūn is the nominative sign of the five verbs.',[39,67,72],'Production currently generates the third-person masculine plural pattern only.'),
+ R_AFAL5_RAF_NUN:sourceRule('Retention of nūn is the nominative sign of the five verbs.',[38,39,67,72],'Rafʿ production includes only the explicitly registered, surface-unambiguous 3md, 3mp, 2mp, and 2fs patterns.'),
  R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74],'Only after the visible nāṣib lan.'),
  R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80],'Only after the visible jāzim lam.'),
  R_PAST_FATH_VISIBLE:sourceRule('A sound-final past verb has visible fatḥ unless wāw al-jamāʿah or a moving rafʿ pronoun is attached.',[71],'Generated scope: bare third-person masculine, the existing sākinah feminine tāʾ forms, and the explicitly stored dual-alif forms.'),
  R_PAST_FATH_EST_MUNASABAH:sourceRule('A past verb attached to wāw al-jamāʿah has estimated fatḥ because the position is occupied by the vowel of munāsabah.',[71,72],'Generated scope: explicitly stored third-person masculine-plural past forms only.'),
  R_PAST_FATH_EST_INCIDENTAL_SUKUN:sourceRule('A past verb attached to a moving rafʿ pronoun has estimated fatḥ whose appearance is prevented by incidental sukūn, avoiding four successive vowels in what is like one word.',[72],'Generated scope: explicitly stored 1s, 2ms, 2fs, 1p, and 3fp past forms only.'),
- C_WAW_JAMAAH_FAIL:sourceRule('Wāw al-jamāʿah is a connected pronoun built on sukūn, in the place of rafʿ as the fāʿil.',[67,71,72,91],'Workspace scan p.72 explicitly analyzes the wāw in the past form as a fāʿil built on sukūn in the position of rafʿ; pp.67 and 91 attest the same attached subject in the existing five-verb path.'),
+ C_WAW_JAMAAH_FAIL:sourceRule('Wāw al-jamāʿah is a connected pronoun built on sukūn, in the place of rafʿ as the fāʿil.',[38,67,71,72,91],'Workspace scan p.38 directly analyzes the present-attached wāw as a fāʿil built on sukūn in the position of rafʿ; p.72 gives the parallel past analysis, and pp.67 and 91 attest the existing five-verb path.'),
  C_TAA_TANIITH_SAKINA:sourceRule('The sākinah tāʾ of the past verb is a ḥarf that marks its subject noun as feminine; it is not the fāʿil and has no place in iʿrāb.',[15,16,88,91],'Workspace scan: the sākinah tāʾ enters only the past verb and marks «the noun to which the verb is attributed» as feminine — «قَالَتْ عَائِشَةُ», where عَائِشَةُ is the fāʿil, not the tāʾ (p.15); it is sākinah in its original form (p.16). The explicit feminine fāʿil is a following noun, «حَضَرَتْ هِنْدٌ» (p.88), while «ضَرَبَتْ» is the هي form whose subject is a hidden pronoun, not the tāʾ (p.91).'),
  C_TAA_FAIL_1S:sourceRule('The 1s subject tāʾ is a connected pronoun built on ḍamm in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 1s past form ending in تُ.'),
  C_TAA_FAIL_2MS:sourceRule('The 2ms subject tāʾ is a connected pronoun built on fatḥ in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 2ms past form ending in تَ.'),
@@ -2616,6 +2792,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  C_NAA_FAILIN:sourceRule('Nā al-fāʿilīn is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 1p past form.'),
  C_ALIF_ITHNAIN:secondarySupportedRule('Alif al-ithnayn is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[71],'Al-Tuḥfah p.71 controls the whole past verb’s visible-fatḥ analysis; Daʿkūr p.86 supplies the exact component analysis.','C_ALIF_ITHNAIN',[DAKUR_ALIF_ITHNAIN]),
  C_NUUN_NISWAH:sourceRule('Nūn al-niswah is a connected pronoun built on fatḥ in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 3fp past form.'),
+ C_YAA_MUKHATABA:sourceRule('Yāʾ al-mukhāṭabah is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[38],'Only an explicitly registered surface-unambiguous 2fs present five-verb form in rafʿ.'),
  C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from the original wāw; it has no grammatical role and no place in iʿrāb.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[91],'Al Jazeera Learning Arabic («الألف الفارقة») names the rule and gives كَتَبُوا / لم يكتُبُوا / اكْتُبُوا. Workspace scan separately attests the written spelling «ضَرَبُوا» (p.91) as form-only; that attestation does not authorize this rule.'),
  R_KANA_PAST_DEFICIENT:sourceRule('Kāna is a deficient past verb that raises its noun and makes its khabar accusative.',[105,106],'Only the surface كَانَ and the app’s single-noun/single-khabar template.',[IA_KANA]),
 
@@ -2627,7 +2804,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
 
  RL_PREPOSITION_GOVERNS_JARR:sourceRule('A preposition governs khafḍ in the immediately following noun.',[13,174,175,176,177],'The internal legacy ID says JARR; output uses Al-Tuḥfah’s term khafḍ.'),
  RL_IDAFA_GOVERNS_JARR:sourceRule('Iḍāfah governs khafḍ in the second noun.',[174,175,177,178],'The internal legacy ID says JARR; output uses Al-Tuḥfah’s term khafḍ.'),
- RL_VERB_REQUIRES_SUBJECT:sourceRule('Every generated verb has an explicit, attached, or permitted hidden subject.',[87,88,89,90,91,92,93,97],'Hidden huwa is used only for supported third-person masculine singular forms.'),
+ RL_VERB_REQUIRES_SUBJECT:sourceRule('Every generated verb has an explicit, attached, or permitted hidden subject.',[38,39,87,88,89,90,91,92,93,97],'Hidden huwa is limited to supported third-person masculine singular forms; advanced 1s and 1p present forms use the person-bound hidden pronouns anā and naḥnu.'),
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
  RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
@@ -2805,6 +2982,20 @@ function registerAdvancedPastSet(items){
   verbFormIndex.set(surface,{lexeme,form:'past',surface,morphology:Object.freeze({pastPerson})});
  }));
 }
+function registerAdvancedPresentSet(items){
+ items.forEach(action=>{
+  const base=verbs.find(lexeme=>lexeme.past===action.past);
+  if(!base)throw new Error(`Advanced-present lemma is not in the reviewed verb registry: ${action.past}`);
+  const lexeme=Object.freeze({...base,obj:Object.freeze([...action.obj]),presentForms:Object.freeze({...action.forms})});
+  action.lexeme=lexeme;
+  Object.entries(action.forms).forEach(([presentPerson,surface])=>{
+   if(!PRESENT_MORPHOLOGY[presentPerson])throw new Error(`Unsupported advanced-present person: ${presentPerson}`);
+   const collision=verbFormIndex.get(surface);
+   if(collision&&collision.lexeme?.past!==action.past)throw new Error(`Duplicate advanced-present surface: ${surface}`);
+   verbFormIndex.set(surface,{lexeme,form:'presentRaf',surface,morphology:Object.freeze({presentPerson,exactPresentRaf:true})});
+  });
+ });
+}
 registerVerbSet(verbs);
 registerVerbSet(additionalVerbActions);
 registerVerbSet(humanActions);
@@ -2814,6 +3005,7 @@ registerVerbSet(thingPrepActions);
 registerVerbSet(femininePastActions,{pastPerson:'3fs-explicit'});
 registerVerbSet(brokenObjectActions);
 registerAdvancedPastSet(advancedPastActions);
+registerAdvancedPresentSet(advancedPresentActions);
 
 const grammarSpec=(type,role,extra={})=>({type,role,...extra});
 const AR={
@@ -2826,6 +3018,7 @@ const AR={
  mudaf:w=>grammarSpec('noun','mubtada',{isMudaf:true}),
  mudafIlayh:(w)=>grammarSpec('noun','mudafIlayh'),
  presentPred:(w)=>grammarSpec('verb','present',{conjugation:'regular',person:'3ms'}),
+ presentAdvanced:(w,person)=>grammarSpec('verb','present',{conjugation:PRESENT_MORPHOLOGY[person]?.formClass==='afalKhamsa'?'afalKhamsa':'regular',person,exactPresentRaf:true}),
  past:(w,opts={})=>grammarSpec('verb','past',{person:opts.person||'3ms'}),
  faail:(w)=>grammarSpec('noun','faail'),
  particle:p=>grammarSpec('particle','particle',{particleType:'inna',particleWord:p.ar,particleIraab:p.iraab}),
@@ -2896,11 +3089,13 @@ const AFAL5_PERSONS=Object.freeze({
  '2mp':{stem:'second',raf:'ُونَ',dropped:'ُوا',subjectAr:'وَاوُ الْجَمَاعَةِ',subjectEn:'the plural wāw'},
  '2fs':{stem:'second',raf:'ِينَ',dropped:'ِي',subjectAr:'يَاءُ الْمُخَاطَبَةِ',subjectEn:'the feminine-address yāʾ'}
 });
-function inflectFiveVerb(lexeme,person,mood){
+function inflectFiveVerb(lexeme,person,mood,allowDerived=true){
  if(!lexeme?.pres) throw new Error('A five-verb form needs a present-tense lexeme.');
+ if(mood==='raf'&&lexeme.presentForms?.[person])return lexeme.presentForms[person];
  if(person==='3mp'&&lexeme.five&&lexeme.fiveSub) return mood==='raf'?lexeme.five:lexeme.fiveSub;
  const pattern=AFAL5_PERSONS[person];
  if(!pattern) throw new Error(`Unsupported five-verb person: ${person}`);
+ if(!allowDerived)throw new Error(`Production requires an exact registered five-verb surface: ${lexeme.past}/${person}/${mood}`);
  const thirdStem=stripFinalHarakah(lexeme.pres);
  const stem=pattern.stem==='second'?secondPersonStem(thirdStem):thirdStem;
  return`${stem}${mood==='raf'?pattern.raf:pattern.dropped}`;
@@ -2934,7 +3129,10 @@ function inflectVerb(token,tokens,index){
  if(!moodRule) throw new Error(`No present-verb rule for ${token.inflection}/${token.state}`);
  token.sign=GRAMMAR_SIGNS[moodRule[0]];
  token.ruleId=moodRule[1];
- if(token.inflection==='afalKhamsa') token.expectedSurface=inflectFiveVerb(token.lexeme,token.grammar.person,token.state);
+ if(registered?.form==='presentRaf'&&token.grammar.exactPresentRaf){
+  if(token.state!=='raf'||registered.morphology.presentPerson!==token.grammar.person)throw new Error(`Exact present surface is not authorized for this person/state: ${token.surfaceHint}`);
+  token.expectedSurface=registered.surface;
+ }else if(token.inflection==='afalKhamsa') token.expectedSurface=inflectFiveVerb(token.lexeme,token.grammar.person,token.state,false);
  else token.expectedSurface=token.lexeme?.[{raf:'pres',nasb:'acc',jazm:'juss'}[token.state]]||token.surfaceHint;
  token.word=token.expectedSurface;
 }
@@ -2961,6 +3159,14 @@ function addRelationship(data,type,fields){
 function resolveRelationships(data){
  const tokens=data.tokens;
  data.relationships=[];
+ tokens.forEach(token=>{token.relations={};});
+ tokens.forEach((item,index)=>{
+  const governor=tokens[index-1];
+  if(item.grammar.type==='verb'&&item.tense==='present'&&item.governorId
+    &&governor?.id===item.governorId&&['lan','lam','sawfa'].includes(governor.grammar?.particleType)){
+   governor.relations.governsId=item.id;
+  }
+ });
  tokens.forEach((item,index)=>{
   if(item.grammar.type==='particle'&&item.grammar.particleType==='preposition'){
    const noun=tokens[index+1]?.grammar.role==='majrur'?tokens[index+1]:null;
@@ -2972,28 +3178,26 @@ function resolveRelationships(data){
   }
  });
  tokens.forEach((verb,index)=>{
- if(verb.grammar.type!=='verb'||verb.tense==='kana')return;
-  const explicit=tokens.slice(index+1).find(candidate=>candidate.grammar.role==='faail');
-  const pastMorphology=verb.tense==='past'?verb.grammar.morphology:null;
-  if(pastMorphology?.subjectMode==='attached'){
-   const componentKind=PAST_ENDING_COMPONENTS[pastMorphology.endingClass]?.find(kind=>COMPONENT_REGISTRY[kind]?.syntacticRole==='fail');
-   const subject=COMPONENT_REGISTRY[componentKind];
-   addRelationship(data,'verbSubject',{verbId:verb.id,subjectType:'attached',pronoun:subject.nameAr});
-   verb.relations.subjectType='attached';verb.relations.subjectPronoun=subject.nameAr;
-  }else if(explicit){
+  if(verb.grammar.type!=='verb'||verb.tense==='kana')return;
+   const explicit=tokens.slice(index+1).find(candidate=>candidate.grammar.role==='faail');
+   const morphology=verb.grammar.morphology;
+   if(morphology?.subjectMode==='attached'){
+    const endingComponents=verb.tense==='past'?PAST_ENDING_COMPONENTS:PRESENT_ENDING_COMPONENTS;
+    const componentKind=endingComponents[morphology.endingClass]?.find(kind=>COMPONENT_REGISTRY[kind]?.syntacticRole==='fail');
+    const subject=COMPONENT_REGISTRY[componentKind];
+    addRelationship(data,'verbSubject',{verbId:verb.id,subjectType:'attached',pronoun:subject.nameAr});
+    verb.relations.subjectType='attached';verb.relations.subjectPronoun=subject.nameAr;
+   }else if(explicit){
    addRelationship(data,'verbSubject',{verbId:verb.id,subjectId:explicit.id,subjectType:'explicit'});
    verb.relations.subjectId=explicit.id;verb.relations.subjectType='explicit';explicit.relations.verbId=verb.id;
-  }else if(pastMorphology?.subjectMode==='explicit'){
-   // Leave the relationship absent; validation reports the missing required subject.
-  }else if(verb.inflection==='afalKhamsa'){
-   const subject=AFAL5_PERSONS[verb.grammar.person];
-   addRelationship(data,'verbSubject',{verbId:verb.id,subjectType:'attached',pronoun:subject.subjectAr});
-   verb.relations.subjectType='attached';verb.relations.subjectPronoun=subject.subjectAr;
-  }else{
-   addRelationship(data,'verbSubject',{verbId:verb.id,subjectType:'implicit',pronoun:'هُوَ'});
-   verb.relations.subjectType='implicit';verb.relations.subjectPronoun='هُوَ';
-  }
- });
+   }else if(morphology?.subjectMode==='explicit'){
+    // Leave the relationship absent; validation reports the missing required subject.
+   }else{
+    const pronoun=verb.tense==='present'?PRESENT_HIDDEN_SUBJECTS[morphology?.person]:'هُوَ';
+    addRelationship(data,'verbSubject',{verbId:verb.id,subjectType:'implicit',pronoun});
+    verb.relations.subjectType='implicit';verb.relations.subjectPronoun=pronoun;
+   }
+  });
  tokens.forEach(object=>{
   if(object.grammar.role!=='object')return;
   const index=tokens.indexOf(object);
@@ -3102,11 +3306,12 @@ function renderVerbAnalysis(token){
  if(token.inflection==='afalKhamsa'){
   arabic+=`؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ`;
  }else if(token.relations.subjectType==='implicit'){
-  arabic+='، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ «هُوَ»';
+  const concealment=token.grammar.morphology?.person==='3ms'?' جَوَازًا':' وُجُوبًا';
+  arabic+=`، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ${concealment} تَقْدِيرُهُ «${token.relations.subjectPronoun}»`;
  }
  token.ar=`${arabic}.`;
  const causeEn=governor?.grammar.particleType==='lan'?' because lan governs it':governor?.grammar.particleType==='lam'?' because lam governs it':'';
- const subjectEn=token.relations.subjectType==='implicit'?' Its subject is the hidden pronoun “he”.':'';
+ const subjectEn=token.relations.subjectType==='implicit'?` Its subject is the hidden pronoun “${{'أَنَا':'I','نَحْنُ':'we','هُوَ':'he'}[token.relations.subjectPronoun]}”.`:'';
  token.en=`A present-tense verb. It is ${token.state==='raf'?'indicative':token.state==='nasb'?'subjunctive':'jussive'}${causeEn}; its sign is ${token.sign.en}.${subjectEn}`;
 }
 function renderParticleAnalysis(token){
@@ -3266,10 +3471,15 @@ function whyVerbSubject(t){
   return null;
  }
  if(t.inflection==='afalKhamsa'){
-  const s=AFAL5_PERSONS[t.grammar.person];
-  return{id:'WHY_SUBJECT_ATTACHED',ar:`وَ${s.subjectAr} ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.`,en:`${cap(s.subjectEn)} is attached to it and is its فَاعِل.`};
+  const kind=PRESENT_ENDING_COMPONENTS[t.grammar.morphology?.endingClass]?.find(item=>COMPONENT_REGISTRY[item]?.syntacticRole==='fail');
+  const component=COMPONENT_REGISTRY[kind];
+  return{id:'WHY_SUBJECT_ATTACHED',ar:`وَ${component.nameAr} ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.`,en:`${cap(component.nameEn)} is attached to it and is its فَاعِل.`};
  }
- if(t.relations&&t.relations.subjectType==='implicit')return{id:'WHY_SUBJECT_HIDDEN',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ».',en:'Its فَاعِل is a hidden pronoun understood as «هُوَ».'};
+ if(t.relations&&t.relations.subjectType==='implicit'){
+  if(t.grammar.morphology?.person==='1s')return{id:'WHY_SUBJECT_HIDDEN_ANA',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «أَنَا».',en:'Its فَاعِل is a hidden pronoun understood as «أَنَا» (I).'};
+  if(t.grammar.morphology?.person==='1p')return{id:'WHY_SUBJECT_HIDDEN_NAHNU',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «نَحْنُ».',en:'Its فَاعِل is a hidden pronoun understood as «نَحْنُ» (we).'};
+  return{id:'WHY_SUBJECT_HIDDEN',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ».',en:'Its فَاعِل is a hidden pronoun understood as «هُوَ».'};
+ }
  return null;
 }
 const WHY_PARTICLE=Object.freeze({
@@ -3465,13 +3675,30 @@ function validateExercise(data){
   if(token.grammar.type==='verb'&&token.tense==='present'){
    const governor=token.governorId?data.tokens.find(item=>item.id===token.governorId):null;
    const required=governor?GRAMMAR_RULES.governors[governor.grammar.particleType]?.mood:'raf';
+   const authoritative=authoritativeVerbMorphology(token,data);
+   const registered=verbFormIndex.get(token.word);
+   if(!authoritative.registered)fail('E_PRESENT_SURFACE','Present surface is not an explicitly registered production form.',token);
+   if(token.state==='jarr')fail('E_PRESENT_KHAFD','A present verb may not be assigned khafḍ.',token);
    if(token.state!==required)fail('E_VERB_MOOD','Present-verb mood disagrees with its actual governor.',token);
    if(token.state!=='raf'&&!governor)fail('E_MISSING_GOVERNOR','Non-indicative present verb has no visible governor.',token);
    if(governor&&data.tokens[data.tokens.indexOf(token)-1]!==governor)fail('E_GOVERNOR_ADJACENCY','Present-verb governor is not immediately before the verb.',token);
    if(governor&&governor.relations.governsId!==token.id)fail('E_GOVERNOR_RECIPROCAL','Governor and present verb do not point to each other.',token);
    const moodRule=GRAMMAR_RULES.presentVerb[token.inflection]?.[token.state];
    if(token.sign?.id!==moodRule?.[0])fail('E_VERB_SIGN','Present-verb sign disagrees with mood and morphology.',token);
-   if(token.inflection==='afalKhamsa'&&token.word!==inflectFiveVerb(token.lexeme,token.grammar.person,token.state))fail('E_AFAL5_SURFACE','Five-verb surface disagrees with its mood.',token);
+   if(token.ruleId!==moodRule?.[1])fail('E_VERB_RULE','Present-verb rule disagrees with mood and morphology.',token);
+   if(token.inflection==='regular'&&token.state==='raf'&&token.sign?.id!=='damma')fail('E_PRESENT_ORDINARY_RAF_SIGN','Ordinary present rafʿ must use ḍammah.',token);
+   if(token.inflection==='regular'&&token.sign?.id==='nunKept')fail('E_PRESENT_ORDINARY_NUN','An ordinary present verb may not use retention of nūn.',token);
+   if(token.inflection==='afalKhamsa'&&token.state==='raf'&&token.sign?.id!=='nunKept')fail('E_AFAL5_RAF_SIGN','A five-verb form in rafʿ must use retention of nūn.',token);
+   if(token.inflection==='afalKhamsa'&&token.state==='raf'&&!/ن[َِ]$/u.test(token.word))fail('E_AFAL5_RAF_NUN','A five-verb form in rafʿ must retain its nūn.',token);
+   const authoritativeInflection=authoritative.formClass==='afalKhamsa'?'afalKhamsa':'regular';
+   if(token.inflection!==authoritativeInflection)fail('E_PRESENT_FORM_CLASS','Present inflection disagrees with the authoritative person/form class.',token);
+   const authorizedForms=token.inflection==='regular'
+    ?{raf:['pres','presentRaf'],nasb:['acc'],jazm:['juss']}[token.state]
+    :{raf:['five','presentRaf'],nasb:['fiveSub'],jazm:['fiveSub']}[token.state];
+   if(!authorizedForms?.includes(registered?.form))fail('E_PRESENT_FORM_STATE','Registered present surface does not belong to its claimed form class and state.',token);
+   if(token.inflection==='afalKhamsa'&&registered&&token.word!==inflectFiveVerb(registered.lexeme,authoritative.person,token.state,false))fail('E_AFAL5_SURFACE','Five-verb surface disagrees with its exact registry entry and mood.',token);
+   if(token.grammar.person!==authoritative.person)fail('E_PRESENT_PERSON','Present person disagrees with the authoritative exact surface.',token);
+   if(productionTemplate?.presentCapabilities?.length&&!templateAuthorizesPresentMorphology(productionTemplate,authoritative))fail('E_PRESENT_TEMPLATE_AUTHORIZATION','Present person and structure are not authorized by the production template.',token);
   }
   if(token.grammar.type==='verb'&&token.tense==='past'){
    const authoritative=authoritativeVerbMorphology(token,data);
@@ -3484,7 +3711,15 @@ function validateExercise(data){
   if(token.grammar.type==='verb'&&token.tense!=='kana'){
    const subjectRel=relationships.find(rel=>rel.type==='verbSubject'&&rel.verbId===token.id);
    if(!subjectRel)fail('E_VERB_NO_SUBJECT','Verb has no explicit, attached, or implicit subject relationship.',token);
-   if(token.inflection==='afalKhamsa'&&(subjectRel?.subjectType!=='attached'||subjectRel.pronoun!==AFAL5_PERSONS[token.grammar.person]?.subjectAr))fail('E_ATTACHED_SUBJECT','Five-verb attached subject does not match its person pattern.',token);
+   if(token.tense==='present'){
+    const morphology=authoritativeVerbMorphology(token,data);
+    const subjectComponent=(token.components||[]).find(component=>component.syntacticRole==='fail');
+    if(morphology.subjectMode==='attached'){
+     if(subjectRel?.subjectType!=='attached'||subjectRel.pronoun!==subjectComponent?.nameAr)fail('E_ATTACHED_SUBJECT','Present attached-subject relationship disagrees with its ending component.',token);
+     if(data.tokens.some(candidate=>candidate.grammar?.role==='faail'))fail('E_PRESENT_COMPETING_SUBJECT','An attached-subject present exercise may not contain an explicit noun fāʿil.',token);
+    }else if(morphology.subjectMode==='explicit'&&subjectRel?.subjectType!=='explicit')fail('E_PRESENT_EXPLICIT_SUBJECT','This present form requires its following explicit noun fāʿil.',token);
+    else if(morphology.subjectMode==='implicit'&&(subjectRel?.subjectType!=='implicit'||subjectRel.pronoun!==PRESENT_HIDDEN_SUBJECTS[morphology.person]))fail('E_PRESENT_IMPLICIT_SUBJECT','Present hidden subject disagrees with the registered person.',token);
+   }
    if(token.tense==='past'){
     const morphology=authoritativeVerbMorphology(token,data);
     const subjectComponent=(token.components||[]).find(component=>component.syntacticRole==='fail');
@@ -3502,7 +3737,9 @@ function validateExercise(data){
    const authoritativeMorphology=authoritativeVerbMorphology(token,data);
    const morphologyFields=token.tense==='past'
     ?['registered','tense','person','subjectMode','endingClass','binaaClass','feminineTaa']
-    :['feminineTaa'];
+    :token.tense==='present'
+     ?['registered','tense','person','subjectMode','formClass','endingClass','feminineTaa']
+     :['feminineTaa'];
    if(morphologyFields.some(field=>token.grammar.morphology?.[field]!==authoritativeMorphology[field]))fail('E_VERB_MORPHOLOGY','Stored verb morphology disagrees with the registered production morphology.',token);
    const expectedKinds=verbComponentKinds(token);
    const actualKinds=(token.components||[]).map(component=>component.kind);
@@ -3524,10 +3761,14 @@ function validateExercise(data){
   }
   if(!token.why)fail('E_WHY_MISSING','Token has no deterministic Why explanation.',token);
   else{
-   const canonicalWhy=buildTokenWhy(token,data);
-   if(token.why.ids?.join('|')!==canonicalWhy.ids.join('|')
-    ||token.why.ar?.join('|')!==canonicalWhy.ar.join('|')
-    ||token.why.en?.join('|')!==canonicalWhy.en.join('|'))fail('E_WHY_CANONICAL','Token Why explanation is not canonical for its structured grammar.',token);
+   try{
+    const canonicalWhy=buildTokenWhy(token,data);
+    if(token.why.ids?.join('|')!==canonicalWhy.ids.join('|')
+     ||token.why.ar?.join('|')!==canonicalWhy.ar.join('|')
+     ||token.why.en?.join('|')!==canonicalWhy.en.join('|'))fail('E_WHY_CANONICAL','Token Why explanation is not canonical for its structured grammar.',token);
+   }catch{
+    fail('E_WHY_CANONICAL','Token Why explanation cannot be rebuilt from invalid structured grammar.',token);
+   }
   }
   if(token.grammar.type==='particle'&&token.expectedSurface!==token.word)fail('E_PARTICLE_SURFACE','Particle surface disagrees with its grammatical identity.',token);
   if(['lan','lam','sawfa'].includes(token.grammar.particleType)){
@@ -3638,6 +3879,16 @@ function add(starts,form,state,sign,build,metadata={}){
   }
   return Object.freeze({person:capability.person,subjectMode:capability.subjectMode});
  }));
+ const presentCapabilities=Object.freeze((metadata.presentCapabilities||[]).map(capability=>{
+  const morphology=PRESENT_MORPHOLOGY[capability.person];
+  const permittedMode=morphology?.subjectMode==='contextual'
+   ?['explicit','implicit'].includes(capability.subjectMode)
+   :morphology?.subjectMode===capability.subjectMode;
+  if(!morphology||!permittedMode||capability.formClass!==morphology.formClass||capability.endingClass!==morphology.endingClass){
+   throw new Error(`Invalid present template capability: ${capability.person}/${capability.subjectMode}/${capability.formClass}/${capability.endingClass}`);
+  }
+  return Object.freeze({...capability});
+ }));
  templates.push({
   id:templates.length,
   stableId,
@@ -3647,6 +3898,8 @@ function add(starts,form,state,sign,build,metadata={}){
   sign,
   pastPerson:metadata.pastPerson||'',
   pastCapabilities,
+  presentPerson:metadata.presentPerson||'',
+  presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
 }
@@ -3655,6 +3908,9 @@ const VISIBLE_FATHA='الْفَتْحَةُ الظَّاهِرَةُ عَلَى 
 const VISIBLE_KASRA='الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ';
 const ADVANCED_PAST_SUBJECT_EN=Object.freeze({
  '1s':'I','2ms':'You','2fs':'You','1p':'We','3md':'The two of them','3mp':'They','3fp':'They'
+});
+const ADVANCED_PRESENT_SUBJECT_EN=Object.freeze({
+ '1s':'I','1p':'We','3ms':'He','3md':'The two of them','3mp':'They','2mp':'You all','2fs':'You'
 });
 function buildAdvancedPastExercise(person){
  const action=pickVaried(advancedPastActions,`advanced-past-action:${person}`,item=>item.past);
@@ -3673,6 +3929,28 @@ function buildAdvancedPastExercise(person){
 const pastTemplateMetadata=(person,subjectMode,phase1=false)=>({
  pastPerson:phase1?person:'',
  pastCapabilities:[{person,subjectMode}]
+});
+function buildAdvancedPresentExercise(person){
+ const action=pickVaried(advancedPresentActions,`advanced-present-action:${person}`,item=>item.past);
+ const surface=action.forms[person];
+ const object=pickVaried(action.obj,`advanced-present-object:${person}:${action.past}`,String);
+ const subject=ADVANCED_PRESENT_SUBJECT_EN[person];
+ return{
+  sentence:`${surface} ${object}`,
+  translation:`${subject} ${action.en} ${nounEnglish(object,'acc')}.`,
+  tokens:[
+   token(surface,`${subject.toLowerCase()} ${action.en}`,AR.presentAdvanced(surface,person),'An exact registered person-bound present form.'),
+   token(object,nounEnglish(object,'acc'),AR.object(object),EN.object,true)
+  ]
+ };
+}
+const presentTemplateMetadata=(person,subjectMode)=>({
+ presentPerson:person,
+ presentCapabilities:[{
+  person,subjectMode,
+  formClass:PRESENT_MORPHOLOGY[person].formClass,
+  endingClass:PRESENT_MORPHOLOGY[person].endingClass
+ }]
 });
 
 // Singular nouns
@@ -3735,8 +4013,13 @@ add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('1p'),pastTem
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('3md'),pastTemplateMetadata('3md','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('3mp'),pastTemplateMetadata('3mp','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('3fp'),pastTemplateMetadata('3fp','attached',true));
-add('verb','present','raf','damma',()=>{const v=pickVerb(),s=pickPerson(),o=pickVerbObject(v);return{sentence:`${v.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('verb','fiveVerbs','raf','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${v.five} ${o}`,translation:`They ${v.en} ${objectEnglish(o)}.`,tokens:[token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('1s'),presentTemplateMetadata('1s','implicit'));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('1p'),presentTemplateMetadata('1p','implicit'));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('3md'),presentTemplateMetadata('3md','attached'));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2mp'),presentTemplateMetadata('2mp','attached'));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2fs'),presentTemplateMetadata('2fs','attached'));
+add('verb','present','raf','damma',()=>{const v=pickVerb(),s=pickPerson(),o=pickVerbObject(v);return{sentence:`${v.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,objectEnglish(o),AR.object(o),EN.object)]}},presentTemplateMetadata('3ms','explicit'));
+add('verb','fiveVerbs','raf','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${v.five} ${o}`,translation:`They ${v.en} ${objectEnglish(o)}.`,tokens:[token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},presentTemplateMetadata('3mp','attached'));
 
 // Particle-first practice
 add('particle','singular','nasb','fatha',()=>{const p=pickInna(),s=pickPerson(),a=pickVaried(singularPredicates,'inna-singular-predicates',x=>x.nom);return{sentence:`${p.ar} ${s.acc} ${a.nom}`,translation:`${p.meaning} ${s.en} ${innaCopula(p,false)} ${a.en}.`,tokens:[token(p.ar,p.gloss,AR.particle(p),'A particle that makes its noun accusative.'),token(s.acc,s.en,AR.ismInna(s.acc,p.ar),`The noun of ${p.ar}; accusative.`,true),token(a.nom,a.en,AR.khabarInna(a.nom,p.ar),`The predicate of ${p.ar}; nominative.`)]}});

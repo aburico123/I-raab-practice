@@ -3944,8 +3944,8 @@ function buildAdvancedPresentExercise(person){
   ]
  };
 }
-const presentTemplateMetadata=(person,subjectMode)=>({
- presentPerson:person,
+const presentTemplateMetadata=(person,subjectMode,phase2Presentation=false)=>({
+ presentPerson:phase2Presentation?person:'',
  presentCapabilities:[{
   person,subjectMode,
   formClass:PRESENT_MORPHOLOGY[person].formClass,
@@ -4013,11 +4013,11 @@ add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('1p'),pastTem
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('3md'),pastTemplateMetadata('3md','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('3mp'),pastTemplateMetadata('3mp','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('3fp'),pastTemplateMetadata('3fp','attached',true));
-add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('1s'),presentTemplateMetadata('1s','implicit'));
-add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('1p'),presentTemplateMetadata('1p','implicit'));
-add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('3md'),presentTemplateMetadata('3md','attached'));
-add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2mp'),presentTemplateMetadata('2mp','attached'));
-add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2fs'),presentTemplateMetadata('2fs','attached'));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('1s'),presentTemplateMetadata('1s','implicit',true));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('1p'),presentTemplateMetadata('1p','implicit',true));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('3md'),presentTemplateMetadata('3md','attached',true));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2mp'),presentTemplateMetadata('2mp','attached',true));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2fs'),presentTemplateMetadata('2fs','attached',true));
 add('verb','present','raf','damma',()=>{const v=pickVerb(),s=pickPerson(),o=pickVerbObject(v);return{sentence:`${v.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,objectEnglish(o),AR.object(o),EN.object)]}},presentTemplateMetadata('3ms','explicit'));
 add('verb','fiveVerbs','raf','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${v.five} ${o}`,translation:`They ${v.en} ${objectEnglish(o)}.`,tokens:[token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},presentTemplateMetadata('3mp','attached'));
 

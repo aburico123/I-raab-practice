@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -33,6 +33,10 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   PRESENT_MORPHOLOGY,
   PRESENT_ENDING_COMPONENTS,
   PRESENT_HIDDEN_SUBJECTS,
+  PRESENT_CONCEALMENT,
+  PRESENT_SURFACE_READINGS,
+  PRESENT_NON_PRODUCTION_PERSONS,
+  resolvePresentReading,
   authoritativeVerbMorphology,
   verbFormIndex,
   nounFormIndex,
@@ -54,7 +58,8 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   verbs,
   generalVerbActions,
   nounLexicons:{singularPeople,singularThings,places,brokenHuman,brokenThings,duals,smp,sfp,fiveNouns,singularPredicates,dualPredicates,masculinePluralPredicates,femininePluralPredicates,masculineThingPredicates,feminineThingPredicates,ownedNouns},
-  verbLexicons:{verbs,additionalVerbActions,humanActions,humanPrepActions,thingActions,thingPrepActions,femininePastActions,advancedPastActions,advancedPresentActions,brokenObjectActions},
+  verbLexicons:{verbs,generalVerbActions,additionalVerbActions,humanActions,humanPrepActions,thingActions,thingPrepActions,femininePastActions,advancedPastActions,advancedPresentActions,brokenObjectActions},
+  vocabularyHistory,
   objectGroups,
   currentExercise:()=>current,
   sentenceHistory:()=>sentenceHistory,
@@ -499,13 +504,25 @@ function assertNominalPair(data,label){
     assert(constructionEnd.phraseAr.includes('الرَّابِطُ'),`${label}: verbal khabar has no link back to its mubtada`);
     assert(constructionEnd.phraseEn.startsWith('Together,'),`${label}: verbal-sentence English is not a separate combined analysis`);
     if(constructionEnd!==verb)assert(!verb.phraseAr&&!verb.phraseEn,`${label}: verb card contains combined analysis before a later component`);
+    // The rābiṭ must be whatever the verb's own subject actually is: the attached pronoun of a
+    // five-verb form, or its hidden pronoun. A fronted feminine mubtadaʾ takes «هِيَ», so the
+    // link is checked against the verb's real pronoun rather than a fixed «هُوَ».
     if(verb.ar.includes('الْأَفْعَالِ الْخَمْسَةِ')){
-      const wawComponent=(verb.components||[]).find(component=>component.kind==='waw-jamaaah');assert(wawComponent&&wawComponent.category==='pronoun'&&wawComponent.syntacticRole==='fail'&&wawComponent.mahall==='raf',`${label}: five-verb lacks its structured waw al-jamaaah subject component`);
-      assert(constructionEnd.phraseAr.includes('وَاوُ الْجَمَاعَةِ'),`${label}: five-verb khabar lacks wāw link`);
+      const attachedKind=(verb.components||[]).find(component=>component.syntacticRole==='fail');
+      assert(attachedKind&&attachedKind.category==='pronoun'&&attachedKind.mahall==='raf',`${label}: five-verb lacks its structured attached subject component`);
+      assert(['waw-jamaaah','alif-ithnain'].includes(attachedKind.kind),`${label}: five-verb verbal khabar has an unexpected attached subject ${attachedKind.kind}`);
+      assert(constructionEnd.phraseAr.includes(attachedKind.nameAr),`${label}: five-verb khabar lacks its attached-pronoun link`);
     }else{
+      // The expected pronoun is derived from the canonical person resolved by the production
+      // morphology authority — never from the learner-facing strings under test. A 3fs
+      // exercise rendering «هُوَ» (or a 3ms rendering «هِيَ») therefore fails here.
+      const canonicalPerson=api.authoritativeVerbMorphology(verb,data).person;
+      const canonicalPronoun=api.PRESENT_HIDDEN_SUBJECTS[canonicalPerson];
+      assert(canonicalPronoun,`${label}: no canonical hidden pronoun for resolved person ${canonicalPerson}`);
+      const hidden=`«${canonicalPronoun}»`;
       assert(verb.ar.includes('ضَمِيرٌ مُسْتَتِرٌ جَوَازًا'),`${label}: regular verbal khabar lacks hidden subject`);
-      assert(verb.ar.includes('«هُوَ»'),`${label}: hidden subject is not identified as huwa`);
-      assert(constructionEnd.phraseAr.includes('«هُوَ»'),`${label}: verbal khabar lacks the hidden-subject link`);
+      assert(verb.ar.includes(hidden),`${label}: hidden subject is not identified`);
+      assert(constructionEnd.phraseAr.includes(hidden),`${label}: verbal khabar lacks the hidden-subject link`);
     }
   }else if(khabar.phraseAr.includes('مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ')){
     stats.phraseKhabar++;
@@ -599,7 +616,7 @@ assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===6,'The noun declen
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.regular).join(',')==='raf,nasb,jazm','Regular present moods are incomplete');
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.afalKhamsa).join(',')==='raf,nasb,jazm','Five-verb moods are incomplete');
 assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),'Unsupported diptotes are not recorded in the coverage matrix');
-assert(Object.keys(api.SOURCE_REGISTRY).length===61,`Expected 61 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===63,`Expected 63 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -708,6 +725,12 @@ function structuredCase(templateId,translation,tokens){
 function targetOf(data){return data.tokens.find(token=>token.target)}
 function relationTypes(data){return new Set(data.relationships.map(rel=>rel.type))}
 function clone(value){return JSON.parse(JSON.stringify(value))}
+// Arabic literals in this project are written with the traditional shadda-before-kasra
+// order, which is not Unicode NFC. Compare Arabic through NFC so a diacritic-ordering
+// difference can never masquerade as a grammatical failure.
+const nfc=value=>String(value==null?'':value).normalize('NFC');
+const arHas=(haystack,needle)=>nfc(haystack).includes(nfc(needle));
+const arEq=(left,right)=>nfc(left)===nfc(right);
 function assertFailureCode(name,data,code){
   const codes=api.validateExercise(data).map(failure=>failure.code);
   assert(codes.includes(code),`${name}: expected ${code}, received ${codes.join(', ')||'no failures'}`);
@@ -1601,11 +1624,20 @@ for(const person of PRESENT_PERSONS){
       `${person}: pre-existing present template incorrectly opted into Phase-2 presentation rebuilding`);
   }
 }
+// Phase 2b-A adds two fronted-mubtadaʾ templates, which opt in through their own
+// `frontedPresent` flag and their own rebuilder branch. The five original Phase-2 templates
+// must keep the plain opt-in, and no pre-existing template may acquire either flag.
+const PHASE2B_FRONTED_PERSONS=['3fs','3fd'];
 assert(api.templates.filter(template=>template.presentPerson).map(template=>template.presentPerson).sort().join('|')
-  ===[...PHASE2_PRESENTATION_PERSONS].sort().join('|'),
-  'Exactly the five genuinely new Phase-2 templates must opt into person-aware presentation rebuilding');
+  ===[...PHASE2_PRESENTATION_PERSONS,...PHASE2B_FRONTED_PERSONS].sort().join('|'),
+  'Exactly the five Phase-2 templates and the two Phase-2b-A fronted templates must opt into person-aware presentation rebuilding');
+assert(api.templates.filter(template=>template.frontedPresent).map(template=>template.presentPerson).sort().join('|')
+  ===[...PHASE2B_FRONTED_PERSONS].sort().join('|'),
+  'Exactly the two Phase-2b-A fronted templates may use the fronted presentation rebuilder');
 
 let presentVerbCases=0;
+let ambiguityCases=0;
+let frontedCases=0;
 let presentAdversarialCases=0;
 let presentHistoryCases=0;
 let presentPresentationRepairCases=0;
@@ -2128,12 +2160,345 @@ for(const person of PRESENT_PERSONS){
   presentHistoryCases++;
 }
 
-// Phase-2 boundary: no ambiguous تـ person, present nūn al-niswah, or nūn al-tawkīd
-// may appear in exact production registration.
-for(const deferred of ['تَكْتُبُ','تَفْتَحُ','تَدْرُسُ','تَكْتُبَانِ','تَفْتَحَانِ','تَدْرُسَانِ',
-  'يَكْتُبْنَ','تَكْتُبْنَ','يَكْتُبَنَّ','يَكْتُبَنْ']){
+// Phase-2b-A boundary: present nūn al-niswah and nūn al-tawkīd remain entirely out of
+// authority. The six تـ surfaces are now registered, but ONLY as ambiguous readings — each
+// must name both of its persons, and the second-person reading must stay unproducible.
+for(const deferred of ['يَكْتُبْنَ','تَكْتُبْنَ','يَكْتُبَنَّ','يَكْتُبَنْ','يَفْتَحْنَ','تَفْتَحْنَ']){
   assert(!api.verbFormIndex.has(deferred),`Deferred present surface entered authority: ${deferred}`);
 }
+for(const [surface,readings] of [['تَكْتُبُ',['2ms','3fs']],['تَفْتَحُ',['2ms','3fs']],['تَدْرُسُ',['2ms','3fs']],
+  ['تَكْتُبَانِ',['2d','3fd']],['تَفْتَحَانِ',['2d','3fd']],['تَدْرُسَانِ',['2d','3fd']]]){
+  const record=api.verbFormIndex.get(surface);
+  assert(record&&record.morphology&&record.morphology.presentPersonCandidates,`Ambiguous surface ${surface} carries no reading set`);
+  assert([...record.morphology.presentPersonCandidates].sort().join('|')===[...readings].sort().join('|'),
+    `Ambiguous surface ${surface} does not declare exactly its real readings`);
+  assert(Object.isFrozen(record.morphology.presentPersonCandidates),`Reading set for ${surface} is not frozen`);
+  ambiguityCases++;
+}
+for(const person of api.PRESENT_NON_PRODUCTION_PERSONS){
+  assert(!api.templates.some(template=>template.presentCapabilities.some(capability=>capability.person===person)),
+    `Deferred person ${person} acquired a production template`);
+  ambiguityCases++;
+}
+
+// ===== Phase 2b-A: fronted-mubtadaʾ 3fs / 3fd, D-3 concealment, ambiguity resolution =====
+// The fronted noun is the MUBTADAʾ and never the fāʿil; the fāʿil is the verb's own hidden
+// pronoun (3fs) or its attached alif (3fd), and that pronoun is the rābiṭ.
+const frontedTemplates=Object.fromEntries(api.templates.filter(t=>t.frontedPresent).map(t=>[t.presentPerson,t]));
+assert(frontedTemplates['3fs']&&frontedTemplates['3fd'],'Fronted 3fs/3fd templates are missing');
+const FRONTED_EXPECTED={
+  '3fs':{surfaces:['تَكْتُبُ','تَفْتَحُ','تَدْرُسُ'],sign:'damma',formClass:'ordinary',endingClass:'none',subjectMode:'implicit'},
+  '3fd':{surfaces:['تَكْتُبَانِ','تَفْتَحَانِ','تَدْرُسَانِ'],sign:'nunKept',formClass:'afalKhamsa',endingClass:'alif-ithnain',subjectMode:'attached'}
+};
+const frontedProduction={};   // every subject×verb pair, all deep-checked below
+const frontedBySurface={};    // one stable fixture per surface, for the attack fixtures
+for(const person of ['3fs','3fd']){
+  // The subject rotates in a per-verb namespace, so the (verb, subject) sequence is a
+  // deterministic period-9 cycle: nine consecutive builds must visit all nine pairs
+  // exactly once. The window is exactly nine — a larger sample would let a regression
+  // back into subject/verb phase-lock hide behind sheer volume.
+  const pairs=new Map();
+  for(let i=0;i<9;i++){
+    const data=api.buildTemplate(frontedTemplates[person].id);
+    const verb=data.tokens.find(t=>t.tense==='present');
+    const noun=data.tokens[0].word;
+    const pairKey=noun+'|'+verb.word;
+    assert(!pairs.has(pairKey),person+': pair '+pairKey+' repeated inside one nine-build cycle');
+    pairs.set(pairKey,data);
+    frontedProduction[person+':'+noun+':'+verb.word]=data;
+    if(!frontedBySurface[person+':'+verb.word])frontedBySurface[person+':'+verb.word]=data;
+  }
+  const nouns=[...new Set([...pairs.keys()].map(key=>key.split('|')[0]))];
+  const verbs=[...new Set([...pairs.keys()].map(key=>key.split('|')[1]))];
+  // The expected verb set comes from the production registry, not from what was generated.
+  const canonicalVerbs=[...api.verbFormIndex.values()]
+    .filter(record=>record.form==='presentRaf'&&record.morphology.presentPerson===person)
+    .map(record=>record.surface);
+  assert(canonicalVerbs.length===3,person+': expected three registered surfaces, found '+canonicalVerbs.length);
+  for(const surface of FRONTED_EXPECTED[person].surfaces){
+    assert(canonicalVerbs.includes(surface),person+': registry lost exact surface '+surface);
+    assert(verbs.includes(surface),person+': exact registered surface '+surface+' was never produced');
+  }
+  assert(verbs.length===3&&verbs.every(v=>canonicalVerbs.includes(v)),
+    person+': production emitted a surface outside the registry');
+  assert(nouns.length===3,person+': expected three reviewed feminine antecedents, saw '+nouns.length);
+  // The observed pair set must equal the complete 3×3 Cartesian product.
+  assert(pairs.size===9,person+': expected nine subject-verb pairs, saw '+pairs.size);
+  for(const noun of nouns)for(const verb of verbs){
+    assert(pairs.has(noun+'|'+verb),person+': subject-verb pair '+noun+'|'+verb+' is unreachable');
+  }
+  for(const noun of nouns){
+    assert(verbs.every(verb=>pairs.has(noun+'|'+verb)),person+': '+noun+' is welded to a subset of the verbs');
+  }
+  for(const verb of verbs){
+    assert(nouns.every(noun=>pairs.has(noun+'|'+verb)),person+': '+verb+' is welded to a subset of the nouns');
+  }
+  // Whichever pair was saved must survive a History round trip unchanged.
+  for(const [pairKey,data] of pairs){
+    const restored=api.restoreExerciseSnapshot(clone(api.createExerciseSnapshot(data)));
+    assert(restored,person+': pair '+pairKey+' did not restore from History');
+    const restoredVerb=restored.tokens.find(t=>t.tense==='present');
+    assert(restored.tokens[0].word+'|'+restoredVerb.word===pairKey,
+      person+': History restore changed the saved subject-verb pair '+pairKey);
+    frontedCases++;
+  }
+  ambiguityCases++;
+}
+// --- Combining-mark order: the new feminine nouns follow the project's local convention ---
+// The project stores shadda BEFORE its vowel. That is deliberately not NFC, which orders by
+// combining class and puts the vowel first. New vocabulary must match the convention already
+// used by its masculine counterpart, or exact-literal registry lookup can diverge.
+{
+  const VOWEL_THEN_SHADDA=/[ً-ِْ]ّ/u;
+  const newNouns=[...new Set(Object.values(frontedProduction).map(data=>data.tokens[0].word))];
+  assert(newNouns.length===6,'Expected exactly six new feminine nouns, saw '+newNouns.length);
+  const counterparts=api.nounLexicons.singularPeople.filter(noun=>noun.nom.includes('ّ')).map(noun=>noun.nom);
+  assert(counterparts.length>0,'No shadda-bearing masculine counterpart was found to model');
+  for(const word of counterparts){
+    assert(!VOWEL_THEN_SHADDA.test(word),'Existing lexeme '+word+' no longer follows the shadda-first convention');
+  }
+  let shaddaBearing=0;
+  for(const word of newNouns){
+    assert(api.nounFormIndex.get(word),'New feminine noun '+word+' is not registered under its stored literal');
+    if(word.includes('ّ')){
+      shaddaBearing++;
+      assert(!VOWEL_THEN_SHADDA.test(word),
+        'New feminine noun '+word+' orders its vowel before the shadda, unlike its masculine counterpart');
+      // Canonically equivalent to the NFC spelling: only mark order differs, nothing visible.
+      assert(word.normalize('NFC')!==word&&word.normalize('NFD')===word.normalize('NFC').normalize('NFD'),
+        'New feminine noun '+word+' is not a pure combining-mark reordering');
+    }
+  }
+  assert(shaddaBearing===4,'Expected four shadda-bearing new nouns, saw '+shaddaBearing);
+  // No canonically equivalent duplicate may exist anywhere in the noun registry.
+  const byNfc=new Map();
+  for(const key of api.nounFormIndex.keys()){
+    const nfc=key.normalize('NFC');
+    assert(!byNfc.has(nfc),'Registry holds canonically equivalent duplicates: '+byNfc.get(nfc)+' and '+key);
+    byNfc.set(nfc,key);
+  }
+  frontedCases++;
+}
+for(const [key,data] of Object.entries(frontedProduction)){
+  const person=key.split(':')[0];
+  const expected=FRONTED_EXPECTED[person];
+  const failures=api.validateExercise(data);
+  assert(failures.length===0,key+': fronted exercise did not validate ('+failures.map(f=>f.code).join(', ')+')');
+  const mubtada=data.tokens.find(t=>t.grammar.role==='mubtada');
+  const verb=data.tokens.find(t=>t.tense==='present');
+  const object=data.tokens.find(t=>t.grammar.role==='object');
+  assert(mubtada&&verb&&object&&data.tokens.length===3,key+': fronted structure is incomplete');
+  assert(data.tokens.indexOf(mubtada)===0,key+': the mubtadaʾ is not fronted');
+  assert(!data.tokens.some(t=>t.grammar.role==='faail'),key+': an explicit fāʿil appeared in a fronted construction');
+  assert(arHas(mubtada.ar,'مُبْتَدَأٌ')&&mubtada.state==='raf',
+    key+': fronted noun is not a nominative mubtadaʾ');
+  assert(verb.grammar.person===person&&verb.grammar.morphology.person===person,key+': resolved person is wrong');
+  assert(verb.grammar.morphology.formClass===expected.formClass
+    &&verb.grammar.morphology.endingClass===expected.endingClass
+    &&verb.grammar.morphology.subjectMode===expected.subjectMode,key+': morphology disagrees with its person');
+  assert(verb.state==='raf'&&verb.sign.id===expected.sign,key+': fronted present verb state/sign is wrong');
+  assert(arHas(verb.ar,'فِعْلٌ مُضَارِعٌ مَرْفُوعٌ'),
+    key+': whole-word iʿrāb does not state present rafʿ');
+  const rel=data.relationships.find(r=>r.type==='mubtadaKhabar');
+  assert(rel&&rel.khabarKind==='verbalSentence'&&rel.mubtadaId===mubtada.id&&rel.anchorId===verb.id,
+    key+': the verbal sentence is not registered as the khabar of the fronted mubtadaʾ');
+  const tail=data.tokens[data.tokens.length-1];
+  assert(arHas(tail.phraseAr,'فِي مَحَلِّ رَفْعٍ خَبَرٌ')&&arHas(tail.phraseAr,'«'+mubtada.word+'»'),
+    key+': combined analysis omits the khabar position or its mubtadaʾ');
+  assert(arHas(tail.phraseAr,'الرَّابِطُ'),key+': combined analysis omits the rābiṭ');
+  const subjectRel=data.relationships.find(r=>r.type==='verbSubject'&&r.verbId===verb.id);
+  if(person==='3fs'){
+    assert(subjectRel.subjectType==='implicit'&&arEq(subjectRel.pronoun,'هِيَ'),key+': 3fs hidden subject is not هِيَ');
+    assert(arHas(verb.ar,'ضَمِيرٌ مُسْتَتِرٌ جَوَازًا')&&arHas(verb.ar,'«هِيَ»'),
+      key+': 3fs whole-word iʿrāb lacks جوازًا/هِيَ');
+    assert(!arHas(verb.ar,'وُجُوبًا'),key+': 3fs must not claim obligatory concealment');
+    assert(verb.subjectRuleId==='R_HIDDEN_SUBJECT_JAWAZ_3S',key+': 3fs concealment is not bound to the jawāz rule');
+    assert(arHas(tail.phraseAr,'«هِيَ»'),key+': the rābiṭ is not the hidden هِيَ');
+    assert((verb.components||[]).length===0,key+': 3fs must carry no internal component');
+    const why=api.buildTokenWhy(verb,data);
+    assert(why.ids.includes('WHY_SUBJECT_HIDDEN_HIYA'),key+': 3fs Why does not use the هِيَ rule');
+    assert(why.ar.join(' ').includes('جَوَازًا')&&why.ar.join(' ').includes('«هِيَ»'),key+': 3fs Why omits جوازًا/هِيَ');
+  }else{
+    assert(subjectRel.subjectType==='attached'&&arEq(subjectRel.pronoun,'أَلِفُ الِاثْنَيْنِ'),key+': 3fd subject is not the attached alif');
+    const alif=(verb.components||[]).find(c=>c.kind==='alif-ithnain');
+    assert(alif&&alif.syntacticRole==='fail'&&alif.mahall==='raf'&&alif.binaaSign==='sukun'&&alif.ruleId==='C_ALIF_ITHNAIN',
+      key+': 3fd alif component is not the canonical attached fāʿil');
+    assert(alif.id.indexOf(verb.id)===0,key+': 3fd alif component is not owned by its verb');
+    assert(arHas(verb.sign.ar,'ثُبُوتُ النُّونِ'),key+': 3fd sign is not retention of the nūn');
+    assert(!arHas(verb.ar,'مُسْتَتِرٌ'),key+': 3fd must not claim a hidden subject');
+    assert(!verb.subjectRuleId,key+': 3fd must not carry a concealment rule');
+    assert(arHas(tail.phraseAr,'أَلِفُ الِاثْنَيْنِ'),key+': the rābiṭ is not the attached alif');
+  }
+  frontedCases++;
+}
+
+// --- Ambiguity resolution: surface × template capability -> exactly one person ------------
+for(const pair of [['تَكْتُبُ','3fs'],['تَكْتُبَانِ','3fd']]){
+  const surface=pair[0],person=pair[1];
+  const record=api.verbFormIndex.get(surface);
+  const template=frontedTemplates[person];
+  assert(api.resolvePresentReading(record,{templateId:template.stableId})===person,
+    surface+': canonical template did not resolve exactly one person');
+  const unrelated=api.templates.find(t=>t.presentCapabilities.some(c=>c.person==='1s'));
+  assert(api.resolvePresentReading(record,{templateId:unrelated.stableId})===null,
+    surface+': a template authorizing neither reading still resolved a person');
+  assert(api.resolvePresentReading(record,{})===null,surface+': resolved a person with no template');
+  assert(api.resolvePresentReading(record,null)===null,surface+': resolved a person with no data');
+  assert(api.resolvePresentReading(record,{templateId:'T_DOES_NOT_EXIST_99'})===null,
+    surface+': an unknown template still resolved a person');
+  const reversedCandidates=record.morphology.presentPersonCandidates.slice().reverse();
+  const reversed={...record,morphology:{...record.morphology,presentPersonCandidates:reversedCandidates}};
+  assert(api.resolvePresentReading(reversed,{templateId:template.stableId})===person,
+    surface+': resolution depends on candidate order');
+  const both={stableId:'T_FAKE_BOTH_01',presentCapabilities:record.morphology.presentPersonCandidates.map(p=>({person:p}))};
+  const originalLength=api.templates.length;
+  api.templates.push(both);
+  assert(api.resolvePresentReading(record,{templateId:both.stableId})===null,
+    surface+': a template claiming both readings still resolved a single person');
+  api.templates.length=originalLength;
+  ambiguityCases+=7;
+}
+for(const template of api.templates){
+  for(const readings of Object.values(api.PRESENT_SURFACE_READINGS)){
+    const claimed=readings.filter(p=>template.presentCapabilities.some(c=>c.person===p));
+    assert(claimed.length<=1,template.stableId+' authorizes more than one reading of a shared surface');
+  }
+}
+
+// --- Same-surface person attacks: the Arabic never changes, only the claim ----------------
+for(const pair of [['3fs','2ms'],['3fd','2d']]){
+  const person=pair[0],other=pair[1];
+  const base=frontedBySurface[person+':'+FRONTED_EXPECTED[person].surfaces[0]];
+  assertPhase2Failure(person+' stored as '+other,mutatePresentVerb(clone(base),verb=>{verb.grammar.person=other}),
+    'E_PRESENT_PERSON','E_PRESENT_TEMPLATE_AUTHORIZATION','E_VERB_MORPHOLOGY');
+  assertPhase2Failure(person+' morphology rewritten to '+other,mutatePresentVerb(clone(base),verb=>{
+    verb.grammar.person=other;verb.grammar.morphology={...verb.grammar.morphology,person:other};
+  }),'E_PRESENT_PERSON','E_PRESENT_TEMPLATE_AUTHORIZATION','E_VERB_MORPHOLOGY');
+  const swapped=clone(base);
+  swapped.templateId=frontedTemplates[person==='3fs'?'3fd':'3fs'].stableId;
+  assertPhase2Failure(person+' rehomed onto the other fronted template',swapped,
+    'E_TEMPLATE_METADATA','E_PRESENT_TEMPLATE_AUTHORIZATION','E_PRESENT_PERSON','E_PRESENT_SURFACE');
+  ambiguityCases++;
+}
+
+// --- 3fs syntax attacks ------------------------------------------------------------------
+const fs3=frontedBySurface['3fs:تَكْتُبُ'];
+assertPhase2Failure('3fs hidden pronoun swapped to huwa',mutatePresentVerb(clone(fs3),(verb,data)=>{
+  verb.relations.subjectPronoun='هُوَ';
+  const rel=data.relationships.find(r=>r.type==='verbSubject'&&r.verbId===verb.id);rel.pronoun='هُوَ';
+}),'E_PRESENT_IMPLICIT_SUBJECT');
+assertPhase2Failure('3fs concealment bound to the wajib rule',mutatePresentVerb(clone(fs3),verb=>{
+  verb.subjectRuleId='R_HIDDEN_SUBJECT_WAJIB_PRESENT';
+}),'E_PRESENT_CONCEALMENT_SOURCE');
+assertPhase2Failure('3fs concealment source removed',mutatePresentVerb(clone(fs3),verb=>{delete verb.subjectRuleId}),'E_PRESENT_CONCEALMENT_SOURCE');
+assertPhase2Failure('3fs subjectMode rewritten to explicit',mutatePresentVerb(clone(fs3),verb=>{
+  verb.grammar.morphology={...verb.grammar.morphology,subjectMode:'explicit'};
+}),'E_VERB_MORPHOLOGY','E_PRESENT_IMPLICIT_SUBJECT');
+{
+  const asFail=clone(fs3);
+  asFail.tokens[0].grammar.role='faail';
+  assertPhase2Failure('3fs fronted noun relabelled as fail',asFail,
+    'E_PRESENT_IMPLICIT_SUBJECT','E_KHABAR_NO_MUBTADA','E_ROLE_CASE','E_PRESENT_EXPLICIT_SUBJECT','E_MUBTADA_NO_KHABAR','E_ORPHAN_SUBJECT','E_WHY_CANONICAL');
+}
+{
+  const noKhabar=clone(fs3);
+  noKhabar.relationships=noKhabar.relationships.filter(r=>r.type!=='mubtadaKhabar');
+  assertPhase2Failure('3fs mubtada left without its khabar',noKhabar,'E_MUBTADA_NO_KHABAR');
+}
+
+// --- 3fd syntax attacks ------------------------------------------------------------------
+const fd3=frontedBySurface['3fd:تَكْتُبَانِ'];
+assertPhase2Failure('3fd alif component removed',mutatePresentVerb(clone(fd3),verb=>{verb.components=[]}),'E_COMPONENT_SET');
+assertPhase2Failure('3fd alif component given the wrong role',mutatePresentVerb(clone(fd3),verb=>{verb.components[0].syntacticRole='none'}),'E_COMPONENT_INVARIANT');
+assertPhase2Failure('3fd alif component given the wrong mahall',mutatePresentVerb(clone(fd3),verb=>{verb.components[0].mahall='nasb'}),'E_COMPONENT_INVARIANT');
+assertPhase2Failure('3fd alif component given the wrong binaa',mutatePresentVerb(clone(fd3),verb=>{verb.components[0].binaaSign='fatha'}),'E_COMPONENT_INVARIANT');
+assertPhase2Failure('3fd alif component given the wrong owner',mutatePresentVerb(clone(fd3),verb=>{verb.components[0].id='OTHER:T1:C1'}),'E_COMPONENT_ID');
+assertPhase2Failure('3fd claims a hidden subject instead of its alif',mutatePresentVerb(clone(fd3),(verb,data)=>{
+  const rel=data.relationships.find(r=>r.type==='verbSubject'&&r.verbId===verb.id);
+  rel.subjectType='implicit';rel.pronoun='هِيَ';verb.relations.subjectType='implicit';verb.relations.subjectPronoun='هِيَ';
+}),'E_ATTACHED_SUBJECT','E_PRESENT_CONCEALMENT_SOURCE');
+{
+  const noKhabar=clone(fd3);
+  noKhabar.relationships=noKhabar.relationships.filter(r=>r.type!=='mubtadaKhabar');
+  assertPhase2Failure('3fd mubtada left without its khabar',noKhabar,'E_MUBTADA_NO_KHABAR');
+}
+{
+  const asFail=clone(fd3);
+  asFail.tokens[0].grammar.role='faail';
+  assertPhase2Failure('3fd fronted dual relabelled as fail',asFail,
+    'E_KHABAR_NO_MUBTADA','E_ROLE_CASE','E_NOUN_SIGN','E_TOKEN_INCOMPLETE','E_MUBTADA_NO_KHABAR','E_ORPHAN_SUBJECT','E_WHY_CANONICAL');
+}
+
+// --- D-3 source authorization ------------------------------------------------------------
+assert(api.isSourceAuthorized('R_HIDDEN_SUBJECT_WAJIB_PRESENT'),'The wajib concealment rule is not source-authorized');
+assert(api.isSourceAuthorized('R_HIDDEN_SUBJECT_JAWAZ_3S'),'The jawaz concealment rule is not source-authorized');
+for(const pair of [['R_HIDDEN_SUBJECT_WAJIB_PRESENT',['1s','1p','2ms']],['R_HIDDEN_SUBJECT_JAWAZ_3S',['3ms','3fs']]]){
+  for(const person of pair[1]){
+    assert(api.PRESENT_CONCEALMENT[person].ruleId===pair[0],person+' is not bound to '+pair[0]);
+  }
+}
+assert(arEq(api.PRESENT_CONCEALMENT['1s'].ar,'وُجُوبًا')&&arEq(api.PRESENT_CONCEALMENT['1p'].ar,'وُجُوبًا'),
+  'Speaker concealment must be obligatory');
+assert(arEq(api.PRESENT_CONCEALMENT['3ms'].ar,'جَوَازًا')&&arEq(api.PRESENT_CONCEALMENT['3fs'].ar,'جَوَازًا'),
+  'Singular absent-person concealment must be permissible');
+{
+  const wajib=api.SOURCE_REGISTRY.R_HIDDEN_SUBJECT_WAJIB_PRESENT;
+  const jawaz=api.SOURCE_REGISTRY.R_HIDDEN_SUBJECT_JAWAZ_3S;
+  assert(wajib.primarySource.pdfPages.includes(81),'The wajib rule lost its Al-Tuhfah p.81 primary page');
+  assert(wajib.secondarySources.some(s=>s.authorityId==='DAKUR_APPLIED_GRAMMAR_2E'
+    &&s.pdfPages.includes(26)&&s.pdfPages.includes(90)),'The wajib rule lost its Dakur pp.26/90 support');
+  assert(jawaz.primarySource.pdfPages.includes(130),'The jawaz rule lost its Al-Tuhfah p.130 primary page');
+  assert(jawaz.secondarySources.some(s=>s.authorityId==='DAKUR_APPLIED_GRAMMAR_2E'
+    &&[24,26,90].every(page=>s.pdfPages.includes(page))),'The jawaz rule lost its Dakur pp.24/26/90 support');
+  assertSourceRecordRejected('forged wajib record','R_HIDDEN_SUBJECT_WAJIB_PRESENT',{...clone(wajib),ruleId:'R_HIDDEN_SUBJECT_WAJIB_PRESENT'});
+  assertSourceRecordRejected('forged jawaz record','R_HIDDEN_SUBJECT_JAWAZ_3S',{...clone(jawaz),ruleId:'R_HIDDEN_SUBJECT_JAWAZ_3S'});
+  assertSourceRecordRejected('wajib record claimed by the jawaz rule','R_HIDDEN_SUBJECT_JAWAZ_3S',wajib);
+  assertSourceRecordRejected('jawaz record claimed by the wajib rule','R_HIDDEN_SUBJECT_WAJIB_PRESENT',jawaz);
+  assert(!api.isSourceAuthorized('R_HIDDEN_SUBJECT_UNKNOWN'),'An unknown concealment rule was authorized');
+}
+assertPhase2Failure('1s concealment bound to the jawaz rule',mutatePresentVerb(phase2Case('1s'),verb=>{
+  verb.subjectRuleId='R_HIDDEN_SUBJECT_JAWAZ_3S';
+}),'E_PRESENT_CONCEALMENT_SOURCE');
+
+// --- History: schema v3, canonical presentation, coordinated same-surface rewrites --------
+const frontedSnapshots={};
+for(const person of ['3fs','3fd']){
+  const data=frontedBySurface[person+':'+FRONTED_EXPECTED[person].surfaces[0]];
+  const snapshot=api.createExerciseSnapshot(data);
+  frontedSnapshots[person]=snapshot;
+  assert(snapshot.schemaVersion===3,person+': fronted snapshot is not schema v3');
+  const restored=api.restoreExerciseSnapshot(clone(snapshot));
+  assert(restored,person+': a clean fronted snapshot did not restore');
+  assert(api.validateExercise(restored).length===0,person+': restored fronted snapshot does not validate');
+  const corrupt=clone(snapshot);
+  corrupt.translation='forged translation';
+  corrupt.tokens.forEach(token=>{token.gloss='forged';token.enHint='forged';});
+  const repaired=api.restoreExerciseSnapshot(corrupt);
+  assert(repaired,person+': corrupted fronted presentation did not restore');
+  assert(repaired.translation===data.translation,person+': fronted translation was not canonically rebuilt');
+  assert(repaired.tokens.every((token,i)=>token.gloss===data.tokens[i].gloss),person+': fronted glosses were not canonically rebuilt');
+  frontedCases+=2;
+  presentHistoryCases+=3;
+}
+for(const pair of [['3fs','3fd'],['3fd','3fs']]){
+  const coordinated=clone(frontedSnapshots[pair[1]]);
+  coordinated.exerciseIdentity=frontedSnapshots[pair[0]].exerciseIdentity;
+  assert(api.restoreExerciseSnapshot(coordinated)===null,
+    pair[0]+' History identity accepted a complete coordinated rewrite to '+pair[1]);
+  coordinatedHistoryAttackCases++;
+  presentHistoryCases++;
+}
+for(const pair of [['3fs','2ms'],['3fd','2d']]){
+  const forged=clone(frontedSnapshots[pair[0]]);
+  const verb=forged.tokens.find(t=>t.tense==='present');
+  verb.grammar.person=pair[1];
+  if(verb.grammar.morphology)verb.grammar.morphology.person=pair[1];
+  assert(api.restoreExerciseSnapshot(forged)===null,
+    pair[0]+': a same-surface rewrite to '+pair[1]+' survived History restore');
+  presentHistoryCases++;
+  ambiguityCases++;
+}
+console.log('Phase-2b-A fronted-mubtada audit passed: '+frontedCases+' production/History checks and '+ambiguityCases+' ambiguity-authority checks.');
 assert(api.COMPONENT_REGISTRY['yaa-mukhataba']?.ruleId==='C_YAA_MUKHATABA'
   &&api.SOURCE_REGISTRY.C_YAA_MUKHATABA.primarySource.pdfPages.includes(38),
   'Canonical yāʾ al-mukhāṭabah component/source evidence is missing');
@@ -2312,35 +2677,57 @@ const additionalBlock=html.match(/const additionalVerbActions=\[([\s\S]*?)\n\];/
 const additionalRecords=[...additionalBlock.matchAll(/\{past:'([^']+)',pres:'([^']+)'/g)]
   .map(record=>({past:record[1],pres:record[2]}));
 assert(additionalRecords.length===196,`Expected 196 additional verb records, found ${additionalRecords.length}`);
-elements.startFilter.value='verb';
-elements.formFilter.value='singular';
-elements.stateFilter.value='any';
-elements.signFilter.value='damma';
-elements.signFilter.dispatch('change');
-const pastStarts=new Set();
-for(let iteration=0;iteration<5000;iteration++){
-  context.nahwGenerate();
-  pastStarts.add(elements.sentence.textContent.split(/\s+/)[0]);
+const pastCoverageTemplate=api.templates.find(template=>template.stableId==='T_VERB_SINGULAR_RAF_DAMMA_01');
+const presentCoverageTemplate=api.templates.find(template=>template.stableId==='T_NOUN_SINGULAR_NASB_FATHA_01');
+assert(pastCoverageTemplate?.starts==='verb'&&pastCoverageTemplate.form==='singular'
+  &&pastCoverageTemplate.state==='raf'&&pastCoverageTemplate.sign==='damma',
+  'Canonical additional-verb past coverage template is missing or changed');
+assert(presentCoverageTemplate?.starts==='noun'&&presentCoverageTemplate.form==='singular'
+  &&presentCoverageTemplate.state==='nasb'&&presentCoverageTemplate.sign==='fatha',
+  'Canonical additional-verb present coverage template is missing or changed');
+function buildWithGeneralVerbIndex(template,index){
+  const originalCrypto=context.crypto;
+  api.vocabularyHistory.delete('general-verbs');
+  context.crypto={getRandomValues(values){values[0]=index;return values}};
+  try{return api.buildTemplate(template.id)}
+  finally{
+    context.crypto=originalCrypto;
+    api.vocabularyHistory.delete('general-verbs');
+  }
 }
-const additionalPastSeen=additionalRecords.filter(record=>pastStarts.has(record.past)).length;
+let additionalPastSeen=0;
+let additionalPresentSeen=0;
+for(const record of additionalRecords){
+  const matchingIndexes=[];
+  api.verbLexicons.generalVerbActions.forEach((lexeme,index)=>{
+    if(lexeme.past===record.past&&lexeme.pres===record.pres)matchingIndexes.push(index);
+  });
+  assert(matchingIndexes.length===1,
+    `${record.past}/${record.pres}: expected one canonical general-verb lexeme, found ${matchingIndexes.length}`);
+  const index=matchingIndexes[0];
+  const pastExercise=buildWithGeneralVerbIndex(pastCoverageTemplate,index);
+  const pastVerb=pastExercise.tokens.find(token=>token.tense==='past');
+  assert(pastVerb?.word===record.past,
+    `${record.past}: canonical past template did not produce the selected lexeme`);
+  assert(api.validateExercise(pastExercise).length===0,
+    `${record.past}: canonical past coverage exercise did not validate`);
+  additionalPastSeen++;
+  const presentExercise=buildWithGeneralVerbIndex(presentCoverageTemplate,index);
+  const presentVerb=presentExercise.tokens.find(token=>token.tense==='present');
+  assert(presentVerb?.word===record.pres,
+    `${record.pres}: canonical present template did not produce the selected lexeme`);
+  assert(presentExercise.relationships.some(relationship=>
+    relationship.type==='mubtadaKhabar'&&relationship.khabarKind==='verbalSentence'),
+    `${record.pres}: canonical present coverage exercise lost its verbal-sentence khabar`);
+  assert(api.validateExercise(presentExercise).length===0,
+    `${record.pres}: canonical present coverage exercise did not validate`);
+  additionalPresentSeen++;
+}
 assert(additionalPastSeen===196,`Only ${additionalPastSeen} of 196 added past verbs appeared`);
-elements.startFilter.value='noun';
-elements.formFilter.value='singular';
-elements.stateFilter.value='any';
-elements.signFilter.value='fatha';
-elements.signFilter.dispatch('change');
-const presentSentences=[];
-for(let iteration=0;iteration<5000;iteration++){
-  context.nahwGenerate();
-  presentSentences.push(elements.sentence.textContent);
-  assert(elements.answers.innerHTML.includes('الْجُمْلَةُ الْفِعْلِيَّةُ'),
-    `Focused nominal run ${iteration}: verbal khabar analysis is missing`);
-}
-const additionalPresentSeen=additionalRecords
-  .filter(record=>presentSentences.some(sentence=>sentence.includes(` ${record.pres} `))).length;
 assert(additionalPresentSeen===196,`Only ${additionalPresentSeen} of 196 added present verbs appeared`);
 
-const nounArrayNames=['singularPeople','singularThings','places','brokenHuman','brokenThings','duals','smp','sfp','fiveNouns'];
+const nounArrayNames=['singularPeople','singularThings','places','brokenHuman','brokenThings','duals','smp','sfp',
+  'feminineHumanSingulars','feminineHumanDuals','fiveNouns'];
 const nounEntries=nounArrayNames.reduce((total,name)=>{
   const block=html.match(new RegExp(`const ${name}=\\[([\\s\\S]*?)\\n\\];`))[1];
   return total+(block.match(/\{/g)||[]).length;
@@ -2353,7 +2740,7 @@ for(const name of presentArrayNames){
 }
 const femininePastBlock=html.match(/const femininePastActions=\[([\s\S]*?)\n\];/)[1];
 const totalVerbFamilies=uniquePresentVerbs.size+(femininePastBlock.match(/\{past:'/g)||[]).length;
-assert(nounEntries===302,`Expected 302 noun entries, found ${nounEntries}`);
+assert(nounEntries===308,`Expected 308 noun entries, found ${nounEntries}`);
 assert(totalVerbFamilies===239,`Expected 239 verb families, found ${totalVerbFamilies}`);
 // The learner-facing footer must advertise the real, current totals in both English and Arabic-Indic
 // digits, so a future vocabulary change cannot update the engine counts while leaving the UI stale.
@@ -2637,7 +3024,7 @@ for(const start of optionValues.startFilter){
 
 // --- Test C: every production template has exactly one target whose real form/state/sign
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
-assert(api.templates.length===68,`Expected 68 production templates, found ${api.templates.length}`);
+assert(api.templates.length===70,`Expected 70 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -2779,7 +3166,7 @@ assert(api.grammarDiagnostics.rejected===rejectedBeforeState,
   `State-filtered generation produced ${api.grammarDiagnostics.rejected-rejectedBeforeState} validation rejections`);
 // Restore an unrestricted selection for the remaining audit.
 setFilters('any','any','any','any');elements.signFilter.dispatch('change');
-console.log(`Iʿrāb-state-filter audit passed: 68 templates, ${validMatrix.length} valid matrix cells, ${validTuples.length} valid filter tuples, ${stateFilterCases} checks.`);
+console.log(`Iʿrāb-state-filter audit passed: ${api.templates.length} templates, ${validMatrix.length} valid matrix cells, ${validTuples.length} valid filter tuples, ${stateFilterCases} checks.`);
 
 // ===================================================================================
 // Language-mode audit (presentation only — must NOT touch grammar/generation state).
@@ -2993,15 +3380,29 @@ for(const [tStart,tForm,tState,tSign] of validTuples){
 assert(tupleRuns===validTuples.length,'Not every valid filter tuple was explained');
 whyCases++;
 // C) Golden checks: representative structures produce the right explanation rules.
-function goldenFind(predicate,attempts=4000){
-  elements.startFilter.value='any';elements.formFilter.value='any';elements.stateFilter.value='any';elements.signFilter.value='any';
-  for(let i=0;i<attempts;i++){
-    context.nahwGenerate();
-    const ex=api.currentExercise();
-    for(const tok of ex.tokens){const hit=predicate(tok,ex);if(hit)return{tok,ex};}
+// Build every canonical production template through its genuine builder. Golden
+// predicates below do not depend on vocabulary identity; the only template-local
+// structural variation is the six-item humanPrepActions pool that can yield a ẓarf.
+// Its pickVaried history window is five, so six consecutive builds guarantee every
+// action regardless of random order. This bounded corpus proves reachability without
+// asking the global randomized template chooser to happen upon a rare template.
+const GOLDEN_LOCAL_VARIATION_BOUND=6;
+const deterministicGoldenCorpus=api.templates
+  .slice()
+  .sort((left,right)=>left.stableId.localeCompare(right.stableId))
+  .flatMap(template=>Array.from({length:GOLDEN_LOCAL_VARIATION_BOUND},
+    ()=>({template,ex:api.buildTemplate(template.id)})));
+function goldenFind(predicate){
+  for(const {template,ex} of deterministicGoldenCorpus){
+    for(const tok of ex.tokens){
+      if(predicate(tok,ex))return{tok,ex,template};
+    }
   }
   return null;
 }
+const coldIsmKanaGolden=goldenFind(token=>token.grammar.role==='ismKana');
+assert(coldIsmKanaGolden?.template.stableId==='T_VERB_SINGULAR_NASB_FATHA_02',
+  'Deterministic cold-corpus scan did not find ism kāna in its canonical template');
 const goldens=[
  ['singular fāʿil / ḍammah',t=>t.grammar.role==='faail'&&t.inflection==='singular',['WHY_ROLE_FAIL','WHY_STATE_FAIL','WHY_SIGN_SINGULAR_RAF']],
  ['singular object / fatḥah',t=>t.grammar.role==='object'&&t.inflection==='singular',['WHY_ROLE_OBJECT','WHY_STATE_OBJECT','WHY_SIGN_SINGULAR_NASB']],
@@ -3040,10 +3441,12 @@ const goldens=[
  ['past verb / estimated fatḥ with incidental sukūn',t=>t.tense==='past'&&t.grammar.morphology?.binaaClass==='estimated-fath-incidental-sukun',['WHY_PAST_VERB','WHY_PAST_FATH_EST_INCIDENTAL_SUKUN']],
  ['kāna (mabnī)',t=>t.tense==='kana',['WHY_KANA','WHY_MABNI_KANA']],
  ['mabnī particle',t=>t.grammar.type==='particle',['WHY_MABNI_PARTICLE']],
- // This golden targets the generic 3ms هُوَ rule. Phase-2 1s/1p exercises
- // intentionally use their separate أَنَا / نَحْنُ Why rules.
+ // Each present concealment person carries its own rule, so the Why can state both the
+ // estimated pronoun and the concealment class the D-3 sources actually license.
  ['hidden subject',t=>t.tense==='present'&&t.relations&&t.relations.subjectType==='implicit'
-   &&t.grammar.morphology?.person==='3ms',['WHY_SUBJECT_HIDDEN']],
+   &&t.grammar.morphology?.person==='3ms',['WHY_SUBJECT_HIDDEN_HUWA']],
+ ['hidden subject (3fs)',t=>t.tense==='present'&&t.relations&&t.relations.subjectType==='implicit'
+   &&t.grammar.morphology?.person==='3fs',['WHY_SUBJECT_HIDDEN_HIYA']],
  ['ẓarf',t=>t.grammar.role==='adverb',['WHY_ROLE_ZARF','WHY_STATE_ZARF']]
 ];
 for(const [name,pred,expectIds] of goldens){
@@ -3135,6 +3538,7 @@ whyCases++;
 {
   const hit=goldenFind(t=>Boolean(t.phraseWhy));
   assert(hit,'No construction card generated for the ordering check');
+  api.render(hit.ex,'',false);
   const card=elements.answers.innerHTML.split('<article').find(part=>part.includes('phrase-analysis'));
   const iIraab=card.indexOf('class="iraab"'),iWhy=card.indexOf('class="why-wrap"'),iPhrase=card.indexOf('class="phrase-analysis"');
   assert(iIraab>=0&&iWhy>=0&&iPhrase>=0,'Ordering check could not locate all sections');

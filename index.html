@@ -402,7 +402,7 @@ body.lang-arabic .icon-popover{direction:rtl}
       </div>
     </section>
     <div id="status" class="status"></div>
-    <div class="footer"><span class="en-only">Practice draws from 239 verb families and 302 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</span><span class="ar-only" lang="ar">يَعْتَمِدُ التَّدْرِيبُ عَلَى ٢٣٩ أُسْرَةً فِعْلِيَّةً وَ٣٠٢ اسْمًا. وَكُلُّ اخْتِيَارٍ مُتَوَافِقٍ يُخْتَارُ عَشْوَائِيًّا مَعَ تَجَنُّبِ التَّكْرَارِ الْقَرِيبِ.</span></div>
+    <div class="footer"><span class="en-only">Practice draws from 239 verb families and 308 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</span><span class="ar-only" lang="ar">يَعْتَمِدُ التَّدْرِيبُ عَلَى ٢٣٩ أُسْرَةً فِعْلِيَّةً وَ٣٠٨ اسْمًا. وَكُلُّ اخْتِيَارٍ مُتَوَافِقٍ يُخْتَارُ عَشْوَائِيًّا مَعَ تَجَنُّبِ التَّكْرَارِ الْقَرِيبِ.</span></div>
   </main>
 </div>
 
@@ -767,6 +767,31 @@ function rebuildCanonicalHistoryPresentation(data,template){
   verb.enHint='An explicitly registered advanced past form.';
   object.gloss=objectEn;
   data.translation=`${subject} ${registered.lexeme.pastEn} ${objectEn}.`;
+  return;
+ }
+ if(template?.frontedPresent){
+  // Rebuilt strictly from canonical data: the mubtadaʾ noun supplies the English subject,
+  // the resolved person supplies the verb form. Nothing is read back from the snapshot text.
+  const mubtada=data.tokens.find(token=>token?.grammar?.role==='mubtada');
+  const verb=data.tokens.find(token=>token?.grammar?.type==='verb'&&token.tense==='present');
+  const object=data.tokens.find(token=>token?.grammar?.role==='object');
+  const registered=verbFormIndex.get(verb?.word);
+  const morphology=authoritativeVerbMorphology(verb,data);
+  const subjectEn=mubtada?nounEnglish(mubtada.word,'nom'):'';
+  if(!mubtada||!verb||!object||!registered?.lexeme||registered.surface!==verb.word||!subjectEn
+    ||morphology.person!==template.presentPerson){
+   throw new Error('Cannot rebuild canonical fronted-present presentation.');
+  }
+  const verbEn=morphology.person==='3fs'?registered.lexeme.third:registered.lexeme.en;
+  const objectEn=nounEnglish(object.word,'acc');
+  verb.lexeme=registered.lexeme;
+  verb.surfaceHint=registered.surface;
+  verb.expectedSurface=registered.surface;
+  mubtada.gloss=subjectEn;
+  verb.gloss=`${subjectEn.toLowerCase()} ${verbEn}`;
+  verb.enHint='An exact registered person-bound present form.';
+  object.gloss=objectEn;
+  data.translation=`${cap(subjectEn)} ${verbEn} ${objectEn}.`;
   return;
  }
  if(!template?.presentPerson)return;
@@ -1945,6 +1970,20 @@ const sfp=[
  {nom:'الْبَاحِثَاتُ',acc:'الْبَاحِثَاتِ',gen:'الْبَاحِثَاتِ',en:'the female researchers'},
  {nom:'الْمُمَرِّضَاتُ',acc:'الْمُمَرِّضَاتِ',gen:'الْمُمَرِّضَاتِ',en:'the nurses'}
 ];
+/* Phase 2b-A. The fronted-mubtadaʾ constructions need a feminine human singular and dual;
+   the app previously carried feminine humans only in the sound feminine plural. These are
+   the singular and dual of lexemes already audited in `sfp` (الطَّالِبَاتُ، الْمُعَلِّمَاتُ،
+   الْمُسْلِمَاتُ) — not new vocabulary, and used ONLY by the two new templates. */
+const feminineHumanSingulars=[
+ {nom:'الطَّالِبَةُ',acc:'الطَّالِبَةَ',gen:'الطَّالِبَةِ',en:'the female student'},
+ {nom:'الْمُعَلِّمَةُ',acc:'الْمُعَلِّمَةَ',gen:'الْمُعَلِّمَةِ',en:'the female teacher'},
+ {nom:'الْمُسْلِمَةُ',acc:'الْمُسْلِمَةَ',gen:'الْمُسْلِمَةِ',en:'the Muslim woman'}
+];
+const feminineHumanDuals=[
+ {nom:'الطَّالِبَتَانِ',acc:'الطَّالِبَتَيْنِ',gen:'الطَّالِبَتَيْنِ',en:'the two female students'},
+ {nom:'الْمُعَلِّمَتَانِ',acc:'الْمُعَلِّمَتَيْنِ',gen:'الْمُعَلِّمَتَيْنِ',en:'the two female teachers'},
+ {nom:'الْمُسْلِمَتَانِ',acc:'الْمُسْلِمَتَيْنِ',gen:'الْمُسْلِمَتَيْنِ',en:'the two Muslim women'}
+];
 const fiveNouns=[
  {nom:'أَبُوكَ',acc:'أَبَاكَ',gen:'أَبِيكَ',en:'your father',base:'أب'},
  {nom:'أَخُوكَ',acc:'أَخَاكَ',gen:'أَخِيكَ',en:'your brother',base:'أخ'},
@@ -2229,13 +2268,16 @@ const advancedPastActions=[
    surface-unambiguous present persons. No prefix or suffix surgery is authority. */
 const advancedPresentActions=[
  {past:'كَتَبَ',en:'write',third:'writes',obj:['الْوَاجِبَ','الدَّرْسَ','الْجَوَابَ','الرِّسَالَةَ','الْقِصَّةَ'],forms:{
-  '3ms':'يَكْتُبُ','1s':'أَكْتُبُ','1p':'نَكْتُبُ','3md':'يَكْتُبَانِ','3mp':'يَكْتُبُونَ','2mp':'تَكْتُبُونَ','2fs':'تَكْتُبِينَ'
+  '3ms':'يَكْتُبُ','1s':'أَكْتُبُ','1p':'نَكْتُبُ','3md':'يَكْتُبَانِ','3mp':'يَكْتُبُونَ','2mp':'تَكْتُبُونَ','2fs':'تَكْتُبِينَ',
+  '3fs':'تَكْتُبُ','3fd':'تَكْتُبَانِ'
  }},
  {past:'فَتَحَ',en:'open',third:'opens',obj:['الْبَابَ','الْكِتَابَ','النَّافِذَةَ','الْحَقِيبَةَ'],forms:{
-  '3ms':'يَفْتَحُ','1s':'أَفْتَحُ','1p':'نَفْتَحُ','3md':'يَفْتَحَانِ','3mp':'يَفْتَحُونَ','2mp':'تَفْتَحُونَ','2fs':'تَفْتَحِينَ'
+  '3ms':'يَفْتَحُ','1s':'أَفْتَحُ','1p':'نَفْتَحُ','3md':'يَفْتَحَانِ','3mp':'يَفْتَحُونَ','2mp':'تَفْتَحُونَ','2fs':'تَفْتَحِينَ',
+  '3fs':'تَفْتَحُ','3fd':'تَفْتَحَانِ'
  }},
  {past:'دَرَسَ',en:'study',third:'studies',obj:['الدَّرْسَ'],forms:{
-  '3ms':'يَدْرُسُ','1s':'أَدْرُسُ','1p':'نَدْرُسُ','3md':'يَدْرُسَانِ','3mp':'يَدْرُسُونَ','2mp':'تَدْرُسُونَ','2fs':'تَدْرُسِينَ'
+  '3ms':'يَدْرُسُ','1s':'أَدْرُسُ','1p':'نَدْرُسُ','3md':'يَدْرُسَانِ','3mp':'يَدْرُسُونَ','2mp':'تَدْرُسُونَ','2fs':'تَدْرُسِينَ',
+  '3fs':'تَدْرُسُ','3fd':'تَدْرُسَانِ'
  }}
 ];
 const brokenObjectActions=[
@@ -2382,7 +2424,7 @@ const objectGroups={
 };
 const generalVerbActions=[...verbs,...additionalVerbActions];
 
-const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...fiveNouns];
+const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...feminineHumanSingulars,...feminineHumanDuals,...fiveNouns];
 function nounEnglish(word,caseName='acc'){
  return allCaseNouns.find(item=>item[caseName]===word)?.en||'the noun';
 }
@@ -2524,20 +2566,43 @@ const PRESENT_MORPHOLOGY=Object.freeze({
  '3md':Object.freeze({tense:'present',person:'3md',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'alif-ithnain'}),
  '3mp':Object.freeze({tense:'present',person:'3mp',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'waw-jamaaah'}),
  '2mp':Object.freeze({tense:'present',person:'2mp',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'waw-jamaaah'}),
- '2fs':Object.freeze({tense:'present',person:'2fs',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'yaa-mukhataba'})
+ '2fs':Object.freeze({tense:'present',person:'2fs',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'yaa-mukhataba'}),
+ /* Phase 2b-A. Both surfaces are shared with a second-person reading (تَكْتُبُ is also 2ms,
+    تَكْتُبَانِ is also 2d), so neither person may ever be resolved from the surface alone.
+    See PRESENT_SURFACE_READINGS and resolvePresentReading. */
+ '3fs':Object.freeze({tense:'present',person:'3fs',subjectMode:'implicit',formClass:'ordinary',endingClass:'none'}),
+ '3fd':Object.freeze({tense:'present',person:'3fd',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'alif-ithnain'}),
+ /* Morphology authority only — no production template may declare these persons.
+    They exist so an ambiguous surface can name every reading it genuinely has. */
+ '2ms':Object.freeze({tense:'present',person:'2ms',subjectMode:'implicit',formClass:'ordinary',endingClass:'none'}),
+ '2d':Object.freeze({tense:'present',person:'2d',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'alif-ithnain'})
 });
+/* Persons that exist only as readings of an ambiguous surface. A production template that
+   declares one of these is a bug, not a feature; add() rejects it. */
+const PRESENT_NON_PRODUCTION_PERSONS=Object.freeze(['2ms','2d']);
 const PRESENT_ENDING_COMPONENTS=Object.freeze({
  'none':Object.freeze([]),
  'alif-ithnain':Object.freeze(['alif-ithnain']),
  'waw-jamaaah':Object.freeze(['waw-jamaaah']),
  'yaa-mukhataba':Object.freeze(['yaa-mukhataba'])
 });
-const PRESENT_HIDDEN_SUBJECTS=Object.freeze({'1s':'أَنَا','1p':'نَحْنُ','3ms':'هُوَ'});
+const PRESENT_HIDDEN_SUBJECTS=Object.freeze({'1s':'أَنَا','1p':'نَحْنُ','3ms':'هُوَ','3fs':'هِيَ','2ms':'أَنْتَ'});
+/* Which D-3 rule authorizes each hidden-subject claim, and how the claim is worded.
+   Speaker/addressee → obligatory; singular absent person → permissible. */
+const PRESENT_CONCEALMENT=Object.freeze({
+ '1s':Object.freeze({ar:'وُجُوبًا',en:'obligatorily',ruleId:'R_HIDDEN_SUBJECT_WAJIB_PRESENT'}),
+ '1p':Object.freeze({ar:'وُجُوبًا',en:'obligatorily',ruleId:'R_HIDDEN_SUBJECT_WAJIB_PRESENT'}),
+ '2ms':Object.freeze({ar:'وُجُوبًا',en:'obligatorily',ruleId:'R_HIDDEN_SUBJECT_WAJIB_PRESENT'}),
+ '3ms':Object.freeze({ar:'جَوَازًا',en:'permissibly',ruleId:'R_HIDDEN_SUBJECT_JAWAZ_3S'}),
+ '3fs':Object.freeze({ar:'جَوَازًا',en:'permissibly',ruleId:'R_HIDDEN_SUBJECT_JAWAZ_3S'})
+});
 /* Which internal components a verb token carries — derived ONLY from structural
    morphology. A stored componentKinds array is never consulted. */
-function verbComponentKinds(token){
+// `data` carries the canonical template, without which an ambiguous surface has no single
+// authorized reading and therefore no components.
+function verbComponentKinds(token,data=null){
  if(!token||token.grammar.type!=='verb')return [];
- const morphology=authoritativeVerbMorphology(token);
+ const morphology=authoritativeVerbMorphology(token,data);
  if(token.tense==='past')return[...(PAST_ENDING_COMPONENTS[morphology.endingClass]||[])];
  if(token.tense==='present'){
   const kinds=[...(PRESENT_ENDING_COMPONENTS[morphology.endingClass]||[])];
@@ -2550,7 +2615,12 @@ function authoritativeVerbMorphology(token,data=null){
  const registered=token?.grammar?.type==='verb'?verbFormIndex.get(token.word):null;
  if(token?.tense==='present'){
   const legacyPerson={pres:'3ms',acc:'3ms',juss:'3ms',five:'3mp',fiveSub:'3mp'}[registered?.form];
-  const person=registered?.morphology?.presentPerson||legacyPerson;
+  // An explicitly registered surface never reports its person from the stored token; it is
+  // resolved from the frozen reading set against the canonical template, and an ambiguous
+  // surface that resolves to zero or several readings reports "unregistered" and is rejected.
+  const person=registered?.morphology?.presentPersonCandidates
+   ?resolvePresentReading(registered,data)
+   :legacyPerson;
   const base=PRESENT_MORPHOLOGY[person];
   if(!base)return{registered:false,feminineTaa:false};
   const result={...base,registered:true,feminineTaa:false};
@@ -2592,7 +2662,7 @@ function materializeAuthoritativeMorphology(data){
 }
 function materializeComponents(data){
  data.tokens.forEach(token=>{
-  const kinds=verbComponentKinds(token);
+  const kinds=verbComponentKinds(token,data);
   token.components=kinds.map((kind,i)=>makeComponent(kind,token.id,i+1));
  });
 }
@@ -2700,7 +2770,7 @@ const sourceRule=(topic,pdfPages,conditions,secondarySources=[])=>Object.freeze(
  conditions,
  exceptions:'Anything outside the stated conditions is excluded from production generation.'
 });
-const secondarySupportedRule=(topic,pdfPages,conditions,secondaryRuleId,secondarySources)=>Object.freeze({
+const secondarySupportedRule=(topic,pdfPages,conditions,secondaryRuleId,secondarySources,exceptions)=>Object.freeze({
  topic,
  status:SOURCE_STATUS.VERIFIED_PRIMARY_SECONDARY,
  productionEnabled:true,
@@ -2710,7 +2780,7 @@ const secondarySupportedRule=(topic,pdfPages,conditions,secondaryRuleId,secondar
  secondaryRuleId,
  secondarySources:Object.freeze(secondarySources.map(source=>Object.freeze({...source,pdfPages:Object.freeze([...source.pdfPages])}))),
  conditions,
- exceptions:'The primary source controls the project’s past-bināʾ model; the identified secondary source supports only the stated component analysis.'
+ exceptions:exceptions||'The primary source controls the project’s past-bināʾ model; the identified secondary source supports only the stated component analysis.'
 });
 const disabledSourceRule=(topic,reason)=>Object.freeze({
  topic,status:SOURCE_STATUS.DISABLED,productionEnabled:false,primarySource:null,secondarySources:Object.freeze([]),conditions:reason,exceptions:'The generic fallback may never enter production.'
@@ -2743,10 +2813,51 @@ const DAKUR_ALIF_ITHNAIN=Object.freeze({
  scope:'internal-component-analysis:alif-ithnain',
  exactClaim:'«كَتَبَا»: the alif is alif al-ithnayn, a connected pronoun built on sukūn in the position of rafʿ as fāʿil.'
 });
+/* D-3 — hidden (mustatir) subjects of the present verb. Two rules only: the division is
+   between the speaker/addressee (obligatory concealment) and the singular absent person
+   (permissible concealment). Persons are NOT split into one rule each; each rule states
+   its own estimated pronouns. Daʿkūr p.26 divides the two categories explicitly:
+   «إِذَا كَانَ الضَّمِيرُ يَدُلُّ عَلَى غَائِبٍ فَهُوَ يَسْتَتِرُ جَوَازًا» against
+   «إِذَا دَلَّ الضَّمِيرُ عَلَى الْحَاضِرِ كَانَ الِاسْتِتَارُ وَاجِبًا». */
+const DAKUR_HIDDEN_WAJIB=Object.freeze({
+ authorityId:'DAKUR_APPLIED_GRAMMAR_2E',
+ ruleId:'R_HIDDEN_SUBJECT_WAJIB_PRESENT',
+ evidenceType:'rule-support',
+ pdfPages:Object.freeze([26,90]),
+ relevantLocation:'Printed p. 26, section «الاستتار الواجب» with «أَكْتُبُ» and «نَكْتُبُ»; p. 90, the present-verb rafʿ chapter, which states both concealment classes.',
+ scope:'grammar-rule:R_HIDDEN_SUBJECT_WAJIB_PRESENT',
+ exactClaim:'«إِذَا دَلَّ الضَّمِيرُ عَلَى الْحَاضِرِ كَانَ الِاسْتِتَارُ وَاجِبًا»: the fāʿil of «أَكْتُبُ» is a pronoun concealed obligatorily estimated «أَنَا», and of «نَكْتُبُ» estimated «نَحْنُ».'
+});
+const DAKUR_HIDDEN_JAWAZ=Object.freeze({
+ authorityId:'DAKUR_APPLIED_GRAMMAR_2E',
+ ruleId:'R_HIDDEN_SUBJECT_JAWAZ_3S',
+ evidenceType:'rule-support',
+ pdfPages:Object.freeze([24,26,90]),
+ relevantLocation:'Printed p. 26, section «الاستتار الجائز»; p. 24, «وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هِيَ»; p. 90, the present-verb rafʿ chapter.',
+ scope:'grammar-rule:R_HIDDEN_SUBJECT_JAWAZ_3S',
+ exactClaim:'«إِذَا كَانَ الضَّمِيرُ يَدُلُّ عَلَى غَائِبٍ فَهُوَ يَسْتَتِرُ جَوَازًا، وَضَمِيرُ الْغَائِبِ الَّذِي يَسْتَتِرُ جَوَازًا هُوَ ضَمِيرُ الْمُفْرَدِ الْغَائِبِ (هُوَ) وَضَمِيرُ الْمُفْرَدَةِ الْغَائِبَةِ (هِيَ)».'
+});
 const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_MUBTADA_RAF:sourceRule('The mubtadaʾ is nominative by ibtidāʾ.',[85,86,99,100],'Only an explicit nominal-sentence mubtadaʾ, including a delayed mubtadaʾ.',[IA_NOMINAL]),
  R_KHABAR_RAF:sourceRule('A single-word khabar is nominative by the mubtadaʾ.',[85,86,99,100,101],'Only a directly inflected, single-word khabar.',[IA_NOMINAL]),
  R_FAIL_RAF:sourceRule('The subject to which a verb is ascribed is nominative.',[87,88,89,90,91,92,93,97],'Explicit noun subjects use noun inflection; attached or hidden pronouns are built forms.'),
+ // Al-Tuḥfah p.81 supplies the wājib model and its exact wording for the addressee
+ // («وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ فِيهِ وُجُوبًا تَقْدِيرُهُ أَنْتَ»); Daʿkūr supplies the
+ // exact speaker claims «أَكْتُبُ»/«نَكْتُبُ». Only 1s and 1p are production-enabled here.
+ R_HIDDEN_SUBJECT_WAJIB_PRESENT:secondarySupportedRule(
+  'A present verb whose fāʿil denotes the speaker or the addressee has a hidden subject concealed obligatorily, estimated أنا, نحن, or أنت according to person.',
+  [81],
+  'Only an explicitly registered present form with no explicit fāʿil. Production is limited to 1s (أَنَا) and 1p (نَحْنُ); the أَنْتَ wording is authorized but 2ms is not production-enabled, because an isolated تَـ surface is also the 3fs reading.',
+  'R_HIDDEN_SUBJECT_WAJIB_PRESENT',
+  [DAKUR_HIDDEN_WAJIB],
+  'The primary source supplies the obligatory-concealment model and its addressee wording; the identified secondary source supplies the exact speaker-person claims. Neither authorizes 2ms production.'),
+ // Al-Tuḥfah p.130 states the jawāz rule directly for هو; Daʿkūr p.26 names both هو and هي
+ // as the absent-person pronouns concealed permissibly, and p.24 gives the هي wording.
+ R_HIDDEN_SUBJECT_JAWAZ_3S:sourceRule(
+  'A present verb whose fāʿil denotes a singular absent person may contain a hidden subject concealed permissibly, estimated هو or هي.',
+  [130],
+  'Only a singular absent person with no explicit fāʿil following the verb. 3ms uses its existing implicit-subject contexts; 3fs is produced only in the fronted feminine-mubtadaʾ construction, where the hidden pronoun is the rābiṭ returning to the mubtadaʾ.',
+  [DAKUR_HIDDEN_JAWAZ]),
  R_MAFUL_NASB:sourceRule('A direct object is accusative when the subject’s action is connected to it.',[140,141],'Only objects of lexically transitive verbs generated by the app.'),
  R_HARF_JARR:sourceRule('A noun after a verified preposition is khafḍ (genitive).',[13,174,175,176,177],'The internal legacy ID says JARR; displayed terminology follows Al-Tuḥfah and says khafḍ.'),
  R_MUDAF_ILAYH:sourceRule('A muḍāf ilayh is khafḍ by iḍāfah.',[174,175,177,178],'The immediately following second noun, or an attached pronoun, completes the iḍāfah.'),
@@ -2967,6 +3078,8 @@ registerNounSet(sfp,'sfp');
 registerNounSet(femininePluralPredicates,'sfp');
 registerNounSet(masculineThingPredicates,'singular');
 registerNounSet(feminineThingPredicates,'singular');
+registerNounSet(feminineHumanSingulars,'singular');
+registerNounSet(feminineHumanDuals,'dual');
 registerNounSet(fiveNouns,'fiveNouns');
 function registerVerbSet(items,morphology={}){
  items.forEach(lexeme=>{
@@ -2982,6 +3095,19 @@ function registerAdvancedPastSet(items){
   verbFormIndex.set(surface,{lexeme,form:'past',surface,morphology:Object.freeze({pastPerson})});
  }));
 }
+/* Reviewed morphological ambiguity. A تـ-prefixed present surface is genuinely readable as
+   more than one person, and nothing in the written word settles which one. The reading is
+   fixed by the production template's frozen capabilities (resolvePresentReading) — never by
+   the surface, never by candidate order, never by the stored token. Persons that appear here
+   without a production template are morphology authority only. */
+const PRESENT_SURFACE_READINGS=Object.freeze({
+ '3fs':Object.freeze(['2ms','3fs']),
+ '3fd':Object.freeze(['2d','3fd'])
+});
+/* A surface may be claimed by the advanced-present pass exactly once. registerVerbSet may
+   have already stored the same string as a plain base form ('pres'); upgrading that record
+   is intentional. A second advanced-present write, a duplicate person, or a different lexeme
+   is a registry bug and throws rather than silently overwriting the earlier reading. */
 function registerAdvancedPresentSet(items){
  items.forEach(action=>{
   const base=verbs.find(lexeme=>lexeme.past===action.past);
@@ -2990,11 +3116,33 @@ function registerAdvancedPresentSet(items){
   action.lexeme=lexeme;
   Object.entries(action.forms).forEach(([presentPerson,surface])=>{
    if(!PRESENT_MORPHOLOGY[presentPerson])throw new Error(`Unsupported advanced-present person: ${presentPerson}`);
-   const collision=verbFormIndex.get(surface);
-   if(collision&&collision.lexeme?.past!==action.past)throw new Error(`Duplicate advanced-present surface: ${surface}`);
-   verbFormIndex.set(surface,{lexeme,form:'presentRaf',surface,morphology:Object.freeze({presentPerson,exactPresentRaf:true})});
+   const candidates=PRESENT_SURFACE_READINGS[presentPerson]||Object.freeze([presentPerson]);
+   if(!candidates.includes(presentPerson))throw new Error(`Reading set for ${presentPerson} does not contain its own person.`);
+   candidates.forEach(candidate=>{
+    if(!PRESENT_MORPHOLOGY[candidate])throw new Error(`Unsupported present reading ${candidate} for surface ${surface}.`);
+   });
+   const existing=verbFormIndex.get(surface);
+   if(existing?.form==='presentRaf')throw new Error(`Duplicate advanced-present surface registration: ${surface}`);
+   if(existing&&existing.lexeme?.past!==action.past)throw new Error(`Conflicting advanced-present surface lexeme: ${surface}`);
+   verbFormIndex.set(surface,{lexeme,form:'presentRaf',surface,morphology:Object.freeze({
+    presentPerson,
+    presentPersonCandidates:candidates,
+    exactPresentRaf:true
+   })});
   });
  });
+}
+/* Exactly one authorized person, or nothing. A single-reading surface resolves on its own;
+   an ambiguous surface resolves only through the canonical template's frozen capabilities,
+   and zero matches or more than one match both reject. */
+function resolvePresentReading(registered,data){
+ const candidates=registered?.morphology?.presentPersonCandidates;
+ if(!Array.isArray(candidates)||!candidates.length)return null;
+ if(candidates.length===1)return candidates[0];
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ const capabilities=template?.presentCapabilities||[];
+ const matches=candidates.filter(person=>capabilities.some(capability=>capability.person===person));
+ return matches.length===1?matches[0]:null;
 }
 registerVerbSet(verbs);
 registerVerbSet(additionalVerbActions);
@@ -3087,7 +3235,12 @@ const AFAL5_PERSONS=Object.freeze({
  '2md':{stem:'second',raf:'َانِ',dropped:'َا',subjectAr:'أَلِفُ الِاثْنَيْنِ',subjectEn:'the dual alif'},
  '3mp':{stem:'third',raf:'ُونَ',dropped:'ُوا',subjectAr:'وَاوُ الْجَمَاعَةِ',subjectEn:'the plural wāw'},
  '2mp':{stem:'second',raf:'ُونَ',dropped:'ُوا',subjectAr:'وَاوُ الْجَمَاعَةِ',subjectEn:'the plural wāw'},
- '2fs':{stem:'second',raf:'ِينَ',dropped:'ِي',subjectAr:'يَاءُ الْمُخَاطَبَةِ',subjectEn:'the feminine-address yāʾ'}
+ '2fs':{stem:'second',raf:'ِينَ',dropped:'ِي',subjectAr:'يَاءُ الْمُخَاطَبَةِ',subjectEn:'the feminine-address yāʾ'},
+ /* 3fd shares the second-person prefix shape, so its derived surface is identical to 2md.
+    Production never derives it — the exact surface is registered — but the subject labels
+    are read from here by the verbal-khabar rābiṭ explanation. */
+ '3fd':{stem:'second',raf:'َانِ',dropped:'َا',subjectAr:'أَلِفُ الِاثْنَيْنِ',subjectEn:'the dual alif'},
+ '2d':{stem:'second',raf:'َانِ',dropped:'َا',subjectAr:'أَلِفُ الِاثْنَيْنِ',subjectEn:'the dual alif'}
 });
 function inflectFiveVerb(lexeme,person,mood,allowDerived=true){
  if(!lexeme?.pres) throw new Error('A five-verb form needs a present-tense lexeme.');
@@ -3130,7 +3283,9 @@ function inflectVerb(token,tokens,index){
  token.sign=GRAMMAR_SIGNS[moodRule[0]];
  token.ruleId=moodRule[1];
  if(registered?.form==='presentRaf'&&token.grammar.exactPresentRaf){
-  if(token.state!=='raf'||registered.morphology.presentPerson!==token.grammar.person)throw new Error(`Exact present surface is not authorized for this person/state: ${token.surfaceHint}`);
+  // The person must be one the surface can genuinely carry. Which single reading is correct
+  // is settled later by resolvePresentReading against the canonical template.
+  if(token.state!=='raf'||!registered.morphology.presentPersonCandidates?.includes(token.grammar.person))throw new Error(`Exact present surface is not authorized for this person/state: ${token.surfaceHint}`);
   token.expectedSurface=registered.surface;
  }else if(token.inflection==='afalKhamsa') token.expectedSurface=inflectFiveVerb(token.lexeme,token.grammar.person,token.state,false);
  else token.expectedSurface=token.lexeme?.[{raf:'pres',nasb:'acc',jazm:'juss'}[token.state]]||token.surfaceHint;
@@ -3196,6 +3351,9 @@ function resolveRelationships(data){
     const pronoun=verb.tense==='present'?PRESENT_HIDDEN_SUBJECTS[morphology?.person]:'هُوَ';
     addRelationship(data,'verbSubject',{verbId:verb.id,subjectType:'implicit',pronoun});
     verb.relations.subjectType='implicit';verb.relations.subjectPronoun=pronoun;
+    // The concealment claim is a separate sourced statement from the verb's mood rule, so it
+    // carries its own rule id and is gated by the same source-verification check.
+    if(verb.tense==='present')verb.subjectRuleId=PRESENT_CONCEALMENT[morphology?.person]?.ruleId;
    }
   });
  tokens.forEach(object=>{
@@ -3306,12 +3464,18 @@ function renderVerbAnalysis(token){
  if(token.inflection==='afalKhamsa'){
   arabic+=`؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ`;
  }else if(token.relations.subjectType==='implicit'){
-  const concealment=token.grammar.morphology?.person==='3ms'?' جَوَازًا':' وُجُوبًا';
-  arabic+=`، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ${concealment} تَقْدِيرُهُ «${token.relations.subjectPronoun}»`;
+  // The concealment class is a sourced grammatical claim, not a formatting choice: the
+  // speaker and addressee conceal obligatorily, the singular absent person permissibly.
+  const concealment=PRESENT_CONCEALMENT[token.grammar.morphology?.person];
+  if(!concealment)throw new Error(`No verified concealment class for present person “${token.grammar.morphology?.person}”.`);
+  arabic+=`، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ ${concealment.ar} تَقْدِيرُهُ «${token.relations.subjectPronoun}»`;
  }
  token.ar=`${arabic}.`;
  const causeEn=governor?.grammar.particleType==='lan'?' because lan governs it':governor?.grammar.particleType==='lam'?' because lam governs it':'';
- const subjectEn=token.relations.subjectType==='implicit'?` Its subject is the hidden pronoun “${{'أَنَا':'I','نَحْنُ':'we','هُوَ':'he'}[token.relations.subjectPronoun]}”.`:'';
+ const hiddenSubjectEn={'أَنَا':'I','نَحْنُ':'we','هُوَ':'he','هِيَ':'she','أَنْتَ':'you'}[token.relations.subjectPronoun];
+ const subjectEn=token.relations.subjectType==='implicit'
+  ?` Its subject is a hidden pronoun, concealed ${PRESENT_CONCEALMENT[token.grammar.morphology?.person].en}, understood as “${hiddenSubjectEn}”.`
+  :'';
  token.en=`A present-tense verb. It is ${token.state==='raf'?'indicative':token.state==='nasb'?'subjunctive':'jussive'}${causeEn}; its sign is ${token.sign.en}.${subjectEn}`;
 }
 function renderParticleAnalysis(token){
@@ -3476,9 +3640,15 @@ function whyVerbSubject(t){
   return{id:'WHY_SUBJECT_ATTACHED',ar:`وَ${component.nameAr} ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.`,en:`${cap(component.nameEn)} is attached to it and is its فَاعِل.`};
  }
  if(t.relations&&t.relations.subjectType==='implicit'){
-  if(t.grammar.morphology?.person==='1s')return{id:'WHY_SUBJECT_HIDDEN_ANA',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «أَنَا».',en:'Its فَاعِل is a hidden pronoun understood as «أَنَا» (I).'};
-  if(t.grammar.morphology?.person==='1p')return{id:'WHY_SUBJECT_HIDDEN_NAHNU',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «نَحْنُ».',en:'Its فَاعِل is a hidden pronoun understood as «نَحْنُ» (we).'};
-  return{id:'WHY_SUBJECT_HIDDEN',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ».',en:'Its فَاعِل is a hidden pronoun understood as «هُوَ».'};
+  // Built from the same tables the whole-word analysis uses, so the concealment class and
+  // the estimated pronoun can never drift apart between the two renderings.
+  const person=t.grammar.morphology?.person;
+  const concealment=PRESENT_CONCEALMENT[person];
+  const pronoun=PRESENT_HIDDEN_SUBJECTS[person];
+  const id={'1s':'WHY_SUBJECT_HIDDEN_ANA','1p':'WHY_SUBJECT_HIDDEN_NAHNU','3ms':'WHY_SUBJECT_HIDDEN_HUWA','3fs':'WHY_SUBJECT_HIDDEN_HIYA'}[person];
+  if(!concealment||!pronoun||!id)throw new Error(`WHY: no verified hidden-subject rule for present person “${person}”`);
+  const gloss={'أَنَا':'I','نَحْنُ':'we','هُوَ':'he','هِيَ':'she'}[pronoun];
+  return{id,ar:`وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ ${concealment.ar} تَقْدِيرُهُ «${pronoun}».`,en:`Its فَاعِل is a hidden pronoun, concealed ${concealment.en}, understood as «${pronoun}» (${gloss}).`};
  }
  return null;
 }
@@ -3541,7 +3711,12 @@ function buildRelationshipWhy(rel,data){
   const link=attached?AFAL5_PERSONS[anchor.grammar.person]:null;
   push(attached
    ?{id:'WHY_REL_LINK_ATTACHED',ar:`وَفِيهَا ${link.subjectAr} تَعُودُ عَلَى الْمُبْتَدَأِ، وَهِيَ الرَّابِطُ.`,en:`Inside it is ${link.subjectEn}, which refers back to the مُبْتَدَأ; that is the رَابِط.`}
-   :{id:'WHY_REL_LINK_HIDDEN',ar:'وَفِيهَا ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ» يَعُودُ عَلَى الْمُبْتَدَأِ، وَهُوَ الرَّابِطُ.',en:'Inside it is a hidden pronoun understood as «هُوَ» that refers back to the مُبْتَدَأ; that is the رَابِط.'});
+   :(()=>{
+    // The rābiṭ is the verb's own hidden pronoun, so it must agree with the mubtadaʾ it
+    // returns to: «هِيَ» for a feminine singular, «هُوَ» for a masculine one.
+    const hidden=anchor.relations?.subjectPronoun||'هُوَ';
+    return{id:'WHY_REL_LINK_HIDDEN',ar:`وَفِيهَا ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «${hidden}» يَعُودُ عَلَى الْمُبْتَدَأِ، وَهُوَ الرَّابِطُ.`,en:`Inside it is a hidden pronoun understood as «${hidden}» that refers back to the مُبْتَدَأ; that is the رَابِط.`};
+   })());
   push({id:'WHY_REL_KHABAR_POSITION',ar:'فَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.',en:'So the sentence is in the position of rafʿ as the خَبَر.'});
  }else{
   const fronted=rel.khabarKind==='frontedPhrase';
@@ -3575,7 +3750,10 @@ function renderRelationshipAnalysis(data){
    anchor.en+=` It is the khabar of the mubtadaʾ “${mubtada.word}”.`;
   }else if(rel.khabarKind==='verbalSentence'){
    const attached=anchor.inflection==='afalKhamsa';
-   const linkAr=attached?`وَ${AFAL5_PERSONS[anchor.grammar.person].subjectAr} تَعُودُ عَلَى الْمُبْتَدَأِ «${mubtada.word}»، وَهِيَ الرَّابِطُ بَيْنَهُمَا.`:`وَالضَّمِيرُ الْمُسْتَتِرُ «هُوَ» يَعُودُ عَلَى الْمُبْتَدَأِ «${mubtada.word}»، وَهُوَ الرَّابِطُ بَيْنَهُمَا.`;
+   // The link names the verb's actual subject: its attached pronoun, or its own hidden
+   // pronoun — «هِيَ» when the mubtadaʾ it returns to is a feminine singular.
+   const hiddenLink=anchor.relations?.subjectPronoun||'هُوَ';
+   const linkAr=attached?`وَ${AFAL5_PERSONS[anchor.grammar.person].subjectAr} تَعُودُ عَلَى الْمُبْتَدَأِ «${mubtada.word}»، وَهِيَ الرَّابِطُ بَيْنَهُمَا.`:`وَالضَّمِيرُ الْمُسْتَتِرُ «${hiddenLink}» يَعُودُ عَلَى الْمُبْتَدَأِ «${mubtada.word}»، وَهُوَ الرَّابِطُ بَيْنَهُمَا.`;
    const sentenceRecipient=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)).filter(Boolean).at(-1)||anchor;
    sentenceRecipient.phraseAr=`وَالْجُمْلَةُ الْفِعْلِيَّةُ «${phrase}» فِي مَحَلِّ رَفْعٍ خَبَرٌ لِلْمُبْتَدَأِ «${mubtada.word}». ${linkAr}`;
    sentenceRecipient.phraseEn=`Together, “${phrase}” is a verbal sentence serving as the khabar of “${mubtada.word}” and contains a link back to it.`;
@@ -3662,9 +3840,15 @@ function validateExercise(data){
  data.tokens.forEach(token=>{
   if(!['noun','verb','particle'].includes(token.grammar?.type))fail('E_GRAMMAR_TYPE','Token has an unknown grammar type.',token);
   if(!token.id||!token.ruleId||!token.ar||!token.en)fail('E_TOKEN_INCOMPLETE','Token metadata or explanation is incomplete.',token);
-  [token.ruleId,token.signRuleId].filter(Boolean).forEach(ruleId=>{
+  [token.ruleId,token.signRuleId,token.subjectRuleId].filter(Boolean).forEach(ruleId=>{
    if(!isSourceAuthorized(ruleId))fail('E_SOURCE_UNVERIFIED',`Rule ${ruleId} is missing, disabled, or not source-verified.`,token);
   });
+  // A hidden present subject is a grammatical claim and must carry the D-3 rule that its
+  // person actually licenses; a missing or swapped concealment authority is a hard failure.
+  if(token.grammar?.type==='verb'&&token.tense==='present'&&token.relations?.subjectType==='implicit'){
+   const expected=PRESENT_CONCEALMENT[token.grammar.morphology?.person]?.ruleId;
+   if(!expected||token.subjectRuleId!==expected)fail('E_PRESENT_CONCEALMENT_SOURCE','Hidden present subject is not bound to the D-3 rule its person licenses.',token);
+  }else if(token.subjectRuleId)fail('E_PRESENT_CONCEALMENT_SOURCE','A concealment rule is bound to a token that has no hidden present subject.',token);
   if(token.expectedSurface&&token.word!==token.expectedSurface)fail('E_SURFACE_FORM','Surface form disagrees with the grammar structure.',token);
   if(token.grammar.type==='noun'){
    const roleRule=GRAMMAR_RULES.roles[token.grammar.role];
@@ -3696,7 +3880,7 @@ function validateExercise(data){
     ?{raf:['pres','presentRaf'],nasb:['acc'],jazm:['juss']}[token.state]
     :{raf:['five','presentRaf'],nasb:['fiveSub'],jazm:['fiveSub']}[token.state];
    if(!authorizedForms?.includes(registered?.form))fail('E_PRESENT_FORM_STATE','Registered present surface does not belong to its claimed form class and state.',token);
-   if(token.inflection==='afalKhamsa'&&registered&&token.word!==inflectFiveVerb(registered.lexeme,authoritative.person,token.state,false))fail('E_AFAL5_SURFACE','Five-verb surface disagrees with its exact registry entry and mood.',token);
+   if(token.inflection==='afalKhamsa'&&registered&&authoritative.person&&token.word!==inflectFiveVerb(registered.lexeme,authoritative.person,token.state,false))fail('E_AFAL5_SURFACE','Five-verb surface disagrees with its exact registry entry and mood.',token);
    if(token.grammar.person!==authoritative.person)fail('E_PRESENT_PERSON','Present person disagrees with the authoritative exact surface.',token);
    if(productionTemplate?.presentCapabilities?.length&&!templateAuthorizesPresentMorphology(productionTemplate,authoritative))fail('E_PRESENT_TEMPLATE_AUTHORIZATION','Present person and structure are not authorized by the production template.',token);
   }
@@ -3741,7 +3925,7 @@ function validateExercise(data){
      ?['registered','tense','person','subjectMode','formClass','endingClass','feminineTaa']
      :['feminineTaa'];
    if(morphologyFields.some(field=>token.grammar.morphology?.[field]!==authoritativeMorphology[field]))fail('E_VERB_MORPHOLOGY','Stored verb morphology disagrees with the registered production morphology.',token);
-   const expectedKinds=verbComponentKinds(token);
+   const expectedKinds=verbComponentKinds(token,data);
    const actualKinds=(token.components||[]).map(component=>component.kind);
    if(expectedKinds.join('|')!==actualKinds.join('|'))fail('E_COMPONENT_SET',`Verb components [${actualKinds.join(',')}] disagree with the structural expectation [${expectedKinds.join(',')}].`,token);
    (token.components||[]).forEach((component,index)=>{
@@ -3852,7 +4036,7 @@ function completeNominalAnalysis(data){
   grammarDiagnostics.valid++;
   grammarDiagnostics.validByTemplate[data.templateId]=(grammarDiagnostics.validByTemplate[data.templateId]||0)+1;
   data.tokens.forEach(item=>{
-   [item.ruleId,item.signRuleId].filter(Boolean).forEach(ruleId=>{grammarDiagnostics.validByRule[ruleId]=(grammarDiagnostics.validByRule[ruleId]||0)+1});
+   [item.ruleId,item.signRuleId,item.subjectRuleId].filter(Boolean).forEach(ruleId=>{grammarDiagnostics.validByRule[ruleId]=(grammarDiagnostics.validByRule[ruleId]||0)+1});
   });
   data.relationships.forEach(rel=>{grammarDiagnostics.validByRule[rel.ruleId]=(grammarDiagnostics.validByRule[rel.ruleId]||0)+1});
   return data;
@@ -3887,8 +4071,17 @@ function add(starts,form,state,sign,build,metadata={}){
   if(!morphology||!permittedMode||capability.formClass!==morphology.formClass||capability.endingClass!==morphology.endingClass){
    throw new Error(`Invalid present template capability: ${capability.person}/${capability.subjectMode}/${capability.formClass}/${capability.endingClass}`);
   }
+  if(PRESENT_NON_PRODUCTION_PERSONS.includes(capability.person)){
+   throw new Error(`Present person ${capability.person} is morphology authority only and may not be produced.`);
+  }
   return Object.freeze({...capability});
  }));
+ // An ambiguous surface is resolved by intersecting its readings with these capabilities, so
+ // a template that claimed two readings of one surface would make the person unresolvable.
+ Object.values(PRESENT_SURFACE_READINGS).forEach(readings=>{
+  const claimed=readings.filter(person=>presentCapabilities.some(capability=>capability.person===person));
+  if(claimed.length>1)throw new Error(`Template ${stableId} authorizes more than one reading of a shared surface: ${claimed.join(', ')}`);
+ });
  templates.push({
   id:templates.length,
   stableId,
@@ -3899,6 +4092,7 @@ function add(starts,form,state,sign,build,metadata={}){
   pastPerson:metadata.pastPerson||'',
   pastCapabilities,
   presentPerson:metadata.presentPerson||'',
+  frontedPresent:metadata.frontedPresent===true,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -3946,6 +4140,42 @@ function buildAdvancedPresentExercise(person){
 }
 const presentTemplateMetadata=(person,subjectMode,phase2Presentation=false)=>({
  presentPerson:phase2Presentation?person:'',
+ presentCapabilities:[{
+  person,subjectMode,
+  formClass:PRESENT_MORPHOLOGY[person].formClass,
+  endingClass:PRESENT_MORPHOLOGY[person].endingClass
+ }]
+});
+/* Phase 2b-A — a fronted feminine mubtadaʾ whose khabar is the verbal sentence after it.
+   The noun before the verb is the MUBTADAʾ, never the fāʿil: the fāʿil is the verb's own
+   hidden pronoun (3fs) or its attached alif (3fd), and that pronoun is the rābiṭ. */
+const FRONTED_PRESENT_SUBJECT_POOLS=Object.freeze({'3fs':feminineHumanSingulars,'3fd':feminineHumanDuals});
+function buildFrontedPresentExercise(person){
+ const action=pickVaried(advancedPresentActions,`fronted-present-action:${person}`,item=>item.past);
+ const surface=action.forms[person];
+ const object=pickVaried(action.obj,`fronted-present-object:${person}:${action.past}`,String);
+ // The subject rotates inside a per-verb namespace. Both pools hold three items, so each
+ // would otherwise advance one step per build and stay phase-locked to the action pool,
+ // welding every noun to a single verb. Keying by the resolved lexeme gives each verb its
+ // own subject rotation, so all nine subject–verb pairs are produced deterministically.
+ const subject=pickVaried(FRONTED_PRESENT_SUBJECT_POOLS[person],`fronted-present-subject:${person}:${action.past}`,item=>item.nom);
+ const verbEn=person==='3fs'?action.third:action.en;
+ const objectEn=nounEnglish(object,'acc');
+ return{
+  sentence:`${subject.nom} ${surface} ${object}`,
+  translation:`${cap(subject.en)} ${verbEn} ${objectEn}.`,
+  tokens:[
+   token(subject.nom,subject.en,AR.mubtada(subject.nom),EN.mubtada),
+   token(surface,`${subject.en.toLowerCase()} ${verbEn}`,AR.presentAdvanced(surface,person),'An exact registered person-bound present form.'),
+   token(object,objectEn,AR.object(object),EN.object,true)
+  ]
+ };
+}
+// `frontedPresent` is an explicit opt-in: only these templates use the fronted presentation
+// rebuilder, so no pre-existing template can be reached by it.
+const frontedPresentTemplateMetadata=(person,subjectMode)=>({
+ presentPerson:person,
+ frontedPresent:true,
  presentCapabilities:[{
   person,subjectMode,
   formClass:PRESENT_MORPHOLOGY[person].formClass,
@@ -4018,6 +4248,10 @@ add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('1p'),pres
 add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('3md'),presentTemplateMetadata('3md','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2mp'),presentTemplateMetadata('2mp','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2fs'),presentTemplateMetadata('2fs','attached',true));
+// Phase 2b-A. Fronted feminine mubtadaʾ + verbal-sentence khabar. The surfaces تَكْتُبُ and
+// تَكْتُبَانِ are shared with 2ms and 2d; only the template capability settles the person.
+add('noun','singular','nasb','fatha',()=>buildFrontedPresentExercise('3fs'),frontedPresentTemplateMetadata('3fs','implicit'));
+add('noun','singular','nasb','fatha',()=>buildFrontedPresentExercise('3fd'),frontedPresentTemplateMetadata('3fd','attached'));
 add('verb','present','raf','damma',()=>{const v=pickVerb(),s=pickPerson(),o=pickVerbObject(v);return{sentence:`${v.pres} ${s.nom} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(o,objectEnglish(o),AR.object(o),EN.object)]}},presentTemplateMetadata('3ms','explicit'));
 add('verb','fiveVerbs','raf','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${v.five} ${o}`,translation:`They ${v.en} ${objectEnglish(o)}.`,tokens:[token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},presentTemplateMetadata('3mp','attached'));
 

@@ -36,6 +36,8 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   PRESENT_CONCEALMENT,
   PRESENT_SURFACE_READINGS,
   PRESENT_NON_PRODUCTION_PERSONS,
+  PRESENT_BINAA_RULE_IDS,
+  MABNI_NUUN_NISWAH,
   resolvePresentReading,
   authoritativeVerbMorphology,
   verbFormIndex,
@@ -616,7 +618,7 @@ assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===6,'The noun declen
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.regular).join(',')==='raf,nasb,jazm','Regular present moods are incomplete');
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.afalKhamsa).join(',')==='raf,nasb,jazm','Five-verb moods are incomplete');
 assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),'Unsupported diptotes are not recorded in the coverage matrix');
-assert(Object.keys(api.SOURCE_REGISTRY).length===63,`Expected 63 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===64,`Expected 64 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -1628,9 +1630,12 @@ for(const person of PRESENT_PERSONS){
 // `frontedPresent` flag and their own rebuilder branch. The five original Phase-2 templates
 // must keep the plain opt-in, and no pre-existing template may acquire either flag.
 const PHASE2B_FRONTED_PERSONS=['3fs','3fd'];
+// Phase 2b-B adds two more, which opt in through the same plain `presentPerson` flag the
+// original Phase-2 templates use — not through `frontedPresent`.
+const PHASE2B_MABNI_PERSONS=['3fp','2fp'];
 assert(api.templates.filter(template=>template.presentPerson).map(template=>template.presentPerson).sort().join('|')
-  ===[...PHASE2_PRESENTATION_PERSONS,...PHASE2B_FRONTED_PERSONS].sort().join('|'),
-  'Exactly the five Phase-2 templates and the two Phase-2b-A fronted templates must opt into person-aware presentation rebuilding');
+  ===[...PHASE2_PRESENTATION_PERSONS,...PHASE2B_FRONTED_PERSONS,...PHASE2B_MABNI_PERSONS].sort().join('|'),
+  'Exactly the five Phase-2, two Phase-2b-A fronted, and two Phase-2b-B mabnī templates must opt into person-aware presentation rebuilding');
 assert(api.templates.filter(template=>template.frontedPresent).map(template=>template.presentPerson).sort().join('|')
   ===[...PHASE2B_FRONTED_PERSONS].sort().join('|'),
   'Exactly the two Phase-2b-A fronted templates may use the fronted presentation rebuilder');
@@ -2160,10 +2165,10 @@ for(const person of PRESENT_PERSONS){
   presentHistoryCases++;
 }
 
-// Phase-2b-A boundary: present nūn al-niswah and nūn al-tawkīd remain entirely out of
-// authority. The six تـ surfaces are now registered, but ONLY as ambiguous readings — each
-// must name both of its persons, and the second-person reading must stay unproducible.
-for(const deferred of ['يَكْتُبْنَ','تَكْتُبْنَ','يَكْتُبَنَّ','يَكْتُبَنْ','يَفْتَحْنَ','تَفْتَحْنَ']){
+// Phase-2b-B boundary: nūn al-TAWKĪD remains entirely out of authority. Its surfaces share an
+// unvowelized skeleton with nūn al-niswah (يكتبن) but are built on FATḤ, not sukūn, so only the
+// fully vocalized niswah forms may exist. Governed niswah forms belong to Phase 2b-C.
+for(const deferred of ['يَكْتُبَنَّ','يَكْتُبَنْ','تَكْتُبَنَّ','يَفْتَحَنَّ','لَنْ يَكْتُبْنَ','لَمْ يَكْتُبْنَ']){
   assert(!api.verbFormIndex.has(deferred),`Deferred present surface entered authority: ${deferred}`);
 }
 for(const [surface,readings] of [['تَكْتُبُ',['2ms','3fs']],['تَفْتَحُ',['2ms','3fs']],['تَدْرُسُ',['2ms','3fs']],
@@ -2499,6 +2504,278 @@ for(const pair of [['3fs','2ms'],['3fd','2d']]){
   ambiguityCases++;
 }
 console.log('Phase-2b-A fronted-mubtada audit passed: '+frontedCases+' production/History checks and '+ambiguityCases+' ambiguity-authority checks.');
+
+/* ===== Phase 2b-B — ungoverned present verbs built on sukūn for نون النسوة ================
+   The whole verb is MABNĪ (Al-Tuḥfah p. 73, applied p. 124) and therefore has no state, no
+   iʿrāb sign, and NO maḥall in the bare case. The attached nūn is separately built on fatḥ in
+   maḥall rafʿ as fāʿil. Conflating the two, or letting the muʿrab lane touch these forms, is
+   the central risk this block exists to catch. */
+let mabniCases=0,mabniAttackCases=0;
+// Same normalization the Why audit uses; defined locally because that helper appears later.
+const bareArMabni=s=>String(s).replace(/[ـً-ْٰ]/g,'').replace(/[أإآٱ]/g,'ا');
+const MABNI_SURFACES={
+  '3fp':{'كَتَبَ':'يَكْتُبْنَ','فَتَحَ':'يَفْتَحْنَ','دَرَسَ':'يَدْرُسْنَ'},
+  '2fp':{'كَتَبَ':'تَكْتُبْنَ','فَتَحَ':'تَفْتَحْنَ','دَرَسَ':'تَدْرُسْنَ'}
+};
+// Exact code points: the final radical carries sukūn (0652) and the nūn carries fatḥ (064E).
+// This is what separates يَكْتُبْنَ (niswah, built on sukūn) from يَكْتُبَنْ / يَكْتُبَنَّ (tawkīd,
+// built on fatḥ), which share an unvowelized skeleton and are NOT in production.
+for(const [person,forms] of Object.entries(MABNI_SURFACES)){
+  for(const [lemma,surface] of Object.entries(forms)){
+    const points=[...surface].map(c=>c.codePointAt(0));
+    assert(points[0]===(person==='3fp'?0x64A:0x62A),`${surface}: wrong person prefix for ${person}`);
+    assert(points[points.length-1]===0x064E&&points[points.length-2]===0x0646,`${surface}: must end in nūn + fatḥ`);
+    assert(points[points.length-3]===0x0652,`${surface}: the radical before the nūn must carry sukūn`);
+    const record=api.verbFormIndex.get(surface);
+    assert(record&&record.form==='presentRaf'&&record.lexeme.past===lemma,`${surface}: not registered against ${lemma}`);
+    assert([...record.morphology.presentPersonCandidates].join('|')===person,
+      `${surface}: a fully vocalized niswah form must have exactly one reading (${person})`);
+    mabniCases++;
+  }
+}
+const mabniTemplates={};
+for(const person of ['3fp','2fp']){
+  const template=api.templates.find(t=>t.presentPerson===person);
+  assert(template&&!template.frontedPresent,`${person}: no Phase-2b-B template`);
+  assert(template.presentCapabilities.length===1,`${person}: template must declare exactly one capability`);
+  const capability=template.presentCapabilities[0];
+  assert(capability.person===person&&capability.subjectMode==='attached'&&capability.formClass==='mabniPresent'
+    &&capability.endingClass==='nuun-niswah'&&capability.binaaClass==='sukun-nuun-niswah',
+    `${person}: template capability is not the registered mabnī shape`);
+  mabniTemplates[person]=template;
+  mabniCases++;
+}
+const mabniGolden={};
+for(const person of ['3fp','2fp']){
+  const wanted=new Set(Object.values(MABNI_SURFACES[person]));
+  for(let i=0;i<4000&&wanted.size;i++){
+    const data=api.buildTemplate(mabniTemplates[person].id);
+    const verb=data.tokens[0];
+    if(!wanted.has(verb.word))continue;
+    wanted.delete(verb.word);
+    mabniGolden[verb.word]={data:clone(data),person};
+    const morphology=verb.grammar.morphology;
+    const bare=bareArMabni(verb.ar);
+    assert(api.validateExercise(data).length===0,`${verb.word}: clean exercise failed validation`);
+    // Whole word: bināʾ only.
+    assert(bare.includes('فعل مضارع مبني على السكون لاتصاله بنون النسوة'),`${verb.word}: wrong whole-word bināʾ wording`);
+    for(const forbidden of ['مرفوع','منصوب','مجزوم','وعلامة','في محل']){
+      assert(!bare.includes(forbidden),`${verb.word}: whole-word analysis claims «${forbidden}»`);
+    }
+    assert(!/raised|accusative|jussive|indicative|subjunctive/i.test(verb.en),`${verb.word}: English describes a case/mood`);
+    assert(/built on suk/i.test(verb.en),`${verb.word}: English omits the bināʾ`);
+    // No muʿrab machinery whatsoever.
+    assert(verb.inflection===api.MABNI_NUUN_NISWAH,`${verb.word}: wrong inflection lane`);
+    assert(!verb.state&&verb.sign===null,`${verb.word}: carries an iʿrāb state or sign`);
+    assert(verb.ruleId==='R_PRESENT_NUUN_NISWAH_BINAA',`${verb.word}: wrong whole-word rule`);
+    assert(!verb.governorId,`${verb.word}: Phase 2b-B is ungoverned only`);
+    assert(verb.subjectRuleId===undefined,`${verb.word}: a hidden-subject rule was bound to an attached-subject verb`);
+    assert(morphology.person===person&&morphology.subjectMode==='attached'&&morphology.formClass==='mabniPresent'
+      &&morphology.endingClass==='nuun-niswah'&&morphology.binaaClass==='sukun-nuun-niswah',
+      `${verb.word}: stored morphology is not the registered mabnī shape`);
+    // The nūn: exactly one, canonical, and the fāʿil.
+    assert(verb.components.length===1&&verb.components[0].kind==='nuun-niswah',`${verb.word}: wrong component set`);
+    const nuun=verb.components[0];
+    assert(nuun.letterAr==='نَ'&&nuun.syntacticRole==='fail'&&nuun.mahall==='raf'&&nuun.binaaSign==='fatha'
+      &&nuun.ruleId==='C_NUUN_NISWAH'&&nuun.category==='pronoun',`${verb.word}: nūn component is not canonical`);
+    assert(bareArMabni(nuun.ar).includes('ضمير متصل مبني على الفتح في محل رفع فاعل'),`${verb.word}: nūn component wording changed`);
+    // Subject: the attached nūn, never an explicit or hidden one.
+    const subject=data.relationships.find(r=>r.type==='verbSubject'&&r.verbId===verb.id);
+    assert(subject&&subject.subjectType==='attached'&&subject.pronoun==='نُونُ النِّسْوَةِ',`${verb.word}: wrong subject relationship`);
+    assert(!data.tokens.some(t=>t.grammar.role==='faail'),`${verb.word}: an explicit fāʿil appeared`);
+    assert(!/مستتر/.test(verb.ar),`${verb.word}: a hidden-subject clause appeared`);
+    for(const pronoun of ['هُوَ','هِيَ','أَنَا','نَحْنُ','أَنْتَ']){
+      assert(!verb.ar.includes(pronoun),`${verb.word}: emitted the hidden pronoun ${pronoun}`);
+    }
+    // Object still present and correct; English names the person unambiguously.
+    const object=data.tokens.find(t=>t.grammar.role==='object');
+    assert(object&&object.state==='nasb'&&object.sign.id==='fatha',`${verb.word}: object is not the accusative target`);
+    assert(person==='3fp'?/^They \(women\)/.test(data.translation):/^You women/.test(data.translation),
+      `${verb.word}: English does not distinguish ${person}`);
+    mabniCases++;
+  }
+  assert(!wanted.size,`${person}: not every registered surface was produced (${[...wanted].join(',')})`);
+}
+assert(Object.keys(mabniGolden).length===6,'Phase 2b-B did not produce all six surfaces');
+/* Internal coverage records the bināʾ, and the learner-facing filters must NOT: `builtOnSukun`
+   is a bināʾ label, not an iʿrāb state, so it may never appear as a state or sign the user can
+   select, and no mabnī template may advertise one. */
+assert(api.GRAMMAR_COVERAGE_MATRIX.verb.mabniPresent?.join(',')==='builtOnSukun',
+  'The coverage matrix does not record the mabnī present verb');
+assert(!api.GRAMMAR_COVERAGE_MATRIX.verb.mabniPresent.some(entry=>['raf','nasb','jazm'].includes(entry)),
+  'The mabnī present verb was recorded on the iʿrāb state axis');
+for(const person of ['3fp','2fp']){
+  const template=api.templates.find(t=>t.presentPerson===person);
+  assert(template.state==='nasb'&&template.sign==='fatha',
+    `${person}: the template's declared state/sign must describe its accusative object target, not the verb`);
+  const target=api.buildTemplate(template.id).tokens.find(t=>t.target===true);
+  assert(target&&target.grammar.type==='noun'&&target.grammar.role==='object',
+    `${person}: the learner target must remain the direct object`);
+}
+mabniCases+=4;
+// Source authority: one narrow whole-word rule, plus the widened component rule.
+const binaaRule=api.SOURCE_REGISTRY.R_PRESENT_NUUN_NISWAH_BINAA;
+assert(binaaRule&&binaaRule.productionEnabled&&binaaRule.basis==='nahw-rule','R_PRESENT_NUUN_NISWAH_BINAA is missing or disabled');
+assert(binaaRule.primarySource.authorityId==='TUHFA_QATAR_WORKSPACE'
+  &&[...binaaRule.primarySource.pdfPages].sort((a,b)=>a-b).join(',')==='73,124',
+  'R_PRESENT_NUUN_NISWAH_BINAA is not bound to Al-Tuḥfah pp. 73 and 124');
+assert(api.isSourceAuthorized('R_PRESENT_NUUN_NISWAH_BINAA'),'R_PRESENT_NUUN_NISWAH_BINAA is not authorized');
+assert(/no raf|authorizes the bina/i.test(binaaRule.conditions)||/maḥall/.test(binaaRule.conditions),
+  'The bināʾ rule does not exclude a maḥall claim in its conditions');
+const nuunComponentRule=api.SOURCE_REGISTRY.C_NUUN_NISWAH;
+assert([...nuunComponentRule.primarySource.pdfPages].sort((a,b)=>a-b).join(',')==='72,124',
+  'C_NUUN_NISWAH was not widened to the present with Al-Tuḥfah p. 124');
+assert(/present/i.test(nuunComponentRule.conditions),'C_NUUN_NISWAH conditions do not mention the present');
+assert(Object.values(api.SOURCE_REGISTRY).filter(r=>/nūn al-niswah is a connected pronoun/i.test(r.topic||'')).length===1,
+  'The nūn-al-niswah component rule was duplicated instead of widened');
+mabniCases+=5;
+// Source attacks.
+const binaaAttacks=[
+  ['wrong authority',{...binaaRule,primarySource:{...binaaRule.primarySource,authorityId:'DAKUR_APPLIED_GRAMMAR_2E'}}],
+  ['wrong page',{...binaaRule,primarySource:{...binaaRule.primarySource,pdfPages:[42]}}],
+  ['no pages',{...binaaRule,primarySource:{...binaaRule.primarySource,pdfPages:[]}}],
+  ['disabled',{...binaaRule,productionEnabled:false}],
+  ['arbitrary metadata',{topic:'A present verb attached to nūn al-niswah is built on sukūn.',status:binaaRule.status,
+    productionEnabled:true,basis:'nahw-rule',primarySource:{authorityId:'TUHFA_QATAR_WORKSPACE',pdfPages:[73,124],evidenceType:'rule-support'},
+    secondarySources:[],conditions:'x',exceptions:'y'}]
+];
+for(const [name,candidate] of binaaAttacks){
+  assert(!api.isSourceRecordAuthorized('R_PRESENT_NUUN_NISWAH_BINAA',candidate),
+    `Forged bināʾ source accepted: ${name}`);
+  mabniAttackCases++;
+}
+assert(!api.isSourceRecordAuthorized('C_NUUN_NISWAH',binaaRule),'The whole-word rule was accepted as the component rule');
+assert(!api.isSourceRecordAuthorized('R_PRESENT_NUUN_NISWAH_BINAA',nuunComponentRule),'The component rule was accepted as the whole-word rule');
+assert(!api.isSourceAuthorized('R_PRESENT_NUUN_TAWKID_BINAA'),'An unregistered nūn-al-tawkīd rule reported as authorized');
+mabniAttackCases+=3;
+// Morphology, component, and lane attacks — every one must reject, none may throw.
+function mabniAttack(name,surface,mutate){
+  const base=clone(mabniGolden[surface].data);
+  mutate(base,base.tokens[0]);
+  let codes=[];
+  assert((()=>{try{codes=api.validateExercise(base).map(e=>e.code);return true}catch(e){return false}})(),
+    `${name}: validateExercise threw instead of rejecting`);
+  assert(codes.length>0,`${name}: forged mabnī exercise was accepted`);
+  mabniAttackCases++;
+}
+mabniAttack('3fp surface claimed as 2fp','يَكْتُبْنَ',(d,v)=>{v.grammar.person='2fp';v.grammar.morphology.person='2fp';});
+mabniAttack('2fp surface claimed as 3fp','تَكْتُبْنَ',(d,v)=>{v.grammar.person='3fp';v.grammar.morphology.person='3fp';});
+mabniAttack('ordinary formClass','يَكْتُبْنَ',(d,v)=>{v.grammar.morphology.formClass='ordinary';});
+mabniAttack('afalKhamsa formClass','يَكْتُبْنَ',(d,v)=>{v.grammar.morphology.formClass='afalKhamsa';});
+mabniAttack('wrong endingClass','يَكْتُبْنَ',(d,v)=>{v.grammar.morphology.endingClass='waw-jamaaah';});
+mabniAttack('blank binaaClass','يَكْتُبْنَ',(d,v)=>{v.grammar.morphology.binaaClass='';});
+mabniAttack('wrong binaaClass','يَكْتُبْنَ',(d,v)=>{v.grammar.morphology.binaaClass='visible-fath';});
+mabniAttack('regular inflection','يَكْتُبْنَ',(d,v)=>{v.inflection='regular';});
+mabniAttack('afalKhamsa inflection','يَكْتُبْنَ',(d,v)=>{v.inflection='afalKhamsa';});
+for(const state of ['raf','nasb','jazm']){
+  mabniAttack(`state ${state}`,'يَكْتُبْنَ',(d,v)=>{v.state=state;});
+}
+for(const sign of ['damma','fatha','sukun','nunKept','nunDropped']){
+  mabniAttack(`sign ${sign}`,'يَكْتُبْنَ',(d,v)=>{v.sign={id:sign,ar:'x',en:'x'};});
+}
+mabniAttack('ordinary present rule','يَكْتُبْنَ',(d,v)=>{v.ruleId='R_MUDARI_RAF_DAMMA';});
+mabniAttack('five-verb rule','يَكْتُبْنَ',(d,v)=>{v.ruleId='R_AFAL5_RAF_NUN';});
+mabniAttack('jazm sukūn rule','يَكْتُبْنَ',(d,v)=>{v.ruleId='R_MUDARI_JAZM_SUKUN';});
+mabniAttack('missing nūn component','يَكْتُبْنَ',(d,v)=>{v.components=[];});
+mabniAttack('duplicate nūn component','يَكْتُبْنَ',(d,v)=>{v.components=[v.components[0],clone(v.components[0])];});
+mabniAttack('wrong component role','يَكْتُبْنَ',(d,v)=>{v.components[0].syntacticRole='object';});
+mabniAttack('wrong component maḥall','يَكْتُبْنَ',(d,v)=>{v.components[0].mahall='nasb';});
+mabniAttack('wrong component bināʾ','يَكْتُبْنَ',(d,v)=>{v.components[0].binaaSign='sukun';});
+mabniAttack('wrong component rule','يَكْتُبْنَ',(d,v)=>{v.components[0].ruleId='C_WAW_JAMAAH_FAIL';});
+// Ownership is structural: the nūn must sit on the verb that carries it, and nowhere else.
+mabniAttack('nūn component copied onto the object','يَكْتُبْنَ',(d,v)=>{
+  d.tokens.find(t=>t.grammar.role==='object').components=[clone(v.components[0])];
+});
+mabniAttack('nūn component moved off the verb','يَكْتُبْنَ',(d,v)=>{
+  d.tokens.find(t=>t.grammar.role==='object').components=[clone(v.components[0])];
+  v.components=[];
+});
+mabniAttack('hidden-subject clause','يَكْتُبْنَ',(d,v)=>{
+  v.relations.subjectType='implicit';v.relations.subjectPronoun='هُنَّ';
+  const rel=d.relationships.find(r=>r.type==='verbSubject');if(rel){rel.subjectType='implicit';rel.pronoun='هُنَّ';}
+});
+mabniAttack('concealment rule bound','يَكْتُبْنَ',(d,v)=>{v.subjectRuleId='R_HIDDEN_SUBJECT_JAWAZ_3S';});
+mabniAttack('2fp template substitution','يَكْتُبْنَ',d=>{d.templateId=mabniTemplates['2fp'].stableId;});
+mabniAttack('fronted 3fs template substitution','يَكْتُبْنَ',d=>{d.templateId=api.templates.find(t=>t.presentPerson==='3fs').stableId;});
+/* Phase 2b-C boundary. A governed niswah form («لن يكتبن» → «في محل نصب») is real grammar and
+   is source-verified at Al-Tuḥfah p. 42, but its maḥall architecture is NOT in this phase, so
+   every route to a governed form must reject — including a dangling governorId, which cannot
+   arise from the builder and can only be forged. */
+mabniAttack('dangling governor link','يَكْتُبْنَ',(d,v)=>{v.governorId='NO_SUCH_TOKEN';});
+for(const [particle,type,rule] of [['لَنْ','lan','G_LAN_NASB'],['لَمْ','lam','G_LAM_JAZM']]){
+  mabniAttack(`governed by ${particle}`,'يَكْتُبْنَ',(d,v)=>{
+    const governor=clone(v);
+    governor.id='T_GOV';governor.word=particle;governor.surfaceHint=particle;governor.expectedSurface=particle;
+    governor.grammar={type:'particle',role:'particle',particleType:type};
+    governor.components=[];governor.relations={governsId:v.id};governor.ruleId=rule;
+    governor.state='';governor.sign=null;
+    d.tokens.unshift(governor);
+    v.governorId='T_GOV';
+    d.sentence=`${particle} ${d.sentence}`;
+  });
+}
+
+// --- History: schema v3, canonical reconstruction, and same-surface person attacks --------
+const mabniSnapshots={};
+for(const surface of Object.keys(mabniGolden)){
+  const data=mabniGolden[surface].data;
+  const snapshot=api.createExerciseSnapshot(data);
+  mabniSnapshots[surface]=snapshot;
+  assert(snapshot.schemaVersion===3,`${surface}: mabnī snapshot is not schema v3`);
+  assert(api.restoreExerciseSnapshot(clone(snapshot)),`${surface}: a clean mabnī snapshot failed to restore`);
+  // Corrupt every presentation layer, then require canonical reconstruction.
+  const corrupt=clone(snapshot);
+  corrupt.translation='CORRUPT';
+  corrupt.tokens.forEach(t=>{
+    t.gloss='CORRUPT';t.enHint='CORRUPT';t.ar='CORRUPT';t.en='CORRUPT';
+    if(t.why){t.why.ar=['CORRUPT'];t.why.en=['CORRUPT'];t.why.ids=['CORRUPT'];}
+    (t.components||[]).forEach(c=>{c.ar='CORRUPT';c.en='CORRUPT';});
+  });
+  (corrupt.relationships||[]).forEach(r=>{r.ar='CORRUPT';r.en='CORRUPT';});
+  const repaired=api.restoreExerciseSnapshot(corrupt);
+  assert(repaired,`${surface}: a corrupted mabnī snapshot did not restore`);
+  assert(repaired.translation===data.translation,`${surface}: translation was not canonically rebuilt`);
+  assert(repaired.tokens.every((t,i)=>t.gloss===data.tokens[i].gloss),`${surface}: glosses were not canonically rebuilt`);
+  const verb=repaired.tokens.find(t=>t.grammar.type==='verb');
+  assert(verb.ar===data.tokens[0].ar,`${surface}: whole-word analysis was not canonically rebuilt`);
+  assert(!bareArMabni(verb.ar).includes('في محل'),`${surface}: canonical rebuild produced a maḥall for the bare verb`);
+  assert(verb.inflection===api.MABNI_NUUN_NISWAH&&!verb.state&&verb.sign===null,
+    `${surface}: restore reintroduced muʿrab state/sign`);
+  assert(verb.components.length===1&&verb.components[0].ruleId==='C_NUUN_NISWAH'
+    &&bareArMabni(verb.components[0].ar).includes('في محل رفع فاعل'),
+    `${surface}: nūn component was not canonically rebuilt`);
+  mabniCases+=3;
+  presentHistoryCases+=2;
+}
+// The two persons share no surface, but a coordinated rewrite that swaps person while keeping
+// the original identity must still be rejected.
+for(const [from,to] of [['يَكْتُبْنَ','2fp'],['تَكْتُبْنَ','3fp']]){
+  const forged=clone(mabniSnapshots[from]);
+  const verb=forged.tokens.find(t=>t.grammar.type==='verb');
+  verb.grammar.person=to;
+  if(verb.grammar.morphology)verb.grammar.morphology.person=to;
+  assert(api.restoreExerciseSnapshot(forged)===null,`${from}: a same-surface rewrite to ${to} survived History restore`);
+  mabniAttackCases++;
+  presentHistoryCases++;
+}
+for(const [from,to] of [['يَكْتُبْنَ','تَكْتُبْنَ'],['تَكْتُبْنَ','يَكْتُبْنَ']]){
+  const coordinated=clone(mabniSnapshots[to]);
+  coordinated.exerciseIdentity=mabniSnapshots[from].exerciseIdentity;
+  assert(api.restoreExerciseSnapshot(coordinated)===null,
+    `${from}: History identity accepted a complete coordinated rewrite to ${to}`);
+  mabniAttackCases++;
+  presentHistoryCases++;
+}
+// Forged binaaClass and formClass must not survive: they are what distinguishes a legitimately
+// signless mabnī verb from a sign-stripped muʿrab one in the identity tuple.
+for(const field of ['formClass','binaaClass','endingClass']){
+  const forged=clone(mabniSnapshots['يَكْتُبْنَ']);
+  const verb=forged.tokens.find(t=>t.grammar.type==='verb');
+  verb.grammar.morphology[field]='';
+  assert(api.restoreExerciseSnapshot(forged)===null,`يَكْتُبْنَ: a blanked ${field} survived History restore`);
+  mabniAttackCases++;
+}
+console.log('Phase-2b-B nun-al-niswah audit passed: '+mabniCases+' production checks and '+mabniAttackCases+' adversarial checks.');
 assert(api.COMPONENT_REGISTRY['yaa-mukhataba']?.ruleId==='C_YAA_MUKHATABA'
   &&api.SOURCE_REGISTRY.C_YAA_MUKHATABA.primarySource.pdfPages.includes(38),
   'Canonical yāʾ al-mukhāṭabah component/source evidence is missing');
@@ -3024,7 +3301,7 @@ for(const start of optionValues.startFilter){
 
 // --- Test C: every production template has exactly one target whose real form/state/sign
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
-assert(api.templates.length===70,`Expected 70 production templates, found ${api.templates.length}`);
+assert(api.templates.length===72,`Expected 72 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -3337,7 +3614,27 @@ function auditTokenWhy(tok,label){
     if(tok.inflection==='sfp'&&tok.state==='nasb')assert(ar.includes('نيابة عن الفتحة'),`${label}: SFP naṣb misses kasrah substitution`);
   }else if(tok.grammar.type==='verb'){
     assert(tok.state!=='jarr'&&!ar.includes('مخفوض'),`${label}: verb described with khafḍ`);
-    if(tok.tense==='present'){
+    if(tok.tense==='present'&&tok.inflection===api.MABNI_NUUN_NISWAH){
+      // A مبني present verb has bināʾ, not iʿrāb: it must carry the bināʾ rule and the attached
+      // nūn's subject rule, and must claim no state, no sign, and no maḥall.
+      assert(tok.why.ids.includes('WHY_PRESENT_NUUN_NISWAH_BINAA'),`${label}: missing WHY_PRESENT_NUUN_NISWAH_BINAA`);
+      assert(tok.why.ids.includes('WHY_SUBJECT_NUUN_NISWAH'),`${label}: missing WHY_SUBJECT_NUUN_NISWAH`);
+      assert(!tok.state&&tok.sign===null,`${label}: mabnī present carries an iʿrāb state or sign`);
+      for(const forbidden of ['WHY_STATE_VERB_FREE','WHY_STATE_VERB_LAN','WHY_STATE_VERB_LAM','WHY_STATE_VERB_SAWFA',
+        'WHY_SIGN_MUDARI_RAF','WHY_SIGN_MUDARI_NASB','WHY_SIGN_MUDARI_JAZM','WHY_SIGN_AFAL5_RAF']){
+        assert(!tok.why.ids.includes(forbidden),`${label}: mabnī present routed through ${forbidden}`);
+      }
+      // The forbidden claims are checked against the WHOLE-WORD line only. The separate
+      // subject line must still carry the attached nūn's own «في محل رفع فاعل», which is the
+      // component's maḥall and says nothing about the verb's.
+      const binaaAr=bareAr(tok.why.ar[tok.why.ids.indexOf('WHY_PRESENT_NUUN_NISWAH_BINAA')]||'');
+      const subjectAr=bareAr(tok.why.ar[tok.why.ids.indexOf('WHY_SUBJECT_NUUN_NISWAH')]||'');
+      for(const claim of ['مرفوع','منصوب','مجزوم','وعلامة','في محل']){
+        assert(!binaaAr.includes(claim),`${label}: mabnī present whole-word Why claims «${claim}»`);
+      }
+      assert(binaaAr.includes('مبني على السكون')&&binaaAr.includes('نون النسوة'),`${label}: mabnī present Why omits its bināʾ`);
+      assert(subjectAr.includes('في محل رفع')&&subjectAr.includes('فاعل'),`${label}: nūn component Why omits its rafʿ maḥall as fāʿil`);
+    }else if(tok.tense==='present'){
       const signRule=tok.inflection==='afalKhamsa'?`WHY_SIGN_AFAL5_${tok.state.toUpperCase()}`:`WHY_SIGN_MUDARI_${tok.state.toUpperCase()}`;
       assert(tok.why.ids.includes(signRule),`${label}: missing ${signRule}`);
       assert(tok.sign.id===api.GRAMMAR_RULES.presentVerb[tok.inflection][tok.state][0],`${label}: verb sign != declared`);

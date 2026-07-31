@@ -747,7 +747,9 @@ function templateAuthorizesPresentMorphology(template,morphology){
   capability.person===morphology?.person
   &&capability.subjectMode===morphology?.subjectMode
   &&capability.formClass===morphology?.formClass
-  &&capability.endingClass===morphology?.endingClass));
+  &&capability.endingClass===morphology?.endingClass
+  // undefined on both sides for every muʿrab person; only the mabnī lane carries a value.
+  &&(capability.binaaClass||'')===(morphology?.binaaClass||'')));
 }
 function rebuildCanonicalHistoryPresentation(data,template){
  if(template?.pastPerson){
@@ -2269,15 +2271,18 @@ const advancedPastActions=[
 const advancedPresentActions=[
  {past:'كَتَبَ',en:'write',third:'writes',obj:['الْوَاجِبَ','الدَّرْسَ','الْجَوَابَ','الرِّسَالَةَ','الْقِصَّةَ'],forms:{
   '3ms':'يَكْتُبُ','1s':'أَكْتُبُ','1p':'نَكْتُبُ','3md':'يَكْتُبَانِ','3mp':'يَكْتُبُونَ','2mp':'تَكْتُبُونَ','2fs':'تَكْتُبِينَ',
-  '3fs':'تَكْتُبُ','3fd':'تَكْتُبَانِ'
+  '3fs':'تَكْتُبُ','3fd':'تَكْتُبَانِ',
+  '3fp':'يَكْتُبْنَ','2fp':'تَكْتُبْنَ'
  }},
  {past:'فَتَحَ',en:'open',third:'opens',obj:['الْبَابَ','الْكِتَابَ','النَّافِذَةَ','الْحَقِيبَةَ'],forms:{
   '3ms':'يَفْتَحُ','1s':'أَفْتَحُ','1p':'نَفْتَحُ','3md':'يَفْتَحَانِ','3mp':'يَفْتَحُونَ','2mp':'تَفْتَحُونَ','2fs':'تَفْتَحِينَ',
-  '3fs':'تَفْتَحُ','3fd':'تَفْتَحَانِ'
+  '3fs':'تَفْتَحُ','3fd':'تَفْتَحَانِ',
+  '3fp':'يَفْتَحْنَ','2fp':'تَفْتَحْنَ'
  }},
  {past:'دَرَسَ',en:'study',third:'studies',obj:['الدَّرْسَ'],forms:{
   '3ms':'يَدْرُسُ','1s':'أَدْرُسُ','1p':'نَدْرُسُ','3md':'يَدْرُسَانِ','3mp':'يَدْرُسُونَ','2mp':'تَدْرُسُونَ','2fs':'تَدْرُسِينَ',
-  '3fs':'تَدْرُسُ','3fd':'تَدْرُسَانِ'
+  '3fs':'تَدْرُسُ','3fd':'تَدْرُسَانِ',
+  '3fp':'يَدْرُسْنَ','2fp':'تَدْرُسْنَ'
  }}
 ];
 const brokenObjectActions=[
@@ -2575,7 +2580,15 @@ const PRESENT_MORPHOLOGY=Object.freeze({
  /* Morphology authority only — no production template may declare these persons.
     They exist so an ambiguous surface can name every reading it genuinely has. */
  '2ms':Object.freeze({tense:'present',person:'2ms',subjectMode:'implicit',formClass:'ordinary',endingClass:'none'}),
- '2d':Object.freeze({tense:'present',person:'2d',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'alif-ithnain'})
+ '2d':Object.freeze({tense:'present',person:'2d',subjectMode:'attached',formClass:'afalKhamsa',endingClass:'alif-ithnain'}),
+ /* Phase 2b-B — the ONLY مبني present forms. A present verb is muʿrab unless نون التوكيد or
+    نون النسوة is attached to it (Al-Tuḥfah p. 73); with نون النسوة it is built on sukūn. These
+    two persons therefore carry a binaaClass and NO state/sign: their sukūn is bināʾ, not an
+    iʿrāb sign, and the bare form is given no maḥall (Al-Tuḥfah pp. 73, 124 both omit one).
+    Both surfaces are fully vocalized and person-unique (يـ vs تـ), so neither needs a reading
+    set. See PRESENT_BINAA_RULE_IDS, MABNI_NUUN_NISWAH, and R_PRESENT_NUUN_NISWAH_BINAA. */
+ '3fp':Object.freeze({tense:'present',person:'3fp',subjectMode:'attached',formClass:'mabniPresent',endingClass:'nuun-niswah',binaaClass:'sukun-nuun-niswah'}),
+ '2fp':Object.freeze({tense:'present',person:'2fp',subjectMode:'attached',formClass:'mabniPresent',endingClass:'nuun-niswah',binaaClass:'sukun-nuun-niswah'})
 });
 /* Persons that exist only as readings of an ambiguous surface. A production template that
    declares one of these is a bug, not a feature; add() rejects it. */
@@ -2584,8 +2597,21 @@ const PRESENT_ENDING_COMPONENTS=Object.freeze({
  'none':Object.freeze([]),
  'alif-ithnain':Object.freeze(['alif-ithnain']),
  'waw-jamaaah':Object.freeze(['waw-jamaaah']),
- 'yaa-mukhataba':Object.freeze(['yaa-mukhataba'])
+ 'yaa-mukhataba':Object.freeze(['yaa-mukhataba']),
+ 'nuun-niswah':Object.freeze(['nuun-niswah'])
 });
+/* The single explicit non-muʿrab present inflection. It is deliberately neither 'regular' nor
+   'afalKhamsa' so that GRAMMAR_RULES.presentVerb yields no mood rule for it and no iʿrāb sign
+   can be looked up: the muʿrab lane cannot be entered by accident. */
+const MABNI_NUUN_NISWAH='mabniNuunNiswah';
+const PRESENT_BINAA_RULE_IDS=Object.freeze({'sukun-nuun-niswah':'R_PRESENT_NUUN_NISWAH_BINAA'});
+/* The one place a person is turned into an inflection lane. A مبني present form must never
+   fall through to 'regular', which would hand it an iʿrāb ḍammah. */
+function presentConjugationFor(person){
+ const formClass=PRESENT_MORPHOLOGY[person]?.formClass;
+ if(formClass==='mabniPresent')return MABNI_NUUN_NISWAH;
+ return formClass==='afalKhamsa'?'afalKhamsa':'regular';
+}
 const PRESENT_HIDDEN_SUBJECTS=Object.freeze({'1s':'أَنَا','1p':'نَحْنُ','3ms':'هُوَ','3fs':'هِيَ','2ms':'أَنْتَ'});
 /* Which D-3 rule authorizes each hidden-subject claim, and how the claim is worded.
    Speaker/addressee → obligatory; singular absent person → permissible. */
@@ -2700,7 +2726,9 @@ const GRAMMAR_RULES=Object.freeze({
 });
 const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr']},
- verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],past:['builtOnFatha']},
+ // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
+ // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
+ verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
  roles:['mubtada','khabar','faail','object','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana'],
  relationships:['mubtadaKhabar','verbSubject','verbObject','preposition','idafa','inna','kana'],
  deliberatelyNotGenerated:[
@@ -2902,7 +2930,17 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  C_TAA_FAIL_2FS:sourceRule('The 2fs subject tāʾ is a connected pronoun built on kasr in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 2fs past form ending in تِ.'),
  C_NAA_FAILIN:sourceRule('Nā al-fāʿilīn is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 1p past form.'),
  C_ALIF_ITHNAIN:secondarySupportedRule('Alif al-ithnayn is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[71],'Al-Tuḥfah p.71 controls the whole past verb’s visible-fatḥ analysis; Daʿkūr p.86 supplies the exact component analysis.','C_ALIF_ITHNAIN',[DAKUR_ALIF_ITHNAIN]),
- C_NUUN_NISWAH:sourceRule('Nūn al-niswah is a connected pronoun built on fatḥ in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 3fp past form.'),
+ /* Scope expanded in Phase 2b-B from past-only to past + present. The component analysis is
+    identical in both tenses and Al-Tuḥfah states it for the present verbatim at p. 124
+    («ونون النسوة فاعل، مبني على الفتح في محل رفع», in «الفتياتُ المهذباتُ يَخْدُمْنَ بلادَهُنَّ»),
+    so the existing component rule is widened rather than duplicated. */
+ C_NUUN_NISWAH:sourceRule('Nūn al-niswah is a connected pronoun built on fatḥ in the position of rafʿ as fāʿil.',[72,124],'Only explicitly registered 3fp past forms and ungoverned 3fp/2fp present forms directly attached to nūn al-niswah.'),
+ /* Phase 2b-B — the whole-word bināʾ claim ONLY. Al-Tuḥfah p. 73 states the rule («وإن اتصلت
+    به نون النسوة بني معها على السكون», ﴿وَالْوَالِدَاتُ يُرْضِعْنَ﴾) and p. 124 applies it in a full
+    iʿrāb («يخدمن: فعل مضارع مبني على السكون لاتصاله بنون النسوة»). Neither page assigns the
+    verb any maḥall, so this rule authorizes no rafʿ/naṣb/jazm position, and it is confined to
+    nūn al-niswah: the same p. 73 passage builds the verb on FATḤ for nūn al-tawkīd. */
+ R_PRESENT_NUUN_NISWAH_BINAA:sourceRule('A present verb directly attached to nūn al-niswah is built on sukūn because of that attachment.',[73,124],'Only an ungoverned, explicitly registered 3fp/2fp present form with nūn al-niswah attached directly to it. It authorizes the bināʾ alone: no rafʿ, naṣb, or jazm maḥall, no governed form, and no nūn al-tawkīd.'),
  C_YAA_MUKHATABA:sourceRule('Yāʾ al-mukhāṭabah is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[38],'Only an explicitly registered surface-unambiguous 2fs present five-verb form in rafʿ.'),
  C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from the original wāw; it has no grammatical role and no place in iʿrāb.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[91],'Al Jazeera Learning Arabic («الألف الفارقة») names the rule and gives كَتَبُوا / لم يكتُبُوا / اكْتُبُوا. Workspace scan separately attests the written spelling «ضَرَبُوا» (p.91) as form-only; that attestation does not authorize this rule.'),
  R_KANA_PAST_DEFICIENT:sourceRule('Kāna is a deficient past verb that raises its noun and makes its khabar accusative.',[105,106],'Only the surface كَانَ and the app’s single-noun/single-khabar template.',[IA_KANA]),
@@ -3166,7 +3204,7 @@ const AR={
  mudaf:w=>grammarSpec('noun','mubtada',{isMudaf:true}),
  mudafIlayh:(w)=>grammarSpec('noun','mudafIlayh'),
  presentPred:(w)=>grammarSpec('verb','present',{conjugation:'regular',person:'3ms'}),
- presentAdvanced:(w,person)=>grammarSpec('verb','present',{conjugation:PRESENT_MORPHOLOGY[person]?.formClass==='afalKhamsa'?'afalKhamsa':'regular',person,exactPresentRaf:true}),
+ presentAdvanced:(w,person)=>grammarSpec('verb','present',{conjugation:presentConjugationFor(person),person,exactPresentRaf:true}),
  past:(w,opts={})=>grammarSpec('verb','past',{person:opts.person||'3ms'}),
  faail:(w)=>grammarSpec('noun','faail'),
  particle:p=>grammarSpec('particle','particle',{particleType:'inna',particleWord:p.ar,particleIraab:p.iraab}),
@@ -3269,6 +3307,25 @@ function inflectVerb(token,tokens,index){
  if(token.tense==='kana'){
   token.ruleId='R_KANA_PAST_DEFICIENT';
   token.expectedSurface='كَانَ';
+  token.word=token.expectedSurface;
+  return;
+ }
+ /* Phase 2b-B — the مبني present lane, modelled on the past lane above: it resolves its rule
+    from binaaClass and returns BEFORE any governor, mood, or sign processing. It never reads
+    GRAMMAR_SIGNS (whose `sukun` is the visible jazm sign, not bināʾ) and leaves state empty
+    and sign null. Phase 2b-B is ungoverned only; a preceding governor is left unlinked so the
+    particle is rejected as orphaned rather than silently governing a built verb. */
+ if(token.grammar.conjugation===MABNI_NUUN_NISWAH){
+  const morphology=registered?.form==='presentRaf'?PRESENT_MORPHOLOGY[registered.morphology.presentPerson]:null;
+  if(morphology?.formClass!=='mabniPresent')throw new Error(`Unregistered mabnī-present surface: ${token.surfaceHint}`);
+  if(!registered.morphology.presentPersonCandidates?.includes(token.grammar.person))throw new Error(`Exact mabnī-present surface is not authorized for this person: ${token.surfaceHint}`);
+  token.inflection=MABNI_NUUN_NISWAH;
+  token.state='';
+  token.sign=null;
+  token.governorId=null;
+  token.ruleId=PRESENT_BINAA_RULE_IDS[morphology.binaaClass];
+  if(!token.ruleId)throw new Error(`No present bināʾ rule for class ${morphology.binaaClass}`);
+  token.expectedSurface=registered.surface;
   token.word=token.expectedSurface;
   return;
  }
@@ -3458,6 +3515,15 @@ function renderVerbAnalysis(token){
   token.en='A deficient past-tense verb built on fatḥah, with no syntactic position of its own.';
   return;
  }
+ /* Phase 2b-B — built on sukūn, so it takes NO مرفوع/منصوب/مجزوم, no «وعلامة … », and no
+    «في محل …». Al-Tuḥfah states the bināʾ at p. 73 and applies it at p. 124 («يخدمن: فعل
+    مضارع مبني على السكون لاتصاله بنون النسوة»), assigning a maḥall to neither. The attached
+    nūn's own «في محل رفع فاعل» is a separate component analysis, rendered separately. */
+ if(token.inflection===MABNI_NUUN_NISWAH){
+  token.ar=`${token.word}: فِعْلٌ مُضَارِعٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنُونِ النِّسْوَةِ.`;
+  token.en='A present-tense verb built on sukūn because nūn al-niswah is directly attached to it.';
+  return;
+ }
  const governor=token.governorId?token._tokens.find(item=>item.id===token.governorId):null;
  const cause=governor?.grammar.particleType==='lan'?' بِـ«لَنْ»':governor?.grammar.particleType==='lam'?' بِـ«لَمْ»':'';
  let arabic=`${token.word}: فِعْلٌ مُضَارِعٌ ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${token.sign.ar}`;
@@ -3634,6 +3700,13 @@ function whyVerbSubject(t){
   if(t.relations&&t.relations.subjectType==='implicit')return{id:'WHY_SUBJECT_HIDDEN',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ».',en:'Its فَاعِل is a hidden pronoun understood as «هُوَ».'};
   return null;
  }
+ /* The attached nūn is the fāʿil, exactly as in the past (كَتَبْنَ), so this reuses the existing
+    component rule rather than duplicating it. Al-Tuḥfah p. 124 gives both contexts the same
+    analysis: «ونون النسوة فاعل، مبني على الفتح في محل رفع». */
+ if(t.inflection===MABNI_NUUN_NISWAH){
+  const component=COMPONENT_REGISTRY['nuun-niswah'];
+  return{id:'WHY_SUBJECT_NUUN_NISWAH',ar:`وَ${component.nameAr} ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.`,en:`${cap(component.nameEn)} is attached to the verb and is its فَاعِلٌ.`};
+ }
  if(t.inflection==='afalKhamsa'){
   const kind=PRESENT_ENDING_COMPONENTS[t.grammar.morphology?.endingClass]?.find(item=>COMPONENT_REGISTRY[item]?.syntacticRole==='fail');
   const component=COMPONENT_REGISTRY[kind];
@@ -3686,6 +3759,11 @@ function buildTokenWhy(token,data){
   }else if(token.tense==='kana'){
    push({id:'WHY_KANA',ar:'«كَانَ» فِعْلٌ مَاضٍ نَاقِصٌ يَدْخُلُ عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَيَرْفَعُ اسْمَهُ وَيَنْصِبُ خَبَرَهُ.',en:'«كَانَ» is a deficient past verb that enters a nominal sentence: its اسْم is مَرْفُوعٌ and its خَبَر is مَنْصُوبٌ.'});
    push({id:'WHY_MABNI_KANA',ar:'وَهُوَ مَبْنِيٌّ عَلَى الْفَتْحِ.',en:'It is مَبْنِيٌّ on the فَتْحَة.'});
+  }else if(token.inflection===MABNI_NUUN_NISWAH){
+   /* Deliberately NOT whyStateVerb/whySignVerb: those claim مرفوع/منصوب/مجزوم and name an
+      iʿrāb sign, neither of which is true of a مبني verb. */
+   push({id:'WHY_PRESENT_NUUN_NISWAH_BINAA',ar:`${wq(token.word)} اتَّصَلَتْ بِهِ نُونُ النِّسْوَةِ مُبَاشَرَةً، فَهُوَ مَبْنِيٌّ عَلَى السُّكُونِ.`,en:`${eq(token.word)} has nūn al-niswah directly attached to it, so it is مَبْنِيٌّ on sukūn.`});
+   push(whyVerbSubject(token));
   }else{
    push(whyStateVerb(token,data));
    push(whySignVerb(token));
@@ -3862,6 +3940,30 @@ function validateExercise(data){
    const authoritative=authoritativeVerbMorphology(token,data);
    const registered=verbFormIndex.get(token.word);
    if(!authoritative.registered)fail('E_PRESENT_SURFACE','Present surface is not an explicitly registered production form.',token);
+   /* Phase 2b-B — the مبني and مُعرب lanes are mutually exclusive and must agree with the
+      registry. A forged token that claims one lane for a surface registered in the other is
+      rejected here, before either lane's checks can run. */
+   const authoritativeMabni=authoritative.formClass==='mabniPresent';
+   const claimedMabni=token.inflection===MABNI_NUUN_NISWAH;
+   if(authoritative.registered&&authoritativeMabni!==claimedMabni)fail('E_PRESENT_FORM_CLASS','Present inflection disagrees with the authoritative person/form class.',token);
+   if(claimedMabni&&authoritativeMabni){
+    const morphology=token.grammar.morphology||{};
+    if(!['3fp','2fp'].includes(authoritative.person))fail('E_MABNI_PRESENT_PERSON','Only 3fp and 2fp present forms may be built on sukūn.',token);
+    if(token.grammar.person!==authoritative.person)fail('E_PRESENT_PERSON','Present person disagrees with the authoritative exact surface.',token);
+    if(token.state)fail('E_MABNI_PRESENT_STATE','A present verb built on sukūn has no iʿrāb state.',token);
+    if(token.sign)fail('E_MABNI_PRESENT_SIGN','A present verb built on sukūn has no iʿrāb sign; its sukūn is bināʾ.',token);
+    if(token.ruleId!==PRESENT_BINAA_RULE_IDS[authoritative.binaaClass])fail('E_MABNI_PRESENT_RULE','Present bināʾ rule disagrees with the registered bināʾ class.',token);
+    if(morphology.formClass!=='mabniPresent'||morphology.endingClass!=='nuun-niswah'||morphology.binaaClass!=='sukun-nuun-niswah'){
+     fail('E_MABNI_PRESENT_MORPHOLOGY','Stored mabnī-present morphology is not the registered nūn-al-niswah shape.',token);
+    }
+    // Any governor link at all, resolvable or dangling: the mabnī lane always clears
+    // governorId, so a non-empty value can only be forged. Governed forms are Phase 2b-C.
+    if(governor||token.governorId)fail('E_MABNI_PRESENT_GOVERNED','Phase 2b-B produces only ungoverned mabnī-present verbs.',token);
+    const subjectRelation=data.relationships.find(item=>item.type==='verbSubject'&&item.verbId===token.id);
+    if(subjectRelation?.subjectType!=='attached')fail('E_MABNI_PRESENT_SUBJECT','The fāʿil of a nūn-al-niswah verb is the attached nūn itself.',token);
+    if(data.tokens.some(item=>item?.grammar?.role==='faail'))fail('E_MABNI_PRESENT_EXPLICIT_SUBJECT','A nūn-al-niswah verb may not also take an explicit noun fāʿil.',token);
+    if(productionTemplate?.presentCapabilities?.length&&!templateAuthorizesPresentMorphology(productionTemplate,authoritative))fail('E_PRESENT_TEMPLATE_AUTHORIZATION','Present person and structure are not authorized by the production template.',token);
+   }else if(!claimedMabni&&!authoritativeMabni){
    if(token.state==='jarr')fail('E_PRESENT_KHAFD','A present verb may not be assigned khafḍ.',token);
    if(token.state!==required)fail('E_VERB_MOOD','Present-verb mood disagrees with its actual governor.',token);
    if(token.state!=='raf'&&!governor)fail('E_MISSING_GOVERNOR','Non-indicative present verb has no visible governor.',token);
@@ -3883,6 +3985,7 @@ function validateExercise(data){
    if(token.inflection==='afalKhamsa'&&registered&&authoritative.person&&token.word!==inflectFiveVerb(registered.lexeme,authoritative.person,token.state,false))fail('E_AFAL5_SURFACE','Five-verb surface disagrees with its exact registry entry and mood.',token);
    if(token.grammar.person!==authoritative.person)fail('E_PRESENT_PERSON','Present person disagrees with the authoritative exact surface.',token);
    if(productionTemplate?.presentCapabilities?.length&&!templateAuthorizesPresentMorphology(productionTemplate,authoritative))fail('E_PRESENT_TEMPLATE_AUTHORIZATION','Present person and structure are not authorized by the production template.',token);
+   }
   }
   if(token.grammar.type==='verb'&&token.tense==='past'){
    const authoritative=authoritativeVerbMorphology(token,data);
@@ -3922,7 +4025,7 @@ function validateExercise(data){
    const morphologyFields=token.tense==='past'
     ?['registered','tense','person','subjectMode','endingClass','binaaClass','feminineTaa']
     :token.tense==='present'
-     ?['registered','tense','person','subjectMode','formClass','endingClass','feminineTaa']
+     ?['registered','tense','person','subjectMode','formClass','endingClass','binaaClass','feminineTaa']
      :['feminineTaa'];
    if(morphologyFields.some(field=>token.grammar.morphology?.[field]!==authoritativeMorphology[field]))fail('E_VERB_MORPHOLOGY','Stored verb morphology disagrees with the registered production morphology.',token);
    const expectedKinds=verbComponentKinds(token,data);
@@ -4068,8 +4171,9 @@ function add(starts,form,state,sign,build,metadata={}){
   const permittedMode=morphology?.subjectMode==='contextual'
    ?['explicit','implicit'].includes(capability.subjectMode)
    :morphology?.subjectMode===capability.subjectMode;
-  if(!morphology||!permittedMode||capability.formClass!==morphology.formClass||capability.endingClass!==morphology.endingClass){
-   throw new Error(`Invalid present template capability: ${capability.person}/${capability.subjectMode}/${capability.formClass}/${capability.endingClass}`);
+  if(!morphology||!permittedMode||capability.formClass!==morphology.formClass||capability.endingClass!==morphology.endingClass
+    ||(capability.binaaClass||'')!==(morphology.binaaClass||'')){
+   throw new Error(`Invalid present template capability: ${capability.person}/${capability.subjectMode}/${capability.formClass}/${capability.endingClass}/${capability.binaaClass||''}`);
   }
   if(PRESENT_NON_PRODUCTION_PERSONS.includes(capability.person)){
    throw new Error(`Present person ${capability.person} is morphology authority only and may not be produced.`);
@@ -4104,7 +4208,10 @@ const ADVANCED_PAST_SUBJECT_EN=Object.freeze({
  '1s':'I','2ms':'You','2fs':'You','1p':'We','3md':'The two of them','3mp':'They','3fp':'They'
 });
 const ADVANCED_PRESENT_SUBJECT_EN=Object.freeze({
- '1s':'I','1p':'We','3ms':'He','3md':'The two of them','3mp':'They','2mp':'You all','2fs':'You'
+ '1s':'I','1p':'We','3ms':'He','3md':'The two of them','3mp':'They','2mp':'You all','2fs':'You',
+ // Phase 2b-B. The gender must be explicit: these forms are feminine-plural only, and
+ // «They»/«You all» alone would not distinguish them from the 3mp/2mp five-verb forms.
+ '3fp':'They (women)','2fp':'You women'
 });
 function buildAdvancedPastExercise(person){
  const action=pickVaried(advancedPastActions,`advanced-past-action:${person}`,item=>item.past);
@@ -4143,7 +4250,8 @@ const presentTemplateMetadata=(person,subjectMode,phase2Presentation=false)=>({
  presentCapabilities:[{
   person,subjectMode,
   formClass:PRESENT_MORPHOLOGY[person].formClass,
-  endingClass:PRESENT_MORPHOLOGY[person].endingClass
+  endingClass:PRESENT_MORPHOLOGY[person].endingClass,
+  binaaClass:PRESENT_MORPHOLOGY[person].binaaClass
  }]
 });
 /* Phase 2b-A — a fronted feminine mubtadaʾ whose khabar is the verbal sentence after it.
@@ -4248,6 +4356,11 @@ add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('1p'),pres
 add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('3md'),presentTemplateMetadata('3md','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2mp'),presentTemplateMetadata('2mp','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2fs'),presentTemplateMetadata('2fs','attached',true));
+/* Phase 2b-B — ungoverned present verbs built on sukūn for نون النسوة. The learner's target
+   stays the direct object, so these reuse the existing verb/singular/nasb/fatha filter tuple
+   and add no state/sign filter for a word that has neither. */
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('3fp'),presentTemplateMetadata('3fp','attached',true));
+add('verb','singular','nasb','fatha',()=>buildAdvancedPresentExercise('2fp'),presentTemplateMetadata('2fp','attached',true));
 // Phase 2b-A. Fronted feminine mubtadaʾ + verbal-sentence khabar. The surfaces تَكْتُبُ and
 // تَكْتُبَانِ are shared with 2ms and 2d; only the template capability settles the person.
 add('noun','singular','nasb','fatha',()=>buildFrontedPresentExercise('3fs'),frontedPresentTemplateMetadata('3fs','implicit'));

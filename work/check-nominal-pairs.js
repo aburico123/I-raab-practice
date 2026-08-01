@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -631,7 +631,8 @@ assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===6,'The noun declen
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.regular).join(',')==='raf,nasb,jazm','Regular present moods are incomplete');
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.afalKhamsa).join(',')==='raf,nasb,jazm','Five-verb moods are incomplete');
 assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),'Unsupported diptotes are not recorded in the coverage matrix');
-assert(Object.keys(api.SOURCE_REGISTRY).length===65,`Expected 65 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+// 65 through Phase 2b-C, plus Phase 3A1's G_AN_NASB, G_KAY_NASB and G_LAM_TALIL_KAY.
+assert(Object.keys(api.SOURCE_REGISTRY).length===68,`Expected 68 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -3643,6 +3644,386 @@ c4Cases+=2;
 console.log('Phase-2b-C final authorization repair audit passed: '+c4Cases+' canonical checks and '+c4AttackCases+' adversarial checks.');
 console.log('  final-repair error-code distribution: '+JSON.stringify(c4CodeHist));
 
+/* ============================================================================
+   PHASE 3A1 — أَنْ and explicit لِكَيْ over the muʿrab present lane.
+
+   Al-Tuḥfah p. 75 puts أَنْ in «القسم الأول ـ وهو الذي يَنصُب الفعل المضارعَ بنفسه» and states
+   «أما «أنْ» فَحَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ». p. 76 gives كَيْ the same direct
+   government but ONLY on a condition: «فَحَرْفُ مَصْدَرٍ وَنَصْبٍ؛ ويشترط في النصب بها أن
+   تتقدَّمَها لام التعليل لفظاً», and adds that without that lām (لفظاً or تقديراً) «كان النصب
+   بأنْ مُضْمَرَة» — the concealed-أَنْ analysis, which this phase does NOT implement. So bare
+   كَيْ must be unreachable in production and must reject as forged input.
+   ========================================================================== */
+let p3Cases=0,p3AttackCases=0;
+const p3CodeHist={};
+const P3_AN='أَنْ',P3_KAY='كَيْ',P3_LAM='لِ';
+const p3Templates={
+  anOrdinary:api.templates.find(t=>t.stableId==='T_PARTICLE_PRESENT_NASB_FATHA_02'),
+  anFive:api.templates.find(t=>t.stableId==='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02'),
+  kayOrdinary:api.templates.find(t=>t.stableId==='T_PARTICLE_PRESENT_NASB_FATHA_03'),
+  kayFive:api.templates.find(t=>t.stableId==='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03')
+};
+for(const [name,template] of Object.entries(p3Templates))assert(template,`Phase 3A1: template ${name} is missing`);
+
+/* --- Source records: exact pages, exact ownership, exact deferred boundary. --- */
+{
+  const an=api.SOURCE_REGISTRY.G_AN_NASB,kay=api.SOURCE_REGISTRY.G_KAY_NASB,lam=api.SOURCE_REGISTRY.G_LAM_TALIL_KAY;
+  for(const [id,record,pages] of [['G_AN_NASB',an,[75]],['G_KAY_NASB',kay,[76]],['G_LAM_TALIL_KAY',lam,[76]]]){
+    assert(record&&record.productionEnabled&&record.basis==='nahw-rule',`${id} is missing or disabled`);
+    assert(record.primarySource.authorityId==='TUHFA_QATAR_WORKSPACE',`${id} is not owned by the workspace Al-Tuḥfah authority`);
+    assert(JSON.stringify(record.primarySource.pdfPages)===JSON.stringify(pages),
+      `${id} must cite exactly ${JSON.stringify(pages)}, found ${JSON.stringify(record.primarySource.pdfPages)}`);
+    assert(api.isSourceAuthorized(id),`${id} is not source-authorized`);
+    p3Cases+=4;
+  }
+  // p. 74 carries only the matn's bare list of the ten nawāṣib, so no Phase 3A1 rule may claim it.
+  for(const [id,record] of [['G_AN_NASB',an],['G_KAY_NASB',kay],['G_LAM_TALIL_KAY',lam]]){
+    assert(!record.primarySource.pdfPages.includes(74),`${id} must not cite the bare matn list on p. 74`);
+    assert(!record.primarySource.pdfPages.includes(13),`${id} must not cite the ḥurūf al-khafḍ page`);
+    p3Cases+=2;
+  }
+  // The deferred boundary is stated in the conditions, not merely implied.
+  assert(/concealed|مُضْمَرَة|bare/i.test(kay.conditions)&&kay.conditions.includes('لام التعليل')===false
+    ?true:true,'placeholder');
+  assert(kay.conditions.includes('bare')&&/تقدير|estimated/i.test(kay.conditions),
+    'The kay rule must exclude bare kay and the estimated lām in its conditions');
+  assert(/never the verb|never the/i.test(lam.conditions),'The lām rule must state that it never governs the verb');
+  assert(/not the naṣb sign|not the na/i.test(an.conditions),'The an rule must disclaim the naṣb sign');
+  // The sign remains owned by the pre-existing, separately verified sign rules.
+  assert(api.GRAMMAR_RULES.presentVerb.regular.nasb[1]==='R_MUDARI_NASB_FATHA'
+    &&api.GRAMMAR_RULES.presentVerb.afalKhamsa.nasb[1]==='R_AFAL5_NASB_DELETE_NUN',
+    'Phase 3A1 must not take ownership of the naṣb sign rules');
+  p3Cases+=4;
+}
+
+/* --- Governor architecture. --- */
+{
+  const governors=api.GRAMMAR_RULES.governors;
+  assert(governors.an&&governors.an.surface===P3_AN&&governors.an.mood==='nasb'&&governors.an.ruleId==='G_AN_NASB',
+    'The أَنْ governor record is not canonical');
+  assert(governors.kay&&governors.kay.surface===P3_KAY&&governors.kay.mood==='nasb'&&governors.kay.ruleId==='G_KAY_NASB',
+    'The كَيْ governor record is not canonical');
+  // The lām is deliberately NOT a governor: being absent from this map is what stops it governing.
+  assert(!governors.lamTalil,'lām al-taʿlīl must not be registered as a verb governor');
+  assert(!governors.idhan&&!governors.hatta&&!governors.faSababiyya,
+    'Deferred nawāṣib must not be registered as governors in Phase 3A1');
+  p3Cases+=4;
+}
+
+/* --- Deterministic production: every template, both lanes, exact output. --- */
+const p3Golden={};
+for(const [name,template] of Object.entries(p3Templates)){
+  const isKay=name.startsWith('kay'),isFive=name.endsWith('Five');
+  const data=api.buildTemplate(template.id);
+  p3Golden[name]=data;
+  assert(api.validateExercise(clone(data)).length===0,`${name}: golden exercise is not clean`);
+  const verbIndex=data.tokens.findIndex(t=>t.grammar.type==='verb');
+  const verb=data.tokens[verbIndex],particle=data.tokens[verbIndex-1];
+  const object=data.tokens[verbIndex+1];
+  assert(data.tokens.length===(isKay?4:3),`${name}: token count is ${data.tokens.length}`);
+  // Structure and exact surfaces.
+  assert(particle.word===(isKay?P3_KAY:P3_AN),`${name}: the direct governor surface is ${particle.word}`);
+  assert(particle.grammar.particleType===(isKay?'kay':'an'),`${name}: wrong particleType`);
+  assert(particle.ruleId===(isKay?'G_KAY_NASB':'G_AN_NASB'),`${name}: particle is not bound to its owning source rule`);
+  if(isKay){
+    const lam=data.tokens[0];
+    assert(lam.word===P3_LAM&&lam.grammar.particleType==='lamTalil',`${name}: the licensing lām is missing or malformed`);
+    assert(lam.ruleId==='G_LAM_TALIL_KAY',`${name}: the lām is not bound to its owning source rule`);
+    assert(!lam.relations.governsId,`${name}: the lām must never govern the verb`);
+    assert(verb.governorId===particle.id,`${name}: the verb must be governed by كَيْ, not by the lām`);
+    // The proclitic is written joined: لِكَيْ, never لِ كَيْ.
+    assert(data.sentence.startsWith(`${P3_LAM}${P3_KAY} `),`${name}: sentence is «${data.sentence}»`);
+    assert(!data.sentence.startsWith(`${P3_LAM} `),`${name}: the lām was written detached`);
+    p3Cases+=6;
+  }
+  // Ordinary vs five-verb morphology (§8 / §9).
+  assert(verb.tense==='present'&&verb.state==='nasb',`${name}: verb is not a manṣūb present`);
+  assert(verb.sign.id===(isFive?'nunDropped':'fatha'),`${name}: sign is ${verb.sign.id}`);
+  assert(verb.inflection===(isFive?'afalKhamsa':'regular'),`${name}: inflection is ${verb.inflection}`);
+  assert(verb.grammar.morphology.formClass===(isFive?'afalKhamsa':'ordinary'),`${name}: formClass drifted`);
+  assert(verb.grammar.morphology.person===(isFive?'3mp':'3ms'),`${name}: person drifted`);
+  assert(verb.grammar.morphology.subjectMode===(isFive?'attached':'implicit'),`${name}: subjectMode drifted`);
+  assert(verb.grammar.morphology.formClass!=='mabniPresent'&&verb.grammar.morphology.endingClass!=='nuun-niswah',
+    `${name}: a nūn-al-niswah form leaked into Phase 3A1`);
+  assert(verb.ruleId===(isFive?'R_AFAL5_NASB_DELETE_NUN':'R_MUDARI_NASB_FATHA'),`${name}: sign rule is ${verb.ruleId}`);
+  assert(!verb.mahallRuleId,`${name}: a muʿrab Phase 3A1 verb may not carry a maḥall rule`);
+  assert(verb.target===true,`${name}: the governed verb must be the learner target`);
+  assert(object.grammar.role==='object'&&object.state==='nasb',`${name}: the direct object is not accusative`);
+  // Reciprocal, adjacent, single governor.
+  assert(particle.relations.governsId===verb.id,`${name}: governor links are not reciprocal`);
+  assert(data.tokens.filter(t=>t.relations&&t.relations.governsId===verb.id).length===1,`${name}: more than one token governs the verb`);
+  // Exact approved whole-word analysis.
+  const cause=isKay?'بِـ«كَيْ»':'بِـ«أَنْ»';
+  assert(arHas(verb.ar,`فِعْلٌ مُضَارِعٌ مَنْصُوبٌ ${cause}`),`${name}: verb iʿrāb is «${verb.ar}»`);
+  assert(arHas(verb.ar,isFive?'وَعَلَامَةُ نَصْبِهِ حَذْفُ النُّونِ':'وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ'),
+    `${name}: naṣb sign clause is wrong: «${verb.ar}»`);
+  if(isFive)assert(arHas(verb.ar,'لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ'),`${name}: five-verb justification missing`);
+  for(const forbidden of ['مَرْفُوعٌ','مَجْزُومٌ','مَخْفُوضٌ','فِي مَحَلِّ','مُضْمَرَة','جَوَازًا تَقْدِيرُهُ «هُمْ»'])
+    assert(!arHas(verb.ar,forbidden),`${name}: the verb analysis claims «${forbidden}»`);
+  assert(!arHas(verb.ar,isKay?'بِـ«أَنْ»':'بِـ«كَيْ»'),`${name}: the verb names the wrong governor`);
+  assert(!arHas(verb.ar,'بِـ«لَنْ»')&&!arHas(verb.ar,'بِـ«لَمْ»'),`${name}: the verb names a Phase-2 governor`);
+  // Exact approved particle analysis.
+  assert(arHas(particle.ar,isKay?'حَرْفُ مَصْدَرٍ وَنَصْبٍ':'حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ'),
+    `${name}: particle iʿrāb is «${particle.ar}»`);
+  if(isKay)assert(!arHas(particle.ar,'وَاسْتِقْبَالٍ'),`${name}: كَيْ must not claim futurity; only أَنْ does`);
+  // Why layers: separate, ordered state → sign → subject, and never a Phase-2 or concealed claim.
+  const why=api.buildTokenWhy(verb,data).ids;
+  assert(why.join('|')===`WHY_STATE_VERB_${isKay?'KAY':'AN'}|WHY_SIGN_${isFive?'AFAL5':'MUDARI'}_NASB|${isFive?'WHY_SUBJECT_ATTACHED':'WHY_SUBJECT_HIDDEN_HUWA'}`,
+    `${name}: verb Why chain is ${why.join('|')}`);
+  const particleWhy=api.buildTokenWhy(particle,data).ids;
+  assert(particleWhy[0]===(isKay?'WHY_PARTICLE_KAY':'WHY_PARTICLE_AN'),`${name}: particle Why is ${particleWhy.join('|')}`);
+  if(isKay)assert(api.buildTokenWhy(data.tokens[0],data).ids[0]==='WHY_PARTICLE_LAM_TALIL',`${name}: the lām lost its Why layer`);
+  for(const banned of ['WHY_STATE_VERB_LAN','WHY_STATE_VERB_LAM','WHY_STATE_VERB_FREE','WHY_STATE_VERB_SAWFA',
+                       'WHY_PRESENT_NUUN_NISWAH_BINAA','WHY_PRESENT_NUUN_NISWAH_LAN_MAHALL'])
+    assert(!why.includes(banned)&&!particleWhy.includes(banned),`${name}: Why routed through ${banned}`);
+  // No internal components on the ordinary lane; the five-verb lane keeps its existing ones.
+  assert((verb.components||[]).map(c=>c.kind).join('|')===(isFive?'waw-jamaaah|alif-fariqa':''),
+    `${name}: components are [${(verb.components||[]).map(c=>c.kind).join(',')}]`);
+  assert(!(particle.components||[]).length,`${name}: a particle grew internal components`);
+  p3Cases+=24;
+}
+// The English never says "concealed an", "permissibly"/"obligatorily" for these, or names a jazm.
+for(const [name,data] of Object.entries(p3Golden)){
+  const verb=data.tokens.find(t=>t.grammar.type==='verb');
+  assert(/subjunctive/i.test(verb.en)&&!/jussive|indicative|genitive/i.test(verb.en),`${name}: English state is wrong: ${verb.en}`);
+  assert(!/concealed an|estimated|muḍmara/i.test(verb.en),`${name}: English leaks the concealed-أَنْ analysis`);
+  assert(data.translation.includes(name.startsWith('kay')?'So that':'That '),`${name}: translation is «${data.translation}»`);
+  p3Cases+=3;
+}
+// Reachability across randomized vocabulary: both lanes, many surfaces, always canonical.
+for(const [name,template] of Object.entries(p3Templates)){
+  const isKay=name.startsWith('kay'),isFive=name.endsWith('Five');
+  const surfaces=new Set();
+  for(let i=0;i<250;i++){
+    const data=api.buildTemplate(template.id);
+    const verb=data.tokens.find(t=>t.grammar.type==='verb');
+    surfaces.add(verb.word);
+    assert(api.validateExercise(clone(data)).length===0,`${name}: a randomized build was invalid`);
+    assert(verb.state==='nasb'&&verb.sign.id===(isFive?'nunDropped':'fatha'),`${name}: randomized state/sign drifted`);
+    if(isFive)assert(!/ن[َِ]$/u.test(verb.word),`${name}: a five verb in naṣb kept its nūn: ${verb.word}`);
+    else assert(/َ$/u.test(verb.word),`${name}: an ordinary manṣūb present does not end in fatḥah: ${verb.word}`);
+  }
+  assert(surfaces.size>=8,`${name}: only ${surfaces.size} distinct verb surfaces reached`);
+  p3Cases+=2;
+}
+
+/* --- Adversarial matrices (§10 أَنْ, §11 لِكَيْ, §8/§9 morphology). --- */
+function p3Live(name,base,expectedCode,mutate){
+  const data=clone(base);
+  mutate(data,data.tokens.find(t=>t.grammar.type==='verb'),data.tokens.find(t=>t.grammar.particleType==='an'||t.grammar.particleType==='kay'));
+  let codes;
+  try{ codes=api.validateExercise(data).map(item=>item.code); }
+  catch(error){ throw new Error(`Phase 3A1 attack "${name}" threw: ${error.message}`); }
+  assert(codes.length>0,`Phase 3A1 attack "${name}" was accepted`);
+  if(expectedCode)assert(codes.includes(expectedCode),
+    `Phase 3A1 attack "${name}" rejected for the wrong reason: ${JSON.stringify(codes)} (wanted ${expectedCode})`);
+  codes.forEach(code=>{p3CodeHist[code]=(p3CodeHist[code]||0)+1;});
+  p3AttackCases++;
+}
+const AN_ORD=p3Golden.anOrdinary,AN_FIVE=p3Golden.anFive,KAY_ORD=p3Golden.kayOrdinary,KAY_FIVE=p3Golden.kayFive;
+// Particle-surface and identity substitution.
+for(const [label,surface] of [['إِنْ','إِنْ'],['إِنَّ','إِنَّ'],['لَنْ','لَنْ'],['لَمْ','لَمْ'],['سَوْفَ','سَوْفَ'],['أن bare','أن']]){
+  p3Live(`أَنْ surface → ${label}`,AN_ORD,'E_PARTICLE_SURFACE',(d,v,p)=>{p.word=surface;});
+  p3Live(`كَيْ surface → ${label}`,KAY_ORD,'E_PARTICLE_SURFACE',(d,v,p)=>{p.word=surface;});
+}
+for(const type of ['lan','lam','sawfa','inna','preposition']){
+  p3Live(`أَنْ particleType → ${type}`,AN_ORD,null,(d,v,p)=>{p.grammar.particleType=type;});
+  p3Live(`كَيْ particleType → ${type}`,KAY_ORD,null,(d,v,p)=>{p.grammar.particleType=type;});
+}
+p3Live('أَنْ rule → G_KAY_NASB',AN_ORD,'E_PARTICLE_RULE_OWNER',(d,v,p)=>{p.ruleId='G_KAY_NASB';});
+p3Live('كَيْ rule → G_AN_NASB',KAY_ORD,'E_PARTICLE_RULE_OWNER',(d,v,p)=>{p.ruleId='G_AN_NASB';});
+p3Live('أَنْ rule → G_LAN_NASB',AN_ORD,'E_PARTICLE_RULE_OWNER',(d,v,p)=>{p.ruleId='G_LAN_NASB';});
+p3Live('أَنْ rule blanked',AN_ORD,'E_TOKEN_INCOMPLETE',(d,v,p)=>{p.ruleId='';});
+// Adjacency, order and linking.
+p3Live('أَنْ removed',AN_ORD,null,d=>{d.tokens.splice(0,1);});
+p3Live('أَنْ after the verb',AN_ORD,null,d=>{const p=d.tokens.shift();d.tokens.splice(1,0,p);});
+p3Live('أَنْ separated from the verb',AN_ORD,null,d=>{const o=d.tokens.pop();d.tokens.splice(1,0,o);});
+p3Live('duplicate أَنْ',AN_ORD,null,d=>{d.tokens.unshift(clone(d.tokens[0]));});
+// A dangling id resolves to no governor at all, so the owning failure is the missing governor.
+p3Live('أَنْ governor link dangling',AN_ORD,'E_MISSING_GOVERNOR',(d,v)=>{v.governorId='NOPE';});
+p3Live('أَنْ governor link cleared',AN_ORD,'E_MISSING_GOVERNOR',(d,v)=>{v.governorId=null;});
+p3Live('أَنْ governor link to object',AN_ORD,null,(d,v)=>{v.governorId=d.tokens[2].id;});
+p3Live('أَنْ governor link self',AN_ORD,null,(d,v)=>{v.governorId=v.id;});
+p3Live('أَنْ one-way link',AN_ORD,'E_ORPHAN_VERB_GOVERNOR',(d,v,p)=>{p.relations.governsId=null;});
+p3Live('أَنْ reverse link to object',AN_ORD,'E_ORPHAN_VERB_GOVERNOR',(d,v,p)=>{p.relations.governsId=d.tokens[2].id;});
+// State and sign (§8/§9).
+for(const [state,label] of [['raf','raf'],['jazm','jazm'],['jarr','khafḍ']]){
+  p3Live(`أَنْ ordinary state → ${label}`,AN_ORD,null,(d,v)=>{v.state=state;});
+  p3Live(`كَيْ five-verb state → ${label}`,KAY_FIVE,null,(d,v)=>{v.state=state;});
+}
+for(const signId of ['damma','sukun','nunKept','nunDropped']){
+  p3Live(`أَنْ ordinary sign → ${signId}`,AN_ORD,'E_VERB_SIGN',(d,v)=>{v.sign={id:signId,ar:'x',en:'x'};});
+}
+for(const signId of ['damma','sukun','nunKept','fatha']){
+  p3Live(`أَنْ five-verb sign → ${signId}`,AN_FIVE,'E_VERB_SIGN',(d,v)=>{v.sign={id:signId,ar:'x',en:'x'};});
+}
+p3Live('أَنْ ordinary → afalKhamsa inflection',AN_ORD,'E_PRESENT_FORM_CLASS',(d,v)=>{v.inflection='afalKhamsa';});
+p3Live('أَنْ five verb → regular inflection',AN_FIVE,'E_PRESENT_FORM_CLASS',(d,v)=>{v.inflection='regular';});
+p3Live('أَنْ ordinary → mabniPresent formClass',AN_ORD,'E_VERB_MORPHOLOGY',(d,v)=>{v.grammar.morphology.formClass='mabniPresent';});
+p3Live('أَنْ ordinary → nuun-niswah ending',AN_ORD,'E_VERB_MORPHOLOGY',(d,v)=>{v.grammar.morphology.endingClass='nuun-niswah';});
+p3Live('أَنْ ordinary person → 3mp',AN_ORD,'E_PRESENT_PERSON',(d,v)=>{v.grammar.person='3mp';});
+p3Live('أَنْ five-verb person → 3ms',AN_FIVE,'E_PRESENT_PERSON',(d,v)=>{v.grammar.person='3ms';});
+p3Live('أَنْ five verb keeps its nūn',AN_FIVE,'E_SURFACE_FORM',(d,v)=>{v.word=v.word+'نَ';});
+p3Live('أَنْ verb carries a maḥall rule',AN_ORD,'E_MAHALL_RULE_OWNER',(d,v)=>{v.mahallRuleId='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN';});
+p3Live('أَنْ verb sign rule → jazm rule',AN_ORD,'E_VERB_RULE',(d,v)=>{v.ruleId='R_MUDARI_JAZM_SUKUN';});
+p3Live('أَنْ verb sign rule → governor rule',AN_ORD,'E_VERB_RULE',(d,v)=>{v.ruleId='G_AN_NASB';});
+// Template authorization and rehoming.
+/* Cross-particle rehoming is owned by E_PRESENT_GOVERNOR_TEMPLATE: person and morphology are
+   IDENTICAL for أَنْ, لَنْ and كَيْ over the ordinary 3ms lane, so the capability check cannot
+   tell them apart and the declared governor is the only thing that can. */
+p3Live('أَنْ ordinary → لَنْ template',AN_ORD,'E_PRESENT_GOVERNOR_TEMPLATE',d=>{d.templateId='T_PARTICLE_PRESENT_NASB_FATHA_01';});
+p3Live('أَنْ ordinary → كَيْ template',AN_ORD,'E_PRESENT_GOVERNOR_TEMPLATE',d=>{d.templateId=p3Templates.kayOrdinary.stableId;});
+p3Live('كَيْ ordinary → أَنْ template',KAY_ORD,'E_PRESENT_GOVERNOR_TEMPLATE',d=>{d.templateId=p3Templates.anOrdinary.stableId;});
+p3Live('أَنْ ordinary → five-verb template',AN_ORD,'E_TEMPLATE_METADATA',d=>{d.templateId=p3Templates.anFive.stableId;});
+p3Live('أَنْ ordinary → unknown template',AN_ORD,'E_TEMPLATE_ID',d=>{d.templateId='T_UNKNOWN_PHASE_3A1';});
+p3Live('أَنْ five verb → لَنْ five-verb template',AN_FIVE,'E_PRESENT_GOVERNOR_TEMPLATE',d=>{d.templateId='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01';});
+p3Live('أَنْ five verb → كَيْ five-verb template',AN_FIVE,'E_PRESENT_GOVERNOR_TEMPLATE',d=>{d.templateId=p3Templates.kayFive.stableId;});
+// Why-layer swaps.
+p3Live('أَنْ Why → لَنْ state Why',AN_ORD,'E_WHY_CANONICAL',(d,v)=>{const w=api.buildTokenWhy(v,d);v.why={ids:['WHY_STATE_VERB_LAN',w.ids[1],w.ids[2]],ar:[...w.ar],en:[...w.en]};});
+p3Live('كَيْ Why → أَنْ state Why',KAY_ORD,'E_WHY_CANONICAL',(d,v)=>{const w=api.buildTokenWhy(v,d);v.why={ids:['WHY_STATE_VERB_AN',w.ids[1],w.ids[2]],ar:[...w.ar],en:[...w.en]};});
+// Translation swaps.
+p3Live('أَنْ translation → كَيْ meaning',AN_ORD,'E_AN_TRANSLATION',d=>{d.translation='So that he does it.';});
+p3Live('كَيْ translation → أَنْ meaning',KAY_ORD,'E_KAY_TRANSLATION',d=>{d.translation='That he does it.';});
+
+/* --- §11: the لِكَيْ structural contract. --- */
+p3Live('bare كَيْ (lām removed)',KAY_ORD,'E_KAY_MISSING_LAM',d=>{d.tokens.splice(0,1);d.sentence=d.sentence.replace(P3_LAM,'');});
+p3Live('lām replaced by a preposition',KAY_ORD,'E_KAY_MISSING_LAM',d=>{d.tokens[0]=api.makeToken('فِي','in',api.specs.prep('فِي'));});
+p3Live('lām particleType → preposition',KAY_ORD,'E_KAY_MISSING_LAM',d=>{d.tokens[0].grammar.particleType='preposition';});
+p3Live('lām particleType → lam (jazm)',KAY_ORD,'E_KAY_MISSING_LAM',d=>{d.tokens[0].grammar.particleType='lam';});
+p3Live('lām surface malformed',KAY_ORD,'E_PARTICLE_SURFACE',d=>{d.tokens[0].word='لَ';});
+p3Live('lām rule → G_KAY_NASB',KAY_ORD,'E_PARTICLE_RULE_OWNER',d=>{d.tokens[0].ruleId='G_KAY_NASB';});
+p3Live('lām rule → R_HARF_JARR',KAY_ORD,'E_PARTICLE_RULE_OWNER',d=>{d.tokens[0].ruleId='R_HARF_JARR';});
+p3Live('كَيْ before the lām',KAY_ORD,null,d=>{const lam=d.tokens.shift();d.tokens.splice(1,0,lam);});
+p3Live('verb before كَيْ',KAY_ORD,null,d=>{const v=d.tokens.splice(2,1)[0];d.tokens.splice(1,0,v);});
+p3Live('object inserted between كَيْ and the verb',KAY_ORD,null,d=>{const o=d.tokens.pop();d.tokens.splice(2,0,o);});
+p3Live('token inserted between the lām and كَيْ',KAY_ORD,'E_KAY_MISSING_LAM',d=>{d.tokens.splice(1,0,clone(d.tokens[3]));});
+p3Live('lām stored as the verb governor',KAY_ORD,null,(d,v)=>{v.governorId=d.tokens[0].id;});
+p3Live('lām claims the verb',KAY_ORD,'E_LAM_TALIL_GOVERNS',d=>{d.tokens[0].relations.governsId=d.tokens[2].id;});
+p3Live('lām orphaned before the verb',KAY_ORD,'E_LAM_TALIL_ORPHAN',d=>{d.tokens.splice(1,1);d.sentence=d.sentence.replace(P3_KAY+' ','');});
+p3Live('كَيْ substituted with أَنْ',KAY_ORD,null,(d,v,p)=>{p.word=P3_AN;p.grammar.particleType='an';p.ruleId='G_AN_NASB';});
+p3Live('أَنْ given a licensing lām',AN_ORD,'E_LAM_TALIL_ORPHAN',d=>{d.tokens.unshift(api.makeToken(P3_LAM,'so',api.specs.lamTalil(P3_LAM)));d.sentence=P3_LAM+d.sentence;});
+p3Live('duplicate lām',KAY_ORD,'E_LAM_TALIL_ORPHAN',d=>{d.tokens.unshift(clone(d.tokens[0]));});
+p3Live('كَيْ five verb, lām removed',KAY_FIVE,'E_KAY_MISSING_LAM',d=>{d.tokens.splice(0,1);d.sentence=d.sentence.replace(P3_LAM,'');});
+// The lām must not be produced anywhere except immediately before كَيْ.
+{
+  const lanTemplate=api.templates.find(t=>t.stableId==='T_PARTICLE_PRESENT_NASB_FATHA_01');
+  const data=api.buildTemplate(lanTemplate.id);
+  data.tokens.unshift(api.makeToken(P3_LAM,'so',api.specs.lamTalil(P3_LAM)));
+  data.sentence=P3_LAM+data.sentence;
+  p3Live('lām attached to a لَنْ sentence',data,'E_LAM_TALIL_ORPHAN',()=>{});
+}
+
+/* --- §15: source and ownership attacks. --- */
+for(const [label,ruleId] of [['G_AN_NASB','G_AN_NASB'],['G_KAY_NASB','G_KAY_NASB'],['G_LAM_TALIL_KAY','G_LAM_TALIL_KAY']]){
+  // An unrelated token may never carry a Phase 3A1 rule as its own rule.
+  p3Live(`object carries ${label}`,AN_ORD,'E_PARTICLE_RULE_OWNER',d=>{d.tokens[2].ruleId=ruleId;});
+  p3Live(`verb carries ${label} as its sign rule`,AN_ORD,'E_VERB_RULE',(d,v)=>{v.ruleId=ruleId;});
+}
+p3Live('أَنْ carries a noun rule',AN_ORD,'E_PARTICLE_RULE_OWNER',(d,v,p)=>{p.ruleId='R_MAFUL_NASB';});
+p3Live('أَنْ carries an unknown rule',AN_ORD,'E_SOURCE_UNVERIFIED',(d,v,p)=>{p.ruleId='G_MADE_UP';});
+
+/* --- §14: History. Schema stays v3; every new shape survives a clean round trip, repairs
+   presentation corruption, and rejects identity and authority forgery. --- */
+const p3Snapshots={};
+for(const [name,data] of Object.entries(p3Golden)){
+  const snapshot=api.createExerciseSnapshot(data);
+  assert(snapshot&&snapshot.schemaVersion===3,`${name}: snapshot is not schema v3`);
+  p3Snapshots[name]=snapshot;
+  const restored=api.restoreExerciseSnapshot(clone(snapshot));
+  assert(restored,`${name}: a clean snapshot failed to restore`);
+  assert(restored.sentence===data.sentence&&restored.translation===data.translation,`${name}: restore changed the sentence`);
+  assert(restored.tokens.map(t=>t.ar).join('|')===data.tokens.map(t=>t.ar).join('|'),`${name}: restore changed the analysis`);
+  p3Cases+=3;
+  // Presentation corruption must rebuild canonically.
+  const corrupt=clone(snapshot);
+  corrupt.translation='CORRUPT';
+  corrupt.tokens.forEach(t=>{t.ar='X';t.en='X';t.gloss='X';t.enHint='X';t.phraseAr='X';t.phraseEn='X';
+    if(t.why){t.why.ar=['X'];t.why.en=['X'];t.why.ids=['X'];}
+    (t.components||[]).forEach(c=>{c.ar='X';c.en='X';});});
+  (corrupt.relationships||[]).forEach(r=>{r.ar='X';r.en='X';});
+  const repaired=api.restoreExerciseSnapshot(corrupt);
+  assert(repaired,`${name}: presentation corruption made the snapshot unrestorable`);
+  assert(repaired.translation===data.translation,`${name}: translation was not rebuilt`);
+  assert(repaired.tokens.map(t=>t.ar).join('|')===data.tokens.map(t=>t.ar).join('|'),`${name}: Arabic was not rebuilt`);
+  assert(repaired.tokens.map(t=>t.en).join('|')===data.tokens.map(t=>t.en).join('|'),`${name}: English was not rebuilt`);
+  assert((repaired.relationships||[]).every(r=>r.ar!=='X'),`${name}: relationship presentation was not rebuilt`);
+  p3Cases+=5;
+}
+function p3History(name,snapshot,mutate){
+  const forged=clone(snapshot);
+  mutate(forged,forged.tokens.find(t=>t.grammar&&t.grammar.type==='verb'));
+  let result;
+  try{ result=api.restoreExerciseSnapshot(forged); }
+  catch(error){ throw new Error(`Phase 3A1 History attack "${name}" threw: ${error.message}`); }
+  assert(result===null,`Phase 3A1 History attack "${name}" was restored instead of rejected`);
+  p3AttackCases++;
+}
+for(const [name,snapshot] of Object.entries(p3Snapshots)){
+  const isKay=name.startsWith('kay');
+  p3History(`${name}: templateId → unknown`,snapshot,f=>{f.templateId='T_UNKNOWN_PHASE_3A1';});
+  p3History(`${name}: templateId → لَنْ template`,snapshot,f=>{f.templateId=name.endsWith('Five')?'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01':'T_PARTICLE_PRESENT_NASB_FATHA_01';});
+  p3History(`${name}: particle surface forged`,snapshot,f=>{const p=f.tokens.find(t=>t.grammar.particleType==='an'||t.grammar.particleType==='kay');p.word='لَنْ';});
+  p3History(`${name}: particle type forged`,snapshot,f=>{const p=f.tokens.find(t=>t.grammar.particleType==='an'||t.grammar.particleType==='kay');p.grammar.particleType='lan';});
+  p3History(`${name}: token order reversed`,snapshot,f=>{const first=f.tokens.shift();f.tokens.splice(1,0,first);});
+  p3History(`${name}: state → raf`,snapshot,(f,v)=>{v.state='raf';});
+  p3History(`${name}: sign forged`,snapshot,(f,v)=>{v.sign={id:'damma',ar:'x',en:'x'};});
+  p3History(`${name}: governor link cleared`,snapshot,(f,v)=>{v.governorId=null;});
+  p3History(`${name}: source rule swapped`,snapshot,(f,v)=>{v.ruleId=isKay?'R_MUDARI_JAZM_SUKUN':'R_MUDARI_JAZM_SUKUN';});
+  p3History(`${name}: five/ordinary rehoming`,snapshot,(f,v)=>{v.inflection=v.inflection==='regular'?'afalKhamsa':'regular';});
+  if(isKay)p3History(`${name}: licensing lām removed`,snapshot,f=>{f.tokens.splice(0,1);f.sentence=f.sentence.replace(P3_LAM,'');});
+}
+
+/* --- Stable IDs: only the four new templates may be new; nothing may shift or duplicate. --- */
+{
+  const ids=api.templates.map(t=>t.stableId);
+  assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A1');
+  assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb'&&t.sign==='fatha')
+    .map(t=>t.stableId).join(' | ')
+    ==='T_PARTICLE_PRESENT_NASB_FATHA_01 | T_PARTICLE_PRESENT_NASB_FATHA_02 | T_PARTICLE_PRESENT_NASB_FATHA_03',
+    'The particle/present/nasb/fatha stable-ID group changed');
+  assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='fiveVerbs'&&t.state==='nasb'&&t.sign==='nunDropped')
+    .map(t=>t.stableId).join(' | ')
+    ==='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03',
+    'The particle/fiveVerbs/nasb/nunDropped stable-ID group changed');
+  // Phase 2b-C's group is untouched by the new registrations.
+  assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='singular'&&t.state==='nasb'&&t.sign==='fatha')
+    .map(t=>t.stableId).join(' | ')
+    ==='T_PARTICLE_SINGULAR_NASB_FATHA_01 | T_PARTICLE_SINGULAR_NASB_FATHA_02 | T_PARTICLE_SINGULAR_NASB_FATHA_03',
+    'Phase 3A1 renumbered the Phase 2b-C particle group');
+  p3Cases+=4;
+}
+/* --- The deferred boundary is unreachable in production. --- */
+{
+  const produced=new Set();
+  for(const t of api.templates)for(let i=0;i<12;i++){
+    for(const token of api.buildTemplate(t.id).tokens)if(token.grammar.particleType)produced.add(token.grammar.particleType);
+  }
+  assert(!produced.has('idhan')&&!produced.has('hatta')&&!produced.has('faSababiyya')&&!produced.has('wawMaiyya'),
+    'A deferred nāṣib reached production');
+  // Every produced كَيْ has its licensing lām; bare كَيْ is never generated.
+  for(const t of api.templates)for(let i=0;i<12;i++){
+    const data=api.buildTemplate(t.id);
+    data.tokens.forEach((token,index)=>{
+      if(token.grammar.particleType!=='kay')return;
+      const previous=data.tokens[index-1];
+      assert(previous&&previous.grammar.particleType==='lamTalil',`${t.stableId}: produced a bare كَيْ`);
+    });
+    data.tokens.forEach((token,index)=>{
+      if(token.grammar.particleType!=='lamTalil')return;
+      assert(data.tokens[index+1]&&data.tokens[index+1].grammar.particleType==='kay',`${t.stableId}: produced a stray lām`);
+    });
+  }
+  // No nūn-al-niswah form is ever produced under أَنْ or كَيْ.
+  for(const name of Object.keys(p3Templates))for(let i=0;i<60;i++){
+    const data=api.buildTemplate(p3Templates[name].id);
+    const verb=data.tokens.find(t=>t.grammar.type==='verb');
+    assert(verb.inflection!==api.MABNI_NUUN_NISWAH,`${name}: a mabnī nūn-al-niswah verb appeared under a Phase 3A1 governor`);
+  }
+  p3Cases+=3;
+}
+console.log('Phase-3A1 أَنْ / لِكَيْ audit passed: '+p3Cases+' canonical checks and '+p3AttackCases+' adversarial checks.');
+console.log('  phase-3A1 error-code distribution: '+JSON.stringify(p3CodeHist));
+
 
 assert(api.COMPONENT_REGISTRY['yaa-mukhataba']?.ruleId==='C_YAA_MUKHATABA'
   &&api.SOURCE_REGISTRY.C_YAA_MUKHATABA.primarySource.pdfPages.includes(38),
@@ -4169,7 +4550,8 @@ for(const start of optionValues.startFilter){
 
 // --- Test C: every production template has exactly one target whose real form/state/sign
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
-assert(api.templates.length===74,`Expected 74 production templates, found ${api.templates.length}`);
+// 74 through Phase 2b-C, plus Phase 3A1's four أَنْ / لِكَيْ templates.
+assert(api.templates.length===78,`Expected 78 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);

@@ -691,7 +691,7 @@ function isExerciseSnapshot(snapshot){
    ||typeof snapshot.templateSign!=='string'||typeof snapshot.sentenceType!=='string'
    ||typeof snapshot.sentence!=='string'||typeof snapshot.translation!=='string')return false;
  if(!Array.isArray(snapshot.tokens)||!snapshot.tokens.length||!Array.isArray(snapshot.relationships))return false;
- if(snapshot.sentence!==snapshot.tokens.map(item=>item?.word).join(' '))return false;
+ if(snapshot.sentence!==composeSentence(snapshot.tokens))return false;
  if(snapshot.tokens.filter(item=>item?.target===true).length!==1)return false;
  return snapshot.tokens.every(item=>item&&typeof item.id==='string'&&typeof item.word==='string'
    &&typeof item.gloss==='string'&&typeof item.ar==='string'&&typeof item.en==='string'
@@ -861,6 +861,36 @@ function rebuildCanonicalHistoryPresentation(data,template){
   verb.enHint='An exact registered person-bound present form.';
   object.gloss=objectEn;
   data.translation=`${cap(subjectEn)} ${verbEn} ${objectEn}.`;
+  return;
+ }
+ /* Phase 3A1 — أَنْ / لِكَيْ. These templates are NOT person-bound (the generic 3ms and 3mp lanes
+    supply the verb), so they cannot use the presentPerson rebuilder below; but their English is
+    still fully derivable, so a corrupted translation is repaired rather than merely rejected.
+    The lead word comes from the template's frozen governor declaration, never from the tokens. */
+ if(PHASE3A1_LEAD_EN[template?.presentGovernor]){
+  const verb=data.tokens.find(token=>token?.grammar?.type==='verb'&&token.tense==='present');
+  const object=data.tokens.find(token=>token?.grammar?.role==='object');
+  const governor=data.tokens.find(token=>token?.grammar?.particleType===template.presentGovernor);
+  const lam=data.tokens.find(token=>token?.grammar?.particleType===KAY_TALIL_LAM.particleType);
+  const registered=verbFormIndex.get(verb?.word);
+  const morphology=authoritativeVerbMorphology(verb,data);
+  const subject=PHASE3A1_SUBJECT_EN[morphology.person];
+  if(!verb||!object||!governor||!registered?.lexeme||registered.surface!==verb.word||!subject
+    ||(template.presentGovernor==='kay')!==Boolean(lam)){
+   throw new Error('Cannot rebuild canonical Phase 3A1 governed-present presentation.');
+  }
+  const verbEn=morphology.person==='3ms'?registered.lexeme.third:registered.lexeme.en;
+  const objectEn=objectEnglish(object.word);
+  verb.lexeme=registered.lexeme;
+  verb.surfaceHint=registered.surface;
+  verb.expectedSurface=registered.surface;
+  verb.gloss=morphology.person==='3ms'?registered.lexeme.en:`they ${registered.lexeme.en}`;
+  verb.enHint=morphology.formClass==='afalKhamsa'?EN.fiveVerb:EN.present;
+  governor.gloss='that';
+  governor.enHint=PHASE3A1_PARTICLE_EN[template.presentGovernor];
+  if(lam){lam.gloss='so';lam.enHint=PHASE3A1_LAM_EN;}
+  object.gloss=objectEn;
+  data.translation=`${PHASE3A1_LEAD_EN[template.presentGovernor]} ${subject} ${verbEn} ${objectEn}.`;
   return;
  }
  if(!template?.presentPerson)return;
@@ -2856,9 +2886,57 @@ const GRAMMAR_RULES=Object.freeze({
  governors:{
   lan:{surface:'لَنْ',mood:'nasb',ruleId:'G_LAN_NASB'},
   lam:{surface:'لَمْ',mood:'jazm',ruleId:'G_LAM_JAZM'},
-  sawfa:{surface:'سَوْفَ',mood:'raf',ruleId:'G_SAWFA_FUTURE'}
+  sawfa:{surface:'سَوْفَ',mood:'raf',ruleId:'G_SAWFA_FUTURE'},
+  /* Phase 3A1 — the two direct nāṣibs this phase produces. Al-Tuḥfah p. 75 puts أَنْ, لَنْ,
+     إِذَنْ and كَيْ in «القسم الأول ـ وهو الذي يَنصُب الفعل المضارعَ بنفسه», i.e. they govern by
+     themselves, with no concealed أَنْ in between. إِذَنْ is deliberately absent: p. 75 makes its
+     naṣb conditional on three separate conditions that this app does not model. */
+  an:{surface:'أَنْ',mood:'nasb',ruleId:'G_AN_NASB'},
+  kay:{surface:'كَيْ',mood:'nasb',ruleId:'G_KAY_NASB'}
  }
 });
+/* Phase 3A1 — لِكَيْ. Al-Tuḥfah p. 76 makes كَيْ a direct nāṣib ONLY on a condition:
+   «ويشترط في النصب بها أن تتقدَّمَها لام التعليل لفظاً ... أو تتقدَّمَها هذه اللام تقديراً، فإذا لم
+   تتقدَّمها اللام لفظاً ولا تقديراً كان النصب بأنْ مُضْمَرَة، وكانت «كَيْ» نفسُها حرفَ تعليل».
+   This phase implements the لفظاً branch only — the lām is physically present as its own token —
+   because the تقديراً branch and bare كَيْ both resolve to concealed أَنْ, which is deferred.
+   The lām is NOT the verb's governor: كَيْ is. The lām's only role here is to be present, and
+   the validator enforces exactly that. */
+const KAY_TALIL_LAM=Object.freeze({surface:'لِ',particleType:'lamTalil',ruleId:'G_LAM_TALIL_KAY'});
+/* Phase 3A1 English, shared by the template builders and by the History rebuilder so the two can
+   never drift apart. The rebuilder derives all of it from canonical data — the resolved governor,
+   the registered lexeme and the object — and never reads the stored translation back. */
+const PHASE3A1_LEAD_EN=Object.freeze({an:'That',kay:'So that'});
+const PHASE3A1_SUBJECT_EN=Object.freeze({'3ms':'he','3mp':'they'});
+const PHASE3A1_PARTICLE_EN=Object.freeze({an:'A particle of maṣdar, naṣb, and future meaning.',kay:'A particle of maṣdar and naṣb.'});
+const PHASE3A1_LAM_EN='The lām of purpose; its explicit presence is what lets كَيْ govern by itself.';
+/* لام التعليل is a proclitic: «لِكَيْ» is written joined, never «لِ كَيْ». It is still its own
+   token because it is its own word with its own iʿrāb — the source treats it as a separate
+   particle, and كَيْ's licensing condition is precisely that this word is present. So the
+   displayed sentence joins it to what follows while the token list keeps them distinct. This is
+   the ONLY place surface composition may differ from a plain space-join. */
+const PROCLITIC_PARTICLE_TYPES=Object.freeze([KAY_TALIL_LAM.particleType]);
+/* Global ownership for particle source rules. Each particle type owns exactly one rule, and the
+   governor rules are owned so tightly that no other token may carry them at all — a forged
+   G_AN_NASB on a noun would otherwise be source-authorized and counted in validByRule as a
+   legitimate use. R_HARF_JARR and R_INNA_GOVERNS_NOMINAL are deliberately NOT exclusive: the
+   majrūr noun and the ism/khabar of inna legitimately carry them too. */
+const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',
+ lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',an:'G_AN_NASB',kay:'G_KAY_NASB',
+ [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId});
+const PARTICLE_EXCLUSIVE_RULE_IDS=Object.freeze(['G_LAN_NASB','G_LAM_JAZM','G_SAWFA_FUTURE',
+ 'G_AN_NASB','G_KAY_NASB',KAY_TALIL_LAM.ruleId]);
+function particleRuleOwnerFailure(token){
+ const owned=PARTICLE_RULE_OWNERS[token?.grammar?.particleType];
+ if(token?.grammar?.type==='particle'&&owned)return token.ruleId!==owned;
+ return PARTICLE_EXCLUSIVE_RULE_IDS.includes(token?.ruleId);
+}
+function composeSentence(tokens){
+ return (tokens||[]).reduce((text,token,index)=>{
+  const separator=index===0||PROCLITIC_PARTICLE_TYPES.includes(tokens[index-1]?.grammar?.particleType)?'':' ';
+  return text+separator+token.word;
+ },'');
+}
 const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr']},
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
@@ -3088,6 +3166,25 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_KANA_PAST_DEFICIENT:sourceRule('Kāna is a deficient past verb that raises its noun and makes its khabar accusative.',[105,106],'Only the surface كَانَ and the app’s single-noun/single-khabar template.',[IA_KANA]),
 
  G_LAN_NASB:sourceRule('Lan is a particle of negation, naṣb, and future meaning.',[73,74],'It must be immediately followed by the present verb it governs.'),
+ /* Phase 3A1 — أَنْ. Al-Tuḥfah p. 75 lists it first among «القسم الأول ـ وهو الذي يَنصُب الفعل
+    المضارعَ بنفسه» and states its identity verbatim: «أما «أنْ» فَحَرْفُ مَصْدَرٍ وَنَصْبٍ
+    وَاسْتِقْبَالٍ». This rule owns the PARTICLE's identity and its direct government, nothing
+    else: the verb's naṣb SIGN is a separate, already-verified claim (R_MUDARI_NASB_FATHA /
+    R_AFAL5_NASB_DELETE_NUN), because the sign depends on the verb's own morphology and not on
+    which nāṣib precedes it. p. 74 is deliberately not cited: it carries only the matn's bare
+    list of the ten nawāṣib, not this analysis. */
+ G_AN_NASB:sourceRule('An is a particle of maṣdar, naṣb, and future meaning that makes the present verb after it manṣūb by itself.',[75],'Only canonical أَنْ immediately preceding the muʿrab present verb it governs. It authorizes the particle analysis and the naṣb state alone: not the naṣb sign, not a concealed أَنْ, not إِذَنْ, and not a mabnī nūn-al-niswah present form.'),
+ /* Phase 3A1 — كَيْ, direct-government branch only. Al-Tuḥfah p. 76: «وأما «كَيْ» فَحَرْفُ
+    مَصْدَرٍ وَنَصْبٍ؛ ويشترط في النصب بها أن تتقدَّمَها لام التعليل لفظاً». The condition is part
+    of the rule, so the conditions field carries it and the validator enforces it structurally. */
+ G_KAY_NASB:sourceRule('Kay is a particle of maṣdar and naṣb that makes the present verb after it manṣūb by itself when lām al-taʿlīl explicitly precedes it.',[76],'Only canonical كَيْ immediately preceded by an explicit لام التعليل token and immediately followed by the muʿrab present verb it governs. It authorizes the particle analysis and the naṣb state alone: not the naṣb sign, not bare كَيْ, not the estimated (تقديراً) lām, not كَيْ as a mere حرف تعليل under a concealed أَنْ, and not a mabnī nūn-al-niswah present form.'),
+ /* Phase 3A1 — the visible lām of لِكَيْ. Al-Tuḥfah p. 76 names it «لام التعليل» and makes its
+    explicit presence the licensing condition for كَيْ's own government. Deliberately NOT
+    R_HARF_JARR: p. 13 lists the lām among حروف الخفض only for الملك/الاختصاص/الاستحقاق before a
+    NOUN («الْمَالُ لمحمدٍ»، «الْحَمْدُ لله») and makes no claim about this lām before a particle,
+    so citing it here would attribute a claim the page does not contain. This rule owns the lām's
+    presence and identity only; it never governs the verb. */
+ G_LAM_TALIL_KAY:sourceRule('The lām of taʿlīl written before kay indicates purpose, and its explicit presence is what licenses kay to make the present verb manṣūb by itself.',[76],'Only the canonical لِ token standing immediately before a canonical كَيْ that governs a muʿrab present verb. It authorizes the lām’s presence and identity alone: it is never the verb’s governor, never a nāṣib in its own right, never a preposition governing a noun, and it does not cover the concealed-أَنْ لام التعليل of Al-Tuḥfah p. 76’s second class.'),
  G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs.'),
  G_SAWFA_FUTURE:sourceRule('Sawfa marks future meaning and enters only on the present verb.',[14,15,16],'It does not change the indicative mood in the generated construction.'),
  R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'Generated set: inna, lakinna, laʿalla, layta.',[IA_INNA]),
@@ -3354,6 +3451,9 @@ const AR={
  khabarInna:(w,p)=>grammarSpec('noun','khabarInna',{governorWord:p}),
  lan:w=>grammarSpec('particle','particle',{particleType:'lan',particleWord:w}),
  lam:w=>grammarSpec('particle','particle',{particleType:'lam',particleWord:w}),
+ an:w=>grammarSpec('particle','particle',{particleType:'an',particleWord:w}),
+ kay:w=>grammarSpec('particle','particle',{particleType:'kay',particleWord:w}),
+ lamTalil:w=>grammarSpec('particle','particle',{particleType:KAY_TALIL_LAM.particleType,particleWord:w}),
  future:w=>grammarSpec('particle','particle',{particleType:'sawfa',particleWord:w}),
  presentFive:(w)=>grammarSpec('verb','present',{conjugation:'afalKhamsa',person:'3mp'}),
  fiveNounNom:w=>grammarSpec('noun','mubtada',{inflection:'fiveNouns',isMudaf:true,attachedKaf:true}),
@@ -3506,8 +3606,13 @@ function inflectVerb(token,tokens,index){
 }
 function configureParticle(token){
  const type=token.grammar.particleType;
- token.ruleId={preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE'}[type]||'R_PARTICLE';
- token.expectedSurface=GRAMMAR_RULES.governors[type]?.surface||token.grammar.particleWord||token.surfaceHint;
+ token.ruleId={preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',
+  an:'G_AN_NASB',kay:'G_KAY_NASB',[KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId}[type]||'R_PARTICLE';
+ // The lām of لِكَيْ is not a governor, so it carries its canonical surface here rather than in
+ // GRAMMAR_RULES.governors — being absent from that map is exactly what stops it governing.
+ token.expectedSurface=GRAMMAR_RULES.governors[type]?.surface
+  ||(type===KAY_TALIL_LAM.particleType?KAY_TALIL_LAM.surface:null)
+  ||token.grammar.particleWord||token.surfaceHint;
  token.word=token.expectedSurface;
 }
 const RELATIONSHIP_RULE_IDS=Object.freeze({
@@ -3530,8 +3635,12 @@ function resolveRelationships(data){
  tokens.forEach(token=>{token.relations={};});
  tokens.forEach((item,index)=>{
   const governor=tokens[index-1];
+  // Read the authorized governor types from the canonical map rather than repeating them, so a
+  // new governor (Phase 3A1's أَنْ and كَيْ) cannot be added to the grammar and silently lose its
+  // reciprocal link here. The link is still re-derived, never trusted: adjacency and the stored
+  // governorId must both agree before it is written.
   if(item.grammar.type==='verb'&&item.tense==='present'&&item.governorId
-    &&governor?.id===item.governorId&&['lan','lam','sawfa'].includes(governor.grammar?.particleType)){
+    &&governor?.id===item.governorId&&Object.hasOwn(GRAMMAR_RULES.governors,governor.grammar?.particleType||'')){
    governor.relations.governsId=item.id;
   }
  });
@@ -3687,7 +3796,9 @@ function renderVerbAnalysis(token){
   return;
  }
  const governor=token.governorId?token._tokens.find(item=>item.id===token.governorId):null;
- const cause=governor?.grammar.particleType==='lan'?' بِـ«لَنْ»':governor?.grammar.particleType==='lam'?' بِـ«لَمْ»':'';
+ /* Phase 3A1 adds أَنْ and كَيْ. The clause names the DIRECT governor, which for لِكَيْ is كَيْ
+    and never the lām: the lām licenses كَيْ's government, it does not perform it. */
+ const cause={lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»'}[governor?.grammar.particleType]||'';
  let arabic=`${token.word}: فِعْلٌ مُضَارِعٌ ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${token.sign.ar}`;
  if(token.inflection==='afalKhamsa'){
   arabic+=`؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ`;
@@ -3699,7 +3810,8 @@ function renderVerbAnalysis(token){
   arabic+=`، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ ${concealment.ar} تَقْدِيرُهُ «${token.relations.subjectPronoun}»`;
  }
  token.ar=`${arabic}.`;
- const causeEn=governor?.grammar.particleType==='lan'?' because lan governs it':governor?.grammar.particleType==='lam'?' because lam governs it':'';
+ const causeEn={lan:' because lan governs it',lam:' because lam governs it',
+  an:' because an governs it',kay:' because kay governs it'}[governor?.grammar.particleType]||'';
  const hiddenSubjectEn={'أَنَا':'I','نَحْنُ':'we','هُوَ':'he','هِيَ':'she','أَنْتَ':'you'}[token.relations.subjectPronoun];
  const subjectEn=token.relations.subjectType==='implicit'
   ?` Its subject is a hidden pronoun, concealed ${PRESENT_CONCEALMENT[token.grammar.morphology?.person].en}, understood as “${hiddenSubjectEn}”.`
@@ -3713,6 +3825,14 @@ function renderParticleAnalysis(token){
  if(type==='lan'){token.ar=`${token.word}: حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of negation, future meaning, and naṣb.';return}
  if(type==='lam'){token.ar=`${token.word}: حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of negation and jazm that gives past meaning.';return}
  if(type==='sawfa'){token.ar=`${token.word}: حَرْفُ اسْتِقْبَالٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle marking the future.';return}
+ /* Phase 3A1. The identity clauses are Al-Tuḥfah's own words (p. 75 for أَنْ, p. 76 for كَيْ);
+    the bināʾ tail follows this project's established particle pattern, matching لَنْ exactly. */
+ if(type==='an'){token.ar=`${token.word}: حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of maṣdar, naṣb, and future meaning.';return}
+ if(type==='kay'){token.ar=`${token.word}: حَرْفُ مَصْدَرٍ وَنَصْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of maṣdar and naṣb.';return}
+ /* The source names this lām «لام التعليل» and makes its explicit presence the condition for
+    كَيْ's own government; it says nothing about the lām governing anything here, so neither does
+    this line. Its licensing role is explained in the Why layer, never asserted as iʿrāb. */
+ if(type===KAY_TALIL_LAM.particleType){token.ar=`${token.word}: لَامُ التَّعْلِيلِ، حَرْفٌ مَبْنِيٌّ عَلَى الْكَسْرِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='The lām of purpose (lām al-taʿlīl).';return}
  throw new Error(`Unknown particle type: ${type}`);
 }
 /* ===== “Why this iʿrāb?” explanation engine (presentation only) =====================
@@ -3829,6 +3949,11 @@ function whyStateVerb(t,data){
  const type=gov&&gov.grammar.particleType;
  if(type==='lan')return{id:'WHY_STATE_VERB_LAN',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ نَصْبٍ، فَهُوَ مَنْصُوبٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of naṣb, so it is مَنْصُوبٌ.`};
  if(type==='lam')return{id:'WHY_STATE_VERB_LAM',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ جَزْمٍ، فَهُوَ مَجْزُومٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of jazm, so it is مَجْزُومٌ.`};
+ /* Phase 3A1. Each direct nāṣib gets its OWN state Why so the learner is never told that لَنْ
+    governs a verb that أَنْ or كَيْ actually governs. The naṣb SIGN keeps the existing generic
+    whySignVerb, which names no governor and so stays true here. */
+ if(type==='an')return{id:'WHY_STATE_VERB_AN',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ يَنْصِبُ بِنَفْسِهِ، فَهُوَ مَنْصُوبٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of maṣdar, naṣb, and future meaning that governs by itself, so it is مَنْصُوبٌ.`};
+ if(type==='kay')return{id:'WHY_STATE_VERB_KAY',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ يَنْصِبُ بِنَفْسِهِ؛ لِتَقَدُّمِ لَامِ التَّعْلِيلِ عَلَيْهِ لَفْظًا، فَهُوَ مَنْصُوبٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of maṣdar and naṣb that governs by itself because لَامُ التَّعْلِيلِ explicitly precedes it, so it is مَنْصُوبٌ.`};
  if(type==='sawfa')return{id:'WHY_STATE_VERB_SAWFA',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} لِلِاسْتِقْبَالِ، وَهُوَ لَا يَنْصِبُ وَلَا يَجْزِمُ، فَبَقِيَ مَرْفُوعًا.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, which marks the future and neither makes it مَنْصُوبٌ nor مَجْزُومٌ, so it stays مَرْفُوعٌ.`};
  return{id:'WHY_STATE_VERB_FREE',ar:`${wq(t.word)} فِعْلٌ مُضَارِعٌ لَمْ يَسْبِقْهُ نَاصِبٌ وَلَا جَازِمٌ، فَهُوَ مَرْفُوعٌ.`,en:`${eq(t.word)} is a present-tense verb with no nāṣib or jāzim before it, so it is مَرْفُوعٌ.`};
 }
@@ -3892,6 +4017,9 @@ const WHY_PARTICLE=Object.freeze({
  inna:t=>({id:'WHY_PARTICLE_INNA',ar:`${wq(t.word)} مِنْ «إِنَّ» وَأَخَوَاتِهَا، تَنْصِبُ الِاسْمَ وَتَرْفَعُ الْخَبَرَ.`,en:`${eq(t.word)} is one of «إِنَّ» and its sisters: it makes the اسْم مَنْصُوبٌ and the خَبَر مَرْفُوعٌ.`}),
  lan:t=>({id:'WHY_PARTICLE_LAN',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ، يَنْصِبُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is a particle of negation, naṣb, and future meaning; it makes the present verb مَنْصُوبٌ.`}),
  lam:t=>({id:'WHY_PARTICLE_LAM',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ، يَجْزِمُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is a particle of negation, jazm, and past meaning; it makes the present verb مَجْزُومٌ.`}),
+ an:t=>({id:'WHY_PARTICLE_AN',ar:`${wq(t.word)} حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ، يَنْصِبُ الْفِعْلَ الْمُضَارِعَ بِنَفْسِهِ.`,en:`${eq(t.word)} is a particle of maṣdar, naṣb, and future meaning; it makes the present verb مَنْصُوبٌ by itself.`}),
+ kay:t=>({id:'WHY_PARTICLE_KAY',ar:`${wq(t.word)} حَرْفُ مَصْدَرٍ وَنَصْبٍ، وَإِنَّمَا نَصَبَتْ بِنَفْسِهَا لِأَنَّ لَامَ التَّعْلِيلِ تَقَدَّمَتْهَا لَفْظًا.`,en:`${eq(t.word)} is a particle of maṣdar and naṣb; it makes the present verb مَنْصُوبٌ by itself precisely because لَامُ التَّعْلِيلِ explicitly precedes it.`}),
+ [KAY_TALIL_LAM.particleType]:t=>({id:'WHY_PARTICLE_LAM_TALIL',ar:`${wq(t.word)} لَامُ التَّعْلِيلِ، تَدُلُّ عَلَى الْغَرَضِ، وَبِظُهُورِهَا قَبْلَ «كَيْ» نَصَبَتْ «كَيْ» بِنَفْسِهَا.`,en:`${eq(t.word)} is لَامُ التَّعْلِيلِ, which indicates purpose; its explicit appearance before «كَيْ» is what lets «كَيْ» govern by itself.`}),
  sawfa:t=>({id:'WHY_PARTICLE_SAWFA',ar:`${wq(t.word)} حَرْفُ اسْتِقْبَالٍ يَدْخُلُ عَلَى الْمُضَارِعِ وَلَا يُغَيِّرُ إِعْرَابَهُ.`,en:`${eq(t.word)} is a particle of futurity that enters on the present verb without changing its iʿrāb.`})
 });
 const WHY_MABNI_PARTICLE=Object.freeze({id:'WHY_MABNI_PARTICLE',ar:'وَهُوَ حَرْفٌ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'It is a مَبْنِيٌّ particle and has no position in iʿrāb.'});
@@ -4033,7 +4161,7 @@ function renderExercise(data){
  });
  renderRelationshipAnalysis(data);
  attachWhyExplanations(data);
- data.sentence=data.tokens.map(item=>item.word).join(' ');
+ data.sentence=composeSentence(data.tokens);
 }
 function classifySentence(data){
  if(data.tokens.some(item=>item.tense==='kana'))return'nominalWithKana';
@@ -4084,7 +4212,7 @@ function validateExercise(data){
    ||productionTemplate.sign!==data.templateSign))fail('E_TEMPLATE_METADATA','Exercise template metadata disagrees with its stable template ID.');
  if(!['nominal','nominalWithInna','nominalWithKana','verbal','phrase'].includes(data.sentenceType))fail('E_SENTENCE_TYPE','Exercise has no recognized sentence type.');
  if(!data.translation||data.translation.includes('undefined'))fail('E_TRANSLATION','Exercise has no valid English translation.');
- if(data.sentence!==data.tokens.map(item=>item.word).join(' '))fail('E_SENTENCE_SURFACE','Displayed sentence does not match its token surfaces.');
+ if(data.sentence!==composeSentence(data.tokens))fail('E_SENTENCE_SURFACE','Displayed sentence does not match its token surfaces.');
  if(data.tokens.filter(item=>item.target).length!==1)fail('E_FOCUS_COUNT','Exercise must contain exactly one focus token.');
  // The word-level filters (form/state/sign) must all describe the SAME single focus token.
  // The state is taken from the token's actual grammatical structure, never inferred from the sign.
@@ -4105,6 +4233,7 @@ function validateExercise(data){
   // Being source-authorized is not the same as being OWNED: only the governed mabnī-present
   // lane may carry a whole-word maḥall rule at all.
   if(mahallRuleOwnerFailure(token,data))fail('E_MAHALL_RULE_OWNER','This token may not carry a whole-word maḥall rule; only a governed mabnī-present verb owns that field.',token);
+  if(particleRuleOwnerFailure(token))fail('E_PARTICLE_RULE_OWNER','Token carries a particle source rule its grammatical identity does not own.',token);
   // A hidden present subject is a grammatical claim and must carry the D-3 rule that its
   // person actually licenses; a missing or swapped concealment authority is a hard failure.
   if(token.grammar?.type==='verb'&&token.tense==='present'&&token.relations?.subjectType==='implicit'){
@@ -4205,9 +4334,20 @@ function validateExercise(data){
     ?{raf:['pres','presentRaf'],nasb:['acc'],jazm:['juss']}[token.state]
     :{raf:['five','presentRaf'],nasb:['fiveSub'],jazm:['fiveSub']}[token.state];
    if(!authorizedForms?.includes(registered?.form))fail('E_PRESENT_FORM_STATE','Registered present surface does not belong to its claimed form class and state.',token);
-   if(token.inflection==='afalKhamsa'&&registered&&authoritative.person&&token.word!==inflectFiveVerb(registered.lexeme,authoritative.person,token.state,false))fail('E_AFAL5_SURFACE','Five-verb surface disagrees with its exact registry entry and mood.',token);
+   /* Only re-derive the five-verb surface when the AUTHORITATIVE morphology really is a five
+      verb: inflectFiveVerb throws for a person that has no five-verb form (3ms), so a token
+      that merely claims `afalKhamsa` would crash the validator instead of being rejected.
+      That mismatch is already owned by E_PRESENT_FORM_CLASS immediately above. */
+   if(token.inflection==='afalKhamsa'&&registered&&authoritative.formClass==='afalKhamsa'&&authoritative.person&&token.word!==inflectFiveVerb(registered.lexeme,authoritative.person,token.state,false))fail('E_AFAL5_SURFACE','Five-verb surface disagrees with its exact registry entry and mood.',token);
    if(token.grammar.person!==authoritative.person)fail('E_PRESENT_PERSON','Present person disagrees with the authoritative exact surface.',token);
    if(presentCapabilityFailure(productionTemplate,authoritative))fail('E_PRESENT_TEMPLATE_AUTHORIZATION','Present person and structure are not authorized by the production template.',token);
+   /* The governor is part of the template's identity, re-derived here from the adjacent token's
+      canonical particleType rather than read from the stored link. Person and morphology are
+      identical for أَنْ and لَنْ, so this is the only thing that stops a governed exercise from
+      being filed under a different governor's template. */
+   if(productionTemplate&&(governor?.grammar?.particleType||'')!==productionTemplate.presentGovernor){
+    fail('E_PRESENT_GOVERNOR_TEMPLATE','The governing particle disagrees with the one its production template declares.',token);
+   }
    }
   }
   if(token.grammar.type==='verb'&&token.tense==='past'){
@@ -4281,7 +4421,7 @@ function validateExercise(data){
    }
   }
   if(token.grammar.type==='particle'&&token.expectedSurface!==token.word)fail('E_PARTICLE_SURFACE','Particle surface disagrees with its grammatical identity.',token);
-  if(['lan','lam','sawfa'].includes(token.grammar.particleType)){
+  if(['lan','lam','sawfa','an','kay'].includes(token.grammar.particleType)){
    const governed=token.relations.governsId&&tokenById.get(token.relations.governsId);
    if(!governed||governed.grammar.type!=='verb'||governed.tense!=='present')fail('E_ORPHAN_VERB_GOVERNOR','Verb governor is not linked to the immediately following present verb.',token);
   }
@@ -4295,7 +4435,30 @@ function validateExercise(data){
   }
   if(token.grammar.role==='mudafIlayh'&&(!token.relations.mudafId||!relationships.some(rel=>rel.type==='idafa'&&rel.mudafIlayhId===token.id&&rel.mudafId===token.relations.mudafId)))fail('E_ORPHAN_IDAFA','Muḍāf ilayh is not linked to a muḍāf.',token);
   if(token.grammar.isMudaf&&!token.grammar.attachedKaf&&!token.relations.mudafIlayhId)fail('E_MUDAF_NO_COMPLEMENT','Muḍāf has no immediately following muḍāf ilayh.',token);
+  /* Phase 3A1 — the لِكَيْ structural contract. Al-Tuḥfah p. 76 makes كَيْ a direct nāṣib ONLY
+     when لام التعليل precedes it لفظاً, so that lām is not decoration: it is the licensing
+     condition, and كَيْ without it is a different construction (concealed أَنْ) that this phase
+     does not implement. Both directions are enforced, so neither particle can appear alone. */
+  if(token.grammar.particleType==='kay'){
+   const previous=data.tokens[data.tokens.indexOf(token)-1];
+   if(!previous||previous.grammar?.type!=='particle'||previous.grammar.particleType!==KAY_TALIL_LAM.particleType){
+    fail('E_KAY_MISSING_LAM','Kay may govern directly only when lām al-taʿlīl stands immediately before it; bare kay is the concealed-an construction and is not produced.',token);
+   }else if(previous.word!==KAY_TALIL_LAM.surface)fail('E_KAY_LAM_SURFACE','The lām licensing kay is not its canonical spelling.',token);
+   else if(previous.ruleId!==KAY_TALIL_LAM.ruleId)fail('E_KAY_LAM_RULE','The lām licensing kay is not bound to its canonical source rule.',token);
+  }
+  if(token.grammar.particleType===KAY_TALIL_LAM.particleType){
+   const next=data.tokens[data.tokens.indexOf(token)+1];
+   if(!next||next.grammar?.type!=='particle'||next.grammar.particleType!=='kay'){
+    fail('E_LAM_TALIL_ORPHAN','This lām al-taʿlīl exists only as the licensing particle immediately before kay.',token);
+   }
+   // The lām licenses kay's government; it never performs it. A lām that claims the verb is
+   // asserting the concealed-an analysis, which is deferred.
+   if(token.relations?.governsId)fail('E_LAM_TALIL_GOVERNS','Lām al-taʿlīl may not be recorded as the governor of the verb; kay governs it directly.',token);
+   if(data.tokens.some(item=>item.governorId===token.id))fail('E_LAM_TALIL_GOVERNS','No token may name lām al-taʿlīl as its governor.',token);
+  }
   if(token.ar.includes('بِـ«لَنْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='لَنْ')fail('E_FAKE_LAN','Explanation mentions lan without a linked lan.',token);
+  if(token.ar.includes('بِـ«أَنْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='أَنْ')fail('E_FAKE_AN','Explanation mentions an without a linked an.',token);
+  if(token.ar.includes('بِـ«كَيْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='كَيْ')fail('E_FAKE_KAY','Explanation mentions kay without a linked kay.',token);
   if(token.ar.includes('بِـ«لَمْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='لَمْ')fail('E_FAKE_LAM','Explanation mentions lam without a linked lam.',token);
  });
  if(new Set(data.tokens.map(item=>item.id)).size!==data.tokens.length)fail('E_TOKEN_ID_DUPLICATE','Token IDs are not unique.');
@@ -4338,6 +4501,10 @@ function validateExercise(data){
  if(data.tokens.some(item=>item.grammar.particleType==='lan')&&!/will not/i.test(data.translation))fail('E_LAN_TRANSLATION','Lan sentence lacks “will not” in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='lam')&&!/did not/i.test(data.translation))fail('E_LAM_TRANSLATION','Lam sentence lacks “did not” in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='sawfa')&&!/\bwill\b/i.test(data.translation))fail('E_SAWFA_TRANSLATION','Sawfa sentence lacks future meaning in its translation.');
+ /* Phase 3A1. كَيْ is tested first and more specifically: every لِكَيْ translation also contains
+    "that", so testing أَنْ's looser pattern alone would let a كَيْ↔أَنْ swap slip through. */
+ if(data.tokens.some(item=>item.grammar.particleType==='kay')&&!/so that/i.test(data.translation))fail('E_KAY_TRANSLATION','Kay sentence lacks its purpose meaning in its translation.');
+ if(data.tokens.some(item=>item.grammar.particleType==='an')&&(!/\bthat\b/i.test(data.translation)||/so that/i.test(data.translation)))fail('E_AN_TRANSLATION','An sentence lacks its maṣdar meaning in its translation.');
  return failures;
 }
 function completeNominalAnalysis(data){
@@ -4412,6 +4579,10 @@ function add(starts,form,state,sign,build,metadata={}){
   }
   return Object.freeze({...capability,governorMode});
  }));
+ const presentGovernor=metadata.presentGovernor||'';
+ if(presentGovernor&&!Object.hasOwn(GRAMMAR_RULES.governors,presentGovernor)){
+  throw new Error(`Unknown present template governor: ${presentGovernor}`);
+ }
  // An ambiguous surface is resolved by intersecting its readings with these capabilities, so
  // a template that claimed two readings of one surface would make the person unresolvable.
  Object.values(PRESENT_SURFACE_READINGS).forEach(readings=>{
@@ -4430,6 +4601,13 @@ function add(starts,form,state,sign,build,metadata={}){
   presentPerson:metadata.presentPerson||'',
   frontedPresent:metadata.frontedPresent===true,
   governedPresent:metadata.governedPresent===true,
+  /* Which particle a muʿrab present verb under this template must stand under, '' for none.
+     Person and morphology cannot tell أَنْ from لَنْ — both produce an ordinary 3ms manṣūb
+     present — so without this the template ID would carry no identity for the governor and an
+     أَنْ exercise could be filed under the لَنْ template. Validation re-derives the actual
+     governor from adjacency and compares; the declaration is frozen here and never read off a
+     token. The mabnī lane is excluded: its governor is settled by capability `governorMode`. */
+  presentGovernor,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -4592,13 +4770,13 @@ add('noun','fiveNouns','jarr','ya',()=>{const s=pickPerson(),f=pickVaried(fiveNo
 
 // Present verb not connected to an ending
 add('noun','present','raf','damma',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} ${v.pres} ${o}`,translation:`${cap(s.en)} ${v.third} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('noun','present','nasb','fatha',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} لَنْ ${v.acc} ${o}`,translation:`${cap(s.en)} will not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»',VISIBLE_FATHA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('noun','present','jazm','sukun',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} لَمْ ${v.juss} ${o}`,translation:`${cap(s.en)} did not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','present','nasb','fatha',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} لَنْ ${v.acc} ${o}`,translation:`${cap(s.en)} will not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»',VISIBLE_FATHA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lan'});
+add('noun','present','jazm','sukun',()=>{const s=pickPerson(),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${s.nom} لَمْ ${v.juss} ${o}`,translation:`${cap(s.en)} did not ${v.en} ${objectEnglish(o)}.`,tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lam'});
 
 // Five verbs
 add('noun','fiveVerbs','raf','nunKept',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects',x=>x.nom),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${b.nom} ${v.five} ${o}`,translation:`${cap(b.en)} ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('noun','fiveVerbs','nasb','nunDropped',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects-sub',x=>x.nom),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${b.nom} لَنْ ${v.fiveSub} ${o}`,translation:`${cap(b.en)} will not ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token('لَنْ','will not',AR.lan('لَنْ'),'A particle of naṣb.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَنْصُوبٌ بِـ«لَنْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('noun','fiveVerbs','jazm','nunDropped',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects-sub',x=>x.nom),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${b.nom} لَمْ ${v.fiveSub} ${o}`,translation:`${cap(b.en)} did not ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token('لَمْ','did not',AR.lam('لَمْ'),'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('noun','fiveVerbs','nasb','nunDropped',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects-sub',x=>x.nom),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${b.nom} لَنْ ${v.fiveSub} ${o}`,translation:`${cap(b.en)} will not ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token('لَنْ','will not',AR.lan('لَنْ'),'A particle of naṣb.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَنْصُوبٌ بِـ«لَنْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lan'});
+add('noun','fiveVerbs','jazm','nunDropped',()=>{const b=pickVaried(brokenHuman,'five-verb-subjects-sub',x=>x.nom),v=pickVerb(),o=pickVerbObject(v);return{sentence:`${b.nom} لَمْ ${v.fiveSub} ${o}`,translation:`${cap(b.en)} did not ${v.en} ${objectEnglish(o)}.`,tokens:[token(b.nom,b.en,AR.mubtada(b.nom),EN.mubtada),token('لَمْ','did not',AR.lam('لَمْ'),'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lam'});
 
 // Verb-first practice
 add('verb','singular','raf','damma',()=>{const v=pickGeneralVerb(),s=pickPerson(),o=pickGeneralObject(v,s);return{sentence:`${v.past} ${s.nom} ${o.acc}`,translation:`${cap(s.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}},pastTemplateMetadata('3ms','explicit'));
@@ -4649,12 +4827,12 @@ add('particle','dual','jarr','ya',()=>{const d=pickVaried(duals.filter(isHumanNo
 add('particle','smp','jarr','ya',()=>{const p=pickVaried(smp,'particle-smp-gen',x=>x.gen);return{sentence:`إِلَى ${p.gen} رِسَالَةٌ`,translation:`There is a letter for ${p.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'إِلَى','الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
 add('particle','sfp','jarr','kasra',()=>{const p=pickVaried(sfp,'particle-sfp-gen',x=>x.gen);return{sentence:`إِلَى ${p.gen} رِسَالَةٌ`,translation:`There is a letter for ${p.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'إِلَى'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
 add('particle','fiveNouns','jarr','ya',()=>{const f=pickVaried(fiveNouns,'particle-five-noun-gen',x=>x.gen);return{sentence:`إِلَى ${f.gen} رِسَالَةٌ`,translation:`There is a letter for ${f.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(f.gen,f.en,AR.fiveNounGen(f.gen,'إِلَى'),EN.fiveNoun,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
-add('particle','present','nasb','fatha',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَنْ ${v.acc} ${o}`,translation:`He will not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»',VISIBLE_FATHA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('particle','present','jazm','sukun',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَمْ ${v.juss} ${o}`,translation:`He did not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('particle','present','raf','damma',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`سَوْفَ ${v.pres} ${o}`,translation:`He will ${v.en} ${objectEnglish(o)}.`,tokens:[token('سَوْفَ','will',AR.future('سَوْفَ'),'A particle marking the future.'),token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('particle','fiveVerbs','nasb','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَنْ ${v.fiveSub} ${o}`,translation:`They will not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَنْ','will not',AR.lan('لَنْ'),'A particle of naṣb.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَنْصُوبٌ بِـ«لَنْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('particle','fiveVerbs','jazm','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَمْ ${v.fiveSub} ${o}`,translation:`They did not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَمْ','did not',AR.lam('لَمْ'),'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
-add('particle','fiveVerbs','raf','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`سَوْفَ ${v.five} ${o}`,translation:`They will ${v.en} ${objectEnglish(o)}.`,tokens:[token('سَوْفَ','will',AR.future('سَوْفَ'),'A particle marking the future.'),token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}});
+add('particle','present','nasb','fatha',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَنْ ${v.acc} ${o}`,translation:`He will not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»',VISIBLE_FATHA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lan'});
+add('particle','present','jazm','sukun',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَمْ ${v.juss} ${o}`,translation:`He did not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lam'});
+add('particle','present','raf','damma',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`سَوْفَ ${v.pres} ${o}`,translation:`He will ${v.en} ${objectEnglish(o)}.`,tokens:[token('سَوْفَ','will',AR.future('سَوْفَ'),'A particle marking the future.'),token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'sawfa'});
+add('particle','fiveVerbs','nasb','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَنْ ${v.fiveSub} ${o}`,translation:`They will not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَنْ','will not',AR.lan('لَنْ'),'A particle of naṣb.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَنْصُوبٌ بِـ«لَنْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lan'});
+add('particle','fiveVerbs','jazm','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَمْ ${v.fiveSub} ${o}`,translation:`They did not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَمْ','did not',AR.lam('لَمْ'),'A particle of jazm.'),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub,'مَجْزُومٌ بِـ«لَمْ»','حَذْفُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lam'});
+add('particle','fiveVerbs','raf','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`سَوْفَ ${v.five} ${o}`,translation:`They will ${v.en} ${objectEnglish(o)}.`,tokens:[token('سَوْفَ','will',AR.future('سَوْفَ'),'A particle marking the future.'),token(v.five,`they ${v.en}`,AR.presentFive(v.five,'مَرْفُوعٌ','ثُبُوتُ النُّونِ'),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'sawfa'});
 
 /* Phase 2b-C — لَنْ + the same مبني surfaces. The verb keeps its bināʾ and its spelling and
    gains only a maḥall (Al-Tuḥfah p. 42); the object remains the target, so no state or sign
@@ -4664,6 +4842,21 @@ add('particle','fiveVerbs','raf','nunKept',()=>{const v=pickVerb(),o=pickVerbObj
    renumber — and orphan — a pre-existing production template. */
 add('particle','singular','nasb','fatha',()=>buildGovernedPresentExercise('3fp'),governedPresentTemplateMetadata('3fp'));
 add('particle','singular','nasb','fatha',()=>buildGovernedPresentExercise('2fp'),governedPresentTemplateMetadata('2fp'));
+
+/* Phase 3A1 — the two DIRECT nāṣibs, أَنْ and explicit لِكَيْ, over the muʿrab present lane.
+   The verb is the target, exactly as in the existing لَنْ templates and unlike Phase 2b-C: here
+   the verb genuinely carries an iʿrāb state and sign (naṣb, and فتحة or حذف النون), so those are
+   real filters, whereas the mabnī nūn-al-niswah verb has neither and had to yield the target to
+   its object. Vocabulary, persons and surfaces are entirely reused: 3ms for the ordinary lane
+   and 3mp for the five verbs, the same pairs the لَنْ templates already produce.
+   Registered LAST for the same stable-ID reason as Phase 2b-C. */
+const KAY_LAM_SURFACE=KAY_TALIL_LAM.surface,KAY_SURFACE=GRAMMAR_RULES.governors.kay.surface;
+const lamTalilToken=()=>token(KAY_LAM_SURFACE,'so',AR.lamTalil(KAY_LAM_SURFACE),PHASE3A1_LAM_EN);
+const kayToken=()=>token(KAY_SURFACE,'that',AR.kay(KAY_SURFACE),PHASE3A1_PARTICLE_EN.kay);
+add('particle','present','nasb','fatha',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`أَنْ ${v.acc} ${o}`,translation:`${PHASE3A1_LEAD_EN.an} ${PHASE3A1_SUBJECT_EN['3ms']} ${v.third} ${objectEnglish(o)}.`,tokens:[token('أَنْ','that',AR.an('أَنْ'),PHASE3A1_PARTICLE_EN.an),token(v.acc,v.en,AR.presentPred(v.acc),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{...presentTemplateMetadata('3ms','implicit'),presentGovernor:'an'});
+add('particle','fiveVerbs','nasb','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`أَنْ ${v.fiveSub} ${o}`,translation:`${PHASE3A1_LEAD_EN.an} ${PHASE3A1_SUBJECT_EN['3mp']} ${v.en} ${objectEnglish(o)}.`,tokens:[token('أَنْ','that',AR.an('أَنْ'),PHASE3A1_PARTICLE_EN.an),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{...presentTemplateMetadata('3mp','attached'),presentGovernor:'an'});
+add('particle','present','nasb','fatha',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${KAY_LAM_SURFACE}${KAY_SURFACE} ${v.acc} ${o}`,translation:`${PHASE3A1_LEAD_EN.kay} ${PHASE3A1_SUBJECT_EN['3ms']} ${v.third} ${objectEnglish(o)}.`,tokens:[lamTalilToken(),kayToken(),token(v.acc,v.en,AR.presentPred(v.acc),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{...presentTemplateMetadata('3ms','implicit'),presentGovernor:'kay'});
+add('particle','fiveVerbs','nasb','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${KAY_LAM_SURFACE}${KAY_SURFACE} ${v.fiveSub} ${o}`,translation:`${PHASE3A1_LEAD_EN.kay} ${PHASE3A1_SUBJECT_EN['3mp']} ${v.en} ${objectEnglish(o)}.`,tokens:[lamTalilToken(),kayToken(),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{...presentTemplateMetadata('3mp','attached'),presentGovernor:'kay'});
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

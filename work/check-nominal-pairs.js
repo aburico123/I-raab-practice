@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -38,6 +38,13 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   PRESENT_NON_PRODUCTION_PERSONS,
   PRESENT_BINAA_RULE_IDS,
   MABNI_NUUN_NISWAH,
+  MABNI_PRESENT_GOVERNORS,
+  MABNI_PRESENT_GOVERNOR_MODES,
+  deriveMabniPresentMahall,
+  templateAuthorizesPresentMorphology,
+  presentCapabilityFailure,
+  mahallRuleOwnerFailure,
+  GENERIC_PRESENT_PERSONS,
   resolvePresentReading,
   authoritativeVerbMorphology,
   verbFormIndex,
@@ -550,7 +557,9 @@ expectThrow('inna noun without khabar',{templateId:'FAULT_INNA',sentence:'إِن
 expectThrow('delayed mubtada without fronted phrase',{templateId:'FAULT_DELAYED',sentence:'زَيْدٌ',translation:'Zayd.',tokens:[api.makeToken('زَيْدٌ','Zayd',api.specs.delayedMubtada('زَيْدٌ'),'',true)]});
 
 const exact=api.completeNominalAnalysis({
-  templateId:'TEST_EXACT_TAILOR',
+  // Structural fixture: bound to a real production template whose declared shape it matches,
+  // because a non-resolving template ID is now an identity failure (E_TEMPLATE_ID).
+  templateId:'T_NOUN_SFP_NASB_KASRASUB_01',templateStarts:'noun',templateForm:'sfp',templateState:'nasb',templateSign:'kasraSub',
   sentence:'الْخَيَّاطُ يَزُورُ الطَّبِيبَاتِ',translation:'The tailor visits the female doctors.',
   tokens:[
     api.makeToken('الْخَيَّاطُ','the tailor',api.specs.mubtada('الْخَيَّاطُ')),
@@ -572,7 +581,9 @@ assert(exactVerbalCards[2].indexOf('class="english en-only"')<exactVerbalCards[2
 assert(exactVerbalCards[2].includes('<strong>Sentence:</strong>'),'Rendered verbal construction is not labeled as a sentence');
 
 const exactFronted=api.completeNominalAnalysis({
-  templateId:'TEST_EXACT_FRONTED',
+  // Structural fixture: bound to a real production template whose declared shape it matches,
+  // because a non-resolving template ID is now an identity failure (E_TEMPLATE_ID).
+  templateId:'T_PARTICLE_SINGULAR_JARR_KASRA_01',templateStarts:'particle',templateForm:'singular',templateState:'jarr',templateSign:'kasra',
   sentence:'فِي السُّوقِ مُعَلِّمٌ',translation:'There is a teacher in the market.',
   tokens:[
     api.makeToken('فِي','in',api.specs.prep('فِي')),
@@ -599,7 +610,9 @@ assert(exactFrontedCards[1].indexOf('class="english en-only"')<exactFrontedCards
 assert(exactFrontedCards[1].includes('class="phrase-analysis-ar"')&&exactFrontedCards[1].includes('class="phrase-analysis-en en-only"'),'Rendered noun card does not separate Arabic and English phrase analysis');
 
 const exactAdverbPhrase=api.completeNominalAnalysis({
-  templateId:'TEST_EXACT_ADVERB_PHRASE',sentence:'زَيْدٌ أَمَامَ الْبَيْتِ',translation:'Zayd is in front of the house.',
+  // Structural fixture: bound to a real production template whose declared shape it matches,
+  // because a non-resolving template ID is now an identity failure (E_TEMPLATE_ID).
+  templateId:'T_NOUN_SINGULAR_JARR_KASRA_01',templateStarts:'noun',templateForm:'singular',templateState:'jarr',templateSign:'kasra',sentence:'زَيْدٌ أَمَامَ الْبَيْتِ',translation:'Zayd is in front of the house.',
   tokens:[
     api.makeToken('زَيْدٌ','Zayd',api.specs.mubtada('زَيْدٌ')),
     api.makeToken('أَمَامَ','in front of',api.specs.adverbMudaf('أَمَامَ')),
@@ -618,7 +631,7 @@ assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===6,'The noun declen
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.regular).join(',')==='raf,nasb,jazm','Regular present moods are incomplete');
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.afalKhamsa).join(',')==='raf,nasb,jazm','Five-verb moods are incomplete');
 assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),'Unsupported diptotes are not recorded in the coverage matrix');
-assert(Object.keys(api.SOURCE_REGISTRY).length===64,`Expected 64 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===65,`Expected 65 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -1615,8 +1628,10 @@ for(const person of PRESENT_PERSONS){
   assert(template,`Phase-2 present template metadata is missing for ${person}`);
   const morphology=api.PRESENT_MORPHOLOGY[person];
   assert(template.presentCapabilities.length===1,`${person}: template does not have exactly one present capability`);
+  // Phase 2b-C: every Phase-2 muʿrab person is ungoverned, so its capability must pin
+  // governorMode:'none' — a muʿrab template may never claim a mabnī governor mode.
   assert(JSON.stringify(template.presentCapabilities[0])===JSON.stringify({
-    person,subjectMode:PRESENT_MODES[person],formClass:morphology.formClass,endingClass:morphology.endingClass
+    person,subjectMode:PRESENT_MODES[person],formClass:morphology.formClass,endingClass:morphology.endingClass,governorMode:'none'
   }),`${person}: template present capability is not canonical`);
   if(PHASE2_PRESENTATION_PERSONS.includes(person)){
     assert(template.stableId===PHASE2_PRESENTATION_TEMPLATE_IDS[person]&&template.presentPerson===person,
@@ -1633,12 +1648,18 @@ const PHASE2B_FRONTED_PERSONS=['3fs','3fd'];
 // Phase 2b-B adds two more, which opt in through the same plain `presentPerson` flag the
 // original Phase-2 templates use — not through `frontedPresent`.
 const PHASE2B_MABNI_PERSONS=['3fp','2fp'];
+// Phase 2b-C adds the two لَنْ-governed templates, which opt in through their own explicit
+// `governedPresent` flag so no earlier template can ever reach the governed rebuilder.
+const PHASE2C_GOVERNED_PERSONS=['3fp','2fp'];
 assert(api.templates.filter(template=>template.presentPerson).map(template=>template.presentPerson).sort().join('|')
-  ===[...PHASE2_PRESENTATION_PERSONS,...PHASE2B_FRONTED_PERSONS,...PHASE2B_MABNI_PERSONS].sort().join('|'),
-  'Exactly the five Phase-2, two Phase-2b-A fronted, and two Phase-2b-B mabnī templates must opt into person-aware presentation rebuilding');
+  ===[...PHASE2_PRESENTATION_PERSONS,...PHASE2B_FRONTED_PERSONS,...PHASE2B_MABNI_PERSONS,...PHASE2C_GOVERNED_PERSONS].sort().join('|'),
+  'Exactly the five Phase-2, two Phase-2b-A fronted, two Phase-2b-B mabnī, and two Phase-2b-C governed templates must opt into person-aware presentation rebuilding');
 assert(api.templates.filter(template=>template.frontedPresent).map(template=>template.presentPerson).sort().join('|')
   ===[...PHASE2B_FRONTED_PERSONS].sort().join('|'),
   'Exactly the two Phase-2b-A fronted templates may use the fronted presentation rebuilder');
+assert(api.templates.filter(template=>template.governedPresent).map(template=>template.presentPerson).sort().join('|')
+  ===[...PHASE2C_GOVERNED_PERSONS].sort().join('|'),
+  'Exactly the two Phase-2b-C governed templates may use the governed presentation rebuilder');
 
 let presentVerbCases=0;
 let ambiguityCases=0;
@@ -2776,6 +2797,853 @@ for(const field of ['formClass','binaaClass','endingClass']){
   mabniAttackCases++;
 }
 console.log('Phase-2b-B nun-al-niswah audit passed: '+mabniCases+' production checks and '+mabniAttackCases+' adversarial checks.');
+
+/* ============================================================================
+   PHASE 2b-C1 — لَنْ + نون النسوة: source, governor, and derived-maḥall architecture.
+   No production template exists yet: every fixture here is synthesized from genuine
+   registered surfaces and morphology, so the architecture is proven before any
+   learner ever sees it. Al-Tuḥfah p. 42 supplies the whole claim:
+   «وإن اتصل بآخره نون النسوة ... فهو حينئذ مبنيٌّ على السكون في محل نصب».
+   ========================================================================== */
+let c1Cases=0,c1AttackCases=0;
+
+// --- Source rule: exact shape, and it authorizes the maḥall ONLY. ---
+const mahallRule=api.SOURCE_REGISTRY.R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN;
+assert(mahallRule&&mahallRule.productionEnabled&&mahallRule.basis==='nahw-rule','The Phase-2b-C maḥall source rule is missing or disabled');
+assert(mahallRule.primarySource.authorityId==='TUHFA_QATAR_WORKSPACE','The maḥall rule is not owned by the workspace Al-Tuḥfah authority');
+assert(JSON.stringify(mahallRule.primarySource.pdfPages)===JSON.stringify([42]),'The maḥall rule must cite exactly Al-Tuḥfah p. 42');
+assert(mahallRule.primarySource.evidenceType==='rule-support','The maḥall rule evidence type is not rule-support');
+assert(api.isSourceAuthorized('R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN'),'The maḥall rule is not source-authorized');
+// The bināʾ pages contain no maḥall claim, and the maḥall page contains no bināʾ claim.
+assert(!api.SOURCE_REGISTRY.R_PRESENT_NUUN_NISWAH_BINAA.primarySource.pdfPages.includes(42),'The bināʾ rule must not claim the maḥall page');
+assert(!mahallRule.primarySource.pdfPages.includes(73)&&!mahallRule.primarySource.pdfPages.includes(124),'The maḥall rule must not claim the bināʾ pages');
+for(const word of ['لَمْ','tawkīd','five verb','ordinary present','component'])
+  assert(typeof mahallRule.conditions==='string'&&mahallRule.conditions.length>80,'The maḥall rule conditions are not stated');
+c1Cases+=8;
+// --- Condition widening kept both rules single and honest. ---
+assert(api.SOURCE_REGISTRY.R_PRESENT_NUUN_NISWAH_BINAA.conditions.includes('لَنْ'),'The bināʾ rule was not widened to cover governed forms');
+assert(api.SOURCE_REGISTRY.C_NUUN_NISWAH.conditions.includes('لَنْ'),'The component rule was not widened to cover governed forms');
+assert(Object.keys(api.SOURCE_REGISTRY).filter(id=>/NUUN_NISWAH/.test(id)).sort().join(',')
+  ==='C_NUUN_NISWAH,R_PRESENT_NUUN_NISWAH_BINAA,R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN',
+  'The nūn-al-niswah rule family is not exactly bināʾ + maḥall + one component rule');
+c1Cases+=3;
+
+// --- governorMode discriminator. ---
+assert(JSON.stringify(api.MABNI_PRESENT_GOVERNOR_MODES)===JSON.stringify(['none','lan']),'The authorized governor modes are not exactly none+lan');
+assert(api.MABNI_PRESENT_GOVERNORS.lan.mahall==='nasb'&&api.MABNI_PRESENT_GOVERNORS.lan.particleRuleId==='G_LAN_NASB','The لَنْ governor spec is not canonical');
+assert(!api.MABNI_PRESENT_GOVERNORS.lam,'لَمْ must not be an authorized mabnī-present governor in Phase 2b-C');
+for(const person of ['3fp','2fp']){
+  const bare=api.templates.find(t=>t.presentPerson===person);
+  assert((bare.presentCapabilities[0].governorMode||'none')==='none',`${person}: the bare template must declare governorMode none`);
+  const morphology=api.PRESENT_MORPHOLOGY[person];
+  assert(api.templateAuthorizesPresentMorphology(bare,morphology,'none'),`${person}: bare template rejects its own bare form`);
+  assert(!api.templateAuthorizesPresentMorphology(bare,morphology,'lan'),`${person}: bare template must reject a governed structure`);
+  const governed={presentCapabilities:[{...bare.presentCapabilities[0],governorMode:'lan'}]};
+  assert(api.templateAuthorizesPresentMorphology(governed,morphology,'lan'),`${person}: governed capability rejects its own governed form`);
+  assert(!api.templateAuthorizesPresentMorphology(governed,morphology,'none'),`${person}: governed template must reject a bare structure`);
+  assert(!api.templateAuthorizesPresentMorphology(governed,morphology,'lam'),`${person}: an unknown governor mode must never authorize`);
+  c1Cases+=6;
+}
+// Every muʿrab present template is pinned to 'none'.
+for(const t of api.templates)for(const capability of t.presentCapabilities||[]){
+  const formClass=api.PRESENT_MORPHOLOGY[capability.person].formClass;
+  if(formClass!=='mabniPresent')assert((capability.governorMode||'none')==='none',`${t.stableId}: a muʿrab template declared a governor mode`);
+  assert(api.MABNI_PRESENT_GOVERNOR_MODES.includes(capability.governorMode||'none'),`${t.stableId}: unknown governorMode`);
+  c1Cases++;
+}
+
+/* --- Synthetic governed fixtures. The templateId is deliberately one that declares no
+   present capability, so this proves the GOVERNOR + MAḤALL architecture on its own; the
+   capability discriminator is proven directly above. --- */
+const C1_LAN='لَنْ';
+const governedTemplateFor=person=>{
+  const t=api.templates.find(x=>x.governedPresent&&x.presentPerson===person);
+  assert(t,`C1: no governed template for ${person}`);
+  return t;
+};
+function c1Fixture(person,surface){
+  const bare=api.templates.find(t=>t.presentPerson===person&&!t.governedPresent);
+  const seed=(()=>{for(let i=0;i<4000;i++){const d=api.buildTemplate(bare.id);if(d.tokens[0].word===surface)return d;}return null;})();
+  assert(seed,`C1: could not seed a bare ${person} exercise for ${surface}`);
+  const object=seed.tokens[1];
+  return api.completeNominalAnalysis({
+    templateId:governedTemplateFor(person).stableId,
+    templateStarts:'particle',templateForm:'singular',templateState:'nasb',templateSign:'fatha',
+    sentence:`${C1_LAN} ${surface} ${object.word}`,
+    translation:seed.translation.replace(/^(They \(women\)|You women) /,'$1 will not '),
+    tokens:[
+      {word:C1_LAN,surfaceHint:C1_LAN,gloss:'will not',grammar:{type:'particle',role:'particle',particleType:'lan'},enHint:'A particle of naṣb.'},
+      {word:surface,surfaceHint:surface,gloss:seed.tokens[0].gloss,grammar:JSON.parse(JSON.stringify(seed.tokens[0].grammar)),enHint:seed.tokens[0].enHint},
+      {word:object.word,surfaceHint:object.word,gloss:object.gloss,grammar:JSON.parse(JSON.stringify(object.grammar)),enHint:object.enHint,target:true}
+    ]
+  });
+}
+const c1Clean={};
+for(const [person,surface] of [['3fp','يَكْتُبْنَ'],['2fp','تَكْتُبْنَ']]){
+  const data=c1Fixture(person,surface);
+  c1Clean[person]=data;
+  const verb=data.tokens[1];
+  assert(data.tokens[0].word===C1_LAN&&data.tokens[0].grammar.particleType==='lan','C1: particle is not canonical لَنْ');
+  assert(data.tokens[0].ruleId==='G_LAN_NASB','C1: particle is not bound to G_LAN_NASB');
+  assert(verb.word===surface,'C1: the governed surface changed');
+  assert(verb.inflection===api.MABNI_NUUN_NISWAH,'C1: the governed verb left the mabnī lane');
+  assert(verb.state==='','C1: the governed verb gained a state');
+  assert(verb.sign===null,'C1: the governed verb gained a sign');
+  assert(verb.ruleId==='R_PRESENT_NUUN_NISWAH_BINAA','C1: bināʾ rule missing on the governed verb');
+  assert(verb.mahallRuleId==='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN','C1: maḥall rule missing on the governed verb');
+  assert(verb.governorId===data.tokens[0].id&&data.tokens[0].relations.governsId===verb.id,'C1: governor links are not reciprocal');
+  const derived=api.deriveMabniPresentMahall(data,1);
+  assert(derived.governorMode==='lan'&&derived.mahall==='nasb','C1: derived maḥall is not naṣb under لَنْ');
+  assert(verb.grammar.morphology.formClass==='mabniPresent'&&verb.grammar.morphology.binaaClass==='sukun-nuun-niswah'
+    &&verb.grammar.morphology.endingClass==='nuun-niswah'&&verb.grammar.morphology.subjectMode==='attached','C1: governed morphology drifted');
+  assert(verb.components.length===1&&verb.components[0].kind==='nuun-niswah'&&verb.components[0].ruleId==='C_NUUN_NISWAH','C1: the nūn component is not canonical');
+  assert(!data.tokens.some(t=>t.grammar.role==='faail'),'C1: an explicit fāʿil appeared');
+  assert(!/مستتر/.test(verb.ar)&&!verb.subjectRuleId,'C1: a hidden subject appeared');
+  // Whole-word wording: bināʾ + maḥall, never a muʿrab state or sign.
+  assert(verb.ar.includes('مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنُونِ النِّسْوَةِ'),'C1: bināʾ clause missing');
+  assert(verb.ar.includes('فِي مَحَلِّ نَصْبٍ بِـ«لَنْ»'),'C1: maḥall clause missing');
+  for(const forbidden of ['مَنْصُوبٌ','مَرْفُوعٌ','مَجْزُومٌ','وَعَلَامَةُ'])
+    assert(!verb.ar.includes(forbidden),`C1: the governed whole word claims «${forbidden}»`);
+  assert(/position of naṣb/.test(verb.en)&&/built on suk/i.test(verb.en)&&!/accusative|jussive|indicative/i.test(verb.en),'C1: governed English is not canonical');
+  // Component keeps its own rafʿ maḥall — a different grammatical object.
+  assert(verb.components[0].ar.includes('فِي مَحَلِّ رَفْعٍ'),'C1: the nūn lost its rafʿ maḥall');
+  // Why layers stay separate and ordered: bināʾ → maḥall → subject.
+  const why=api.buildTokenWhy(verb,data);
+  assert(why.ids.join('|')==='WHY_PRESENT_NUUN_NISWAH_BINAA|WHY_PRESENT_NUUN_NISWAH_LAN_MAHALL|WHY_SUBJECT_NUUN_NISWAH',
+    `C1: governed Why chain is ${why.ids.join('|')}`);
+  for(const banned of ['WHY_STATE_VERB_LAN','WHY_STATE_VERB_FREE','WHY_SIGN_MUDARI_NASB','WHY_SIGN_AFAL5_NASB'])
+    assert(!why.ids.includes(banned),`C1: governed Why routed through ${banned}`);
+  assert(api.buildTokenWhy(data.tokens[0],data).ids.includes('WHY_PARTICLE_LAN'),'C1: the particle lost its canonical Why');
+  c1Cases+=22;
+}
+// The BARE form must still carry no maḥall at all.
+for(const [person,surface] of [['3fp','يَكْتُبْنَ'],['2fp','تَكْتُبْنَ']]){
+  const bare=api.templates.find(t=>t.presentPerson===person);
+  let seed=null;for(let i=0;i<4000&&!seed;i++){const d=api.buildTemplate(bare.id);if(d.tokens[0].word===surface)seed=d;}
+  assert(!seed.tokens[0].ar.includes('فِي مَحَلِّ'),`${surface}: the bare form gained a maḥall`);
+  assert(!seed.tokens[0].mahallRuleId,`${surface}: the bare form gained a maḥall rule`);
+  assert(api.deriveMabniPresentMahall(seed,0).governorMode==='none',`${surface}: the bare form resolved a governor`);
+  assert(api.buildTokenWhy(seed.tokens[0],seed).ids.length===2,`${surface}: the bare Why chain changed`);
+  c1Cases+=4;
+}
+
+// --- C1 adversarial matrix. Every fixture must reject, and none may throw. ---
+function c1Attack(name,person,mutate){
+  const data=clone(c1Clean[person]);
+  let codes;
+  try{ mutate(data,data.tokens[1],data.tokens[0]); }
+  catch(error){ throw new Error(`C1 attack "${name}" could not be built: ${error.message}`); }
+  try{ codes=api.validateExercise(data).map(item=>item.code); }
+  catch(error){ throw new Error(`C1 attack "${name}" threw instead of rejecting: ${error.message}`); }
+  assert(codes.length>0,`C1 attack "${name}" was accepted`);
+  c1AttackCases++;
+}
+c1Attack('particle removed','3fp',data=>{data.tokens.splice(0,1);});
+c1Attack('particle misspelled','3fp',(d,v,p)=>{p.word='لن';});
+c1Attack('particle type cleared','3fp',(d,v,p)=>{p.grammar.particleType='';});
+c1Attack('particle type -> lam','3fp',(d,v,p)=>{p.grammar.particleType='lam';});
+c1Attack('particle type -> sawfa','3fp',(d,v,p)=>{p.grammar.particleType='sawfa';});
+c1Attack('particle type -> preposition','3fp',(d,v,p)=>{p.grammar.particleType='preposition';});
+c1Attack('particle rule forged','3fp',(d,v,p)=>{p.ruleId='G_LAM_JAZM';});
+c1Attack('particle rule blanked','3fp',(d,v,p)=>{p.ruleId='';});
+c1Attack('particle after the verb','3fp',data=>{const p=data.tokens.shift();data.tokens.splice(1,0,p);});
+c1Attack('particle separated from verb','3fp',data=>{const o=data.tokens.pop();data.tokens.splice(1,0,o);});
+c1Attack('duplicate particle','3fp',data=>{data.tokens.unshift(clone(data.tokens[0]));});
+c1Attack('second governor claims the verb','3fp',(d,v)=>{const p2=clone(d.tokens[0]);p2.id='X2';p2.relations={governsId:v.id};d.tokens.push(p2);});
+c1Attack('governor link dangling','3fp',(d,v)=>{v.governorId='NOPE';});
+c1Attack('governor link cleared','3fp',(d,v)=>{v.governorId=null;});
+c1Attack('governor link to object','3fp',(d,v)=>{v.governorId=d.tokens[2].id;});
+c1Attack('governor link self','3fp',(d,v)=>{v.governorId=v.id;});
+c1Attack('reverse link cleared','3fp',(d,v,p)=>{p.relations.governsId=null;});
+c1Attack('reverse link to object','3fp',(d,v,p)=>{p.relations.governsId=d.tokens[2].id;});
+c1Attack('particle claims a second verb','3fp',(d,v)=>{const t=clone(v);t.id='V2';t.governorId=d.tokens[0].id;d.tokens.push(t);});
+c1Attack('maḥall rule blanked','3fp',(d,v)=>{v.mahallRuleId='';});
+c1Attack('maḥall rule -> bināʾ rule','3fp',(d,v)=>{v.mahallRuleId='R_PRESENT_NUUN_NISWAH_BINAA';});
+c1Attack('maḥall rule -> component rule','3fp',(d,v)=>{v.mahallRuleId='C_NUUN_NISWAH';});
+c1Attack('maḥall rule -> unknown','3fp',(d,v)=>{v.mahallRuleId='R_MADE_UP';});
+c1Attack('bināʾ rule -> maḥall rule','3fp',(d,v)=>{v.ruleId='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN';});
+c1Attack('state nasb added','3fp',(d,v)=>{v.state='nasb';});
+c1Attack('state raf added','3fp',(d,v)=>{v.state='raf';});
+c1Attack('state jazm added','3fp',(d,v)=>{v.state='jazm';});
+c1Attack('sign fatha added','3fp',(d,v)=>{v.sign={id:'fatha',ar:'x',en:'x'};});
+c1Attack('sign sukun added','3fp',(d,v)=>{v.sign={id:'sukun',ar:'x',en:'x'};});
+c1Attack('sign nunDropped added','3fp',(d,v)=>{v.sign={id:'nunDropped',ar:'x',en:'x'};});
+c1Attack('3fp -> 2fp','3fp',(d,v)=>{v.grammar.person='2fp';v.grammar.morphology.person='2fp';});
+c1Attack('2fp -> 3fp','2fp',(d,v)=>{v.grammar.person='3fp';v.grammar.morphology.person='3fp';});
+c1Attack('ordinary formClass','3fp',(d,v)=>{v.grammar.morphology.formClass='ordinary';});
+c1Attack('afalKhamsa formClass','3fp',(d,v)=>{v.grammar.morphology.formClass='afalKhamsa';});
+c1Attack('binaaClass blanked','3fp',(d,v)=>{v.grammar.morphology.binaaClass='';});
+c1Attack('inflection -> regular','3fp',(d,v)=>{v.inflection='regular';});
+c1Attack('nūn component removed','3fp',(d,v)=>{v.components=[];});
+c1Attack('nūn component duplicated','3fp',(d,v)=>{v.components=[v.components[0],clone(v.components[0])];});
+c1Attack('component maḥall -> nasb','3fp',(d,v)=>{v.components[0].mahall='nasb';});
+c1Attack('component bināʾ -> sukun','3fp',(d,v)=>{v.components[0].binaaSign='sukun';});
+c1Attack('explicit fāʿil added','3fp',d=>{d.tokens[2].grammar.role='faail';});
+c1Attack('hidden subject added','3fp',(d,v)=>{v.subjectRuleId='R_HIDDEN_SUBJECT_JAWAZ_3S';});
+c1Attack('bare template rehoming','3fp',d=>{d.templateId=api.templates.find(t=>t.presentPerson==='3fp').stableId;});
+c1Attack('五-verb لَنْ template rehoming','3fp',d=>{
+  const t=api.templates.find(x=>x.starts==='particle'&&x.form==='fiveVerbs'&&x.state==='nasb');
+  if(t)d.templateId=t.stableId; else d.templateId=api.templates.find(x=>x.presentPerson==='2fp').stableId;
+});
+/* A forged stored maḥall value must never become authority. Isolated: `mahallRuleId` and every
+   other canonical field are left intact, so the rejection can only be the injected field, and
+   the exact owning code is asserted rather than "some error happened". (This used to blank
+   mahallRuleId at the same time, which meant it could not identify the owning defect.) */
+{
+  const data=clone(c1Clean['3fp']);
+  data.tokens[1].grammar.mahall='jazm';
+  const codes=api.validateExercise(data).map(item=>item.code);
+  assert(codes.includes('E_MABNI_PRESENT_STORED_MAHALL'),
+    `C1: a forged stored maḥall rejected for the wrong reason: ${JSON.stringify(codes)}`);
+  assert(data.tokens[1].mahallRuleId==='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN',
+    'C1: the isolated stored-maḥall attack must leave mahallRuleId intact');
+  c1AttackCases++;
+}
+console.log('Phase-2b-C1 architecture audit passed: '+c1Cases+' canonical checks and '+c1AttackCases+' adversarial checks.');
+
+/* ============================================================================
+   PHASE 2b-C2 — the two لَنْ-governed production templates, their rendering, Why,
+   English, and History. Everything below runs against REAL production output.
+   ========================================================================== */
+let c2Cases=0,c2AttackCases=0;
+const governedTemplates={};
+for(const person of ['3fp','2fp']){
+  const t=api.templates.find(x=>x.governedPresent&&x.presentPerson===person);
+  assert(t,`Phase-2b-C: no governed template for ${person}`);
+  governedTemplates[person]=t;
+  assert(t.presentCapabilities.length===1,`${person}: governed template must declare exactly one capability`);
+  const capability=t.presentCapabilities[0];
+  assert(capability.person===person&&capability.subjectMode==='attached'&&capability.formClass==='mabniPresent'
+    &&capability.endingClass==='nuun-niswah'&&capability.binaaClass==='sukun-nuun-niswah'&&capability.governorMode==='lan',
+    `${person}: governed capability is not canonical`);
+  assert(t.starts==='particle'&&t.form==='singular'&&t.state==='nasb'&&t.sign==='fatha',`${person}: governed target metadata is not the object's`);
+  assert(!t.frontedPresent,`${person}: governed template must not use the fronted rebuilder`);
+  c2Cases+=5;
+}
+const governedSurfaces={'3fp':['يَكْتُبْنَ','يَفْتَحْنَ','يَدْرُسْنَ'],'2fp':['تَكْتُبْنَ','تَفْتَحْنَ','تَدْرُسْنَ']};
+const c2Golden={},c2Snapshots={};
+for(const person of ['3fp','2fp']){
+  const wanted=new Set(governedSurfaces[person]);
+  for(let i=0;i<6000&&wanted.size;i++){
+    const data=api.buildTemplate(governedTemplates[person].id);
+    const verb=data.tokens[1];
+    if(!wanted.has(verb.word))continue;
+    wanted.delete(verb.word);
+    c2Golden[verb.word]=data;
+    const particle=data.tokens[0],object=data.tokens[2];
+    assert(data.tokens.length===3&&particle.word==='لَنْ'&&particle.grammar.particleType==='lan',`${verb.word}: particle structure wrong`);
+    assert(object.target===true&&object.grammar.role==='object'&&object.state==='nasb'&&object.sign.id==='fatha',`${verb.word}: object is not the accusative target`);
+    assert(data.sentence===`لَنْ ${verb.word} ${object.word}`,`${verb.word}: sentence shape wrong`);
+    assert(particle.ruleId==='G_LAN_NASB',`${verb.word}: particle lost G_LAN_NASB`);
+    assert(arHas(particle.ar,'حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ'),`${verb.word}: particle iʿrāb is not canonical`);
+    assert(api.buildTokenWhy(particle,data).ids.includes('WHY_PARTICLE_LAN'),`${verb.word}: particle Why is not canonical`);
+    assert(verb.inflection===api.MABNI_NUUN_NISWAH&&verb.state===''&&verb.sign===null,`${verb.word}: governed verb gained state/sign`);
+    assert(verb.ruleId==='R_PRESENT_NUUN_NISWAH_BINAA'&&verb.mahallRuleId==='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN',`${verb.word}: rule binding wrong`);
+    assert(arHas(verb.ar,'مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنُونِ النِّسْوَةِ'),`${verb.word}: bināʾ clause missing`);
+    assert(arHas(verb.ar,'فِي مَحَلِّ نَصْبٍ'),`${verb.word}: maḥall clause missing`);
+    for(const forbidden of ['مَنْصُوبٌ','مَرْفُوعٌ','مَجْزُومٌ','وَعَلَامَةُ'])
+      assert(!arHas(verb.ar,forbidden),`${verb.word}: governed whole word claims «${forbidden}»`);
+    assert(!/accusative|jussive|indicative|subjunctive|nominative/i.test(verb.en)&&/built on suk/i.test(verb.en)&&/position of na/.test(verb.en),
+      `${verb.word}: governed English is not canonical: ${verb.en}`);
+    assert(verb.components.length===1&&verb.components[0].kind==='nuun-niswah'&&verb.components[0].ruleId==='C_NUUN_NISWAH',`${verb.word}: nūn component wrong`);
+    assert(arHas(verb.components[0].ar,'فِي مَحَلِّ رَفْعٍ'),`${verb.word}: nūn lost its rafʿ maḥall`);
+    assert(!data.tokens.some(t=>t.grammar.role==='faail')&&!verb.subjectRuleId&&!arHas(verb.ar,'مُسْتَتِرٌ'),`${verb.word}: a competing subject appeared`);
+    const why=api.buildTokenWhy(verb,data);
+    assert(why.ids.join('|')==='WHY_PRESENT_NUUN_NISWAH_BINAA|WHY_PRESENT_NUUN_NISWAH_LAN_MAHALL|WHY_SUBJECT_NUUN_NISWAH',
+      `${verb.word}: governed Why chain is ${why.ids.join('|')}`);
+    for(const banned of ['WHY_STATE_VERB_LAN','WHY_SIGN_MUDARI_NASB','WHY_SIGN_AFAL5_NASB'])
+      assert(!why.ids.includes(banned),`${verb.word}: governed Why routed through ${banned}`);
+    const expectedSubject=person==='3fp'?'They (women) will not':'You women will not';
+    assert(data.translation.startsWith(expectedSubject),`${verb.word}: translation is «${data.translation}»`);
+    const snapshot=api.createExerciseSnapshot(data);
+    assert(snapshot.schemaVersion===3,`${verb.word}: governed snapshot is not schema v3`);
+    c2Snapshots[verb.word]=snapshot;
+    assert(api.restoreExerciseSnapshot(clone(snapshot)),`${verb.word}: clean governed snapshot failed to restore`);
+    c2Cases+=16;
+  }
+  assert(!wanted.size,`${person}: governed template never produced ${[...wanted].join(',')}`);
+}
+assert(Object.keys(c2Golden).length===6,'Phase-2b-C did not produce all six governed surfaces');
+assert(api.verbFormIndex.size===604,`Phase-2b-C must reuse the existing surfaces; verb index is ${api.verbFormIndex.size}`);
+c2Cases+=2;
+
+for(const surface of Object.keys(c2Golden)){
+  const original=c2Golden[surface];
+  const corrupt=clone(c2Snapshots[surface]);
+  corrupt.translation='CORRUPT';
+  corrupt.tokens.forEach(t=>{t.gloss='X';t.enHint='X';t.ar='X';t.en='X';t.phraseAr='X';t.phraseEn='X';
+    if(t.why){t.why.ar=['X'];t.why.en=['X'];t.why.ids=['X'];}
+    (t.components||[]).forEach(c=>{c.ar='X';c.en='X';});});
+  (corrupt.relationships||[]).forEach(r=>{r.ar='X';r.en='X';});
+  const restored=api.restoreExerciseSnapshot(corrupt);
+  assert(restored,`${surface}: corrupted governed snapshot did not restore`);
+  const verb=restored.tokens[1];
+  assert(restored.translation===original.translation,`${surface}: governed translation not rebuilt`);
+  assert(verb.ar===original.tokens[1].ar&&verb.en===original.tokens[1].en,`${surface}: governed verb presentation not rebuilt`);
+  assert(restored.tokens[0].ar===original.tokens[0].ar,`${surface}: particle presentation not rebuilt`);
+  assert(verb.components[0].ar===original.tokens[1].components[0].ar,`${surface}: component presentation not rebuilt`);
+  assert(verb.state===''&&verb.sign===null&&!verb.grammar.mahall,`${surface}: restore introduced state/sign/stored maḥall`);
+  assert(arHas(verb.ar,'فِي مَحَلِّ نَصْبٍ'),`${surface}: restore lost the derived maḥall`);
+  assert(verb.governorId===restored.tokens[0].id&&restored.tokens[0].relations.governsId===verb.id,`${surface}: restore lost the governor links`);
+  assert(verb.components.length===1,`${surface}: restore changed the component set`);
+  c2Cases+=8;
+}
+function c2HistoryAttack(name,surface,mutate){
+  const forged=clone(c2Snapshots[surface]);
+  mutate(forged,forged.tokens.find(t=>t.grammar&&t.grammar.type==='verb'),forged.tokens[0]);
+  let result;
+  try{ result=api.restoreExerciseSnapshot(forged); }
+  catch(error){ throw new Error(`C2 History attack "${name}" threw: ${error.message}`); }
+  if(result!==null){
+    const verb=result.tokens.find(t=>t.grammar.type==='verb');
+    const original=c2Golden[surface].tokens[1];
+    assert(verb.ar===original.ar&&verb.grammar.morphology.person===original.grammar.morphology.person
+      &&verb.state===''&&verb.sign===null,
+      `C2 History attack "${name}" survived without canonical repair`);
+  }
+  c2AttackCases++;
+}
+c2HistoryAttack('person 3fp->2fp','يَكْتُبْنَ',(f,v)=>{v.grammar.person='2fp';v.grammar.morphology.person='2fp';});
+c2HistoryAttack('person 2fp->3fp','تَكْتُبْنَ',(f,v)=>{v.grammar.person='3fp';v.grammar.morphology.person='3fp';});
+c2HistoryAttack('template -> bare 2b-B','يَكْتُبْنَ',f=>{f.templateId=api.templates.find(t=>t.presentPerson==='3fp'&&!t.governedPresent).stableId;});
+c2HistoryAttack('template -> other governed person','يَكْتُبْنَ',f=>{f.templateId=governedTemplates['2fp'].stableId;});
+c2HistoryAttack('particle removed','يَكْتُبْنَ',f=>{f.tokens.splice(0,1);});
+c2HistoryAttack('particle -> lam','يَكْتُبْنَ',(f,v,p)=>{p.word='لَمْ';p.grammar.particleType='lam';});
+c2HistoryAttack('token order reversed','يَكْتُبْنَ',f=>{const p=f.tokens.shift();f.tokens.splice(1,0,p);});
+c2HistoryAttack('state nasb stored','يَكْتُبْنَ',(f,v)=>{v.state='nasb';});
+c2HistoryAttack('sign fatha stored','يَكْتُبْنَ',(f,v)=>{v.sign={id:'fatha',ar:'x',en:'x'};});
+c2HistoryAttack('forged stored mahall','يَكْتُبْنَ',(f,v)=>{v.grammar.mahall='nasb';});
+c2HistoryAttack('mahall rule blanked','يَكْتُبْنَ',(f,v)=>{v.mahallRuleId='';});
+c2HistoryAttack('binaaClass blanked','يَكْتُبْنَ',(f,v)=>{v.grammar.morphology.binaaClass='';});
+c2HistoryAttack('component removed','يَكْتُبْنَ',(f,v)=>{v.components=[];});
+{
+  const forged=clone(c2Snapshots['تَكْتُبْنَ']);
+  forged.exerciseIdentity=c2Snapshots['يَكْتُبْنَ'].exerciseIdentity;
+  assert(api.restoreExerciseSnapshot(forged)===null,'A coordinated governed identity rewrite survived');
+  c2AttackCases++;
+}
+function c2Attack(name,surface,mutate){
+  const data=clone(c2Golden[surface]);
+  mutate(data,data.tokens[1],data.tokens[0]);
+  let codes;
+  try{ codes=api.validateExercise(data).map(item=>item.code); }
+  catch(error){ throw new Error(`C2 attack "${name}" threw: ${error.message}`); }
+  assert(codes.length>0,`C2 attack "${name}" was accepted`);
+  c2AttackCases++;
+}
+c2Attack('bare template rehoming','يَكْتُبْنَ',d=>{d.templateId=api.templates.find(t=>t.presentPerson==='3fp'&&!t.governedPresent).stableId;});
+c2Attack('governed template rehoming','يَكْتُبْنَ',d=>{d.templateId=governedTemplates['2fp'].stableId;});
+c2Attack('particle -> sawfa','يَكْتُبْنَ',(d,v,p)=>{p.grammar.particleType='sawfa';p.word='سَوْفَ';});
+c2Attack('duplicate governor relation','يَكْتُبْنَ',(d,v)=>{const p2=clone(d.tokens[0]);p2.id='PX';p2.relations={governsId:v.id};d.tokens.push(p2);});
+c2Attack('one-way particle link','يَكْتُبْنَ',(d,v,p)=>{p.relations.governsId=null;});
+/* A rendered iʿrāb string is a presentation CACHE for every token type in this project —
+   governed, bare Phase-2b-B, and ordinary muʿrab alike — so validateExercise deliberately does
+   not police it. The real guarantee is that History rebuilds it canonically, which is what
+   must be asserted: a snapshot whose whole-word maḥall was rewritten from نَصْب to رَفْع has to
+   come back saying نَصْب. */
+{
+  const forged=clone(c2Snapshots['يَكْتُبْنَ']);
+  const verbToken=forged.tokens.find(t=>t.grammar&&t.grammar.type==='verb');
+  verbToken.ar=verbToken.ar.replace('نَصْبٍ','رَفْعٍ');
+  const repaired=api.restoreExerciseSnapshot(forged);
+  assert(repaired,'A whole-word maḥall rewrite made the governed snapshot unrestorable');
+  assert(repaired.tokens[1].ar===c2Golden['يَكْتُبْنَ'].tokens[1].ar,'A forged whole-word rafʿ maḥall claim survived History restore');
+  assert(arHas(repaired.tokens[1].ar,'فِي مَحَلِّ نَصْبٍ'),'The rebuilt governed verb lost its naṣb maḥall');
+  c2AttackCases++;
+}
+c2Attack('fatha-sign Why substituted','يَكْتُبْنَ',(d,v)=>{const w=api.buildTokenWhy(v,d);v.why={ids:[w.ids[0],'WHY_SIGN_MUDARI_NASB',w.ids[2]],ar:[w.ar[0],'x',w.ar[2]],en:[w.en[0],'x',w.en[2]]};});
+c2Attack('mahall Why removed','يَكْتُبْنَ',(d,v)=>{const w=api.buildTokenWhy(v,d);v.why={ids:[w.ids[0],w.ids[2]],ar:[w.ar[0],w.ar[2]],en:[w.en[0],w.en[2]]};});
+c2Attack('component Why removed','يَكْتُبْنَ',(d,v)=>{const w=api.buildTokenWhy(v,d);v.why={ids:[w.ids[0],w.ids[1]],ar:[w.ar[0],w.ar[1]],en:[w.en[0],w.en[1]]};});
+c2Attack('explicit fail added','يَكْتُبْنَ',d=>{d.tokens[2].grammar.role='faail';});
+for(const person of ['3fp','2fp']){
+  const bare=api.templates.find(t=>t.presentPerson===person&&!t.governedPresent);
+  for(let i=0;i<400;i++){
+    const data=api.buildTemplate(bare.id);
+    const verb=data.tokens[0];
+    assert(!arHas(verb.ar,'فِي مَحَلِّ'),`${verb.word}: a bare form gained a maḥall after Phase 2b-C`);
+    assert(!verb.mahallRuleId&&!verb.governorId,`${verb.word}: a bare form gained a governor after Phase 2b-C`);
+    assert(api.buildTokenWhy(verb,data).ids.length===2,`${verb.word}: the bare Why chain changed after Phase 2b-C`);
+  }
+  c2Cases+=3;
+}
+// --- Remaining §9 matrix items not already covered by the C1 architecture block. ---
+c2Attack('component moved to object','يَكْتُبْنَ',(d,v)=>{d.tokens[2].components=[clone(v.components[0])];v.components=[];});
+c2Attack('component copied to object','يَكْتُبْنَ',(d,v)=>{d.tokens[2].components=[clone(v.components[0])];});
+c2Attack('component role -> object','يَكْتُبْنَ',(d,v)=>{v.components[0].syntacticRole='object';});
+c2Attack('component rule -> mahall rule','يَكْتُبْنَ',(d,v)=>{v.components[0].ruleId='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN';});
+c2Attack('sign damma added','يَكْتُبْنَ',(d,v)=>{v.sign={id:'damma',ar:'x',en:'x'};});
+c2Attack('sign nunKept added','يَكْتُبْنَ',(d,v)=>{v.sign={id:'nunKept',ar:'x',en:'x'};});
+c2Attack('sign nunDropped added','يَكْتُبْنَ',(d,v)=>{v.sign={id:'nunDropped',ar:'x',en:'x'};});
+c2Attack('state raf added','يَكْتُبْنَ',(d,v)=>{v.state='raf';});
+c2Attack('state jazm added','يَكْتُبْنَ',(d,v)=>{v.state='jazm';});
+c2Attack('wrong binaaClass','يَكْتُبْنَ',(d,v)=>{v.grammar.morphology.binaaClass='visible-fath';});
+c2Attack('afalKhamsa formClass','يَكْتُبْنَ',(d,v)=>{v.grammar.morphology.formClass='afalKhamsa';});
+c2Attack('inflection -> regular','يَكْتُبْنَ',(d,v)=>{v.inflection='regular';});
+c2Attack('malformed lan spelling','يَكْتُبْنَ',(d,v,p)=>{p.word='لَنَّ';});
+c2Attack('particle non-adjacent','يَكْتُبْنَ',d=>{const o=d.tokens.pop();d.tokens.splice(1,0,o);});
+c2Attack('missing governorId','يَكْتُبْنَ',(d,v)=>{v.governorId=null;});
+c2Attack('self governor','يَكْتُبْنَ',(d,v)=>{v.governorId=v.id;});
+c2Attack('object as governor','يَكْتُبْنَ',(d,v)=>{v.governorId=d.tokens[2].id;});
+c2Attack('binaa source used as mahall source','يَكْتُبْنَ',(d,v)=>{v.mahallRuleId='R_PRESENT_NUUN_NISWAH_BINAA';});
+c2Attack('component source used as mahall source','يَكْتُبْنَ',(d,v)=>{v.mahallRuleId='C_NUUN_NISWAH';});
+c2Attack('mahall source used as binaa source','يَكْتُبْنَ',(d,v)=>{v.ruleId='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN';});
+c2Attack('ordinary lan state Why substituted','يَكْتُبْنَ',(d,v)=>{const w=api.buildTokenWhy(v,d);v.why={ids:[w.ids[0],'WHY_STATE_VERB_LAN',w.ids[2]],ar:[w.ar[0],'x',w.ar[2]],en:[w.en[0],'x',w.en[2]]};});
+c2Attack('hidden subject relation','يَكْتُبْنَ',(d,v)=>{const r=d.relationships.find(x=>x.type==='verbSubject');if(r){r.subjectType='implicit';r.pronoun='هُنَّ';}v.relations.subjectType='implicit';});
+// A bare snapshot must not be restorable under a governed template, and vice versa.
+{
+  const bareTemplate=api.templates.find(t=>t.presentPerson==='3fp'&&!t.governedPresent);
+  let bare=null;for(let i=0;i<4000&&!bare;i++){const d=api.buildTemplate(bareTemplate.id);if(d.tokens[0].word==='يَكْتُبْنَ')bare=d;}
+  const bareSnapshot=api.createExerciseSnapshot(bare);
+  const asGoverned=clone(bareSnapshot);asGoverned.templateId=governedTemplates['3fp'].stableId;
+  assert(api.restoreExerciseSnapshot(asGoverned)===null,'A bare snapshot was restored under a governed template');
+  const asBare=clone(c2Snapshots['يَكْتُبْنَ']);asBare.templateId=bareTemplate.stableId;
+  assert(api.restoreExerciseSnapshot(asBare)===null,'A governed snapshot was restored under a bare template');
+  c2AttackCases+=2;
+}
+// The pre-existing inna template must keep its historic stableId: registering the governed
+// templates later in the same filter group must never renumber an earlier template.
+assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='singular'&&t.state==='nasb'&&t.sign==='fatha')
+  .map(t=>t.stableId+(t.governedPresent?':governed':':inna')).join(' | ')
+  ==='T_PARTICLE_SINGULAR_NASB_FATHA_01:inna | T_PARTICLE_SINGULAR_NASB_FATHA_02:governed | T_PARTICLE_SINGULAR_NASB_FATHA_03:governed',
+  'Phase 2b-C renumbered a pre-existing template stableId');
+c2Cases++;
+console.log('Phase-2b-C2 production audit passed: '+c2Cases+' production/History checks and '+c2AttackCases+' adversarial checks.');
+
+/* ============================================================================
+   PHASE 2b-C VALIDATION REPAIR — stored semantic fields, template resolution,
+   and template-capability authorization. Every attack here starts from a fully
+   canonical governed exercise and changes exactly ONE thing, so a rejection can
+   only be attributed to the field under test.
+   ========================================================================== */
+let c3Cases=0,c3AttackCases=0;
+const c3CodeHist={};
+const c3Gov={'3fp':api.templates.find(t=>t.governedPresent&&t.presentPerson==='3fp'),
+             '2fp':api.templates.find(t=>t.governedPresent&&t.presentPerson==='2fp')};
+const c3Bare={'3fp':api.templates.find(t=>t.presentPerson==='3fp'&&!t.governedPresent),
+              '2fp':api.templates.find(t=>t.presentPerson==='2fp'&&!t.governedPresent)};
+function c3Build(template,surface,verbIndex){
+  for(let i=0;i<6000;i++){const d=api.buildTemplate(template.id);if(d.tokens[verbIndex].word===surface)return d;}
+  throw new Error(`repair block: could not build ${surface}`);
+}
+const c3Golden=c3Build(c3Gov['3fp'],'يَكْتُبْنَ',1);
+const c3GoldenBare=c3Build(c3Bare['3fp'],'يَكْتُبْنَ',0);
+assert(api.validateExercise(clone(c3Golden)).length===0,'repair block: the governed golden case is not clean');
+assert(api.validateExercise(clone(c3GoldenBare)).length===0,'repair block: the bare golden case is not clean');
+c3Cases+=2;
+const c3Snapshot=api.createExerciseSnapshot(c3Golden);
+const c3SnapshotBare=api.createExerciseSnapshot(c3GoldenBare);
+assert(api.restoreExerciseSnapshot(clone(c3Snapshot)),'repair block: the governed golden snapshot does not restore');
+assert(api.restoreExerciseSnapshot(clone(c3SnapshotBare)),'repair block: the bare golden snapshot does not restore');
+c3Cases+=2;
+
+// Exactly one field changes per attack, and the EXPECTED code must be among the failures.
+function c3Live(name,base,verbIndex,expectedCode,mutate){
+  const data=clone(base);
+  mutate(data,data.tokens[verbIndex]);
+  let codes;
+  try{ codes=api.validateExercise(data).map(item=>item.code); }
+  catch(error){ throw new Error(`repair attack "${name}" threw: ${error.message}`); }
+  assert(codes.length>0,`repair attack "${name}" was accepted`);
+  assert(codes.includes(expectedCode),`repair attack "${name}" rejected for the wrong reason: ${JSON.stringify(codes)} (wanted ${expectedCode})`);
+  codes.forEach(code=>{c3CodeHist[code]=(c3CodeHist[code]||0)+1;});
+  c3AttackCases++;
+}
+function c3History(name,snapshot,verbIndex,mutate){
+  const forged=clone(snapshot);
+  mutate(forged,forged.tokens[verbIndex]);
+  let result;
+  try{ result=api.restoreExerciseSnapshot(forged); }
+  catch(error){ throw new Error(`repair History attack "${name}" threw: ${error.message}`); }
+  assert(result===null,`repair History attack "${name}" was restored instead of rejected`);
+  c3AttackCases++;
+}
+
+/* --- Stored whole-word maḥall. mahallRuleId, governor links, morphology, source IDs and the
+   template ID are all left canonical, so the ONLY reason to reject is the injected field.
+   Presence is the violation: null and '' must reject exactly like 'nasb'. --- */
+for(const [label,value] of [['nasb','nasb'],['raf','raf'],['jazm','jazm'],['null',null],['empty','']]){
+  c3Live(`governed token.mahall=${label}`,c3Golden,1,'E_MABNI_PRESENT_STORED_MAHALL',(d,v)=>{v.mahall=value;});
+  c3Live(`governed grammar.mahall=${label}`,c3Golden,1,'E_MABNI_PRESENT_STORED_MAHALL',(d,v)=>{v.grammar.mahall=value;});
+  c3Live(`governed morphology.mahall=${label}`,c3Golden,1,'E_MABNI_PRESENT_STORED_MAHALL',(d,v)=>{v.grammar.morphology.mahall=value;});
+}
+c3Live('governed token.mahall=undefined-own',c3Golden,1,'E_MABNI_PRESENT_STORED_MAHALL',(d,v)=>{v.mahall=undefined;});
+// The bare Phase-2b-B form is equally forbidden to store one.
+for(const location of ['token','grammar','morphology']){
+  c3Live(`bare ${location}.mahall`,c3GoldenBare,0,'E_MABNI_PRESENT_STORED_MAHALL',(d,v)=>{
+    if(location==='token')v.mahall='nasb'; else if(location==='grammar')v.grammar.mahall='nasb'; else v.grammar.morphology.mahall='nasb';
+  });
+}
+/* --- Stored governor mode. Rejected even when the value is the canonically correct one: the
+   mode is frozen template authority plus adjacency, and a stored copy is a second source of
+   truth that a forged snapshot could set. --- */
+for(const value of ['lan','none','lam','zzz','',null]){
+  const label=value===null?'null':(value===''?'empty':value);
+  c3Live(`governed token.governorMode=${label}`,c3Golden,1,'E_MABNI_PRESENT_STORED_GOVERNOR_MODE',(d,v)=>{v.governorMode=value;});
+  c3Live(`governed grammar.governorMode=${label}`,c3Golden,1,'E_MABNI_PRESENT_STORED_GOVERNOR_MODE',(d,v)=>{v.grammar.governorMode=value;});
+  c3Live(`governed morphology.governorMode=${label}`,c3Golden,1,'E_MABNI_PRESENT_STORED_GOVERNOR_MODE',(d,v)=>{v.grammar.morphology.governorMode=value;});
+}
+for(const location of ['token','grammar','morphology']){
+  c3Live(`bare ${location}.governorMode`,c3GoldenBare,0,'E_MABNI_PRESENT_STORED_GOVERNOR_MODE',(d,v)=>{
+    if(location==='token')v.governorMode='none'; else if(location==='grammar')v.grammar.governorMode='none'; else v.grammar.morphology.governorMode='none';
+  });
+}
+// The canonical component keeps its own maḥall — the guard must not touch component objects.
+assert(c3Golden.tokens[1].components[0].mahall==='raf','The nūn component lost its canonical rafʿ maḥall');
+assert(api.validateExercise(clone(c3Golden)).length===0,'The stored-field guard rejected the canonical component maḥall');
+c3Cases+=2;
+
+/* --- Template identity and capability authorization. --- */
+c3Live('governed templateId unknown',c3Golden,1,'E_TEMPLATE_ID',d=>{d.templateId='T_UNKNOWN_PHASE_2BC';});
+c3Live('governed templateId unknown → also unauthorized',c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',d=>{d.templateId='T_UNKNOWN_PHASE_2BC';});
+c3Live('governed templateId = inna _01',c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',d=>{d.templateId='T_PARTICLE_SINGULAR_NASB_FATHA_01';});
+c3Live('governed templateId = noun template',c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',d=>{
+  d.templateId=api.templates.find(t=>t.starts==='noun'&&!t.presentPerson).stableId;});
+c3Live('governed templateId = past template',c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',d=>{
+  d.templateId=api.templates.find(t=>t.pastPerson).stableId;});
+c3Live('bare templateId unknown',c3GoldenBare,0,'E_TEMPLATE_ID',d=>{d.templateId='T_UNKNOWN_PHASE_2BB';});
+c3Live('bare templateId = inna _01',c3GoldenBare,0,'E_PRESENT_TEMPLATE_AUTHORIZATION',d=>{d.templateId='T_PARTICLE_SINGULAR_NASB_FATHA_01';});
+c3Live('governed → bare template',c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',d=>{d.templateId=c3Bare['3fp'].stableId;});
+c3Live('bare → governed template',c3GoldenBare,0,'E_PRESENT_TEMPLATE_AUTHORIZATION',d=>{d.templateId=c3Gov['3fp'].stableId;});
+c3Live('governed → other governed person',c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',d=>{d.templateId=c3Gov['2fp'].stableId;});
+
+/* --- The same injections through History must REJECT before canonical rebuilding, not be
+   silently erased and restored as though the snapshot had been honest. --- */
+for(const location of ['token','grammar','morphology']){
+  c3History(`snapshot governed ${location}.mahall`,c3Snapshot,1,(f,v)=>{
+    if(location==='token')v.mahall='nasb'; else if(location==='grammar')v.grammar.mahall='nasb'; else v.grammar.morphology.mahall='nasb';});
+  c3History(`snapshot governed ${location}.governorMode`,c3Snapshot,1,(f,v)=>{
+    if(location==='token')v.governorMode='lan'; else if(location==='grammar')v.grammar.governorMode='lan'; else v.grammar.morphology.governorMode='lan';});
+  c3History(`snapshot bare ${location}.mahall`,c3SnapshotBare,0,(f,v)=>{
+    if(location==='token')v.mahall='raf'; else if(location==='grammar')v.grammar.mahall='raf'; else v.grammar.morphology.mahall='raf';});
+  c3History(`snapshot bare ${location}.governorMode`,c3SnapshotBare,0,(f,v)=>{
+    if(location==='token')v.governorMode='none'; else if(location==='grammar')v.grammar.governorMode='none'; else v.grammar.morphology.governorMode='none';});
+}
+c3History('snapshot governed mahall=null',c3Snapshot,1,(f,v)=>{v.grammar.mahall=null;});
+c3History('snapshot governed governorMode=none',c3Snapshot,1,(f,v)=>{v.grammar.governorMode='none';});
+c3History('snapshot governed templateId unknown',c3Snapshot,1,f=>{f.templateId='T_UNKNOWN_PHASE_2BC';});
+c3History('snapshot governed templateId inna',c3Snapshot,1,f=>{f.templateId='T_PARTICLE_SINGULAR_NASB_FATHA_01';});
+c3History('snapshot bare templateId unknown',c3SnapshotBare,0,f=>{f.templateId='T_UNKNOWN_PHASE_2BB';});
+
+/* --- Presentation corruption must still REPAIR, not reject: the repair must not have turned
+   into a blanket "any change rejects". --- */
+{
+  const presentational=clone(c3Snapshot);
+  presentational.translation='CORRUPT';
+  presentational.tokens.forEach(t=>{t.ar='X';t.en='X';t.gloss='X';t.enHint='X';
+    if(t.why){t.why.ar=['X'];t.why.ids=['X'];t.why.en=['X'];}
+    (t.components||[]).forEach(c=>{c.ar='X';c.en='X';});});
+  const repaired=api.restoreExerciseSnapshot(presentational);
+  assert(repaired,'Presentation corruption now rejects instead of rebuilding');
+  assert(repaired.translation===c3Golden.translation&&repaired.tokens[1].ar===c3Golden.tokens[1].ar,
+    'Presentation corruption was not rebuilt canonically');
+  c3Cases+=2;
+}
+
+/* --- Source conditions: exact canonical text, not "the prose is long enough". --- */
+const C3_EXPECTED_CONDITIONS={
+  R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN:'Only canonical لَنْ immediately preceding an explicitly registered 3fp/2fp nūn-al-niswah present form whose formClass is mabniPresent, endingClass nuun-niswah, binaaClass sukun-nuun-niswah, with empty state and null sign. It authorizes the naṣb maḥall alone: not the bināʾ, not the nūn component, not لَمْ or any other governor, not an ordinary present, not a five verb, and not nūn al-tawkīd. The surface does not change and no iʿrāb sign is introduced.',
+  R_PRESENT_NUUN_NISWAH_BINAA:'Only an explicitly registered 3fp/2fp present form with nūn al-niswah attached directly to it, either ungoverned or canonically governed by لَنْ. It authorizes the bināʾ alone: no rafʿ, naṣb, or jazm maḥall (a governed form takes its maḥall from a separate rule), no ordinary present, no five verb, and no nūn al-tawkīd — the same p. 73 passage builds the verb on FATḤ for nūn al-tawkīd.',
+  C_NUUN_NISWAH:'Only explicitly registered 3fp past forms and 3fp/2fp present forms directly attached to nūn al-niswah, whether ungoverned or canonically governed by لَنْ. The component analysis is identical in every one of those contexts; the whole word’s own position is a separate claim under a separate rule.'
+};
+for(const [ruleId,conditions] of Object.entries(C3_EXPECTED_CONDITIONS)){
+  assert(api.SOURCE_REGISTRY[ruleId].conditions===conditions,`${ruleId}: conditions text drifted from the reviewed record`);
+  c3Cases++;
+}
+// Behavioural exclusions: the rules refuse the constructions their conditions exclude.
+c3Live('maḥall rule on a bare form',c3GoldenBare,0,'E_MABNI_PRESENT_MAHALL',(d,v)=>{v.mahallRuleId='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN';});
+c3Live('maḥall rule under لَمْ',c3Golden,1,'E_MABNI_PRESENT_GOVERNOR',(d,v,p)=>{d.tokens[0].grammar.particleType='lam';d.tokens[0].word='لَمْ';});
+c3Live('bināʾ rule replaced by maḥall rule',c3Golden,1,'E_MABNI_PRESENT_RULE',(d,v)=>{v.ruleId='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN';});
+c3Live('maḥall rule replaced by component rule',c3Golden,1,'E_MABNI_PRESENT_MAHALL_RULE',(d,v)=>{v.mahallRuleId='C_NUUN_NISWAH';});
+c3Live('component rule replaced by maḥall rule',c3Golden,1,'E_COMPONENT_INVARIANT',(d,v)=>{v.components[0].ruleId='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN';});
+c3Live('component moved onto the object',c3Golden,1,'E_COMPONENT_OWNER',(d,v)=>{d.tokens[2].components=[clone(v.components[0])];});
+
+/* --- Stable-ID mapping must be exactly what committed Phase-2b-B HEAD had, plus the two new
+   governed templates appended. No pre-existing ID may shift and none may duplicate. --- */
+assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='singular'&&t.state==='nasb'&&t.sign==='fatha')
+  .map(t=>`${t.stableId}:${t.governedPresent?'governed-'+t.presentPerson:'inna'}`).join(' | ')
+  ==='T_PARTICLE_SINGULAR_NASB_FATHA_01:inna | T_PARTICLE_SINGULAR_NASB_FATHA_02:governed-3fp | T_PARTICLE_SINGULAR_NASB_FATHA_03:governed-2fp',
+  'The particle/singular/nasb/fatha stable-ID mapping changed');
+{
+  const ids=api.templates.map(t=>t.stableId);
+  assert(new Set(ids).size===ids.length,'Duplicate template stableId');
+  c3Cases+=2;
+}
+console.log('Phase-2b-C validation-repair audit passed: '+c3Cases+' canonical checks and '+c3AttackCases+' adversarial checks.');
+console.log('  repair error-code distribution: '+JSON.stringify(c3CodeHist));
+
+/* ============================================================================
+   PHASE 2b-C FINAL AUTHORIZATION REPAIR — the two bypasses the independent audit
+   found in the first repair.
+
+   A. Template-capability enforcement was gated on `token.grammar.exactPresentRaf`,
+      a stored, forgeable token flag. Deleting or falsifying it switched the whole
+      check off, so a governed 3fp exercise validated under the inna template, and a
+      muʿrab advanced-present exercise validated under any metadata-identical peer.
+      Authorization is now derived only from the resolved production template and the
+      registry-resolved authoritative morphology; the flag is validated as a redundant
+      canonical field (E_PRESENT_EXACT_MARKER) and never trusted as authority.
+
+   B. `mahallRuleId` became source-authorized and counted in validByRule, but ownership
+      was policed only inside the mabnī-present lane, so any noun, particle, past verb,
+      ordinary present or five verb could carry the Phase-2b-C maḥall rule and validate.
+      A global ownership contract (E_MAHALL_RULE_OWNER) now fails that closed.
+
+   Every attack below starts from a clean canonical exercise and changes only the field
+   under test, and every one asserts its exact owning code.
+   ========================================================================== */
+let c4Cases=0,c4AttackCases=0;
+const c4CodeHist={};
+function c4Live(name,base,verbIndex,expectedCode,mutate){
+  const data=clone(base);
+  mutate(data,data.tokens[verbIndex]);
+  let codes;
+  try{ codes=api.validateExercise(data).map(item=>item.code); }
+  catch(error){ throw new Error(`final-repair attack "${name}" threw: ${error.message}`); }
+  assert(codes.length>0,`final-repair attack "${name}" was accepted`);
+  assert(codes.includes(expectedCode),
+    `final-repair attack "${name}" rejected for the wrong reason: ${JSON.stringify(codes)} (wanted ${expectedCode})`);
+  codes.forEach(code=>{c4CodeHist[code]=(c4CodeHist[code]||0)+1;});
+  c4AttackCases++;
+}
+function c4History(name,snapshot,tokenIndex,mutate){
+  const forged=clone(snapshot);
+  mutate(forged,forged.tokens[tokenIndex]);
+  let result;
+  try{ result=api.restoreExerciseSnapshot(forged); }
+  catch(error){ throw new Error(`final-repair History attack "${name}" threw: ${error.message}`); }
+  assert(result===null,`final-repair History attack "${name}" was restored instead of rejected`);
+  c4AttackCases++;
+}
+
+/* --- A0. The authorization contract, asserted directly on the repaired predicate so it is
+   pinned independently of the E_PRESENT_EXACT_MARKER invariant that also guards these attacks.
+   `presentCapabilityFailure` takes only canonical inputs — a resolved template and the
+   registry-resolved morphology — so there is no token argument it could be fooled by. --- */
+{
+  assert(api.presentCapabilityFailure.length<=3,'presentCapabilityFailure must not take a token argument');
+  const governedTemplate=c3Gov['3fp'],bareTemplate=c3Bare['3fp'];
+  const mabni3fp=api.PRESENT_MORPHOLOGY['3fp'],mabni2fp=api.PRESENT_MORPHOLOGY['2fp'];
+  // 1/2/6 — unresolved template and a resolved template with no capabilities both reject a
+  //         person-bound form; 3/4 — the matching capability must agree on every field.
+  const innaTemplate=api.templates.find(t=>t.stableId==='T_PARTICLE_SINGULAR_NASB_FATHA_01');
+  assert(!innaTemplate.presentCapabilities.length,'the inna template must declare no present capabilities');
+  assert(api.presentCapabilityFailure(undefined,mabni3fp,'lan'),'an unresolved template authorized a person-bound form');
+  assert(api.presentCapabilityFailure(null,mabni3fp,'lan'),'a null template authorized a person-bound form');
+  assert(api.presentCapabilityFailure(innaTemplate,mabni3fp,'lan'),'a capability-less template authorized a person-bound form');
+  assert(api.presentCapabilityFailure(bareTemplate,mabni3fp,'lan'),'the bare template authorized a governed structure');
+  assert(api.presentCapabilityFailure(governedTemplate,mabni3fp,'none'),'the governed template authorized a bare structure');
+  assert(api.presentCapabilityFailure(governedTemplate,mabni2fp,'lan'),'the governed 3fp template authorized 2fp');
+  assert(!api.presentCapabilityFailure(governedTemplate,mabni3fp,'lan'),'the governed template rejected its own canonical form');
+  assert(!api.presentCapabilityFailure(bareTemplate,mabni3fp,'none'),'the bare template rejected its own canonical form');
+  for(const [field,value] of [['subjectMode','implicit'],['formClass','ordinary'],['endingClass','none'],['binaaClass','visible-fath']]){
+    assert(api.presentCapabilityFailure(governedTemplate,{...mabni3fp,[field]:value},'lan'),
+      `the governed template authorized a form with a wrong ${field}`);
+  }
+  // 5 — the generic lane, and ONLY the generic lane, survives a capability-less template.
+  assert(JSON.stringify(api.GENERIC_PRESENT_PERSONS)===JSON.stringify(['3ms','3mp']),
+    `the generic present-person set is ${JSON.stringify(api.GENERIC_PRESENT_PERSONS)}`);
+  for(const person of api.GENERIC_PRESENT_PERSONS){
+    assert(!api.presentCapabilityFailure(innaTemplate,api.PRESENT_MORPHOLOGY[person],'none'),
+      `${person}: a generic-lane form was rejected under a capability-less template`);
+  }
+  for(const person of Object.keys(api.PRESENT_MORPHOLOGY).filter(p=>!api.GENERIC_PRESENT_PERSONS.includes(p))){
+    assert(api.presentCapabilityFailure(innaTemplate,api.PRESENT_MORPHOLOGY[person],'none'),
+      `${person}: a person-bound form was authorized by a capability-less template`);
+  }
+  // The ownership predicate is likewise canonical: it reads the registry, never a stored flag.
+  assert(api.mahallRuleOwnerFailure({grammar:{type:'noun'},mahallRuleId:'R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN'},{tokens:[]}),
+    'a noun token was allowed to own a whole-word maḥall rule');
+  assert(!api.mahallRuleOwnerFailure({grammar:{type:'noun'},mahallRuleId:''},{tokens:[]}),
+    'an empty mahallRuleId was treated as a claim');
+  assert(!api.mahallRuleOwnerFailure({grammar:{type:'noun'}},{tokens:[]}),
+    'an absent mahallRuleId was treated as a claim');
+  assert(!api.mahallRuleOwnerFailure(c3Golden.tokens[1],c3Golden),
+    'the canonical governed verb was denied ownership of its maḥall rule');
+  c4Cases+=12;
+}
+
+/* --- A. The capability trigger is canonical, not the stored marker. --- */
+// Deleting or falsifying the marker must not let ANY exercise change template.
+for(const [label,forge] of [['deleted',v=>{delete v.grammar.exactPresentRaf;}],
+                            ['false',v=>{v.grammar.exactPresentRaf=false;}]]){
+  // A / C — governed 3fp onto the pre-existing inna template (identical metadata tuple).
+  c4Live(`governed 3fp marker ${label} → inna _01`,c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',(d,v)=>{
+    forge(v);d.templateId='T_PARTICLE_SINGULAR_NASB_FATHA_01';});
+  // B — governed 3fp onto the other governed person.
+  c4Live(`governed 3fp marker ${label} → governed 2fp`,c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',(d,v)=>{
+    forge(v);d.templateId=c3Gov['2fp'].stableId;});
+  c4Live(`governed 3fp marker ${label} → bare 3fp`,c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',(d,v)=>{
+    forge(v);d.templateId=c3Bare['3fp'].stableId;});
+  c4Live(`governed 3fp marker ${label} → unknown template`,c3Golden,1,'E_PRESENT_TEMPLATE_AUTHORIZATION',(d,v)=>{
+    forge(v);d.templateId='T_UNKNOWN_PHASE_2BC';});
+  // D — bare 3fp onto the other person's bare template.
+  c4Live(`bare 3fp marker ${label} → bare 2fp`,c3GoldenBare,0,'E_PRESENT_TEMPLATE_AUTHORIZATION',(d,v)=>{
+    forge(v);d.templateId=c3Bare['2fp'].stableId;});
+  c4Live(`bare 3fp marker ${label} → governed 3fp`,c3GoldenBare,0,'E_PRESENT_TEMPLATE_AUTHORIZATION',(d,v)=>{
+    forge(v);d.templateId=c3Gov['3fp'].stableId;});
+}
+// E — a muʿrab advanced-present exercise rehomed onto EVERY metadata-identical template.
+{
+  const muarab=api.templates.find(t=>t.presentPerson&&!t.governedPresent&&!t.frontedPresent
+    &&api.PRESENT_MORPHOLOGY[t.presentPerson].formClass!=='mabniPresent');
+  assert(muarab,'no muʿrab advanced-present template found');
+  const golden=api.buildTemplate(muarab.id);
+  const verbIndex=golden.tokens.findIndex(token=>token.grammar.type==='verb');
+  assert(api.validateExercise(clone(golden)).length===0,`${muarab.stableId}: muʿrab advanced golden is not clean`);
+  const peers=api.templates.filter(t=>t.starts===muarab.starts&&t.form===muarab.form
+    &&t.state===muarab.state&&t.sign===muarab.sign&&t.stableId!==muarab.stableId);
+  assert(peers.length>=10,`expected many metadata-identical peers, found ${peers.length}`);
+  for(const peer of peers){
+    c4Live(`muʿrab marker deleted → ${peer.stableId}`,golden,verbIndex,'E_PRESENT_TEMPLATE_AUTHORIZATION',(d,v)=>{
+      delete v.grammar.exactPresentRaf;d.templateId=peer.stableId;});
+    c4Live(`muʿrab marker false → ${peer.stableId}`,golden,verbIndex,'E_PRESENT_TEMPLATE_AUTHORIZATION',(d,v)=>{
+      v.grammar.exactPresentRaf=false;d.templateId=peer.stableId;});
+  }
+  /* F — correct template preserved, marker forged. Documented intended behaviour: REJECT. The
+     marker is a redundant canonical field, so a value that disagrees with registry authority is
+     itself a forgery — but note the rejection is E_PRESENT_EXACT_MARKER, NOT an authorization
+     failure, which proves authorization no longer depends on it. */
+  c4Live('muʿrab marker deleted, correct template',golden,verbIndex,'E_PRESENT_EXACT_MARKER',(d,v)=>{
+    delete v.grammar.exactPresentRaf;});
+  c4Live('muʿrab marker false, correct template',golden,verbIndex,'E_PRESENT_EXACT_MARKER',(d,v)=>{
+    v.grammar.exactPresentRaf=false;});
+  // The History path must reject the same rehoming.
+  const muarabSnapshot=api.createExerciseSnapshot(golden);
+  c4History('muʿrab snapshot marker deleted → peer',muarabSnapshot,verbIndex,(f,v)=>{
+    delete v.grammar.exactPresentRaf;f.templateId=peers[0].stableId;});
+  c4Cases+=2;
+}
+c4Live('governed marker deleted, correct template',c3Golden,1,'E_PRESENT_EXACT_MARKER',(d,v)=>{delete v.grammar.exactPresentRaf;});
+c4Live('governed marker false, correct template',c3Golden,1,'E_PRESENT_EXACT_MARKER',(d,v)=>{v.grammar.exactPresentRaf=false;});
+c4Live('bare marker deleted, correct template',c3GoldenBare,0,'E_PRESENT_EXACT_MARKER',(d,v)=>{delete v.grammar.exactPresentRaf;});
+// A generic token may not falsely CLAIM the marker either.
+for(const [label,pick] of [['ordinary present',t=>t.starts==='particle'&&t.form==='present'&&t.state==='raf'],
+                           ['five verb',t=>t.starts==='particle'&&t.form==='fiveVerbs'&&t.state==='raf']]){
+  const template=api.templates.find(pick);
+  const data=api.buildTemplate(template.id);
+  const verbIndex=data.tokens.findIndex(token=>token.grammar.type==='verb');
+  c4Live(`${label} falsely claims the marker`,data,verbIndex,'E_PRESENT_EXACT_MARKER',(d,v)=>{v.grammar.exactPresentRaf=true;});
+}
+// History: the governed/bare marker forgeries must reject there too.
+c4History('governed snapshot marker deleted → inna _01',c3Snapshot,1,(f,v)=>{
+  delete v.grammar.exactPresentRaf;f.templateId='T_PARTICLE_SINGULAR_NASB_FATHA_01';});
+c4History('governed snapshot marker deleted → governed 2fp',c3Snapshot,1,(f,v)=>{
+  delete v.grammar.exactPresentRaf;f.templateId=c3Gov['2fp'].stableId;});
+c4History('bare snapshot marker deleted → bare 2fp',c3SnapshotBare,0,(f,v)=>{
+  delete v.grammar.exactPresentRaf;f.templateId=c3Bare['2fp'].stableId;});
+// Positive control: the canonical marker is present on advanced tokens and absent on generic ones.
+assert(c3Golden.tokens[1].grammar.exactPresentRaf===true,'the governed verb lost its canonical exact-present marker');
+assert(c3GoldenBare.tokens[0].grammar.exactPresentRaf===true,'the bare verb lost its canonical exact-present marker');
+{
+  const generic=api.buildTemplate(api.templates.find(t=>t.starts==='particle'&&t.form==='present'&&t.state==='raf').id);
+  const verb=generic.tokens.find(token=>token.grammar.type==='verb');
+  assert(verb.grammar.exactPresentRaf!==true,'a generic present token claims the advanced marker');
+  assert(api.validateExercise(clone(generic)).length===0,'the marker invariant rejected a canonical generic present exercise');
+}
+c4Cases+=4;
+
+/* --- B. Global mahallRuleId ownership. --- */
+const C4_MAHALL='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN';
+function c4TemplateData(pick,label){
+  const template=api.templates.find(pick);
+  assert(template,`final repair: no template for ${label}`);
+  return api.buildTemplate(template.id);
+}
+// A — ordinary muʿrab present.
+{
+  const data=c4TemplateData(t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb','ordinary present');
+  const verbIndex=data.tokens.findIndex(token=>token.grammar.type==='verb');
+  c4Live('ordinary present carries the maḥall rule',data,verbIndex,'E_MAHALL_RULE_OWNER',(d,v)=>{v.mahallRuleId=C4_MAHALL;});
+  // L — the canonical empty representation stays legal: presence of an EMPTY value is no claim.
+  const empty=clone(data);empty.tokens[verbIndex].mahallRuleId='';
+  assert(api.validateExercise(empty).length===0,'an empty mahallRuleId on a generic token was rejected');
+  c4Cases++;
+}
+// B..E — five verbs, with four different unrelated authorized rules.
+{
+  const data=c4TemplateData(t=>t.starts==='particle'&&t.form==='fiveVerbs'&&t.state==='nasb','five verbs');
+  const verbIndex=data.tokens.findIndex(token=>token.grammar.type==='verb');
+  for(const ruleId of [C4_MAHALL,'C_NUUN_NISWAH','G_LAN_NASB','R_KANA_PAST_DEFICIENT','R_PRESENT_NUUN_NISWAH_BINAA']){
+    c4Live(`five verb carries ${ruleId}`,data,verbIndex,'E_MAHALL_RULE_OWNER',(d,v)=>{v.mahallRuleId=ruleId;});
+  }
+}
+// F, G — noun and particle tokens.
+{
+  const data=c4TemplateData(t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb','noun/particle host');
+  c4Live('noun token carries the maḥall rule',data,data.tokens.findIndex(t=>t.grammar.type==='noun'),'E_MAHALL_RULE_OWNER',(d,v)=>{v.mahallRuleId=C4_MAHALL;});
+  c4Live('particle token carries the maḥall rule',data,data.tokens.findIndex(t=>t.grammar.type==='particle'),'E_MAHALL_RULE_OWNER',(d,v)=>{v.mahallRuleId=C4_MAHALL;});
+}
+// H — past verb.
+{
+  const data=c4TemplateData(t=>!!t.pastPerson,'advanced past');
+  c4Live('past verb carries the maḥall rule',data,data.tokens.findIndex(t=>t.grammar.type==='verb'),'E_MAHALL_RULE_OWNER',(d,v)=>{v.mahallRuleId=C4_MAHALL;});
+}
+// I — the bare mabnī-present verb is INSIDE the owning lane, so it keeps its own precise code.
+c4Live('bare mabnī-present carries the maḥall rule',c3GoldenBare,0,'E_MABNI_PRESENT_MAHALL',(d,v)=>{v.mahallRuleId=C4_MAHALL;});
+// J, K — the governed control stays valid; a wrong rule inside the lane keeps its own code.
+assert(api.validateExercise(clone(c3Golden)).length===0,'the ownership contract rejected the canonical governed exercise');
+assert(c3Golden.tokens[1].mahallRuleId===C4_MAHALL,'the canonical governed verb lost its maḥall rule');
+c4Cases+=2;
+c4Live('governed verb carries the bināʾ rule as maḥall',c3Golden,1,'E_MABNI_PRESENT_MAHALL_RULE',(d,v)=>{v.mahallRuleId='R_PRESENT_NUUN_NISWAH_BINAA';});
+c4Live('governed verb carries the component rule as maḥall',c3Golden,1,'E_MABNI_PRESENT_MAHALL_RULE',(d,v)=>{v.mahallRuleId='C_NUUN_NISWAH';});
+c4Live('governed verb blanks its maḥall rule',c3Golden,1,'E_MABNI_PRESENT_MAHALL_RULE',(d,v)=>{v.mahallRuleId='';});
+// The component's own maḥall and rule are a different object and must be untouched.
+assert(c3Golden.tokens[1].components[0].mahall==='raf'&&c3Golden.tokens[1].components[0].ruleId==='C_NUUN_NISWAH',
+  'the ownership contract disturbed the nūn component');
+c4Cases++;
+// Exhaustive sweep: EVERY token position of EVERY production template must refuse a forged rule.
+{
+  let swept=0;
+  for(const template of api.templates){
+    const data=api.buildTemplate(template.id);
+    for(let index=0;index<data.tokens.length;index++){
+      const token=data.tokens[index];
+      // Skip the one token in the project that legitimately owns the field.
+      if(token.grammar.type==='verb'&&token.inflection===api.MABNI_NUUN_NISWAH&&token.mahallRuleId)continue;
+      const forged=clone(data);
+      forged.tokens[index].mahallRuleId=C4_MAHALL;
+      const codes=api.validateExercise(forged).map(item=>item.code);
+      assert(codes.length>0,`${template.stableId} token ${index}: a forged maḥall rule was accepted`);
+      swept++;
+    }
+  }
+  assert(swept>=200,`expected a wide ownership sweep, only ${swept} token positions`);
+  c4AttackCases+=swept;
+}
+// History: a forged maḥall rule must REJECT the snapshot, not be silently repaired away.
+for(const [label,pick,pred] of [
+  ['ordinary present',t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb',t=>t.grammar.type==='verb'],
+  ['five verb',t=>t.starts==='particle'&&t.form==='fiveVerbs'&&t.state==='nasb',t=>t.grammar.type==='verb'],
+  ['noun',t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb',t=>t.grammar.type==='noun'],
+  ['particle',t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb',t=>t.grammar.type==='particle'],
+  ['past verb',t=>!!t.pastPerson,t=>t.grammar.type==='verb']]){
+  const data=c4TemplateData(pick,label);
+  const snapshot=api.createExerciseSnapshot(data);
+  assert(snapshot,`${label}: could not snapshot a clean exercise`);
+  c4History(`snapshot ${label} + maḥall rule`,snapshot,data.tokens.findIndex(pred),(f,v)=>{v.mahallRuleId=C4_MAHALL;});
+}
+c4History('snapshot bare mabnī + maḥall rule',c3SnapshotBare,0,(f,v)=>{v.mahallRuleId=C4_MAHALL;});
+c4History('snapshot governed + wrong maḥall rule',c3Snapshot,1,(f,v)=>{v.mahallRuleId='C_NUUN_NISWAH';});
+assert(api.restoreExerciseSnapshot(clone(c3Snapshot)),'the ownership contract broke the clean governed restore');
+assert(api.restoreExerciseSnapshot(clone(c3SnapshotBare)),'the ownership contract broke the clean bare restore');
+c4Cases+=2;
+/* Diagnostics integrity: a forged maḥall rule must never be counted as legitimate production use
+   of a real source rule. Source REGISTRATION is not ownership. */
+{
+  const before=api.grammarDiagnostics.validByRule[C4_MAHALL]||0;
+  const data=c4TemplateData(t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb','diagnostics probe');
+  data.tokens[data.tokens.findIndex(t=>t.grammar.type==='verb')].mahallRuleId=C4_MAHALL;
+  let rejected=false;
+  try{ api.completeNominalAnalysis(data); }catch(error){ rejected=true; }
+  assert(rejected,'a forged maḥall rule survived completeNominalAnalysis');
+  assert((api.grammarDiagnostics.validByRule[C4_MAHALL]||0)===before,
+    'a forged maḥall rule was counted as legitimate source-rule production use');
+  c4Cases+=2;
+}
+console.log('Phase-2b-C final authorization repair audit passed: '+c4Cases+' canonical checks and '+c4AttackCases+' adversarial checks.');
+console.log('  final-repair error-code distribution: '+JSON.stringify(c4CodeHist));
+
+
 assert(api.COMPONENT_REGISTRY['yaa-mukhataba']?.ruleId==='C_YAA_MUKHATABA'
   &&api.SOURCE_REGISTRY.C_YAA_MUKHATABA.primarySource.pdfPages.includes(38),
   'Canonical yāʾ al-mukhāṭabah component/source evidence is missing');
@@ -3301,7 +4169,7 @@ for(const start of optionValues.startFilter){
 
 // --- Test C: every production template has exactly one target whose real form/state/sign
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
-assert(api.templates.length===72,`Expected 72 production templates, found ${api.templates.length}`);
+assert(api.templates.length===74,`Expected 74 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);

@@ -542,8 +542,11 @@ const EXERCISE_IDENTITY_PREFIX='nahw-exercise-v1:';
 /* This public, deterministic identity detects accidental or partial History corruption.
    It is not a cryptographic authenticity claim: a party able to rewrite the entire
    client-side record can also recompute a public identity. */
+/* `_tokens` and `_data` are transient render-time back-references (and `_data` is circular), so
+   they are stripped rather than serialized. Both are deleted as soon as rendering finishes; this
+   is belt-and-braces so a clone taken mid-render can never throw or leak them into a snapshot. */
 function cloneSerializable(value){
- return JSON.parse(JSON.stringify(value,(key,item)=>key==='_tokens'?undefined:item));
+ return JSON.parse(JSON.stringify(value,(key,item)=>key==='_tokens'||key==='_data'?undefined:item));
 }
 function canonicalExerciseIdentity(data){
  const tokens=data.tokens.map(token=>{
@@ -691,7 +694,15 @@ function isExerciseSnapshot(snapshot){
    ||typeof snapshot.templateSign!=='string'||typeof snapshot.sentenceType!=='string'
    ||typeof snapshot.sentence!=='string'||typeof snapshot.translation!=='string')return false;
  if(!Array.isArray(snapshot.tokens)||!snapshot.tokens.length||!Array.isArray(snapshot.relationships))return false;
- if(snapshot.sentence!==composeSentence(snapshot.tokens))return false;
+ /* The stored sentence is PRESENTATION, not authority. It used to be compared against
+    composeSentence here, which meant an ordinary presentation corruption — a stale string, an
+    appended stray word, a detached «لِ كَيْ» — was rejected outright instead of being rebuilt,
+    while contributing nothing to safety: the exercise's real identity is the token list, and
+    restoreExerciseSnapshot already recomposes data.sentence from the restored tokens through the
+    single composeSentence path. Structural corruption is caught where it actually lives — the
+    identity hash covers token order and every token's semantic fields, and validateExercise
+    re-derives the surface — so a token-order forgery still rejects even when the attacker
+    recomputes a matching sentence. Only the type check below is a shape requirement. */
  if(snapshot.tokens.filter(item=>item?.target===true).length!==1)return false;
  return snapshot.tokens.every(item=>item&&typeof item.id==='string'&&typeof item.word==='string'
    &&typeof item.gloss==='string'&&typeof item.ar==='string'&&typeof item.en==='string'
@@ -893,6 +904,39 @@ function rebuildCanonicalHistoryPresentation(data,template){
   data.translation=`${PHASE3A1_LEAD_EN[template.presentGovernor]} ${subject} ${verbEn} ${objectEn}.`;
   return;
  }
+ /* Phase 3A2 — أَنْ / لِكَيْ over the mabnī nūn-al-niswah lane. The governor comes from the frozen
+    template CAPABILITY (this lane declares no `presentGovernor`; §9 keeps that field the muʿrab
+    contract), the person from the resolved morphology, and the verb and object from the registry.
+    Nothing is read back from the stored translation, so a corrupted one is rebuilt rather than
+    trusted, and a snapshot whose person or governor disagrees with its template cannot be
+    repaired into agreement — it throws, and restoration rejects it. */
+ const p3a2Mode=(template?.presentCapabilities||[]).map(capability=>capability.governorMode)
+  .find(mode=>PHASE3A2_LEAD_EN[mode]);
+ if(p3a2Mode){
+  const verb=data.tokens.find(token=>token?.grammar?.type==='verb'&&token.tense==='present');
+  const object=data.tokens.find(token=>token?.grammar?.role==='object');
+  const governor=data.tokens.find(token=>token?.grammar?.particleType===p3a2Mode);
+  const lam=data.tokens.find(token=>token?.grammar?.particleType===KAY_TALIL_LAM.particleType);
+  const registered=verbFormIndex.get(verb?.word);
+  const morphology=authoritativeVerbMorphology(verb,data);
+  const subject=PHASE3A2_SUBJECT_EN[morphology.person];
+  if(!verb||!object||!governor||!registered?.lexeme||registered.surface!==verb.word||!subject
+    ||morphology.person!==template.presentPerson||(p3a2Mode==='kay')!==Boolean(lam)){
+   throw new Error('Cannot rebuild canonical Phase 3A2 mabnī governed-present presentation.');
+  }
+  const objectEn=nounEnglish(object.word,'acc');
+  verb.lexeme=registered.lexeme;
+  verb.surfaceHint=registered.surface;
+  verb.expectedSurface=registered.surface;
+  verb.gloss=`${subject} ${registered.lexeme.en}`;
+  verb.enHint=PHASE3A2_VERB_HINT;
+  governor.gloss='that';
+  governor.enHint=PHASE3A1_PARTICLE_EN[p3a2Mode];
+  if(lam){lam.gloss='so';lam.enHint=PHASE3A1_LAM_EN;}
+  object.gloss=objectEn;
+  data.translation=`${PHASE3A2_LEAD_EN[p3a2Mode]} ${subject} ${registered.lexeme.en} ${objectEn}.`;
+  return;
+ }
  if(!template?.presentPerson)return;
  const verb=data.tokens.find(token=>token?.grammar?.type==='verb'&&token.tense==='present');
  const object=data.tokens.find(token=>token?.grammar?.role==='object');
@@ -915,17 +959,28 @@ function rebuildCanonicalHistoryPresentation(data,template){
  object.gloss=objectEn;
  data.translation=`${subject} ${morphology.person==='3ms'?registered.lexeme.third:registered.lexeme.en} ${objectEn}.`;
 }
+/* Unsupported semantic fields must REJECT, not quietly vanish. Canonical rebuilding would
+   otherwise erase an injected whole-word maḥall or governor mode and restore the snapshot as
+   though nothing had happened — indistinguishable, to the caller, from an honest snapshot.
+
+   This scans the TRULY raw snapshot object, before migrateExerciseSnapshot clones it. The clone
+   is serializable, so it silently drops exactly the two shapes the ownership contract calls out
+   as violations — an own property whose value is `undefined`, and a non-enumerable own property —
+   and scanning the clone therefore let both through. Presentation and relationship caches are
+   untouched here and are still rebuilt downstream. */
+function mabniPresentSnapshotInjection(snapshot){
+ const tokens=snapshot?.tokens;
+ if(!Array.isArray(tokens))return false;
+ return tokens.some(token=>token?.grammar?.type==='verb'&&token.inflection===MABNI_NUUN_NISWAH
+  &&(mabniPresentStoredField(token,'mahall')||mabniPresentStoredField(token,'governorMode')));
+}
 function restoreExerciseSnapshot(snapshot){
  if(!isExerciseSnapshot(snapshot))return null;
+ if(mabniPresentSnapshotInjection(snapshot))return null;
  try{
    const data=migrateExerciseSnapshot(snapshot);
-   /* Unsupported semantic fields must REJECT, not quietly vanish. Canonical rebuilding would
-      otherwise erase an injected whole-word maḥall or governor mode and restore the snapshot as
-      though nothing had happened — indistinguishable, to the caller, from an honest snapshot.
-      This runs on the RAW tokens, before any rebuilding, so the forgery is caught while it is
-      still visible. Presentation and relationship caches are untouched and still rebuilt. */
-   if(data.tokens?.some(token=>token?.grammar?.type==='verb'&&token.inflection===MABNI_NUUN_NISWAH
-     &&(mabniPresentStoredField(token,'mahall')||mabniPresentStoredField(token,'governorMode'))))return null;
+   // Re-checked after migration too: a v1/v2 migration path could in principle reintroduce one.
+   if(mabniPresentSnapshotInjection(data))return null;
    const snapshotVersion=data.schemaVersion;
    const storedExerciseIdentity=data.exerciseIdentity;
    const template=resolveHistoryTemplate(data);
@@ -2717,7 +2772,14 @@ const PRESENT_BINAA_RULE_IDS=Object.freeze({'sukun-nuun-niswah':'R_PRESENT_NUUN_
    iʿrāb state. Al-Tuḥfah p. 42 states exactly this for لَنْ («وإن اتصل بآخره نون النسوة، نحو
    «لَنْ تُدْرِكْنَ الْمَجْدَ إلا بالعفاف» فهو حينئذ مبنيٌّ على السكون في محل نصب»), and p. 41
    independently excludes these forms from sign-based naṣb. لَمْ is deliberately absent: no
-   verified primary source states the jazm maḥall, so a لَمْ-governed form must reject. */
+   verified primary source states the jazm maḥall, so a لَمْ-governed form must reject.
+
+   Phase 3A2 adds أَنْ and explicit كَيْ. p. 42's rule is stated for «الفعل المضارع المسبوق
+   بناصب» as a class — its worked example happens to be لَنْ — and p. 75 / p. 76 put أَنْ and
+   كَيْ in the same class of direct nāṣibs («ينصب الفعل المضارع بنفسه»). Each governor still
+   gets its OWN maḥall rule: the composed claim differs per governor, so one shared rule would
+   let a forged لَنْ rule authorize an أَنْ form. `requiresLam` carries كَيْ's licensing
+   condition into the resolver, so a bare كَيْ can never derive a maḥall. */
 const MABNI_PRESENT_GOVERNORS=Object.freeze({
  lan:Object.freeze({
   mahall:'nasb',
@@ -2725,25 +2787,66 @@ const MABNI_PRESENT_GOVERNORS=Object.freeze({
   mahallRuleId:'R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN',
   causeAr:'بِـ«لَنْ»',
   causeEn:'because لَنْ governs it'
+ }),
+ an:Object.freeze({
+  mahall:'nasb',
+  particleRuleId:'G_AN_NASB',
+  mahallRuleId:'R_PRESENT_NUUN_NISWAH_MAHALL_NASB_AN',
+  causeAr:'بِـ«أَنْ»',
+  causeEn:'because أَنْ governs it'
+ }),
+ kay:Object.freeze({
+  mahall:'nasb',
+  particleRuleId:'G_KAY_NASB',
+  mahallRuleId:'R_PRESENT_NUUN_NISWAH_MAHALL_NASB_KAY',
+  causeAr:'بِـ«كَيْ»',
+  causeEn:'because كَيْ governs it',
+  requiresLam:true
  })
 });
 const MABNI_PRESENT_GOVERNOR_MODES=Object.freeze(['none',...Object.keys(MABNI_PRESENT_GOVERNORS)]);
-/* The three snapshot-owned places a forged semantic field could hide on a whole verb. Presence
-   is checked with hasOwnProperty, never truthiness: an explicitly stored null or '' is just as
-   much a second source of truth as a stored 'nasb'. Component objects are NOT scanned — the
-   nūn's own `mahall:'raf'` is canonical and required. */
+/* The whole-word maḥall rules, derived from the governor table so the two can never drift apart.
+   A token may carry one of these ONLY in its `mahallRuleId` field; see the ownership check in
+   validateExercise. */
+const MABNI_PRESENT_MAHALL_RULE_IDS=Object.freeze(Object.values(MABNI_PRESENT_GOVERNORS).map(governor=>governor.mahallRuleId));
+/* Every snapshot-owned place a forged semantic field could hide on a whole verb. Presence is
+   checked with hasOwnProperty, never truthiness: an explicitly stored null, '' or undefined is
+   just as much a second source of truth as a stored 'nasb', and a non-enumerable own property is
+   still an own property. Component objects are NOT scanned — the nūn's own `mahall:'raf'` is
+   canonical and required.
+
+   `token.morphology` is a LITERAL sibling of the canonical `token.grammar.morphology`. Nothing in
+   production ever writes it (the canonical cache is only ever assigned to token.grammar.
+   morphology), which is exactly why it was invisible: an injected sibling object survived every
+   guard and every History rebuild while carrying a second, forgeable claim. It is scanned here
+   rather than deleted, because silently deleting an injected semantic field would make a forgery
+   indistinguishable from an honest snapshot. */
+const MABNI_PRESENT_STORED_FIELD_LOCATIONS=Object.freeze([
+ token=>token,
+ token=>token.grammar,
+ token=>token.grammar&&token.grammar.morphology,
+ token=>token.morphology
+]);
 function mabniPresentStoredField(token,field){
+ if(!token)return false;
  const owner=Object.prototype.hasOwnProperty;
- return Boolean(token&&(owner.call(token,field)
-  ||(token.grammar&&owner.call(token.grammar,field))
-  ||(token.grammar&&token.grammar.morphology&&owner.call(token.grammar.morphology,field))));
+ return MABNI_PRESENT_STORED_FIELD_LOCATIONS.some(pick=>{
+  const target=pick(token);
+  // Only real objects can carry an own property; a primitive or null location holds no claim.
+  return Boolean(target)&&(typeof target==='object')&&owner.call(target,field);
+ });
 }
-/* Pure canonical resolver. Authority is TOKEN ADJACENCY plus the previous token's canonical
-   particleType — both identity-bound — never the stored governorId or relations.governsId,
-   which are caches that must agree with this result rather than produce it. Returns the mode
-   it OBSERVES (including an unauthorized one such as 'lam'), so the caller can reject it;
-   returns null only when the token is not a مبني present verb at all. */
-function deriveMabniPresentMahall(data,tokenIndex){
+/* STRUCTURAL OBSERVATION ONLY — what particle, if any, stands immediately before this مبني verb.
+   Authority is TOKEN ADJACENCY plus the previous token's canonical particleType, both
+   identity-bound; never the stored governorId or relations.governsId, which are caches that must
+   agree with the result rather than produce it. Returns the mode it OBSERVES (including an
+   unauthorized one such as 'lam') so a caller can reject it precisely, and null only when the
+   token is not a مبني present verb at all.
+
+   This is deliberately NOT the authority for the maḥall: it runs during inflectVerb, before
+   morphology is materialized and before relationships are resolved, so it can only propose the
+   link that those later stages and deriveMabniPresentMahall then verify. */
+function observeMabniPresentGovernor(data,tokenIndex){
  const tokens=data?.tokens||[];
  const token=tokens[tokenIndex];
  if(!token||token.grammar?.type!=='verb'||token.inflection!==MABNI_NUUN_NISWAH)return null;
@@ -2751,7 +2854,17 @@ function deriveMabniPresentMahall(data,tokenIndex){
  const observed=previous?.grammar?.type==='particle'?(previous.grammar.particleType||''):'';
  if(!observed)return Object.freeze({governorMode:'none',mahall:'',particleId:null,mahallRuleId:'',causeAr:'',causeEn:''});
  const governor=MABNI_PRESENT_GOVERNORS[observed];
- if(!governor)return Object.freeze({governorMode:observed,mahall:'',particleId:previous.id,mahallRuleId:'',causeAr:'',causeEn:''});
+ const withheld=Object.freeze({governorMode:observed,mahall:'',particleId:previous.id,mahallRuleId:'',causeAr:'',causeEn:''});
+ if(!governor)return withheld;
+ /* Phase 3A2 — كَيْ governs by itself ONLY when لام التعليل stands immediately before it لفظاً
+    (Al-Tuḥfah p. 76). Without that lām the construction is the concealed-أَنْ one, which is not
+    implemented, so no link is proposed at all. */
+ if(governor.requiresLam){
+  const lam=tokenIndex>1?tokens[tokenIndex-2]:null;
+  if(!(lam&&lam.grammar?.type==='particle'
+    &&lam.grammar.particleType===KAY_TALIL_LAM.particleType
+    &&lam.word===KAY_TALIL_LAM.surface))return withheld;
+ }
  return Object.freeze({
   governorMode:observed,
   mahall:governor.mahall,
@@ -2760,6 +2873,62 @@ function deriveMabniPresentMahall(data,tokenIndex){
   causeAr:governor.causeAr,
   causeEn:governor.causeEn
  });
+}
+/* THE AUTHORITY. Phase 3A2 makes this fail-closed: it yields a maḥall only after EVERY canonical
+   condition holds, so that no caller — validator, renderer, Why engine or History — can ever be
+   handed a naṣb position that the structure does not actually license. Previously it checked
+   adjacency and particle type alone and left everything else to the validator; that made it an
+   authority-bearing function which returned `nasb` for forged input, and any future caller that
+   trusted it without re-validating would have inherited the forgery.
+
+   Nothing here is read from presentation, from the stored maḥall or governor mode, from the
+   stored translation, from state/sign, or from the template ID alone: the template is resolved to
+   its FROZEN capability and that capability must itself authorize the observed structure. */
+function deriveMabniPresentMahall(data,tokenIndex){
+ const observation=observeMabniPresentGovernor(data,tokenIndex);
+ // Not a مبني present verb, ungoverned, or already withheld by the structural observation.
+ if(!observation||!observation.mahall)return observation;
+ const tokens=data?.tokens||[];
+ const token=tokens[tokenIndex];
+ const particle=tokens[tokenIndex-1];
+ const governor=MABNI_PRESENT_GOVERNORS[observation.governorMode];
+ const withheld=Object.freeze({governorMode:observation.governorMode,mahall:'',
+  particleId:particle?particle.id:null,mahallRuleId:'',causeAr:'',causeEn:''});
+ // --- The word itself must really be the mabnī nūn-al-niswah form, by REGISTRY authority. ---
+ const morphology=authoritativeVerbMorphology(token,data);
+ if(!morphology.registered
+   ||token.tense!=='present'
+   ||morphology.formClass!=='mabniPresent'
+   ||!['3fp','2fp'].includes(morphology.person)
+   ||morphology.subjectMode!=='attached'
+   ||morphology.endingClass!=='nuun-niswah'
+   ||morphology.binaaClass!=='sukun-nuun-niswah')return withheld;
+ // A built word carries no iʿrāb state and no sign; either one means this is not that word.
+ if(token.state||token.sign)return withheld;
+ // --- The frozen template capability must authorize exactly this structure. ---
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ if(!template||!templateAuthorizesPresentMorphology(template,morphology,observation.governorMode))return withheld;
+ // --- The governing particle must be canonical in surface, type and source rule, and the
+ //     governor links must be reciprocal and exclusive. ---
+ if(!particle||particle.grammar?.type!=='particle'
+   ||particle.word!==GRAMMAR_RULES.governors[observation.governorMode]?.surface
+   ||particle.ruleId!==governor.particleRuleId
+   ||token.governorId!==particle.id
+   ||particle.relations?.governsId!==token.id)return withheld;
+ if(tokens.some(item=>item!==particle&&item?.relations?.governsId===token.id))return withheld;
+ if(tokens.some(item=>item!==token&&item?.governorId===particle.id))return withheld;
+ // --- كَيْ only: the licensing lām must be canonical, immediately before كَيْ, and must not
+ //     itself govern the verb — لِ → كَيْ → verb, with nothing between. ---
+ if(governor.requiresLam){
+  const lam=tokenIndex>1?tokens[tokenIndex-2]:null;
+  if(!lam||lam.grammar?.type!=='particle'
+    ||lam.grammar.particleType!==KAY_TALIL_LAM.particleType
+    ||lam.word!==KAY_TALIL_LAM.surface
+    ||lam.ruleId!==KAY_TALIL_LAM.ruleId
+    ||lam.relations?.governsId
+    ||tokens.some(item=>item?.governorId===lam.id))return withheld;
+ }
+ return observation;
 }
 /* The one place a person is turned into an inflection lane. A مبني present form must never
    fall through to 'regular', which would hand it an iʿrāb ḍammah. */
@@ -2910,6 +3079,13 @@ const PHASE3A1_LEAD_EN=Object.freeze({an:'That',kay:'So that'});
 const PHASE3A1_SUBJECT_EN=Object.freeze({'3ms':'he','3mp':'they'});
 const PHASE3A1_PARTICLE_EN=Object.freeze({an:'A particle of maṣdar, naṣb, and future meaning.',kay:'A particle of maṣdar and naṣb.'});
 const PHASE3A1_LAM_EN='The lām of purpose; its explicit presence is what lets كَيْ govern by itself.';
+/* Phase 3A2 English. The lead word comes from the governor, the subject from the resolved person.
+   The two persons must stay distinguishable — a bare «they» would collapse 3fp into the 3mp
+   five-verb reading and «you» would collapse 2fp into 2ms/2fs — so both keep the explicit gender
+   wording already established for the bare and لَنْ-governed nūn-al-niswah forms. */
+const PHASE3A2_LEAD_EN=Object.freeze({an:'That',kay:'So that'});
+const PHASE3A2_SUBJECT_EN=Object.freeze({'3fp':'they (women)','2fp':'you women'});
+const PHASE3A2_VERB_HINT='An exact registered person-bound present form built on sukūn.';
 /* لام التعليل is a proclitic: «لِكَيْ» is written joined, never «لِ كَيْ». It is still its own
    token because it is its own word with its own iʿrāb — the source treats it as a separate
    particle, and كَيْ's licensing condition is precisely that this word is present. So the
@@ -3147,13 +3323,13 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     identical in both tenses and Al-Tuḥfah states it for the present verbatim at p. 124
     («ونون النسوة فاعل، مبني على الفتح في محل رفع», in «الفتياتُ المهذباتُ يَخْدُمْنَ بلادَهُنَّ»),
     so the existing component rule is widened rather than duplicated. */
- C_NUUN_NISWAH:sourceRule('Nūn al-niswah is a connected pronoun built on fatḥ in the position of rafʿ as fāʿil.',[72,124],'Only explicitly registered 3fp past forms and 3fp/2fp present forms directly attached to nūn al-niswah, whether ungoverned or canonically governed by لَنْ. The component analysis is identical in every one of those contexts; the whole word’s own position is a separate claim under a separate rule.'),
+ C_NUUN_NISWAH:sourceRule('Nūn al-niswah is a connected pronoun built on fatḥ in the position of rafʿ as fāʿil.',[72,124],'Only explicitly registered 3fp past forms and 3fp/2fp present forms directly attached to nūn al-niswah, whether ungoverned or canonically governed by لَنْ, أَنْ, or explicit لِكَيْ. The component analysis is identical in every one of those contexts — the governor changes the whole word’s position, never the nūn’s own — and the whole word’s own position is a separate claim under a separate rule.'),
  /* Phase 2b-B — the whole-word bināʾ claim ONLY. Al-Tuḥfah p. 73 states the rule («وإن اتصلت
     به نون النسوة بني معها على السكون», ﴿وَالْوَالِدَاتُ يُرْضِعْنَ﴾) and p. 124 applies it in a full
     iʿrāb («يخدمن: فعل مضارع مبني على السكون لاتصاله بنون النسوة»). Neither page assigns the
     verb any maḥall, so this rule authorizes no rafʿ/naṣb/jazm position, and it is confined to
     nūn al-niswah: the same p. 73 passage builds the verb on FATḤ for nūn al-tawkīd. */
- R_PRESENT_NUUN_NISWAH_BINAA:sourceRule('A present verb directly attached to nūn al-niswah is built on sukūn because of that attachment.',[73,124],'Only an explicitly registered 3fp/2fp present form with nūn al-niswah attached directly to it, either ungoverned or canonically governed by لَنْ. It authorizes the bināʾ alone: no rafʿ, naṣb, or jazm maḥall (a governed form takes its maḥall from a separate rule), no ordinary present, no five verb, and no nūn al-tawkīd — the same p. 73 passage builds the verb on FATḤ for nūn al-tawkīd.'),
+ R_PRESENT_NUUN_NISWAH_BINAA:sourceRule('A present verb directly attached to nūn al-niswah is built on sukūn because of that attachment.',[73,124],'Only an explicitly registered 3fp/2fp present form with nūn al-niswah attached directly to it, either ungoverned or canonically governed by لَنْ, أَنْ, or explicit لِكَيْ. It authorizes the bināʾ alone: no rafʿ, naṣb, or jazm maḥall (a governed form takes its maḥall from a separate rule, one per governor), no ordinary present, no five verb, and no nūn al-tawkīd — the same p. 73 passage builds the verb on FATḤ for nūn al-tawkīd.'),
  /* Phase 2b-C — the whole word's POSITION under لَنْ, and nothing else. Al-Tuḥfah p. 42:
     «وإن اتصل بآخره نون النسوة، نحو «لَنْ تُدْرِكْنَ الْمَجْدَ إلا بِالْعَفَافِ» فهو حينئذ مبنيٌّ على
     السكون في محل نصب». p. 41 separately restricts the fatḥah naṣb sign to a present verb
@@ -3161,6 +3337,23 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     source itself. The bināʾ pages (73, 124) contain no maḥall claim, which is exactly why this
     is a separate rule rather than a widening of the bināʾ rule. */
  R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN:sourceRule('A present verb built on sukūn for nūn al-niswah is in the position of naṣb when immediately governed by لَنْ.',[42],'Only canonical لَنْ immediately preceding an explicitly registered 3fp/2fp nūn-al-niswah present form whose formClass is mabniPresent, endingClass nuun-niswah, binaaClass sukun-nuun-niswah, with empty state and null sign. It authorizes the naṣb maḥall alone: not the bināʾ, not the nūn component, not لَمْ or any other governor, not an ordinary present, not a five verb, and not nūn al-tawkīd. The surface does not change and no iʿrāb sign is introduced.'),
+ /* Phase 3A2 — the whole word's POSITION under أَنْ. This claim is COMPOSED, and the composition
+    is stated here rather than implied. Al-Tuḥfah p. 42 states the maḥall rule for the CLASS
+    «الفعل المضارع المسبوق بناصب»: «وإن اتصل بآخره نون النسوة ... فهو حينئذ مبنيٌّ على السكون في
+    محل نصب». Its worked example there is لَنْ, and p. 42 contains NO أَنْ example — the page
+    supplies the general pattern, not an أَنْ instance. p. 75 independently supplies the missing
+    premise: أَنْ heads «القسم الأول ـ وهو الذي يَنصُب الفعل المضارعَ بنفسه», so it is a member of
+    exactly the class p. 42 speaks about. pp. 73 and 124 supply the bināʾ half of the sentence
+    («بني معها على السكون» / «فعل مضارع مبني على السكون لاتصاله بنون النسوة»). No page states this
+    composed sentence verbatim, which is why it is a rule of its own rather than a widening of the
+    لَنْ rule, and why G_AN_NASB — which owns only the PARTICLE's identity and direct government —
+    may never be used as the whole word's maḥall rule. */
+ R_PRESENT_NUUN_NISWAH_MAHALL_NASB_AN:sourceRule('A present verb built on sukūn for nūn al-niswah is in the position of naṣb when immediately governed by أَنْ.',[42,73,75,124],'Composed authority, page by page: p. 42 states the maḥall rule for a present verb preceded by a nāṣib and attached to nūn al-niswah, illustrating it with لَنْ and containing no أَنْ example; p. 75 states that أَنْ makes the present verb manṣūb by itself, placing it in that same class; pp. 73 and 124 state and apply the bināʾ on sukūn. Production is limited to canonical أَنْ immediately preceding an explicitly registered 3fp/2fp nūn-al-niswah present form whose formClass is mabniPresent, endingClass nuun-niswah, binaaClass sukun-nuun-niswah, with empty state and null sign. It authorizes the naṣb maḥall alone: not the bināʾ, not the nūn component, not لَنْ, not كَيْ, not a concealed أَنْ, not إِذَنْ, not لَمْ, not an ungoverned form, not an ordinary present, not a five verb, and not nūn al-tawkīd. The surface does not change and no iʿrāb sign is introduced.'),
+ /* Phase 3A2 — the same composition for كَيْ, with كَيْ's own licensing condition folded into the
+    conditions. p. 76 gives كَيْ direct government ONLY «أن تتقدَّمَها لام التعليل لفظاً», and its
+    own example is written joined (﴿لِكَيْلَا تَأْسَوْا﴾). The تقديراً branch and bare كَيْ both
+    resolve to concealed أَنْ and are excluded, so this rule can never authorize them. */
+ R_PRESENT_NUUN_NISWAH_MAHALL_NASB_KAY:sourceRule('A present verb built on sukūn for nūn al-niswah is in the position of naṣb when immediately governed by كَيْ whose lām al-taʿlīl is explicitly present.',[42,73,76,124],'Composed authority, page by page: p. 42 states the maḥall rule for a present verb preceded by a nāṣib and attached to nūn al-niswah, illustrating it with لَنْ and containing no كَيْ example; p. 76 states that كَيْ makes the present verb manṣūb by itself when لام التعليل precedes it لفظاً, placing it in that same class; pp. 73 and 124 state and apply the bināʾ on sukūn. Production is limited to canonical كَيْ immediately preceded by an explicit لام التعليل token and immediately preceding an explicitly registered 3fp/2fp nūn-al-niswah present form whose formClass is mabniPresent, endingClass nuun-niswah, binaaClass sukun-nuun-niswah, with empty state and null sign. It authorizes the naṣb maḥall alone: not the bināʾ, not the nūn component, not bare كَيْ, not the estimated (تقديراً) lām, not كَيْ as a mere حرف تعليل under a concealed أَنْ, not أَنْ, not لَنْ, not لَمْ, not an ungoverned form, not an ordinary present, not a five verb, and not nūn al-tawkīd. The surface does not change and no iʿrāb sign is introduced.'),
  C_YAA_MUKHATABA:sourceRule('Yāʾ al-mukhāṭabah is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[38],'Only an explicitly registered surface-unambiguous 2fs present five-verb form in rafʿ.'),
  C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from the original wāw; it has no grammatical role and no place in iʿrāb.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[91],'Al Jazeera Learning Arabic («الألف الفارقة») names the rule and gives كَتَبُوا / لم يكتُبُوا / اكْتُبُوا. Workspace scan separately attests the written spelling «ضَرَبُوا» (p.91) as form-only; that attestation does not authorize this rule.'),
  R_KANA_PAST_DEFICIENT:sourceRule('Kāna is a deficient past verb that raises its noun and makes its khabar accusative.',[105,106],'Only the surface كَانَ and the app’s single-noun/single-khabar template.',[IA_KANA]),
@@ -3173,11 +3366,15 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     R_AFAL5_NASB_DELETE_NUN), because the sign depends on the verb's own morphology and not on
     which nāṣib precedes it. p. 74 is deliberately not cited: it carries only the matn's bare
     list of the ten nawāṣib, not this analysis. */
- G_AN_NASB:sourceRule('An is a particle of maṣdar, naṣb, and future meaning that makes the present verb after it manṣūb by itself.',[75],'Only canonical أَنْ immediately preceding the muʿrab present verb it governs. It authorizes the particle analysis and the naṣb state alone: not the naṣb sign, not a concealed أَنْ, not إِذَنْ, and not a mabnī nūn-al-niswah present form.'),
+ /* Phase 3A2 widens the GOVERNED lane from muʿrab-only to muʿrab plus the mabnī nūn-al-niswah
+    form. p. 75 makes أَنْ's government a fact about the particle, not about the verb's
+    morphology, so the same rule covers both; what differs is the EFFECT, and this rule owns only
+    the muʿrab half of that. A mabnī form's naṣb is a maḥall under its own separate rule. */
+ G_AN_NASB:sourceRule('An is a particle of maṣdar, naṣb, and future meaning that makes the present verb after it manṣūb by itself.',[75],'Only canonical أَنْ immediately preceding the present verb it governs. It authorizes the particle analysis and its direct government alone: for a muʿrab verb that means the naṣb state, but not the naṣb sign; for a mabnī nūn-al-niswah verb it authorizes no position at all — that maḥall is a separate composed claim under R_PRESENT_NUUN_NISWAH_MAHALL_NASB_AN, and this rule may never be used as a whole-word maḥall rule. It does not cover a concealed أَنْ or إِذَنْ.'),
  /* Phase 3A1 — كَيْ, direct-government branch only. Al-Tuḥfah p. 76: «وأما «كَيْ» فَحَرْفُ
     مَصْدَرٍ وَنَصْبٍ؛ ويشترط في النصب بها أن تتقدَّمَها لام التعليل لفظاً». The condition is part
     of the rule, so the conditions field carries it and the validator enforces it structurally. */
- G_KAY_NASB:sourceRule('Kay is a particle of maṣdar and naṣb that makes the present verb after it manṣūb by itself when lām al-taʿlīl explicitly precedes it.',[76],'Only canonical كَيْ immediately preceded by an explicit لام التعليل token and immediately followed by the muʿrab present verb it governs. It authorizes the particle analysis and the naṣb state alone: not the naṣb sign, not bare كَيْ, not the estimated (تقديراً) lām, not كَيْ as a mere حرف تعليل under a concealed أَنْ, and not a mabnī nūn-al-niswah present form.'),
+ G_KAY_NASB:sourceRule('Kay is a particle of maṣdar and naṣb that makes the present verb after it manṣūb by itself when lām al-taʿlīl explicitly precedes it.',[76],'Only canonical كَيْ immediately preceded by an explicit لام التعليل token and immediately followed by the present verb it governs. It authorizes the particle analysis and its direct government alone: for a muʿrab verb that means the naṣb state, but not the naṣb sign; for a mabnī nūn-al-niswah verb it authorizes no position at all — that maḥall is a separate composed claim under R_PRESENT_NUUN_NISWAH_MAHALL_NASB_KAY, and this rule may never be used as a whole-word maḥall rule. It does not cover bare كَيْ, the estimated (تقديراً) lām, or كَيْ as a mere حرف تعليل under a concealed أَنْ.'),
  /* Phase 3A1 — the visible lām of لِكَيْ. Al-Tuḥfah p. 76 names it «لام التعليل» and makes its
     explicit presence the licensing condition for كَيْ's own government. Deliberately NOT
     R_HARF_JARR: p. 13 lists the lām among حروف الخفض only for الملك/الاختصاص/الاستحقاق before a
@@ -3573,7 +3770,12 @@ function inflectVerb(token,tokens,index){
      result, and validation re-derives and compares rather than trusting it. An unauthorized
      governor (لَمْ, سَوْفَ, …) is deliberately left unlinked so the particle is rejected as
      orphaned instead of silently governing a built verb. */
-  const derived=deriveMabniPresentMahall({tokens},index);
+  /* Build time only: morphology is not materialized and relationships are not resolved yet, so
+     the fail-closed resolver cannot run here — it would withhold the maḥall from every honest
+     exercise. The structural observation PROPOSES the link; deriveMabniPresentMahall re-derives
+     it under full canonical authority at render, Why, validation and History time, and the
+     validator compares the two rather than trusting what is written below. */
+  const derived=observeMabniPresentGovernor({tokens},index);
   if(derived&&derived.mahall&&derived.particleId){
    const particle=tokens[index-1];
    token.governorId=particle.id;
@@ -3789,7 +3991,7 @@ function renderVerbAnalysis(token){
      word is never called مَنْصُوبٌ and never receives «وَعَلَامَةُ نَصْبِهِ ...»: Al-Tuḥfah p. 41
      excludes it from the fatḥah sign, and p. 42 gives it «في محل نصب» instead. */
   const owner=token._tokens||[];
-  const mabniMahall=deriveMabniPresentMahall({tokens:owner},owner.indexOf(token));
+  const mabniMahall=deriveMabniPresentMahall(token._data||{tokens:owner},owner.indexOf(token));
   const governed=mabniMahall&&mabniMahall.mahall==='nasb'?mabniMahall:null;
   token.ar=`${token.word}: فِعْلٌ مُضَارِعٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنُونِ النِّسْوَةِ${governed?`، فِي مَحَلِّ نَصْبٍ ${governed.causeAr}`:''}.`;
   token.en=`A present-tense verb built on sukūn because nūn al-niswah is directly attached to it.${governed?` It is in the position of naṣb ${governed.causeEn}; its bināʾ and its spelling do not change.`:''}`;
@@ -4023,6 +4225,16 @@ const WHY_PARTICLE=Object.freeze({
  sawfa:t=>({id:'WHY_PARTICLE_SAWFA',ar:`${wq(t.word)} حَرْفُ اسْتِقْبَالٍ يَدْخُلُ عَلَى الْمُضَارِعِ وَلَا يُغَيِّرُ إِعْرَابَهُ.`,en:`${eq(t.word)} is a particle of futurity that enters on the present verb without changing its iʿrāb.`})
 });
 const WHY_MABNI_PARTICLE=Object.freeze({id:'WHY_MABNI_PARTICLE',ar:'وَهُوَ حَرْفٌ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'It is a مَبْنِيٌّ particle and has no position in iʿrāb.'});
+/* The maḥall line of a مبني present verb, one entry per authorized governor. Each says only what
+   its own source rule says: the governor precedes, so the word occupies the position of naṣb —
+   never «مَنْصُوبٌ», which is an iʿrāb state a built word cannot take, and never a sign. كَيْ's
+   line names its licensing lām, because that lām is what makes كَيْ the governor at all. Keyed by
+   the DERIVED governor mode, so a Why line can never be attached to the wrong nāṣib. */
+const WHY_MABNI_PRESENT_MAHALL=Object.freeze({
+ lan:Object.freeze({id:'WHY_PRESENT_NUUN_NISWAH_LAN_MAHALL',ar:'وَسَبَقَهُ «لَنْ» وَهُوَ حَرْفُ نَصْبٍ، فَهُوَ فِي مَحَلِّ نَصْبٍ، وَبِنَاؤُهُ وَصُورَتُهُ لَا يَتَغَيَّرَانِ.',en:'«لَنْ», a particle of naṣb, precedes it, so it is in the position of naṣb; its bināʾ and its spelling do not change.'}),
+ an:Object.freeze({id:'WHY_PRESENT_NUUN_NISWAH_AN_MAHALL',ar:'وَسَبَقَهُ «أَنْ» وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ يَنْصِبُ بِنَفْسِهِ، فَهُوَ فِي مَحَلِّ نَصْبٍ، وَبِنَاؤُهُ وَصُورَتُهُ لَا يَتَغَيَّرَانِ.',en:'«أَنْ», a particle of maṣdar, naṣb, and future meaning that governs by itself, precedes it, so it is in the position of naṣb; its bināʾ and its spelling do not change.'}),
+ kay:Object.freeze({id:'WHY_PRESENT_NUUN_NISWAH_KAY_MAHALL',ar:'وَسَبَقَهُ «كَيْ» وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ يَنْصِبُ بِنَفْسِهِ؛ لِتَقَدُّمِ لَامِ التَّعْلِيلِ عَلَيْهِ لَفْظًا، فَهُوَ فِي مَحَلِّ نَصْبٍ، وَبِنَاؤُهُ وَصُورَتُهُ لَا يَتَغَيَّرَانِ.',en:'«كَيْ», a particle of maṣdar and naṣb that governs by itself because لَامُ التَّعْلِيلِ explicitly precedes it, comes before it, so it is in the position of naṣb; its bināʾ and its spelling do not change.'})
+});
 function buildTokenWhy(token,data){
  const ids=[],ar=[],en=[];
  const push=s=>{if(s){ids.push(s.id);ar.push(s.ar);en.push(s.en)}};
@@ -4055,11 +4267,18 @@ function buildTokenWhy(token,data){
    push({id:'WHY_PRESENT_NUUN_NISWAH_BINAA',ar:`${wq(token.word)} اتَّصَلَتْ بِهِ نُونُ النِّسْوَةِ مُبَاشَرَةً، فَهُوَ مَبْنِيٌّ عَلَى السُّكُونِ.`,en:`${eq(token.word)} has nūn al-niswah directly attached to it, so it is مَبْنِيٌّ on sukūn.`});
    /* Phase 2b-C — the maḥall is a SEPARATE claim from the bināʾ and gets its own line, so a
       learner never reads the two as one fact. Deliberately not WHY_STATE_VERB_LAN, which
-      says «فَهُوَ مَنْصُوبٌ» — untrue of a مبني word. */
-   const whyOwner=data?.tokens||token._tokens||[];
-   const whyMahall=deriveMabniPresentMahall({tokens:whyOwner},whyOwner.indexOf(token));
+      says «فَهُوَ مَنْصُوبٌ» — untrue of a مبني word. Phase 3A2 keys the line on the DERIVED
+      governor mode, so each nāṣib explains itself in its own words and no learner is ever told
+      that لَنْ governs a verb that أَنْ or كَيْ actually governs. */
+   // Same reason as the renderer: the fail-closed resolver needs the whole exercise, because the
+   // frozen template capability is one of the conditions it verifies.
+   const whyExercise=data?.tokens?data:(token._data||{tokens:token._tokens||[]});
+   const whyOwner=whyExercise.tokens||[];
+   const whyMahall=deriveMabniPresentMahall(whyExercise,whyOwner.indexOf(token));
    if(whyMahall&&whyMahall.mahall==='nasb'){
-    push({id:'WHY_PRESENT_NUUN_NISWAH_LAN_MAHALL',ar:`وَسَبَقَهُ «لَنْ» وَهُوَ حَرْفُ نَصْبٍ، فَهُوَ فِي مَحَلِّ نَصْبٍ، وَبِنَاؤُهُ وَصُورَتُهُ لَا يَتَغَيَّرَانِ.`,en:`«لَنْ», a particle of naṣb, precedes it, so it is in the position of naṣb; its bināʾ and its spelling do not change.`});
+    const whyLine=WHY_MABNI_PRESENT_MAHALL[whyMahall.governorMode];
+    if(!whyLine)throw new Error(`WHY: no maḥall rule for mabnī-present governor “${whyMahall.governorMode}”`);
+    push(whyLine);
    }
    push(whyVerbSubject(token));
   }else{
@@ -4154,10 +4373,16 @@ function renderExercise(data){
   token.why=null;
   token.phraseWhy=null;
   token._tokens=data.tokens;
+  /* The maḥall resolver is fail-closed and resolves the exercise's TEMPLATE to check its frozen
+     capability, so the renderer must hand it the whole exercise, not a bare {tokens} wrapper —
+     a wrapper carries no templateId and would make the resolver withhold the maḥall from every
+     honest exercise. Stripped again below, exactly like `_tokens`. */
+  token._data=data;
   if(token.grammar.type==='noun')renderNounAnalysis(token);
   else if(token.grammar.type==='verb')renderVerbAnalysis(token);
   else renderParticleAnalysis(token);
   delete token._tokens;
+  delete token._data;
  });
  renderRelationshipAnalysis(data);
  attachWhyExplanations(data);
@@ -4233,6 +4458,15 @@ function validateExercise(data){
   // Being source-authorized is not the same as being OWNED: only the governed mabnī-present
   // lane may carry a whole-word maḥall rule at all.
   if(mahallRuleOwnerFailure(token,data))fail('E_MAHALL_RULE_OWNER','This token may not carry a whole-word maḥall rule; only a governed mabnī-present verb owns that field.',token);
+  /* …and it may carry one only in the `mahallRuleId` FIELD. A maḥall rule worn as a token's own
+     rule, sign rule, or concealment rule would still be source-authorized and would still be
+     counted in validByRule as a legitimate production use of a real source rule — the same hole
+     PARTICLE_EXCLUSIVE_RULE_IDS closes for the governor rules. The list is derived from the
+     governor table, so a future governor cannot be added without inheriting this protection. */
+  if(MABNI_PRESENT_MAHALL_RULE_IDS.includes(token.ruleId)||MABNI_PRESENT_MAHALL_RULE_IDS.includes(token.signRuleId)
+    ||MABNI_PRESENT_MAHALL_RULE_IDS.includes(token.subjectRuleId)){
+   fail('E_MAHALL_RULE_OWNER','A mabnī-present maḥall rule may only ever be a whole-word maḥall claim, never a token’s own rule, sign rule, or concealment rule.',token);
+  }
   if(particleRuleOwnerFailure(token))fail('E_PARTICLE_RULE_OWNER','Token carries a particle source rule its grammatical identity does not own.',token);
   // A hidden present subject is a grammatical claim and must carry the D-3 rule that its
   // person actually licenses; a missing or swapped concealment authority is a hard failure.
@@ -4302,7 +4536,19 @@ function validateExercise(data){
     }else{
      const spec=MABNI_PRESENT_GOVERNORS[governorMode];
      const particle=data.tokens[mabniIndex-1];
-     if(derived.mahall!=='nasb')fail('E_MABNI_PRESENT_MAHALL','The derived maḥall for a لَنْ-governed mabnī-present verb must be naṣb.',token);
+     if(derived.mahall!=='nasb')fail('E_MABNI_PRESENT_MAHALL','The derived maḥall for a governed mabnī-present verb must be naṣb.',token);
+     /* Phase 3A2 — كَيْ's licensing lām is part of THIS verb's authorization, not only of the
+        particle's own contract: without it كَيْ is not the governor at all, so the verb has no
+        derived maḥall to claim. The resolver already withholds the maḥall (caught immediately
+        above); this binds the lām to its canonical source rule as well, so a lām carrying a
+        forged rule cannot license a maḥall claim. */
+     if(spec.requiresLam){
+      const lam=mabniIndex>1?data.tokens[mabniIndex-2]:null;
+      if(!lam||lam.grammar?.type!=='particle'||lam.grammar.particleType!==KAY_TALIL_LAM.particleType
+        ||lam.word!==KAY_TALIL_LAM.surface||lam.ruleId!==KAY_TALIL_LAM.ruleId){
+       fail('E_MABNI_PRESENT_KAY_LAM','A mabnī-present verb under kay requires the canonical lām al-taʿlīl immediately before kay.',token);
+      }
+     }
      if(token.governorId!==particle.id)fail('E_MABNI_PRESENT_GOVERNOR_LINK','The mabnī-present verb does not point at the particle immediately before it.',token);
      if(particle.relations?.governsId!==token.id)fail('E_GOVERNOR_RECIPROCAL','Governor and mabnī-present verb do not point to each other.',token);
      if(particle.word!==GRAMMAR_RULES.governors[governorMode]?.surface)fail('E_PARTICLE_SURFACE','The governing particle surface is not its canonical spelling.',token);
@@ -4857,6 +5103,42 @@ add('particle','present','nasb','fatha',()=>{const v=pickVerb(),o=pickVerbObject
 add('particle','fiveVerbs','nasb','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`أَنْ ${v.fiveSub} ${o}`,translation:`${PHASE3A1_LEAD_EN.an} ${PHASE3A1_SUBJECT_EN['3mp']} ${v.en} ${objectEnglish(o)}.`,tokens:[token('أَنْ','that',AR.an('أَنْ'),PHASE3A1_PARTICLE_EN.an),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{...presentTemplateMetadata('3mp','attached'),presentGovernor:'an'});
 add('particle','present','nasb','fatha',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${KAY_LAM_SURFACE}${KAY_SURFACE} ${v.acc} ${o}`,translation:`${PHASE3A1_LEAD_EN.kay} ${PHASE3A1_SUBJECT_EN['3ms']} ${v.third} ${objectEnglish(o)}.`,tokens:[lamTalilToken(),kayToken(),token(v.acc,v.en,AR.presentPred(v.acc),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{...presentTemplateMetadata('3ms','implicit'),presentGovernor:'kay'});
 add('particle','fiveVerbs','nasb','nunDropped',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`${KAY_LAM_SURFACE}${KAY_SURFACE} ${v.fiveSub} ${o}`,translation:`${PHASE3A1_LEAD_EN.kay} ${PHASE3A1_SUBJECT_EN['3mp']} ${v.en} ${objectEnglish(o)}.`,tokens:[lamTalilToken(),kayToken(),token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub),EN.fiveVerb,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{...presentTemplateMetadata('3mp','attached'),presentGovernor:'kay'});
+
+/* Phase 3A2 — the same two direct nāṣibs over the MABNĪ nūn-al-niswah lane. The verb reuses the
+   very surfaces the bare Phase 2b-B and لَنْ-governed Phase 2b-C templates already produce: the
+   whole content of the maḥall analysis is that the word does not change, so a second surface
+   record would assert a difference that does not exist. The DIRECT OBJECT is the target, as in
+   Phase 2b-C and unlike Phase 3A1 — this verb has no state and no sign, so only the object can
+   truthfully supply the template's singular/naṣb/fatḥah filter tuple.
+
+   These templates deliberately declare NO `presentGovernor`: that field is the muʿrab lane's
+   contract (it disambiguates أَنْ from لَنْ for a verb whose morphology is identical either way).
+   Here the governor is settled by the frozen capability `governorMode`, which the validator
+   compares against the maḥall re-derived from token adjacency. Registered LAST, for the same
+   stable-ID reason as Phase 2b-C and Phase 3A1. */
+const AN_SURFACE=GRAMMAR_RULES.governors.an.surface;
+const anToken=()=>token(AN_SURFACE,'that',AR.an(AN_SURFACE),PHASE3A1_PARTICLE_EN.an);
+function buildMabniGovernedPresentExercise(person,governorMode){
+ const isKay=governorMode==='kay';
+ const action=pickVaried(advancedPresentActions,`mabni-governed-present-action:${governorMode}:${person}`,item=>item.past);
+ const surface=action.forms[person];
+ const object=pickVaried(action.obj,`mabni-governed-present-object:${governorMode}:${person}:${action.past}`,String);
+ const subject=PHASE3A2_SUBJECT_EN[person];
+ const objectEn=nounEnglish(object,'acc');
+ return{
+  sentence:`${isKay?`${KAY_LAM_SURFACE}${KAY_SURFACE}`:AN_SURFACE} ${surface} ${object}`,
+  translation:`${PHASE3A2_LEAD_EN[governorMode]} ${subject} ${action.en} ${objectEn}.`,
+  tokens:[
+   ...(isKay?[lamTalilToken(),kayToken()]:[anToken()]),
+   token(surface,`${subject} ${action.en}`,AR.presentAdvanced(surface,person),PHASE3A2_VERB_HINT),
+   token(object,objectEn,AR.object(object),EN.object,true)
+  ]
+ };
+}
+add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('3fp','an'),presentTemplateMetadata('3fp','attached',true,'an'));
+add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('2fp','an'),presentTemplateMetadata('2fp','attached',true,'an'));
+add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('3fp','kay'),presentTemplateMetadata('3fp','attached',true,'kay'));
+add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('2fp','kay'),presentTemplateMetadata('2fp','attached',true,'kay'));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

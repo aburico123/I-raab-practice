@@ -570,7 +570,7 @@ function canonicalExerciseIdentity(data){
    token.tense||'',
    token.inflection||'',
    token.state||'',
-   token.sign?.id||'',
+   safeSignId(token.sign)||'',
    verbRecord?.form||'',
    verbRecord?.surface||'',
    verbRecord?.lexeme?.past||'',
@@ -631,7 +631,7 @@ function canonicalExerciseIdentityV3Phase1(data){
    token.tense||'',
    token.inflection||'',
    token.state||'',
-   token.sign?.id||'',
+   safeSignId(token.sign)||'',
    verbRecord?.form||'',
    verbRecord?.surface||'',
    verbRecord?.lexeme?.past||'',
@@ -974,11 +974,41 @@ function mabniPresentSnapshotInjection(snapshot){
  return tokens.some(token=>token?.grammar?.type==='verb'&&token.inflection===MABNI_NUUN_NISWAH
   &&(mabniPresentStoredField(token,'mahall')||mabniPresentStoredField(token,'governorMode')));
 }
+/* Raw-snapshot normalization. This runs BEFORE migrateExerciseSnapshot's cloneSerializable, so
+   an inherited (or own) toJSON, valueOf or Symbol.toPrimitive can never be invoked by
+   serialization: by the time anything is stringified, every sign is plain local data.
+
+   It returns a shallow copy — the caller's snapshot is never mutated — or null when a sign cannot
+   be safely read at all (an accessor, an own symbol, a non-string id) or names no known sign.
+   Ordinary presentation corruption beside a good id is rebuilt here rather than refused, which is
+   what keeps History's repair contract intact. */
+function snapshotWithNormalizedSigns(snapshot){
+ const tokens=snapshot?.tokens;
+ if(!Array.isArray(tokens))return snapshot;
+ const normalized=[];
+ for(const token of tokens){
+  const sign=token?.sign;
+  if(sign===null||sign===undefined||(typeof sign!=='object'&&typeof sign!=='function')){normalized.push(token);continue;}
+  const shape=readSignShape(sign);
+  const canonical=shape?canonicalSignRecord(shape.id):null;
+  if(canonical&&shape.ar===canonical.ar&&shape.en===canonical.en){
+   normalized.push({...token,sign:{id:canonical.id,ar:canonical.ar,en:canonical.en}});
+   continue;
+  }
+  const repairId=readSignIdForRepair(sign);
+  const repaired=repairId?canonicalSignCopy(repairId):null;
+  if(repaired){normalized.push({...token,sign:repaired});continue;}
+  return null;
+ }
+ return {...snapshot,tokens:normalized};
+}
 function restoreExerciseSnapshot(snapshot){
  if(!isExerciseSnapshot(snapshot))return null;
  if(mabniPresentSnapshotInjection(snapshot))return null;
+ const safeSnapshot=snapshotWithNormalizedSigns(snapshot);
+ if(!safeSnapshot)return null;
  try{
-   const data=migrateExerciseSnapshot(snapshot);
+   const data=migrateExerciseSnapshot(safeSnapshot);
    // Re-checked after migration too: a v1/v2 migration path could in principle reintroduce one.
    if(mabniPresentSnapshotInjection(data))return null;
    const snapshotVersion=data.schemaVersion;
@@ -999,6 +1029,8 @@ function restoreExerciseSnapshot(snapshot){
    // Stored declarations, relationships, components, and presentation are caches, never
    // grammatical authority. Rebuild every derived layer from the registered token surfaces.
    materializeAuthoritativeMorphology(data);
+   // Sign labels are presentation: restore them from the frozen table via the semantic id.
+   materializeCanonicalSigns(data);
    if(data.tokens.some(token=>token?.grammar?.type==='verb'&&token.tense==='past'
      &&!templateAuthorizesPastMorphology(template,token.grammar.morphology)))return null;
    /* The governor mode is re-derived from the restored token order, never read from the
@@ -2618,7 +2650,7 @@ function pickHumanPrepAction(){return pickVaried(humanPrepActions,'human-prep-ac
 function pickThingAction(){return pickVaried(thingActions,'thing-actions',a=>a.pres)}
 function pickThingPrepAction(){return pickVaried(thingPrepActions,'thing-prep-actions',a=>`${a.pres}:${a.prep}`)}
 function isHumanNoun(noun){return /\b(student|teacher|men|man|doctor|friend|traveler|child|engineer|worker|researcher|driver|women|woman|nurse|Muslim|present)\b/i.test(noun.en)}
-const GRAMMAR_SIGNS=Object.freeze({
+const GRAMMAR_SIGN_SOURCE=Object.freeze({
  damma:{id:'damma',ar:'الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ',en:'the visible ḍammah'},
  fatha:{id:'fatha',ar:'الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ',en:'the visible fatḥah'},
  kasra:{id:'kasra',ar:'الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ',en:'the visible kasrah'},
@@ -2630,6 +2662,221 @@ const GRAMMAR_SIGNS=Object.freeze({
  nunKept:{id:'nunKept',ar:'ثُبُوتُ النُّونِ',en:'retention of the nūn'},
  nunDropped:{id:'nunDropped',ar:'حَذْفُ النُّونِ',en:'deletion of the nūn'}
 });
+/* Phase 3B0-pre hardening — the registry is rebuilt as a NULL-PROTOTYPE store of DEEPLY FROZEN
+   records. Two separate defects made the previous shape unsafe:
+
+     • only the outer object was frozen, so a produced token — which received the registry entry
+       BY REFERENCE — could rewrite the authority itself with `token.sign.ar='…'`. After that the
+       forgery WAS canonical: validation accepted it and every exercise in the app rendered it.
+     • lookup was a bare index, so an id of 'toString' or 'constructor' resolved to a function off
+       Object.prototype and the renderer printed «undefined» to the learner.
+
+   A null prototype removes the inherited-name class at the root, and every read still goes through
+   an explicit own-property check so the guarantee does not depend on the prototype alone. */
+const GRAMMAR_SIGNS=(()=>{
+ const store=Object.create(null);
+ for(const id of Object.keys(GRAMMAR_SIGN_SOURCE)){
+  const entry=GRAMMAR_SIGN_SOURCE[id];
+  store[id]=Object.freeze({id:entry.id,ar:entry.ar,en:entry.en});
+ }
+ return Object.freeze(store);
+})();
+/* Startup invariant. A registry that is not deeply frozen, or that carries an accessor or a
+   non-string label, is a build error rather than something to discover at runtime. */
+(()=>{
+ if(!Object.isFrozen(GRAMMAR_SIGNS))throw new Error('The sign registry is not frozen.');
+ if(Object.getPrototypeOf(GRAMMAR_SIGNS)!==null)throw new Error('The sign registry has a prototype.');
+ for(const id of Object.keys(GRAMMAR_SIGNS)){
+  const entry=GRAMMAR_SIGNS[id];
+  if(!Object.isFrozen(entry))throw new Error(`Sign entry ${id} is not frozen.`);
+  const names=Object.getOwnPropertyNames(entry);
+  if(names.length!==3||!names.includes('id')||!names.includes('ar')||!names.includes('en')){
+   throw new Error(`Sign entry ${id} does not carry exactly id/ar/en.`);
+  }
+  if(Object.getOwnPropertySymbols(entry).length)throw new Error(`Sign entry ${id} carries own symbols.`);
+  for(const name of names){
+   const descriptor=Object.getOwnPropertyDescriptor(entry,name);
+   if(typeof descriptor.get==='function'||typeof descriptor.set==='function'){
+    throw new Error(`Sign entry ${id}.${name} is an accessor.`);
+   }
+   if(typeof descriptor.value!=='string'||!descriptor.value)throw new Error(`Sign entry ${id}.${name} is not a non-empty string.`);
+  }
+  if(entry.id!==id)throw new Error(`Sign entry ${id} is not bound to its own key.`);
+ }
+})();
+/* Phase 3B0-pre, Model B — PROTOTYPE IS NOT AUTHORITY.
+
+   The previous design tried to decide whether an incoming sign's prototype "was really an
+   Object.prototype". That is not decidable: sign objects legitimately arrive from several realms
+   (the harness runs index.html in a vm while injecting the host realm's Object; JSON.parse in a
+   caller's realm yields that realm's prototype), and any predicate loose enough to admit honest
+   cross-realm literals also admits an arbitrary custom prototype whose own parent is null. Such a
+   prototype can carry inherited behaviour — a throwing toJSON that blew up createExerciseSnapshot,
+   inherited getters, Symbol.toPrimitive — none of which the shape check ever looked at.
+
+   So the prototype is no longer consulted at all. Instead every sign is NORMALIZED: only own
+   data-descriptor values are extracted, and the incoming object is then replaced by a fresh local
+   plain record built by this file. Nothing inherited is ever read, nothing inherited survives, and
+   no downstream subsystem — rendering, Why, filters, identity, diagnostics, snapshots, History —
+   ever sees the original object. That also disposes of the Proxy question without pretending to
+   detect proxies: a wrapper whose traps are never invoked is replaced by plain data before
+   anything can observe it. */
+/* Safe shape inspection. A hostile sign may define throwing getters, so NOTHING is read by plain
+   property access: each field is taken from its own property DESCRIPTOR, accessors are refused
+   without ever being invoked, and the descriptor calls themselves are wrapped because a Proxy can
+   throw from ownKeys or getOwnPropertyDescriptor. Returns the extracted primitives, or null for
+   "not a canonical-shaped sign" — never an exception. */
+const SIGN_FIELDS=Object.freeze(['id','ar','en']);
+function readSignShape(value){
+ if(value===null||typeof value!=='object')return null;
+ try{
+  if(Array.isArray(value))return null;
+  if(Object.getOwnPropertySymbols(value).length)return null;
+  const names=Object.getOwnPropertyNames(value);
+  if(names.length!==SIGN_FIELDS.length)return null;
+  const shape={};
+  for(const field of SIGN_FIELDS){
+   if(!names.includes(field))return null;
+   const descriptor=Object.getOwnPropertyDescriptor(value,field);
+   // An accessor is refused on sight; its getter is never called.
+   if(!descriptor||typeof descriptor.get==='function'||typeof descriptor.set==='function')return null;
+   if(typeof descriptor.value!=='string')return null;
+   shape[field]=descriptor.value;
+  }
+  return shape;
+ }catch{ return null; }            // exotic/Proxy failure → not a canonical sign
+}
+/* Repair-time id extraction, deliberately NARROWER than readSignShape in what it inspects and
+   WIDER in what it tolerates. History must still rebuild ordinary presentation corruption — a
+   stale, emptied, missing or extra label beside a perfectly good semantic id — so the label values
+   are not required here. What is still refused, because these are not presentation problems, is
+   anything hostile: an accessor anywhere on the object (its getter is never invoked, only its
+   descriptor inspected), an own symbol, a non-plain prototype, a non-string id, or an id that is
+   not an own key of the registry. Those fall through unrepaired so the validator rejects them,
+   exactly as an injected semantic field is left visible rather than silently erased. */
+function readSignIdForRepair(value){
+ if(value===null||typeof value!=='object')return null;
+ try{
+  if(Array.isArray(value))return null;
+  if(Object.getOwnPropertySymbols(value).length)return null;
+  for(const name of Object.getOwnPropertyNames(value)){
+   const descriptor=Object.getOwnPropertyDescriptor(value,name);
+   if(!descriptor||typeof descriptor.get==='function'||typeof descriptor.set==='function')return null;
+  }
+  const id=Object.getOwnPropertyDescriptor(value,'id');
+  return id&&typeof id.value==='string'?id.value:null;
+ }catch{ return null; }
+}
+/* The getter-safe way to read a sign's id. Several checks legitimately need the id before the
+   full shape has been validated — the target-sign check, the lane rules, the identity hash and the
+   failure record all do — and a plain `sign?.id` on a hostile object invokes its getter, which can
+   throw straight out of validateExercise. This reads the own descriptor instead, so a hostile
+   accessor is simply "no id" and becomes an ordinary grammar failure. */
+function safeSignId(sign){
+ if(sign===null||sign===undefined||typeof sign!=='object')return undefined;
+ try{
+  if(Array.isArray(sign))return undefined;
+  const descriptor=Object.getOwnPropertyDescriptor(sign,'id');
+  if(!descriptor||typeof descriptor.get==='function'||typeof descriptor.set==='function')return undefined;
+  return descriptor.value;
+ }catch{ return undefined; }
+}
+/* Own-property lookup. A bare index would resolve inherited Object.prototype names; the registry
+   has a null prototype AND this check, so neither alone is load-bearing. */
+function canonicalSignRecord(id){
+ if(typeof id!=='string')return null;
+ return Object.prototype.hasOwnProperty.call(GRAMMAR_SIGNS,id)?GRAMMAR_SIGNS[id]:null;
+}
+/* A FRESH serializable copy for tokens. The registry is authority and is never handed out by
+   reference: a token is a snapshot-shaped copy, so mutating one token can neither reach the
+   registry nor any other token. */
+function canonicalSignCopy(id){
+ const record=canonicalSignRecord(id);
+ return record?{id:record.id,ar:record.ar,en:record.en}:null;
+}
+/* Public accessor used by renderers and tests. It returns the frozen record, which is safe to
+   share precisely because it cannot be mutated; token assignment uses canonicalSignCopy. */
+function canonicalSign(id){return canonicalSignRecord(id)}
+/* Phase 3B0-pre — GRAMMAR_SIGNS is the SINGLE canonical authority for iʿrāb-sign labels.
+   `sign.id` is the semantic claim; `sign.ar` and `sign.en` are a denormalized copy of this frozen
+   table carried on the token for convenience. That copy used to be trusted: a token could keep a
+   canonical `id` while carrying forged labels, and the forged text validated, reached the learner
+   through both renderers, and survived History — including labels lifted from a DIFFERENT sign,
+   which made the analysis state a grammatical falsehood («وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ» printed
+   under an alif dual). Labels are now resolved from the id at every render, and the stored copy
+   must agree with this table exactly or the exercise rejects.
+
+   Which sign is legal for which lane/state/formClass is deliberately NOT re-declared here: that is
+   already owned by GRAMMAR_RULES.nounInflection and GRAMMAR_RULES.presentVerb and enforced by
+   E_NOUN_SIGN / E_VERB_SIGN / E_PRESENT_ORDINARY_RAF_SIGN / E_AFAL5_RAF_SIGN. A second copy of
+   that mapping would be a second source of truth; the harness instead DERIVES the legal
+   combinations from those rule tables and checks that the two agree. */
+/* A stored sign is canonical only when it is a plain object naming a known id and carrying
+   exactly that id's two labels and nothing else. Own properties are read with
+   getOwnPropertyNames so a non-enumerable extra field cannot hide, and the comparison is by VALUE
+   rather than object identity because every snapshot round trip and every test clone produces a
+   structurally-equal copy rather than the frozen instance. A null sign (mabnī present, past verb,
+   particle) carries no claim and is owned by its own lane's checks. */
+function canonicalSignFailure(token){
+ const sign=token?.sign;
+ if(sign===null||sign===undefined)return false;
+ const shape=readSignShape(sign);
+ if(!shape)return true;
+ const canonical=canonicalSignRecord(shape.id);
+ if(!canonical)return true;
+ return shape.ar!==canonical.ar||shape.en!==canonical.en;
+}
+/* "This lane carries no iʿrāb sign at all." Absent and null are the two canonical ways to say
+   that; every other value — including `false`, `0` and `''`, which are falsy and used to slip
+   past a plain truthiness test — is a claim the lane must reject through its OWN owner. */
+function carriesSignValue(token){
+ return Boolean(token)&&token.sign!==null&&token.sign!==undefined;
+}
+/* THE PIPELINE. Every entry point runs this before anything else touches a sign, so the rule
+   "no subsystem ever sees the incoming object" is enforced in one place rather than trusted.
+
+     • a null/absent sign is left alone — it is a lane claim, owned by the lane rules;
+     • a primitive is left alone — it carries no behaviour and no properties to invoke;
+     • an object or function sign is REPLACED, always: either by a fresh canonical record when its
+       own descriptor data matches the registry exactly, or by a plain quarantine record carrying
+       only the safely-extracted id and empty labels.
+
+   Quarantine keeps the id so the existing lane owners (E_NOUN_SIGN, E_VERB_SIGN, E_TARGET_SIGN)
+   still fire with their usual precision, while the empty labels guarantee E_SIGN_CANONICAL and
+   guarantee that nothing forged can be rendered. Either way the original object — its prototype,
+   its accessors, its toJSON, its proxy traps — is gone before validation, rendering, Why,
+   identity hashing, diagnostics or serialization can reach it. */
+function normalizeTokenSigns(data){
+ let quarantined=0;
+ (data?.tokens||[]).forEach(token=>{
+  if(!token)return;
+  const sign=token.sign;
+  if(sign===null||sign===undefined)return;
+  if(typeof sign!=='object'&&typeof sign!=='function')return;
+  const shape=readSignShape(sign);
+  const canonical=shape?canonicalSignRecord(shape.id):null;
+  if(canonical&&shape.ar===canonical.ar&&shape.en===canonical.en){
+   token.sign={id:canonical.id,ar:canonical.ar,en:canonical.en};
+   return;
+  }
+  const quarantinedId=shape&&typeof shape.id==='string'?shape.id:safeSignId(sign);
+  token.sign={id:typeof quarantinedId==='string'?quarantinedId:'',ar:'',en:''};
+  quarantined++;
+ });
+ return quarantined;
+}
+/* Presentation repair, mirroring how the sentence, translation, Why, components and relationships
+   are rebuilt on restore: the frozen sign object is restored from the semantic id. A stored id
+   naming no known sign is left untouched so the validator rejects it rather than letting it
+   silently vanish — the same principle the mabnī-present injection guard follows. */
+function materializeCanonicalSigns(data){
+ (data?.tokens||[]).forEach(token=>{
+  if(!token||token.sign===null||token.sign===undefined)return;
+  const id=readSignIdForRepair(token.sign);
+  const canonical=id?canonicalSignCopy(id):null;
+  if(canonical)token.sign=canonical;
+ });
+}
 /* ===== Word-internal components (Phase 0 infrastructure) ==========================
    A grammatically meaningful element written INSIDE one visible verb word (e.g. واو
    الجماعة, تاء التأنيث الساكنة). The visible token is NEVER split; components are
@@ -3695,7 +3942,7 @@ function inflectNoun(token){
  token.ruleId=roleRule.ruleId;
  const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
  if(!signRule) throw new Error(`No noun rule for ${token.inflection}/${token.state}`);
- token.sign=GRAMMAR_SIGNS[signRule[0]];
+ token.sign=canonicalSignCopy(signRule[0]);
  token.signRuleId=signRule[1];
  const formKey={raf:'nom',nasb:'acc',jarr:'gen'}[token.state];
  token.expectedSurface=registered?.lexeme?.[formKey]||token.surfaceHint;
@@ -3795,7 +4042,7 @@ function inflectVerb(token,tokens,index){
  token.inflection=token.grammar.conjugation;
  const moodRule=GRAMMAR_RULES.presentVerb[token.inflection]?.[token.state];
  if(!moodRule) throw new Error(`No present-verb rule for ${token.inflection}/${token.state}`);
- token.sign=GRAMMAR_SIGNS[moodRule[0]];
+ token.sign=canonicalSignCopy(moodRule[0]);
  token.ruleId=moodRule[1];
  if(registered?.form==='presentRaf'&&token.grammar.exactPresentRaf){
   // The person must be one the surface can genuinely carry. Which single reading is correct
@@ -3956,11 +4203,14 @@ function nounRoleArabic(token){
 function renderNounAnalysis(token){
  const roleRule=GRAMMAR_RULES.roles[token.grammar.role];
  const reason=inflectionReasonArabic(token.inflection);
- let arabic=`${token.word}: ${nounRoleArabic(token)}، وَعَلَامَةُ ${signActionArabic(token.state)} ${token.sign.ar}${reason}`;
+ // Labels come from the frozen table via the semantic id, never from the token’s stored copy.
+ const canonical=canonicalSign(safeSignId(token.sign));
+ if(!canonical)throw new Error(`No canonical sign for noun sign id “${safeSignId(token.sign)}”`);
+ let arabic=`${token.word}: ${nounRoleArabic(token)}، وَعَلَامَةُ ${signActionArabic(token.state)} ${canonical.ar}${reason}`;
  if(token.grammar.isMudaf)arabic+='، وَهُوَ مُضَافٌ';
  if(token.grammar.attachedKaf)arabic+='، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ';
  token.ar=`${arabic}.`;
- token.en=`${roleRule.en} Its sign is ${token.sign.en}.`;
+ token.en=`${roleRule.en} Its sign is ${canonical.en}.`;
 }
 function renderVerbAnalysis(token){
  if(token.tense==='past'){
@@ -4001,7 +4251,9 @@ function renderVerbAnalysis(token){
  /* Phase 3A1 adds أَنْ and كَيْ. The clause names the DIRECT governor, which for لِكَيْ is كَيْ
     and never the lām: the lām licenses كَيْ's government, it does not perform it. */
  const cause={lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»'}[governor?.grammar.particleType]||'';
- let arabic=`${token.word}: فِعْلٌ مُضَارِعٌ ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${token.sign.ar}`;
+ const canonicalVerbSign=canonicalSign(safeSignId(token.sign));
+ if(!canonicalVerbSign)throw new Error(`No canonical sign for present sign id “${safeSignId(token.sign)}”`);
+ let arabic=`${token.word}: فِعْلٌ مُضَارِعٌ ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${canonicalVerbSign.ar}`;
  if(token.inflection==='afalKhamsa'){
   arabic+=`؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ`;
  }else if(token.relations.subjectType==='implicit'){
@@ -4018,7 +4270,7 @@ function renderVerbAnalysis(token){
  const subjectEn=token.relations.subjectType==='implicit'
   ?` Its subject is a hidden pronoun, concealed ${PRESENT_CONCEALMENT[token.grammar.morphology?.person].en}, understood as “${hiddenSubjectEn}”.`
   :'';
- token.en=`A present-tense verb. It is ${token.state==='raf'?'indicative':token.state==='nasb'?'subjunctive':'jussive'}${causeEn}; its sign is ${token.sign.en}.${subjectEn}`;
+ token.en=`A present-tense verb. It is ${token.state==='raf'?'indicative':token.state==='nasb'?'subjunctive':'jussive'}${causeEn}; its sign is ${canonicalVerbSign.en}.${subjectEn}`;
 }
 function renderParticleAnalysis(token){
  const type=token.grammar.particleType;
@@ -4136,8 +4388,8 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_ZARF',stateAr:()=>'وَالظَّرْفُ مَنْصُوبٌ.',stateEn:()=>'The ظَرْفٌ is مَنْصُوبٌ.'}
 });
 function whySignNoun(t){
- const form=WHY_FORM[t.inflection],sign=WHY_SIGN_NAME[t.sign.id],st=WHY_STATE[t.state];
- if(!form||!sign||!st)throw new Error(`Missing why sign data for ${t.inflection}/${t.state}/${t.sign&&t.sign.id}`);
+ const form=WHY_FORM[t.inflection],sign=WHY_SIGN_NAME[safeSignId(t.sign)],st=WHY_STATE[t.state];
+ if(!form||!sign||!st)throw new Error(`Missing why sign data for ${t.inflection}/${t.state}/${safeSignId(t.sign)}`);
  const id=`WHY_SIGN_${t.inflection.toUpperCase()}_${t.state.toUpperCase()}`;
  if(t.inflection==='sfp'&&t.state==='nasb')return{id,
   ar:`وَ${wq(t.word)} ${form.ar}، وَهُوَ يُنْصَبُ بِالْكَسْرَةِ نِيَابَةً عَنِ الْفَتْحَةِ.`,
@@ -4160,7 +4412,7 @@ function whyStateVerb(t,data){
  return{id:'WHY_STATE_VERB_FREE',ar:`${wq(t.word)} فِعْلٌ مُضَارِعٌ لَمْ يَسْبِقْهُ نَاصِبٌ وَلَا جَازِمٌ، فَهُوَ مَرْفُوعٌ.`,en:`${eq(t.word)} is a present-tense verb with no nāṣib or jāzim before it, so it is مَرْفُوعٌ.`};
 }
 function whySignVerb(t){
- const st=WHY_STATE[t.state],sign=WHY_SIGN_NAME[t.sign.id];
+ const st=WHY_STATE[t.state],sign=WHY_SIGN_NAME[safeSignId(t.sign)];
  if(t.inflection==='afalKhamsa'){
   const tail=t.state==='raf'?{ar:'وَالْأَفْعَالُ الْخَمْسَةُ تُرْفَعُ بِثُبُوتِ النُّونِ',en:'its sign of rafʿ is ثُبُوتُ النُّونِ'}
    :t.state==='nasb'?{ar:'وَالْأَفْعَالُ الْخَمْسَةُ تُنْصَبُ بِحَذْفِ النُّونِ',en:'its sign of naṣb is حَذْفُ النُّونِ'}
@@ -4236,6 +4488,12 @@ const WHY_MABNI_PRESENT_MAHALL=Object.freeze({
  kay:Object.freeze({id:'WHY_PRESENT_NUUN_NISWAH_KAY_MAHALL',ar:'وَسَبَقَهُ «كَيْ» وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ يَنْصِبُ بِنَفْسِهِ؛ لِتَقَدُّمِ لَامِ التَّعْلِيلِ عَلَيْهِ لَفْظًا، فَهُوَ فِي مَحَلِّ نَصْبٍ، وَبِنَاؤُهُ وَصُورَتُهُ لَا يَتَغَيَّرَانِ.',en:'«كَيْ», a particle of maṣdar and naṣb that governs by itself because لَامُ التَّعْلِيلِ explicitly precedes it, comes before it, so it is in the position of naṣb; its bināʾ and its spelling do not change.'})
 });
 function buildTokenWhy(token,data){
+ /* A token whose sign is not canonical has no Why. Rendering already refuses such an exercise
+    before reaching this function, but buildTokenWhy is also reachable directly, and a quarantine
+    record keeps a valid-looking id — enough for the Why tables to resolve and produce plausible
+    learner text for data that is about to be rejected. Throwing here is contained: the Why
+    validation path already converts it into E_WHY_CANONICAL. */
+ if(canonicalSignFailure(token))throw new Error(`No Why for a non-canonical iʿrāb sign.`);
  const ids=[],ar=[],en=[];
  const push=s=>{if(s){ids.push(s.id);ar.push(s.ar);en.push(s.en)}};
  const type=token.grammar.type;
@@ -4366,6 +4624,17 @@ function renderRelationshipAnalysis(data){
  });
 }
 function renderExercise(data){
+ // Nothing below may see an untrusted sign object, and nothing below runs at all unless every
+ // sign normalized to canonical data.
+ if(normalizeTokenSigns(data)){
+  data.sentence='';
+  data.translation='';
+  (data?.tokens||[]).forEach(token=>{
+   token.ar='';token.en='';token.phraseAr='';token.phraseEn='';token.phraseLabel='';
+   token.why=null;token.phraseWhy=null;
+  });
+  throw new Error('Refusing to render: at least one iʿrāb sign is not canonical.');
+ }
  data.tokens.forEach(token=>{
   token.phraseAr='';
   token.phraseEn='';
@@ -4403,17 +4672,25 @@ class GrammarValidationError extends Error{
  }
 }
 const grammarDiagnostics={generated:0,valid:0,rejected:0,rejectionReasons:{},validByTemplate:{},validByRule:{},recentRejections:[]};
+/* Build one diagnostic record without trusting a sign object. Kept outside validateExercise so
+   the failure boundary can be tested directly: normalization is defence in depth, not the reason
+   a rejected sign accessor remains unobserved here. */
+function grammarFailureRecord(code,message,data,token,tokenById){
+ const governor=token?.governorId?tokenById.get(token.governorId):null;
+ const expectedState=token?.grammar?.type==='noun'?GRAMMAR_RULES.roles[token.grammar.role]?.state:token?.tense==='present'?(governor?GRAMMAR_RULES.governors[governor.grammar.particleType]?.mood:'raf'):'';
+ const expectedSignId=token?.grammar?.type==='noun'?GRAMMAR_RULES.nounInflection[token.inflection]?.[expectedState]?.[0]:token?.tense==='present'?GRAMMAR_RULES.presentVerb[token.inflection]?.[expectedState]?.[0]:'';
+ return{code,message,templateId:data.templateId,word:token?.word||'',lemma:token?.lexeme?.past||token?.lexeme?.nom||'',surfaceHint:token?.surfaceHint||'',expectedSurface:token?.expectedSurface||'',actualSurface:token?.word||'',role:token?.grammar?.role||'',expectedState:expectedState||'',actualState:token?.state||'',expectedSign:expectedSignId||'',actualSign:safeSignId(token?.sign)||'',governorId:token?.governorId||'',governorSurface:governor?.word||'',ruleId:token?.ruleId||'',sourceStatus:SOURCE_REGISTRY[token?.ruleId]?.status||''};
+}
 function validateExercise(data){
+ /* First, before any check, any diagnostic and any Why rebuild: replace every incoming sign
+    object with plain local data. createExerciseSnapshot gates on this function, so this is also
+    what guarantees a hostile object can never reach cloneSerializable. */
+ normalizeTokenSigns(data);
  const failures=[];
  const relationships=Array.isArray(data.relationships)?data.relationships:[];
  const tokenById=new Map(data.tokens.map(item=>[item.id,item]));
  const productionTemplate=templates.find(template=>template.stableId===data.templateId);
- const fail=(code,message,token)=>{
-  const governor=token?.governorId?tokenById.get(token.governorId):null;
-  const expectedState=token?.grammar?.type==='noun'?GRAMMAR_RULES.roles[token.grammar.role]?.state:token?.tense==='present'?(governor?GRAMMAR_RULES.governors[governor.grammar.particleType]?.mood:'raf'):'';
-  const expectedSignId=token?.grammar?.type==='noun'?GRAMMAR_RULES.nounInflection[token.inflection]?.[expectedState]?.[0]:token?.tense==='present'?GRAMMAR_RULES.presentVerb[token.inflection]?.[expectedState]?.[0]:'';
-  failures.push({code,message,templateId:data.templateId,word:token?.word||'',lemma:token?.lexeme?.past||token?.lexeme?.nom||'',surfaceHint:token?.surfaceHint||'',expectedSurface:token?.expectedSurface||'',actualSurface:token?.word||'',role:token?.grammar?.role||'',expectedState:expectedState||'',actualState:token?.state||'',expectedSign:expectedSignId||'',actualSign:token?.sign?.id||'',governorId:token?.governorId||'',governorSurface:governor?.word||'',ruleId:token?.ruleId||'',sourceStatus:SOURCE_REGISTRY[token?.ruleId]?.status||''});
- };
+ const fail=(code,message,token)=>failures.push(grammarFailureRecord(code,message,data,token,tokenById));
  const componentIds=new Set();
  data.tokens.forEach(token=>(token.components||[]).forEach(component=>{
   if(componentIds.has(component.id))fail('E_COMPONENT_ID_DUPLICATE',`Duplicate internal-component id ${component.id}.`,token);
@@ -4447,7 +4724,7 @@ function validateExercise(data){
   const focusForm=focus.grammar?.type==='verb'?(focus.inflection==='afalKhamsa'?'fiveVerbs':'present'):focus.inflection;
   if(data.templateForm&&focusForm!==data.templateForm)fail('E_TARGET_FORM',`Focus form ${focusForm} disagrees with the template's declared form ${data.templateForm}.`,focus);
   if(data.templateState&&focus.state!==data.templateState)fail('E_TARGET_STATE',`Focus state ${focus.state} disagrees with the template's declared state ${data.templateState}.`,focus);
-  if(data.templateSign&&focus.sign?.id!==data.templateSign)fail('E_TARGET_SIGN',`Focus sign ${focus.sign?.id} disagrees with the template's declared sign ${data.templateSign}.`,focus);
+  if(data.templateSign&&safeSignId(focus.sign)!==data.templateSign)fail('E_TARGET_SIGN',`Focus sign ${safeSignId(focus.sign)} disagrees with the template's declared sign ${data.templateSign}.`,focus);
  }
  data.tokens.forEach(token=>{
   if(!['noun','verb','particle'].includes(token.grammar?.type))fail('E_GRAMMAR_TYPE','Token has an unknown grammar type.',token);
@@ -4474,12 +4751,18 @@ function validateExercise(data){
    const expected=PRESENT_CONCEALMENT[token.grammar.morphology?.person]?.ruleId;
    if(!expected||token.subjectRuleId!==expected)fail('E_PRESENT_CONCEALMENT_SOURCE','Hidden present subject is not bound to the D-3 rule its person licenses.',token);
   }else if(token.subjectRuleId)fail('E_PRESENT_CONCEALMENT_SOURCE','A concealment rule is bound to a token that has no hidden present subject.',token);
+  /* Phase 3B0-pre. The sign ID is the semantic claim and is checked by the lane rules below; the
+     two labels beside it are a redundant canonical copy, and a stored copy that disagrees with the
+     frozen table is a forgery even when the id is right — exactly the contract the exactPresentRaf
+     marker carries. Renderers no longer read the stored copy, so this can never fire on something
+     a learner has already seen; it fires on a forged object handed straight to the validator. */
+  if(canonicalSignFailure(token))fail('E_SIGN_CANONICAL','Stored iʿrāb-sign labels are not the canonical labels for their sign ID.',token);
   if(token.expectedSurface&&token.word!==token.expectedSurface)fail('E_SURFACE_FORM','Surface form disagrees with the grammar structure.',token);
   if(token.grammar.type==='noun'){
    const roleRule=GRAMMAR_RULES.roles[token.grammar.role];
    if(token.state!==roleRule?.state)fail('E_ROLE_CASE',`Role ${token.grammar.role} requires ${roleRule?.state}, not ${token.state}.`,token);
    const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
-   if(token.sign?.id!==signRule?.[0])fail('E_NOUN_SIGN','Noun sign disagrees with case and declension.',token);
+   if(safeSignId(token.sign)!==signRule?.[0])fail('E_NOUN_SIGN','Noun sign disagrees with case and declension.',token);
   }
   if(token.grammar.type==='verb'&&token.tense==='present'){
    const governor=token.governorId?data.tokens.find(item=>item.id===token.governorId):null;
@@ -4508,7 +4791,7 @@ function validateExercise(data){
     if(!['3fp','2fp'].includes(authoritative.person))fail('E_MABNI_PRESENT_PERSON','Only 3fp and 2fp present forms may be built on sukūn.',token);
     if(token.grammar.person!==authoritative.person)fail('E_PRESENT_PERSON','Present person disagrees with the authoritative exact surface.',token);
     if(token.state)fail('E_MABNI_PRESENT_STATE','A present verb built on sukūn has no iʿrāb state.',token);
-    if(token.sign)fail('E_MABNI_PRESENT_SIGN','A present verb built on sukūn has no iʿrāb sign; its sukūn is bināʾ.',token);
+    if(carriesSignValue(token))fail('E_MABNI_PRESENT_SIGN','A present verb built on sukūn has no iʿrāb sign; its sukūn is bināʾ.',token);
     if(token.ruleId!==PRESENT_BINAA_RULE_IDS[authoritative.binaaClass])fail('E_MABNI_PRESENT_RULE','Present bināʾ rule disagrees with the registered bināʾ class.',token);
     if(morphology.formClass!=='mabniPresent'||morphology.endingClass!=='nuun-niswah'||morphology.binaaClass!=='sukun-nuun-niswah'){
      fail('E_MABNI_PRESENT_MORPHOLOGY','Stored mabnī-present morphology is not the registered nūn-al-niswah shape.',token);
@@ -4568,11 +4851,11 @@ function validateExercise(data){
    if(governor&&data.tokens[data.tokens.indexOf(token)-1]!==governor)fail('E_GOVERNOR_ADJACENCY','Present-verb governor is not immediately before the verb.',token);
    if(governor&&governor.relations.governsId!==token.id)fail('E_GOVERNOR_RECIPROCAL','Governor and present verb do not point to each other.',token);
    const moodRule=GRAMMAR_RULES.presentVerb[token.inflection]?.[token.state];
-   if(token.sign?.id!==moodRule?.[0])fail('E_VERB_SIGN','Present-verb sign disagrees with mood and morphology.',token);
+   if(safeSignId(token.sign)!==moodRule?.[0])fail('E_VERB_SIGN','Present-verb sign disagrees with mood and morphology.',token);
    if(token.ruleId!==moodRule?.[1])fail('E_VERB_RULE','Present-verb rule disagrees with mood and morphology.',token);
-   if(token.inflection==='regular'&&token.state==='raf'&&token.sign?.id!=='damma')fail('E_PRESENT_ORDINARY_RAF_SIGN','Ordinary present rafʿ must use ḍammah.',token);
-   if(token.inflection==='regular'&&token.sign?.id==='nunKept')fail('E_PRESENT_ORDINARY_NUN','An ordinary present verb may not use retention of nūn.',token);
-   if(token.inflection==='afalKhamsa'&&token.state==='raf'&&token.sign?.id!=='nunKept')fail('E_AFAL5_RAF_SIGN','A five-verb form in rafʿ must use retention of nūn.',token);
+   if(token.inflection==='regular'&&token.state==='raf'&&safeSignId(token.sign)!=='damma')fail('E_PRESENT_ORDINARY_RAF_SIGN','Ordinary present rafʿ must use ḍammah.',token);
+   if(token.inflection==='regular'&&safeSignId(token.sign)==='nunKept')fail('E_PRESENT_ORDINARY_NUN','An ordinary present verb may not use retention of nūn.',token);
+   if(token.inflection==='afalKhamsa'&&token.state==='raf'&&safeSignId(token.sign)!=='nunKept')fail('E_AFAL5_RAF_SIGN','A five-verb form in rafʿ must use retention of nūn.',token);
    if(token.inflection==='afalKhamsa'&&token.state==='raf'&&!/ن[َِ]$/u.test(token.word))fail('E_AFAL5_RAF_NUN','A five-verb form in rafʿ must retain its nūn.',token);
    const authoritativeInflection=authoritative.formClass==='afalKhamsa'?'afalKhamsa':'regular';
    if(token.inflection!==authoritativeInflection)fail('E_PRESENT_FORM_CLASS','Present inflection disagrees with the authoritative person/form class.',token);
@@ -4599,7 +4882,7 @@ function validateExercise(data){
   if(token.grammar.type==='verb'&&token.tense==='past'){
    const authoritative=authoritativeVerbMorphology(token,data);
    if(!authoritative.registered)fail('E_PAST_SURFACE','Past surface is not an explicitly registered production form.',token);
-   if(token.state||token.sign)fail('E_PAST_MUARAB','A past verb may not carry a muʿrab state or sign.',token);
+   if(token.state||carriesSignValue(token))fail('E_PAST_MUARAB','A past verb may not carry a muʿrab state or sign.',token);
    if(token.grammar.person!==authoritative.person)fail('E_PAST_PERSON','Past person disagrees with the authoritative registered surface.',token);
    if(token.ruleId!==PAST_BINAA_RULE_IDS[authoritative.binaaClass])fail('E_PAST_BINAA_RULE','Past bināʾ rule disagrees with its authoritative morphology.',token);
    if(productionTemplate&&!templateAuthorizesPastMorphology(productionTemplate,authoritative))fail('E_PAST_TEMPLATE_AUTHORIZATION','Past person and subject mode are not authorized by the production template.',token);
@@ -4666,6 +4949,10 @@ function validateExercise(data){
     fail('E_WHY_CANONICAL','Token Why explanation cannot be rebuilt from invalid structured grammar.',token);
    }
   }
+  /* A particle is mabnī and has no iʿrāb sign at all. Past verbs (E_PAST_MUARAB) and mabnī
+     present verbs (E_MABNI_PRESENT_SIGN) already say so for their lanes; this closes the last
+     lane that could carry a sign object without any rule objecting. */
+  if(token.grammar.type==='particle'&&carriesSignValue(token))fail('E_PARTICLE_SIGN','A particle is mabnī and may not carry an iʿrāb sign.',token);
   if(token.grammar.type==='particle'&&token.expectedSurface!==token.word)fail('E_PARTICLE_SURFACE','Particle surface disagrees with its grammatical identity.',token);
   if(['lan','lam','sawfa','an','kay'].includes(token.grammar.particleType)){
    const governed=token.relations.governsId&&tokenById.get(token.relations.governsId);

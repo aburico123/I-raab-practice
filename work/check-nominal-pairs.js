@@ -21,12 +21,23 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
+  renderNounAnalysis,
+  renderVerbAnalysis,
   buildTokenWhy,
+  whySignNoun,
+  whySignVerb,
   buildRelationshipWhy,
   poolFor,
   grammarDefinitionGroups,
   GRAMMAR_RULES,
   GRAMMAR_COVERAGE_MATRIX,
+  GRAMMAR_SIGNS,
+  canonicalSign,
+  canonicalSignCopy,
+  canonicalSignFailure,
+  safeSignId,
+  readSignShape,
+  readSignIdForRepair,
   COMPONENT_REGISTRY,
   PAST_MORPHOLOGY,
   PAST_BINAA_RULE_IDS,
@@ -61,6 +72,7 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   isSourceRecordAuthorized,
   isCanonicalReviewedEvidence,
   grammarDiagnostics,
+  grammarFailureRecord,
   validateExercise,
   render,
   inflectFiveVerb,
@@ -5119,6 +5131,1147 @@ for(const t of api.templates){
 console.log('Phase-3A2 mabnī أَنْ / لِكَيْ audit passed: '+p4Cases+' canonical checks and '+p4AttackCases+' adversarial checks.');
 console.log('  phase-3A2 fuzz accounting: '+JSON.stringify(p4FuzzReport));
 console.log('  phase-3A2 error-code distribution: '+JSON.stringify(p4CodeHist));
+
+/* ============================================================================
+   PHASE 3B0-pre — CANONICAL SIGN-LABEL AUTHORITY.
+
+   `sign.id` is the semantic claim; `sign.ar`/`sign.en` are a denormalized copy of the frozen
+   GRAMMAR_SIGNS table. Before this repair the copy was trusted: a token could keep a canonical id
+   while carrying forged labels, and the forgery validated, was rendered to the learner through
+   both the noun and the verb renderer, and survived a History round trip. Worst case, the labels
+   of a DIFFERENT sign could be worn while the id stayed right, so the analysis printed a
+   grammatical falsehood.
+
+   Contract now enforced, mirroring the Why layer exactly:
+     • renderers resolve labels from the id, so no path can expose a stored label;
+     • live validation requires the stored copy to equal the frozen entry (E_SIGN_CANONICAL);
+     • History rebuilds the frozen object from the id, as presentation repair;
+     • the id itself remains owned by the existing lane rules, unchanged.
+   ========================================================================== */
+let s0Cases=0,s0AttackCases=0,s0NoOps=0,s0InertCases=0,s0FuzzReport=null,s0DirectAccessorCases=0;
+const s0CodeHist={};
+const S0_FORGE_AR='زُورٌ عَرَبِيٌّ',S0_FORGE_EN='FORGED ENGLISH LABEL';
+
+/* --- Inventory: every declared sign must be reachable in production, and production must never
+   produce a sign outside the table. Derived by enumeration, not asserted from a hand list. --- */
+const s0Fixtures={};
+{
+  const declared=Object.keys(api.GRAMMAR_SIGNS);
+  for(const t of api.templates){
+    for(let i=0;i<25;i++){
+      const data=api.buildTemplate(t.id);
+      data.tokens.forEach((token,index)=>{
+        if(!token.sign)return;
+        assert(api.GRAMMAR_SIGNS[token.sign.id],`${t.stableId}: produced an unknown sign id ${token.sign.id}`);
+        if(!s0Fixtures[token.sign.id])s0Fixtures[token.sign.id]={data,index,stableId:t.stableId,
+          lane:token.grammar.type==='noun'?`noun/${token.inflection}`:`verb/${token.inflection}`};
+      });
+      if(Object.keys(s0Fixtures).length===declared.length)break;
+    }
+  }
+  assert(Object.keys(s0Fixtures).sort().join(',')===declared.sort().join(','),
+    `Reachable signs ${Object.keys(s0Fixtures).sort()} != declared ${declared.sort()}`);
+  // Every declared entry is self-consistent and non-empty.
+  for(const [id,entry] of Object.entries(api.GRAMMAR_SIGNS)){
+    assert(entry.id===id,`GRAMMAR_SIGNS.${id} is not bound to its own key`);
+    assert(typeof entry.ar==='string'&&entry.ar.trim()&&typeof entry.en==='string'&&entry.en.trim(),
+      `GRAMMAR_SIGNS.${id} has an empty label`);
+    assert(api.canonicalSign(id)===entry,`canonicalSign(${id}) is not the frozen entry`);
+    s0Cases+=3;
+  }
+  // Labels are distinct, so a swap between any two ids is always a detectable change.
+  assert(new Set(Object.values(api.GRAMMAR_SIGNS).map(s=>s.ar)).size===declared.length,'Two signs share an Arabic label');
+  assert(new Set(Object.values(api.GRAMMAR_SIGNS).map(s=>s.en)).size===declared.length,'Two signs share an English label');
+  assert(api.canonicalSign('nope')===null&&api.canonicalSign(undefined)===null,'canonicalSign accepted an unknown id');
+  s0Cases+=4;
+}
+/* --- Lane legality is NOT re-declared in the sign table; it is derived from the rule tables that
+   already own it, and the two must agree. --- */
+{
+  const fromRules=new Set();
+  for(const table of [api.GRAMMAR_RULES.nounInflection,api.GRAMMAR_RULES.presentVerb]){
+    for(const lane of Object.values(table))for(const pair of Object.values(lane)){
+      assert(api.GRAMMAR_SIGNS[pair[0]],`A rule table names an unknown sign id ${pair[0]}`);
+      fromRules.add(pair[0]);
+    }
+  }
+  assert([...fromRules].sort().join(',')===Object.keys(api.GRAMMAR_SIGNS).sort().join(','),
+    `Rule tables reference ${[...fromRules].sort()} but the sign table declares ${Object.keys(api.GRAMMAR_SIGNS).sort()}`);
+  // And every produced token's sign id is the one its own lane rule prescribes.
+  for(const t of api.templates)for(let i=0;i<8;i++){
+    for(const token of api.buildTemplate(t.id).tokens){
+      if(!token.sign)continue;
+      const expected=token.grammar.type==='noun'
+        ?api.GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state]?.[0]
+        :api.GRAMMAR_RULES.presentVerb[token.inflection]?.[token.state]?.[0];
+      assert(token.sign.id===expected,`${t.stableId}: ${token.word} carries ${token.sign.id}, its lane prescribes ${expected}`);
+    }
+  }
+  s0Cases+=2;
+}
+function s0Live(name,base,index,expectedCode,mutate){
+  const data=clone(base);
+  const before=JSON.stringify(data);
+  mutate(data.tokens[index],data);
+  if(JSON.stringify(data)===before){s0NoOps++;return;}
+  let codes;
+  try{ codes=api.validateExercise(data).map(item=>item.code); }
+  catch(error){ throw new Error(`Sign attack "${name}" threw: ${error.message}`); }
+  assert(codes.length>0,`Sign attack "${name}" was accepted`);
+  if(expectedCode)assert(codes.includes(expectedCode),
+    `Sign attack "${name}" rejected as ${JSON.stringify(codes)} (wanted ${expectedCode})`);
+  codes.forEach(code=>{s0CodeHist[code]=(s0CodeHist[code]||0)+1;});
+  s0AttackCases++;
+}
+/* --- Per-sign matrix: every production sign id, one field at a time. --- */
+for(const [id,fixture] of Object.entries(s0Fixtures)){
+  const {data:base,index,lane}=fixture;
+  const other=Object.keys(api.GRAMMAR_SIGNS).find(x=>x!==id);
+  const canonical=api.GRAMMAR_SIGNS[id];
+  // Clean baseline: validates, and renders the canonical labels.
+  {
+    const clean=clone(base);
+    assert(api.validateExercise(clean).length===0,`${id}: the clean fixture does not validate`);
+    assert(!api.canonicalSignFailure(base.tokens[index]),`${id}: a produced sign is not canonical`);
+    const rendered=clone(base);
+    api.renderExercise(rendered);
+    assert(rendered.tokens[index].ar.includes(canonical.ar),`${id}: the canonical Arabic label is not rendered`);
+    assert(rendered.tokens[index].en.includes(canonical.en),`${id}: the canonical English label is not rendered`);
+    s0Cases+=4;
+  }
+  // Forged labels — every shape.
+  s0Live(`${id} (${lane}): forged sign.ar`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={...t.sign,ar:S0_FORGE_AR};});
+  s0Live(`${id} (${lane}): forged sign.en`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={...t.sign,en:S0_FORGE_EN};});
+  s0Live(`${id} (${lane}): both forged`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={...t.sign,ar:S0_FORGE_AR,en:S0_FORGE_EN};});
+  s0Live(`${id} (${lane}): labels from ${other}`,base,index,'E_SIGN_CANONICAL',
+    t=>{t.sign={id,ar:api.GRAMMAR_SIGNS[other].ar,en:api.GRAMMAR_SIGNS[other].en};});
+  s0Live(`${id} (${lane}): Arabic label from ${other}`,base,index,'E_SIGN_CANONICAL',
+    t=>{t.sign={...t.sign,ar:api.GRAMMAR_SIGNS[other].ar};});
+  s0Live(`${id} (${lane}): English label from ${other}`,base,index,'E_SIGN_CANONICAL',
+    t=>{t.sign={...t.sign,en:api.GRAMMAR_SIGNS[other].en};});
+  s0Live(`${id} (${lane}): labels swapped with ${other}`,base,index,'E_SIGN_CANONICAL',
+    t=>{t.sign={id,ar:api.GRAMMAR_SIGNS[other].en,en:api.GRAMMAR_SIGNS[other].ar};});
+  s0Live(`${id} (${lane}): empty Arabic label`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={...t.sign,ar:''};});
+  s0Live(`${id} (${lane}): empty English label`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={...t.sign,en:''};});
+  s0Live(`${id} (${lane}): null Arabic label`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={...t.sign,ar:null};});
+  s0Live(`${id} (${lane}): null English label`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={...t.sign,en:null};});
+  s0Live(`${id} (${lane}): missing Arabic label`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={id,en:canonical.en};});
+  s0Live(`${id} (${lane}): missing English label`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={id,ar:canonical.ar};});
+  s0Live(`${id} (${lane}): extra property`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={...t.sign,extra:'x'};});
+  s0Live(`${id} (${lane}): non-enumerable extra property`,base,index,'E_SIGN_CANONICAL',
+    t=>{t.sign={...t.sign};Object.defineProperty(t.sign,'hidden',{value:'x',enumerable:false,configurable:true});});
+  s0Live(`${id} (${lane}): unknown sign id`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={id:'zzz',ar:canonical.ar,en:canonical.en};});
+  s0Live(`${id} (${lane}): sign is a string`,base,index,'E_SIGN_CANONICAL',t=>{t.sign=canonical.ar;});
+  s0Live(`${id} (${lane}): sign is an array`,base,index,'E_SIGN_CANONICAL',t=>{t.sign=[canonical.id,canonical.ar,canonical.en];});
+  s0Live(`${id} (${lane}): sign is a number`,base,index,'E_SIGN_CANONICAL',t=>{t.sign=7;});
+  s0Live(`${id} (${lane}): nested sign object`,base,index,'E_SIGN_CANONICAL',t=>{t.sign={...t.sign,ar:{text:canonical.ar}};});
+  // Labels supplied only on the prototype are not own properties, so the object is still a forgery.
+  s0Live(`${id} (${lane}): labels on the prototype only`,base,index,'E_SIGN_CANONICAL',
+    t=>{t.sign=Object.create({ar:canonical.ar,en:canonical.en});t.sign.id=id;});
+  // CONTROL — a wrong sign id stays semantic corruption, owned by the lane rules, not by the
+  // label contract, even when the labels are made to look canonical for the forged id.
+  s0Live(`${id} (${lane}): wrong sign id with matching labels`,base,index,
+    base.tokens[index].grammar.type==='noun'?'E_NOUN_SIGN':'E_VERB_SIGN',
+    t=>{t.sign=api.GRAMMAR_SIGNS[other];});
+  /* --- Rendering: a forged label must never reach the learner through any path. --- */
+  for(const [label,mutate] of [
+    ['forged Arabic',t=>{t.sign={...t.sign,ar:S0_FORGE_AR};}],
+    ['forged English',t=>{t.sign={...t.sign,en:S0_FORGE_EN};}],
+    ['labels from another sign',t=>{t.sign={id,ar:api.GRAMMAR_SIGNS[other].ar,en:api.GRAMMAR_SIGNS[other].en};}]
+  ]){
+    /* Rendering must now REFUSE a malformed sign outright rather than merely avoid printing the
+       forged text: a record that keeps a valid canonical ID used to be quarantined and then
+       rendered with the canonical labels resolved from that ID, producing learner-visible,
+       canonical-looking analysis from data that validation was about to reject. */
+    const rendered=clone(base);
+    assert(rendered.sentence&&rendered.translation,`${id}: "${label}" fixture lacked top-level output`);
+    mutate(rendered.tokens[index]);
+    let refused=false;
+    try{ api.renderExercise(rendered); }catch(error){ refused=true; }
+    assert(refused,`${id}: "${label}" was rendered instead of refused`);
+    assert(rendered.sentence===''&&rendered.translation==='',`${id}: "${label}" left stale sentence or translation output`);
+    assert(rendered.tokens.every(t=>!t.ar&&!t.en&&!t.phraseAr&&!t.phraseEn&&!t.phraseLabel&&!t.why&&!t.phraseWhy),
+      `${id}: "${label}" left learner-visible presentation behind`);
+    assert(!rendered.tokens.some(t=>(t.ar||'').includes(canonical.ar)),`${id}: "${label}" rendered canonical-looking output from invalid data`);
+    const text=rendered.tokens.map(t=>`${t.ar||''} ${t.en||''} ${(t.why||{ar:[]}).ar.join(' ')} ${(t.why||{en:[]}).en.join(' ')}`).join(' ');
+    assert(!text.includes(S0_FORGE_AR)&&!text.includes(S0_FORGE_EN),
+      `${id}: "${label}" reached the learner-visible analysis`);
+    /* No sign's labels — the forged ones, another sign's, or this sign's own canonical ones —
+       may appear anywhere, because the whole exercise was refused before construction. */
+    assert(!text.includes(api.GRAMMAR_SIGNS[other].ar)&&!text.includes(api.GRAMMAR_SIGNS[other].en),
+      `${id}: "${label}" rendered another sign's label`);
+    assert(!text.includes('undefined'),`${id}: "${label}" rendered the literal undefined`);
+    s0Cases+=5;
+  }
+  /* --- History: forged labels are PRESENTATION and must rebuild canonically; a wrong id is
+     semantic and must reject. --- */
+  {
+    const snapshot=api.createExerciseSnapshot(base);
+    assert(snapshot&&snapshot.schemaVersion===3,`${id}: snapshot is not schema v3`);
+    assert(api.restoreExerciseSnapshot(clone(snapshot)),`${id}: the clean snapshot no longer restores`);
+    s0Cases+=2;
+    for(const [label,mutate] of [
+      ['forged Arabic',t=>{t.sign={...t.sign,ar:S0_FORGE_AR};}],
+      ['forged English',t=>{t.sign={...t.sign,en:S0_FORGE_EN};}],
+      ['both forged',t=>{t.sign={...t.sign,ar:S0_FORGE_AR,en:S0_FORGE_EN};}],
+      [`labels from ${other}`,t=>{t.sign={id,ar:api.GRAMMAR_SIGNS[other].ar,en:api.GRAMMAR_SIGNS[other].en};}],
+      ['empty labels',t=>{t.sign={id,ar:'',en:''};}],
+      ['missing labels',t=>{t.sign={id};}],
+      ['null labels',t=>{t.sign={id,ar:null,en:null};}],
+      ['extra property',t=>{t.sign={...t.sign,extra:'x'};}]
+    ]){
+      const forged=clone(snapshot);
+      mutate(forged.tokens[index]);
+      let restored;
+      try{ restored=api.restoreExerciseSnapshot(forged); }
+      catch(error){ throw new Error(`Sign History "${id}: ${label}" threw: ${error.message}`); }
+      assert(restored,`${id}: History rejected presentation corruption "${label}" instead of rebuilding it`);
+      const sign=restored.tokens[index].sign;
+      assert(sign&&sign.id===id&&sign.ar===canonical.ar&&sign.en===canonical.en,
+        `${id}: History did not rebuild the sign for "${label}"`);
+      assert(!api.canonicalSignFailure(restored.tokens[index]),`${id}: the restored sign is not canonical after "${label}"`);
+      /* Sentinels are unique so the whole exercise is scanned; the other sign's real label is
+         scoped to the restored mutated token, because sibling tokens legitimately carry it. */
+      const text=restored.tokens.map(t=>`${t.ar||''} ${t.en||''}`).join(' ');
+      assert(!text.includes(S0_FORGE_AR)&&!text.includes(S0_FORGE_EN),
+        `${id}: a forged sentinel label survived History as rendered text after "${label}"`);
+      const restoredText=`${restored.tokens[index].ar||''} ${restored.tokens[index].en||''}`;
+      assert(!restoredText.includes(api.GRAMMAR_SIGNS[other].ar)&&!restoredText.includes(api.GRAMMAR_SIGNS[other].en),
+        `${id}: another sign's label survived History on the mutated token after "${label}"`);
+      assert(api.validateExercise(clone(restored)).length===0,`${id}: the restored exercise does not validate after "${label}"`);
+      s0Cases+=5;
+    }
+    // Wrong id in History remains semantic corruption.
+    const wrongId=clone(snapshot);
+    wrongId.tokens[index].sign=api.GRAMMAR_SIGNS[other];
+    assert(api.restoreExerciseSnapshot(wrongId)===null,`${id}: History accepted a forged sign ID`);
+    // An unknown id can neither be rebuilt nor accepted.
+    const unknownId=clone(snapshot);
+    unknownId.tokens[index].sign={id:'zzz',ar:canonical.ar,en:canonical.en};
+    assert(api.restoreExerciseSnapshot(unknownId)===null,`${id}: History accepted an unknown sign ID`);
+    s0AttackCases+=2;
+  }
+}
+/* --- §6 filter integrity: forged labels must not move a token between filter pools. --- */
+{
+  for(const [id,fixture] of Object.entries(s0Fixtures)){
+    const focus=fixture.data.tokens.find(t=>t.target);
+    if(!focus||!focus.sign)continue;
+    const before=focus.sign.id;
+    const forged=clone(fixture.data);
+    const forgedFocus=forged.tokens.find(t=>t.target);
+    forgedFocus.sign={...forgedFocus.sign,ar:S0_FORGE_AR,en:S0_FORGE_EN};
+    assert(forgedFocus.sign.id===before,`${id}: forging labels changed the semantic sign id`);
+    assert(api.validateExercise(forged).map(f=>f.code).includes('E_SIGN_CANONICAL'),
+      `${id}: a forged focus sign was not caught before it could affect filters`);
+    s0AttackCases++;
+  }
+  // State/sign separation is unchanged: no noun takes jazm, no verb takes khafḍ.
+  for(const [inflection,lane] of Object.entries(api.GRAMMAR_RULES.nounInflection))
+    assert(!lane.jazm,`Noun inflection ${inflection} acquired a jazm sign`);
+  for(const [inflection,lane] of Object.entries(api.GRAMMAR_RULES.presentVerb))
+    assert(!lane.jarr,`Present lane ${inflection} acquired a khafḍ sign`);
+  assert(api.GRAMMAR_RULES.presentVerb.regular.nasb[0]==='fatha'&&api.GRAMMAR_RULES.presentVerb.regular.jazm[0]==='sukun'
+    &&api.GRAMMAR_RULES.presentVerb.afalKhamsa.nasb[0]==='nunDropped'&&api.GRAMMAR_RULES.presentVerb.afalKhamsa.jazm[0]==='nunDropped'
+    &&api.GRAMMAR_RULES.presentVerb.afalKhamsa.raf[0]==='nunKept','A present sign/state pairing changed');
+  s0Cases+=3;
+}
+/* --- §8 control: the Phase 3A2 mabnī lane has sign:null and must keep it. --- */
+{
+  for(const stableId of ['T_PARTICLE_SINGULAR_NASB_FATHA_04','T_PARTICLE_SINGULAR_NASB_FATHA_06']){
+    const template=api.templates.find(t=>t.stableId===stableId);
+    const data=api.buildTemplate(template.id);
+    const verbIndex=data.tokens.findIndex(t=>t.grammar.type==='verb');
+    assert(data.tokens[verbIndex].sign===null,`${stableId}: the mabnī verb gained a sign`);
+    assert(!api.canonicalSignFailure(data.tokens[verbIndex]),`${stableId}: a null sign was treated as a forgery`);
+    // Restoring must not invent a sign object.
+    const restored=api.restoreExerciseSnapshot(clone(api.createExerciseSnapshot(data)));
+    assert(restored&&restored.tokens[verbIndex].sign===null,`${stableId}: restore gave the mabnī verb a sign object`);
+    // Injecting one is semantic corruption, owned by the mabnī lane.
+    const forged=clone(data);
+    forged.tokens[verbIndex].sign=api.GRAMMAR_SIGNS.fatha;
+    assert(api.validateExercise(forged).map(f=>f.code).includes('E_MABNI_PRESENT_SIGN'),
+      `${stableId}: a sign injected into the mabnī lane was not owned by E_MABNI_PRESENT_SIGN`);
+    const forgedSnap=clone(api.createExerciseSnapshot(data));
+    forgedSnap.tokens[verbIndex].sign=api.GRAMMAR_SIGNS.fatha;
+    assert(api.restoreExerciseSnapshot(forgedSnap)===null,`${stableId}: History accepted a sign on a mabnī verb`);
+    s0Cases+=3;s0AttackCases+=2;
+  }
+  // Past verbs and particles carry no sign either.
+  for(const t of api.templates)for(let i=0;i<6;i++){
+    for(const token of api.buildTemplate(t.id).tokens){
+      if(token.grammar.type==='particle'||token.tense==='past'||token.tense==='kana')
+        assert(!token.sign,`${t.stableId}: ${token.word} carries a sign it should not have`);
+    }
+  }
+  s0Cases++;
+}
+/* --- §9 throw safety across every lane that can carry a sign, plus lanes that cannot. --- */
+{
+  const laneFixtures=[];
+  for(const [id,f] of Object.entries(s0Fixtures))laneFixtures.push([`${id}/${f.lane}`,f.data,f.index]);
+  // Lanes with no sign: mabnī present, past verb, particle.
+  {
+    const mabni=api.buildTemplate(api.templates.find(t=>t.stableId==='T_PARTICLE_SINGULAR_NASB_FATHA_04').id);
+    laneFixtures.push(['mabniPresent',mabni,mabni.tokens.findIndex(t=>t.grammar.type==='verb')]);
+    laneFixtures.push(['particle',mabni,0]);
+    const past=api.buildTemplate(api.templates.find(t=>t.starts==='verb'&&t.form==='broken'&&t.state==='raf').id);
+    laneFixtures.push(['pastVerb',past,past.tokens.findIndex(t=>t.tense==='past')]);
+  }
+  const signMutations=[
+    ['null',t=>{t.sign=null;}],
+    ['undefined',t=>{t.sign=undefined;}],
+    ['deleted',t=>{delete t.sign;}],
+    ['empty object',t=>{t.sign={};}],
+    ['string',t=>{t.sign='damma';}],
+    ['array',t=>{t.sign=['damma'];}],
+    ['number',t=>{t.sign=0;}],
+    ['boolean',t=>{t.sign=true;}],
+    ['nested',t=>{t.sign={id:{deep:'damma'},ar:'x',en:'y'};}],
+    ['id only',t=>{t.sign={id:'damma'};}],
+    ['canonical damma',t=>{t.sign=api.GRAMMAR_SIGNS.damma;}],
+    ['canonical nunKept',t=>{t.sign=api.GRAMMAR_SIGNS.nunKept;}],
+    ['prototype labels',t=>{const s=Object.create({ar:'x',en:'y'});s.id='damma';t.sign=s;}],
+    ['non-enumerable id',t=>{const s={ar:'x',en:'y'};Object.defineProperty(s,'id',{value:'damma',enumerable:false});t.sign=s;}],
+    ['frozen forgery',t=>{t.sign=Object.freeze({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['sealed forgery',t=>{t.sign=Object.seal({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['function',t=>{const f=function(){};f.id='damma';f.ar=S0_FORGE_AR;f.en=S0_FORGE_EN;t.sign=f;}],
+    ['class instance',t=>{class S{constructor(){this.id='damma';this.ar=S0_FORGE_AR;this.en=S0_FORGE_EN}}t.sign=new S();}],
+    ['null-prototype forgery',t=>{t.sign=Object.assign(Object.create(null),{id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['custom prototype',t=>{t.sign=Object.assign(Object.create({marker:1}),{id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['Date prototype',t=>{t.sign=Object.assign(Object.create(Date.prototype),{id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['inherited id',t=>{t.sign=Object.assign(Object.create({id:'damma'}),{ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['inherited labels',t=>{t.sign=Object.assign(Object.create({ar:S0_FORGE_AR,en:S0_FORGE_EN}),{id:'damma'});}],
+    ['inherited registry name as id',t=>{t.sign={id:'toString',ar:S0_FORGE_AR,en:S0_FORGE_EN};}],
+    ['constructor as id',t=>{t.sign={id:'constructor',ar:S0_FORGE_AR,en:S0_FORGE_EN};}],
+    ['__proto__ as id',t=>{t.sign={id:'__proto__',ar:S0_FORGE_AR,en:S0_FORGE_EN};}],
+    ['accessor on id',t=>{const o={ar:S0_FORGE_AR,en:S0_FORGE_EN};Object.defineProperty(o,'id',{get(){return 'damma'},enumerable:true});t.sign=o;}],
+    ['accessor on ar',t=>{const o={id:'damma',en:S0_FORGE_EN};Object.defineProperty(o,'ar',{get(){return S0_FORGE_AR},enumerable:true});t.sign=o;}],
+    ['accessor on en',t=>{const o={id:'damma',ar:S0_FORGE_AR};Object.defineProperty(o,'en',{get(){return S0_FORGE_EN},enumerable:true});t.sign=o;}],
+    ['throwing getter on id',t=>{const o={ar:S0_FORGE_AR,en:S0_FORGE_EN};Object.defineProperty(o,'id',{get(){throw new Error('g-id')},enumerable:true});t.sign=o;}],
+    ['throwing getter on ar',t=>{const o={id:'damma',en:S0_FORGE_EN};Object.defineProperty(o,'ar',{get(){throw new Error('g-ar')},enumerable:true});t.sign=o;}],
+    ['throwing getter on en',t=>{const o={id:'damma',ar:S0_FORGE_AR};Object.defineProperty(o,'en',{get(){throw new Error('g-en')},enumerable:true});t.sign=o;}],
+    ['throwing setter on ar',t=>{const o={id:'damma',en:S0_FORGE_EN};Object.defineProperty(o,'ar',{set(){throw new Error('s-ar')},get(){return S0_FORGE_AR},enumerable:true});t.sign=o;}],
+    ['own symbol',t=>{const o={id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN};o[Symbol('k')]=1;t.sign=o;}],
+    ['proxy: getPrototypeOf throws',t=>{t.sign=new Proxy({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN},{getPrototypeOf(){throw new Error('p1')}});}],
+    ['proxy: ownKeys throws',t=>{t.sign=new Proxy({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN},{ownKeys(){throw new Error('p2')}});}],
+    ['proxy: descriptor throws',t=>{t.sign=new Proxy({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN},{getOwnPropertyDescriptor(){throw new Error('p3')}});}],
+    ['registry entry by reference',t=>{t.sign=api.GRAMMAR_SIGNS.damma;}],
+    ['copied canonical damma',t=>{const c=api.GRAMMAR_SIGNS.damma;t.sign={id:c.id,ar:c.ar,en:c.en};}],
+    ['shallow custom prototype',t=>{const p=Object.create(null);p.marker=1;t.sign=Object.assign(Object.create(p),{id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['shallow prototype + toJSON',t=>{const p=Object.create(null);p.toJSON=()=>({id:'zzz'});t.sign=Object.assign(Object.create(p),{id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['shallow prototype + throwing toJSON',t=>{const p=Object.create(null);p.toJSON=()=>{throw new Error('j')};t.sign=Object.assign(Object.create(p),{id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['shallow prototype + getter',t=>{const p=Object.create(null);Object.defineProperty(p,'g',{get(){return 1}});t.sign=Object.assign(Object.create(p),{id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['shallow prototype + Symbol.toPrimitive',t=>{const p=Object.create(null);p[Symbol.toPrimitive]=()=>{throw new Error('tp')};t.sign=Object.assign(Object.create(p),{id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['shallow prototype canonical own data',t=>{const p=Object.create(null);p.marker=1;const c=api.GRAMMAR_SIGNS[t.sign&&t.sign.id?t.sign.id:'damma'];t.sign=Object.assign(Object.create(p),{id:c.id,ar:c.ar,en:c.en});}],
+    ['has-only proxy forged',t=>{t.sign=new Proxy({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN},{has(){return true}});}],
+    ['get-only proxy forged',t=>{t.sign=new Proxy({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN},{get(o,k){return o[k]}});}],
+    ['getPrototypeOf proxy forged',t=>{t.sign=new Proxy({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN},{getPrototypeOf(){throw new Error('p')}});}],
+    ['array prototype',t=>{t.sign=Object.assign(Object.create(Array.prototype),{id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN});}],
+    ['cross-realm-style literal',t=>{t.sign=JSON.parse(JSON.stringify({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN}));}],
+    ['revoked proxy',t=>{const r=Proxy.revocable({id:'damma',ar:S0_FORGE_AR,en:S0_FORGE_EN},{});r.revoke();t.sign=r.proxy;}],
+    ['quarantine: forged canonical id',t=>{const c=api.GRAMMAR_SIGNS.damma;t.sign={id:c.id,ar:S0_FORGE_AR,en:S0_FORGE_EN};}],
+    ['quarantine: extra key',t=>{const c=api.GRAMMAR_SIGNS.damma;t.sign={id:c.id,ar:c.ar,en:c.en,extra:1};}],
+    ['quarantine: missing label',t=>{const c=api.GRAMMAR_SIGNS.damma;t.sign={id:c.id,ar:c.ar};}]
+  ];
+  let fuzzCandidates=0,fuzzNoOps=0,fuzzInert=0,fuzzInertWrappers=0,fuzzMeaningful=0,fuzzRejected=0,fuzzAccepted=0,fuzzThrows=0;
+  const fuzzAcceptedNames=[];
+  for(const [laneName,base,index] of laneFixtures){
+    for(const [mutationName,mutate] of signMutations){
+      const name=`${laneName}/${mutationName}`;
+      fuzzCandidates++;
+      const data=clone(base);
+      let before=null;
+      try{ before=JSON.stringify(data); }catch(error){ before=null; }
+      try{ mutate(data.tokens[index]); }
+      catch(error){ fuzzThrows++; fuzzAcceptedNames.push(`${name} (mutating: ${error.message})`); continue; }
+      let serialized=null;
+      try{ serialized=JSON.stringify(data); }catch(error){ serialized=null; }
+      if(serialized!==null&&serialized===before){fuzzNoOps++;continue;}
+      /* Inert: on a lane that canonically has NO sign, null / undefined / delete all leave the
+         token with no sign. The serialization differs, the grammatical claim does not. Naming
+         them keeps them out of the adversarial total instead of inflating it. */
+      const laneHasNoSign=!base.tokens[index].sign;
+      if(laneHasNoSign&&['null','undefined','deleted'].includes(mutationName)){fuzzInert++;continue;}
+      fuzzMeaningful++;
+      let codes;
+      try{ codes=api.validateExercise(data).map(f=>f.code); }
+      catch(error){ fuzzThrows++; fuzzAcceptedNames.push(`${name}: ${error.message}`); continue; }
+      if(codes.length){fuzzRejected++;codes.forEach(c=>{s0CodeHist[c]=(s0CodeHist[c]||0)+1;});}
+      else{
+        /* Accepted is only honest when the sign was NORMALIZED to canonical local data: incoming
+           object gone, plain shape, canonical labels. Anything else accepted is a real miss. */
+        const after=data.tokens[index].sign;
+        const proto=after&&typeof after==='object'?Object.getPrototypeOf(after):undefined;
+        const normalized=Boolean(after)&&typeof after==='object'
+          &&Object.getOwnPropertyNames(after).join(',')==='id,ar,en'
+          &&!Object.getOwnPropertySymbols(after).length
+          &&(proto===null||Object.getPrototypeOf(proto)===null)
+          &&after.ar!==S0_FORGE_AR&&after.en!==S0_FORGE_EN
+          &&!api.canonicalSignFailure(data.tokens[index]);
+        if(normalized)fuzzInertWrappers++;
+        else{fuzzAccepted++;fuzzAcceptedNames.push(name);}
+      }
+      // Rendering a malformed sign must reject or repair, never leak forged text.
+      try{
+        const rendered=clone(base);
+        mutate(rendered.tokens[index]);
+        void 0;
+        api.renderExercise(rendered);
+        const text=rendered.tokens.map(t=>`${t.ar||''} ${t.en||''}`).join(' ');
+        assert(!text.includes(S0_FORGE_AR)&&!text.includes(S0_FORGE_EN),`${name}: rendering leaked a forged label`);
+        assert(!text.includes('undefined'),`${name}: rendering printed the literal undefined`);
+      }catch(error){ /* a renderer that refuses malformed input is acceptable; it cannot leak. */ }
+    }
+  }
+  assert(fuzzThrows===0,`Sign fuzz threw ${fuzzThrows} time(s): ${fuzzAcceptedNames.join(' | ')}`);
+  assert(fuzzAccepted===0,`Sign fuzz accepted ${fuzzAccepted} meaningful mutation(s): ${fuzzAcceptedNames.join(' | ')}`);
+  assert(fuzzRejected===fuzzMeaningful,`Sign fuzz rejected ${fuzzRejected} of ${fuzzMeaningful} meaningful mutations`);
+  assert(fuzzCandidates===fuzzNoOps+fuzzInert+fuzzMeaningful,'The sign fuzz classification does not account for every candidate');
+  s0AttackCases+=fuzzRejected;
+  s0NoOps+=fuzzNoOps;
+  s0Cases+=4;
+  s0FuzzReport={candidates:fuzzCandidates,noOps:fuzzNoOps,inert:fuzzInert,
+    inertWrappersNormalized:fuzzInertWrappers,meaningful:fuzzMeaningful,
+    rejected:fuzzRejected,accepted:fuzzAccepted,throws:fuzzThrows};
+}
+/* --- §7 source/rule ownership is untouched by label text. --- */
+{
+  for(const [id,fixture] of Object.entries(s0Fixtures)){
+    const token=fixture.data.tokens[fixture.index];
+    const ruleField=token.grammar.type==='noun'?'signRuleId':'ruleId';
+    const before=token[ruleField];
+    const forged=clone(fixture.data);
+    forged.tokens[fixture.index].sign={id,ar:S0_FORGE_AR,en:S0_FORGE_EN};
+    assert(forged.tokens[fixture.index][ruleField]===before,`${id}: forging labels changed the sign rule id`);
+    /* A forged label is rejected by validation, and it can never masquerade as a different sign
+       RULE: the rule id is chosen from the lane tables by state and inflection, never from label
+       text. (completeNominalAnalysis is deliberately not used here — it is the BUILDER, and it
+       rebuilds the sign object from the frozen table, so it repairs rather than rejects. That
+       rebuild is asserted separately just below, because it is the reason production output can
+       never carry a non-canonical label in the first place.) */
+    assert(api.validateExercise(clone(forged)).map(f=>f.code).includes('E_SIGN_CANONICAL'),
+      `${id}: a forged sign label was not rejected by validation`);
+    const rebuilt=api.completeNominalAnalysis(clone(forged));
+    const rebuiltToken=rebuilt.tokens[fixture.index];
+    assert(!api.canonicalSignFailure(rebuiltToken),`${id}: the builder did not rebuild a canonical sign`);
+    assert(rebuiltToken.sign.ar===api.GRAMMAR_SIGNS[id].ar&&rebuiltToken[ruleField]===before,
+      `${id}: the builder changed the sign or its rule id`);
+    s0Cases+=4;
+  }
+}
+
+/* ============================================================================
+   PHASE 3B0-pre FINAL HARDENING — registry immutability, ownership, and hostile objects.
+
+   The first pass made labels canonical but left the registry itself reachable and mutable: a
+   produced token received the registry entry BY REFERENCE, and the entries were not frozen, so
+   `token.sign.ar='…'` rewrote the authority for the whole application — after which the
+   forgery was, by definition, canonical. Lookup was also a bare index, so an id of 'toString'
+   resolved off Object.prototype and the renderer printed «undefined» to the learner; and a sign
+   carrying a throwing getter escaped straight out of validateExercise.
+   ========================================================================== */
+{
+  const SIGN_IDS=Object.keys(api.GRAMMAR_SIGNS);
+  const INHERITED=['toString','valueOf','constructor','hasOwnProperty','isPrototypeOf',
+    'propertyIsEnumerable','toLocaleString','__proto__','__defineGetter__'];
+
+  /* --- A/B: the registry is deeply frozen, prototype-free and accessor-free. --- */
+  assert(Object.isFrozen(api.GRAMMAR_SIGNS),'The sign registry is not frozen');
+  assert(Object.getPrototypeOf(api.GRAMMAR_SIGNS)===null,'The sign registry has a prototype');
+  for(const id of SIGN_IDS){
+    const entry=api.GRAMMAR_SIGNS[id];
+    assert(Object.isFrozen(entry),id+': registry entry is not frozen');
+    const names=Object.getOwnPropertyNames(entry);
+    assert(names.length===3&&names.includes('id')&&names.includes('ar')&&names.includes('en'),
+      id+': registry entry does not carry exactly id/ar/en');
+    assert(!Object.getOwnPropertySymbols(entry).length,id+': registry entry carries own symbols');
+    for(const name of names){
+      const d=Object.getOwnPropertyDescriptor(entry,name);
+      assert(typeof d.get!=='function'&&typeof d.set!=='function',id+'.'+name+': registry entry uses an accessor');
+      assert(typeof d.value==='string'&&d.value,id+'.'+name+': registry label is not a non-empty string');
+      assert(d.writable===false&&d.configurable===false,id+'.'+name+': registry label is still writable/configurable');
+    }
+    s0Cases+=4;
+  }
+  /* --- G: attempted registry mutation has no effect (silent in sloppy mode, throws in strict). --- */
+  for(const id of SIGN_IDS){
+    const entry=api.GRAMMAR_SIGNS[id];
+    const beforeAr=entry.ar,beforeEn=entry.en;
+    try{ entry.ar='زُوِّرَ'; }catch(e){}
+    try{ entry.en='forged'; }catch(e){}
+    try{ entry.extra='x'; }catch(e){}
+    try{ delete entry.ar; }catch(e){}
+    try{ Object.defineProperty(entry,'ar',{value:'زُوِّرَ'}); }catch(e){}
+    assert(entry.ar===beforeAr&&entry.en===beforeEn,id+': the registry entry was mutated');
+    assert(!('extra' in entry),id+': the registry entry gained a property');
+    try{ api.GRAMMAR_SIGNS[id]={id,ar:'x',en:'y'}; }catch(e){}
+    assert(api.GRAMMAR_SIGNS[id]===entry,id+': the registry slot was replaced');
+    s0AttackCases+=5;s0Cases+=3;
+  }
+  /* --- H: inherited Object.prototype names never resolve, in every entry point. --- */
+  for(const name of INHERITED){
+    assert(api.canonicalSign(name)===null,'canonicalSign("'+name+'") resolved an inherited name');
+    assert(api.canonicalSignCopy(name)===null,'canonicalSignCopy("'+name+'") resolved an inherited name');
+    s0AttackCases+=2;
+  }
+  for(const bad of ['nope','',' damma','DAMMA',null,undefined,7,{},[],true]){
+    assert(api.canonicalSign(bad)===null,'canonicalSign accepted '+String(bad));
+    s0AttackCases++;
+  }
+  assert(api.canonicalSign(Symbol('damma').toString())===null,'canonicalSign accepted a symbol description');
+  s0AttackCases++;
+
+  /* --- C/D/E/F: tokens receive fresh, independent copies; the registry is never handed out. --- */
+  const ownership=[];
+  for(const t of api.templates){
+    for(let i=0;i<4;i++){
+      const d=api.buildTemplate(t.id);
+      d.tokens.forEach((tok,ix)=>{ if(tok.sign)ownership.push({d,ix,id:tok.sign.id,stableId:t.stableId}); });
+    }
+  }
+  assert(ownership.length>0,'no signed tokens were produced');
+  for(const o of ownership.slice(0,120)){
+    const tok=o.d.tokens[o.ix];
+    assert(tok.sign!==api.GRAMMAR_SIGNS[o.id],o.stableId+': a produced token holds the registry entry itself');
+    assert(!Object.isFrozen(tok.sign)||tok.sign!==api.GRAMMAR_SIGNS[o.id],o.stableId+': token sign aliases the registry');
+    s0Cases+=2;
+  }
+  // D: two independently produced tokens never share one mutable sign object.
+  {
+    const a=api.buildTemplate(api.templates[0].id),b=api.buildTemplate(api.templates[0].id);
+    const ai=a.tokens.findIndex(t=>t.sign),bi=b.tokens.findIndex(t=>t.sign);
+    assert(ai>=0&&bi>=0,'no signed token in the probe template');
+    assert(a.tokens[ai].sign!==b.tokens[bi].sign,'two builds share one sign object');
+    // F: mutating a token copy touches neither the registry nor the other token.
+    const id=a.tokens[ai].sign.id;
+    const registryAr=api.GRAMMAR_SIGNS[id].ar;
+    a.tokens[ai].sign.ar='زُوِّرَ';
+    assert(api.GRAMMAR_SIGNS[id].ar===registryAr,'mutating a token sign changed the registry');
+    assert(b.tokens[bi].sign.ar===registryAr,'mutating one token sign changed another token');
+    assert(api.validateExercise(a).map(f=>f.code).includes('E_SIGN_CANONICAL'),'a mutated token copy was accepted');
+    s0Cases+=4;s0AttackCases++;
+  }
+  // E: a restored token's sign is a fresh copy too.
+  {
+    const d=api.buildTemplate(api.templates.find(t=>t.starts==='noun').id);
+    const ix=d.tokens.findIndex(t=>t.sign);
+    const restored=api.restoreExerciseSnapshot(clone(api.createExerciseSnapshot(d)));
+    assert(restored,'the probe snapshot did not restore');
+    assert(restored.tokens[ix].sign!==api.GRAMMAR_SIGNS[restored.tokens[ix].sign.id],'a restored token holds the registry entry');
+    assert(!api.canonicalSignFailure(restored.tokens[ix]),'a restored sign is not canonical');
+    s0Cases+=3;
+  }
+
+  /* --- I/J/K/L/M/N: hostile sign objects become grammar failures, never exceptions. --- */
+  const hostileBase=(()=>{
+    for(const t of api.templates)for(let i=0;i<12;i++){
+      const d=api.buildTemplate(t.id);
+      const ix=d.tokens.findIndex(x=>x.sign&&x.grammar.type==='noun');
+      if(ix>=0)return{d,ix,id:d.tokens[ix].sign.id};
+    }
+    return null;
+  })();
+  assert(hostileBase,'no noun fixture for hostile-object tests');
+  const CANON=api.GRAMMAR_SIGNS[hostileBase.id];
+  function hostileCase(name,build,expected){
+    const d=clone(hostileBase.d);
+    let sign;
+    try{ sign=build(); }catch(e){ throw new Error('hostile fixture "'+name+'" could not be built: '+e.message); }
+    d.tokens[hostileBase.ix].sign=sign;
+    let codes;
+    try{ codes=api.validateExercise(d).map(f=>f.code); }
+    catch(error){ throw new Error('Hostile sign "'+name+'" threw out of validation: '+error.message); }
+    assert(codes.length>0,'Hostile sign "'+name+'" was accepted');
+    const owners=expected?(Array.isArray(expected)?expected:[expected]):['E_SIGN_CANONICAL'];
+    assert(owners.some(code=>codes.includes(code)),
+      'Hostile sign "'+name+'" rejected as '+JSON.stringify(codes)+' (wanted one of '+JSON.stringify(owners)+')');
+    codes.forEach(c=>{s0CodeHist[c]=(s0CodeHist[c]||0)+1;});
+    // Rendering must fail closed: never a forged label, never the literal "undefined".
+    const r=clone(hostileBase.d);
+    r.tokens[hostileBase.ix].sign=build();
+    let visible='';
+    try{ api.renderExercise(r); visible=(r.tokens[hostileBase.ix].ar||'')+' '+(r.tokens[hostileBase.ix].en||''); }
+    catch(error){ visible=''; }   // a renderer that refuses malformed input cannot leak
+    assert(r.sentence===''&&r.translation==='','Hostile sign "'+name+'" left stale top-level output');
+    assert(!visible.includes('undefined'),'Hostile sign "'+name+'" rendered the literal undefined');
+    assert(!visible.includes('زُوِّرَ')&&!visible.includes('FORGED'),'Hostile sign "'+name+'" rendered a forged label');
+    s0AttackCases++;
+  }
+  for(const field of ['id','ar','en']){
+    hostileCase('throwing getter on '+field,()=>{
+      const o={};
+      for(const f of ['id','ar','en']){
+        if(f===field)Object.defineProperty(o,f,{get(){throw new Error('boom-'+f)},enumerable:true,configurable:true});
+        else Object.defineProperty(o,f,{value:f==='id'?hostileBase.id:CANON[f],enumerable:true,configurable:true,writable:true});
+      }
+      return o;
+    });
+    hostileCase('throwing setter on '+field,()=>{
+      const o={id:hostileBase.id,ar:CANON.ar,en:CANON.en};
+      Object.defineProperty(o,field,{set(){throw new Error('set-'+field)},get(){return CANON[field]},enumerable:true,configurable:true});
+      return o;
+    });
+    hostileCase('plain accessor on '+field,()=>{
+      const o={id:hostileBase.id,ar:CANON.ar,en:CANON.en};
+      Object.defineProperty(o,field,{get(){return field==='id'?hostileBase.id:CANON[field]},enumerable:true,configurable:true});
+      return o;
+    });
+  }
+  hostileCase('inherited labels via prototype',()=>Object.assign(Object.create({ar:CANON.ar,en:CANON.en}),{id:hostileBase.id}));
+  hostileCase('inherited id via prototype',()=>Object.assign(Object.create({id:hostileBase.id}),{ar:CANON.ar,en:CANON.en}));
+  /* --- Model B: an object whose OWN descriptor data is exactly canonical is not a forgery, no
+     matter what its prototype is. It is an INERT WRAPPER: normalization replaces it with a fresh
+     local record before anything can observe it, so the prototype, its inherited behaviour and any
+     proxy traps are simply gone. These are asserted as normalized away, not counted as rejected
+     attacks — counting them as rejections would be false. --- */
+  function inertCase(name,build,probe){
+    const marker=probe||{};
+    const d=clone(hostileBase.d);
+    d.tokens[hostileBase.ix].sign=build();
+    let codes;
+    try{ codes=api.validateExercise(d).map(f=>f.code); }
+    catch(error){ throw new Error('Inert wrapper "'+name+'" threw: '+error.message); }
+    assert(codes.length===0,'Inert wrapper "'+name+'" was rejected as '+JSON.stringify(codes));
+    const sign=d.tokens[hostileBase.ix].sign;
+    // The incoming object must NOT survive: fresh, plain, exactly canonical, and not the registry.
+    assert(sign!==api.GRAMMAR_SIGNS[hostileBase.id],name+': normalization handed out the registry entry');
+    assert(Object.getOwnPropertyNames(sign).join(',')==='id,ar,en',name+': normalized sign is not exactly id/ar/en');
+    assert(sign.id===hostileBase.id&&sign.ar===CANON.ar&&sign.en===CANON.en,name+': normalized sign is not canonical');
+    assert(!Object.getOwnPropertySymbols(sign).length,name+': normalized sign kept own symbols');
+    const proto=Object.getPrototypeOf(sign);
+    assert(proto===null||Object.getPrototypeOf(proto)===null,name+': a custom prototype survived normalization');
+    assert(!('marker' in sign)&&sign.toJSON===undefined,name+': inherited behaviour survived normalization');
+    // It must also serialize, render and round-trip exactly like a canonical sign.
+    assert(JSON.stringify(sign)===JSON.stringify({id:CANON.id,ar:CANON.ar,en:CANON.en}),name+': normalized sign does not serialize canonically');
+    const r=clone(hostileBase.d); r.tokens[hostileBase.ix].sign=build();
+    api.renderExercise(r);
+    assert(r.tokens[hostileBase.ix].ar.includes(CANON.ar),name+': did not render the canonical label');
+    assert(!r.tokens[hostileBase.ix].ar.includes('undefined'),name+': rendered the literal undefined');
+    const snapSource=clone(hostileBase.d); snapSource.tokens[hostileBase.ix].sign=build(); snapSource.validated=true;
+    let snap;
+    try{ snap=api.createExerciseSnapshot(snapSource); }
+    catch(error){ throw new Error('Inert wrapper "'+name+'" threw during snapshot: '+error.message); }
+    assert(snap,name+': could not be snapshotted');
+    assert(JSON.stringify(snap.tokens[hostileBase.ix].sign)===JSON.stringify({id:CANON.id,ar:CANON.ar,en:CANON.en}),
+      name+': snapshot did not contain plain canonical sign data');
+    assert(api.restoreExerciseSnapshot(clone(snap)),name+': did not round-trip');
+    for(const [what,count] of Object.entries(marker))assert(count.n===0,name+': '+what+' was invoked '+count.n+' time(s)');
+    s0InertCases++;
+    s0Cases+=11;
+  }
+  inertCase('exotic prototype (Date)',()=>Object.assign(Object.create(Date.prototype),{id:hostileBase.id,ar:CANON.ar,en:CANON.en}));
+  inertCase('exotic prototype (Map)',()=>Object.assign(Object.create(Map.prototype),{id:hostileBase.id,ar:CANON.ar,en:CANON.en}));
+  inertCase('class instance',()=>{class Sign{constructor(){this.id=hostileBase.id;this.ar=CANON.ar;this.en=CANON.en}}return new Sign();});
+  inertCase('custom deep prototype',()=>Object.assign(Object.create(Object.create({})),{id:hostileBase.id,ar:CANON.ar,en:CANON.en}));
+  /* --- A/B/C/D/E: the shallow custom prototype whose parent is null, with inherited behaviour.
+     Each counter proves the inherited member was never touched. --- */
+  {
+    const shallow=(protoBuild)=>{const proto=Object.create(null);protoBuild(proto);
+      return Object.assign(Object.create(proto),{id:hostileBase.id,ar:CANON.ar,en:CANON.en});};
+    inertCase('shallow null-root prototype (marker)',()=>shallow(p=>{p.marker=1;}));
+    const jsonHits={n:0};
+    inertCase('inherited toJSON',()=>shallow(p=>{p.toJSON=()=>{jsonHits.n++;return{id:'zzz',ar:'X',en:'Y'}};}),{'inherited toJSON':jsonHits});
+    inertCase('inherited THROWING toJSON',()=>shallow(p=>{p.toJSON=()=>{throw new Error('proto-toJSON')};}));
+    const getHits={n:0};
+    inertCase('inherited getter',()=>shallow(p=>{Object.defineProperty(p,'extra',{get(){getHits.n++;return 1}});}),{'inherited getter':getHits});
+    inertCase('inherited THROWING getter',()=>shallow(p=>{Object.defineProperty(p,'boom',{get(){throw new Error('proto-getter')}});}));
+    inertCase('inherited THROWING valueOf',()=>shallow(p=>{p.valueOf=()=>{throw new Error('proto-valueOf')};}));
+    inertCase('inherited Symbol.toPrimitive',()=>shallow(p=>{p[Symbol.toPrimitive]=()=>{throw new Error('proto-toPrimitive')};}));
+    /* M/N: a has-only Proxy. Its trap is never invoked because no sign path uses `in` or
+       Reflect.has, and normalization replaces the wrapper with plain data, so it cannot survive
+       into authority, rendering, Why, filters, serialization or History. */
+    const hasHits={n:0};
+    inertCase('has-only proxy',()=>new Proxy({id:hostileBase.id,ar:CANON.ar,en:CANON.en},
+      {has(){hasHits.n++;return true}}),{'the has trap':hasHits});
+    const getTrapHits={n:0};
+    inertCase('get-only proxy',()=>new Proxy({id:hostileBase.id,ar:CANON.ar,en:CANON.en},
+      {get(t,k){getTrapHits.n++;return t[k]}}),{'the get trap':getTrapHits});
+  }
+  hostileCase('own symbol present',()=>{const o={id:hostileBase.id,ar:CANON.ar,en:CANON.en};o[Symbol('x')]=1;return o;});
+  hostileCase('inherited registry id name',()=>({id:'toString',ar:CANON.ar,en:CANON.en}));
+  hostileCase('non-string id',()=>({id:7,ar:CANON.ar,en:CANON.en}));
+  hostileCase('array',()=>[hostileBase.id,CANON.ar,CANON.en]);
+  hostileCase('function',()=>{const f=function(){};f.id=hostileBase.id;f.ar=CANON.ar;f.en=CANON.en;return f;});
+  hostileCase('null-prototype with wrong labels',()=>Object.assign(Object.create(null),{id:hostileBase.id,ar:'زُوِّرَ',en:'FORGED'}));
+  hostileCase('shallow prototype with wrong own labels',()=>{const p=Object.create(null);p.marker=1;
+    return Object.assign(Object.create(p),{id:hostileBase.id,ar:'زُوِّرَ',en:'FORGED'});});
+  // N: a Proxy that throws from every trap must still become a deterministic failure.
+  /* Traps that the shape inspector itself uses: inspection fails safely, so the label contract
+     owns the rejection. */
+  for(const trap of ['getOwnPropertyDescriptor','ownKeys']){
+    hostileCase('throwing proxy trap: '+trap,()=>new Proxy({id:hostileBase.id,ar:CANON.ar,en:CANON.en},
+      {[trap]:()=>{throw new Error('proxy-'+trap)}}));
+  }
+  /* A proxy that throws only from `get` is DESCRIPTOR-canonical, and under Model B nothing in
+     the sign path performs a plain property read on an untrusted sign, so it is normalized away
+     like any other inert wrapper — its trap never fires at all. */
+  {
+    const protoTrap={n:0};
+    inertCase('throwing getPrototypeOf-trap proxy',()=>new Proxy({id:hostileBase.id,ar:CANON.ar,en:CANON.en},
+      {getPrototypeOf(){protoTrap.n++;throw new Error('proxy-proto')}}),{'the getPrototypeOf trap':protoTrap});
+    const throwingGet={n:0};
+    inertCase('throwing get-trap proxy',()=>new Proxy({id:hostileBase.id,ar:CANON.ar,en:CANON.en},
+      {get(){throwingGet.n++;throw new Error('proxy-get')}}),{'the throwing get trap':throwingGet});
+  }
+  // A null-prototype record with the CORRECT labels is a legitimate serializable shape.
+  {
+    const d=clone(hostileBase.d);
+    d.tokens[hostileBase.ix].sign=Object.assign(Object.create(null),{id:hostileBase.id,ar:CANON.ar,en:CANON.en});
+    assert(api.validateExercise(d).length===0,'a null-prototype canonical sign record was rejected');
+    s0Cases++;
+  }
+
+  /* --- O: falsy non-null values reach the LANE owner, not only the generic label code. --- */
+  {
+    const mabni=api.buildTemplate(api.templates.find(t=>t.stableId==='T_PARTICLE_SINGULAR_NASB_FATHA_04').id);
+    const past=api.buildTemplate(api.templates.find(t=>t.starts==='verb'&&t.form==='broken'&&t.state==='raf').id);
+    const lanes=[
+      ['particle',mabni,0,'E_PARTICLE_SIGN'],
+      ['mabniPresent',mabni,mabni.tokens.findIndex(t=>t.grammar.type==='verb'),'E_MABNI_PRESENT_SIGN'],
+      ['pastVerb',past,past.tokens.findIndex(t=>t.tense==='past'),'E_PAST_MUARAB']
+    ];
+    for(const [lane,base,ix,owner] of lanes){
+      assert(base.tokens[ix].sign===null||base.tokens[ix].sign===undefined,lane+': the clean lane already carries a sign');
+      s0Cases++;
+      for(const [label,value] of [['false',false],['0',0],['empty string',''],['NaN',NaN],
+          ['empty object',{}],['array',[]],['string','damma'],['number',5],['true',true],
+          ['canonical sign',api.GRAMMAR_SIGNS.fatha]]){
+        const d=clone(base);
+        d.tokens[ix].sign=value;
+        let codes;
+        try{ codes=api.validateExercise(d).map(f=>f.code); }
+        catch(error){ throw new Error(lane+'/'+label+' threw: '+error.message); }
+        assert(codes.includes(owner),
+          lane+'/'+label+' did not reach its lane owner '+owner+': '+JSON.stringify(codes));
+        codes.forEach(c=>{s0CodeHist[c]=(s0CodeHist[c]||0)+1;});
+        s0AttackCases++;
+      }
+      // Absent and null remain the two canonical ways to say "no sign".
+      for(const value of [null,undefined]){
+        const d=clone(base);
+        d.tokens[ix].sign=value;
+        assert(!api.validateExercise(d).map(f=>f.code).includes(owner),lane+': '+String(value)+' was treated as a sign claim');
+        s0Cases++;
+      }
+    }
+  }
+
+  /* --- R: raw History hostile objects reject before any serialization can invoke them. --- */
+  {
+    const snap=api.createExerciseSnapshot(hostileBase.d);
+    const hostileBuilders=[
+      ['getter on id',()=>{const o={ar:CANON.ar,en:CANON.en};Object.defineProperty(o,'id',{get(){throw new Error('h-id')},enumerable:true});return o;}],
+      ['getter on ar',()=>{const o={id:hostileBase.id,en:CANON.en};Object.defineProperty(o,'ar',{get(){throw new Error('h-ar')},enumerable:true});return o;}],
+      ['getter on en',()=>{const o={id:hostileBase.id,ar:CANON.ar};Object.defineProperty(o,'en',{get(){throw new Error('h-en')},enumerable:true});return o;}],
+      ['accessor labels',()=>{const o={id:hostileBase.id};Object.defineProperty(o,'ar',{get(){return CANON.ar},enumerable:true});Object.defineProperty(o,'en',{get(){return CANON.en},enumerable:true});return o;}],
+      ['inherited id',()=>({id:'constructor',ar:CANON.ar,en:CANON.en})],
+      ['unknown id',()=>({id:'zzz',ar:CANON.ar,en:CANON.en})],
+      ['non-string id',()=>({id:{},ar:CANON.ar,en:CANON.en})],
+      ['own symbol',()=>{const o={id:hostileBase.id,ar:CANON.ar,en:CANON.en};o[Symbol('s')]=1;return o;}],
+      ['throwing proxy',()=>new Proxy({id:hostileBase.id,ar:CANON.ar,en:CANON.en},{ownKeys(){throw new Error('pk')}})]
+    ];
+    for(const [label,build] of hostileBuilders){
+      const forged=clone(snap);
+      forged.tokens[hostileBase.ix].sign=build();
+      let result;
+      try{ result=api.restoreExerciseSnapshot(forged); }
+      catch(error){ throw new Error('Raw History hostile sign "'+label+'" threw: '+error.message); }
+      assert(result===null,'Raw History hostile sign "'+label+'" was restored');
+      s0AttackCases++;
+    }
+    // …while ordinary presentation corruption beside a good id still rebuilds.
+    for(const [label,build] of [
+      ['stale labels',()=>({id:hostileBase.id,ar:'زُوِّرَ',en:'FORGED'})],
+      ['missing labels',()=>({id:hostileBase.id})],
+      ['extra property',()=>({id:hostileBase.id,ar:CANON.ar,en:CANON.en,extra:1})],
+      ['null-prototype record',()=>Object.assign(Object.create(null),{id:hostileBase.id,ar:'x',en:'y'})],
+      ['exotic prototype, canonical own data',()=>Object.assign(Object.create(Date.prototype),{id:hostileBase.id,ar:CANON.ar,en:CANON.en})],
+      ['shallow prototype with throwing toJSON',()=>{const pr=Object.create(null);pr.toJSON=()=>{throw new Error('h-json')};return Object.assign(Object.create(pr),{id:hostileBase.id,ar:CANON.ar,en:CANON.en});}],
+      ['has-only proxy',()=>new Proxy({id:hostileBase.id,ar:CANON.ar,en:CANON.en},{has(){return true}})]
+    ]){
+      const forged=clone(snap);
+      forged.tokens[hostileBase.ix].sign=build();
+      const restored=api.restoreExerciseSnapshot(forged);
+      assert(restored,'History rejected repairable corruption "'+label+'"');
+      const rebuilt=restored.tokens[hostileBase.ix].sign;
+      assert(rebuilt.id===hostileBase.id&&rebuilt.ar===CANON.ar&&rebuilt.en===CANON.en,
+        'History did not rebuild "'+label+'"');
+      assert(rebuilt!==api.GRAMMAR_SIGNS[hostileBase.id],'History handed out the registry entry for "'+label+'"');
+      const text=restored.tokens.map(t=>(t.ar||'')+' '+(t.en||'')).join(' ');
+      assert(!text.includes('زُوِّرَ')&&!text.includes('FORGED')&&!text.includes('undefined'),
+        'History leaked a bad label for "'+label+'"');
+      s0Cases+=4;
+    }
+  }
+
+  /* --- P/Q/T: every production sign still renders canonically, and nothing prints undefined. --- */
+  {
+    let renderedSigns=0;
+    for(const t of api.templates){
+      const d=api.buildTemplate(t.id);
+      api.renderExercise(d);
+      for(const tok of d.tokens){
+        const text=(tok.ar||'')+' '+(tok.en||'');
+        assert(!text.includes('undefined'),t.stableId+': rendered the literal undefined');
+        if(tok.sign){
+          const canon=api.GRAMMAR_SIGNS[tok.sign.id];
+          assert(text.includes(canon.ar),t.stableId+': did not render the canonical Arabic label for '+tok.sign.id);
+          renderedSigns++;
+        }
+      }
+      s0Cases++;
+    }
+    assert(renderedSigns>0,'no signs were rendered');
+    // S: wrong id with correct-looking labels is still owned by the lane rule.
+    const other=SIGN_IDS.find(x=>x!==hostileBase.id);
+    const d=clone(hostileBase.d);
+    d.tokens[hostileBase.ix].sign={id:other,ar:api.GRAMMAR_SIGNS[other].ar,en:api.GRAMMAR_SIGNS[other].en};
+    assert(api.validateExercise(d).map(f=>f.code).includes('E_NOUN_SIGN'),'a wrong sign id was not owned by E_NOUN_SIGN');
+    s0AttackCases++;
+  }
+}
+
+/* ============================================================================
+   PHASE 3B0-pre FINAL BOUNDARY — render quarantine, revoked Proxies, accessor side effects.
+
+   Three contained defects remained after Model B:
+     • a malformed record that kept a valid canonical ID was quarantined and then RENDERED with
+       the canonical labels resolved from that ID, so learner-visible, canonical-looking analysis
+       was produced from data validation was about to reject;
+     • Array.isArray sat outside the protected inspection boundary, and on a revoked Proxy it
+       throws, so a revoked Proxy escaped as a TypeError from validation, rendering, snapshot
+       creation and History alike;
+     • the accessor tests asserted rejection but never asserted that the rejected getter was not
+       invoked, so a mutant that read t.sign.id inside Why rebuilding still passed.
+   ========================================================================== */
+{
+  const SIGN_IDS=Object.keys(api.GRAMMAR_SIGNS);
+  const laneFixture=(pred)=>{
+    for(const t of api.templates)for(let i=0;i<20;i++){
+      const d=api.buildTemplate(t.id);
+      const ix=d.tokens.findIndex(pred);
+      if(ix>=0)return{d,ix,id:d.tokens[ix].sign.id,stableId:t.stableId};
+    }
+    return null;
+  };
+  const LANES={
+    noun:laneFixture(t=>t.sign&&t.grammar.type==='noun'),
+    ordinary:laneFixture(t=>t.sign&&t.grammar.type==='verb'&&t.inflection==='regular'),
+    fiveVerb:laneFixture(t=>t.sign&&t.grammar.type==='verb'&&t.inflection==='afalKhamsa')
+  };
+  for(const [name,f] of Object.entries(LANES))assert(f,'no fixture for lane '+name);
+
+  /* --- §9 QUARANTINE BOUNDARY: a malformed record that keeps a valid canonical ID must reject,
+     must render nothing, must build no Why, must not snapshot, and must not touch diagnostics. --- */
+  for(const [lane,f] of Object.entries(LANES)){
+    const C=api.GRAMMAR_SIGNS[f.id];
+    const malformed=[
+      ['forged ar',()=>({id:f.id,ar:'زُوِّرَ',en:C.en})],
+      ['forged en',()=>({id:f.id,ar:C.ar,en:'FORGED-EN'})],
+      ['both forged',()=>({id:f.id,ar:'زُوِّرَ',en:'FORGED-EN'})],
+      ['extra own key',()=>({id:f.id,ar:C.ar,en:C.en,extra:1})],
+      ['missing label',()=>({id:f.id,ar:C.ar})],
+      ['wrong label type',()=>({id:f.id,ar:5,en:C.en})],
+      ['own symbol',()=>{const o={id:f.id,ar:C.ar,en:C.en};o[Symbol('s')]=1;return o;}],
+      ['accessor descriptor',()=>{const o={id:f.id,ar:C.ar};Object.defineProperty(o,'en',{get(){return C.en},enumerable:true});return o;}],
+      ['descriptor-throwing proxy',()=>new Proxy({id:f.id,ar:C.ar,en:C.en},{getOwnPropertyDescriptor(){throw new Error('p')}})],
+      ['revoked proxy',()=>{const pair=Proxy.revocable({id:f.id,ar:C.ar,en:C.en},{});pair.revoke();return pair.proxy;}]
+    ];
+    for(const [label,build] of malformed){
+      const name=lane+'/'+label;
+      assert(f.d.sentence&&f.d.translation,name+': fixture did not start with sentence and translation output');
+      // (a) validation rejects, and diagnostics do not move.
+      const before=JSON.stringify(api.grammarDiagnostics.validByRule);
+      const v=clone(f.d); v.tokens[f.ix].sign=build();
+      let codes;
+      try{ codes=api.validateExercise(v).map(x=>x.code); }
+      catch(error){ throw new Error('quarantine "'+name+'" threw in validation: '+error.message); }
+      assert(codes.includes('E_SIGN_CANONICAL'),name+': not owned by E_SIGN_CANONICAL — '+JSON.stringify(codes));
+      assert(JSON.stringify(api.grammarDiagnostics.validByRule)===before,name+': diagnostics changed for rejected input');
+      codes.forEach(c=>{s0CodeHist[c]=(s0CodeHist[c]||0)+1;});
+      // (b) direct rendering produces NOTHING learner-visible.
+      const r=clone(f.d); r.tokens[f.ix].sign=build();
+      let refused=false;
+      try{ api.renderExercise(r); }catch(error){ refused=true; }
+      assert(refused,name+': renderExercise produced output instead of refusing');
+      assert(r.sentence==='',name+': stale sentence survived the refusal');
+      assert(r.translation==='',name+': stale translation survived the refusal');
+      assert(r.sentence!==f.d.sentence,name+': old sentence was not actively cleared');
+      assert(r.translation!==f.d.translation,name+': old translation was not actively cleared');
+      assert(r.tokens.every(t=>!t.ar&&!t.en&&!t.phraseAr&&!t.phraseEn&&!t.phraseLabel&&!t.why&&!t.phraseWhy),
+        name+': token, target, Why, phrase, or relationship presentation survived the refusal');
+      const text=r.tokens.map(t=>(t.ar||'')+' '+(t.en||'')+' '+(t.phraseAr||'')+' '+(t.phraseEn||'')
+        +' '+((t.why?.ar||[]).join(' '))+' '+((t.why?.en||[]).join(' '))
+        +' '+((t.phraseWhy?.ar||[]).join(' '))+' '+((t.phraseWhy?.en||[]).join(' '))).join(' ');
+      assert(!text.trim(),name+': learner-visible presentation survived the refusal');
+      assert(!text.includes(C.ar)&&!text.includes(C.en),name+': canonical-looking output was produced from invalid data');
+      assert(!text.includes('زُوِّرَ')&&!text.includes('FORGED-EN'),name+': forged text was rendered');
+      assert(!text.includes('undefined'),name+': the literal undefined was rendered');
+      assert(JSON.stringify(api.grammarDiagnostics.validByRule)===before,name+': rendering changed diagnostics for rejected input');
+      // (c) no Why is produced for a quarantined sign.
+      const w=clone(f.d); w.tokens[f.ix].sign=build();
+      let whyRefused=false;
+      try{ api.buildTokenWhy(w.tokens[f.ix],w); }catch(error){ whyRefused=true; }
+      assert(whyRefused,name+': Why was built for a quarantined sign');
+      // (d) no valid snapshot.
+      const sd=clone(f.d); sd.tokens[f.ix].sign=build(); sd.validated=true;
+      let snap=null;
+      try{ snap=api.createExerciseSnapshot(sd); }
+      catch(error){ throw new Error('quarantine "'+name+'" threw in createExerciseSnapshot: '+error.message); }
+      assert(snap===null,name+': a malformed live sign produced a snapshot');
+      // (e) History must not promote a malformed LIVE-shaped sign into a valid exercise.
+      const good=api.createExerciseSnapshot(f.d);
+      const forgedSnap=clone(good); forgedSnap.tokens[f.ix].sign=build();
+      let restored;
+      try{ restored=api.restoreExerciseSnapshot(forgedSnap); }
+      catch(error){ throw new Error('quarantine "'+name+'" threw in restore: '+error.message); }
+      if(restored){
+        /* Only ordinary presentation corruption beside a good id may rebuild, and then the sign
+           must be exactly canonical — never the malformed record promoted to valid. */
+        const sign=restored.tokens[f.ix].sign;
+        assert(sign.id===f.id&&sign.ar===C.ar&&sign.en===C.en,name+': History promoted a malformed sign');
+        assert(Object.getOwnPropertyNames(sign).join(',')==='id,ar,en',name+': History kept a malformed shape');
+        s0Cases++;
+      }
+      s0AttackCases++;
+      s0Cases+=8;
+    }
+  }
+
+  /* --- §7 ACCESSOR SIDE EFFECTS: the rejected getter must never be invoked, by ANY path. --- */
+  {
+    const f=LANES.noun,C=api.GRAMMAR_SIGNS[f.id];
+    const descriptors=[
+      ['non-throwing getter',(o,field,hits)=>Object.defineProperty(o,field,{get(){hits.n++;return field==='id'?f.id:C[field]},enumerable:true,configurable:true})],
+      ['throwing getter',(o,field,hits)=>Object.defineProperty(o,field,{get(){hits.n++;throw new Error('boom')},enumerable:true,configurable:true})],
+      ['getter/setter pair',(o,field,hits)=>Object.defineProperty(o,field,{get(){hits.n++;return field==='id'?f.id:C[field]},set(){hits.n++;},enumerable:true,configurable:true})],
+      ['setter-only',(o,field,hits)=>Object.defineProperty(o,field,{set(){hits.n++;},enumerable:true,configurable:true})]
+    ];
+    for(const field of ['id','ar','en']){
+      for(const [kind,define] of descriptors){
+        const hits={n:0};
+        const build=()=>{
+          const o={};
+          for(const k of ['id','ar','en']){
+            if(k===field)define(o,k,hits);
+            else Object.defineProperty(o,k,{value:k==='id'?f.id:C[k],enumerable:true,configurable:true,writable:true});
+          }
+          return o;
+        };
+        const name='own '+kind+' on '+field;
+        // validateExercise
+        const v=clone(f.d); v.tokens[f.ix].sign=build();
+        let codes;
+        try{ codes=api.validateExercise(v).map(x=>x.code); }
+        catch(error){ throw new Error(name+' threw in validation: '+error.message); }
+        assert(codes.includes('E_SIGN_CANONICAL'),name+': not rejected by the label contract — '+JSON.stringify(codes));
+        // renderExercise
+        const r=clone(f.d); r.tokens[f.ix].sign=build();
+        let refused=false;
+        try{ api.renderExercise(r); }catch(error){ refused=true; }
+        assert(refused,name+': rendered instead of refusing');
+        // createExerciseSnapshot
+        const sd=clone(f.d); sd.tokens[f.ix].sign=build(); sd.validated=true;
+        let snap=null;
+        try{ snap=api.createExerciseSnapshot(sd); }catch(error){ throw new Error(name+' threw in snapshot: '+error.message); }
+        assert(snap===null,name+': produced a snapshot');
+        // restoreExerciseSnapshot
+        const good=api.createExerciseSnapshot(f.d);
+        const forged=clone(good); forged.tokens[f.ix].sign=build();
+        let restored;
+        try{ restored=api.restoreExerciseSnapshot(forged); }catch(error){ throw new Error(name+' threw in restore: '+error.message); }
+        assert(restored===null,name+': History accepted an accessor-bearing sign');
+        // Why rebuild path
+        const w=clone(f.d); w.tokens[f.ix].sign=build();
+        try{ api.buildTokenWhy(w.tokens[f.ix],w); }catch(error){ /* refused */ }
+        // THE assertion this whole section exists for.
+        assert(hits.n===0,name+': the rejected accessor was invoked '+hits.n+' time(s)');
+        s0AttackCases++;
+        s0Cases+=6;
+      }
+    }
+    /* Inherited behaviour must likewise never run. */
+    const inheritedProbes=[
+      ['inherited getter',(p,hits)=>Object.defineProperty(p,'extra',{get(){hits.n++;return 1}})],
+      ['inherited toJSON',(p,hits)=>{p.toJSON=()=>{hits.n++;return{id:'zzz'}};}],
+      ['inherited throwing toJSON',(p,hits)=>{p.toJSON=()=>{hits.n++;throw new Error('j')};}],
+      ['inherited valueOf',(p,hits)=>{p.valueOf=()=>{hits.n++;throw new Error('v')};}],
+      ['inherited Symbol.toPrimitive',(p,hits)=>{p[Symbol.toPrimitive]=()=>{hits.n++;throw new Error('tp')};}]
+    ];
+    for(const [name,define] of inheritedProbes){
+      const hits={n:0};
+      const build=()=>{const p=Object.create(null);define(p,hits);
+        return Object.assign(Object.create(p),{id:f.id,ar:C.ar,en:C.en});};
+      const v=clone(f.d); v.tokens[f.ix].sign=build();
+      assert(api.validateExercise(v).length===0,name+': a canonical-data inert wrapper was rejected');
+      const r=clone(f.d); r.tokens[f.ix].sign=build();
+      api.renderExercise(r);
+      assert(r.tokens[f.ix].ar.includes(C.ar),name+': inert wrapper did not render canonically');
+      const sd=clone(f.d); sd.tokens[f.ix].sign=build(); sd.validated=true;
+      const snap=api.createExerciseSnapshot(sd);
+      assert(snap,name+': inert wrapper produced no snapshot');
+      assert(api.restoreExerciseSnapshot(clone(snap)),name+': inert wrapper did not round-trip');
+      assert(hits.n===0,name+': inherited behaviour was invoked '+hits.n+' time(s)');
+      s0InertCases++;
+      s0Cases+=5;
+    }
+  }
+
+  /* --- FINAL CLEANUP: direct helper boundaries. These calls deliberately bypass
+     normalizeTokenSigns so a future plain sign.id/ar/en read in the helper itself cannot hide
+     behind entry-point normalization. Every accessor counter is therefore load-bearing. --- */
+  {
+    const clearPresentation=token=>{
+      token.ar='';token.en='';token.phraseAr='';token.phraseEn='';token.phraseLabel='';
+      token.why=null;token.phraseWhy=null;
+    };
+    const accessorSign=(canonical,field,kind,hits)=>{
+      const sign={};
+      for(const name of ['id','ar','en']){
+        const value=name==='id'?canonical.id:(name===field?`FORGED-${field.toUpperCase()}`:canonical[name]);
+        if(name!==field)Object.defineProperty(sign,name,{value,enumerable:true,configurable:true,writable:true});
+        else Object.defineProperty(sign,name,{
+          get(){hits.n++;if(kind==='throwing')throw new Error('direct-'+field);return value},
+          enumerable:true,configurable:true
+        });
+      }
+      return sign;
+    };
+    const tokenText=token=>`${token.ar||''} ${token.en||''} ${token.phraseAr||''} ${token.phraseEn||''}`.trim();
+    const directIdTargets=[
+      ['whySignNoun',LANES.noun,'refuse',(data,token)=>api.whySignNoun(token)],
+      ['whySignVerb',LANES.ordinary,'refuse',(data,token)=>api.whySignVerb(token)],
+      ['buildTokenWhy',LANES.noun,'refuse',(data,token)=>api.buildTokenWhy(token,data)],
+      ['diagnostic record',LANES.noun,'diagnostic',(data,token)=>api.grammarFailureRecord(
+        'E_DIRECT_ACCESSOR','Direct accessor audit.',data,token,new Map(data.tokens.map(item=>[item.id,item])))],
+      ['current identity',LANES.noun,'identity',(data)=>api.canonicalExerciseIdentity(data)],
+      ['phase1-v3 identity',LANES.noun,'identity-v3',(data)=>api.canonicalExerciseIdentityV3Phase1(data)]
+    ];
+    for(const [helper,f,mode,call] of directIdTargets)for(const kind of ['returning','throwing']){
+      const data=clone(f.d),token=data.tokens[f.ix],canonical=api.GRAMMAR_SIGNS[f.id],hits={n:0};
+      clearPresentation(token);
+      token.sign=accessorSign(canonical,'id',kind,hits);
+      let result,error;
+      try{result=call(data,token)}catch(caught){error=caught}
+      assert(hits.n===0,helper+'/'+kind+': rejected id accessor was invoked '+hits.n+' time(s)');
+      if(mode==='refuse'){
+        assert(error,helper+'/'+kind+': rejected id accessor did not refuse');
+        assert(!result,helper+'/'+kind+': rejected id accessor produced Why output');
+        assert(!tokenText(token),helper+'/'+kind+': rejected id accessor produced learner text');
+      }else if(mode==='diagnostic'){
+        assert(!error&&result?.code==='E_DIRECT_ACCESSOR',helper+'/'+kind+': failure record was not deterministic');
+        assert(result.actualSign==='',helper+'/'+kind+': failure record trusted the rejected id accessor');
+        assert(!tokenText(token),helper+'/'+kind+': diagnostic construction produced learner text');
+      }else{
+        assert(!error&&typeof result==='string',helper+'/'+kind+': identity hashing escaped or failed');
+        const control=clone(f.d);control.tokens[f.ix].sign=null;
+        const expected=mode==='identity'?api.canonicalExerciseIdentity(control):api.canonicalExerciseIdentityV3Phase1(control);
+        assert(result===expected,helper+'/'+kind+': rejected id accessor changed the identity');
+        assert(!tokenText(token),helper+'/'+kind+': identity hashing produced learner text');
+      }
+      s0DirectAccessorCases++;s0AttackCases++;
+    }
+
+    /* ar/en are presentation fields. Leaf Why and render helpers may resolve canonical text from
+       the safe semantic id, but they must never touch the rejected stored label accessor. */
+    const directLabelTargets=[
+      ['whySignNoun',LANES.noun,'canonical',(data,token)=>api.whySignNoun(token)],
+      ['whySignVerb',LANES.ordinary,'canonical',(data,token)=>api.whySignVerb(token)],
+      ['buildTokenWhy',LANES.noun,'refuse',(data,token)=>api.buildTokenWhy(token,data)],
+      ['diagnostic record',LANES.noun,'diagnostic',(data,token)=>api.grammarFailureRecord(
+        'E_DIRECT_LABEL_ACCESSOR','Direct label-accessor audit.',data,token,new Map(data.tokens.map(item=>[item.id,item])))],
+      ['current identity',LANES.noun,'identity',(data)=>api.canonicalExerciseIdentity(data)],
+      ['phase1-v3 identity',LANES.noun,'identity-v3',(data)=>api.canonicalExerciseIdentityV3Phase1(data)],
+      ['noun renderer',LANES.noun,'render-noun',(data,token)=>api.renderNounAnalysis(token)],
+      ['verb renderer',LANES.ordinary,'render-verb',(data,token)=>{
+        token._tokens=data.tokens;token._data=data;
+        try{return api.renderVerbAnalysis(token)}finally{delete token._tokens;delete token._data}
+      }]
+    ];
+    for(const field of ['ar','en'])for(const [helper,f,mode,call] of directLabelTargets)
+      for(const kind of ['returning','throwing']){
+        const data=clone(f.d),token=data.tokens[f.ix],canonical=api.GRAMMAR_SIGNS[f.id],hits={n:0};
+        clearPresentation(token);
+        token.sign=accessorSign(canonical,field,kind,hits);
+        let result,error;
+        try{result=call(data,token)}catch(caught){error=caught}
+        assert(hits.n===0,helper+'/'+field+'/'+kind+': rejected '+field+' accessor was invoked '+hits.n+' time(s)');
+        if(mode==='refuse')assert(error&&!result,helper+'/'+field+'/'+kind+': malformed label did not refuse');
+        else if(mode==='diagnostic')assert(!error&&result?.actualSign===f.id,
+          helper+'/'+field+'/'+kind+': diagnostic sign id changed');
+        else if(mode==='identity'||mode==='identity-v3'){
+          const control=clone(f.d);control.tokens[f.ix].sign={id:f.id,ar:canonical.ar,en:canonical.en};
+          const expected=mode==='identity'?api.canonicalExerciseIdentity(control):api.canonicalExerciseIdentityV3Phase1(control);
+          assert(!error&&result===expected,helper+'/'+field+'/'+kind+': identity changed or escaped');
+        }else{
+          const rendered=`${result?.ar||''} ${result?.en||''} ${tokenText(token)}`;
+          assert(!error,helper+'/'+field+'/'+kind+': canonical resolution escaped');
+          assert(!rendered.includes('FORGED-AR')&&!rendered.includes('FORGED-EN'),
+            helper+'/'+field+'/'+kind+': stored accessor text reached output');
+          if(mode==='render-noun'||mode==='render-verb')assert(rendered.includes(canonical[field]),
+            helper+'/'+field+'/'+kind+': renderer did not use canonical text');
+        }
+        s0DirectAccessorCases++;s0AttackCases++;
+      }
+    assert(s0DirectAccessorCases===44,'Direct helper accessor matrix did not execute 44 cases');
+  }
+
+  /* --- §10 REVOKED PROXY: inspection itself throws, so this is not an inert wrapper. Every
+     entry point must reject deterministically without letting the TypeError escape. --- */
+  {
+    const revoked=()=>{const r=Proxy.revocable({id:'damma',ar:'x',en:'y'},{});r.revoke();return r.proxy;};
+    for(const [lane,f] of Object.entries(LANES)){
+      const before=JSON.stringify(api.grammarDiagnostics.validByRule);
+      // normalization
+      const n=clone(f.d); n.tokens[f.ix].sign=revoked();
+      try{ api.validateExercise(n); }
+      catch(error){ throw new Error(lane+': a revoked Proxy escaped validation: '+error.message); }
+      const codes=api.validateExercise((()=>{const d=clone(f.d);d.tokens[f.ix].sign=revoked();return d})()).map(x=>x.code);
+      assert(codes.includes('E_SIGN_CANONICAL'),lane+': revoked Proxy not owned by E_SIGN_CANONICAL — '+JSON.stringify(codes));
+      codes.forEach(c=>{s0CodeHist[c]=(s0CodeHist[c]||0)+1;});
+      assert(JSON.stringify(api.grammarDiagnostics.validByRule)===before,lane+': diagnostics changed for a revoked Proxy');
+      // rendering
+      const r=clone(f.d); r.tokens[f.ix].sign=revoked();
+      let refused=false;
+      try{ api.renderExercise(r); }catch(error){ refused=true;
+        assert(!/revoked/i.test(error.message),lane+': the revoked-Proxy TypeError escaped rendering'); }
+      assert(refused,lane+': a revoked Proxy rendered');
+      assert(r.sentence===''&&r.translation==='',lane+': revoked Proxy left stale top-level output');
+      assert(!r.tokens.map(t=>(t.ar||'')+(t.en||'')).join('').trim(),lane+': revoked Proxy left learner-visible output');
+      // Why
+      const w=clone(f.d); w.tokens[f.ix].sign=revoked();
+      let whyRefused=false;
+      try{ api.buildTokenWhy(w.tokens[f.ix],w); }catch(error){ whyRefused=true;
+        assert(!/revoked/i.test(error.message),lane+': the revoked-Proxy TypeError escaped Why'); }
+      assert(whyRefused,lane+': Why was built for a revoked Proxy');
+      // snapshot
+      const sd=clone(f.d); sd.tokens[f.ix].sign=revoked(); sd.validated=true;
+      let snap=null;
+      try{ snap=api.createExerciseSnapshot(sd); }
+      catch(error){ throw new Error(lane+': a revoked Proxy escaped createExerciseSnapshot: '+error.message); }
+      assert(snap===null,lane+': a revoked Proxy produced a snapshot');
+      // History
+      const good=api.createExerciseSnapshot(f.d);
+      const forged=clone(good); forged.tokens[f.ix].sign=revoked();
+      let restored;
+      try{ restored=api.restoreExerciseSnapshot(forged); }
+      catch(error){ throw new Error(lane+': a revoked Proxy escaped History: '+error.message); }
+      assert(restored===null,lane+': History restored a revoked Proxy');
+      s0AttackCases++;
+      s0Cases+=8;
+    }
+    // The safe readers themselves must never throw for a revoked Proxy.
+    assert(api.safeSignId(revoked())===undefined,'safeSignId threw or resolved for a revoked Proxy');
+    assert(api.readSignShape(revoked())===null,'readSignShape did not refuse a revoked Proxy');
+    assert(api.readSignIdForRepair(revoked())===null,'readSignIdForRepair did not refuse a revoked Proxy');
+    s0Cases+=3;
+  }
+}
+console.log('Phase-3B0-pre canonical sign-label audit passed: '+s0Cases+' canonical checks and '+s0AttackCases+' adversarial checks.');
+console.log('  sign fuzz accounting: '+JSON.stringify(s0FuzzReport)+'; no-ops excluded: '+s0NoOps+'; inert wrappers normalized away: '+s0InertCases);
+console.log('  direct helper accessor checks: '+s0DirectAccessorCases+'; rejected accessor invocations: 0; stale top-level outputs: 0');
+console.log('  sign error-code distribution: '+JSON.stringify(s0CodeHist));
 
 
 assert(api.COMPONENT_REGISTRY['yaa-mukhataba']?.ruleId==='C_YAA_MUKHATABA'

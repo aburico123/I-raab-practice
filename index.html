@@ -366,6 +366,10 @@ body.lang-arabic .icon-popover{direction:rtl}
 
   <main class="practice">
     <div id="practiceEyebrow" class="eyebrow">Practice sentence</div>
+    <div id="responseContext" class="response-context" hidden>
+      <div id="responseContextPromptAr" class="response-context-ar" lang="ar"></div>
+      <div id="responseContextPromptEn" class="response-context-en en-only"></div>
+    </div>
     <div id="sentence" lang="ar">الطَّالِبُ مُجْتَهِدٌ</div>
     <div id="translation">The student is hardworking.</div>
     <div id="practiceTip" class="tip">Say the complete iʿrāb of every word. The gold card after revealing is the word that matches your selected form, state, and sign.</div>
@@ -685,15 +689,100 @@ function canonicalHistoryIdentityInput(data){
  });
  return normalized;
 }
+/* The exact key set a snapshot may carry. v1 and v2 simply omit `exerciseIdentity`; nothing may
+   ADD a key. Extras used to be ignored, which meant arbitrary top-level data — including a hostile
+   value the materializer had normalized into inert junk — rode into the restored exercise. */
+const SENTENCE_HISTORY_SNAPSHOT_KEYS=Object.freeze(['schemaVersion','templateId','templateStarts',
+ 'templateForm','templateState','templateSign','sentenceType','sentence','translation','tokens',
+ 'relationships','exerciseIdentity']);
+/* The NESTED key sets, closed the same way the root above is — Policy A: an unknown key REJECTS.
+   Closing the root alone was not enough. `tokens[i]` and `tokens[i].grammar` stayed open, so any
+   unknown name rode into the restored exercise carrying whatever the materializer had normalized
+   its value into: an empty record from a Date, Map, Set, WeakMap, WeakSet, Promise, ArrayBuffer,
+   DataView, typed array, boxed primitive, URL or class instance, a record of inert scraps from a
+   RegExp, and an empty record from a get-trapping, descriptor-trapping or inherited-accessor
+   wrapper. Nothing downstream read them — the danger was never that the junk was live — but an
+   unknown key is a claim the canonical builder never makes, and a restored exercise that is not
+   byte-identical to the canonical one is not a property worth keeping. Both lists are asserted
+   against the canonical builder's own output across all 82 templates by the permanent tests, so
+   neither can silently go stale when a token or grammar field is added.
+
+   The records BELOW these two are Policy B and deliberately carry no list: `grammar.morphology`,
+   `relations`, `lexeme`, `components` and every `relationships[i]` are derived caches, discarded
+   and rebuilt from frozen authority by materializeAuthoritativeMorphology, materializeCanonicalSigns,
+   materializeCanonicalLexemes, materializeComponents and resolveRelationships, so an unknown key
+   planted in one of them cannot reach the restored exercise at all. */
+const EXERCISE_TOKEN_KEYS=Object.freeze(['ar','components','en','enHint','expectedSurface','gloss',
+ 'governorId','grammar','id','inflection','lexeme','mahallRuleId','phraseAr','phraseEn','phraseLabel',
+ 'phraseWhy','relations','ruleId','sign','signRuleId','state','subjectRuleId','surfaceHint','target',
+ 'tense','why','word']);
+const EXERCISE_GRAMMAR_KEYS=Object.freeze(['attachedKaf','conjugation','delayed','exactPresentRaf',
+ 'governorWord','inflection','isMudaf','morphology','particleIraab','particleType','particleWord',
+ 'person','role','type']);
+/* One declared LEGACY name, accepted under Policy B rather than Policy A. Pre-Phase-2 snapshots
+   stored a `componentKinds` array on a verb's grammar. It is never consulted — internal components
+   are derived from structural morphology alone — and materializeAuthoritativeMorphology DELETES it
+   before canonical reconstruction, so it provably cannot survive restoration. That discard runs for
+   VERB tokens only, which is exactly why the name is tolerated only there: on a noun or particle
+   grammar nothing would remove it, so there it is an unknown key like any other and rejects. */
+const EXERCISE_GRAMMAR_LEGACY_VERB_KEYS=Object.freeze(['componentKinds']);
+function isExerciseRecord(value){return Boolean(value)&&typeof value==='object'&&!Array.isArray(value)}
+/* '' when every token, and every token's grammar, is a record carrying only canonical names;
+   otherwise the reason it is refused. Shared by the History boundary and the live-snapshot
+   boundary so one closed schema governs both directions. */
+function exerciseTokenSchemaFailure(tokens){
+ for(const token of tokens){
+  if(!isExerciseRecord(token))return 'token-not-a-record';
+  if(Object.getOwnPropertyNames(token).some(key=>!EXERCISE_TOKEN_KEYS.includes(key)))return 'token-unknown-key';
+  if(!isExerciseRecord(token.grammar))return 'token-grammar-not-a-record';
+  const legacyAllowed=token.grammar.type==='verb';
+  if(Object.getOwnPropertyNames(token.grammar).some(key=>!EXERCISE_GRAMMAR_KEYS.includes(key)
+    &&!(legacyAllowed&&EXERCISE_GRAMMAR_LEGACY_VERB_KEYS.includes(key))))return 'grammar-unknown-key';
+ }
+ return '';
+}
+/* '' when a freshly materialized LIVE exercise has the container shape every step after
+   materialization reads ordinarily, otherwise the reason. Materialization guarantees the graph is
+   fresh, finite, acyclic and descriptor-clean; it guarantees nothing whatever about its SHAPE, and
+   that gap is what let a fresh-but-malformed graph reach validateExercise and the identity
+   calculation. This check is structural only — validateExercise remains the semantic authority and
+   runs immediately after it. */
+function liveExerciseGraphFailure(data){
+ if(!isExerciseRecord(data))return 'not-a-record';
+ if(!Array.isArray(data.tokens)||!data.tokens.length)return 'tokens-not-an-array';
+ if(!Array.isArray(data.relationships))return 'relationships-not-an-array';
+ const tokenReason=exerciseTokenSchemaFailure(data.tokens);
+ if(tokenReason)return tokenReason;
+ for(const token of data.tokens){
+  if(!isExerciseRecord(token.relations))return 'token-relations-not-a-record';
+  if(token.components!==undefined&&!Array.isArray(token.components))return 'token-components-not-an-array';
+  if(Array.isArray(token.components)&&token.components.some(item=>!isExerciseRecord(item)))return 'token-component-not-a-record';
+  /* `null` is canonical for both: كَانَ and its sisters carry `lexeme:null`, and every optional
+     cache reads through `?.`, so an absent one is a record-shaped absence rather than a shape
+     error. A truthy non-record is not. */
+  if(token.lexeme!==undefined&&token.lexeme!==null&&!isExerciseRecord(token.lexeme))return 'token-lexeme-not-a-record';
+  if(token.grammar.morphology!==undefined&&token.grammar.morphology!==null
+    &&!isExerciseRecord(token.grammar.morphology))return 'grammar-morphology-not-a-record';
+ }
+ if(data.relationships.some(item=>!isExerciseRecord(item)))return 'relationship-not-a-record';
+ return '';
+}
 function isExerciseSnapshot(snapshot){
  if(!snapshot||!SENTENCE_HISTORY_SUPPORTED_VERSIONS.includes(snapshot.schemaVersion))return false;
+ if(Object.getOwnPropertyNames(snapshot).some(key=>!SENTENCE_HISTORY_SNAPSHOT_KEYS.includes(key)))return false;
  if(snapshot.schemaVersion===SENTENCE_HISTORY_SNAPSHOT_VERSION
    &&(typeof snapshot.exerciseIdentity!=='string'||!snapshot.exerciseIdentity.startsWith(EXERCISE_IDENTITY_PREFIX)))return false;
  if(typeof snapshot.templateId!=='string'||typeof snapshot.templateStarts!=='string'
    ||typeof snapshot.templateForm!=='string'||typeof snapshot.templateState!=='string'
    ||typeof snapshot.templateSign!=='string'||typeof snapshot.sentenceType!=='string'
-   ||typeof snapshot.sentence!=='string'||typeof snapshot.translation!=='string')return false;
+   ||typeof snapshot.sentence!=='string')return false;
+ /* `translation` carries no type requirement any more. It is PRESENTATION ONLY: restoration
+    ignores whatever is stored and rebuilds it through composeCanonicalTranslation, so a missing,
+    empty or wrong-typed value is a presentation corruption to repair, not a schema violation to
+    refuse. The key itself stays in the closed root set, so nothing new may appear. */
  if(!Array.isArray(snapshot.tokens)||!snapshot.tokens.length||!Array.isArray(snapshot.relationships))return false;
+ /* The nested schemas, closed here for exactly the reason the root key set above is closed. */
+ if(exerciseTokenSchemaFailure(snapshot.tokens))return false;
  /* The stored sentence is PRESENTATION, not authority. It used to be compared against
     composeSentence here, which meant an ordinary presentation corruption — a stale string, an
     appended stray word, a detached «لِ كَيْ» — was rejected outright instead of being rebuilt,
@@ -704,10 +793,48 @@ function isExerciseSnapshot(snapshot){
     re-derives the surface — so a token-order forgery still rejects even when the attacker
     recomputes a matching sentence. Only the type check below is a shape requirement. */
  if(snapshot.tokens.filter(item=>item?.target===true).length!==1)return false;
+ /* Morphology is a VERB cache and lives only at `grammar.morphology`. A noun or particle token
+    carrying one, or any token carrying a top-level `morphology`, is storing a field the canonical
+    builder never writes. Without this, a hostile value planted at either location normalized to
+    an inert empty record and rode into the restored exercise — harmless in itself, since neither
+    is read for a non-verb, but it meant a restored exercise was not byte-identical to the
+    canonical one, and "inert junk survives" is not a property worth keeping. */
+ if(snapshot.tokens.some(item=>Object.prototype.hasOwnProperty.call(item,'morphology')))return false;
+ if(snapshot.tokens.some(item=>item.grammar&&item.grammar.type!=='verb'
+   &&Object.prototype.hasOwnProperty.call(item.grammar,'morphology')))return false;
  return snapshot.tokens.every(item=>item&&typeof item.id==='string'&&typeof item.word==='string'
    &&typeof item.gloss==='string'&&typeof item.ar==='string'&&typeof item.en==='string'
    &&item.grammar&&typeof item.grammar==='object'&&item.relations&&typeof item.relations==='object')
    &&snapshot.relationships.every(item=>item&&typeof item==='object');
+}
+/* ---- Phase 3B0A presentation repair — derived English caches are never History authority ----
+   Two of the four learner-facing English fields have an EXACT canonical source and are rebuilt
+   here, before anything downstream reads them.
+
+   `surfaceHint` is a cache of the token's own surface. The builder writes `surfaceHint:word` for
+   every token it makes — all 237 across the 82 production templates — and the one place that ever
+   rewrites it (the advanced-past presentation rebuild) writes back `registered.surface`, which the
+   same function asserts equal to the token's word. It is also the KEY that authoritativeVerbMorphology,
+   inflectNoun and inflectVerb look a token up by, so a stored forgery did not merely display wrongly:
+   it redirected the lexeme lookup onto a different vocabulary record, and 162 of the 237 production
+   tokens lost their lexeme entirely that way. `word` is already authority — a forged word is refused
+   outright by the identity seal — so rebuilding the hint from the word closes the redirection exactly
+   and is a no-op for every clean snapshot.
+
+   `enHint` is a build-time English hint. Nothing reads it after the build: not the renderer, not
+   validation, not the identity seal, not the Why builder. It has no canonical source to be rebuilt
+   from and no consumer to need one, so a stored value is discarded rather than trusted — the
+   treatment this repair's brief prescribes for a builder cache that is not required after
+   restoration.
+
+   `gloss` and the root `translation` are NOT rebuilt here; see the note on
+   HISTORY_PRESENTATION_NOT_YET_CANONICAL below. */
+function materializeCanonicalPresentationCaches(data){
+ (data&&data.tokens||[]).forEach(token=>{
+  if(!token||typeof token!=='object')return;
+  token.surfaceHint=token.word;
+  token.enHint='';
+ });
 }
 function migrateExerciseSnapshot(snapshot){
  const migrated=cloneSerializable(snapshot);
@@ -722,22 +849,48 @@ function migrateExerciseSnapshot(snapshot){
  }
  return migrated;
 }
-function createExerciseSnapshot(data){
- if(!data?.validated||validateExercise(data).length)return null;
- const snapshot={
-  schemaVersion:SENTENCE_HISTORY_SNAPSHOT_VERSION,
-  templateId:data.templateId,
-  templateStarts:data.templateStarts,
-  templateForm:data.templateForm,
-  templateState:data.templateState,
-  templateSign:data.templateSign,
-  sentenceType:data.sentenceType,
-  sentence:data.sentence,
-  translation:data.translation,
-  tokens:cloneSerializable(data.tokens),
-  relationships:cloneSerializable(data.relationships),
-  exerciseIdentity:canonicalExerciseIdentity(data)
- };
+function createExerciseSnapshot(rawData){
+ /* Section 9 — the live graph gets the same boundary as raw History. `data.validated`,
+    validateExercise, sign normalization, the identity calculation and cloneSerializable all read
+    nested data ordinarily, and cloneSerializable's JSON.stringify walks the entire graph invoking
+    getters, so a hostile value nested in a caller-supplied exercise reached every one of them.
+    Nothing below touches the caller's object: validation, identity and serialization all run on
+    the fresh materialized exercise, and the snapshot is built from that. */
+ const data=safeMaterializedGraph(rawData,null);
+ if(!data)return null;
+ /* STRICT SHAPE VERIFICATION, between materialization and validation. The materializer answers
+    "is this graph safe to touch"; it does not answer "is this graph an exercise". A hostile value
+    at `tokens`, at `tokens[0]`, at `token.components` or at `relationships` — a get-trapping or
+    descriptor-trapping Proxy, or an object inheriting an accessor — normalizes to an inert EMPTY
+    RECORD, which is fresh and safe and still not an array. The malformed-but-fresh graph then met
+    ordinary reads further down: `.forEach` on a record in sign normalization and component
+    validation, `.find` on a record in relationship validation, and `token.grammar.type` on a
+    missing grammar — twelve distinct TypeErrors escaping this boundary instead of the established
+    failure result. Refusing the shape first makes every one of them deterministic. */
+ if(liveExerciseGraphFailure(data))return null;
+ let snapshot=null;
+ try{
+  /* The narrow boundary: validation, identity and serialization of a CALLER-DERIVED materialized
+     graph, and nothing else. The shape check above is what actually refuses every malformed graph
+     this phase found — the permanent tests prove each of the twelve is refused there, with this
+     catch inert — so this is a backstop for shapes not yet imagined, not a blanket thrown over
+     ordinary programming errors. Nothing outside these three calls is inside it. */
+  if(!data.validated||validateExercise(data).length)return null;
+  snapshot={
+   schemaVersion:SENTENCE_HISTORY_SNAPSHOT_VERSION,
+   templateId:data.templateId,
+   templateStarts:data.templateStarts,
+   templateForm:data.templateForm,
+   templateState:data.templateState,
+   templateSign:data.templateSign,
+   sentenceType:data.sentenceType,
+   sentence:data.sentence,
+   translation:data.translation,
+   tokens:cloneSerializable(data.tokens),
+   relationships:cloneSerializable(data.relationships),
+   exerciseIdentity:canonicalExerciseIdentity(data)
+  };
+ }catch{return null}
  return isExerciseSnapshot(snapshot)?snapshot:null;
 }
 function resolveHistoryTemplate(data){
@@ -802,6 +955,483 @@ function mahallRuleOwnerFailure(token,data){
  if(!token?.mahallRuleId)return false;
  if(token.grammar?.type!=='verb'||token.tense!=='present')return true;
  return authoritativeVerbMorphology(token,data).formClass!=='mabniPresent';
+}
+/* ---- Phase 3B0A-G — canonical token-gloss authority --------------------------------------
+   A stored `gloss` used to ride out of raw History into the answer cards: 169 token cases across
+   56 templates, learner-visible. It is presentation, so it is rebuilt here from the same frozen
+   authority the builders use, and the stored value is never read.
+
+   Nothing below is a second English implementation. Every branch resolves an EXISTING production
+   registry — the noun and verb form indexes, the two preposition-action pools, innaSisters, and
+   `nounEnglish` — by the token's own Arabic surface, which is already authority (a forged word is
+   refused outright by the identity seal). The permanent harness asserts, over many random
+   vocabulary selections, that this resolver reproduces the builder's gloss byte for byte for every
+   (template, token) pair, so the two can never drift apart.
+
+   The resolver FAILS CLOSED: a token it cannot authorize yields null and the snapshot is refused,
+   rather than a generic English fallback being invented for it. */
+const GLOSS_CLOSED_PARTICLES=Object.freeze({
+ /* An UNPAIRED preposition. When a preposition is not half of a preposition-action pair its
+    gloss is fixed. The paired case never reaches here: it is resolved earlier from the action
+    record, where the same surface carries a different English gloss under a different verb.
+    عَنْ is "about" here and "for" under يَبْحَثُ; إِلَى is "to" here and "at" under يَنْظُرُ. */
+ 'فِي':'in','لَنْ':'will not','لَمْ':'did not','سَوْفَ':'will','أَنْ':'that','لِ':'so','كَيْ':'that','عَنْ':'about','إِلَى':'to','عَلَى':'to'
+});
+/* The eight surfaces no vocabulary registry owns. Each is bound to the token TYPE that may carry
+   it, so the same surface cannot borrow this gloss in another role. */
+const GLOSS_FIXED_TOKENS=Object.freeze({
+ 'كَانَ':Object.freeze({type:'verb',en:'was'}),
+ 'مُعَلِّمٌ':Object.freeze({type:'noun',en:'a teacher'}),
+ 'سُؤَالٌ':Object.freeze({type:'noun',en:'a question'}),
+ 'رِسَالَةٌ':Object.freeze({type:'noun',en:'a letter'}),
+ 'مَعَ':Object.freeze({type:'noun',en:'with'}),
+ 'طَالِبٌ':Object.freeze({type:'noun',en:'a student'}),
+ 'كِتَابٌ':Object.freeze({type:'noun',en:'a book'}),
+ 'ضَيْفٌ':Object.freeze({type:'noun',en:'a guest'})
+});
+/* The preposition-action pools are keyed by the pair (verb surface, preposition surface): the same
+   preposition carries a different English gloss under a different verb — عَنْ is "about" under
+   يَسْأَلُ and "for" under يَبْحَثُ — so neither surface alone can authorize it. */
+function prepActionRecord(verbSurface,prepSurface){
+ for(const pool of [humanPrepActions,thingPrepActions]){
+  const found=pool.find(action=>action.pres===verbSurface&&action.prep===prepSurface);
+  if(found)return found;
+ }
+ return null;
+}
+/* The preposition-action verb and its relation token, located as a pair inside the exercise. */
+function prepActionFor(data,index){
+ const tokens=(data&&data.tokens)||[];
+ const token=tokens[index];
+ if(!token)return null;
+ if(token.grammar&&token.grammar.type==='verb'){
+  for(let next=index+1;next<tokens.length;next++){
+   const candidate=tokens[next];
+   if(!candidate||!candidate.grammar)continue;
+   const record=prepActionRecord(token.word,candidate.word);
+   if(record)return{record,role:'verb'};
+   break;
+  }
+  return null;
+ }
+ for(let previous=index-1;previous>=0;previous--){
+  const candidate=tokens[previous];
+  if(!candidate||!candidate.grammar)continue;
+  const record=prepActionRecord(candidate.word,token.word);
+  if(record)return{record,role:'preposition'};
+  break;
+ }
+ return null;
+}
+/* The particle types whose English wording covers the verb that follows them. Frozen, and matched
+   on the particle's own canonical `particleType`, never on its stored English. */
+const GLOSS_MODALITY_PARTICLE_TYPES=Object.freeze(['lan','lam','sawfa','an','kay','lamTalil']);
+/* The verb-focused families: the present verb is the exercise's subject of study, and both its
+   own gloss and its object gloss are drawn from the verb-side pools rather than the noun registry. */
+function verbFocusedTemplateForm(data){
+ return Boolean(data)&&(data.templateForm==='present'||data.templateForm==='fiveVerbs');
+}
+/* Every object surface the exercise's own verbs license, from their registered lexemes. */
+function registeredVerbObjects(data){
+ const objects=[];
+ for(const item of (data&&data.tokens)||[]){
+  if(!item||!item.grammar||item.grammar.type!=='verb')continue;
+  const registered=verbFormIndex.get(item.word);
+  const list=registered&&registered.lexeme&&registered.lexeme.obj;
+  if(Array.isArray(list))for(const entry of list)if(typeof entry==='string')objects.push(entry);
+ }
+ return objects;
+}
+/* The gloss an object token's own GOVERNING VERB authorizes, resolved to a lexical RECORD rather
+   than to a surface.
+
+   A verb licenses its objects in exactly one of two ways, and the builder's English follows
+   whichever it is: an explicit `obj` list of surfaces, where the object is glossed through
+   objectEnglish; or a named object GROUP, where the builder takes a whole record out of
+   objectGroups and uses that record's own `en`. Reading the record is what separates two words
+   that share a surface — الْمَكْتَبَ is "the desk" as a solid thing and "the office" as a place, and
+   the two live in different groups — so the governing verb is what says which one this is.
+
+   There is no special case for any particular surface: this is the general rule, and any future
+   homograph resolves through the same chain. Zero authorizing verbs, or two that disagree, fails
+   closed rather than picking one. */
+function authorizedObjectGloss(data,surface){
+ const readings=[];
+ for(const item of (data&&data.tokens)||[]){
+  if(!item||!item.grammar||item.grammar.type!=='verb')continue;
+  const registered=verbFormIndex.get(item.word);
+  const lexeme=registered&&registered.lexeme;
+  if(!lexeme)continue;
+  if(Array.isArray(lexeme.obj)){
+   if(lexeme.obj.includes(surface)){
+    const named=nounEnglish(surface,'acc');
+    if(named!=='the noun')readings.push(named);
+   }
+   continue;
+  }
+  const groupName=lexeme.group;
+  if(typeof groupName!=='string'
+    ||!Object.prototype.hasOwnProperty.call(objectGroups,groupName))continue;
+  const group=objectGroups[groupName];
+  if(!Array.isArray(group))continue;
+  const matches=group.filter(record=>record&&record.acc===surface&&typeof record.en==='string');
+  if(matches.length===1)readings.push(matches[0].en);
+ }
+ const distinct=[...new Set(readings)];
+ return distinct.length===1?distinct[0]:null;
+}
+/* True when a bare surface lookup would have to choose between two different English readings. */
+function ambiguousNounSurface(surface){
+ const registered=nounFormIndex.get(surface);
+ const fromRegistry=registered&&registered.lexeme&&typeof registered.lexeme.en==='string'
+  ?registered.lexeme.en:null;
+ const byCase=nounEnglish(surface,'acc');
+ const fromCases=byCase==='the noun'?null:byCase;
+ return Boolean(fromRegistry&&fromCases&&fromRegistry!==fromCases);
+}
+function precedingModalityParticle(data,index){
+ const tokens=(data&&data.tokens)||[];
+ for(let previous=index-1;previous>=0;previous--){
+  const candidate=tokens[previous];
+  if(!candidate||!candidate.grammar)continue;
+  if(candidate.grammar.type!=='particle')continue;
+  if(GLOSS_MODALITY_PARTICLE_TYPES.includes(candidate.grammar.particleType))return true;
+ }
+ return false;
+}
+function resolveCanonicalTokenGloss(data,token,index){
+ if(!token||typeof token!=='object'||!token.grammar)return null;
+ const surface=token.word;
+ if(typeof surface!=='string'||!surface)return null;
+ const type=token.grammar.type;
+ /* 1 — a preposition action authorizes BOTH its verb and its relation token. */
+ const paired=prepActionFor(data,index);
+ if(paired)return paired.role==='verb'?paired.record.third:paired.record.prepEn;
+ /* 2 — إِنَّ and her sisters. */
+ if(type==='particle'&&token.grammar.particleType==='inna'){
+  const sister=innaSisters.find(item=>item.ar===surface);
+  return sister?sister.gloss:null;
+ }
+ /* 3 — the closed particle vocabulary. */
+ if(type==='particle'){
+  return Object.prototype.hasOwnProperty.call(GLOSS_CLOSED_PARTICLES,surface)
+   ?GLOSS_CLOSED_PARTICLES[surface]:null;
+ }
+ /* 4 — the eight template-owned surfaces, bound to their token type. */
+ if(Object.prototype.hasOwnProperty.call(GLOSS_FIXED_TOKENS,surface)){
+  const fixed=GLOSS_FIXED_TOKENS[surface];
+  if(fixed.type===type)return fixed.en;
+ }
+ /* 5 — an object noun, resolved through its GOVERNING VERB rather than through its surface.
+    Two vocabulary records can share one accusative surface with different English, so a bare
+    surface lookup would have to choose between them. The verb that governs the object is what
+    authorizes it, and that authority names a lexical record, not a spelling.
+
+    When no verb authorizes the surface, the fallback is allowed only where the surface is
+    UNAMBIGUOUS. An ambiguous surface with no authorizing verb fails closed: guessing either
+    reading, by majority or by first match, is exactly what this repair removes. */
+ if(type==='noun'&&token.grammar.role==='object'){
+  const authorized=authorizedObjectGloss(data,surface);
+  if(typeof authorized==='string')return authorized;
+  if(ambiguousNounSurface(surface))return null;
+  const byCase=nounEnglish(surface,'acc');
+  if(byCase!=='the noun')return byCase;
+  const registered=nounFormIndex.get(surface);
+  if(registered&&registered.lexeme&&typeof registered.lexeme.en==='string')return registered.lexeme.en;
+  return null;
+ }
+ /* 6 — an ordinary noun carries its registered lexeme's English. */
+ if(type==='noun'){
+  const registered=nounFormIndex.get(surface);
+  if(registered&&registered.lexeme&&typeof registered.lexeme.en==='string')return registered.lexeme.en;
+  const byCase=nounEnglish(surface,'acc');
+  return byCase==='the noun'?null:byCase;
+ }
+ /* 7 — a verb takes the registered field its tense selects. The person-inflected and negated
+    wordings belong to the advanced families, whose canonical presentation is rebuilt by
+    rebuildCanonicalHistoryPresentation immediately after this pass and overrides what is set here. */
+ if(type==='verb'){
+  const registered=verbFormIndex.get(surface);
+  const lexeme=registered&&registered.lexeme;
+  if(!lexeme)return null;
+  if(token.tense==='past'&&typeof lexeme.pastEn==='string')return lexeme.pastEn;
+  if(token.tense==='present'){
+   const person=token.grammar.person;
+   if(person==='3mp'&&typeof lexeme.en==='string')return 'they '+lexeme.en;
+   /* A present verb under a MODALITY particle is glossed bare, because the particle already
+      carries the English modality — لَنْ is "will not", لَمْ is "did not", سَوْفَ is "will" — so the
+      pair reads "will not · explain". An unmodalized present predicate carries its own
+      third-person agreement instead: "the teacher · honors".
+
+      Both signals are structural and neither reads stored English. The grammatical governor covers
+      لَنْ and لَمْ, which change the verb's iʿrāb; سَوْفَ does not govern at all, so the preceding
+      particle's own frozen type is what identifies it.
+
+      The template's own frozen `form` is the third signal and the broadest: under the verb-focused
+      families the present verb IS the exercise's subject of study and the builders gloss it in its
+      bare dictionary form, while a present verb appearing as a predicate inside a noun-focused
+      family agrees with its subject. */
+   const verbFocusedForm=data&&(data.templateForm==='present'||data.templateForm==='fiveVerbs');
+   const modal=verbFocusedForm||Boolean(token.governorId)||Boolean(token.grammar.governorWord)
+    ||precedingModalityParticle(data,index);
+   if(modal&&typeof lexeme.en==='string')return lexeme.en;
+   if(typeof lexeme.third==='string')return lexeme.third;
+   if(typeof lexeme.en==='string')return lexeme.en;
+  }
+  return null;
+ }
+ return null;
+}
+/* Assigns the canonical gloss to every token, or reports the first token it cannot authorize. */
+function materializeCanonicalGlosses(data){
+ const tokens=(data&&data.tokens)||[];
+ for(let index=0;index<tokens.length;index++){
+  const token=tokens[index];
+  if(!token||typeof token!=='object')return 'token-not-a-record';
+  const gloss=resolveCanonicalTokenGloss(data,token,index);
+  if(typeof gloss!=='string')return 'no-gloss-authority:'+(token.word||'');
+  token.gloss=gloss;
+ }
+ return '';
+}
+/* ---- Phase 3B0A-T1A — canonical translation composition (ORACLE ONLY) --------------------
+   A stored root `translation` is still trusted by History; this phase does NOT change that.
+   What it adds is the authority that will replace it: a composition of the sentence's English
+   from the same frozen records the builders use, so the two can be compared byte for byte.
+
+   The registries below are MACHINE-DERIVED from builder output and self-verified before emission
+   (18,040 compositions matched, 0 failures, over 220 generation passes). They are data, not a
+   translator: every variable part is a SLOT resolved from canonical authority — a token's
+   canonical gloss, a registered verb's own English field, an inna sister's lead, or innaCopula —
+   and every fixed part is wording already present in production builder output.
+
+   A composition is keyed by stable template ID PLUS the ordered token type/role structure, because
+   five templates legitimately build two different token layouts (an adverbial and a prepositional
+   lane) and each layout needs its own composer. That is why there are 87 keys for 82 templates.
+
+   NOTHING here is called from restoreExerciseSnapshot, rebuildCanonicalHistoryPresentation,
+   migration, snapshot creation, the renderer or History preview. Routing is T2. */
+const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null),{
+ TS01:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" is "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
+ TS02:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" is "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS03:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS04:Object.freeze({parts:Object.freeze([Object.freeze({lit:"The "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" of "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" is "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS05:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" are "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
+ TS06:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:3"}),Object.freeze({lit:"."})])}),
+ TS07:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"verb:1:third"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS08:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:3"}),Object.freeze({lit:"."})])}),
+ TS09:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"verb:1:en"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS10:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"verb:2:en"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:3"}),Object.freeze({lit:"."})])}),
+ TS11:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:1:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS12:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:1:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:"."})])}),
+ TS13:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
+ TS14:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:1:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"verb:0:third"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS15:Object.freeze({parts:Object.freeze([Object.freeze({slot:"innaLead:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"copula"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS16:Object.freeze({parts:Object.freeze([Object.freeze({lit:"There is "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
+ TS17:Object.freeze({parts:Object.freeze([Object.freeze({lit:"There is "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:" for "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
+ TS18:Object.freeze({parts:Object.freeze([Object.freeze({lit:"He "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS19:Object.freeze({parts:Object.freeze([Object.freeze({lit:"They "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"verb:1:en"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS20:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:1:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS21:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" he "}),Object.freeze({slot:"verb:1:third"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS22:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" he "}),Object.freeze({slot:"verb:2:third"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:3"}),Object.freeze({lit:"."})])})
+}));
+const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
+ "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
+ "T_NOUN_SINGULAR_RAF_DAMMA_02||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_02",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS02",copulaPlural:false}),
+ "T_NOUN_SINGULAR_NASB_FATHA_01||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_01",structure:"noun:mubtada,verb:present,noun:object",shape:"TS03",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_01||noun:mubtada,noun:mudafIlayh,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_01",structure:"noun:mubtada,noun:mudafIlayh,noun:khabar",shape:"TS04",copulaPlural:false}),
+ "T_NOUN_BROKEN_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_BROKEN_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS05",copulaPlural:true}),
+ "T_NOUN_BROKEN_NASB_FATHA_01||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_BROKEN_NASB_FATHA_01",structure:"noun:mubtada,verb:present,noun:object",shape:"TS03",copulaPlural:true}),
+ "T_NOUN_BROKEN_JARR_KASRA_01||noun:mubtada,verb:present,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_BROKEN_JARR_KASRA_01",structure:"noun:mubtada,verb:present,particle:particle,noun:majrur",shape:"TS06",copulaPlural:true}),
+ "T_NOUN_DUAL_RAF_ALIF_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_DUAL_RAF_ALIF_01",structure:"noun:mubtada,noun:khabar",shape:"TS05",copulaPlural:true}),
+ "T_NOUN_DUAL_NASB_YA_01||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_DUAL_NASB_YA_01",structure:"noun:mubtada,verb:present,noun:object",shape:"TS03",copulaPlural:true}),
+ "T_NOUN_DUAL_JARR_YA_01||noun:mubtada,verb:present,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_DUAL_JARR_YA_01",structure:"noun:mubtada,verb:present,particle:particle,noun:majrur",shape:"TS06",copulaPlural:true}),
+ "T_NOUN_SMP_RAF_WAW_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SMP_RAF_WAW_01",structure:"noun:mubtada,noun:khabar",shape:"TS05",copulaPlural:true}),
+ "T_NOUN_SMP_NASB_YA_01||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_SMP_NASB_YA_01",structure:"noun:mubtada,verb:present,noun:object",shape:"TS03",copulaPlural:true}),
+ "T_NOUN_SMP_JARR_YA_01||noun:mubtada,verb:present,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SMP_JARR_YA_01",structure:"noun:mubtada,verb:present,particle:particle,noun:majrur",shape:"TS06",copulaPlural:true}),
+ "T_NOUN_SFP_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SFP_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS05",copulaPlural:true}),
+ "T_NOUN_SFP_NASB_KASRASUB_01||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_SFP_NASB_KASRASUB_01",structure:"noun:mubtada,verb:present,noun:object",shape:"TS03",copulaPlural:true}),
+ "T_NOUN_SFP_JARR_KASRA_01||noun:mubtada,verb:present,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SFP_JARR_KASRA_01",structure:"noun:mubtada,verb:present,particle:particle,noun:majrur",shape:"TS06",copulaPlural:true}),
+ "T_NOUN_FIVENOUNS_RAF_WAW_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_FIVENOUNS_RAF_WAW_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
+ "T_NOUN_FIVENOUNS_NASB_ALIF_01||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_FIVENOUNS_NASB_ALIF_01",structure:"noun:mubtada,verb:present,noun:object",shape:"TS03",copulaPlural:false}),
+ "T_NOUN_FIVENOUNS_JARR_YA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_FIVENOUNS_JARR_YA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:false}),
+ "T_NOUN_PRESENT_RAF_DAMMA_01||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_PRESENT_RAF_DAMMA_01",structure:"noun:mubtada,verb:present,noun:object",shape:"TS07",copulaPlural:false}),
+ "T_NOUN_PRESENT_NASB_FATHA_01||noun:mubtada,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_PRESENT_NASB_FATHA_01",structure:"noun:mubtada,particle:particle,verb:present,noun:object",shape:"TS08",copulaPlural:false}),
+ "T_NOUN_PRESENT_JAZM_SUKUN_01||noun:mubtada,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_PRESENT_JAZM_SUKUN_01",structure:"noun:mubtada,particle:particle,verb:present,noun:object",shape:"TS08",copulaPlural:false}),
+ "T_NOUN_FIVEVERBS_RAF_NUNKEPT_01||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_FIVEVERBS_RAF_NUNKEPT_01",structure:"noun:mubtada,verb:present,noun:object",shape:"TS09",copulaPlural:false}),
+ "T_NOUN_FIVEVERBS_NASB_NUNDROPPED_01||noun:mubtada,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_FIVEVERBS_NASB_NUNDROPPED_01",structure:"noun:mubtada,particle:particle,verb:present,noun:object",shape:"TS10",copulaPlural:false}),
+ "T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01||noun:mubtada,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01",structure:"noun:mubtada,particle:particle,verb:present,noun:object",shape:"TS10",copulaPlural:false}),
+ "T_VERB_SINGULAR_RAF_DAMMA_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_RAF_DAMMA_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:false}),
+ "T_VERB_BROKEN_RAF_DAMMA_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_BROKEN_RAF_DAMMA_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
+ "T_VERB_BROKEN_NASB_FATHA_01||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_BROKEN_NASB_FATHA_01",structure:"verb:present,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
+ "T_VERB_DUAL_RAF_ALIF_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_DUAL_RAF_ALIF_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
+ "T_VERB_DUAL_NASB_YA_01||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_DUAL_NASB_YA_01",structure:"verb:present,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
+ "T_VERB_SMP_RAF_WAW_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SMP_RAF_WAW_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
+ "T_VERB_SMP_NASB_YA_01||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SMP_NASB_YA_01",structure:"verb:present,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
+ "T_VERB_SFP_RAF_DAMMA_01||verb:past,noun:faail":Object.freeze({templateId:"T_VERB_SFP_RAF_DAMMA_01",structure:"verb:past,noun:faail",shape:"TS12",copulaPlural:true}),
+ "T_VERB_FIVENOUNS_RAF_WAW_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_FIVENOUNS_RAF_WAW_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_02||verb:kana,noun:ismKana,noun:khabarKana":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_02",structure:"verb:kana,noun:ismKana,noun:khabarKana",shape:"TS11",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_03||verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_03",structure:"verb:past,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_04||verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_04",structure:"verb:past,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_05||verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_05",structure:"verb:past,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_06||verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_06",structure:"verb:past,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_07||verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_07",structure:"verb:past,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_08||verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_08",structure:"verb:past,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_09||verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_09",structure:"verb:past,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_10||verb:present,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_10",structure:"verb:present,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_11||verb:present,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_11",structure:"verb:present,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_12||verb:present,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_12",structure:"verb:present,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_13||verb:present,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_13",structure:"verb:present,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_14||verb:present,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_14",structure:"verb:present,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_15||verb:present,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_15",structure:"verb:present,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_16||verb:present,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_16",structure:"verb:present,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_NOUN_SINGULAR_NASB_FATHA_02||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_02",structure:"noun:mubtada,verb:present,noun:object",shape:"TS07",copulaPlural:false}),
+ "T_NOUN_SINGULAR_NASB_FATHA_03||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_03",structure:"noun:mubtada,verb:present,noun:object",shape:"TS09",copulaPlural:false}),
+ "T_VERB_PRESENT_RAF_DAMMA_01||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_PRESENT_RAF_DAMMA_01",structure:"verb:present,noun:faail,noun:object",shape:"TS14",copulaPlural:false}),
+ "T_VERB_FIVEVERBS_RAF_NUNKEPT_01||verb:present,noun:object":Object.freeze({templateId:"T_VERB_FIVEVERBS_RAF_NUNKEPT_01",structure:"verb:present,noun:object",shape:"TS13",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_01||particle:particle,noun:ismInna,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_01",structure:"particle:particle,noun:ismInna,noun:khabarInna",shape:"TS15",copulaPlural:false}),
+ "T_PARTICLE_BROKEN_NASB_FATHA_01||particle:particle,noun:ismInna,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_BROKEN_NASB_FATHA_01",structure:"particle:particle,noun:ismInna,noun:khabarInna",shape:"TS15",copulaPlural:true}),
+ "T_PARTICLE_DUAL_NASB_YA_01||particle:particle,noun:ismInna,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_DUAL_NASB_YA_01",structure:"particle:particle,noun:ismInna,noun:khabarInna",shape:"TS15",copulaPlural:true}),
+ "T_PARTICLE_SMP_NASB_YA_01||particle:particle,noun:ismInna,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_SMP_NASB_YA_01",structure:"particle:particle,noun:ismInna,noun:khabarInna",shape:"TS15",copulaPlural:true}),
+ "T_PARTICLE_SFP_NASB_KASRASUB_01||particle:particle,noun:ismInna,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_SFP_NASB_KASRASUB_01",structure:"particle:particle,noun:ismInna,noun:khabarInna",shape:"TS15",copulaPlural:true}),
+ "T_PARTICLE_FIVENOUNS_NASB_ALIF_01||particle:particle,noun:ismInna,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_FIVENOUNS_NASB_ALIF_01",structure:"particle:particle,noun:ismInna,noun:khabarInna",shape:"TS15",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_JARR_KASRA_01||particle:particle,noun:majrur,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_01",structure:"particle:particle,noun:majrur,noun:mubtada",shape:"TS16",copulaPlural:false}),
+ "T_PARTICLE_BROKEN_JARR_KASRA_01||particle:particle,noun:majrur,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_BROKEN_JARR_KASRA_01",structure:"particle:particle,noun:majrur,noun:mubtada",shape:"TS16",copulaPlural:true}),
+ "T_PARTICLE_DUAL_JARR_YA_01||particle:particle,noun:majrur,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_DUAL_JARR_YA_01",structure:"particle:particle,noun:majrur,noun:mubtada",shape:"TS17",copulaPlural:true}),
+ "T_PARTICLE_SMP_JARR_YA_01||particle:particle,noun:majrur,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SMP_JARR_YA_01",structure:"particle:particle,noun:majrur,noun:mubtada",shape:"TS17",copulaPlural:true}),
+ "T_PARTICLE_SFP_JARR_KASRA_01||particle:particle,noun:majrur,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SFP_JARR_KASRA_01",structure:"particle:particle,noun:majrur,noun:mubtada",shape:"TS17",copulaPlural:true}),
+ "T_PARTICLE_FIVENOUNS_JARR_YA_01||particle:particle,noun:majrur,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_FIVENOUNS_JARR_YA_01",structure:"particle:particle,noun:majrur,noun:mubtada",shape:"TS17",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_NASB_FATHA_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_01",structure:"particle:particle,verb:present,noun:object",shape:"TS18",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_01",structure:"particle:particle,verb:present,noun:object",shape:"TS18",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_RAF_DAMMA_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_RAF_DAMMA_01",structure:"particle:particle,verb:present,noun:object",shape:"TS18",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01",structure:"particle:particle,verb:present,noun:object",shape:"TS19",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01",structure:"particle:particle,verb:present,noun:object",shape:"TS19",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01",structure:"particle:particle,verb:present,noun:object",shape:"TS19",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_02||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_02",structure:"particle:particle,verb:present,noun:object",shape:"TS20",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_03||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_03",structure:"particle:particle,verb:present,noun:object",shape:"TS20",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_NASB_FATHA_02||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_02",structure:"particle:particle,verb:present,noun:object",shape:"TS21",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02",structure:"particle:particle,verb:present,noun:object",shape:"TS03",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_NASB_FATHA_03||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_03",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS22",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS08",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_04||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_04",structure:"particle:particle,verb:present,noun:object",shape:"TS03",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_05||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_05",structure:"particle:particle,verb:present,noun:object",shape:"TS03",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_06||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_06",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS08",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_07||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_07",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS08",copulaPlural:false}),
+ "T_NOUN_FIVENOUNS_JARR_YA_01||noun:mubtada,verb:present,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_FIVENOUNS_JARR_YA_01",structure:"noun:mubtada,verb:present,particle:particle,noun:majrur",shape:"TS06",copulaPlural:false}),
+ "T_NOUN_SFP_JARR_KASRA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SFP_JARR_KASRA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
+ "T_NOUN_SMP_JARR_YA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SMP_JARR_YA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
+ "T_NOUN_BROKEN_JARR_KASRA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_BROKEN_JARR_KASRA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
+ "T_NOUN_DUAL_JARR_YA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_DUAL_JARR_YA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true})
+}));
+const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
+/* A key component must be a non-empty string carrying none of the key's own delimiters. */
+function isTranslationKeyComponent(value){
+ return typeof value==='string'&&value.length>0
+  &&!value.includes(':')&&!value.includes(',')&&!value.includes('|');
+}
+/* The canonical structural key. Structure only: no English, no stored presentation. */
+/* A key component is read as an OWN DATA property. An inherited value is not this token's own
+   structure, and an accessor is caller code, which must never run merely to build a key. The value
+   is used exactly as found — never coerced, never stringified — so a number, a symbol, a null or
+   an object with a tempting toString all refuse instead of becoming key text. */
+function ownTranslationKeyComponent(record,field){
+ const descriptor=Object.getOwnPropertyDescriptor(record,field);
+ if(!descriptor||!Object.prototype.hasOwnProperty.call(descriptor,'value'))return undefined;
+ return descriptor.value;
+}
+function translationStructureKey(exercise){
+ if(!exercise||typeof exercise!=='object')return null;
+ const templateId=ownTranslationKeyComponent(exercise,'templateId');
+ if(!isTranslationKeyComponent(templateId))return null;
+ const tokens=ownTranslationKeyComponent(exercise,'tokens');
+ if(!Array.isArray(tokens)||!tokens.length)return null;
+ const parts=[];
+ for(const token of tokens){
+  if(!token||typeof token!=='object')return null;
+  const grammar=ownTranslationKeyComponent(token,'grammar');
+  if(!grammar||typeof grammar!=='object')return null;
+  const type=ownTranslationKeyComponent(grammar,'type');
+  if(!isTranslationKeyComponent(type))return null;
+  /* A missing role is legitimate structure and encodes as empty. A role of the wrong TYPE is not:
+     coercing it would let two different structures share one key. And a component carrying a
+     delimiter could splice extra tokens into the key string, forging another lane's structure out
+     of a single token, so the delimiters are refused outright rather than escaped. */
+  const declaredRole=ownTranslationKeyComponent(grammar,'role');
+  const role=declaredRole===undefined?'':declaredRole;
+  if(role!==''&&!isTranslationKeyComponent(role))return null;
+  parts.push(type+':'+role);
+ }
+ return templateId+'||'+parts.join(',');
+}
+/* One slot, resolved through canonical authority. Anything unresolvable fails closed. */
+function resolveTranslationSlot(exercise,mapping,spec){
+ if(typeof spec!=='string')return null;
+ const bits=spec.split(':');
+ if(bits[0]==='copula'){
+  const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
+  if(!particle)return null;
+  const sister=innaSisters.find(item=>item.ar===particle.word);
+  if(!sister)return null;
+  return innaCopula(sister,mapping.copulaPlural===true);
+ }
+ const index=Number(bits[1]);
+ if(!Number.isInteger(index)||index<0||index>=exercise.tokens.length)return null;
+ const token=exercise.tokens[index];
+ if(!token||typeof token!=='object')return null;
+ if(bits[0]==='gloss'){
+  const gloss=token.gloss;
+  if(typeof gloss!=='string'||!gloss)return null;
+  return bits[2]==='cap'?cap(gloss):gloss;
+ }
+ if(bits[0]==='innaLead'){
+  if(!token.grammar||token.grammar.particleType!=='inna')return null;
+  const sister=innaSisters.find(item=>item.ar===token.word);
+  return sister&&typeof sister.meaning==='string'?sister.meaning:null;
+ }
+ if(bits[0]==='verb'){
+  if(!token.grammar||token.grammar.type!=='verb')return null;
+  if(!TRANSLATION_VERB_FIELDS.includes(bits[2]))return null;
+  const registered=verbFormIndex.get(token.word);
+  const lexeme=registered&&registered.lexeme;
+  if(!lexeme)return null;
+  const value=lexeme[bits[2]];
+  if(typeof value!=='string'||!value)return null;
+  return bits[3]==='cap'?cap(value):value;
+ }
+ return null;
+}
+/* ORDERING OBLIGATION for T2: a gloss slot consumes the token's CANONICAL gloss, which the
+   restore path rebuilds from frozen authority before any presentation is rendered. The composer
+   must therefore be called after materializeCanonicalGlosses, never before it — the permanent
+   tests pin that a synthetic exercise cannot borrow another template's approved English, and that
+   the canonical exercise boundary rejects such an exercise outright. */
+function composeCanonicalTranslation(exercise){
+ const key=translationStructureKey(exercise);
+ if(key===null)return null;
+ if(!Object.prototype.hasOwnProperty.call(TRANSLATION_STRUCTURE_MAP,key))return null;
+ const mapping=TRANSLATION_STRUCTURE_MAP[key];
+ if(mapping.templateId!==exercise.templateId)return null;
+ /* Re-derive the structure from the tokens and require it to equal the mapping's own record. The
+    key already encodes it, but checking the record independently means a forged or spliced key
+    cannot authorize a shape whose slots address tokens this exercise does not have. */
+ const expected=mapping.structure.split(',');
+ if(expected.length!==exercise.tokens.length)return null;
+ for(let index=0;index<expected.length;index++){
+  const grammar=exercise.tokens[index].grammar;
+  const role=grammar.role===undefined?'':grammar.role;
+  if(expected[index]!==grammar.type+':'+role)return null;
+ }
+ if(!Object.prototype.hasOwnProperty.call(TRANSLATION_COMPOSER_SHAPES,mapping.shape))return null;
+ const shape=TRANSLATION_COMPOSER_SHAPES[mapping.shape];
+ let composed='';
+ for(const part of shape.parts){
+  if(typeof part.lit==='string'){composed+=part.lit;continue}
+  const value=resolveTranslationSlot(exercise,mapping,part.slot);
+  if(typeof value!=='string'||!value)return null;
+  composed+=value;
+ }
+ return composed;
 }
 function rebuildCanonicalHistoryPresentation(data,template){
  if(template?.pastPerson){
@@ -1002,7 +1632,39 @@ function snapshotWithNormalizedSigns(snapshot){
  }
  return {...snapshot,tokens:normalized};
 }
-function restoreExerciseSnapshot(snapshot){
+/* A stored `lexeme` is a derived CACHE, never authority: identity and validation both resolve the
+   lexeme from the noun/verb registries by `surfaceHint`, exactly as inflectNoun and inflectVerb do
+   when building. Rebuilding it on restore means a stored lexeme cannot survive at all — so a value
+   planted there, even one normalized to inert data by the materializer, is replaced by the
+   canonical record instead of riding along. A token that is neither a noun nor a verb carries no
+   lexeme, so any stored one is removed. */
+function materializeCanonicalLexemes(data){
+ data.tokens.forEach(token=>{
+  if(!token||typeof token!=='object')return;
+  const type=token.grammar?.type;
+  if(type!=='noun'&&type!=='verb'){
+   if(Object.prototype.hasOwnProperty.call(token,'lexeme'))delete token.lexeme;
+   return;
+  }
+  const registered=(type==='verb'?verbFormIndex:nounFormIndex).get(token.surfaceHint);
+  token.lexeme=registered?.lexeme||null;
+ });
+}
+function restoreExerciseSnapshot(rawSnapshot){
+ /* Sections 7–8 — FULL-GRAPH materialization, first of all and on the snapshot exactly as it
+    arrived. Nothing here reads the caller's graph ordinarily: it is walked descriptor-only and
+    rebuilt into a fresh application-owned graph, and every step after this line — the shape
+    check, sign normalization, cloneSerializable, migration, canonical rebuilding, presentation
+    repair — sees only that fresh graph. A top-level check was not enough, because a hostile value
+    nested at tokens[0], token.grammar or relationships[i] still met an ordinary read further
+    down, and JSON.stringify walks the whole graph invoking getters.
+
+    The discourse-claim guard is part of the same walk, so a forbidden name rejects on presence
+    before its value is read and before any rewrite could erase the evidence. The authorized
+    fixture path does not come through here at all — it carries a fixture identity, not raw
+    claims, and restoreFixtureSnapshot rebuilds it from the registries. */
+ const snapshot=safeMaterializedGraph(rawSnapshot,null);
+ if(!snapshot)return null;
  if(!isExerciseSnapshot(snapshot))return null;
  if(mabniPresentSnapshotInjection(snapshot))return null;
  const safeSnapshot=snapshotWithNormalizedSigns(snapshot);
@@ -1011,6 +1673,9 @@ function restoreExerciseSnapshot(snapshot){
    const data=migrateExerciseSnapshot(safeSnapshot);
    // Re-checked after migration too: a v1/v2 migration path could in principle reintroduce one.
    if(mabniPresentSnapshotInjection(data))return null;
+   /* BEFORE the identity calculation, because canonicalHistoryIdentityInput resolves verb
+      morphology and that resolution looks the token up by `surfaceHint`. */
+   materializeCanonicalPresentationCaches(data);
    const snapshotVersion=data.schemaVersion;
    const storedExerciseIdentity=data.exerciseIdentity;
    const template=resolveHistoryTemplate(data);
@@ -1038,7 +1703,23 @@ function restoreExerciseSnapshot(snapshot){
       snapshot cannot be restored under a bare one. */
    if(template.presentCapabilities.length&&data.tokens.some((token,index)=>token?.grammar?.type==='verb'&&token.tense==='present'
      &&!templateAuthorizesPresentMorphology(template,token.grammar.morphology,deriveMabniPresentMahall(data,index)?.governorMode||'none')))return null;
+   /* Stored glosses are discarded and rebuilt from frozen vocabulary authority. This runs BEFORE
+      the advanced-family presentation rebuild, which owns the person-inflected and negated
+      wordings and overrides what is set here for the families it covers. */
+   if(materializeCanonicalGlosses(data))return null;
    rebuildCanonicalHistoryPresentation(data,template);
+   /* The root translation is rebuilt from canonical authority, and the stored one is never read.
+      This runs AFTER every step that establishes what the exercise IS — morphology, signs, template
+      authorization, canonical glosses, and the advanced-family presentation rebuild — because the
+      composer's slots consume those canonical values. Ordering is the whole safety argument: run
+      before them and the composer would read attacker-controlled glosses.
+
+      A composition that cannot resolve is a REJECTION, not a fallback. There is no path here that
+      keeps the stored translation, and none that leaves the field missing. */
+   const canonicalTranslation=composeCanonicalTranslation(data);
+   if(typeof canonicalTranslation!=='string'||!canonicalTranslation)return null;
+   data.translation=canonicalTranslation;
+   materializeCanonicalLexemes(data);
    materializeComponents(data);
   resolveRelationships(data);
   data.sentenceType=classifySentence(data);
@@ -1734,8 +2415,8 @@ const definitionEnrichment=[
  examples:[
   {ar:'لَنْ يَغِيبَ زَيْدٌ',en:'Zayd will not be absent.',focus:'لَنْ',iraabAr:'«لَنْ» حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ، نَصَبَ الْمُضَارِعَ «يَغِيبَ».',iraabEn:'Lan is a particle of negation, naṣb, and futurity; it made the present verb (yaghība) accusative.'}
  ],
- detailsAr:'النَّاصِبُ أَدَاةٌ تَجْعَلُ الْفِعْلَ الْمُضَارِعَ مَنْصُوبًا، مِثْلُ: أَنْ، وَلَنْ، وَكَيْ، وَإِذَنْ. وَعَمَلُهَا يَظْهَرُ فِي آخِرِ الْمُضَارِعِ.',
- detailsEn:'A naṣb-governor is a particle that makes the present verb accusative, such as an, lan, kay, and idhan. Its effect shows on the end of the present verb.'},
+ detailsAr:'النَّاصِبُ أَدَاةٌ تَجْعَلُ الْفِعْلَ الْمُضَارِعَ مَنْصُوبًا، مِثْلُ: أَنْ، وَلَنْ، وَكَيْ، وَإِذَنْ. وَعَمَلُهَا يَظْهَرُ فِي آخِرِ الْمُضَارِعِ. وَ«إِذَنْ» لَا تَنْصِبُ إِلَّا بِثَلَاثَةِ شُرُوطٍ: أَنْ تَكُونَ فِي صَدْرِ جُمْلَةِ الْجَوَابِ، وَأَنْ يَكُونَ الْمُضَارِعُ بَعْدَهَا دَالًّا عَلَى الِاسْتِقْبَالِ، وَأَنْ لَا يَفْصِلَ بَيْنَهَا وَبَيْنَ الْمُضَارِعِ فَاصِلٌ غَيْرُ الْقَسَمِ أَوِ النِّدَاءِ أَوْ «لَا» النَّافِيَةِ.',
+ detailsEn:'A naṣb-governor is a particle that makes the present verb accusative, such as an, lan, kay, and idhan. Its effect shows on the end of the present verb. Idhan is conditional: it makes the verb accusative only when it stands at the head of the answer sentence, the present verb after it denotes the future, and nothing separates the two except an oath, a vocative, or the negating lā.'},
 
 {term:'Jussive governor',
  examples:[
@@ -2877,6 +3558,948 @@ function materializeCanonicalSigns(data){
   if(canonical)token.sign=canonical;
  });
 }
+/* ===== Phase 3B0A — response-context architecture (NON-PRODUCTION) ================
+   إِذَنْ cannot be produced as an isolated particle+verb sentence: two of its three conditions are
+   DISCOURSE facts (it must head an answer, and the verb after it must denote the future), and the
+   app had no canonical layer able to state either. This section builds that layer and nothing
+   more — no production template consumes it, and the generator cannot reach it.
+
+   Authority is frozen application-owned data, never per-exercise claims. Three stores hold it:
+     • a CONTEXT record — the preceding statement and its discourse facts;
+     • a PAIR record — one exact prompt construction bound to one exact permitted response;
+     • a FIXTURE record — the application's own canonical exercise: its authorized consumer, its
+       token spine, its reciprocal context↔response graph, and the identity every rebuild must
+       reproduce.
+   All three follow the Phase 3B0-pre hardening pattern — null-prototype store, deeply frozen
+   records, own-property lookup — so a record can be neither mutated nor reached by an inherited
+   name.
+
+   The resolver re-derives every condition from those records and from the exercise's own
+   structure. It reads no stored Boolean, no English, no rendered Arabic, no sentence string, no
+   template ID alone and no token index alone. A caller-built look-alike cannot prove the
+   conditions however faithfully it copies the visible surfaces: proof requires the application's
+   own fixture authority, which only buildIdhanSourceDirectFixture confers. */
+/* A record is not authority if a nested array or record can still be rewritten after startup. */
+function deepFreezeAuthority(value){
+ if(!value||typeof value!=='object')return value;
+ Object.freeze(value);
+ for(const key of Object.getOwnPropertyNames(value))deepFreezeAuthority(value[key]);
+ return value;
+}
+const FUTURE_EVIDENCE_KINDS=deepFreezeAuthority({
+ /* The evidence is the SOURCE'S OWN prompt, not a general claim about سـ. p. 75 supplies the
+    statement «سَأَجْتَهِدُ فِي دُرُوسِي» as the thing إِذَنْ answers, and its verb carries the
+    future sīn; the resolver verifies that marker structurally on that exact Arabic surface. No
+    English field appears here, and none may: an English "will" is a translator's choice, so
+    letting it stand for futurity would make the second condition provable in the wrong language. */
+ sourcePromptFutureSin:{
+  id:'sourcePromptFutureSin',
+  markerAr:'س',
+  descriptionAr:'السِّينُ الدَّالَّةُ عَلَى الِاسْتِقْبَالِ',
+  descriptionEn:'the future sīn prefixed to the prompt verb',
+  sourceRuleId:'R_IDHAN_CONDITIONS'
+ }
+});
+const RESPONSE_RELATIONS=Object.freeze({jawabJazaa:'jawabJazaa'});
+const RESPONSE_RELATION_TYPES=Object.freeze({contextAnswer:'contextAnswer',answerContext:'answerContext'});
+const DISCOURSE_POSITIONS=Object.freeze({sadrJumlatAlJawab:'sadrJumlatAlJawab'});
+const SEPARATOR_MODES=Object.freeze({none:'none'});
+const ARCHITECTURE_FIXTURE_STATUS='architecture-fixture';
+/* The one consumer authorized in this phase. It is NOT a template stableId and no template may
+   ever carry it, which is what keeps the fixture out of production. It is also distinct from the
+   fixture's own ID: a consumer names WHO may use the fixture, the fixture ID names WHAT is used,
+   and collapsing the two would let either stand in for the other. */
+const IDHAN_FIXTURE_CONSUMER='FIXTURE_IDHAN_SOURCE_DIRECT';
+const IDHAN_FIXTURE_ID='IDHAN_SOURCE_DIRECT_FIXTURE';
+/* The response is a node in the discourse graph, not a token: the context points AT it and it
+   points BACK. Giving it its own ID is what makes a one-way, self-linked or mis-targeted link
+   detectable at all. */
+const IDHAN_RESPONSE_NODE_ID='IDHAN_SOURCE_DIRECT_RESPONSE';
+const RESPONSE_CONTEXT_SOURCE={
+ IDHAN_SOURCE_DIRECT:{
+  id:'IDHAN_SOURCE_DIRECT',
+  contextType:'promptResponse',
+  promptAr:'سَأَجْتَهِدُ فِي دُرُوسِي',
+  promptEn:'I will work hard in my studies.',
+  promptVerbAr:'سَأَجْتَهِدُ',
+  responseNodeId:IDHAN_RESPONSE_NODE_ID,
+  futureEvidenceId:'sourcePromptFutureSin',
+  responseRelation:'jawabJazaa',
+  discoursePosition:'sadrJumlatAlJawab',
+  separatorMode:'none',
+  responseParticleAr:'إِذَنْ',
+  conditionSetId:'R_IDHAN_CONDITIONS',
+  sourceRuleId:'R_IDHAN_CONDITIONS',
+  sourcePdfPage:75,
+  authorizedConsumers:[IDHAN_FIXTURE_CONSUMER],
+  productionStatus:ARCHITECTURE_FIXTURE_STATUS
+ }
+};
+/* A prompt and a response may never be paired arbitrarily: a pair record names BOTH exact
+   constructions, so the future generator must select a whole approved record rather than
+   randomizing the two halves independently. Every field here is authority and every field is
+   rechecked by the resolver — nothing in this record is decorative. */
+const RESPONSE_PAIR_SOURCE={
+ IDHAN_SOURCE_DIRECT_PAIR:{
+  id:'IDHAN_SOURCE_DIRECT_PAIR',
+  contextId:'IDHAN_SOURCE_DIRECT',
+  fixtureId:IDHAN_FIXTURE_ID,
+  promptVerbAr:'سَأَجْتَهِدُ',
+  promptPerson:'1s',
+  responseParticleAr:'إِذَنْ',
+  responseVerbAr:'تَنْجَحَ',
+  responsePerson:'2ms',
+  semanticRelation:'consequence',
+  responseTransitivity:'intransitive',
+  futureEvidenceId:'sourcePromptFutureSin',
+  auditStatus:'source-verified',
+  sourcePdfPage:75,
+  productionStatus:ARCHITECTURE_FIXTURE_STATUS
+ }
+};
+/* The application's own canonical fixture. This — not a harness literal, and not any object a
+   caller can assemble — is what the resolver authenticates. It binds the fixture ID to its
+   consumer, its context, its pair, the exact token spine (identity, order, focus), the exact
+   reciprocal discourse graph, the source rule that owns it, and the canonical identity string a
+   correct rebuild must reproduce. `productionStatus` keeps it out of production by construction:
+   the resolver refuses to prove anything that is not marked a non-production fixture. */
+const IDHAN_FIXTURE_SOURCE={
+ [IDHAN_FIXTURE_ID]:{
+  id:IDHAN_FIXTURE_ID,
+  consumerId:IDHAN_FIXTURE_CONSUMER,
+  responseContextId:'IDHAN_SOURCE_DIRECT',
+  responsePairId:'IDHAN_SOURCE_DIRECT_PAIR',
+  responseNodeId:IDHAN_RESPONSE_NODE_ID,
+  sourceRuleId:'R_IDHAN_CONDITIONS',
+  sourcePdfPage:75,
+  auditStatus:'source-verified',
+  productionStatus:ARCHITECTURE_FIXTURE_STATUS,
+  schemaVersion:3,
+  futureEvidenceId:'sourcePromptFutureSin',
+  prompt:{ar:'سَأَجْتَهِدُ فِي دُرُوسِي',en:'I will work hard in my studies.',verbAr:'سَأَجْتَهِدُ',person:'1s'},
+  response:{
+   ar:'إِذَنْ تَنْجَحَ',
+   en:'In that case you will succeed.',
+   particleAr:'إِذَنْ',
+   verbAr:'تَنْجَحَ',
+   person:'2ms',
+   transitivity:'intransitive',
+   semanticRelation:'consequence'
+  },
+  /* The token spine is IDENTITY: ids, order and which token is the focus. Surfaces and grammar
+     appear here too so the builder has one source, but the resolver checks the two layers
+     separately — the spine authenticates the exercise, the condition clauses below evaluate its
+     grammar. Neither token carries a state or a sign: R_IDHAN_CONDITIONS authorizes the three
+     conditions and nothing else, so an iʿrāb state on either token is a claim this phase has no
+     source for, and the identity seal rejects one. */
+  tokens:[
+   {id:'idhan-fixture-0',word:'إِذَنْ',target:false,type:'particle',role:'particle',particleType:'idhan',person:'',tense:'',
+    gloss:'in that case',
+    ar:'وَقَعَتْ «إِذَنْ» فِي صَدْرِ جُمْلَةِ الْجَوَابِ.',
+    en:'Idhan stands at the head of the answer sentence.'},
+   {id:'idhan-fixture-1',word:'تَنْجَحَ',target:true,type:'verb',role:'present',particleType:'',person:'2ms',tense:'present',
+    gloss:'you succeed',
+    ar:'وَقَعَ الْمُضَارِعُ بَعْدَ «إِذَنْ» بِلَا فَاصِلٍ، وَهُوَ دَالٌّ عَلَى الِاسْتِقْبَالِ بِدَلِيلِ السِّينِ فِي الْجُمْلَةِ السَّابِقَةِ.',
+    en:'The present verb follows idhan with no separator, and denotes the future on the evidence of the sīn in the preceding statement.'}
+  ],
+  /* The reciprocal discourse graph. Two links, each naming the other: the context points at the
+     response and the response points back. A one-way link, a self-link, a duplicate, a swapped
+     target or an unrelated statement-response combination all fail. */
+  responseRelationships:[
+   {id:'REL_IDHAN_CONTEXT_ANSWER',type:'contextAnswer',fromId:'IDHAN_SOURCE_DIRECT',toId:IDHAN_RESPONSE_NODE_ID,
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_ANSWER_CONTEXT'},
+   {id:'REL_IDHAN_ANSWER_CONTEXT',type:'answerContext',fromId:IDHAN_RESPONSE_NODE_ID,toId:'IDHAN_SOURCE_DIRECT',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_CONTEXT_ANSWER'}
+  ],
+  /* The three conditions, restated for display from the rule that owns them. This is the ONLY
+     analysis the fixture presents: no particle analysis of إِذَنْ, no naṣb, no maḥall. */
+  conditions:[
+   {ar:'أَنْ تَكُونَ «إِذَنْ» فِي صَدْرِ جُمْلَةِ الْجَوَابِ.',en:'Idhan stands at the head of the answer sentence.'},
+   {ar:'أَنْ يَكُونَ الْمُضَارِعُ الْوَاقِعُ بَعْدَهَا دَالًّا عَلَى الِاسْتِقْبَالِ.',en:'The present verb after it denotes the future.'},
+   {ar:'أَنْ لَا يَفْصِلَ بَيْنَهَا وَبَيْنَ الْمُضَارِعِ فَاصِلٌ.',en:'Nothing separates it from the present verb.'}
+  ],
+  /* The identity a correct rebuild must reproduce, stated here as frozen authority rather than
+     recomputed from whatever the builder happens to emit. Startup verifies the builder against
+     it, so a drift in EITHER the builder or this record fails closed at load. */
+  canonicalIdentity:'nahw-fixture-v1:["IDHAN_SOURCE_DIRECT_FIXTURE","FIXTURE_IDHAN_SOURCE_DIRECT","IDHAN_SOURCE_DIRECT","IDHAN_SOURCE_DIRECT_PAIR","R_IDHAN_CONDITIONS","architecture-fixture",3,[["idhan-fixture-0","إِذَنْ",false,"particle","particle","idhan","","","","",""],["idhan-fixture-1","تَنْجَحَ",true,"verb","present","","2ms","present","","",""]],[["REL_IDHAN_CONTEXT_ANSWER","contextAnswer","IDHAN_SOURCE_DIRECT","IDHAN_SOURCE_DIRECT_RESPONSE","jawabJazaa","REL_IDHAN_ANSWER_CONTEXT"],["REL_IDHAN_ANSWER_CONTEXT","answerContext","IDHAN_SOURCE_DIRECT_RESPONSE","IDHAN_SOURCE_DIRECT","jawabJazaa","REL_IDHAN_CONTEXT_ANSWER"]]]'
+ }
+};
+function freezeRecordStore(source,label){
+ const store=Object.create(null);
+ for(const id of Object.keys(source)){
+  const entry=deepFreezeAuthority(source[id]);
+  if(entry.id!==id)throw new Error(label+' record '+id+' is not bound to its own key.');
+  if(!Object.isFrozen(entry))throw new Error(label+' record '+id+' is not frozen.');
+  store[id]=entry;
+ }
+ return Object.freeze(store);
+}
+const RESPONSE_CONTEXT_REGISTRY=freezeRecordStore(RESPONSE_CONTEXT_SOURCE,'response context');
+const RESPONSE_PAIR_REGISTRY=freezeRecordStore(RESPONSE_PAIR_SOURCE,'response pair');
+const IDHAN_FIXTURE_REGISTRY=freezeRecordStore(IDHAN_FIXTURE_SOURCE,'response fixture');
+/* A copied or look-alike record object is not authority; only an own key of a frozen store is. */
+function frozenStoreRecord(store,id){
+ if(typeof id!=='string')return null;
+ return Object.prototype.hasOwnProperty.call(store,id)?store[id]:null;
+}
+function responseContextRecord(id){return frozenStoreRecord(RESPONSE_CONTEXT_REGISTRY,id)}
+function responsePairRecord(id){return frozenStoreRecord(RESPONSE_PAIR_REGISTRY,id)}
+function responseFixtureRecord(id){return frozenStoreRecord(IDHAN_FIXTURE_REGISTRY,id)}
+/* Section 12 — consumer restriction encoded WITH the rule, not with its callers. Citing
+   R_IDHAN_CONDITIONS is a claim that the three discourse conditions have been checked, and only
+   the canonical fixture's consumer is ever in a position to have checked them. A production
+   template, an ordinary token, a relationship, another source rule or an arbitrary caller may not
+   wear it; validateExercise rejects the exercise outright, so a rejected attempt never reaches
+   the validByRule tally. */
+const RESTRICTED_SOURCE_RULE_OWNERS=Object.freeze(Object.assign(Object.create(null),{
+ R_IDHAN_CONDITIONS:Object.freeze([IDHAN_FIXTURE_CONSUMER])
+}));
+function isRestrictedSourceRule(ruleId){
+ return typeof ruleId==='string'&&Object.prototype.hasOwnProperty.call(RESTRICTED_SOURCE_RULE_OWNERS,ruleId);
+}
+function isSourceRuleConsumerAuthorized(ruleId,consumerId){
+ if(!isRestrictedSourceRule(ruleId))return true;
+ return typeof consumerId==='string'&&RESTRICTED_SOURCE_RULE_OWNERS[ruleId].includes(consumerId);
+}
+/* Application ownership is EXTERNAL object identity, never an exercise property. A property-held
+   token — even a private Symbol, a non-enumerable descriptor or a closure-secret object — can be
+   transferred by Reflect.ownKeys/getOwnPropertyDescriptors or inherited through Object.create.
+   This module-private WeakSet cannot be copied, serialized, inherited or reached by a caller. Only
+   the canonical builder adds an exact exercise object, after the complete semantic proof passes. */
+const IDHAN_FIXTURE_OWNED_EXERCISES=new WeakSet();
+/* ---- Fail-closed inspection of untrusted values ----------------------------------
+   An untrusted candidate can be a revoked Proxy, a Proxy whose traps throw or lie, or an ordinary
+   object carrying an own or INHERITED accessor. Every one of those turns an innocent-looking
+   `value.fixtureId`, `Array.isArray(value.tokens)` or `Object.keys(value)` into caller-controlled
+   code that can throw out of a security boundary — so a rejection becomes an exception instead of
+   a refusal, and the attacker learns which checks ran in what order. The helpers below are the
+   only operations any boundary may perform on a value it has not yet vouched for. */
+function safeIsObject(value){
+ const kind=typeof value;
+ return value!==null&&(kind==='object'||kind==='function');
+}
+/* Ownership is decided by object IDENTITY and nothing else. `typeof` and WeakSet.has are the only
+   operations here: neither invokes an accessor nor triggers a Proxy trap, and WeakSet.has answers
+   false for a revoked Proxy rather than throwing. No field of the candidate is read — reading one
+   to decide ownership would be exactly the hole this predicate exists to close. */
+function isIdhanFixtureOwned(value){
+ return safeIsObject(value)&&IDHAN_FIXTURE_OWNED_EXERCISES.has(value);
+}
+/* The single frozen refusal every ownership-dependent boundary returns. It is a module constant,
+   not a message built from the candidate: formatting "unknown fixture X" would have to read X. */
+const IDHAN_UNOWNED_PROOF=Object.freeze({satisfied:false,reason:'not-application-owned',field:'',
+ fixtureId:null,contextId:null,pairId:null});
+/* The same refusal in the shape the fixture renderer returns. */
+const IDHAN_UNOWNED_RENDER=Object.freeze({rendered:false,reason:'not-application-owned'});
+/* Sentinel for an inspection that could not be completed. It is truthy, so every caller that
+   treats "a claim was found" as rejection also treats "the value could not be inspected" as
+   rejection, which is the fail-closed direction. */
+const CLAIM_SCAN_FAILED='__claim-scan-failed__';
+/* Own-property presence WITHOUT invoking anything: an accessor is reported as present from its
+   descriptor, never called. Returns '' (absent), 'data', 'accessor', or CLAIM_SCAN_FAILED. */
+function safeOwnPropertyKind(target,field){
+ try{
+  const descriptor=Object.getOwnPropertyDescriptor(target,field);
+  if(!descriptor)return '';
+  return Object.prototype.hasOwnProperty.call(descriptor,'value')?'data':'accessor';
+ }catch{return CLAIM_SCAN_FAILED}
+}
+/* An own DATA value, or undefined. Never runs a getter and never throws. */
+function safeOwnDataValue(target,field){
+ if(!safeIsObject(target))return undefined;
+ try{
+  const descriptor=Object.getOwnPropertyDescriptor(target,field);
+  return descriptor&&Object.prototype.hasOwnProperty.call(descriptor,'value')?descriptor.value:undefined;
+ }catch{return undefined}
+}
+/* Array.isArray unwraps proxies and throws on a revoked one, so even it needs guarding. */
+function safeIsArray(value){
+ try{return Array.isArray(value)}catch{return false}
+}
+function safeOwnDataArray(target,field){
+ const value=safeOwnDataValue(target,field);
+ return safeIsArray(value)?value:[];
+}
+/* ---- Full-graph safe materialization --------------------------------------------
+   A top-level plain-data check is not enough, and the previous one was wrong twice over. It
+   trusted the whole nested graph after checking only the outermost object, so a hostile value at
+   `tokens[0]`, `token.grammar` or `relationships[i]` still met an ordinary read further down — in
+   isExerciseSnapshot, in Array.isArray, or in cloneSerializable's JSON.stringify, which walks the
+   entire graph invoking getters. And its "ordinary object" test — prototype's prototype is null —
+   accepted ANY custom root prototype, so a wrapper over a hand-made root passed while still
+   carrying inherited accessors that fired on the first ordinary read.
+
+   Both are replaced by one rule: an untrusted graph is never read ordinarily at all. It is walked
+   descriptor-only and MATERIALIZED into a fresh application-owned graph, and every later step —
+   schema recognition, migration, canonical rebuilding, serialization — sees only that fresh graph.
+
+   PROTOTYPE POLICY (Policy B, prototype-agnostic normalization). The original prototype is not
+   inspected and not trusted; it is discarded. Only own data descriptors are copied, into records
+   this function creates, so nothing inherited can survive and no custom prototype can carry
+   authority. A class instance or custom-root wrapper is therefore not an accepted attack — it is
+   an inert normalized wrapper whose own data must still satisfy every canonical schema check.
+   Exotic built-ins are nevertheless rejected explicitly rather than normalized, so a Date or a Map
+   can never quietly become a valid empty record.
+
+   DOMAIN AND LIMITS, measured from canonical data rather than guessed. Across all 82 production
+   templates (live, rendered and snapshotted) and the إِذَنْ fixture, canonical graphs contain only
+   `[object Object]` and `[object Array]`, and contain no undefined, no non-finite number, no
+   function, no symbol, no accessor, no sparse array, no extra array property, no cycle and no
+   repeated object reference. Their maxima are depth 5, 53 nodes and 25 keys on one object, so the
+   limits below sit well clear of honest data while still bounding an adversarial graph. */
+const SAFE_GRAPH_MAX_DEPTH=12;
+const SAFE_GRAPH_MAX_NODES=2048;
+const SAFE_GRAPH_MAX_KEYS=256;
+/* EXOTIC BUILT-INS. There is deliberately no brand test here. Reading a value's brand means
+   `Object.prototype.toString.call(value)`, which performs Get(value, Symbol.toStringTag) — a
+   `get` trap invocation on a Proxy, and the established guarantee is that this boundary invokes
+   none. Brand also reads the prototype chain, which Policy B has committed to discarding.
+
+   Exotics are handled by the domain itself instead. Functions and symbols are refused by the
+   `typeof` gate; everything else keeps its payload in internal slots that own-property reflection
+   cannot see, so a genuine Date, Map, Set, WeakMap, WeakSet, Promise, ArrayBuffer or typed array
+   normalizes to an empty record, and a RegExp or Error to a record of inert scraps. None of those
+   satisfies any canonical schema — a snapshot needs template metadata and tokens, a sign needs
+   exactly id/ar/en — so they are rejected one step later, by the schema, rather than silently
+   accepted. The permanent tests prove each of them fails to yield a valid snapshot or restore. */
+function safeGraphFailure(reason){return Object.freeze({ok:false,reason,value:null})}
+/* Returns {ok:true,value:<fresh graph>} or a frozen {ok:false,reason}. Never throws for any
+   caller-controlled input. `allowedClaims` names the context-claim fields this particular path is
+   entitled to carry (the fixture snapshot legitimately names its fixture); every other guarded
+   name rejects on PRESENCE, before its value is read, so migration and serialization can never
+   erase the evidence. */
+function safeMaterializeDataGraph(value,allowedClaims){
+ let nodes=0;
+ const active=new WeakSet();
+ const walk=(node,depth)=>{
+  if(node===null)return{ok:true,value:null};
+  const kind=typeof node;
+  if(kind==='string'||kind==='boolean')return{ok:true,value:node};
+  if(kind==='number')return Number.isFinite(node)?{ok:true,value:node}:safeGraphFailure('non-finite-number');
+  // undefined, function, symbol and bigint are outside the canonical snapshot domain.
+  if(kind!=='object')return safeGraphFailure('unsupported-'+kind);
+  if(++nodes>SAFE_GRAPH_MAX_NODES)return safeGraphFailure('node-limit');
+  if(depth>SAFE_GRAPH_MAX_DEPTH)return safeGraphFailure('depth-limit');
+  /* Every reflective step below can be made to throw by a revoked or trapping Proxy, so all of
+     them happen inside one guard and a failure to inspect is a rejection. `Array.isArray` is in
+     here too: it unwraps proxies and throws for a revoked one. */
+  let isArray=false,keys=null;
+  try{
+   // Array.isArray is slot-based: it unwraps proxies and fires no trap, but it throws for a
+   // revoked one, which is why it lives inside the guard.
+   isArray=Array.isArray(node);
+   keys=Reflect.ownKeys(node);
+  }catch{return safeGraphFailure('uninspectable')}
+  if(keys.length>SAFE_GRAPH_MAX_KEYS)return safeGraphFailure('key-limit');
+  // A cycle is rejected; a repeated reference on distinct branches is materialized independently,
+  // so no identity — and therefore no authority — can be shared through the output graph.
+  if(active.has(node))return safeGraphFailure('cycle');
+  active.add(node);
+  const release=result=>{active.delete(node);return result};
+  const descriptorOf=key=>{
+   try{return Object.getOwnPropertyDescriptor(node,key)}catch{return undefined}
+  };
+  if(isArray){
+   const lengthDescriptor=descriptorOf('length');
+   if(!lengthDescriptor||!Object.prototype.hasOwnProperty.call(lengthDescriptor,'value'))return release(safeGraphFailure('array-length-not-data'));
+   const length=lengthDescriptor.value;
+   if(typeof length!=='number'||!Number.isInteger(length)||length<0)return release(safeGraphFailure('array-length-invalid'));
+   if(length>SAFE_GRAPH_MAX_KEYS)return release(safeGraphFailure('key-limit'));
+   // Exactly the dense indices plus `length`: no holes, no extra properties, no symbol keys.
+   for(const key of keys){
+    if(typeof key==='symbol')return release(safeGraphFailure('symbol-key'));
+    if(key==='length')continue;
+    const index=Number(key);
+    if(!Number.isInteger(index)||index<0||index>=length||String(index)!==key)return release(safeGraphFailure('array-extra-property'));
+   }
+   const fresh=[];
+   for(let index=0;index<length;index++){
+    const descriptor=descriptorOf(String(index));
+    if(!descriptor)return release(safeGraphFailure('array-hole'));
+    if(!Object.prototype.hasOwnProperty.call(descriptor,'value'))return release(safeGraphFailure('accessor'));
+    const element=walk(descriptor.value,depth+1);
+    if(!element.ok)return release(element);
+    fresh.push(element.value);
+   }
+   return release({ok:true,value:fresh});
+  }
+  /* A fresh record. Its prototype is the application's own, never the original's — Policy B — so
+     an inherited accessor, an inherited semantic field and a custom root prototype all vanish
+     here rather than being trusted or inspected. */
+  const fresh={};
+  for(const key of keys){
+   if(typeof key==='symbol')return release(safeGraphFailure('symbol-key'));
+   /* The context-claim guard runs DURING the walk, on presence alone, before the value is read:
+      a forbidden name valued undefined or backed by an accessor must reject rather than be
+      quietly dropped by a later JSON round trip. */
+   if(RESPONSE_CONTEXT_CLAIM_FIELDS.includes(key)&&!(allowedClaims&&allowedClaims.includes(key))){
+    return release(safeGraphFailure('context-claim'));
+   }
+   const descriptor=descriptorOf(key);
+   if(!descriptor)return release(safeGraphFailure('uninspectable'));
+   if(!Object.prototype.hasOwnProperty.call(descriptor,'value'))return release(safeGraphFailure('accessor'));
+   const materialized=walk(descriptor.value,depth+1);
+   if(!materialized.ok)return release(materialized);
+   fresh[key]=materialized.value;
+  }
+  return release({ok:true,value:fresh});
+ };
+ try{return walk(value,0)}catch{return safeGraphFailure('uninspectable')}
+}
+/* Convenience wrapper: the fresh graph, or null. */
+function safeMaterializedGraph(value,allowedClaims){
+ const result=safeMaterializeDataGraph(value,allowedClaims);
+ return result.ok?result.value:null;
+}
+/* Retained as a direct predicate for the permanent tests: an ordinary plain data object is exactly
+   one that materializes to an equivalent fresh graph. */
+function safeIsPlainDataObject(value){
+ if(typeof value!=='object'||value===null)return false;
+ try{
+  return safeMaterializeDataGraph(value,null).ok;
+ }catch{return false}
+}
+const FIXTURE_IDENTITY_PREFIX='nahw-fixture-v1:';
+/* The canonical semantic identity of a fixture exercise. It covers what the exercise IS —
+   its bindings, its token spine and grammar, its discourse graph — and deliberately reaches
+   fields no individual clause checks: `schemaVersion`, and the presence of any iʿrāb `state` or
+   `sign` on a token. A naṣb state smuggled onto the response verb changes this string and
+   nothing else, so the seal is what rejects it. Presentation (gloss, ar, en, translation) is
+   excluded: presentation is rebuilt from frozen authority on every render and must never be
+   able to change what an exercise is. */
+function canonicalFixtureIdentity(exercise){
+ /* Public and deliberately NOT ownership-gated: the builder must compute an identity before its
+    exercise is registered, so this cannot demand membership. It is fail-closed instead — a
+    hostile accessor or Proxy trap yields '', which matches no canonical identity — so it can
+    never throw out of a boundary that calls it. The guard wraps only reads of the candidate. */
+ if(!exercise||typeof exercise!=='object')return '';
+ try{
+ const tokens=safeIsArray(exercise.tokens)?exercise.tokens:[];
+ const links=safeIsArray(exercise.responseRelationships)?exercise.responseRelationships:[];
+ return FIXTURE_IDENTITY_PREFIX+JSON.stringify([
+  typeof exercise.fixtureId==='string'?exercise.fixtureId:'',
+  typeof exercise.consumerId==='string'?exercise.consumerId:'',
+  typeof exercise.responseContextId==='string'?exercise.responseContextId:'',
+  typeof exercise.responsePairId==='string'?exercise.responsePairId:'',
+  typeof exercise.sourceRuleId==='string'?exercise.sourceRuleId:'',
+  typeof exercise.productionStatus==='string'?exercise.productionStatus:'',
+  /* Type-EXACT, not coerced. `Number(...)` mapped the string '3' onto the canonical number 3, so
+     a fixture whose schemaVersion was the wrong primitive sealed identically to the canonical one
+     and still proved its conditions. Every other field above is already type-exact; this one was
+     the exception, and a version claim of the wrong type is a claim this phase has no source for. */
+  typeof exercise.schemaVersion==='number'&&Number.isFinite(exercise.schemaVersion)?exercise.schemaVersion:0,
+  tokens.map(item=>[
+   item?.id||'',item?.word||'',item?.target===true,
+   item?.grammar?.type||'',item?.grammar?.role||'',item?.grammar?.particleType||'',
+   item?.grammar?.person||'',item?.tense||'',item?.state||'',item?.sign?'SIGN':'',
+   /* Presence only, never a read. Phase 3B0A authorizes no inflection on a fixture token — no
+      state, no sign and no morphology cache — so any of the three appearing is a claim this
+      phase has no source for, and the seal is what rejects it. */
+   item?.grammar?.morphology?'MORPH':''
+  ]),
+  links.map(link=>[link?.id||'',link?.type||'',link?.fromId||'',link?.toId||'',
+   link?.relation||'',link?.reciprocalId||''])
+ ]);
+ }catch{return ''}
+}
+/* ---- Pure condition clauses ------------------------------------------------------
+   Each clause is a pure predicate over records handed in as arguments, returning '' when it
+   holds or its own failure reason. That shape is what makes "changing any single field must fail
+   closed" directly testable: a test passes a synthetic record with one field altered. Synthetic
+   records can never reach production, because the resolver itself accepts only own keys of the
+   frozen registries. */
+/* Condition 1 — صَدْرُ جُمْلَةِ الْجَوَاب. A preceding statement must exist, the target must be its
+   ANSWER, and إِذَنْ must open that answer. Sentence-initial position alone is explicitly not
+   enough; that is the whole reason this architecture exists. */
+function responseHeadFailure(context,pair,exercise){
+ if(!context||!pair)return 'unknown-context';
+ if(context.contextType!=='promptResponse')return 'not-a-response-context';
+ if(context.responseRelation!==RESPONSE_RELATIONS.jawabJazaa)return 'wrong-response-relation';
+ if(context.discoursePosition!==DISCOURSE_POSITIONS.sadrJumlatAlJawab)return 'wrong-discourse-position';
+ if(typeof context.promptAr!=='string'||!context.promptAr.trim())return 'no-preceding-statement';
+ const tokens=exercise&&Array.isArray(exercise.tokens)?exercise.tokens:null;
+ if(!tokens||tokens.length<2)return 'no-response-tokens';
+ const head=tokens[0];
+ if(!head||head.grammar?.type!=='particle')return 'response-head-not-a-particle';
+ if(head.word!==context.responseParticleAr||head.word!==pair.responseParticleAr)return 'response-head-not-idhan';
+ return '';
+}
+/* Condition 2 — دَلَالَة عَلَى الِاسْتِقْبَال, proven from the prompt's own Arabic future marker.
+   Nothing in this clause touches English: `promptEn` is not read here and is not readable from
+   anywhere else in the proof, so an English "will" can neither create the future reading nor
+   repair a missing sīn. */
+function futureEvidenceFailure(context,evidenceKinds){
+ const id=context&&context.futureEvidenceId;
+ const evidence=typeof id==='string'&&evidenceKinds&&Object.prototype.hasOwnProperty.call(evidenceKinds,id)
+  ?evidenceKinds[id]:null;
+ if(!evidence)return 'unknown-future-evidence';
+ if(evidence.sourceRuleId!==context.sourceRuleId)return 'future-evidence-not-source-owned';
+ if(typeof context.promptVerbAr!=='string'||context.promptVerbAr[0]!==evidence.markerAr)return 'prompt-carries-no-future-marker';
+ if(typeof context.promptAr!=='string'||!context.promptAr.startsWith(context.promptVerbAr))return 'prompt-does-not-open-with-its-verb';
+ return '';
+}
+/* Every authority-bearing CONTEXT field, cross-checked against the fixture that owns it. */
+const CONTEXT_AUTHORITY_FIELDS=Object.freeze([
+ ['id',fixture=>fixture.responseContextId],
+ ['contextType',()=>'promptResponse'],
+ ['promptAr',fixture=>fixture.prompt.ar],
+ ['promptVerbAr',fixture=>fixture.prompt.verbAr],
+ ['responseNodeId',fixture=>fixture.responseNodeId],
+ ['futureEvidenceId',fixture=>fixture.futureEvidenceId],
+ ['responseRelation',()=>RESPONSE_RELATIONS.jawabJazaa],
+ ['discoursePosition',()=>DISCOURSE_POSITIONS.sadrJumlatAlJawab],
+ ['separatorMode',()=>SEPARATOR_MODES.none],
+ ['responseParticleAr',fixture=>fixture.response.particleAr],
+ ['conditionSetId',fixture=>fixture.sourceRuleId],
+ ['sourceRuleId',fixture=>fixture.sourceRuleId],
+ ['sourcePdfPage',fixture=>fixture.sourcePdfPage],
+ ['productionStatus',fixture=>fixture.productionStatus]
+]);
+function contextAuthorityFailure(context,fixture){
+ if(!context||typeof context!=='object')return 'record';
+ if(!fixture||typeof fixture!=='object')return 'fixture';
+ for(const [field,expected] of CONTEXT_AUTHORITY_FIELDS)if(context[field]!==expected(fixture))return field;
+ if(!Array.isArray(context.authorizedConsumers)||context.authorizedConsumers.length!==1
+   ||context.authorizedConsumers[0]!==fixture.consumerId)return 'authorizedConsumers';
+ return '';
+}
+/* Every authority-bearing PAIR field. Codex found promptPerson, semanticRelation,
+   responseTransitivity, auditStatus and productionStatus were stored but never rechecked; every
+   field in the record is now cross-checked against the fixture and the context, so no field
+   exists decoratively. */
+const PAIR_AUTHORITY_FIELDS=Object.freeze([
+ ['id',fixture=>fixture.responsePairId],
+ ['fixtureId',fixture=>fixture.id],
+ ['promptVerbAr',fixture=>fixture.prompt.verbAr],
+ ['promptPerson',fixture=>fixture.prompt.person],
+ ['responseParticleAr',fixture=>fixture.response.particleAr],
+ ['responseVerbAr',fixture=>fixture.response.verbAr],
+ ['responsePerson',fixture=>fixture.response.person],
+ ['semanticRelation',fixture=>fixture.response.semanticRelation],
+ ['responseTransitivity',fixture=>fixture.response.transitivity],
+ ['futureEvidenceId',fixture=>fixture.futureEvidenceId],
+ ['auditStatus',fixture=>fixture.auditStatus],
+ ['sourcePdfPage',fixture=>fixture.sourcePdfPage],
+ ['productionStatus',fixture=>fixture.productionStatus]
+]);
+function pairAuthorityFailure(pair,context,fixture){
+ if(!pair||typeof pair!=='object')return 'record';
+ if(!context||typeof context!=='object')return 'context';
+ if(!fixture||typeof fixture!=='object')return 'fixture';
+ if(pair.contextId!==context.id)return 'contextId';
+ for(const [field,expected] of PAIR_AUTHORITY_FIELDS)if(pair[field]!==expected(fixture))return field;
+ // The pair and the context must also agree with EACH OTHER, not only with the fixture.
+ if(pair.promptVerbAr!==context.promptVerbAr)return 'promptVerbAr';
+ if(pair.responseParticleAr!==context.responseParticleAr)return 'responseParticleAr';
+ if(pair.futureEvidenceId!==context.futureEvidenceId)return 'futureEvidenceId';
+ return '';
+}
+/* The reciprocal discourse graph, re-derived rather than read in record order. */
+function responseGraphFailure(links,contextId,responseNodeId){
+ if(!Array.isArray(links))return 'missing';
+ if(links.length!==2)return 'count';
+ const forward=links.find(link=>link&&link.type===RESPONSE_RELATION_TYPES.contextAnswer);
+ const back=links.find(link=>link&&link.type===RESPONSE_RELATION_TYPES.answerContext);
+ if(!forward||!back)return 'incomplete-graph';
+ if(forward.id===back.id)return 'duplicate';
+ if(forward.fromId===forward.toId||back.fromId===back.toId)return 'self-link';
+ if(forward.fromId!==contextId||forward.toId!==responseNodeId)return 'forward-target';
+ if(back.fromId!==responseNodeId||back.toId!==contextId)return 'reciprocal-target';
+ if(forward.reciprocalId!==back.id||back.reciprocalId!==forward.id)return 'reciprocal-id';
+ if(forward.relation!==RESPONSE_RELATIONS.jawabJazaa||back.relation!==RESPONSE_RELATIONS.jawabJazaa)return 'relation';
+ return '';
+}
+/* The token SPINE — identity, order and focus, checked apart from grammar so that authenticating
+   the exercise and evaluating its conditions stay separate concerns. */
+function fixtureTokenSpineFailure(exercise,fixture){
+ const tokens=exercise&&Array.isArray(exercise.tokens)?exercise.tokens:null;
+ if(!tokens)return 'missing';
+ if(tokens.length!==fixture.tokens.length)return 'count';
+ for(let index=0;index<fixture.tokens.length;index++){
+  const spec=fixture.tokens[index];
+  const item=tokens[index];
+  if(!item||typeof item!=='object')return 'token';
+  if(item.id!==spec.id)return 'id';
+  if((item.target===true)!==spec.target)return 'target';
+ }
+ return '';
+}
+/* ---- Section 10 — a safe semantic view of an OWNED fixture -----------------------
+   WeakSet membership proves that this is the exact object the builder registered. It does NOT
+   prove the object is still what it was: a caller holding the reference can replace `tokens`,
+   `token.grammar` or `responseRelationships` with a revoked Proxy or an accessor afterwards, and
+   every ordinary read in the proof would then run the caller's code. Ownership therefore admits
+   the object; it does not license reading it carelessly.
+
+   This builds a descriptor-only view of exactly the fields the proof consults. Element and array
+   REFERENCES are preserved — the reciprocal graph must still be checked by identity against the
+   frozen registry — while every read that reaches the exercise is guarded. A view that cannot be
+   extracted is null, and the proof fails closed. */
+function safeOwnDataElements(value){
+ if(!safeIsObject(value))return null;
+ try{
+  if(!Array.isArray(value))return null;
+  const lengthDescriptor=Object.getOwnPropertyDescriptor(value,'length');
+  if(!lengthDescriptor||typeof lengthDescriptor.value!=='number')return null;
+  const elements=[];
+  for(let index=0;index<lengthDescriptor.value;index++){
+   const descriptor=Object.getOwnPropertyDescriptor(value,String(index));
+   if(!descriptor||!Object.prototype.hasOwnProperty.call(descriptor,'value'))return null;
+   elements.push(descriptor.value);
+  }
+  return elements;
+ }catch{return null}
+}
+/* The authoritative field manifest of the safe fixture view: the COMPLETE set of exercise fields
+   the condition proof is permitted to consult, at every level it reaches. It exists so the
+   completeness property is a checkable artifact rather than a reading of the source: the permanent
+   tests assert the view's own key structure equals this manifest exactly in both directions, that
+   every name listed here is load-bearing (a controlled semantic mutation of it must break the
+   proof, and making it unreadable must fail the proof closed), and — with a recording prototype
+   installed on the exercise, its tokens and their grammar — that the resolver reads NOTHING off
+   the exercise outside this view. Adding a resolver read of a field that is not here, or adding a
+   field to the view without listing it, fails the harness. */
+const IDHAN_SAFE_VIEW_MANIFEST=Object.freeze({
+ exercise:Object.freeze(['fixtureId','consumerId','responseContextId','responsePairId','sourceRuleId',
+  'productionStatus','schemaVersion','responseRelationships','tokens']),
+ token:Object.freeze(['id','word','target','tense','state','sign','grammar']),
+ grammar:Object.freeze(['type','role','particleType','person','morphology'])
+});
+function safeIdhanFixtureView(exercise){
+ const field=name=>safeOwnDataValue(exercise,name);
+ const rawTokens=safeOwnDataElements(field('tokens'));
+ if(!rawTokens)return null;
+ const tokens=rawTokens.map(item=>{
+  // A non-object token is carried through as null, so the spine clause still reports it as such
+  // rather than seeing a hollow record the view invented.
+  if(!safeIsObject(item))return null;
+  const grammar=safeOwnDataValue(item,'grammar');
+  return{
+   id:safeOwnDataValue(item,'id'),
+   word:safeOwnDataValue(item,'word'),
+   target:safeOwnDataValue(item,'target'),
+   tense:safeOwnDataValue(item,'tense'),
+   state:safeOwnDataValue(item,'state'),
+   // Only ever tested for truthiness by the identity seal, so the raw value is safe to carry.
+   sign:safeOwnDataValue(item,'sign'),
+   grammar:grammar===undefined?undefined:{
+    type:safeOwnDataValue(grammar,'type'),
+    role:safeOwnDataValue(grammar,'role'),
+    particleType:safeOwnDataValue(grammar,'particleType'),
+    person:safeOwnDataValue(grammar,'person'),
+    // Carried for its PRESENCE alone, so the identity seal can reject an inflection cache.
+    morphology:safeOwnDataValue(grammar,'morphology')
+   }
+  };
+ });
+ return{
+  fixtureId:field('fixtureId'),
+  consumerId:field('consumerId'),
+  responseContextId:field('responseContextId'),
+  responsePairId:field('responsePairId'),
+  sourceRuleId:field('sourceRuleId'),
+  productionStatus:field('productionStatus'),
+  schemaVersion:field('schemaVersion'),
+  responseRelationships:safeOwnDataElements(field('responseRelationships')),
+  tokens
+ };
+}
+/* ---- The fail-closed condition proof --------------------------------------------
+   Requires, in order: the application's own fixture record; proof that the exercise was produced
+   from it; exact fixture↔context↔pair↔consumer binding; non-production status; both registry
+   records; every context and pair authority field; the source rule, its verification and its
+   consumer restriction; the full reciprocal graph; the token spine; and only then the three
+   conditions themselves. Caller-supplied IDs authorize nothing on their own: every one of them
+   must agree with a fixture the caller could not have manufactured. The result is frozen. */
+/* ---- Section 10 — Condition 3: أَنْ لَا يَفْصِلَ بَيْنَهَا وَبَيْنَ الْمُضَارِعِ فَاصِلٌ ----------
+   This phase authorizes ONLY إِذَنْ immediately followed by the exact paired present verb, under
+   separatorMode 'none'. Adjacency is proven from the token list itself, never from a stored flag.
+   Al-Tuḥfah p. 75 permits three separators — القسم، النداء، «لا» النافية — but Phase 3B0A does not
+   implement any of them, so an oath, a vocative or a negating لا is a separator like any other and
+   rejects here. Nothing in this phase makes a separator lane productive. */
+function separatorFailure(context,pair,exercise){
+ if(!context||!pair)return 'unknown-context';
+ if(context.separatorMode!==SEPARATOR_MODES.none)return 'separator-mode-not-implemented';
+ const tokens=exercise&&safeIsArray(exercise.tokens)?exercise.tokens:null;
+ if(!tokens||tokens.length<2)return 'no-response-tokens';
+ /* Exactly two tokens. Any third token is a separator, whatever it is: a noun, a pronoun, an
+    adverb, a prepositional phrase, a punctuation token, an object, a second إِذَنْ, an oath, a
+    vocative or the negating لا. Naming them individually would invite the list to go stale. */
+ if(tokens.length!==2)return 'separator-token-present';
+ const head=tokens[0],verb=tokens[1];
+ if(!head||head.word!==pair.responseParticleAr)return 'response-head-not-idhan';
+ if(!verb||verb.grammar?.type!=='verb'||verb.tense!=='present')return 'no-adjacent-present-verb';
+ if(verb.word!==pair.responseVerbAr)return 'response-verb-not-the-paired-construction';
+ if(verb.grammar?.person!==pair.responsePerson)return 'response-person-mismatch';
+ return '';
+}
+/* ---- Sections 8–9 — the three conditions as REQUIRED proof results --------------
+   Each condition returns a PRIVATE frozen success token, and a satisfied proof can only be built
+   by handing all three to one assembler that demands the exact tokens. This is structural rather
+   than defensive: with the old `if(separatorFailure)return fail(...)` shape, deleting or
+   short-circuiting the branch left success completely unchanged, so the harness could not tell a
+   working separator proof from an absent one. Now the assembler simply has no third token to
+   accept.
+
+   The tokens are module-private frozen objects. They are never stored on an exercise, never
+   serialized, never exported, never caller-supplied, never Booleans, and never inferred from
+   English or presentation — so they cannot be forged, replayed or transferred. */
+const IDHAN_HEAD_PROOF_OK=Object.freeze({condition:'sadrJumlatAlJawab'});
+const IDHAN_FUTURE_PROOF_OK=Object.freeze({condition:'dalalatAlIstiqbal'});
+const IDHAN_SEPARATOR_PROOF_OK=Object.freeze({condition:'laFasila'});
+function proveResponseHead(context,pair,exercise){
+ const reason=responseHeadFailure(context,pair,exercise);
+ return reason?Object.freeze({ok:false,reason}):Object.freeze({ok:true,reason:'',token:IDHAN_HEAD_PROOF_OK});
+}
+function proveFutureEvidence(context){
+ const reason=futureEvidenceFailure(context,FUTURE_EVIDENCE_KINDS);
+ return reason?Object.freeze({ok:false,reason}):Object.freeze({ok:true,reason:'',token:IDHAN_FUTURE_PROOF_OK});
+}
+function proveNoSeparator(context,pair,exercise){
+ const reason=separatorFailure(context,pair,exercise);
+ return reason?Object.freeze({ok:false,reason}):Object.freeze({ok:true,reason:'',token:IDHAN_SEPARATOR_PROOF_OK});
+}
+/* Success requires all three EXACT private tokens. A missing result, `true`, a copied token, a
+   structurally identical look-alike, or the right token in the wrong slot all fail. */
+function assembleIdhanConditionProof(headProof,futureProof,separatorProof){
+ /* `held` is exact-token identity, so `true`, a copy, a look-alike and the right token in the
+    wrong slot all fail. `stated` prefers the condition's OWN reason when it gave one, so an
+    honest failure keeps its precise diagnosis and only a missing or malformed result falls back
+    to the generic "…-not-proven". */
+ const held=(proof,token)=>Boolean(proof&&typeof proof==='object'&&proof.ok===true&&proof.token===token);
+ const stated=proof=>proof&&typeof proof==='object'&&typeof proof.reason==='string'?proof.reason:'';
+ if(!held(headProof,IDHAN_HEAD_PROOF_OK))return Object.freeze({ok:false,reason:stated(headProof)||'response-head-not-proven'});
+ if(!held(futureProof,IDHAN_FUTURE_PROOF_OK))return Object.freeze({ok:false,reason:stated(futureProof)||'future-evidence-not-proven'});
+ if(!held(separatorProof,IDHAN_SEPARATOR_PROOF_OK))return Object.freeze({ok:false,reason:stated(separatorProof)||'separator-not-proven'});
+ return Object.freeze({ok:true,reason:''});
+}
+/* The default prover set. The core resolver takes an optional replacement so the permanent tests
+   can prove the public path actually CONSUMES each condition's result — substituting a failing or
+   token-less separator prover must make the whole proof fail at the separator layer. The seam is
+   module-internal: no production caller passes it, and the public resolver never does. */
+const IDHAN_CONDITION_PROVERS=Object.freeze({
+ head:proveResponseHead,
+ future:proveFutureEvidence,
+ separator:proveNoSeparator
+});
+/* The complete semantic proof after ownership. This is the builder's private pre-registration
+   path: it has no public flag, is not exported and bypasses ONLY the WeakSet lookup. */
+function resolveIdhanConditionProofCore(exercise,consumerId,contextId,pairId,provers){
+ const fail=(reason,field='')=>Object.freeze({satisfied:false,reason,field,fixtureId:null,contextId:null,pairId:null});
+ if(!exercise||typeof exercise!=='object')return fail('unknown-fixture');
+ /* Section 10 — every read of the exercise below goes through a descriptor-only view, because
+    ownership proves identity, not that the object is still structurally what it was when it was
+    registered. A view that cannot be extracted fails closed. */
+ const view=safeIdhanFixtureView(exercise);
+ if(!view)return fail('fixture-token-mismatch','unreadable');
+ const fixture=responseFixtureRecord(view.fixtureId);
+ if(!fixture)return fail('unknown-fixture');
+ /* Both sides: the registered fixture must be non-production, AND the exercise must not claim any
+    other status. An exercise asserting production status is asking for a production authorization
+    this rule cannot give, whatever the record says. */
+ if(fixture.productionStatus!==ARCHITECTURE_FIXTURE_STATUS
+   ||view.productionStatus!==fixture.productionStatus)return fail('fixture-not-non-production');
+ if(consumerId!==fixture.consumerId)return fail('fixture-binding-mismatch','consumerId');
+ if(contextId!==fixture.responseContextId)return fail('fixture-binding-mismatch','responseContextId');
+ if(pairId!==fixture.responsePairId)return fail('fixture-binding-mismatch','responsePairId');
+ if(view.consumerId!==fixture.consumerId)return fail('fixture-binding-mismatch','exerciseConsumerId');
+ if(view.responseContextId!==fixture.responseContextId)return fail('fixture-binding-mismatch','exerciseContextId');
+ if(view.responsePairId!==fixture.responsePairId)return fail('fixture-binding-mismatch','exercisePairId');
+ const context=responseContextRecord(contextId);
+ if(!context)return fail('unknown-context');
+ const pair=responsePairRecord(pairId);
+ if(!pair)return fail('unknown-pair');
+ const contextField=contextAuthorityFailure(context,fixture);
+ if(contextField)return fail('context-field-mismatch',contextField);
+ if(!context.authorizedConsumers.includes(consumerId))return fail('unauthorized-consumer');
+ if(!isSourceAuthorized(context.sourceRuleId))return fail('unverified-source');
+ if(!isSourceRuleConsumerAuthorized(context.sourceRuleId,consumerId))return fail('unauthorized-source-consumer');
+ const pairField=pairAuthorityFailure(pair,context,fixture);
+ if(pairField)return fail('pair-field-mismatch',pairField);
+ // The graph must BE the frozen authority, not a copy of it: a deep-cloned link is exactly how a
+ // caller would smuggle in an altered target while keeping every visible field identical.
+ const links=view.responseRelationships;
+ if(!links||links.length!==fixture.responseRelationships.length
+   ||links.some((link,index)=>link!==fixture.responseRelationships[index]))return fail('fixture-relationship-not-authority');
+ const graphReason=responseGraphFailure(links,fixture.responseContextId,fixture.responseNodeId);
+ if(graphReason)return fail('fixture-relationship-invalid',graphReason);
+ const spineReason=fixtureTokenSpineFailure(view,fixture);
+ if(spineReason)return fail('fixture-token-mismatch',spineReason);
+ /* The three conditions of Al-Tuḥfah p. 75, each producing a private success token, and a
+    satisfied result obtainable ONLY by assembling all three. The assembler is the single road to
+    success, so no condition can be dropped without the proof failing. */
+ const active=provers||IDHAN_CONDITION_PROVERS;
+ const headProof=active.head(context,pair,view);          // 1 — صَدْرُ جُمْلَةِ الْجَوَاب
+ const futureProof=active.future(context);                // 2 — دَلَالَة عَلَى الِاسْتِقْبَال
+ const separatorProof=active.separator(context,pair,view);// 3 — لَا فَاصِلَ
+ const assembled=assembleIdhanConditionProof(headProof,futureProof,separatorProof);
+ if(!assembled.ok)return fail(assembled.reason);
+ // The seal. It covers what no single clause above does — schemaVersion, and any iʿrāb state or
+ // sign smuggled onto a token — so a fixture carrying a naṣb claim fails here.
+ if(canonicalFixtureIdentity(view)!==fixture.canonicalIdentity)return fail('fixture-identity-mismatch');
+ return Object.freeze({satisfied:true,reason:'',field:'',fixtureId:fixture.id,contextId:context.id,pairId:pair.id});
+}
+/* Public proof boundary. WeakSet identity is checked before any semantic authority can succeed;
+   copies and prototype children can reproduce every visible field and still cannot be members. */
+function resolveIdhanConditionProof(exercise,consumerId,contextId,pairId){
+ /* Ownership FIRST, on identity alone. Nothing about `exercise` is read — not fixtureId, not its
+    prototype, not its keys, not a diagnostic value — until the WeakSet has vouched for the exact
+    object. The old order read `exercise.fixtureId` first, so an inherited or own accessor, or a
+    revoked or trapping Proxy, ran caller code and threw out of the boundary instead of being
+    refused. The refusal is a frozen module constant for the same reason: naming the supplied
+    fixture in the failure would require dereferencing the thing being rejected. */
+ if(!isIdhanFixtureOwned(exercise))return IDHAN_UNOWNED_PROOF;
+ return resolveIdhanConditionProofCore(exercise,consumerId,contextId,pairId);
+}
+/* Section 11 — the condition-prover seam. It is the SAME path as the public boundary: ownership
+   first, then the identical semantic proof, differing only in that the three condition provers
+   are supplied explicitly. That lets the permanent tests prove the resolver actually CONSUMES
+   each condition's result — substitute a failing or token-less separator prover and the whole
+   proof must fail at the separator layer — without a source-text assertion and without any way to
+   skip ownership. The whole script is an IIFE, so this reaches no production caller; it is
+   visible only to the test export block, which the harness injects into its own copy. */
+function resolveIdhanConditionProofWithProvers(exercise,consumerId,contextId,pairId,provers){
+ if(!isIdhanFixtureOwned(exercise))return IDHAN_UNOWNED_PROOF;
+ return resolveIdhanConditionProofCore(exercise,consumerId,contextId,pairId,provers);
+}
+/* Every static failure reason the resolver and its clauses can return. Enumerated here so the
+   permanent tests can assert they exercise all of them rather than counting by hand. */
+const IDHAN_PROOF_FAILURE_REASONS=Object.freeze([
+ 'unknown-fixture','not-application-owned','fixture-not-non-production','fixture-binding-mismatch',
+ 'unknown-context','unknown-pair','context-field-mismatch','unauthorized-consumer','unverified-source',
+ 'unauthorized-source-consumer','pair-field-mismatch','fixture-relationship-not-authority',
+ 'fixture-relationship-invalid','fixture-token-mismatch','not-a-response-context','wrong-response-relation',
+ 'wrong-discourse-position','no-preceding-statement','no-response-tokens','response-head-not-a-particle',
+ 'response-head-not-idhan','unknown-future-evidence','future-evidence-not-source-owned',
+ 'prompt-carries-no-future-marker','prompt-does-not-open-with-its-verb','separator-mode-not-implemented',
+ 'separator-token-present','no-adjacent-present-verb','response-verb-not-the-paired-construction',
+ 'response-person-mismatch','response-head-not-proven','future-evidence-not-proven','separator-not-proven',
+ 'fixture-identity-mismatch'
+]);
+/* Startup invariant: the stores are deeply frozen, prototype-free, self-consistent, and bound to
+   one another in both directions. */
+(()=>{
+ const stores=[['context',RESPONSE_CONTEXT_REGISTRY],['pair',RESPONSE_PAIR_REGISTRY],['fixture',IDHAN_FIXTURE_REGISTRY]];
+ for(const [label,store] of stores){
+  if(!Object.isFrozen(store))throw new Error('The response '+label+' registry is not frozen.');
+  if(Object.getPrototypeOf(store)!==null)throw new Error('The response '+label+' registry has a prototype.');
+  for(const id of Object.keys(store)){
+   const record=store[id];
+   if(!Object.isFrozen(record))throw new Error(label+' record '+id+' is not frozen.');
+   for(const key of Object.getOwnPropertyNames(record)){
+    const nested=record[key];
+    if(nested&&typeof nested==='object'&&!Object.isFrozen(nested))throw new Error(label+' record '+id+'.'+key+' is mutable.');
+   }
+  }
+ }
+ for(const id of Object.keys(RESPONSE_CONTEXT_REGISTRY)){
+  const record=RESPONSE_CONTEXT_REGISTRY[id];
+  if(!FUTURE_EVIDENCE_KINDS[record.futureEvidenceId])throw new Error('Context '+id+' names an unknown future evidence kind.');
+  if(record.responseRelation!==RESPONSE_RELATIONS.jawabJazaa)throw new Error('Context '+id+' has an unknown response relation.');
+  if(record.discoursePosition!==DISCOURSE_POSITIONS.sadrJumlatAlJawab)throw new Error('Context '+id+' has an unknown discourse position.');
+  if(record.separatorMode!==SEPARATOR_MODES.none)throw new Error('Context '+id+' authorizes a separator this phase does not implement.');
+  if(record.productionStatus!==ARCHITECTURE_FIXTURE_STATUS)throw new Error('Context '+id+' is not marked a non-production fixture.');
+ }
+ for(const id of Object.keys(RESPONSE_PAIR_REGISTRY)){
+  const pair=RESPONSE_PAIR_REGISTRY[id];
+  if(!responseContextRecord(pair.contextId))throw new Error('Pair '+id+' names an unknown context.');
+  if(!responseFixtureRecord(pair.fixtureId))throw new Error('Pair '+id+' names an unknown fixture.');
+ }
+ for(const id of Object.keys(IDHAN_FIXTURE_REGISTRY)){
+  const fixture=IDHAN_FIXTURE_REGISTRY[id];
+  const context=responseContextRecord(fixture.responseContextId);
+  const pair=responsePairRecord(fixture.responsePairId);
+  if(!context)throw new Error('Fixture '+id+' names an unknown context.');
+  if(!pair)throw new Error('Fixture '+id+' names an unknown pair.');
+  if(pair.fixtureId!==id)throw new Error('Fixture '+id+' and its pair are not bound in both directions.');
+  if(fixture.productionStatus!==ARCHITECTURE_FIXTURE_STATUS)throw new Error('Fixture '+id+' is not a non-production fixture.');
+  if(fixture.consumerId===id)throw new Error('Fixture '+id+' reuses its own id as its consumer id.');
+  const contextField=contextAuthorityFailure(context,fixture);
+  if(contextField)throw new Error('Fixture '+id+' disagrees with its context at '+contextField+'.');
+  const pairField=pairAuthorityFailure(pair,context,fixture);
+  if(pairField)throw new Error('Fixture '+id+' disagrees with its pair at '+pairField+'.');
+  const graphReason=responseGraphFailure(fixture.responseRelationships,fixture.responseContextId,fixture.responseNodeId);
+  if(graphReason)throw new Error('Fixture '+id+' has an invalid discourse graph: '+graphReason+'.');
+  if(fixture.tokens.some(spec=>Object.prototype.hasOwnProperty.call(spec,'state')
+    ||Object.prototype.hasOwnProperty.call(spec,'sign')))throw new Error('Fixture '+id+' claims an iʿrāb state this phase has no source for.');
+  if(fixture.tokens.filter(spec=>spec.target===true).length!==1)throw new Error('Fixture '+id+' has no single focus token.');
+ }
+})();
+/* ---- Section 10 — the complete response-context claim vocabulary -----------------
+   ONE authoritative frozen list of every name that would claim discourse authority or discourse
+   presentation. No production template may carry any of them, on any surface: the exercise, a
+   relationship, a token, token.grammar, or either morphology cache. Presence alone rejects,
+   exactly as the stored-maḥall guard works, because a stored copy of a discourse fact is a second
+   and forgeable source of truth for something the resolver already owns.
+
+   The list was built by auditing this implementation for every field the context, pair and
+   fixture records actually use, plus the presentation names a forged learner-visible context
+   would need — not by guessing plausible words. Each group below says what a claim of that kind
+   would be asserting. */
+const RESPONSE_CONTEXT_CLAIM_FIELDS=Object.freeze([
+ // Identity and binding — "this exercise is that registered fixture/context/pair".
+ 'responseContextId','responseContext','responsePairId','pairId','fixtureId','responseFixtureId',
+ 'fixtureAuthority','consumerId','contextConsumer','contextOwner','pairRecord','contextRecord',
+ 'responseNodeId','responseTargetId','promptTargetId','canonicalIdentity','conditionProof',
+ // Discourse facts — "this stands at the head of an answer to something".
+ 'contextType','discoursePosition','sadrAlJawab','sadrJumlatAlJawab','responseRelation',
+ 'responseRelationships','semanticRelation','separatorMode','conditionSatisfied','conditionSet',
+ 'conditionSetId','isAnswer','isResponse','responseHead','responseSentenceHead',
+ // Futurity — "the verb after the particle denotes the future".
+ 'futureMeaning','futureEvidence','futureEvidenceId','futureEvidenceKind','futureMarker',
+ // Source and audit — the claims that would make all of the above look already checked.
+ 'sourceRuleId','contextSourceRuleId','sourcePdfPage','auditStatus','productionStatus',
+ // The paired construction itself.
+ 'promptVerbAr','promptPerson','responseParticleAr','responseVerbAr','responsePerson',
+ 'responseTransitivity',
+ // Presentation — what a forged learner-visible context would need in order to appear.
+ 'promptAr','promptEn','promptTokens','promptPunctuation','contextLayout',
+ 'responseContextPresentation','responsePresentation','speaker','speakerAr','speakerEn','speakerLabel'
+]);
+/* Own-property presence, whatever the value: null, false, '', undefined and a non-enumerable own
+   property are all claims. `in` would also see inherited names, and Object.keys would miss the
+   non-enumerable ones, so neither is usable here. `allowed` is the authorized fixture path's own
+   key list — a fixture snapshot legitimately names its fixture, and nothing else. */
+/* Raw History is NOT owned — it arrives from localStorage and can be anything — so it cannot be
+   ownership-gated and must still be inspected. Every step is therefore descriptor-based and
+   guarded: an accessor is reported present from its descriptor and never invoked, an inherited
+   name is ignored, and a value that cannot be inspected at all returns CLAIM_SCAN_FAILED, which
+   every caller treats as rejection. */
+function responseContextClaim(target,allowed){
+ if(!safeIsObject(target))return '';
+ for(const field of RESPONSE_CONTEXT_CLAIM_FIELDS){
+  if(allowed&&allowed.includes(field))continue;
+  const kind=safeOwnPropertyKind(target,field);
+  if(kind===CLAIM_SCAN_FAILED)return CLAIM_SCAN_FAILED;
+  if(kind)return field;
+ }
+ return '';
+}
+/* Every surface a claim could hide on, scanned in ONE place so the live guard and the raw
+   History guard can never drift apart. Nested surfaces are reached through own DATA descriptors
+   only, so a getter on `tokens` or `grammar` cannot run and a revoked Proxy cannot throw.
+   Returns 'where.field' or ''. */
+function responseContextClaimSite(data,allowed){
+ if(!safeIsObject(data))return '';
+ const at=(where,target)=>{
+  const field=responseContextClaim(target,allowed);
+  return field?where+'.'+field:'';
+ };
+ let found=at('exercise',data);
+ if(found)return found;
+ for(const relationship of safeOwnDataArray(data,'relationships')){
+  found=at('relationship',relationship);
+  if(found)return found;
+ }
+ for(const token of safeOwnDataArray(data,'tokens')){
+  const grammar=safeOwnDataValue(token,'grammar');
+  found=at('token',token)||at('token.grammar',grammar)
+   ||at('token.grammar.morphology',safeOwnDataValue(grammar,'morphology'))
+   ||at('token.morphology',safeOwnDataValue(token,'morphology'));
+  if(found)return found;
+ }
+ return '';
+}
 /* ===== Word-internal components (Phase 0 infrastructure) ==========================
    A grammatically meaningful element written INSIDE one visible verb word (e.g. واو
    الجماعة, تاء التأنيث الساكنة). The visible token is NEVER split; components are
@@ -3629,6 +5252,17 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     so citing it here would attribute a claim the page does not contain. This rule owns the lām's
     presence and identity only; it never governs the verb. */
  G_LAM_TALIL_KAY:sourceRule('The lām of taʿlīl written before kay indicates purpose, and its explicit presence is what licenses kay to make the present verb manṣūb by itself.',[76],'Only the canonical لِ token standing immediately before a canonical كَيْ that governs a muʿrab present verb. It authorizes the lām’s presence and identity alone: it is never the verb’s governor, never a nāṣib in its own right, never a preposition governing a noun, and it does not cover the concealed-أَنْ لام التعليل of Al-Tuḥfah p. 76’s second class.'),
+/* Phase 3B0A — إِذَنْ's three conditions, and nothing else. Al-Tuḥfah p. 75 states them as a
+   single three-part شرط on ONE particle: «وأما «إِذَنْ» فَحَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ، ويشترط
+   لنصب المضارع بها ثلاثةُ شروط؛ الأول: أن تكون «إِذَنْ» في صَدْرِ جملة الجواب. الثاني: أن يكون
+   المضارع الواقع بعدها دالاً على الاستقبال. الثالث: أن لا يَفْصِلَ بينها وبين المضارع فاصلٌ غَيْرُ
+   القسم أو النداء أو «لا» النافية». Because the page states them together, they are one rule
+   rather than three: splitting them would assert three separate source claims the page does not
+   make. This rule owns the CONDITIONS only — it authorizes no particle identity, no governed verb,
+   no naṣb state and no template. Al-Tuḥfah's own worked example is the response «إِذَنْ تَنْجَحَ»
+   to the statement «سَأَجْتَهِدُ فِي دُرُوسِي», and that example is the sole context this phase
+   registers. No production template consumes this rule yet. */
+ R_IDHAN_CONDITIONS:sourceRule('Idhan makes the present verb after it accusative by itself only when it heads the answer sentence, the following present verb denotes the future, and nothing separates them except an oath, a vocative, or the negating lā.',[75],'Condition authority only. It authorizes neither the particle analysis of إِذَنْ, nor a naṣb state, nor a maḥall, nor any production template: Phase 3B0A registers the architecture and Al-Tuḥfah'+String.fromCharCode(8217)+'s own source-direct example alone. The three permitted separators (القسم، النداء، «لا» النافية) are named by the source but are deliberately NOT authorized for production in this phase, and the estimated/concealed constructions are outside it entirely.'),
  G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs.'),
  G_SAWFA_FUTURE:sourceRule('Sawfa marks future meaning and enters only on the present verb.',[14,15,16],'It does not change the indicative mood in the generated construction.'),
  R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'Generated set: inna, lakinna, laʿalla, layta.',[IA_INNA]),
@@ -4681,6 +6315,17 @@ function grammarFailureRecord(code,message,data,token,tokenById){
  const expectedSignId=token?.grammar?.type==='noun'?GRAMMAR_RULES.nounInflection[token.inflection]?.[expectedState]?.[0]:token?.tense==='present'?GRAMMAR_RULES.presentVerb[token.inflection]?.[expectedState]?.[0]:'';
  return{code,message,templateId:data.templateId,word:token?.word||'',lemma:token?.lexeme?.past||token?.lexeme?.nom||'',surfaceHint:token?.surfaceHint||'',expectedSurface:token?.expectedSurface||'',actualSurface:token?.word||'',role:token?.grammar?.role||'',expectedState:expectedState||'',actualState:token?.state||'',expectedSign:expectedSignId||'',actualSign:safeSignId(token?.sign)||'',governorId:token?.governorId||'',governorSurface:governor?.word||'',ruleId:token?.ruleId||'',sourceStatus:SOURCE_REGISTRY[token?.ruleId]?.status||''};
 }
+/* Which context record, if any, a template is authorized to present, and which fixture it may
+   display. Frozen template metadata is the ONLY road in; no production template declares either
+   in Phase 3B0A, so the answers are always null and '' and every context claim is unauthorized. */
+function templateResponseContext(template){
+ const id=template&&typeof template.responseContextId==='string'?template.responseContextId:'';
+ return id?responseContextRecord(id):null;
+}
+function templateResponseFixtureId(template){
+ const id=template&&typeof template.responseFixtureId==='string'?template.responseFixtureId:'';
+ return responseFixtureRecord(id)?id:'';
+}
 function validateExercise(data){
  /* First, before any check, any diagnostic and any Why rebuild: replace every incoming sign
     object with plain local data. createExerciseSnapshot gates on this function, so this is also
@@ -4712,6 +6357,34 @@ function validateExercise(data){
    ||productionTemplate.form!==data.templateForm
    ||productionTemplate.state!==data.templateState
    ||productionTemplate.sign!==data.templateSign))fail('E_TEMPLATE_METADATA','Exercise template metadata disagrees with its stable template ID.');
+ /* Phase 3B0A — discourse authority. A claim is authorized only when the RESOLVED template's own
+    frozen metadata names a registry record and the claim matches it exactly; otherwise its mere
+    presence is the violation. No production template names one, so every claim rejects here.
+    Every surface is scanned — the exercise, its relationships, each token, token.grammar and both
+    morphology caches — because a claim that only had to move one level down to survive would not
+    be guarded at all. */
+ {
+  const authorizedContext=templateResponseContext(productionTemplate);
+  const exerciseClaim=responseContextClaim(data);
+  if(exerciseClaim&&!authorizedContext){
+   fail('E_RESPONSE_CONTEXT_UNAUTHORIZED',`This template may not carry the response-context field "${exerciseClaim}".`);
+  }else if(exerciseClaim&&authorizedContext&&data.responseContextId!==authorizedContext.id){
+   fail('E_RESPONSE_CONTEXT_UNAUTHORIZED','The exercise names a response context its template does not authorize.');
+  }
+  relationships.forEach(relationship=>{
+   const relationshipClaim=responseContextClaim(relationship);
+   if(relationshipClaim)fail('E_RESPONSE_CONTEXT_UNAUTHORIZED',`A relationship may not carry the response-context field "${relationshipClaim}".`);
+  });
+  data.tokens.forEach(token=>{
+   const tokenClaim=responseContextClaim(token);
+   if(tokenClaim)fail('E_RESPONSE_CONTEXT_UNAUTHORIZED',`A token may not carry the response-context field "${tokenClaim}".`,token);
+   const grammarClaim=responseContextClaim(token&&token.grammar);
+   if(grammarClaim)fail('E_RESPONSE_CONTEXT_UNAUTHORIZED',`Token grammar may not carry the response-context field "${grammarClaim}".`,token);
+   const morphologyClaim=responseContextClaim(token&&token.grammar&&token.grammar.morphology)
+    ||responseContextClaim(token&&token.morphology);
+   if(morphologyClaim)fail('E_RESPONSE_CONTEXT_UNAUTHORIZED',`A morphology cache may not carry the response-context field "${morphologyClaim}".`,token);
+  });
+ }
  if(!['nominal','nominalWithInna','nominalWithKana','verbal','phrase'].includes(data.sentenceType))fail('E_SENTENCE_TYPE','Exercise has no recognized sentence type.');
  if(!data.translation||data.translation.includes('undefined'))fail('E_TRANSLATION','Exercise has no valid English translation.');
  if(data.sentence!==composeSentence(data.tokens))fail('E_SENTENCE_SURFACE','Displayed sentence does not match its token surfaces.');
@@ -4731,6 +6404,12 @@ function validateExercise(data){
   if(!token.id||!token.ruleId||!token.ar||!token.en)fail('E_TOKEN_INCOMPLETE','Token metadata or explanation is incomplete.',token);
   [token.ruleId,token.signRuleId,token.subjectRuleId,token.mahallRuleId].filter(Boolean).forEach(ruleId=>{
    if(!isSourceAuthorized(ruleId))fail('E_SOURCE_UNVERIFIED',`Rule ${ruleId} is missing, disabled, or not source-verified.`,token);
+   /* Phase 3B0A section 12 — a restricted rule is source-verified AND owned. R_IDHAN_CONDITIONS
+      states three DISCOURSE conditions, so citing it is a claim that they were checked, and only
+      the canonical fixture's consumer is ever in a position to have checked them. Rejecting the
+      whole exercise is what keeps a forged citation out of the validByRule tally, which is only
+      incremented after validation passes. */
+   if(isRestrictedSourceRule(ruleId))fail('E_RESTRICTED_SOURCE_RULE',`Rule ${ruleId} may be cited only by its registered non-production consumer.`,token);
   });
   // Being source-authorized is not the same as being OWNED: only the governed mabnī-present
   // lane may carry a whole-word maḥall rule at all.
@@ -4998,6 +6677,7 @@ function validateExercise(data){
  relationships.forEach(rel=>{
   if(!rel.ruleId||rel.ruleId!==RELATIONSHIP_RULE_IDS[rel.type])fail('E_RELATION_RULE','Relationship is missing its governing rule ID.');
   if(rel.ruleId&&!isSourceAuthorized(rel.ruleId))fail('E_SOURCE_UNVERIFIED',`Relationship rule ${rel.ruleId} is missing, disabled, or not source-verified.`);
+  if(isRestrictedSourceRule(rel.ruleId))fail('E_RESTRICTED_SOURCE_RULE',`Relationship rule ${rel.ruleId} may be cited only by its registered non-production consumer.`);
   const ids=Object.entries(rel).filter(([key])=>key!=='ruleId'&&key!=='id'&&/(?:Id|Ids)$/.test(key)).flatMap(([,value])=>Array.isArray(value)?value:[value]).filter(Boolean);
   ids.forEach(id=>{if(!tokenById.has(id)&&!String(id).includes(':R'))fail('E_RELATION_TOKEN','Relationship points to a missing token.');});
  });
@@ -5520,8 +7200,187 @@ function whyBlockHtml(why,regionId,kind){
  const enLines=why.en.map(line=>`<p class="why-line-en">${esc(line)}</p>`).join('');
  return `<div class="why-wrap"><button class="why-toggle" type="button" aria-expanded="false" aria-controls="${regionId}"><span class="en-only">${labelEn}</span><span class="ar-only" lang="ar">${labelAr}</span></button><div class="why-region" id="${regionId}" hidden><div class="why-ar">${arLines}</div><div class="why-en en-only">${enLines}</div></div></div>`;
 }
+/* ===== Phase 3B0A — the canonical fixture: builder, renderer, History =============
+   Everything below is APPLICATION-owned. The harness builds nothing of its own: a test that
+   assembled its own plain object would be testing the test, and Codex's first finding was
+   exactly that such an object could prove the source's conditions. */
+/* The one way to obtain a canonical fixture exercise. It reads only frozen authority, hands back
+   fresh mutable token records (the app mutates presentation during rendering), shares the frozen
+   discourse graph by reference (a copy is precisely how an altered target would be smuggled in),
+   verifies its own output against the record's canonical identity, and refuses to return an
+   exercise that does not satisfy the source's three conditions. */
+function buildIdhanSourceDirectFixture(){
+ const fixture=responseFixtureRecord(IDHAN_FIXTURE_ID);
+ if(!fixture)throw new Error('The canonical إِذَنْ fixture is not registered.');
+ const context=responseContextRecord(fixture.responseContextId);
+ const pair=responsePairRecord(fixture.responsePairId);
+ if(!context||!pair)throw new Error('The canonical إِذَنْ fixture is not bound to its registry records.');
+ const tokens=fixture.tokens.map(spec=>{
+  const grammar={type:spec.type,role:spec.role};
+  if(spec.particleType)grammar.particleType=spec.particleType;
+  if(spec.person)grammar.person=spec.person;
+  const item=token(spec.word,spec.gloss,grammar,'',spec.target);
+  item.id=spec.id;
+  if(spec.tense)item.tense=spec.tense;
+  item.ar=spec.ar;
+  item.en=spec.en;
+  return item;
+ });
+ const exercise={
+  fixtureId:fixture.id,
+  consumerId:fixture.consumerId,
+  responseContextId:fixture.responseContextId,
+  responsePairId:fixture.responsePairId,
+  sourceRuleId:fixture.sourceRuleId,
+  productionStatus:fixture.productionStatus,
+  schemaVersion:fixture.schemaVersion,
+  responseRelationships:fixture.responseRelationships,
+  tokens,
+  /* The TARGET's own relationship list, deliberately empty and deliberately separate from the
+     discourse graph above: the preceding statement is context, so it is never a participant in
+     the analysed sentence's grammar. */
+  relationships:[],
+  sentence:composeSentence(tokens),
+  translation:fixture.response.en
+ };
+ if(canonicalFixtureIdentity(exercise)!==fixture.canonicalIdentity){
+  throw new Error('The إِذَنْ fixture builder did not reproduce its canonical identity.');
+ }
+ /* Validate every semantic layer before registration. The private core bypasses only ownership;
+    no partially built or semantically invalid object can enter the WeakSet. */
+ const preOwnershipProof=resolveIdhanConditionProofCore(exercise,fixture.consumerId,fixture.responseContextId,fixture.responsePairId);
+ if(!preOwnershipProof.satisfied)throw new Error('The إِذَنْ fixture does not satisfy its own conditions: '+preOwnershipProof.reason);
+ IDHAN_FIXTURE_OWNED_EXERCISES.add(exercise);
+ /* Final assertion through the public boundary proves registration and the complete owned path
+    agree. Remove the entry if that invariant ever fails, so even an exceptional build leaks no
+    registered partial object. */
+ const proof=resolveIdhanConditionProof(exercise,fixture.consumerId,fixture.responseContextId,fixture.responsePairId);
+ if(!proof.satisfied){
+  IDHAN_FIXTURE_OWNED_EXERCISES.delete(exercise);
+  throw new Error('The registered إِذَنْ fixture failed its public proof: '+proof.reason);
+ }
+ return exercise;
+}
+/* ---- Section 7 — the canonical rendering boundary --------------------------------
+   The optional preceding statement is PRESENTATION: rebuilt from the frozen registry records on
+   every display and never read from a caller-supplied object. A fixture ID is the ONLY input —
+   arbitrary context or pair objects are not accepted at all, so a copied record, a look-alike
+   record, forged Arabic and forged English have no way in. Anything unresolvable clears the block
+   and hides it, so all 82 production templates display byte-identically and context-free.
+   Returns '' when a context was displayed, or the reason nothing was. */
+function renderResponseContext(fixtureId){
+ const host=byId('responseContext');
+ if(!host)return 'no-host';
+ const promptAr=byId('responseContextPromptAr');
+ const promptEn=byId('responseContextPromptEn');
+ const clear=reason=>{
+  if(promptAr)promptAr.textContent='';
+  if(promptEn)promptEn.textContent='';
+  host.hidden=true;
+  return reason;
+ };
+ const fixture=responseFixtureRecord(fixtureId);
+ if(!fixture)return clear('unknown-fixture');
+ if(fixture.productionStatus!==ARCHITECTURE_FIXTURE_STATUS)return clear('fixture-not-non-production');
+ const context=responseContextRecord(fixture.responseContextId);
+ if(!context)return clear('unknown-context');
+ const pair=responsePairRecord(fixture.responsePairId);
+ if(!pair)return clear('unknown-pair');
+ if(pair.contextId!==context.id)return clear('pair-context-mismatch');
+ if(!isSourceAuthorized(context.sourceRuleId))return clear('unverified-source');
+ promptAr.textContent=context.promptAr;
+ promptEn.textContent=context.promptEn;
+ host.hidden=false;
+ return '';
+}
+/* Rendering FROM an exercise still resolves through the registries: the exercise supplies only a
+   fixture ID, and it must first prove the conditions. Its own presentation fields are never read. */
+function renderResponseContextFromExercise(exercise){
+ // Ownership first: an unowned candidate is refused without a single property read.
+ if(!isIdhanFixtureOwned(exercise)){renderResponseContext('');return 'not-application-owned'}
+ // Owned, but not therefore still structurally trustworthy — read it descriptor-only.
+ const fixture=responseFixtureRecord(safeOwnDataValue(exercise,'fixtureId'));
+ if(!fixture){renderResponseContext('');return 'unknown-fixture'}
+ const proof=resolveIdhanConditionProof(exercise,fixture.consumerId,fixture.responseContextId,fixture.responsePairId);
+ if(!proof.satisfied){renderResponseContext('');return proof.reason}
+ return renderResponseContext(proof.fixtureId);
+}
+/* ---- Section 8 — the end-to-end fixture rendering path ---------------------------
+   The prompt renders ABOVE the target (the #responseContext block precedes #sentence in the
+   document), and the target response remains the only analysed sentence: the prompt contributes
+   no token, no relationship, no iʿrāb line and no Why line. All displayed text is rebuilt from
+   the frozen fixture record, so a tampered exercise cannot repaint the screen — and cannot get
+   this far anyway, because the proof runs first.
+
+   The analysis region states the three CONDITIONS and nothing else. R_IDHAN_CONDITIONS owns the
+   conditions alone: it authorizes no particle analysis of إِذَنْ, no naṣb, no maḥall and no sign,
+   so none appears. No UI control reaches this function; it is the architecture's own rendering
+   path, exercised by the permanent tests. */
+function renderIdhanSourceDirectFixture(exercise){
+ /* `== null` compares without touching the value, so a hostile candidate cannot influence the
+    choice between "build a fresh fixture" and "use the supplied one". */
+ const data=exercise==null?buildIdhanSourceDirectFixture():exercise;
+ // Ownership first: nothing is read, rendered or constructed for an unowned candidate.
+ if(!isIdhanFixtureOwned(data)){renderResponseContext('');return IDHAN_UNOWNED_RENDER}
+ // Owned, but not therefore still structurally trustworthy — read it descriptor-only.
+ const fixture=responseFixtureRecord(safeOwnDataValue(data,'fixtureId'));
+ if(!fixture){renderResponseContext('');return Object.freeze({rendered:false,reason:'unknown-fixture'})}
+ const proof=resolveIdhanConditionProof(data,fixture.consumerId,fixture.responseContextId,fixture.responsePairId);
+ if(!proof.satisfied){renderResponseContext('');return Object.freeze({rendered:false,reason:proof.reason})}
+ const contextReason=renderResponseContext(proof.fixtureId);
+ if(contextReason)return Object.freeze({rendered:false,reason:contextReason});
+ /* Composed from the descriptor-safe view, never from the caller's container. Defence in depth:
+    unreachable while the proof holds, because the proof pins both token surfaces, the token count
+    and the token order. */
+ const sentence=composeSentence(safeIdhanFixtureView(data)?.tokens);
+ if(sentence!==fixture.response.ar)return Object.freeze({rendered:false,reason:'response-surface-mismatch'});
+ byId('sentence').textContent=sentence;
+ byId('translation').textContent=fixture.response.en;
+ const cards=fixture.tokens.map(spec=>`<article class="word-card${spec.target?' target':''}"><div class="word-head"><span class="gloss">${spec.target?'<span class="target-note en-only">Focus word</span><span class="target-note ar-only" lang="ar">الْكَلِمَةُ الْمُسْتَهْدَفَةُ</span> ':''}<span class="gloss-en en-only">${esc(spec.gloss)}</span></span><span class="word-ar" lang="ar">${esc(spec.word)}</span></div><div class="iraab" lang="ar">${esc(spec.ar)}</div><div class="english en-only"><strong>English:</strong> ${esc(spec.en)}</div></article>`).join('');
+ const conditions=`<article class="word-card"><div class="phrase-analysis"><div class="phrase-analysis-ar" lang="ar">${fixture.conditions.map(item=>esc(item.ar)).join(' ')}</div><div class="phrase-analysis-en en-only"><strong>Conditions:</strong> ${fixture.conditions.map(item=>esc(item.en)).join(' ')}</div></div></article>`;
+ byId('answers').innerHTML=cards+conditions;
+ byId('answerPanel').classList.remove('open');
+ return Object.freeze({rendered:true,reason:'',fixtureId:fixture.id,contextId:proof.contextId,pairId:proof.pairId,
+  sentence,translation:fixture.response.en});
+}
+/* ---- Section 9 — the fixture's own schema-v3 History path ------------------------
+   A fixture snapshot persists IDENTITY and nothing else: three keys, no tokens, no relationships,
+   no grammatical claims of any kind. Restoration re-resolves the fixture ID through the fixture
+   registry, the context registry and the pair registry and REBUILDS from that frozen authority,
+   so nothing a stored snapshot carries can become a grammatical fact. The schema version is the
+   existing v3 — this path adds no new History schema. */
+const FIXTURE_SNAPSHOT_KEYS=Object.freeze(['schemaVersion','fixtureId','exerciseIdentity']);
+function createFixtureSnapshot(exercise){
+ // Ownership first: no property read, no reflection, no serialization, no snapshot.
+ if(!isIdhanFixtureOwned(exercise))return null;
+ // Owned, but not therefore still structurally trustworthy — read it descriptor-only.
+ const fixture=responseFixtureRecord(safeOwnDataValue(exercise,'fixtureId'));
+ if(!fixture)return null;
+ const proof=resolveIdhanConditionProof(exercise,fixture.consumerId,fixture.responseContextId,fixture.responsePairId);
+ if(!proof.satisfied)return null;
+ return{schemaVersion:SENTENCE_HISTORY_SNAPSHOT_VERSION,fixtureId:fixture.id,exerciseIdentity:fixture.canonicalIdentity};
+}
+function restoreFixtureSnapshot(rawSnapshot){
+ /* Same full-graph boundary as production History. `fixtureId` is the one context-claim name this
+    path is entitled to carry; every other guarded name rejects during the walk, on presence, and
+    nothing is read ordinarily from the caller's graph. */
+ const snapshot=safeMaterializedGraph(rawSnapshot,FIXTURE_SNAPSHOT_KEYS);
+ if(!snapshot)return null;
+ const keys=Object.getOwnPropertyNames(snapshot);
+ if(keys.length!==FIXTURE_SNAPSHOT_KEYS.length
+   ||FIXTURE_SNAPSHOT_KEYS.some(key=>!Object.prototype.hasOwnProperty.call(snapshot,key)))return null;
+ if(snapshot.schemaVersion!==SENTENCE_HISTORY_SNAPSHOT_VERSION)return null;
+ const fixture=responseFixtureRecord(snapshot.fixtureId);
+ if(!fixture)return null;
+ if(snapshot.exerciseIdentity!==fixture.canonicalIdentity)return null;
+ return buildIdhanSourceDirectFixture();
+}
 function render(data,notice='',shouldRecord=true){
  if(!data?.validated)throw new Error('Refusing to display an exercise that has not passed grammar validation.');
+ /* A fixture ID resolved from the template's frozen metadata, never from the exercise's own
+    fields, and never a record object. No production template names one, so this always clears
+    and hides the block and all 82 render context-free. */
+ renderResponseContext(templateResponseFixtureId(templates.find(item=>item.stableId===data.templateId)));
  current=data;
  byId('sentence').textContent=data.sentence;
  byId('translation').textContent=data.translation;
@@ -5677,6 +7536,22 @@ byId('filtersToggle').addEventListener('click',()=>{
 // Mobile starts collapsed; desktop starts expanded. Either way the button can toggle it.
 setFiltersExpanded(!((typeof matchMedia==='function')&&matchMedia('(max-width:640px)').matches));
 ['startFilter','formFilter','stateFilter','signFilter'].forEach(id=>byId(id).addEventListener('change',handleFilterChange));
+/* Phase 3B0A startup verification. The builder is run once, here rather than beside the registry,
+   because it needs the token factory and the surface composer that are declared further down.
+   It proves at load that the builder, the three registries and the frozen canonical identity all
+   still agree, and that the fixture stays outside production: a drift in any of them throws
+   before the first exercise is generated instead of being discovered by a test months later.
+   Nothing is displayed and nothing is recorded — the fixture has no UI entry point. */
+(()=>{
+ const fixtureExercise=buildIdhanSourceDirectFixture();
+ const fixture=responseFixtureRecord(IDHAN_FIXTURE_ID);
+ const proof=resolveIdhanConditionProof(fixtureExercise,fixture.consumerId,fixture.responseContextId,fixture.responsePairId);
+ if(!proof.satisfied)throw new Error('The canonical إِذَنْ fixture no longer proves its conditions: '+proof.reason);
+ if(canonicalFixtureIdentity(fixtureExercise)!==fixture.canonicalIdentity)throw new Error('The canonical إِذَنْ fixture identity drifted.');
+ if(composeSentence(fixtureExercise.tokens)!==fixture.response.ar)throw new Error('The canonical إِذَنْ fixture surface drifted.');
+ if(templates.some(template=>template.stableId===fixture.id||template.stableId===fixture.consumerId
+   ||templateResponseFixtureId(template)))throw new Error('A production template reaches the إِذَنْ fixture.');
+})();
 window.nahwGenerate=generate;
 window.nahwReveal=toggleReveal;
 window.nahwSetLanguage=setLanguageMode;

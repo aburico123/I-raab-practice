@@ -90,6 +90,94 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   createExerciseSnapshot,
   restoreExerciseSnapshot,
   canonicalExerciseIdentity,
+  RESPONSE_CONTEXT_REGISTRY,
+  RESPONSE_PAIR_REGISTRY,
+  IDHAN_FIXTURE_REGISTRY,
+  FUTURE_EVIDENCE_KINDS,
+  RESPONSE_RELATIONS,
+  RESPONSE_RELATION_TYPES,
+  DISCOURSE_POSITIONS,
+  SEPARATOR_MODES,
+  ARCHITECTURE_FIXTURE_STATUS,
+  IDHAN_FIXTURE_CONSUMER,
+  IDHAN_FIXTURE_ID,
+  IDHAN_RESPONSE_NODE_ID,
+  IDHAN_PROOF_FAILURE_REASONS,
+  CONTEXT_AUTHORITY_FIELDS,
+  PAIR_AUTHORITY_FIELDS,
+  RESTRICTED_SOURCE_RULE_OWNERS,
+  FIXTURE_SNAPSHOT_KEYS,
+  responseContextRecord,
+  responsePairRecord,
+  responseFixtureRecord,
+  resolveIdhanConditionProof,
+  responseHeadFailure,
+  futureEvidenceFailure,
+  /* Phase 3B0A fail-closed boundary + load-bearing separator proof. These names exist only in the
+     harness's own copy of the script — this export block is injected here, not present in
+     index.html — so a production caller can reach none of them. The three private success TOKENS
+     are deliberately NOT exported: tests obtain them only as the provers' return values, exactly
+     as the assembler does. */
+  separatorFailure,
+  proveResponseHead,
+  proveFutureEvidence,
+  proveNoSeparator,
+  assembleIdhanConditionProof,
+  IDHAN_CONDITION_PROVERS,
+  resolveIdhanConditionProofWithProvers,
+  IDHAN_UNOWNED_PROOF,
+  IDHAN_UNOWNED_RENDER,
+  safeIsObject,
+  safeIsArray,
+  safeIsPlainDataObject,
+  safeMaterializeDataGraph,
+  safeMaterializedGraph,
+  safeIdhanFixtureView,
+  IDHAN_SAFE_VIEW_MANIFEST,
+  composeCanonicalTranslation,
+  translationStructureKey,
+  resolveTranslationSlot,
+  TRANSLATION_COMPOSER_SHAPES,
+  TRANSLATION_STRUCTURE_MAP,
+  TRANSLATION_VERB_FIELDS,
+  resolveCanonicalTokenGloss,
+  materializeCanonicalGlosses,
+  GLOSS_CLOSED_PARTICLES,
+  GLOSS_FIXED_TOKENS,
+  prepActionRecord,
+  isExerciseSnapshot,
+  exerciseTokenSchemaFailure,
+  liveExerciseGraphFailure,
+  EXERCISE_TOKEN_KEYS,
+  EXERCISE_GRAMMAR_KEYS,
+  SENTENCE_HISTORY_SNAPSHOT_KEYS,
+  safeOwnDataElements,
+  SAFE_GRAPH_MAX_DEPTH,
+  SAFE_GRAPH_MAX_NODES,
+  SAFE_GRAPH_MAX_KEYS,
+  safeOwnPropertyKind,
+  safeOwnDataValue,
+  safeOwnDataArray,
+  CLAIM_SCAN_FAILED,
+  contextAuthorityFailure,
+  pairAuthorityFailure,
+  responseGraphFailure,
+  fixtureTokenSpineFailure,
+  canonicalFixtureIdentity,
+  isIdhanFixtureOwned,
+  buildIdhanSourceDirectFixture,
+  createFixtureSnapshot,
+  restoreFixtureSnapshot,
+  isRestrictedSourceRule,
+  isSourceRuleConsumerAuthorized,
+  templateResponseContext,
+  templateResponseFixtureId,
+  responseContextClaim,
+  responseContextClaimSite,
+  RESPONSE_CONTEXT_CLAIM_FIELDS,
+  renderResponseContext,
+  renderResponseContextFromExercise,
+  renderIdhanSourceDirectFixture,
   getLanguageMode:()=>languageMode,
   setLanguageMode,
   selectDefinitionChapter,
@@ -154,7 +242,10 @@ const elements={
   stateLabel:element('stateLabel'),signLabel:element('signLabel'),
   historyTitle:element('historyTitle'),historyNote:element('historyNote'),
   apprSystem:element('apprSystem'),apprLight:element('apprLight'),apprDark:element('apprDark'),
-  filtersToggle:element('filtersToggle'),filtersPanel:element('filtersPanel')
+  filtersToggle:element('filtersToggle'),filtersPanel:element('filtersPanel'),
+  responseContext:element('responseContext'),
+  responseContextPromptAr:element('responseContextPromptAr'),
+  responseContextPromptEn:element('responseContextPromptEn')
 };
 const bodyElement=element('body');
 const documentElement=element('documentElement');
@@ -235,9 +326,19 @@ assert(reviewed.templateId===originalExerciseSnapshot.templateId
   &&reviewed.sentence===originalExerciseSnapshot.sentence
   &&reviewed.translation===originalExerciseSnapshot.translation,
   'History review did not restore the exact saved exercise');
-assert(JSON.stringify(reviewed.tokens)===JSON.stringify(originalExerciseSnapshot.tokens)
+/* `enHint` is excluded from both sides here and wherever else a saved token payload is compared
+   exactly. It is a build-time English hint with no reader after the build, so History no longer
+   carries a stored one into a restored exercise; every other field still has to match byte for
+   byte. The discard is asserted on its own immediately below. */
+const tokensWithoutEnHint=tokens=>JSON.stringify(tokens.map(token=>{
+  const {enHint,...rest}=token;return rest;
+}));
+assert(tokensWithoutEnHint(reviewed.tokens)===tokensWithoutEnHint(originalExerciseSnapshot.tokens)
   &&JSON.stringify(reviewed.relationships)===JSON.stringify(originalExerciseSnapshot.relationships),
   'History review did not preserve the original token and relationship grammar data');
+/* The enHint discard itself is asserted in the D-2 round-trip block and, exhaustively, in the
+   canonical-English-presentation block — not here, where a failure of any earlier contract would
+   be misreported as a presentation failure. */
 const reviewedFocus=reviewed.tokens.find(token=>token.target);
 const savedFocus=originalExerciseSnapshot.tokens.find(token=>token.target);
 assert(reviewedFocus.word===savedFocus.word&&reviewedFocus.inflection===savedFocus.inflection
@@ -645,9 +746,10 @@ assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===6,'The noun declen
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.regular).join(',')==='raf,nasb,jazm','Regular present moods are incomplete');
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.afalKhamsa).join(',')==='raf,nasb,jazm','Five-verb moods are incomplete');
 assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),'Unsupported diptotes are not recorded in the coverage matrix');
-// 65 through Phase 2b-C, plus Phase 3A1's G_AN_NASB, G_KAY_NASB and G_LAM_TALIL_KAY, plus
+// 65 through Phase 2b-C, plus Phase 3A1's three particle rules, Phase 3A2's two mabnī maḥall
+// rules, and Phase 3B0A's condition-only R_IDHAN_CONDITIONS. Plus
 // Phase 3A2's two governor-specific mabnī-present maḥall rules.
-assert(Object.keys(api.SOURCE_REGISTRY).length===70,`Expected 70 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===71,`Expected 71 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -1794,8 +1896,19 @@ for(const [person,stableId] of Object.entries(PREEXISTING_PRESENT_TEMPLATE_IDS))
     const savedVerb=snapshot.tokens.find(token=>token.tense==='present');
     const restoredVerb=restored?.tokens.find(token=>token.tense==='present');
     assert(restored,`${stableId}/${iteration}: legitimate current-v3 snapshot did not restore`);
-    assert(stableHistoryJson(restored.tokens)===stableHistoryJson(snapshot.tokens),
+    /* `enHint` is excluded from BOTH sides, and only `enHint`. It is a build-time English hint
+       that nothing reads after the build — not the renderer, not validation, not the identity
+       seal, not the Why builder — so History is no longer permitted to carry one into a restored
+       exercise. The D-2 property this case exists for is unchanged and still exact: every
+       semantic and every rendered field of the saved token payload must round-trip byte for byte.
+       The discard itself is asserted separately, immediately below. */
+    const withoutEnHint=tokens=>stableHistoryJson(tokens.map(token=>{
+      const {enHint,...rest}=token;return rest;
+    }));
+    assert(withoutEnHint(restored.tokens)===withoutEnHint(snapshot.tokens),
       `${stableId}/${iteration}: saved token payload did not round-trip exactly`);
+    assert(restored.tokens.every(token=>token.enHint===''),
+      `${stableId}/${iteration}: a stored enHint survived History restoration`);
     assert(restored.translation===snapshot.translation,
       `${stableId}/${iteration}: saved translation did not round-trip exactly`);
     assert(restoredVerb.gloss===savedVerb.gloss,
@@ -6268,6 +6381,3610 @@ for(const [id,fixture] of Object.entries(s0Fixtures)){
     s0Cases+=3;
   }
 }
+
+/* ============================================================================
+   PHASE 3B0A — response-context architecture for إِذَنْ (NON-PRODUCTION).
+
+   Al-Tuḥfah p. 75 makes إِذَنْ's naṣb conditional on three things, two of which are discourse
+   facts the app could not previously state: «ويشترط لنصب المضارع بها ثلاثةُ شروط؛ الأول: أن تكون
+   «إِذَنْ» في صَدْرِ جملة الجواب. الثاني: أن يكون المضارع الواقع بعدها دالاً على الاستقبال.
+   الثالث: أن لا يَفْصِلَ بينها وبين المضارع فاصلٌ غَيْرُ القسم أو النداء أو «لا» النافية.»
+   The page's own worked example is the reply «إِذَنْ تَنْجَحَ» to «سَأَجْتَهِدُ فِي دُرُوسِي».
+
+   This phase builds the architecture and registers ONLY that source-direct example, as a
+   non-production fixture. No template consumes it, the generator cannot reach it, and the
+   production template count stays at 82.
+
+   Every fixture used below comes from the APPLICATION's own builder. A test that assembled its
+   own plain look-alike object would be testing the test — and a look-alike satisfying the
+   resolver was the first thing this repair had to close, so the look-alike appears here only as
+   an attack that must be rejected.
+   ========================================================================== */
+/* The exact 82 stable template IDs this phase inherited. Phase 3B0A adds no template and
+   renames none, so this manifest must match byte for byte. */
+const PHASE3B0A_STABLE_TEMPLATE_IDS='T_NOUN_BROKEN_JARR_KASRA_01,T_NOUN_BROKEN_NASB_FATHA_01,T_NOUN_BROKEN_RAF_DAMMA_01,T_NOUN_DUAL_JARR_YA_01,T_NOUN_DUAL_NASB_YA_01,T_NOUN_DUAL_RAF_ALIF_01,T_NOUN_FIVENOUNS_JARR_YA_01,T_NOUN_FIVENOUNS_NASB_ALIF_01,T_NOUN_FIVENOUNS_RAF_WAW_01,T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01,T_NOUN_FIVEVERBS_NASB_NUNDROPPED_01,T_NOUN_FIVEVERBS_RAF_NUNKEPT_01,T_NOUN_PRESENT_JAZM_SUKUN_01,T_NOUN_PRESENT_NASB_FATHA_01,T_NOUN_PRESENT_RAF_DAMMA_01,T_NOUN_SFP_JARR_KASRA_01,T_NOUN_SFP_NASB_KASRASUB_01,T_NOUN_SFP_RAF_DAMMA_01,T_NOUN_SINGULAR_JARR_KASRA_01,T_NOUN_SINGULAR_NASB_FATHA_01,T_NOUN_SINGULAR_NASB_FATHA_02,T_NOUN_SINGULAR_NASB_FATHA_03,T_NOUN_SINGULAR_RAF_DAMMA_01,T_NOUN_SINGULAR_RAF_DAMMA_02,T_NOUN_SMP_JARR_YA_01,T_NOUN_SMP_NASB_YA_01,T_NOUN_SMP_RAF_WAW_01,T_PARTICLE_BROKEN_JARR_KASRA_01,T_PARTICLE_BROKEN_NASB_FATHA_01,T_PARTICLE_DUAL_JARR_YA_01,T_PARTICLE_DUAL_NASB_YA_01,T_PARTICLE_FIVENOUNS_JARR_YA_01,T_PARTICLE_FIVENOUNS_NASB_ALIF_01,T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01,T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01,T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02,T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03,T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01,T_PARTICLE_PRESENT_JAZM_SUKUN_01,T_PARTICLE_PRESENT_NASB_FATHA_01,T_PARTICLE_PRESENT_NASB_FATHA_02,T_PARTICLE_PRESENT_NASB_FATHA_03,T_PARTICLE_PRESENT_RAF_DAMMA_01,T_PARTICLE_SFP_JARR_KASRA_01,T_PARTICLE_SFP_NASB_KASRASUB_01,T_PARTICLE_SINGULAR_JARR_KASRA_01,T_PARTICLE_SINGULAR_NASB_FATHA_01,T_PARTICLE_SINGULAR_NASB_FATHA_02,T_PARTICLE_SINGULAR_NASB_FATHA_03,T_PARTICLE_SINGULAR_NASB_FATHA_04,T_PARTICLE_SINGULAR_NASB_FATHA_05,T_PARTICLE_SINGULAR_NASB_FATHA_06,T_PARTICLE_SINGULAR_NASB_FATHA_07,T_PARTICLE_SMP_JARR_YA_01,T_PARTICLE_SMP_NASB_YA_01,T_VERB_BROKEN_NASB_FATHA_01,T_VERB_BROKEN_RAF_DAMMA_01,T_VERB_DUAL_NASB_YA_01,T_VERB_DUAL_RAF_ALIF_01,T_VERB_FIVENOUNS_RAF_WAW_01,T_VERB_FIVEVERBS_RAF_NUNKEPT_01,T_VERB_PRESENT_RAF_DAMMA_01,T_VERB_SFP_RAF_DAMMA_01,T_VERB_SINGULAR_NASB_FATHA_01,T_VERB_SINGULAR_NASB_FATHA_02,T_VERB_SINGULAR_NASB_FATHA_03,T_VERB_SINGULAR_NASB_FATHA_04,T_VERB_SINGULAR_NASB_FATHA_05,T_VERB_SINGULAR_NASB_FATHA_06,T_VERB_SINGULAR_NASB_FATHA_07,T_VERB_SINGULAR_NASB_FATHA_08,T_VERB_SINGULAR_NASB_FATHA_09,T_VERB_SINGULAR_NASB_FATHA_10,T_VERB_SINGULAR_NASB_FATHA_11,T_VERB_SINGULAR_NASB_FATHA_12,T_VERB_SINGULAR_NASB_FATHA_13,T_VERB_SINGULAR_NASB_FATHA_14,T_VERB_SINGULAR_NASB_FATHA_15,T_VERB_SINGULAR_NASB_FATHA_16,T_VERB_SINGULAR_RAF_DAMMA_01,T_VERB_SMP_NASB_YA_01,T_VERB_SMP_RAF_WAW_01';
+let ctxCases=0,ctxAttackCases=0,ctxOwnershipCopyAttacks=0,ctxUnreachableReasons=null;
+const ctxCodeHist={};
+const ctxProofReasonsSeen=new Set();
+const CTX_ID='IDHAN_SOURCE_DIRECT',PAIR_ID='IDHAN_SOURCE_DIRECT_PAIR',FIXTURE_ID='IDHAN_SOURCE_DIRECT_FIXTURE';
+const RESPONSE_NODE_ID='IDHAN_SOURCE_DIRECT_RESPONSE';
+const IDHAN='إِذَنْ',TANJAHA='تَنْجَحَ',PROMPT='سَأَجْتَهِدُ فِي دُرُوسِي',PROMPT_VERB='سَأَجْتَهِدُ';
+const CTX=api.RESPONSE_CONTEXT_REGISTRY[CTX_ID];
+const PAIR=api.RESPONSE_PAIR_REGISTRY[PAIR_ID];
+const FIX=api.IDHAN_FIXTURE_REGISTRY[FIXTURE_ID];
+const CONSUMER=api.IDHAN_FIXTURE_CONSUMER;
+/* One canonical proof call, so a test can never accidentally authorize itself by passing
+   different IDs than the ones the fixture record names. */
+function ctxProof(exercise,consumer,contextId,pairId){
+  return api.resolveIdhanConditionProof(exercise,
+    consumer===undefined?CONSUMER:consumer,
+    contextId===undefined?CTX_ID:contextId,
+    pairId===undefined?PAIR_ID:pairId);
+}
+/* A tampered copy of the APPLICATION's fixture: built by the builder, then mutated. This is the
+   only honest way to test one broken clause at a time — everything except the mutation is
+   genuine application output. */
+function tamperedFixture(mutate){
+  const exercise=api.buildIdhanSourceDirectFixture();
+  mutate(exercise);
+  return exercise;
+}
+function ctxRejects(name,expectedReason,expectedField,build){
+  let result;
+  try{ result=build(); }
+  catch(error){ throw new Error('Phase-3B0A attack "'+name+'" threw: '+error.message); }
+  assert(result&&result.satisfied===false,'Phase-3B0A attack "'+name+'" still satisfied the proof');
+  assert(result.reason===expectedReason,
+    'Phase-3B0A attack "'+name+'" failed as "'+result.reason+'" (wanted "'+expectedReason+'")');
+  if(expectedField!==null)assert(result.field===expectedField,
+    'Phase-3B0A attack "'+name+'" named field "'+result.field+'" (wanted "'+expectedField+'")');
+  assert(Object.isFrozen(result),'Phase-3B0A attack "'+name+'" returned a mutable result');
+  assert(result.fixtureId===null&&result.contextId===null&&result.pairId===null,
+    'Phase-3B0A attack "'+name+'" leaked record ids into a failed proof');
+  ctxProofReasonsSeen.add(result.reason);
+  ctxCodeHist[result.reason]=(ctxCodeHist[result.reason]||0)+1;
+  ctxAttackCases++;
+}
+/* A pure clause rejecting. `proofReason` records which resolver reason the clause feeds. */
+function ctxClauseRejects(name,expected,proofReason,run){
+  let reason;
+  try{ reason=run(); }
+  catch(error){ throw new Error('Phase-3B0A clause "'+name+'" threw: '+error.message); }
+  assert(reason===expected,'Phase-3B0A clause "'+name+'" returned "'+reason+'" (wanted "'+expected+'")');
+  if(proofReason)ctxProofReasonsSeen.add(proofReason);
+  const bucket=proofReason||reason||'presentation-not-authority';
+  ctxCodeHist[bucket]=(ctxCodeHist[bucket]||0)+1;
+  ctxAttackCases++;
+}
+/* Exercise external object-identity ownership independently of identity and graph authority.
+   Each derivative is intentionally semantically identical; ownership alone must reject it. */
+function ctxOwnershipRejects(name,original,build){
+  let derivative;
+  try{derivative=build(original)}catch(error){throw new Error('ownership copy "'+name+'" threw: '+error.message)}
+  assert(derivative!==original,'ownership copy "'+name+'" returned the original object');
+  assert(api.isIdhanFixtureOwned(derivative)===false,'ownership copy "'+name+'" remained application-owned');
+  assert(api.canonicalFixtureIdentity(derivative)===FIX.canonicalIdentity,
+    'ownership copy "'+name+'" did not preserve canonical identity, so ownership was not isolated');
+  const proof=ctxProof(derivative);
+  assert(proof.satisfied===false&&proof.reason==='not-application-owned',
+    'ownership copy "'+name+'" failed as "'+proof.reason+'" instead of the ownership boundary');
+  assert(Object.isFrozen(proof)&&proof.fixtureId===null&&proof.contextId===null&&proof.pairId===null,
+    'ownership copy "'+name+'" leaked authority in its failure result');
+  ctxProofReasonsSeen.add(proof.reason);
+  ctxCodeHist[proof.reason]=(ctxCodeHist[proof.reason]||0)+1;
+  ctxAttackCases++;ctxOwnershipCopyAttacks++;
+}
+function runOwnershipDerivativeSuite(label,original){
+  const stringValues=value=>Object.fromEntries(Object.getOwnPropertyNames(value).map(key=>[key,value[key]]));
+  const stringDescriptors=value=>{const out={};for(const key of Object.getOwnPropertyNames(value))
+    Object.defineProperty(out,key,Object.getOwnPropertyDescriptor(value,key));return out};
+  const stringAndSymbolDescriptors=value=>{const out={};for(const key of Reflect.ownKeys(value))
+    Object.defineProperty(out,key,Object.getOwnPropertyDescriptor(value,key));return out};
+  const reflectValues=value=>{const out={};for(const key of Reflect.ownKeys(value))out[key]=value[key];return out};
+  const symbolDescriptors=value=>{const out=stringValues(value);for(const key of Object.getOwnPropertySymbols(value))
+    Object.defineProperty(out,key,Object.getOwnPropertyDescriptor(value,key));return out};
+  for(const [name,build] of [
+    ['spread',value=>({...value})],
+    ['Object.assign',value=>Object.assign({},value)],
+    ['string descriptors',stringDescriptors],
+    ['symbol descriptors',symbolDescriptors],
+    ['all descriptors',stringAndSymbolDescriptors],
+    ['Reflect.ownKeys values',reflectValues],
+    ['Object.create',value=>Object.create(value)],
+    ['prototype-inheriting child',value=>Object.assign(Object.create(value),{})],
+    ['JSON clone',value=>clone(value)],
+    ['structured clone equivalent',value=>typeof structuredClone==='function'?structuredClone(value):clone(value)],
+    ['deep copy',value=>clone(value)],
+    ['shallow nested metadata',value=>({...value,tokens:value.tokens.map(token=>({...token,grammar:{...token.grammar}}))})],
+    ['metadata copy',stringValues],
+    ['graph-preserving copy',value=>({...value,responseRelationships:value.responseRelationships})],
+    ['identity-preserving look-alike',value=>({...value})]
+  ])ctxOwnershipRejects(label+' '+name,original,build);
+}
+
+/* --- A: the three registries are frozen, prototype-free, deeply frozen and owner-bound. --- */
+{
+  for(const [label,store] of [['context',api.RESPONSE_CONTEXT_REGISTRY],['pair',api.RESPONSE_PAIR_REGISTRY],
+                              ['fixture',api.IDHAN_FIXTURE_REGISTRY]]){
+    assert(Object.isFrozen(store),label+' registry is not frozen');
+    assert(Object.getPrototypeOf(store)===null,label+' registry has a prototype');
+    for(const id of Object.keys(store)){
+      const record=store[id];
+      assert(Object.isFrozen(record),label+' record '+id+' is not frozen');
+      assert(record.id===id,label+' record '+id+' is not bound to its own key');
+      const before=JSON.stringify(record);
+      try{ record.id='TAMPERED'; }catch(e){}
+      try{ record.extra=1; }catch(e){}
+      assert(JSON.stringify(record)===before,label+' record '+id+' was mutated');
+      // Nested arrays and records are frozen too: a mutable nested value is not authority.
+      for(const key of Object.getOwnPropertyNames(record)){
+        const nested=record[key];
+        if(nested&&typeof nested==='object'){
+          assert(Object.isFrozen(nested),label+' record '+id+'.'+key+' is mutable');
+          try{ nested.injected=1; }catch(e){}
+          assert(!Object.prototype.hasOwnProperty.call(nested,'injected'),label+' record '+id+'.'+key+' accepted a new key');
+          ctxAttackCases++;
+        }
+      }
+      ctxCases+=4;ctxAttackCases++;
+    }
+  }
+  // Own-property lookup: an inherited name never resolves a record.
+  for(const name of ['toString','valueOf','constructor','hasOwnProperty','__proto__']){
+    assert(api.responseContextRecord(name)===null,'context lookup resolved inherited '+name);
+    assert(api.responsePairRecord(name)===null,'pair lookup resolved inherited '+name);
+    assert(api.responseFixtureRecord(name)===null,'fixture lookup resolved inherited '+name);
+    ctxAttackCases+=3;
+  }
+  for(const bad of ['nope','',null,undefined,7,{},[],true]){
+    assert(api.responseContextRecord(bad)===null,'context lookup accepted '+String(bad));
+    assert(api.responsePairRecord(bad)===null,'pair lookup accepted '+String(bad));
+    assert(api.responseFixtureRecord(bad)===null,'fixture lookup accepted '+String(bad));
+    ctxAttackCases+=3;
+  }
+  assert(Object.keys(api.RESPONSE_CONTEXT_REGISTRY).join(',')===CTX_ID,'unexpected context registry contents');
+  assert(Object.keys(api.RESPONSE_PAIR_REGISTRY).join(',')===PAIR_ID,'unexpected pair registry contents');
+  assert(Object.keys(api.IDHAN_FIXTURE_REGISTRY).join(',')===FIXTURE_ID,'unexpected fixture registry contents');
+  // The fixture ID is distinct from every other identifier class it could be confused with.
+  assert(FIXTURE_ID!==CTX_ID&&FIXTURE_ID!==PAIR_ID&&FIXTURE_ID!==CONSUMER&&FIXTURE_ID!==RESPONSE_NODE_ID,
+    'the fixture id collides with another identifier class');
+  assert(!api.SOURCE_REGISTRY[FIXTURE_ID],'the fixture id collides with a source rule id');
+  assert(api.templates.every(template=>template.stableId!==FIXTURE_ID&&template.stableId!==CONSUMER),
+    'the fixture or consumer id collides with a production template stable id');
+  // Both directions of the fixture↔pair binding.
+  assert(PAIR.fixtureId===FIXTURE_ID&&FIX.responsePairId===PAIR_ID,'the fixture and pair are not bound both ways');
+  assert(FIX.responseContextId===CTX_ID&&PAIR.contextId===CTX_ID,'the fixture and pair name a different context');
+  ctxCases+=8;
+}
+
+/* --- A/C: the source-direct records match Al-Tuḥfah p. 75 exactly. --- */
+{
+  assert(CTX.promptAr===PROMPT,'prompt Arabic is «'+CTX.promptAr+'»');
+  assert(CTX.promptVerbAr===PROMPT_VERB,'prompt verb is «'+CTX.promptVerbAr+'»');
+  assert(CTX.responseParticleAr===IDHAN,'response particle is «'+CTX.responseParticleAr+'»');
+  assert(PAIR.responseVerbAr===TANJAHA,'response verb is «'+PAIR.responseVerbAr+'»');
+  assert(FIX.response.ar===IDHAN+' '+TANJAHA,'the fixture response surface is «'+FIX.response.ar+'»');
+  assert(CTX.sourcePdfPage===75&&PAIR.sourcePdfPage===75&&FIX.sourcePdfPage===75,'the fixture does not cite p. 75');
+  assert(CTX.sourceRuleId==='R_IDHAN_CONDITIONS'&&CTX.conditionSetId==='R_IDHAN_CONDITIONS'
+    &&FIX.sourceRuleId==='R_IDHAN_CONDITIONS','the fixture is not bound to R_IDHAN_CONDITIONS');
+  assert(CTX.responseRelation===api.RESPONSE_RELATIONS.jawabJazaa,'wrong response relation');
+  assert(CTX.discoursePosition===api.DISCOURSE_POSITIONS.sadrJumlatAlJawab,'wrong discourse position');
+  assert(CTX.separatorMode===api.SEPARATOR_MODES.none,'the fixture authorizes a separator');
+  assert(CTX.productionStatus===api.ARCHITECTURE_FIXTURE_STATUS&&PAIR.productionStatus===api.ARCHITECTURE_FIXTURE_STATUS
+    &&FIX.productionStatus===api.ARCHITECTURE_FIXTURE_STATUS,'the fixture is not marked non-production');
+  assert(PAIR.auditStatus==='source-verified'&&FIX.auditStatus==='source-verified','the pair is not marked source-verified');
+  assert(PAIR.responseTransitivity==='intransitive','the source response verb is transitive');
+  assert(PAIR.promptPerson==='1s'&&PAIR.responsePerson==='2ms','the source persons drifted');
+  assert(PAIR.semanticRelation==='consequence','the source semantic relation drifted');
+  // The future marker is the prompt's own Arabic sīn, verified structurally.
+  const evidence=api.FUTURE_EVIDENCE_KINDS[CTX.futureEvidenceId];
+  assert(evidence&&evidence.markerAr==='س','the future evidence marker is not the sīn');
+  assert(CTX.promptVerbAr.startsWith(evidence.markerAr),'the prompt verb does not carry the future sīn');
+  assert(CTX.promptAr.startsWith(CTX.promptVerbAr),'the prompt does not open with its verb');
+  // No English field may exist on the evidence record: futurity is an Arabic fact here.
+  assert(!Object.keys(evidence).some(key=>/^(prompt|marker)En$/.test(key)),'the future evidence record carries English authority');
+  // The fixture declares no iʿrāb: R_IDHAN_CONDITIONS authorizes conditions only.
+  assert(FIX.tokens.every(spec=>!Object.prototype.hasOwnProperty.call(spec,'state')
+    &&!Object.prototype.hasOwnProperty.call(spec,'sign')),'the fixture claims an iʿrāb state or sign');
+  assert(FIX.tokens.filter(spec=>spec.target===true).length===1,'the fixture has no single focus token');
+  ctxCases+=20;
+}
+
+/* --- The source rule exists, is condition-only, and authorizes no production. --- */
+{
+  const rule=api.SOURCE_REGISTRY.R_IDHAN_CONDITIONS;
+  assert(rule&&rule.productionEnabled&&rule.basis==='nahw-rule','R_IDHAN_CONDITIONS is missing or disabled');
+  assert(JSON.stringify(rule.primarySource.pdfPages)===JSON.stringify([75]),
+    'R_IDHAN_CONDITIONS must cite exactly p. 75, found '+JSON.stringify(rule.primarySource.pdfPages));
+  assert(api.isSourceAuthorized('R_IDHAN_CONDITIONS'),'R_IDHAN_CONDITIONS is not source-authorized');
+  assert(/heads the answer sentence/.test(rule.topic),'the rule topic omits the response-head condition');
+  assert(/future/.test(rule.topic),'the rule topic omits the future condition');
+  assert(/separates|oath|vocative/.test(rule.topic),'the rule topic omits the separation condition');
+  assert(/Condition authority only/.test(rule.conditions),'the rule does not disclaim particle/state/template authority');
+  assert(!api.GRAMMAR_RULES.governors.idhan,'إِذَنْ was registered as an active production governor');
+  assert(!api.SOURCE_REGISTRY.G_IDHAN_NASB,'G_IDHAN_NASB exists as a production record');
+  assert(!api.MABNI_PRESENT_GOVERNOR_MODES.includes('idhan'),'إِذَنْ became a mabnī governor mode');
+  ctxCases+=10;
+}
+
+/* --- B: the application-owned builder. --- */
+const ctxFixture=api.buildIdhanSourceDirectFixture();
+{
+  assert(ctxFixture&&Array.isArray(ctxFixture.tokens)&&ctxFixture.tokens.length===2,'the builder did not produce two tokens');
+  assert(ctxFixture.tokens[0].word===IDHAN&&ctxFixture.tokens[1].word===TANJAHA,'the builder produced the wrong surfaces');
+  assert(ctxFixture.sentence===IDHAN+' '+TANJAHA,'the builder composed «'+ctxFixture.sentence+'»');
+  assert(ctxFixture.fixtureId===FIXTURE_ID&&ctxFixture.responseContextId===CTX_ID
+    &&ctxFixture.responsePairId===PAIR_ID&&ctxFixture.consumerId===CONSUMER,'the builder mis-bound the fixture');
+  assert(ctxFixture.schemaVersion===3,'the fixture is not schema v3');
+  assert(ctxFixture.relationships.length===0,'the fixture target carries relationships of its own');
+  assert(api.isIdhanFixtureOwned(ctxFixture)===true,'the exact builder result is not application-owned');
+  assert(Object.getOwnPropertySymbols(ctxFixture).length===0,'the builder exposed an ownership Symbol');
+  assert(!Object.getOwnPropertyNames(ctxFixture).some(key=>/authority|ownership|owned/i.test(key)),
+    'the builder exposed ownership material as a string property');
+  assert(Reflect.ownKeys(ctxFixture).every(key=>typeof key==='string'),
+    'the builder exposed a non-string ownership key');
+  // Fresh mutable exercise data, but the frozen discourse graph SHARED by reference.
+  const second=api.buildIdhanSourceDirectFixture();
+  assert(second!==ctxFixture&&second.tokens!==ctxFixture.tokens&&second.tokens[0]!==ctxFixture.tokens[0],
+    'two builds shared mutable exercise data');
+  assert(!Object.isFrozen(second.tokens[0]),'the builder returned frozen token records the app cannot render');
+  assert(second.responseRelationships===ctxFixture.responseRelationships
+    &&second.responseRelationships===FIX.responseRelationships,'the builder copied the frozen discourse graph');
+  assert(api.isIdhanFixtureOwned(second)===true,'a second exact builder result is not owned');
+  assert(Object.isFrozen(FIX.responseRelationships[0]),'a discourse link is mutable');
+  ctxCases+=14;
+}
+
+/* --- B2: ownership storage and registration remain private and non-transferable. --- */
+{
+  assert(!Object.prototype.hasOwnProperty.call(api,'IDHAN_FIXTURE_OWNED_EXERCISES'),
+    'the private ownership WeakSet was exported');
+  assert(!Object.prototype.hasOwnProperty.call(api,'resolveIdhanConditionProofCore'),
+    'the pre-ownership resolver core was exported');
+  assert(!Object.keys(api).some(key=>/register.*fixture|add.*owned|own.*add/i.test(key)),
+    'an ownership registration helper was exported');
+  assert(!Object.values(api).some(value=>['[object WeakSet]','[object WeakMap]'].includes(Object.prototype.toString.call(value))),
+    'a WeakSet/WeakMap escaped through the test API');
+  for(const record of [FIX,CTX,PAIR]){
+    assert(Object.getOwnPropertySymbols(record).length===0,'a registry record exposes an ownership Symbol');
+    assert(!Object.getOwnPropertyNames(record).some(key=>/fixtureAuthority|ownershipToken|ownedExercise/i.test(key)),
+      'a registry record exposes ownership material');
+  }
+  assert(!Object.getOwnPropertyNames(ctxFixture).includes('fixtureAuthority'),
+    'the retired transferable ownership property remains on the exercise');
+  const builderSourceStart=script.indexOf('function buildIdhanSourceDirectFixture(){');
+  const builderSourceEnd=script.indexOf('function renderResponseContext(',builderSourceStart);
+  const builderSource=script.slice(builderSourceStart,builderSourceEnd);
+  const identityAt=builderSource.indexOf('canonicalFixtureIdentity(exercise)');
+  const preProofAt=builderSource.indexOf('resolveIdhanConditionProofCore(exercise');
+  const registerAt=builderSource.indexOf('IDHAN_FIXTURE_OWNED_EXERCISES.add(exercise)');
+  const publicProofAt=builderSource.indexOf('resolveIdhanConditionProof(exercise');
+  assert(builderSourceStart>=0&&builderSourceEnd>builderSourceStart
+    &&identityAt>=0&&identityAt<preProofAt&&preProofAt<registerAt&&registerAt<publicProofAt,
+    'the builder does not validate semantics before registration and recheck the public proof after it');
+  assert((script.match(/IDHAN_FIXTURE_OWNED_EXERCISES\.add\(/g)||[]).length===1,
+    'ownership can be registered from more than the one canonical builder path');
+  ctxCases+=11;
+}
+
+/* --- C: canonical fixture identity. --- */
+{
+  assert(api.canonicalFixtureIdentity(ctxFixture)===FIX.canonicalIdentity,'the built fixture does not match its canonical identity');
+  assert(FIX.canonicalIdentity.startsWith('nahw-fixture-v1:'),'the canonical identity has no format prefix');
+  assert(api.canonicalFixtureIdentity(null)===''&&api.canonicalFixtureIdentity('x')==='','the identity accepted a non-object');
+  // Presentation is deliberately outside identity: it is rebuilt on every render.
+  const repainted=tamperedFixture(data=>{data.translation='ANYTHING';data.tokens[0].ar='ANYTHING';
+    data.tokens[1].en='ANYTHING';data.tokens[0].gloss='ANYTHING';});
+  assert(api.canonicalFixtureIdentity(repainted)===FIX.canonicalIdentity,'presentation entered the canonical identity');
+  assert(ctxProof(repainted).satisfied===true,'repainting presentation broke the proof');
+  ctxCases+=5;
+  // …but semantics are inside it.
+  for(const [name,mutate] of [
+    ['token word',data=>{data.tokens[1].word='يَكْتُبَ'}],
+    ['token id',data=>{data.tokens[0].id='other'}],
+    ['focus flag',data=>{data.tokens[0].target=true}],
+    ['token order',data=>{data.tokens.reverse()}],
+    ['schema version',data=>{data.schemaVersion=4}],
+    ['smuggled naṣb state',data=>{data.tokens[1].state='nasb'}],
+    ['smuggled sign',data=>{data.tokens[1].sign={id:'fatha'}}],
+    /* A copy carrying the SAME values leaves the identity untouched on purpose: identity is over
+       values, and reference authority is a separate clause. Changing a value is what must show. */
+    ['graph target',data=>{data.responseRelationships=[{...FIX.responseRelationships[0],toId:'OTHER'},
+      {...FIX.responseRelationships[1]}]}],
+    ['graph direction',data=>{data.responseRelationships=[{...FIX.responseRelationships[1]},
+      {...FIX.responseRelationships[0]}]}]
+  ]){
+    const mutated=tamperedFixture(mutate);
+    assert(api.canonicalFixtureIdentity(mutated)!==FIX.canonicalIdentity,
+      'canonical identity ignored a change to '+name);
+    ctxAttackCases++;
+  }
+}
+
+/* --- The clean proof. --- */
+{
+  const clean=ctxProof(ctxFixture);
+  assert(clean.satisfied===true,'the source-direct fixture does not satisfy its own conditions: '+clean.reason);
+  assert(clean.fixtureId===FIXTURE_ID&&clean.contextId===CTX_ID&&clean.pairId===PAIR_ID,'the proof does not name its records');
+  assert(clean.reason===''&&clean.field==='','the clean proof carries a failure reason');
+  assert(Object.isFrozen(clean),'the proof result is mutable');
+  ctxCases+=4;
+}
+
+/* --- D: look-alike exercise rejection. This was Codex's first finding: an object with the same
+   token surfaces, the same public context and pair IDs and the same consumer ID proved the
+   source's conditions. Every shape below must now reject. --- */
+{
+  const surfaces=()=>[
+    {word:IDHAN,grammar:{type:'particle',role:'particle',particleType:'idhan'}},
+    {word:TANJAHA,tense:'present',grammar:{type:'verb',role:'present',person:'2ms'}}
+  ];
+  /* Every one of these now rejects as `not-application-owned` rather than `unknown-fixture`:
+     ownership is decided on object identity BEFORE any field of an untrusted candidate is read,
+     so the resolver never learns — and never reports — which fixture the candidate claimed. That
+     is the stronger answer, and it is what makes a hostile accessor or Proxy trap unreachable. */
+  ctxRejects('bare two-token literal','not-application-owned','',()=>ctxProof({tokens:surfaces()}));
+  ctxRejects('look-alike naming the public ids','not-application-owned','',()=>ctxProof({
+    tokens:surfaces(),responseContextId:CTX_ID,responsePairId:PAIR_ID,consumerId:CONSUMER}));
+  ctxRejects('look-alike claiming a fixture boolean','not-application-owned','',()=>ctxProof({
+    tokens:surfaces(),isFixture:true,conditionSatisfied:true,sadrJumlatAlJawab:true,futureMeaning:true}));
+  ctxRejects('look-alike naming an unknown fixture','not-application-owned','',()=>ctxProof({
+    tokens:surfaces(),fixtureId:'IDHAN_SOURCE_DIRECT_FIXTURE_2'}));
+  ctxRejects('look-alike naming an inherited fixture name','not-application-owned','',()=>ctxProof({
+    tokens:surfaces(),fixtureId:'constructor'}));
+  ctxRejects('non-object exercise','not-application-owned','',()=>ctxProof('IDHAN_SOURCE_DIRECT_FIXTURE'));
+  ctxRejects('null exercise','not-application-owned','',()=>ctxProof(null));
+  // Naming the right fixture is not enough: the exercise must have been produced from it.
+  ctxRejects('look-alike naming the real fixture','not-application-owned','',()=>ctxProof({
+    tokens:surfaces(),fixtureId:FIXTURE_ID,consumerId:CONSUMER,responseContextId:CTX_ID,responsePairId:PAIR_ID,
+    productionStatus:api.ARCHITECTURE_FIXTURE_STATUS,schemaVersion:3,sourceRuleId:'R_IDHAN_CONDITIONS',
+    responseRelationships:FIX.responseRelationships}));
+  ctxRejects('fixture record worn as copied ownership metadata','not-application-owned','',()=>ctxProof({
+    ...ctxFixture,ownershipRecord:FIX}));
+  /* Every ordinary and deliberate copy mechanism preserves semantic identity. None can preserve
+     membership in the module-private WeakSet. */
+  runOwnershipDerivativeSuite('builder result',ctxFixture);
+  ctxCases+=0;
+}
+
+/* --- Fixture binding and non-production status. --- */
+{
+  ctxRejects('wrong consumer argument','fixture-binding-mismatch','consumerId',()=>ctxProof(ctxFixture,'T_NOUN_SINGULAR_RAF_DAMMA_01'));
+  ctxRejects('empty consumer argument','fixture-binding-mismatch','consumerId',()=>ctxProof(ctxFixture,''));
+  ctxRejects('null consumer argument','fixture-binding-mismatch','consumerId',()=>ctxProof(ctxFixture,null));
+  ctxRejects('fixture id used as consumer','fixture-binding-mismatch','consumerId',()=>ctxProof(ctxFixture,FIXTURE_ID));
+  ctxRejects('wrong context argument','fixture-binding-mismatch','responseContextId',()=>ctxProof(ctxFixture,undefined,'NOPE'));
+  ctxRejects('inherited context argument','fixture-binding-mismatch','responseContextId',()=>ctxProof(ctxFixture,undefined,'toString'));
+  ctxRejects('wrong pair argument','fixture-binding-mismatch','responsePairId',()=>ctxProof(ctxFixture,undefined,undefined,'NOPE'));
+  ctxRejects('inherited pair argument','fixture-binding-mismatch','responsePairId',()=>ctxProof(ctxFixture,undefined,undefined,'constructor'));
+  ctxRejects('exercise consumer rewritten','fixture-binding-mismatch','exerciseConsumerId',()=>ctxProof(tamperedFixture(data=>{data.consumerId='OTHER'})));
+  ctxRejects('exercise context rewritten','fixture-binding-mismatch','exerciseContextId',()=>ctxProof(tamperedFixture(data=>{data.responseContextId='OTHER'})));
+  ctxRejects('exercise pair rewritten','fixture-binding-mismatch','exercisePairId',()=>ctxProof(tamperedFixture(data=>{data.responsePairId='OTHER'})));
+  ctxRejects('exercise claims production status','fixture-not-non-production','',()=>ctxProof(tamperedFixture(data=>{data.productionStatus='production'})));
+  ctxRejects('exercise drops production status','fixture-not-non-production','',()=>ctxProof(tamperedFixture(data=>{delete data.productionStatus})));
+}
+
+/* --- E/F/G: reciprocal context↔response relationships. --- */
+{
+  // E: the canonical graph is complete and bidirectional.
+  assert(FIX.responseRelationships.length===2,'the discourse graph is not two links');
+  const forward=FIX.responseRelationships.find(link=>link.type===api.RESPONSE_RELATION_TYPES.contextAnswer);
+  const back=FIX.responseRelationships.find(link=>link.type===api.RESPONSE_RELATION_TYPES.answerContext);
+  assert(forward&&back,'the discourse graph is missing a direction');
+  assert(forward.fromId===CTX_ID&&forward.toId===RESPONSE_NODE_ID,'the context does not point at the response');
+  assert(back.fromId===RESPONSE_NODE_ID&&back.toId===CTX_ID,'the response does not point back at the context');
+  assert(forward.reciprocalId===back.id&&back.reciprocalId===forward.id,'the two links do not name each other');
+  assert(forward.relation===api.RESPONSE_RELATIONS.jawabJazaa&&back.relation===api.RESPONSE_RELATIONS.jawabJazaa,
+    'a link carries the wrong answer/consequence relation');
+  assert(api.responseGraphFailure(FIX.responseRelationships,CTX_ID,RESPONSE_NODE_ID)==='','the canonical graph failed its own check');
+  // The discourse graph is separate from the analysed sentence: its nodes are not tokens.
+  assert(ctxFixture.tokens.every(token=>token.id!==CTX_ID&&token.id!==RESPONSE_NODE_ID),
+    'a discourse node id collides with a token id');
+  ctxCases+=8;
+  // G: a copied link is not authority, however identical it looks.
+  ctxRejects('deep-copied graph','fixture-relationship-not-authority','',()=>ctxProof(tamperedFixture(data=>{data.responseRelationships=clone(FIX.responseRelationships)})));
+  ctxRejects('shallow-copied links','fixture-relationship-not-authority','',()=>ctxProof(tamperedFixture(data=>{
+    data.responseRelationships=FIX.responseRelationships.map(link=>({...link}))})));
+  ctxRejects('reordered authentic links','fixture-relationship-not-authority','',()=>ctxProof(tamperedFixture(data=>{
+    data.responseRelationships=[FIX.responseRelationships[1],FIX.responseRelationships[0]]})));
+  // F: one-way, missing and duplicated graphs.
+  ctxRejects('one-way graph','fixture-relationship-not-authority','',()=>ctxProof(tamperedFixture(data=>{
+    data.responseRelationships=[FIX.responseRelationships[0]]})));
+  ctxRejects('graph removed','fixture-relationship-not-authority','',()=>ctxProof(tamperedFixture(data=>{delete data.responseRelationships})));
+  ctxRejects('graph replaced by an empty list','fixture-relationship-not-authority','',()=>ctxProof(tamperedFixture(data=>{data.responseRelationships=[]})));
+  ctxRejects('graph padded with an authentic duplicate','fixture-relationship-not-authority','',()=>ctxProof(tamperedFixture(data=>{
+    data.responseRelationships=[...FIX.responseRelationships,FIX.responseRelationships[0]]})));
+  /* The graph predicate itself, exercised directly. In the resolver these branches sit behind the
+     reference check above, so synthetic links are the only way to reach them — and synthetic links
+     can never reach production, because the resolver accepts only the frozen array. */
+  const link=(over={})=>Object.freeze({id:'REL_IDHAN_CONTEXT_ANSWER',type:'contextAnswer',fromId:CTX_ID,
+    toId:RESPONSE_NODE_ID,relation:'jawabJazaa',reciprocalId:'REL_IDHAN_ANSWER_CONTEXT',...over});
+  const backLink=(over={})=>Object.freeze({id:'REL_IDHAN_ANSWER_CONTEXT',type:'answerContext',fromId:RESPONSE_NODE_ID,
+    toId:CTX_ID,relation:'jawabJazaa',reciprocalId:'REL_IDHAN_CONTEXT_ANSWER',...over});
+  assert(api.responseGraphFailure([link(),backLink()],CTX_ID,RESPONSE_NODE_ID)==='','a clean synthetic graph failed');
+  ctxCases++;
+  for(const [name,expected,links] of [
+    ['not an array','missing',null],
+    ['one link','count',[link()]],
+    ['three links','count',[link(),backLink(),link()]],
+    ['both directions forward','incomplete-graph',[link(),link({id:'X'})]],
+    ['both directions backward','incomplete-graph',[backLink(),backLink({id:'X'})]],
+    ['duplicate id','duplicate',[link(),backLink({id:'REL_IDHAN_CONTEXT_ANSWER'})]],
+    ['self-linked forward','self-link',[link({toId:CTX_ID}),backLink()]],
+    ['self-linked back','self-link',[link(),backLink({toId:RESPONSE_NODE_ID})]],
+    ['forward from the wrong node','forward-target',[link({fromId:'OTHER'}),backLink()]],
+    ['forward to the wrong node','forward-target',[link({toId:'OTHER'}),backLink()]],
+    ['reciprocal from the wrong node','reciprocal-target',[link(),backLink({fromId:'OTHER'})]],
+    ['reciprocal to the wrong node','reciprocal-target',[link(),backLink({toId:'OTHER'})]],
+    ['links do not name each other','reciprocal-id',[link({reciprocalId:'OTHER'}),backLink()]],
+    ['wrong answer relation','relation',[link({relation:'sequence'}),backLink()]]
+  ]){
+    ctxClauseRejects('graph: '+name,expected,'fixture-relationship-invalid',
+      ()=>api.responseGraphFailure(links,CTX_ID,RESPONSE_NODE_ID));
+  }
+}
+
+/* --- The token spine: identity, order and focus, checked apart from grammar. --- */
+{
+  assert(api.fixtureTokenSpineFailure(ctxFixture,FIX)==='','the canonical spine failed its own check');
+  ctxCases++;
+  ctxRejects('token id rewritten','fixture-token-mismatch','id',()=>ctxProof(tamperedFixture(data=>{data.tokens[0].id='forged'})));
+  ctxRejects('focus moved to the particle','fixture-token-mismatch','target',()=>ctxProof(tamperedFixture(data=>{
+    data.tokens[0].target=true;data.tokens[1].target=false})));
+  ctxRejects('focus removed','fixture-token-mismatch','target',()=>ctxProof(tamperedFixture(data=>{data.tokens[1].target=false})));
+  ctxRejects('third token appended','fixture-token-mismatch','count',()=>ctxProof(tamperedFixture(data=>{
+    data.tokens.push({id:'x',word:'زَيْدٌ',grammar:{type:'noun',role:'faail'}})})));
+  ctxRejects('token removed','fixture-token-mismatch','count',()=>ctxProof(tamperedFixture(data=>{data.tokens.pop()})));
+  /* Now caught one step earlier, by the descriptor-safe view: a `tokens` that is not a readable
+     dense array cannot even be extracted, so the proof fails as 'unreadable' before any clause
+     inspects it. */
+  ctxRejects('tokens replaced by a non-array','fixture-token-mismatch','unreadable',()=>ctxProof(tamperedFixture(data=>{data.tokens='إِذَنْ تَنْجَحَ'})));
+  ctxRejects('token replaced by a primitive','fixture-token-mismatch','token',()=>ctxProof(tamperedFixture(data=>{data.tokens[0]=null})));
+  ctxRejects('tokens reordered','fixture-token-mismatch','id',()=>ctxProof(tamperedFixture(data=>{data.tokens.reverse()})));
+}
+
+/* --- Condition 1 — صَدْرُ جُمْلَةِ الْجَوَاب. --- */
+{
+  // Through the resolver, on the application's own fixture.
+  ctxRejects('head is not a particle','response-head-not-a-particle','',()=>ctxProof(tamperedFixture(data=>{data.tokens[0].grammar.type='noun'})));
+  ctxRejects('head is أَنْ','response-head-not-idhan','',()=>ctxProof(tamperedFixture(data=>{data.tokens[0].word='أَنْ'})));
+  ctxRejects('head is لَنْ','response-head-not-idhan','',()=>ctxProof(tamperedFixture(data=>{data.tokens[0].word='لَنْ'})));
+  /* The clause as a pure predicate. Sentence-initial position ALONE must never satisfy it: a
+     preceding statement must exist and the target must be its answer. */
+  const goodTokens={tokens:[{word:IDHAN,grammar:{type:'particle'}},{word:TANJAHA,grammar:{type:'verb'}}]};
+  const okCtx=()=>({contextType:'promptResponse',responseRelation:api.RESPONSE_RELATIONS.jawabJazaa,
+    discoursePosition:api.DISCOURSE_POSITIONS.sadrJumlatAlJawab,promptAr:PROMPT,responseParticleAr:IDHAN});
+  const okPair=()=>({responseParticleAr:IDHAN});
+  assert(api.responseHeadFailure(okCtx(),okPair(),goodTokens)==='','the clean head clause failed');
+  ctxCases++;
+  for(const [name,expected,mutate] of [
+    ['no preceding statement','no-preceding-statement',c=>{c.promptAr=''}],
+    ['whitespace-only statement','no-preceding-statement',c=>{c.promptAr='   '}],
+    ['missing statement','no-preceding-statement',c=>{delete c.promptAr}],
+    ['non-string statement','no-preceding-statement',c=>{c.promptAr=75}],
+    ['not a response context','not-a-response-context',c=>{c.contextType='isolatedSentence'}],
+    ['wrong response relation','wrong-response-relation',c=>{c.responseRelation='sequence'}],
+    ['wrong discourse position','wrong-discourse-position',c=>{c.discoursePosition='sentenceStart'}]
+  ]){
+    const context=okCtx(); mutate(context);
+    ctxClauseRejects('head: '+name,expected,expected,()=>api.responseHeadFailure(context,okPair(),goodTokens));
+  }
+  ctxClauseRejects('head: no context record','unknown-context','unknown-context',()=>api.responseHeadFailure(null,okPair(),goodTokens));
+  ctxClauseRejects('head: no pair record','unknown-context','unknown-context',()=>api.responseHeadFailure(okCtx(),null,goodTokens));
+  ctxClauseRejects('head: no tokens','no-response-tokens','no-response-tokens',()=>api.responseHeadFailure(okCtx(),okPair(),{tokens:[]}));
+  ctxClauseRejects('head: missing token list','no-response-tokens','no-response-tokens',()=>api.responseHeadFailure(okCtx(),okPair(),{}));
+  ctxClauseRejects('head: verb removed','no-response-tokens','no-response-tokens',
+    ()=>api.responseHeadFailure(okCtx(),okPair(),{tokens:[goodTokens.tokens[0]]}));
+  ctxClauseRejects('head: pair names another particle','response-head-not-idhan','response-head-not-idhan',
+    ()=>api.responseHeadFailure(okCtx(),{responseParticleAr:'أَنْ'},goodTokens));
+  // Sentence-initial position on its own proves nothing.
+  const initialOnly=okCtx(); initialOnly.promptAr='';
+  ctxClauseRejects('head: sentence-initial with no statement','no-preceding-statement','no-preceding-statement',
+    ()=>api.responseHeadFailure(initialOnly,okPair(),goodTokens));
+}
+
+/* --- Q/R: Condition 2 — the future reading is an ARABIC fact. --- */
+{
+  const evidenceKinds=api.FUTURE_EVIDENCE_KINDS;
+  const okCtx=()=>({futureEvidenceId:'sourcePromptFutureSin',sourceRuleId:'R_IDHAN_CONDITIONS',
+    promptVerbAr:PROMPT_VERB,promptAr:PROMPT,promptEn:'I will work hard in my studies.'});
+  assert(api.futureEvidenceFailure(okCtx(),evidenceKinds)==='','the clean future clause failed');
+  ctxCases++;
+  /* Q — English presentation is not authority. Every English surface is mutated, ALL canonical
+     Arabic and registry identity preserved: the proof must be completely unmoved. */
+  for(const [name,mutate] of [
+    ['English prompt rewritten',c=>{c.promptEn='I am working hard right now.'}],
+    ['English "will" removed',c=>{c.promptEn='I work hard in my studies.'}],
+    ['English prompt emptied',c=>{c.promptEn=''}],
+    ['English prompt deleted',c=>{delete c.promptEn}],
+    ['English context description added',c=>{c.promptDescriptionEn='This clearly refers to the future.'}]
+  ]){
+    const context=okCtx(); mutate(context);
+    assert(api.futureEvidenceFailure(context,evidenceKinds)==='','English mutation "'+name+'" broke the Arabic future proof');
+    ctxCases++;ctxAttackCases++;
+  }
+  // English cannot REPAIR a missing Arabic marker either.
+  const englishOnly=okCtx();
+  englishOnly.promptVerbAr='أَجْتَهِدُ';
+  englishOnly.promptAr='أَجْتَهِدُ فِي دُرُوسِي';
+  englishOnly.promptEn='I will definitely work hard in my studies, in the future.';
+  ctxClauseRejects('future: English "will" with the Arabic sīn removed','prompt-carries-no-future-marker',
+    'prompt-carries-no-future-marker',()=>api.futureEvidenceFailure(englishOnly,evidenceKinds));
+  // R — the Arabic evidence is what carries the proof.
+  for(const [name,expected,mutate] of [
+    ['sīn stripped from the verb','prompt-carries-no-future-marker',c=>{c.promptVerbAr='أَجْتَهِدُ';c.promptAr='أَجْتَهِدُ فِي دُرُوسِي'}],
+    ['verb replaced by a past form','prompt-carries-no-future-marker',c=>{c.promptVerbAr='اجْتَهَدْتُ';c.promptAr='اجْتَهَدْتُ فِي دُرُوسِي'}],
+    ['verb is not a string','prompt-carries-no-future-marker',c=>{c.promptVerbAr=null}],
+    ['statement does not open with its verb','prompt-does-not-open-with-its-verb',c=>{c.promptAr='وَاللَّهِ '+PROMPT}],
+    ['statement is not a string','prompt-does-not-open-with-its-verb',c=>{c.promptAr=null}],
+    ['unknown evidence kind','unknown-future-evidence',c=>{c.futureEvidenceId='englishWill'}],
+    ['missing evidence kind','unknown-future-evidence',c=>{delete c.futureEvidenceId}],
+    ['inherited evidence name','unknown-future-evidence',c=>{c.futureEvidenceId='constructor'}],
+    ['evidence owned by another rule','future-evidence-not-source-owned',c=>{c.sourceRuleId='R_MUBTADA_RAF'}]
+  ]){
+    const context=okCtx(); mutate(context);
+    ctxClauseRejects('future: '+name,expected,expected,()=>api.futureEvidenceFailure(context,evidenceKinds));
+  }
+  // An exercise whose English is entirely rewritten still proves — and still renders canonically.
+  const englishRepainted=tamperedFixture(data=>{data.translation='Completely invented English.';
+    data.tokens[0].en='Invented.';data.tokens[1].en='Invented.'});
+  assert(ctxProof(englishRepainted).satisfied===true,'rewriting the exercise English broke the proof');
+  ctxCases++;ctxAttackCases++;
+}
+
+/* --- Condition 3 — no separator between إِذَنْ and the verb. --- */
+{
+  ctxRejects('separator inserted','fixture-token-mismatch','count',()=>ctxProof(tamperedFixture(data=>{
+    data.tokens.splice(1,0,{id:'sep',word:'يَا',grammar:{type:'particle',particleType:'nidaa'}})})));
+  ctxRejects('verb is past','no-adjacent-present-verb','',()=>ctxProof(tamperedFixture(data=>{data.tokens[1].tense='past'})));
+  ctxRejects('verb tense removed','no-adjacent-present-verb','',()=>ctxProof(tamperedFixture(data=>{delete data.tokens[1].tense})));
+  ctxRejects('verb is not a verb','no-adjacent-present-verb','',()=>ctxProof(tamperedFixture(data=>{data.tokens[1].grammar.type='noun'})));
+  ctxRejects('unpaired response verb','response-verb-not-the-paired-construction','',()=>ctxProof(tamperedFixture(data=>{data.tokens[1].word='يَكْتُبَ'})));
+  ctxRejects('wrong response person','response-person-mismatch','',()=>ctxProof(tamperedFixture(data=>{data.tokens[1].grammar.person='3ms'})));
+  ctxRejects('response person removed','response-person-mismatch','',()=>ctxProof(tamperedFixture(data=>{delete data.tokens[1].grammar.person})));
+  // The separator lane is not implemented at all: exactly one mode exists, and it is 'none'.
+  assert(Object.keys(api.SEPARATOR_MODES).join(',')==='none','a separator lane was added');
+  assert(CTX.separatorMode==='none','the fixture context authorizes a separator');
+  ctxCases+=2;
+}
+
+/* --- Identity seal: what no individual clause covers. --- */
+{
+  ctxRejects('schema version rewritten','fixture-identity-mismatch','',()=>ctxProof(tamperedFixture(data=>{data.schemaVersion=4})));
+  ctxRejects('schema version removed','fixture-identity-mismatch','',()=>ctxProof(tamperedFixture(data=>{delete data.schemaVersion})));
+  ctxRejects('naṣb state smuggled onto the response verb','fixture-identity-mismatch','',()=>ctxProof(tamperedFixture(data=>{data.tokens[1].state='nasb'})));
+  ctxRejects('iʿrāb sign smuggled onto the response verb','fixture-identity-mismatch','',()=>ctxProof(tamperedFixture(data=>{data.tokens[1].sign={id:'fatha'}})));
+  ctxRejects('particle role rewritten','fixture-identity-mismatch','',()=>ctxProof(tamperedFixture(data=>{data.tokens[0].grammar.role='governor'})));
+  ctxRejects('particle type rewritten','fixture-identity-mismatch','',()=>ctxProof(tamperedFixture(data=>{data.tokens[0].grammar.particleType='lan'})));
+  ctxRejects('source rule rewritten','fixture-identity-mismatch','',()=>ctxProof(tamperedFixture(data=>{data.sourceRuleId='G_LAN_NASB'})));
+}
+
+/* --- H: every PAIR field independently, and every CONTEXT field independently. --- */
+{
+  assert(api.pairAuthorityFailure(PAIR,CTX,FIX)==='','the canonical pair failed its own authority check');
+  assert(api.contextAuthorityFailure(CTX,FIX)==='','the canonical context failed its own authority check');
+  ctxCases+=2;
+  const bump=value=>typeof value==='number'?value+1:(typeof value==='string'?value+'_TAMPERED':'TAMPERED');
+  // Every own field of the pair record, both rewritten and deleted.
+  for(const field of Object.keys(PAIR)){
+    const rewritten={...PAIR}; rewritten[field]=bump(PAIR[field]);
+    ctxClauseRejects('pair field rewritten: '+field,field,'pair-field-mismatch',()=>api.pairAuthorityFailure(rewritten,CTX,FIX));
+    const removed={...PAIR}; delete removed[field];
+    ctxClauseRejects('pair field removed: '+field,field,'pair-field-mismatch',()=>api.pairAuthorityFailure(removed,CTX,FIX));
+  }
+  assert(Object.keys(PAIR).length===14,'the pair record gained or lost a field: '+Object.keys(PAIR).length);
+  ctxCases++;
+  // No pair field is decorative: every one of them is named by the authority table or the contextId check.
+  const pairChecked=new Set(api.PAIR_AUTHORITY_FIELDS.map(entry=>entry[0]).concat(['contextId']));
+  assert(Object.keys(PAIR).every(field=>pairChecked.has(field)),
+    'a pair field is never revalidated: '+Object.keys(PAIR).filter(field=>!pairChecked.has(field)).join(','));
+  ctxCases++;
+  // Every own field of the context record. promptEn is PRESENTATION and deliberately excluded.
+  for(const field of Object.keys(CTX)){
+    const rewritten={...CTX}; rewritten[field]=bump(CTX[field]);
+    const expected=field==='promptEn'?'':field;
+    ctxClauseRejects('context field rewritten: '+field,expected,expected?'context-field-mismatch':'',
+      ()=>api.contextAuthorityFailure(rewritten,FIX));
+    const removed={...CTX}; delete removed[field];
+    ctxClauseRejects('context field removed: '+field,expected,expected?'context-field-mismatch':'',
+      ()=>api.contextAuthorityFailure(removed,FIX));
+  }
+  assert(Object.keys(CTX).length===16,'the context record gained or lost a field: '+Object.keys(CTX).length);
+  ctxCases++;
+  // The consumer list must be exactly the one authorized consumer.
+  for(const [name,consumers] of [['emptied',[]],['padded',[CONSUMER,'T_NOUN_SINGULAR_RAF_DAMMA_01']],
+                                 ['replaced',['T_NOUN_SINGULAR_RAF_DAMMA_01']],['not a list','FIXTURE_IDHAN_SOURCE_DIRECT']]){
+    ctxClauseRejects('context consumers '+name,'authorizedConsumers','context-field-mismatch',
+      ()=>api.contextAuthorityFailure({...CTX,authorizedConsumers:consumers},FIX));
+  }
+  // The clauses fail closed on missing records rather than throwing.
+  ctxClauseRejects('pair clause: no record','record','pair-field-mismatch',()=>api.pairAuthorityFailure(null,CTX,FIX));
+  ctxClauseRejects('pair clause: no context','context','pair-field-mismatch',()=>api.pairAuthorityFailure(PAIR,null,FIX));
+  ctxClauseRejects('pair clause: no fixture','fixture','pair-field-mismatch',()=>api.pairAuthorityFailure(PAIR,CTX,null));
+  ctxClauseRejects('context clause: no record','record','context-field-mismatch',()=>api.contextAuthorityFailure(null,FIX));
+  ctxClauseRejects('context clause: no fixture','fixture','context-field-mismatch',()=>api.contextAuthorityFailure(CTX,null));
+  // A pair whose contextId points elsewhere.
+  ctxClauseRejects('pair points at another context','contextId','pair-field-mismatch',
+    ()=>api.pairAuthorityFailure({...PAIR,contextId:'OTHER'},CTX,FIX));
+  // The pair and the context must agree with EACH OTHER, not only with the fixture.
+  ctxClauseRejects('pair and context disagree on the prompt verb','promptVerbAr','pair-field-mismatch',
+    ()=>api.pairAuthorityFailure(PAIR,{...CTX,promptVerbAr:'أَجْتَهِدُ'},FIX));
+  ctxClauseRejects('pair and context disagree on the particle','responseParticleAr','pair-field-mismatch',
+    ()=>api.pairAuthorityFailure(PAIR,{...CTX,responseParticleAr:'أَنْ'},FIX));
+  ctxClauseRejects('pair and context disagree on the evidence','futureEvidenceId','pair-field-mismatch',
+    ()=>api.pairAuthorityFailure(PAIR,{...CTX,futureEvidenceId:'other'},FIX));
+  // The spine clause fails closed too.
+  ctxClauseRejects('spine clause: no exercise','missing','fixture-token-mismatch',()=>api.fixtureTokenSpineFailure(null,FIX));
+}
+
+/* --- I: every static resolver failure reason is accounted for. --- */
+{
+  const declared=api.IDHAN_PROOF_FAILURE_REASONS;
+  assert(Array.isArray(declared)&&Object.isFrozen(declared),'the failure-reason list is missing or mutable');
+  assert(new Set(declared).size===declared.length,'the failure-reason list has duplicates');
+  // The declared list must match what the implementation can actually return.
+  const implemented=new Set();
+  /* The scanned region now starts at the separator predicate, so it covers the predicate, the
+     three condition provers, the assembler, the private core and the public boundary. */
+  const proofSourceStart=script.indexOf('function separatorFailure(');
+  const proofSourceEnd=script.indexOf('/* Every static failure reason',proofSourceStart);
+  assert(proofSourceStart>=0&&proofSourceEnd>proofSourceStart,'the private/public proof source region was not found');
+  const proofImplementationSource=script.slice(proofSourceStart,proofSourceEnd);
+  /* The unowned refusals are frozen module constants rather than fail() calls — that is the whole
+     point, since building a message would mean dereferencing the rejected object — so the
+     constants are scanned too. */
+  const refusalSourceStart=script.indexOf('const IDHAN_UNOWNED_PROOF=');
+  const refusalSource=script.slice(refusalSourceStart,script.indexOf('\n',script.indexOf('IDHAN_UNOWNED_RENDER=')));
+  assert(refusalSourceStart>=0&&/not-application-owned/.test(refusalSource),'the frozen unowned refusals were not found');
+  for(const source of [proofImplementationSource,refusalSource,api.responseHeadFailure.toString(),
+    api.futureEvidenceFailure.toString(),api.separatorFailure.toString()]){
+    // `||'…'` covers the assembler's fallback reasons, which sit after a stated-reason preference.
+    for(const match of source.matchAll(/(?:fail\(|return\s*|reason:|\|\|)'([a-z][a-z0-9-]+)'/g))implemented.add(match[1]);
+  }
+  implemented.delete('');
+  for(const reason of implemented)assert(declared.includes(reason),'reason "'+reason+'" is returned but not declared');
+  for(const reason of declared)assert(implemented.has(reason),'reason "'+reason+'" is declared but never returned');
+  ctxCases+=5;
+  /* The clause-level tests below prove each predicate is correct; this proves the resolver still
+     CONSULTS them. Without it, deleting a whole clause from the resolver would leave every
+     predicate test green while the proof silently stopped checking that condition — which is
+     exactly how "the Arabic future evidence is omitted" would slip through. The three CONDITIONS
+     are additionally proven load-bearing behaviourally further below; source text alone is not
+     relied on for them. */
+  const resolverBody=proofImplementationSource;
+  for(const clause of ['contextAuthorityFailure(','pairAuthorityFailure(','responseHeadFailure(',
+    'futureEvidenceFailure(','separatorFailure(','responseGraphFailure(','fixtureTokenSpineFailure(',
+    'canonicalFixtureIdentity(','responseFixtureRecord(','responseContextRecord(','responsePairRecord(',
+    'isSourceAuthorized(','isSourceRuleConsumerAuthorized(','assembleIdhanConditionProof(',
+    'active.head(','active.future(','active.separator(']){
+    assert(resolverBody.includes(clause),'the resolver no longer consults '+clause+')');
+    ctxCases++;
+  }
+  assert(api.resolveIdhanConditionProof.toString().includes('isIdhanFixtureOwned(exercise)'),
+    'the public resolver no longer checks external object-identity ownership');
+  assert(api.resolveIdhanConditionProof.toString().includes('resolveIdhanConditionProofCore('),
+    'the public resolver no longer delegates to the complete semantic proof');
+  ctxCases+=2;
+  // …and each clause is reached with the canonical records, not with a placeholder.
+  assert(/futureEvidenceFailure\(context,FUTURE_EVIDENCE_KINDS\)/.test(resolverBody),
+    'the future clause is not called with the canonical evidence table');
+  assert(/responseHeadFailure\(context,pair,exercise\)/.test(resolverBody),
+    'the head clause is not called with the canonical records');
+  assert(/pairAuthorityFailure\(pair,context,fixture\)/.test(resolverBody),
+    'the pair clause is not called with the canonical records');
+  assert(/contextAuthorityFailure\(context,fixture\)/.test(resolverBody),
+    'the context clause is not called with the canonical records');
+  ctxCases+=4;
+  /* Seven reasons are structurally UNREACHABLE while exactly one fixture is registered and its
+     three records are frozen and startup-verified. They are defence in depth, kept so that a
+     second fixture or a future registry edit cannot silently skip the check. Each one's
+     underlying condition is proven separately just below.
+
+     `unknown-fixture` and `separator-token-present` became unreachable in this repair, for two
+     different and deliberate reasons:
+       • `unknown-fixture` — the public boundary now rejects on OWNERSHIP before reading any field,
+         so nothing that reaches the fixture lookup can be carrying an unknown id. Losing this
+         reason publicly is the point: the resolver no longer tells a caller what it claimed.
+       • `separator-token-present` — the token spine is authenticated before the conditions run, so
+         an inserted separator is caught as a spine mismatch first. The separator predicate still
+         owns the rule and is proven directly against every inserted-token shape below. */
+  /* `unknown-fixture` WAS listed unreachable here, and that was wrong. Ownership admits an object
+     by identity; it does not freeze it. A caller holding the builder's own fixture can rewrite
+     `fixtureId` afterwards, and the resolver then correctly reports that the exercise names no
+     registered fixture. It is exercised directly below. */
+  ctxUnreachableReasons=Object.freeze(['unknown-pair','unauthorized-consumer',
+    'unverified-source','unauthorized-source-consumer','separator-mode-not-implemented',
+    'separator-token-present']);
+  /* The exercised/unreachable tally itself is asserted at the very END of this phase's block:
+     three of the reasons are produced by the separator-load-bearing tests, which run last. */
+  // …and the conditions those seven stand for, proven directly.
+  assert(api.responsePairRecord('NOPE')===null&&api.responsePairRecord('toString')===null,
+    'the pair lookup is not fail-closed (backs "unknown-pair")');
+  assert(CTX.authorizedConsumers.length===1&&CTX.authorizedConsumers[0]===CONSUMER
+    &&!CTX.authorizedConsumers.includes('T_NOUN_SINGULAR_RAF_DAMMA_01'),
+    'the consumer list is not exactly the one authorized consumer (backs "unauthorized-consumer")');
+  assert(api.isSourceAuthorized('R_IDHAN_CONDITIONS')&&!api.isSourceAuthorized('R_NOT_A_RULE'),
+    'source authorization is not fail-closed (backs "unverified-source")');
+  assert(!api.isSourceRuleConsumerAuthorized('R_IDHAN_CONDITIONS','T_NOUN_SINGULAR_RAF_DAMMA_01')
+    &&api.isSourceRuleConsumerAuthorized('R_IDHAN_CONDITIONS',CONSUMER),
+    'the source consumer restriction is not enforced (backs "unauthorized-source-consumer")');
+  assert(Object.keys(api.SEPARATOR_MODES).length===1&&api.SEPARATOR_MODES.none==='none',
+    'a separator mode exists that this phase does not implement (backs "separator-mode-not-implemented")');
+  ctxCases+=5;
+}
+
+/* --- P: source-rule consumer restriction. --- */
+{
+  assert(Object.getPrototypeOf(api.RESTRICTED_SOURCE_RULE_OWNERS)===null,'the restricted-rule map has a prototype');
+  assert(api.isRestrictedSourceRule('R_IDHAN_CONDITIONS'),'R_IDHAN_CONDITIONS is not owner-restricted');
+  for(const name of ['toString','constructor','__proto__','hasOwnProperty'])
+    assert(!api.isRestrictedSourceRule(name),'an inherited name resolved as a restricted rule: '+name);
+  for(const bad of [null,undefined,7,{},'R_MUBTADA_RAF'])assert(!api.isRestrictedSourceRule(bad),'a non-restricted rule was restricted');
+  for(const consumer of ['','T_NOUN_SINGULAR_RAF_DAMMA_01','R_IDHAN_CONDITIONS',FIXTURE_ID,CTX_ID,PAIR_ID,null,undefined,7])
+    assert(!api.isSourceRuleConsumerAuthorized('R_IDHAN_CONDITIONS',consumer),
+      'an unauthorized consumer may wear R_IDHAN_CONDITIONS: '+String(consumer));
+  assert(api.isSourceRuleConsumerAuthorized('R_IDHAN_CONDITIONS',CONSUMER),'the authorized consumer was refused');
+  assert(api.isSourceRuleConsumerAuthorized('R_MUBTADA_RAF','anything'),'an unrestricted rule became restricted');
+  ctxCases+=6;ctxAttackCases+=18;
+  /* No ordinary token, and no relationship, may wear it — and a rejected attempt must never be
+     counted in validByRule, which is only incremented after validation passes. */
+  const base=api.buildTemplate(api.templates[0].id);
+  const before=api.grammarDiagnostics.validByRule.R_IDHAN_CONDITIONS||0;
+  for(const field of ['ruleId','signRuleId','subjectRuleId','mahallRuleId']){
+    const data=clone(base);
+    data.tokens[0][field]='R_IDHAN_CONDITIONS';
+    const codes=api.validateExercise(data).map(failure=>failure.code);
+    assert(codes.includes('E_RESTRICTED_SOURCE_RULE'),'token.'+field+' wore R_IDHAN_CONDITIONS: '+JSON.stringify(codes));
+    codes.forEach(code=>{ctxCodeHist[code]=(ctxCodeHist[code]||0)+1});
+    ctxAttackCases++;
+  }
+  const relational=clone(base);
+  if(relational.relationships.length){
+    relational.relationships[0].ruleId='R_IDHAN_CONDITIONS';
+    assert(api.validateExercise(relational).map(failure=>failure.code).includes('E_RESTRICTED_SOURCE_RULE'),
+      'a relationship wore R_IDHAN_CONDITIONS');
+    ctxAttackCases++;
+  }
+  assert((api.grammarDiagnostics.validByRule.R_IDHAN_CONDITIONS||0)===before,
+    'a rejected R_IDHAN_CONDITIONS citation was counted in validByRule');
+  assert(!api.grammarDiagnostics.validByRule.R_IDHAN_CONDITIONS,'R_IDHAN_CONDITIONS reached production validByRule');
+  ctxCases+=2;
+}
+
+/* --- The learner definition states ALL THREE conditions, in the source's own terminology. --- */
+{
+  const entry=api.grammarDefinitionGroups.flatMap(group=>group.items)
+    .find(item=>/naṣb-governor|Accusative governor/.test(item.enTerm||'')||/إِذَنْ/.test(item.detailsAr||''));
+  assert(entry,'the accusative-governor definition is missing');
+  for(const phrase of ['صَدْرِ جُمْلَةِ الْجَوَابِ','دَالًّا عَلَى الِاسْتِقْبَالِ','لَا يَفْصِلَ',
+                       'الْقَسَمِ','النِّدَاءِ','«لَا» النَّافِيَةِ']){
+    assert(entry.detailsAr.includes(phrase),'the Arabic definition omits «'+phrase+'»');
+    ctxCases++;
+  }
+  for(const phrase of ['head of the answer sentence','denotes the future','oath','vocative','negating lā']){
+    assert(entry.detailsEn.includes(phrase),'the English definition omits "'+phrase+'"');
+    ctxCases++;
+  }
+  assert(/إِذَنْ/.test(entry.detailsAr)&&/conditional|only when/i.test(entry.detailsEn),
+    'the definition still implies إِذَنْ always causes naṣb');
+  assert(api.grammarDefinitionGroups.flatMap(group=>group.items).some(item=>(item.enTerm||'').includes('ussive')),
+    'a neighbouring definition disappeared');
+  ctxCases+=2;
+}
+
+/* --- N: the complete live claim vocabulary, on every surface. --- */
+{
+  const vocabulary=api.RESPONSE_CONTEXT_CLAIM_FIELDS;
+  assert(Object.isFrozen(vocabulary),'the claim vocabulary is mutable');
+  assert(new Set(vocabulary).size===vocabulary.length,'the claim vocabulary has duplicates');
+  // The nine names Codex found unguarded, and the audited variants, are all present.
+  for(const field of ['contextType','sadrJumlatAlJawab','pairId','contextSourceRuleId','sourceRuleId',
+    'responseContextPresentation','promptPunctuation','contextLayout','speakerLabel',
+    'fixtureId','responseFixtureId','pairRecord','contextRecord','isAnswer','responseHead',
+    'responseSentenceHead','futureMarker','futureEvidenceKind','contextConsumer','contextOwner',
+    'responseTargetId','promptTargetId','fixtureAuthority','responseRelationships','canonicalIdentity',
+    'auditStatus','productionStatus','semanticRelation','responseTransitivity']){
+    assert(vocabulary.includes(field),'the claim vocabulary omits "'+field+'"');
+    ctxCases++;
+  }
+  // Every field the three registry records actually use is guarded.
+  for(const record of [CTX,PAIR,FIX])for(const field of Object.keys(record)){
+    if(['id','contextId','prompt','response','tokens','conditions','schemaVersion','authorizedConsumers'].includes(field))continue;
+    assert(vocabulary.includes(field),'a registry field is not in the claim vocabulary: '+field);
+    ctxCases++;
+  }
+  // No production template declares context or fixture authority.
+  for(const template of api.templates){
+    assert(api.templateResponseContext(template)===null,template.stableId+' resolved a response context');
+    assert(api.templateResponseFixtureId(template)==='',template.stableId+' resolved a response fixture');
+    assert(!template.responseContextId&&!template.responseFixtureId,template.stableId+' declares response authority');
+    ctxCases+=2;
+  }
+  const base=api.buildTemplate(api.templates[0].id);
+  assert(api.validateExercise(base).length===0,'the claim-guard base exercise is not clean');
+  ctxCases++;
+  for(const field of vocabulary){
+    for(const [where,place] of [
+      ['exercise',(data,value)=>{data[field]=value}],
+      ['token',(data,value)=>{data.tokens[0][field]=value}],
+      ['token.grammar',(data,value)=>{data.tokens[0].grammar[field]=value}],
+      ['token.grammar.morphology',(data,value)=>{data.tokens[0].grammar.morphology=Object.assign({},data.tokens[0].grammar.morphology,{[field]:value})}],
+      ['token.morphology',(data,value)=>{data.tokens[0].morphology={[field]:value}}],
+      ['relationship',(data,value)=>{if(data.relationships[0])data.relationships[0][field]=value}]
+    ]){
+      if(where==='relationship'&&!base.relationships.length)continue;
+      const data=clone(base);
+      place(data,field==='responseContextId'?CTX_ID:'x');
+      let codes;
+      try{ codes=api.validateExercise(data).map(failure=>failure.code); }
+      catch(error){ throw new Error('claim "'+field+'" at '+where+' threw: '+error.message); }
+      assert(codes.includes('E_RESPONSE_CONTEXT_UNAUTHORIZED'),
+        'claim "'+field+'" at '+where+' was not rejected: '+JSON.stringify(codes));
+      codes.forEach(code=>{ctxCodeHist[code]=(ctxCodeHist[code]||0)+1});
+      ctxAttackCases++;
+    }
+    // Presence alone is the violation: null, false, '' and undefined are all claims.
+    for(const value of [null,false,'',undefined,0]){
+      const data=clone(base);
+      data[field]=value;
+      assert(api.validateExercise(data).map(failure=>failure.code).includes('E_RESPONSE_CONTEXT_UNAUTHORIZED'),
+        'claim "'+field+'" with value '+String(value)+' was not rejected');
+      ctxAttackCases++;
+    }
+    // …including a non-enumerable own property, which Object.keys would miss.
+    const hidden=clone(base);
+    Object.defineProperty(hidden,field,{value:'x',enumerable:false,configurable:true,writable:true});
+    assert(api.validateExercise(hidden).map(failure=>failure.code).includes('E_RESPONSE_CONTEXT_UNAUTHORIZED'),
+      'a non-enumerable claim "'+field+'" was not rejected');
+    ctxAttackCases++;
+  }
+  // An inherited name is NOT an own property and must not reject an honest exercise.
+  const inherited=Object.create({responseContextId:CTX_ID,contextType:'promptResponse'});
+  Object.assign(inherited,clone(base));
+  assert(!api.validateExercise(inherited).map(failure=>failure.code).includes('E_RESPONSE_CONTEXT_UNAUTHORIZED'),
+    'an inherited name was treated as an own claim');
+  ctxAttackCases++;
+  // A particle-initial template does not become context-capable just by starting with a particle.
+  const particleFirst=api.templates.find(template=>template.starts==='particle');
+  const forged=api.buildTemplate(particleFirst.id);
+  forged.responseContextId=CTX_ID;
+  assert(api.validateExercise(forged).map(failure=>failure.code).includes('E_RESPONSE_CONTEXT_UNAUTHORIZED'),
+    'a particle-initial template accepted response authority');
+  ctxAttackCases++;
+  // The whole-graph scanner agrees with the per-surface guard.
+  assert(api.responseContextClaimSite(base)==='','the claim scanner flagged a clean exercise');
+  assert(api.responseContextClaimSite({...clone(base),contextType:'x'})==='exercise.contextType','the scanner missed an exercise claim');
+  ctxCases+=2;
+}
+
+/* --- O: the RAW History claim guard, before serialization and before migration. --- */
+{
+  const base=api.buildTemplate(api.templates.find(template=>template.starts==='particle').id);
+  const snapshot=api.createExerciseSnapshot(base);
+  assert(snapshot&&snapshot.schemaVersion===3,'snapshot is not schema v3');
+  assert(api.restoreExerciseSnapshot(clone(snapshot)),'the clean snapshot does not restore');
+  ctxCases+=2;
+  for(const field of api.RESPONSE_CONTEXT_CLAIM_FIELDS){
+    assert(!Object.prototype.hasOwnProperty.call(snapshot,field),'the snapshot persisted "'+field+'"');
+    assert(snapshot.tokens.every(token=>!Object.prototype.hasOwnProperty.call(token,field)),'a snapshot token persisted "'+field+'"');
+    ctxCases+=2;
+    // Every claim, on every raw-snapshot surface, must reject — and must reject rather than be
+    // quietly erased by migration or by canonical presentation repair.
+    for(const [where,place] of [
+      ['snapshot',(data,value)=>{data[field]=value}],
+      ['token',(data,value)=>{data.tokens[0][field]=value}],
+      ['token.grammar',(data,value)=>{data.tokens[0].grammar[field]=value}],
+      ['token.grammar.morphology',(data,value)=>{data.tokens[0].grammar.morphology=Object.assign({},data.tokens[0].grammar.morphology,{[field]:value})}],
+      ['relationship',(data,value)=>{if(data.relationships[0])data.relationships[0][field]=value}]
+    ]){
+      if(where==='relationship'&&!snapshot.relationships.length)continue;
+      const forged=clone(snapshot);
+      place(forged,field==='responseContextId'?CTX_ID:'FORGED');
+      let restored;
+      try{ restored=api.restoreExerciseSnapshot(forged); }
+      catch(error){ throw new Error('raw History claim "'+field+'" at '+where+' threw: '+error.message); }
+      assert(restored===null,'raw History restored a snapshot carrying "'+field+'" at '+where);
+      ctxAttackCases++;
+    }
+  }
+  /* GUARD ORDER, proven rather than assumed. cloneSerializable is a JSON round trip, and JSON
+     silently DROPS an own property whose value is undefined or a function. So a claim carrying
+     one of those values is exactly the case a guard placed after migration would never see: the
+     migration would erase the evidence and the snapshot would restore clean. A guard that runs
+     first sees the own property whatever its value. */
+  for(const field of ['contextType','sadrJumlatAlJawab','pairId','contextSourceRuleId','sourceRuleId',
+    'responseContextPresentation','promptPunctuation','contextLayout','speakerLabel']){
+    for(const [label,value] of [['undefined',undefined],['a function',function(){return CTX_ID}]]){
+      const forged=clone(snapshot);
+      forged[field]=value;                       // set AFTER cloning: JSON would have dropped it
+      assert(Object.prototype.hasOwnProperty.call(forged,field),'the guard-order fixture lost its own property');
+      assert(JSON.parse(JSON.stringify(forged))[field]===undefined
+        &&!Object.prototype.hasOwnProperty.call(JSON.parse(JSON.stringify(forged)),field),
+        'a '+label+'-valued claim survives serialization, so it does not prove guard order');
+      assert(api.restoreExerciseSnapshot(forged)===null,
+        'a '+label+'-valued claim "'+field+'" was erased by migration instead of rejected — the raw guard runs too late');
+      ctxAttackCases++;
+    }
+  }
+  // The same ordering proof for the fixture History path.
+  {
+    const fixtureSnapshot=api.createFixtureSnapshot(api.buildIdhanSourceDirectFixture());
+    for(const [label,value] of [['undefined',undefined],['a function',function(){return 1}]]){
+      const forged={...fixtureSnapshot};
+      forged.conditionSatisfied=value;
+      assert(api.restoreFixtureSnapshot(forged)===null,
+        'a '+label+'-valued claim survived the fixture History guard');
+      ctxAttackCases++;
+    }
+  }
+  // A v1 snapshot must not be able to launder a claim through migration.
+  const legacy=clone(snapshot);
+  legacy.schemaVersion=1;
+  delete legacy.exerciseIdentity;
+  legacy.contextType='promptResponse';
+  assert(api.restoreExerciseSnapshot(legacy)===null,'a v1 migration laundered a discourse claim');
+  ctxAttackCases++;
+  // Copied records and forged rule names are equally refused.
+  for(const [label,mutate] of [
+    ['copied context object',forgedSnapshot=>{forgedSnapshot.responseContext={...CTX}}],
+    ['copied pair object',forgedSnapshot=>{forgedSnapshot.pairRecord={...PAIR}}],
+    ['copied fixture object',forgedSnapshot=>{forgedSnapshot.fixtureId=FIXTURE_ID}],
+    ['forged condition set',forgedSnapshot=>{forgedSnapshot.conditionSetId='R_MUBTADA_RAF'}],
+    ['forged future evidence',forgedSnapshot=>{forgedSnapshot.futureEvidenceId='sourcePromptFutureSin'}],
+    ['forged canonical identity',forgedSnapshot=>{forgedSnapshot.canonicalIdentity=FIX.canonicalIdentity}]
+  ]){
+    const forged=clone(snapshot); mutate(forged);
+    assert(api.restoreExerciseSnapshot(forged)===null,'raw History accepted '+label);
+    ctxAttackCases++;
+  }
+  // The guard also runs before serialization on the way in.
+  const claiming=clone(base);
+  claiming.contextType='promptResponse';
+  claiming.validated=true;
+  assert(api.createExerciseSnapshot(claiming)===null,'a claiming exercise was serialized into a snapshot');
+  ctxAttackCases++;
+}
+
+/* --- J/K: the canonical rendering boundary. --- */
+{
+  // J: rendering by fixture ID resolves through the registries and paints canonical text.
+  assert(api.renderResponseContext(FIXTURE_ID)==='','rendering the canonical fixture context failed');
+  assert(elements.responseContext.hidden===false,'the context block stayed hidden for the fixture');
+  assert(elements.responseContextPromptAr.textContent===PROMPT,'the prompt Arabic did not render');
+  assert(elements.responseContextPromptEn.textContent===CTX.promptEn,'the prompt English did not render');
+  ctxCases+=4;
+  // K: no arbitrary object, copied record or look-alike may produce learner-visible context.
+  for(const [label,input] of [
+    ['a copied context record',{...CTX}],
+    ['a deep-copied context record',clone(CTX)],
+    ['a prototype-chained context record',Object.create(CTX)],
+    ['a copied pair record',{...PAIR}],
+    ['a copied fixture record',{...FIX}],
+    ['a deep-copied fixture record',clone(FIX)],
+    ['a bare forged record',{promptAr:'أَنَا كَاذِبٌ تَمَامًا',promptEn:'This context was invented by the caller.'}],
+    ['a look-alike id',FIXTURE_ID+'_2'],
+    ['the context id',CTX_ID],
+    ['the pair id',PAIR_ID],
+    ['the consumer id',CONSUMER],
+    ['an inherited name','constructor'],
+    ['an empty id',''],['null',null],['undefined',undefined],['a number',75],['an array',[FIXTURE_ID]],['true',true]
+  ]){
+    api.renderResponseContext(FIXTURE_ID);            // paint canonical text first…
+    const reason=api.renderResponseContext(input);    // …then attempt the forgery.
+    assert(reason!=='',label+' was accepted by the rendering boundary');
+    assert(elements.responseContext.hidden===true,label+' left the context block visible');
+    assert(elements.responseContextPromptAr.textContent==='',label+' left Arabic context text on screen');
+    assert(elements.responseContextPromptEn.textContent==='',label+' left English context text on screen');
+    ctxCodeHist['render:'+reason]=(ctxCodeHist['render:'+reason]||0)+1;
+    ctxAttackCases++;
+  }
+  // Forged presentation on an exercise is ignored and rebuilt, never displayed.
+  const repainted=tamperedFixture(data=>{data.promptAr='أَنَا كَاذِبٌ';data.promptEn='Invented.';data.translation='Invented.'});
+  const reason=api.renderResponseContextFromExercise(repainted);
+  assert(reason==='','rendering from a presentation-repainted fixture failed: '+reason);
+  assert(elements.responseContextPromptAr.textContent===PROMPT,'forged Arabic reached the learner');
+  assert(elements.responseContextPromptEn.textContent===CTX.promptEn,'forged English reached the learner');
+  ctxCases+=3;ctxAttackCases++;
+  // An exercise that cannot prove its conditions renders no context at all.
+  for(const [label,mutate] of [
+    ['an unowned look-alike',()=>({tokens:[],fixtureId:FIXTURE_ID})],
+    ['a tampered head',()=>tamperedFixture(data=>{data.tokens[0].word='أَنْ'})],
+    ['a tampered graph',()=>tamperedFixture(data=>{data.responseRelationships=clone(FIX.responseRelationships)})]
+  ]){
+    api.renderResponseContext(FIXTURE_ID);
+    const failure=api.renderResponseContextFromExercise(mutate());
+    assert(failure!=='',label+' rendered context without proving its conditions');
+    assert(elements.responseContext.hidden===true&&elements.responseContextPromptAr.textContent==='',
+      label+' left forged context on screen');
+    ctxAttackCases++;
+  }
+  assert(api.renderResponseContextFromExercise(null)==='not-application-owned','a null exercise was accepted by the renderer');
+  assert(api.renderResponseContextFromExercise({})==='not-application-owned','an empty exercise was accepted by the renderer');
+  ctxAttackCases+=2;
+  api.renderResponseContext('');
+}
+
+/* --- L/S: the end-to-end fixture rendering path, and target/context separation. --- */
+{
+  // The prompt block precedes the target sentence in the document itself.
+  assert(html.indexOf('id="responseContext"')>=0&&html.indexOf('id="responseContext"')<html.indexOf('id="sentence"'),
+    'the response-context block is not rendered above the target sentence');
+  ctxCases++;
+  const rendered=api.renderIdhanSourceDirectFixture();
+  assert(rendered.rendered===true,'the fixture rendering path failed: '+rendered.reason);
+  assert(Object.isFrozen(rendered),'the fixture rendering result is mutable');
+  assert(rendered.fixtureId===FIXTURE_ID&&rendered.contextId===CTX_ID&&rendered.pairId===PAIR_ID,
+    'the rendering result does not name its records');
+  assert(elements.responseContextPromptAr.textContent===PROMPT,'the prompt did not render above the target');
+  assert(elements.sentence.textContent===IDHAN+' '+TANJAHA,'the target sentence is «'+elements.sentence.textContent+'»');
+  assert(elements.translation.textContent===FIX.response.en,'the target translation drifted');
+  ctxCases+=6;
+  // S: the prompt is context, and nothing else. It is in no token, no relationship, no iʿrāb, no Why.
+  assert(!elements.sentence.textContent.includes(PROMPT_VERB),'the prompt leaked into the target sentence');
+  assert(!elements.answers.innerHTML.includes(PROMPT),'the prompt leaked into the target iʿrāb');
+  assert(!elements.answers.innerHTML.includes(PROMPT_VERB),'the prompt verb leaked into the target iʿrāb');
+  assert(!elements.translation.textContent.includes('my studies'),'the prompt leaked into the target translation');
+  assert(ctxFixture.tokens.length===2&&ctxFixture.tokens.every(token=>token.word!==PROMPT_VERB),
+    'the prompt entered the target token list');
+  assert(ctxFixture.relationships.length===0,'the prompt entered the target relationships');
+  assert(ctxFixture.tokens.every(token=>!token.why&&!token.phraseWhy),'the fixture generated Why lines it has no source for');
+  ctxCases+=7;
+  // The analysis states the three CONDITIONS and claims no iʿrāb: no naṣb, no maḥall, no sign.
+  for(const forbidden of ['مَنْصُوب','نَصَبَ','فِي مَحَلِّ','عَلَامَةُ','حَرْفُ جَوَابٍ'])
+    assert(!elements.answers.innerHTML.includes(forbidden),'the fixture analysis claims «'+forbidden+'», which this phase has no source for');
+  for(const condition of FIX.conditions)assert(elements.answers.innerHTML.includes(condition.ar.slice(0,12)),
+    'the fixture analysis omits a condition');
+  assert(elements.answers.innerHTML.includes('word-card'),'the fixture rendered no whole-word cards');
+  assert(elements.answers.innerHTML.indexOf('word-card')<elements.answers.innerHTML.indexOf('phrase-analysis'),
+    'the fixture broke the whole-word → combined order');
+  ctxCases+=9;
+  // Presentation is rebuilt from frozen authority: a repainted exercise paints canonical text.
+  const repainted=tamperedFixture(data=>{data.tokens[0].ar='مَنْصُوبٌ بِإِذَنْ';data.tokens[1].ar='FORGED';
+    data.tokens[0].gloss='FORGED';data.translation='FORGED';});
+  const repaintedResult=api.renderIdhanSourceDirectFixture(repainted);
+  assert(repaintedResult.rendered===true,'a presentation-repainted fixture failed to render: '+repaintedResult.reason);
+  assert(!elements.answers.innerHTML.includes('FORGED'),'forged iʿrāb text reached the learner');
+  assert(!elements.answers.innerHTML.includes('مَنْصُوبٌ بِإِذَنْ'),'a forged naṣb claim reached the learner');
+  assert(elements.translation.textContent===FIX.response.en,'a forged translation reached the learner');
+  ctxCases+=4;ctxAttackCases++;
+  // A fixture that cannot prove its conditions renders nothing at all.
+  for(const [label,build] of [
+    ['a look-alike',()=>({tokens:[],fixtureId:FIXTURE_ID})],
+    ['a JSON copy',()=>clone(ctxFixture)],
+    ['a tampered verb',()=>tamperedFixture(data=>{data.tokens[1].word='يَكْتُبَ'})],
+    ['a smuggled naṣb state',()=>tamperedFixture(data=>{data.tokens[1].state='nasb'})]
+  ]){
+    api.renderResponseContext('');
+    const failed=api.renderIdhanSourceDirectFixture(build());
+    assert(failed.rendered===false,label+' was rendered without proving its conditions');
+    assert(elements.responseContext.hidden===true,label+' left context on screen');
+    ctxCodeHist['render:'+failed.reason]=(ctxCodeHist['render:'+failed.reason]||0)+1;
+    ctxAttackCases++;
+  }
+  // Defence in depth: the surface the proof pins is the surface that renders.
+  assert(api.buildTemplate!==undefined&&FIX.response.ar===IDHAN+' '+TANJAHA,'the fixture response surface drifted');
+  ctxCases++;
+}
+
+/* --- M: the fixture's own schema-v3 History round trip. --- */
+{
+  api.renderIdhanSourceDirectFixture();
+  const renderedContext=elements.responseContextPromptAr.textContent;
+  const renderedSentence=elements.sentence.textContent;
+  const renderedTranslation=elements.translation.textContent;
+  const renderedAnswers=elements.answers.innerHTML;
+  const snapshot=api.createFixtureSnapshot(ctxFixture);
+  assert(snapshot,'the canonical fixture did not snapshot');
+  assert(snapshot.schemaVersion===3,'the fixture snapshot is not schema v3');
+  assert(Object.keys(snapshot).sort().join(',')===[...api.FIXTURE_SNAPSHOT_KEYS].sort().join(','),
+    'the fixture snapshot persisted more than its identity: '+Object.keys(snapshot).join(','));
+  assert(snapshot.fixtureId===FIXTURE_ID&&snapshot.exerciseIdentity===FIX.canonicalIdentity,
+    'the fixture snapshot does not carry its canonical identity');
+  // Nothing mutable and nothing grammatical is persisted.
+  assert(!('tokens' in snapshot)&&!('relationships' in snapshot)&&!('responseRelationships' in snapshot)
+    &&!('sentence' in snapshot)&&!('translation' in snapshot),'the fixture snapshot persisted grammatical claims');
+  assert(Object.getOwnPropertySymbols(snapshot).length===0
+    &&!Reflect.ownKeys(snapshot).some(key=>typeof key==='string'&&/authority|ownership|owned/i.test(key)),
+    'the fixture snapshot persisted ownership material');
+  ctxCases+=6;
+  const restored=api.restoreFixtureSnapshot(clone(snapshot));
+  assert(restored,'the fixture snapshot did not restore');
+  assert(restored!==ctxFixture,'restoration returned the same object instead of rebuilding');
+  assert(api.canonicalFixtureIdentity(restored)===FIX.canonicalIdentity,'the restored fixture lost its canonical identity');
+  assert(restored.responseRelationships===FIX.responseRelationships,'the restored fixture lost its reciprocal graph');
+  assert(ctxProof(restored).satisfied===true,'the restored fixture no longer proves its conditions');
+  assert(api.isIdhanFixtureOwned(restored)===true,'the exact History-restored object is not owned');
+  assert(restored.productionStatus===api.ARCHITECTURE_FIXTURE_STATUS,'the restored fixture is no longer non-production');
+  assert(api.templates.every(template=>template.stableId!==restored.fixtureId),'the restored fixture entered the 82 templates');
+  ctxCases+=8;
+  runOwnershipDerivativeSuite('History-restored result',restored);
+  // …and re-rendering it reproduces the display byte for byte.
+  const rerendered=api.renderIdhanSourceDirectFixture(restored);
+  assert(rerendered.rendered===true,'the restored fixture did not re-render: '+rerendered.reason);
+  assert(elements.responseContextPromptAr.textContent===renderedContext,'the restored context presentation drifted');
+  assert(elements.sentence.textContent===renderedSentence,'the restored target sentence drifted');
+  assert(elements.translation.textContent===renderedTranslation,'the restored translation drifted');
+  assert(elements.answers.innerHTML===renderedAnswers,'the restored analysis drifted');
+  ctxCases+=5;
+  // Every way of forging a fixture snapshot rejects.
+  for(const [label,mutate] of [
+    ['an unknown fixture id',forged=>{forged.fixtureId='NOPE'}],
+    ['an inherited fixture name',forged=>{forged.fixtureId='constructor'}],
+    ['the context id',forged=>{forged.fixtureId=CTX_ID}],
+    ['the consumer id',forged=>{forged.fixtureId=CONSUMER}],
+    ['a forged identity',forged=>{forged.exerciseIdentity=FIX.canonicalIdentity+'x'}],
+    ['a removed identity',forged=>{delete forged.exerciseIdentity}],
+    ['schema v4',forged=>{forged.schemaVersion=4}],
+    ['schema v1',forged=>{forged.schemaVersion=1}],
+    ['an extra grammatical key',forged=>{forged.tokens=clone(ctxFixture.tokens)}],
+    ['an extra claim',forged=>{forged.conditionSatisfied=true}],
+    ['a smuggled context record',forged=>{forged.responseContext={...CTX}}],
+    ['a smuggled naṣb state',forged=>{forged.state='nasb'}]
+  ]){
+    const forged=clone(snapshot); mutate(forged);
+    assert(api.restoreFixtureSnapshot(forged)===null,'a fixture snapshot with '+label+' restored');
+    ctxAttackCases++;
+  }
+  for(const bad of [null,undefined,'',7,[],{},{schemaVersion:3},{schemaVersion:3,fixtureId:FIXTURE_ID}])
+    assert(api.restoreFixtureSnapshot(bad)===null,'restoreFixtureSnapshot accepted '+JSON.stringify(bad));
+  ctxAttackCases+=8;
+  // A fixture snapshot cannot be created from anything that does not prove its conditions.
+  for(const [label,build] of [
+    ['a look-alike',()=>({tokens:[],fixtureId:FIXTURE_ID})],
+    ['a JSON copy',()=>clone(ctxFixture)],
+    ['a tampered fixture',()=>tamperedFixture(data=>{data.tokens[1].grammar.person='3ms'})],
+    ['null',()=>null]
+  ]){
+    assert(api.createFixtureSnapshot(build())===null,'a fixture snapshot was created from '+label);
+    ctxAttackCases++;
+  }
+  // The fixture path is separate from production History: neither accepts the other's snapshot.
+  assert(api.restoreExerciseSnapshot(clone(snapshot))===null,'production History accepted a fixture snapshot');
+  const productionSnapshot=api.createExerciseSnapshot(api.buildTemplate(api.templates[0].id));
+  assert(api.restoreFixtureSnapshot(productionSnapshot)===null,'the fixture path accepted a production snapshot');
+  assert(api.sentenceHistory().every(item=>item.fixtureId===undefined),'the fixture entered production sentence History');
+  ctxCases+=3;ctxAttackCases+=2;
+}
+
+/* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
+{
+  assert(api.templates.length===82,'the production template count changed: '+api.templates.length);
+  const ids=api.templates.map(template=>template.stableId);
+  assert(new Set(ids).size===ids.length,'duplicate stable IDs');
+  // X: the exact 82 stable IDs, unchanged.
+  assert([...ids].sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,'the set of stable template IDs changed');
+  ctxCases+=3;
+  const particleTypes=new Set();
+  for(const template of api.templates)for(let attempt=0;attempt<10;attempt++){
+    const data=api.buildTemplate(template.id);
+    for(const item of data.tokens){
+      if(item.grammar.particleType)particleTypes.add(item.grammar.particleType);
+      assert(item.word!==IDHAN,template.stableId+' produced إِذَنْ');
+      assert(item.word!==TANJAHA,template.stableId+' produced the fixture response verb');
+      assert(item.ruleId!=='R_IDHAN_CONDITIONS',template.stableId+' cited R_IDHAN_CONDITIONS');
+    }
+    assert(!data.sentence.includes(PROMPT),template.stableId+' produced the fixture prompt');
+    assert(!data.sentence.includes(PROMPT_VERB),template.stableId+' produced the fixture prompt verb');
+    assert(api.responseContextClaimSite(data)==='',template.stableId+' produced a discourse claim: '+api.responseContextClaimSite(data));
+  }
+  assert(!particleTypes.has('idhan'),'the idhan particle type reached production');
+  assert(api.templates.every(template=>template.stableId!==CONSUMER),'a template claimed the fixture consumer id');
+  // V: the deliberate 2ms production exclusion is untouched, even though the fixture is 2ms.
+  assert(api.PRESENT_NON_PRODUCTION_PERSONS.includes('2ms'),'2ms production exclusion was removed');
+  assert(PAIR.responsePerson==='2ms','the source fixture is not the source example person');
+  assert(api.templates.every(template=>template.presentCapabilities.every(capability=>capability.person!=='2ms')),
+    'a template gained a 2ms capability');
+  // The production display is context-free and byte-identical for all 82.
+  for(const template of api.templates){
+    const data=api.buildTemplate(template.id);
+    api.render(data,'',false);
+    assert(elements.responseContext.hidden===true,template.stableId+' revealed the context block');
+    assert(elements.responseContextPromptAr.textContent==='',template.stableId+' left Arabic context text');
+    assert(elements.responseContextPromptEn.textContent==='',template.stableId+' left English context text');
+    assert(!elements.answers.innerHTML.includes(PROMPT),template.stableId+' rendered the fixture prompt');
+    ctxCases+=4;
+  }
+  const anySnapshot=api.createExerciseSnapshot(api.buildTemplate(api.templates[0].id));
+  assert(anySnapshot.schemaVersion===3,'History schema is no longer v3');
+  /* 30 before this repair, plus `separator-token-present` from the separator predicate and the
+     three assembler reasons that make an absent condition proof detectable. */
+  assert(api.IDHAN_PROOF_FAILURE_REASONS.length===34,'the resolver reason count changed: '+api.IDHAN_PROOF_FAILURE_REASONS.length);
+  ctxCases+=8;
+}
+/* ============================================================================
+   PHASE 3B0A — HOSTILE OBJECTS AT UNTRUSTED BOUNDARIES (section 7).
+
+   A candidate arriving at an ownership-dependent boundary may be a revoked Proxy, a Proxy whose
+   traps throw, or an ordinary object carrying an own or INHERITED accessor. Before this repair
+   every such boundary read `candidate.fixtureId` first, so the candidate's own code ran — and
+   threw out of the boundary — before ownership was ever consulted. Ownership is now decided on
+   object identity alone, so none of these shapes can execute anything at all.
+   ========================================================================== */
+let ctxHostileCases=0,ctxSeparatorCases=0;
+{
+  let getterCalls=0;
+  const traps={};
+  const bump=name=>{traps[name]=(traps[name]||0)+1};
+  const resetCounters=()=>{getterCalls=0;for(const key of Object.keys(traps))delete traps[key]};
+  const trapTotal=()=>Object.values(traps).reduce((sum,count)=>sum+count,0);
+  const HOSTILE=[
+    ['inherited returning fixtureId getter',()=>Object.create(Object.defineProperty({},'fixtureId',
+      {get(){getterCalls++;return FIXTURE_ID},configurable:true}))],
+    ['inherited throwing fixtureId getter',()=>Object.create(Object.defineProperty({},'fixtureId',
+      {get(){getterCalls++;throw new Error('inherited getter fired')},configurable:true}))],
+    ['own returning fixtureId getter',()=>Object.defineProperty({},'fixtureId',
+      {get(){getterCalls++;return FIXTURE_ID},configurable:true,enumerable:true})],
+    ['own throwing fixtureId getter',()=>Object.defineProperty({},'fixtureId',
+      {get(){getterCalls++;throw new Error('own getter fired')},configurable:true,enumerable:true})],
+    ['revoked Proxy',()=>{const handle=Proxy.revocable({fixtureId:FIXTURE_ID},{});handle.revoke();return handle.proxy}],
+    ['get-throwing Proxy',()=>new Proxy({fixtureId:FIXTURE_ID},{get(){bump('get');throw new Error('get trap')}})],
+    ['ownKeys-throwing Proxy',()=>new Proxy({fixtureId:FIXTURE_ID},{ownKeys(){bump('ownKeys');throw new Error('ownKeys trap')}})],
+    ['descriptor-throwing Proxy',()=>new Proxy({fixtureId:FIXTURE_ID},
+      {getOwnPropertyDescriptor(){bump('getOwnPropertyDescriptor');throw new Error('descriptor trap')}})],
+    ['getPrototypeOf-throwing Proxy',()=>new Proxy({fixtureId:FIXTURE_ID},
+      {getPrototypeOf(){bump('getPrototypeOf');throw new Error('getPrototypeOf trap')}})]
+  ];
+  /* Three classes of boundary, with different guarantees.
+       ownership  — decided on identity: zero accessor invocations AND zero trap invocations.
+       rawHistory — genuinely unowned input that must still be inspected, so protected reflection
+                    may fire traps, but no getter may run and nothing may throw.
+       failClosed — canonicalFixtureIdentity, which the builder must be able to call before its
+                    exercise is owned; it may touch the candidate, but must never throw. */
+  const BOUNDARIES=[
+    ['resolveIdhanConditionProof','ownership',value=>ctxProof(value),
+      result=>result&&result.satisfied===false&&result.reason==='not-application-owned'&&Object.isFrozen(result)],
+    ['isIdhanFixtureOwned','ownership',value=>api.isIdhanFixtureOwned(value),result=>result===false],
+    ['createFixtureSnapshot','ownership',value=>api.createFixtureSnapshot(value),result=>result===null],
+    ['renderIdhanSourceDirectFixture','ownership',value=>api.renderIdhanSourceDirectFixture(value),
+      result=>result&&result.rendered===false&&result.reason==='not-application-owned'&&Object.isFrozen(result)],
+    ['renderResponseContextFromExercise','ownership',value=>api.renderResponseContextFromExercise(value),
+      result=>result==='not-application-owned'],
+    ['responseContextClaimSite','rawHistory',value=>api.responseContextClaimSite(value),
+      result=>typeof result==='string'],
+    ['restoreExerciseSnapshot','rawHistory',value=>api.restoreExerciseSnapshot(value),result=>result===null],
+    ['createExerciseSnapshot','rawHistory',value=>api.createExerciseSnapshot(value),result=>result===null],
+    ['restoreFixtureSnapshot','rawHistory',value=>api.restoreFixtureSnapshot(value),result=>result===null],
+    /* canonicalFixtureIdentity may touch the candidate — the builder must be able to call it
+       before its exercise is owned — so the guarantee here is narrower: it never throws, and a
+       hostile object never produces the canonical identity, so it can never seal a forged
+       fixture. It is never reached before ownership at any other boundary. */
+    ['canonicalFixtureIdentity','failClosed',value=>api.canonicalFixtureIdentity(value),
+      result=>typeof result==='string'&&result!==FIX.canonicalIdentity]
+  ];
+  const ruleTallyBefore=JSON.stringify(api.grammarDiagnostics.validByRule);
+  for(const [candidateName,make] of HOSTILE){
+    for(const [boundaryName,kind,call,accept] of BOUNDARIES){
+      const where=candidateName+' @ '+boundaryName;
+      resetCounters();
+      let result,threw='';
+      try{ result=call(make()); }
+      catch(error){ threw=error.message; }
+      assert(!threw,'hostile candidate escaped an exception: '+where+' — '+threw);
+      assert(accept(result),'hostile candidate was not refused deterministically: '+where
+        +' → '+JSON.stringify(result));
+      if(kind==='ownership'){
+        assert(getterCalls===0,'an accessor ran before ownership rejection: '+where+' ('+getterCalls+')');
+        assert(trapTotal()===0,'a Proxy trap ran before ownership rejection: '+where+' '+JSON.stringify(traps));
+      }
+      if(kind==='rawHistory'){
+        assert(getterCalls===0,'an accessor ran during protected raw-History inspection: '+where);
+      }
+      // No learner-visible context, and no ownership registration, in any case.
+      assert(elements.responseContext.hidden===true&&elements.responseContextPromptAr.textContent==='',
+        'a hostile candidate produced learner-visible context: '+where);
+      ctxHostileCases++;ctxAttackCases++;
+    }
+    // A refused candidate is never registered as owned, whatever the boundary did.
+    const candidate=make();
+    try{ api.createFixtureSnapshot(candidate); }catch(error){}
+    assert(api.isIdhanFixtureOwned(candidate)===false,'a hostile candidate was registered as owned: '+candidateName);
+    ctxHostileCases++;
+  }
+  assert(JSON.stringify(api.grammarDiagnostics.validByRule)===ruleTallyBefore,
+    'hostile-object rejection changed the validByRule tally');
+  ctxCases++;
+  /* Hostile raw snapshots carrying NO claim-vocabulary field at all. This is the case the
+     plain-data gate exists for: the descriptor-safe claim scan finds nothing to object to and
+     returns cleanly, so without the gate the very next step — isExerciseSnapshot's ordinary
+     `snapshot.schemaVersion` read — would fire the get trap and throw out of the boundary. Every
+     candidate above carried `fixtureId`, which is itself a guarded name, so the claim scan caught
+     them first and left this path untested. */
+  {
+    const innocent=()=>({schemaVersion:3,sentence:'x',translation:'x',tokens:[],relationships:[]});
+    const CLAIMLESS=[
+      ['revoked Proxy, no claim fields',()=>{const handle=Proxy.revocable(innocent(),{});handle.revoke();return handle.proxy}],
+      ['get-throwing Proxy, no claim fields',()=>new Proxy(innocent(),{get(){bump('get');throw new Error('get trap')}})],
+      ['ownKeys-throwing Proxy, no claim fields',()=>new Proxy(innocent(),{ownKeys(){bump('ownKeys');throw new Error('ownKeys trap')}})],
+      ['descriptor-throwing Proxy, no claim fields',()=>new Proxy(innocent(),
+        {getOwnPropertyDescriptor(){bump('getOwnPropertyDescriptor');throw new Error('descriptor trap')}})],
+      ['getPrototypeOf-throwing Proxy, no claim fields',()=>new Proxy(innocent(),
+        {getPrototypeOf(){bump('getPrototypeOf');throw new Error('getPrototypeOf trap')}})],
+      ['inherited throwing schemaVersion getter',()=>Object.create(Object.defineProperty({},'schemaVersion',
+        {get(){getterCalls++;throw new Error('inherited schemaVersion getter fired')},configurable:true}))],
+      ['own throwing schemaVersion getter',()=>Object.defineProperty(innocent(),'schemaVersion',
+        {get(){getterCalls++;throw new Error('own schemaVersion getter fired')},configurable:true})]
+    ];
+    for(const [name,make] of CLAIMLESS){
+      for(const [boundaryName,call] of [
+        ['responseContextClaimSite',value=>api.responseContextClaimSite(value)],
+        ['restoreExerciseSnapshot',value=>api.restoreExerciseSnapshot(value)],
+        ['createExerciseSnapshot',value=>api.createExerciseSnapshot(value)],
+        ['restoreFixtureSnapshot',value=>api.restoreFixtureSnapshot(value)]
+      ]){
+        resetCounters();
+        let result,threw='';
+        try{ result=call(make()); }catch(error){ threw=error.message; }
+        assert(!threw,'a claim-free hostile snapshot escaped an exception: '+name+' @ '+boundaryName+' — '+threw);
+        assert(getterCalls===0,'an accessor ran on a claim-free hostile snapshot: '+name+' @ '+boundaryName);
+        if(boundaryName!=='responseContextClaimSite')assert(result===null,
+          'a claim-free hostile snapshot was accepted: '+name+' @ '+boundaryName);
+        ctxHostileCases++;ctxAttackCases++;
+      }
+    }
+    // An ordinary plain snapshot still materializes, so the boundary rejects nothing honest.
+    assert(api.safeIsPlainDataObject(innocent())===true,'the boundary rejects an ordinary snapshot');
+    /* Policy B: a prototype chain is neither trusted nor rejected — it is DISCARDED. The wrapper
+       materializes (it is inert), but nothing inherited survives into the fresh graph, so it can
+       carry no authority. The old assertion here encoded Policy A and was itself the bug Codex
+       found: it accepted any custom root prototype while claiming to prove ordinariness. */
+    const inherited=Object.create({schemaVersion:3,tokens:[{id:'ghost'}]});
+    const materialized=api.safeMaterializeDataGraph(inherited,null);
+    assert(materialized.ok===true,'an inert prototype wrapper was rejected instead of normalized');
+    assert(Object.getOwnPropertyNames(materialized.value).length===0,
+      'an inherited field survived materialization: '+JSON.stringify(materialized.value));
+    assert(materialized.value.schemaVersion===undefined&&materialized.value.tokens===undefined,
+      'inherited semantic fields are still reachable on the fresh graph');
+    ctxCases+=4;
+  }
+  /* A hostile surface NESTED inside an otherwise ordinary raw snapshot. The claim scan walks
+     tokens, grammar and both morphology caches, so each of those reads is an untrusted read too:
+     `token.grammar` on a token whose `grammar` is a throwing getter would hand control to the
+     snapshot's author in the middle of the guard. Every nested hop is a descriptor read for
+     exactly this reason. */
+  {
+    const throwingAt=(host,field)=>Object.defineProperty(host,field,
+      {get(){getterCalls++;throw new Error(field+' getter fired')},configurable:true,enumerable:true});
+    const nested=[
+      ['token.grammar getter',()=>({schemaVersion:3,tokens:[throwingAt({id:'t0',word:'x'},'grammar')],relationships:[]})],
+      ['token.morphology getter',()=>({schemaVersion:3,tokens:[throwingAt({id:'t0',word:'x',grammar:{}},'morphology')],relationships:[]})],
+      ['grammar.morphology getter',()=>({schemaVersion:3,tokens:[{id:'t0',word:'x',grammar:throwingAt({},'morphology')}],relationships:[]})],
+      ['tokens getter',()=>throwingAt({schemaVersion:3,relationships:[]},'tokens')],
+      ['relationships getter',()=>throwingAt({schemaVersion:3,tokens:[]},'relationships')],
+      ['a revoked Proxy token',()=>{const handle=Proxy.revocable({id:'t0'},{});handle.revoke();
+        return{schemaVersion:3,tokens:[handle.proxy],relationships:[]}}],
+      ['a get-throwing Proxy token',()=>({schemaVersion:3,relationships:[],
+        tokens:[new Proxy({id:'t0'},{get(){bump('get');throw new Error('token get trap')}})]})],
+      ['a descriptor-throwing Proxy token',()=>({schemaVersion:3,relationships:[],
+        tokens:[new Proxy({id:'t0'},{getOwnPropertyDescriptor(){bump('getOwnPropertyDescriptor');
+          throw new Error('token descriptor trap')}})]})]
+    ];
+    for(const [name,make] of nested){
+      for(const [boundaryName,call] of [
+        ['responseContextClaimSite',value=>api.responseContextClaimSite(value)],
+        ['restoreExerciseSnapshot',value=>api.restoreExerciseSnapshot(value)],
+        ['createExerciseSnapshot',value=>api.createExerciseSnapshot(value)],
+        ['restoreFixtureSnapshot',value=>api.restoreFixtureSnapshot(value)]
+      ]){
+        resetCounters();
+        let threw='';
+        try{ call(make()); }catch(error){ threw=error.message; }
+        assert(!threw,'a nested hostile surface escaped an exception: '+name+' @ '+boundaryName+' — '+threw);
+        assert(getterCalls===0,'a nested accessor was invoked: '+name+' @ '+boundaryName+' ('+getterCalls+')');
+        ctxHostileCases++;ctxAttackCases++;
+      }
+      // None of them may restore or snapshot.
+      assert(api.restoreExerciseSnapshot(make())===null&&api.restoreFixtureSnapshot(make())===null,
+        'a nested hostile surface produced a restored exercise: '+name);
+      ctxHostileCases++;
+    }
+  }
+  /* Primitives, symbols, bigints and functions are refused without inspection too. */
+  for(const value of [null,undefined,'IDHAN_SOURCE_DIRECT_FIXTURE',7,true,false,0,'',
+    Symbol('fixture'),BigInt(3),function(){},()=>{},[],new Map()]){
+    assert(api.isIdhanFixtureOwned(value)===false,'ownership accepted a non-fixture value: '+String(value));
+    assert(ctxProof(value).reason==='not-application-owned','the resolver did not refuse: '+String(value));
+    assert(api.createFixtureSnapshot(value)===null,'a snapshot was produced for: '+String(value));
+    ctxHostileCases+=3;ctxAttackCases++;
+  }
+  /* The canonical builder and a History-restored fixture keep working exactly. */
+  for(const [label,make] of [['builder',()=>api.buildIdhanSourceDirectFixture()],
+    ['restored',()=>api.restoreFixtureSnapshot(api.createFixtureSnapshot(api.buildIdhanSourceDirectFixture()))]]){
+    const exercise=make();
+    assert(api.isIdhanFixtureOwned(exercise),label+' fixture is not owned');
+    assert(ctxProof(exercise).satisfied===true,label+' fixture no longer proves its conditions');
+    assert(api.createFixtureSnapshot(exercise)!==null,label+' fixture cannot be snapshotted');
+    assert(api.renderIdhanSourceDirectFixture(exercise).rendered===true,label+' fixture cannot be rendered');
+    ctxHostileCases+=4;ctxCases+=4;
+  }
+  api.renderResponseContext('');
+}
+
+/* ============================================================================
+   PHASE 3B0A — THE SEPARATOR PROOF IS LOAD-BEARING (sections 8–11).
+
+   Codex's second blocker: the harness tested the separator predicate and the registry mode, yet
+   the public proof still succeeded when the resolver's separator branch was bypassed, because
+   `if(separatorFailure) return fail(...)` contributes nothing to SUCCESS. The three conditions now
+   each yield a private success token and only the assembler can turn three tokens into a satisfied
+   proof, so an absent separator result cannot be assembled at all. The tests below prove that
+   behaviourally — never from source text, never from the registry's `none`, and never from the
+   predicate alone.
+   ========================================================================== */
+{
+  const OWNED=api.buildIdhanSourceDirectFixture();
+  const seam=(provers)=>api.resolveIdhanConditionProofWithProvers(OWNED,CONSUMER,CTX_ID,PAIR_ID,provers);
+  const REAL=api.IDHAN_CONDITION_PROVERS;
+  // The default prover set really is the real predicates — not constants standing in for them.
+  assert(REAL.head===api.proveResponseHead&&REAL.future===api.proveFutureEvidence
+    &&REAL.separator===api.proveNoSeparator,'the default condition provers are not the real predicates');
+  assert(Object.isFrozen(REAL),'the condition prover set is mutable');
+  // The seam with the real provers is exactly the public boundary.
+  assert(seam(undefined).satisfied===true&&seam(REAL).satisfied===true,
+    'the prover seam disagrees with the public resolver on the canonical fixture');
+  ctxSeparatorCases+=4;ctxCases+=4;
+  /* Substituting each condition's prover must change the PUBLIC outcome. If the resolver ignored
+     a condition's result — deleted the call, hardcoded its token, kept the call but dropped the
+     value, or replaced the branch with `if(false)` — the proof would stay satisfied here. */
+  const swap=(slot,prover)=>seam(Object.freeze({...REAL,[slot]:prover}));
+  for(const slot of ['head','future','separator']){
+    const invented='invented-'+slot+'-failure';
+    // A failing prover must surface its OWN reason through the public result.
+    const failing=swap(slot,()=>Object.freeze({ok:false,reason:invented}));
+    assert(failing.satisfied===false&&failing.reason===invented,
+      'the resolver ignored the '+slot+' condition result: '+JSON.stringify(failing));
+    // Success without the exact private token is not success.
+    const missing='response-head-not-proven|future-evidence-not-proven|separator-not-proven'.split('|')[
+      ['head','future','separator'].indexOf(slot)];
+    for(const [shape,prover] of [
+      ['no token',()=>Object.freeze({ok:true,reason:''})],
+      ['token undefined',()=>Object.freeze({ok:true,reason:'',token:undefined})],
+      ['boolean true',()=>true],
+      ['null result',()=>null],
+      ['undefined result',()=>undefined],
+      ['ok not exactly true',()=>Object.freeze({ok:1,reason:'',token:api.proveNoSeparator(CTX,PAIR,OWNED).token})],
+      ['copied token',()=>Object.freeze({ok:true,reason:'',token:{...api.proveNoSeparator(CTX,PAIR,OWNED).token}})],
+      ['another condition\'s token',()=>Object.freeze({ok:true,reason:'',token:api.proveResponseHead(CTX,PAIR,OWNED).token})]
+    ]){
+      // The head slot legitimately holds the head token, so skip that one self-consistent case.
+      if(slot==='head'&&shape==='another condition\'s token')continue;
+      const result=swap(slot,prover);
+      assert(result.satisfied===false,'the '+slot+' condition succeeded with '+shape);
+      assert(result.reason===missing,'the '+slot+' condition with '+shape+' failed as "'+result.reason
+        +'" (wanted "'+missing+'")');
+      ctxProofReasonsSeen.add(result.reason);
+      ctxCodeHist[result.reason]=(ctxCodeHist[result.reason]||0)+1;
+      ctxSeparatorCases++;ctxAttackCases++;
+    }
+    ctxSeparatorCases++;ctxAttackCases++;
+    ctxProofReasonsSeen.add(invented);
+  }
+  ctxProofReasonsSeen.delete('invented-head-failure');
+  ctxProofReasonsSeen.delete('invented-future-failure');
+  ctxProofReasonsSeen.delete('invented-separator-failure');
+  /* The assembler itself, tested directly: three exact tokens or nothing. */
+  {
+    const head=api.proveResponseHead(CTX,PAIR,OWNED);
+    const future=api.proveFutureEvidence(CTX);
+    const separator=api.proveNoSeparator(CTX,PAIR,OWNED);
+    assert(head.ok&&future.ok&&separator.ok,'a canonical condition prover failed');
+    assert(api.assembleIdhanConditionProof(head,future,separator).ok===true,'the assembler rejected three valid proofs');
+    assert(Object.isFrozen(api.assembleIdhanConditionProof(head,future,separator)),'the assembled result is mutable');
+    assert(head.token!==future.token&&future.token!==separator.token&&head.token!==separator.token,
+      'the three condition tokens are not distinct');
+    for(const token of [head.token,future.token,separator.token])assert(Object.isFrozen(token),'a condition token is mutable');
+    ctxSeparatorCases+=5;ctxCases+=5;
+    for(const [name,args,reason] of [
+      ['separator omitted',[head,future,undefined],'separator-not-proven'],
+      ['separator null',[head,future,null],'separator-not-proven'],
+      ['only head and future',[head,future],'separator-not-proven'],
+      ['separator is true',[head,future,true],'separator-not-proven'],
+      ['separator token copied',[head,future,{ok:true,reason:'',token:{...separator.token}}],'separator-not-proven'],
+      ['separator holds the head token',[head,future,{ok:true,reason:'',token:head.token}],'separator-not-proven'],
+      ['head omitted',[undefined,future,separator],'response-head-not-proven'],
+      ['future omitted',[head,undefined,separator],'future-evidence-not-proven'],
+      ['head and separator swapped',[separator,future,head],'response-head-not-proven'],
+      ['nothing at all',[],'response-head-not-proven']
+    ]){
+      const assembled=api.assembleIdhanConditionProof(...args);
+      assert(assembled.ok===false,'the assembler accepted "'+name+'"');
+      assert(assembled.reason===reason,'the assembler rejected "'+name+'" as "'+assembled.reason
+        +'" (wanted "'+reason+'")');
+      ctxSeparatorCases++;ctxAttackCases++;
+    }
+  }
+  /* Section 10 — what the separator predicate itself authorizes. Only إِذَنْ immediately followed
+     by the exact paired present verb, under separatorMode 'none'. The source's three permitted
+     exceptions stay deferred, so an oath, a vocative and the negating لا reject like any other
+     separator, and no separator lane becomes productive. */
+  {
+    const clean=()=>api.buildIdhanSourceDirectFixture();
+    assert(api.separatorFailure(CTX,PAIR,clean())==='','the canonical fixture failed the separator clause');
+    ctxSeparatorCases++;ctxCases++;
+    const inserted=token=>{const exercise=clean();exercise.tokens.splice(1,0,token);return exercise};
+    const SEPARATORS=[
+      ['noun',{word:'زَيْدٌ',grammar:{type:'noun',role:'mubtada'}}],
+      ['pronoun',{word:'أَنْتَ',grammar:{type:'noun',role:'mubtada'}}],
+      ['adverb',{word:'غَدًا',grammar:{type:'noun',role:'adverb'}}],
+      ['preposition',{word:'فِي',grammar:{type:'particle',role:'particle',particleType:'preposition'}}],
+      ['punctuation',{word:'،',grammar:{type:'particle',role:'particle'}}],
+      ['object',{word:'الدَّرْسَ',grammar:{type:'noun',role:'object'}}],
+      ['a second إِذَنْ',{word:IDHAN,grammar:{type:'particle',role:'particle',particleType:'idhan'}}],
+      ['an oath',{word:'وَاللَّهِ',grammar:{type:'particle',role:'particle',particleType:'qasam'}}],
+      ['a vocative',{word:'يَا',grammar:{type:'particle',role:'particle',particleType:'nidaa'}}],
+      ['the negating لَا',{word:'لَا',grammar:{type:'particle',role:'particle',particleType:'laaNafiya'}}]
+    ];
+    for(const [name,separatorToken] of SEPARATORS){
+      const exercise=inserted(separatorToken);
+      assert(api.separatorFailure(CTX,PAIR,exercise)==='separator-token-present',
+        'the separator clause admitted '+name);
+      // …and the public proof refuses the same exercise, at the spine that authenticates it first.
+      assert(ctxProof(exercise).satisfied===false,'the public proof admitted '+name);
+      assert(api.proveNoSeparator(CTX,PAIR,exercise).ok===false,'the separator prover admitted '+name);
+      ctxSeparatorCases+=3;ctxAttackCases++;
+    }
+    for(const [name,mutate,reason] of [
+      ['reordered verb',exercise=>exercise.tokens.reverse(),'response-head-not-idhan'],
+      ['verb removed',exercise=>exercise.tokens.splice(1,1),'no-response-tokens'],
+      ['verb replaced by a noun',exercise=>{exercise.tokens[1]={word:'زَيْدٌ',grammar:{type:'noun',role:'mubtada'}}},'no-adjacent-present-verb'],
+      ['past verb',exercise=>{exercise.tokens[1].tense='past'},'no-adjacent-present-verb'],
+      ['unpaired verb',exercise=>{exercise.tokens[1].word='يَكْتُبَ'},'response-verb-not-the-paired-construction'],
+      ['wrong person',exercise=>{exercise.tokens[1].grammar.person='3ms'},'response-person-mismatch'],
+      ['head is not إِذَنْ',exercise=>{exercise.tokens[0].word='أَنْ'},'response-head-not-idhan']
+    ]){
+      const exercise=clean();mutate(exercise);
+      assert(api.separatorFailure(CTX,PAIR,exercise)===reason,
+        'the separator clause rejected "'+name+'" as "'+api.separatorFailure(CTX,PAIR,exercise)+'" (wanted "'+reason+'")');
+      ctxSeparatorCases++;ctxAttackCases++;
+    }
+    // An unsupported separator MODE rejects, whatever the tokens look like.
+    for(const mode of ['qasam','nidaa','laaNafiya','any','',null,undefined]){
+      assert(api.separatorFailure({...CTX,separatorMode:mode},PAIR,clean())==='separator-mode-not-implemented',
+        'the separator clause admitted mode '+String(mode));
+      ctxSeparatorCases++;ctxAttackCases++;
+    }
+    assert(api.separatorFailure(null,PAIR,clean())==='unknown-context'
+      &&api.separatorFailure(CTX,null,clean())==='unknown-context','the separator clause is not fail-closed');
+    assert(Object.keys(api.SEPARATOR_MODES).join(',')==='none','a separator lane was added to SEPARATOR_MODES');
+    ctxSeparatorCases+=2;ctxCases+=2;
+  }
+}
+/* ============================================================================
+   PHASE 3B0A — FULL-GRAPH SNAPSHOT SAFETY (sections 1–12) AND OWNED-FIXTURE MUTATION.
+
+   A top-level plain-data check left the whole nested graph trusted, so a hostile value at
+   tokens[0], token.grammar or relationships[i] still met an ordinary read in isExerciseSnapshot,
+   in Array.isArray, or in cloneSerializable's JSON.stringify — which walks the entire graph
+   invoking getters. And the "ordinary object" test accepted any custom ROOT prototype, so a
+   wrapper over a hand-made root passed while still carrying inherited accessors.
+
+   Both are now one rule: an untrusted graph is walked descriptor-only and materialized into a
+   fresh application-owned graph, and nothing downstream ever sees the original.
+   ========================================================================== */
+let ctxGraphCases=0,ctxInertWrappers=0;
+{
+  const templateSnapshot=()=>api.createExerciseSnapshot(api.buildTemplate(api.templates[0].id));
+  const CLEAN=templateSnapshot();
+  assert(CLEAN,'the canonical production snapshot could not be built');
+  const CLEAN_RESTORE=JSON.stringify(api.restoreExerciseSnapshot(clone(CLEAN)));
+  assert(CLEAN_RESTORE!=='null','the canonical production snapshot does not round-trip');
+  ctxGraphCases+=2;ctxCases+=2;
+
+  let getterHits=0;
+  const HOSTILE_VALUES=[
+    ['revoked Proxy',()=>{const handle=Proxy.revocable({id:'x'},{});handle.revoke();return handle.proxy}],
+    ['get-throwing Proxy',()=>new Proxy({id:'x'},{get(){throw new Error('get trap')}})],
+    ['has-throwing Proxy',()=>new Proxy({id:'x'},{has(){throw new Error('has trap')}})],
+    ['ownKeys-throwing Proxy',()=>new Proxy({id:'x'},{ownKeys(){throw new Error('ownKeys trap')}})],
+    ['descriptor-throwing Proxy',()=>new Proxy({id:'x'},{getOwnPropertyDescriptor(){throw new Error('descriptor trap')}})],
+    ['getPrototypeOf-throwing Proxy',()=>new Proxy({id:'x'},{getPrototypeOf(){throw new Error('getPrototypeOf trap')}})],
+    ['revoked Proxy array',()=>{const handle=Proxy.revocable([],{});handle.revoke();return handle.proxy}],
+    ['inherited throwing getter',()=>Object.create(Object.defineProperty({},'id',
+      {get(){getterHits++;throw new Error('inherited getter')},configurable:true}))],
+    ['own throwing getter',()=>Object.defineProperty({},'id',
+      {get(){getterHits++;throw new Error('own getter')},configurable:true,enumerable:true})],
+    ['own returning getter',()=>Object.defineProperty({},'id',
+      {get(){getterHits++;return 'x'},configurable:true,enumerable:true})],
+    ['custom-root prototype wrapper',()=>{const root=Object.create(null);root.smuggled='authority';
+      return Object.assign(Object.create(root),{id:'x'})}],
+    ['class instance',()=>{class Thing{constructor(){this.id='x'}}return new Thing()}],
+    ['Date',()=>new Date()],['Map',()=>new Map([['a',1]])],['Set',()=>new Set([1])],
+    ['WeakMap',()=>new WeakMap()],['RegExp',()=>/x/g],['Error',()=>new Error('x')],
+    ['Promise',()=>Promise.resolve(1)],['ArrayBuffer',()=>new ArrayBuffer(4)],
+    ['typed array',()=>new Uint8Array(2)],
+    ['cyclic value',()=>{const node={id:'x'};node.self=node;return node}],
+    ['sparse array',()=>{const list=[1];list[3]=2;return list}],
+    ['array with an extra property',()=>{const list=[1];list.extra='x';return list}],
+    ['symbol-keyed record',()=>{const record={id:'x'};record[Symbol('s')]=1;return record}],
+    ['function value',()=>function(){}],
+    ['undefined-valued field',()=>({id:undefined})],
+    ['NaN-valued field',()=>({id:NaN})]
+  ];
+  /* Section 11 — every nested location the snapshot pipeline reaches. */
+  const LOCATIONS=[
+    ['tokens',(snapshot,hostile)=>{snapshot.tokens=hostile}],
+    ['tokens[0]',(snapshot,hostile)=>{snapshot.tokens[0]=hostile}],
+    ['token.grammar',(snapshot,hostile)=>{snapshot.tokens[0].grammar=hostile}],
+    ['token.grammar.morphology',(snapshot,hostile)=>{snapshot.tokens[0].grammar.morphology=hostile}],
+    ['token.morphology',(snapshot,hostile)=>{snapshot.tokens[0].morphology=hostile}],
+    ['token.components',(snapshot,hostile)=>{snapshot.tokens[0].components=hostile}],
+    ['token.relations',(snapshot,hostile)=>{snapshot.tokens[0].relations=hostile}],
+    ['token.sign',(snapshot,hostile)=>{snapshot.tokens[0].sign=hostile}],
+    ['token.lexeme',(snapshot,hostile)=>{snapshot.tokens[0].lexeme=hostile}],
+    ['relationships',(snapshot,hostile)=>{snapshot.relationships=hostile}],
+    ['relationships[0]',(snapshot,hostile)=>{if(!snapshot.relationships.length)snapshot.relationships.push({});
+      snapshot.relationships[0]=hostile}],
+    ['snapshot root',(snapshot,hostile)=>{snapshot.smuggled=hostile}]
+  ];
+  const SNAPSHOT_BOUNDARIES=[
+    ['restoreExerciseSnapshot',value=>api.restoreExerciseSnapshot(value),result=>result===null||typeof result==='object'],
+    ['createExerciseSnapshot',value=>api.createExerciseSnapshot(value),result=>result===null||typeof result==='object'],
+    ['restoreFixtureSnapshot',value=>api.restoreFixtureSnapshot(value),result=>result===null||typeof result==='object'],
+    ['responseContextClaimSite',value=>api.responseContextClaimSite(value),result=>typeof result==='string']
+  ];
+  for(const [hostileName,make] of HOSTILE_VALUES){
+    for(const [locationName,place] of LOCATIONS){
+      for(const [boundaryName,call,accept] of SNAPSHOT_BOUNDARIES){
+        const where=hostileName+' @ '+locationName+' @ '+boundaryName;
+        const snapshot=clone(CLEAN);
+        try{ place(snapshot,make()); }catch(error){ continue }
+        getterHits=0;
+        let result,threw='';
+        try{ result=call(snapshot); }catch(error){ threw=error.message }
+        assert(!threw,'a nested hostile value escaped an exception: '+where+' — '+threw);
+        assert(accept(result),'a nested hostile value produced an unexpected result: '+where);
+        assert(getterHits===0,'a getter ran during materialization: '+where+' ('+getterHits+')');
+        /* Either the graph is refused outright, or it is normalized into an INERT wrapper whose
+           restore is byte-identical to the canonical one. Nothing in between is acceptable. */
+        if(boundaryName==='restoreExerciseSnapshot'&&result!==null){
+          assert(JSON.stringify(result)===CLEAN_RESTORE,
+            'a nested hostile value changed the restored exercise: '+where);
+          ctxInertWrappers++;
+        }
+        ctxGraphCases++;ctxAttackCases++;
+      }
+    }
+  }
+  /* Section 12 — invariants of a successfully materialized graph, walked directly. */
+  {
+    const materialized=api.safeMaterializeDataGraph(clone(CLEAN),null);
+    assert(materialized.ok,'the canonical snapshot did not materialize');
+    const walk=(node,depth)=>{
+      if(node===null||typeof node!=='object')return;
+      assert(depth<=api.SAFE_GRAPH_MAX_DEPTH,'the materialized graph exceeds the depth limit');
+      assert(!Object.getOwnPropertySymbols(node).length,'a symbol key survived materialization');
+      const prototype=Object.getPrototypeOf(node);
+      /* A fresh array's chain is Array.prototype → Object.prototype → null; a fresh record's is
+         Object.prototype → null (or null outright). Anything longer means a custom prototype
+         survived. */
+      if(Array.isArray(node))assert(Object.getPrototypeOf(Object.getPrototypeOf(prototype))===null,
+        'an array prototype chain is not canonical');
+      else assert(prototype===null||Object.getPrototypeOf(prototype)===null,'a custom prototype survived materialization');
+      for(const key of Object.getOwnPropertyNames(node)){
+        const descriptor=Object.getOwnPropertyDescriptor(node,key);
+        assert(Object.prototype.hasOwnProperty.call(descriptor,'value'),'an accessor survived materialization');
+        walk(descriptor.value,depth+1);
+      }
+    };
+    walk(materialized.value,0);
+    // No original container survives: every object identity differs from the source graph.
+    const originals=new Set();
+    const collect=node=>{
+      if(node===null||typeof node!=='object')return;
+      originals.add(node);
+      for(const key of Object.getOwnPropertyNames(node))collect(node[key]);
+    };
+    collect(CLEAN);
+    const checkFresh=node=>{
+      if(node===null||typeof node!=='object')return;
+      assert(!originals.has(node),'an original container survived materialization');
+      for(const key of Object.getOwnPropertyNames(node))checkFresh(node[key]);
+    };
+    checkFresh(api.safeMaterializeDataGraph(CLEAN,null).value);
+    ctxGraphCases+=2;ctxCases+=2;
+  }
+  /* Limits, cycles and the value domain, tested directly on the materializer. */
+  {
+    const deep=(levels)=>{let node={};const root=node;for(let i=0;i<levels;i++){node.child={};node=node.child}return root};
+    assert(api.safeMaterializeDataGraph(deep(api.SAFE_GRAPH_MAX_DEPTH+4),null).reason==='depth-limit','the depth limit is not enforced');
+    assert(api.safeMaterializeDataGraph(deep(3),null).ok,'an ordinary shallow graph was rejected');
+    /* Spread across several containers, because a single array wide enough to blow the node limit
+       would trip the per-container key limit first. */
+    const bulk=[];
+    for(let group=0;group<20;group++){
+      const chunk=[];
+      for(let i=0;i<200;i++)chunk.push({i});
+      bulk.push(chunk);
+    }
+    assert(api.safeMaterializeDataGraph({bulk},null).reason==='node-limit','the node limit is not enforced');
+    const wide=[];for(let i=0;i<api.SAFE_GRAPH_MAX_KEYS+10;i++)wide.push(i);
+    assert(api.safeMaterializeDataGraph({wide},null).reason==='key-limit','the key limit is not enforced');
+    const cyclic={};cyclic.self=cyclic;
+    assert(api.safeMaterializeDataGraph(cyclic,null).reason==='cycle','a cycle was accepted');
+    const shared={id:'x'};
+    const dag=api.safeMaterializeDataGraph({a:shared,b:shared},null);
+    assert(dag.ok&&dag.value.a!==dag.value.b,'a repeated reference was shared into the fresh graph');
+    for(const [name,value,reason] of [
+      ['undefined',{x:undefined},'unsupported-undefined'],
+      ['function',{x(){}},'unsupported-function'],
+      ['symbol value',{x:Symbol('s')},'unsupported-symbol'],
+      ['bigint',{x:BigInt(1)},'unsupported-bigint'],
+      ['NaN',{x:NaN},'non-finite-number'],
+      ['Infinity',{x:Infinity},'non-finite-number'],
+      ['sparse array',{x:(()=>{const l=[1];l[3]=2;return l})()},'array-hole'],
+      ['array extra property',{x:(()=>{const l=[1];l.extra=1;return l})()},'array-extra-property'],
+      ['accessor',{x:Object.defineProperty({},'a',{get(){return 1},configurable:true,enumerable:true})},'accessor'],
+      ['revoked Proxy',{x:(()=>{const h=Proxy.revocable({},{});h.revoke();return h.proxy})()},'uninspectable']
+    ]){
+      const result=api.safeMaterializeDataGraph(value,null);
+      assert(result.ok===false&&result.reason===reason,
+        'the materializer accepted '+name+' (reason "'+result.reason+'", wanted "'+reason+'")');
+      ctxGraphCases++;ctxAttackCases++;
+    }
+    // A symbol KEY, and the context-claim guard firing during the walk on presence alone.
+    const symbolKeyed={};symbolKeyed[Symbol('s')]=1;
+    assert(api.safeMaterializeDataGraph(symbolKeyed,null).reason==='symbol-key','a symbol key was accepted');
+    for(const shape of [{contextType:'x'},{sadrJumlatAlJawab:undefined},{pairId:null},
+      {sourceRuleId:false},{promptAr:''},
+      Object.defineProperty({},'futureMeaning',{get(){getterHits++;return true},configurable:true,enumerable:true})]){
+      getterHits=0;
+      const result=api.safeMaterializeDataGraph(shape,null);
+      assert(result.ok===false&&result.reason==='context-claim','a context claim survived the walk');
+      assert(getterHits===0,'a context-claim getter was invoked before rejection');
+      ctxGraphCases++;ctxAttackCases++;
+    }
+    // The fixture path may name its fixture, and nothing else.
+    assert(api.safeMaterializeDataGraph({fixtureId:'x'},['fixtureId']).ok,'the fixture path may not name its fixture');
+    assert(api.safeMaterializeDataGraph({fixtureId:'x'},null).reason==='context-claim','fixtureId is unguarded by default');
+    ctxGraphCases+=4;ctxCases+=4;
+  }
+  /* Section 5/G — cross-realm honest data must keep working; the prototype is discarded, so an
+     inert wrapper normalizes and carries nothing inherited. */
+  {
+    const crossRealm=vm.runInNewContext('('+JSON.stringify(CLEAN)+')');
+    const restored=api.restoreExerciseSnapshot(crossRealm);
+    assert(restored!==null,'honest cross-realm snapshot data was rejected');
+    assert(JSON.stringify(restored)===CLEAN_RESTORE,'cross-realm restore differs from the canonical restore');
+    const root=Object.create(null);root.templateId='FORGED';root.tokens=[{id:'ghost'}];
+    const wrapper=Object.create(root);
+    for(const [key,value] of Object.entries(clone(CLEAN))){
+      if(key==='templateId')continue;
+      Object.defineProperty(wrapper,key,{value,enumerable:true,configurable:true,writable:true});
+    }
+    const materialized=api.safeMaterializeDataGraph(wrapper,null);
+    assert(materialized.ok,'an inert custom-root wrapper was rejected');
+    assert(materialized.value.templateId===undefined,'an inherited field survived materialization');
+    assert(api.restoreExerciseSnapshot(wrapper)===null,'a custom-root wrapper missing its own templateId restored');
+    ctxGraphCases+=5;ctxCases+=5;
+  }
+  /* Section 10 — an OWNED fixture mutated after registration. WeakSet membership proves identity,
+     not that the object is still structurally what it was. */
+  {
+    const owned=()=>api.buildIdhanSourceDirectFixture();
+    const MUTATIONS=[
+      ['tokens revoked',data=>{const h=Proxy.revocable([],{});h.revoke();data.tokens=h.proxy}],
+      ['tokens get-throwing',data=>{data.tokens=new Proxy([],{get(){throw new Error('get')}})}],
+      ['token revoked',data=>{const h=Proxy.revocable({},{});h.revoke();data.tokens[0]=h.proxy}],
+      ['token own throwing getter',data=>{data.tokens[0]=Object.defineProperty({},'word',
+        {get(){getterHits++;throw new Error('word getter')},configurable:true,enumerable:true})}],
+      ['token inherited throwing getter',data=>{data.tokens[0]=Object.create(
+        Object.defineProperty({},'word',{get(){getterHits++;throw new Error('word getter')},configurable:true}))}],
+      ['grammar revoked',data=>{const h=Proxy.revocable({},{});h.revoke();data.tokens[1].grammar=h.proxy}],
+      ['grammar throwing getter',data=>{data.tokens[1].grammar=Object.defineProperty({},'type',
+        {get(){getterHits++;throw new Error('type getter')},configurable:true,enumerable:true})}],
+      ['morphology hostile',data=>{data.tokens[1].grammar.morphology=new Proxy({},{get(){throw new Error('m')}})}],
+      ['relationships revoked',data=>{const h=Proxy.revocable([],{});h.revoke();data.responseRelationships=h.proxy}],
+      ['relationship replaced',data=>{data.responseRelationships=[{...data.responseRelationships[0]},
+        {...data.responseRelationships[1]}]}],
+      ['fixtureId rewritten',data=>{data.fixtureId='IDHAN_SOURCE_DIRECT_FIXTURE_2'}],
+      ['fixtureId hostile getter',data=>{Object.defineProperty(data,'fixtureId',
+        {get(){getterHits++;throw new Error('fixtureId getter')},configurable:true})}]
+    ];
+    for(const [name,mutate] of MUTATIONS){
+      const data=owned();
+      mutate(data);
+      getterHits=0;
+      for(const [boundaryName,call,accept] of [
+        ['resolver',()=>ctxProof(data),result=>result&&result.satisfied===false],
+        ['snapshot',()=>api.createFixtureSnapshot(data),result=>result===null],
+        ['render',()=>api.renderIdhanSourceDirectFixture(data),result=>result&&result.rendered===false],
+        ['context render',()=>api.renderResponseContextFromExercise(data),result=>typeof result==='string'&&result!=='']
+      ]){
+        let result,threw='';
+        try{ result=call(); }catch(error){ threw=error.message }
+        assert(!threw,'owned-mutation "'+name+'" escaped an exception at '+boundaryName+' — '+threw);
+        assert(accept(result),'owned-mutation "'+name+'" was not refused at '+boundaryName
+          +': '+JSON.stringify(result));
+        ctxGraphCases++;ctxAttackCases++;
+      }
+      assert(getterHits===0,'owned-mutation "'+name+'" invoked an accessor');
+      assert(elements.responseContext.hidden===true,'owned-mutation "'+name+'" left learner-visible context');
+      // Ownership itself is untouched: the object is still the registered one.
+      assert(api.isIdhanFixtureOwned(data)===true,'owned-mutation "'+name+'" lost WeakSet membership');
+      ctxGraphCases+=3;
+    }
+    /* Section 13 — and the specific case Codex proved reachable: an owned fixture whose own
+       fixtureId no longer names a registered fixture. This is what makes `unknown-fixture`
+       reachable, and it is now exercised rather than documented away. */
+    ctxRejects('owned fixture with a rewritten fixtureId','unknown-fixture','',
+      ()=>ctxProof(tamperedFixture(data=>{data.fixtureId='IDHAN_SOURCE_DIRECT_FIXTURE_2'})));
+    ctxRejects('owned fixture whose fixtureId names an inherited name','unknown-fixture','',
+      ()=>ctxProof(tamperedFixture(data=>{data.fixtureId='constructor'})));
+    ctxRejects('owned fixture whose fixtureId is not a string','unknown-fixture','',
+      ()=>ctxProof(tamperedFixture(data=>{data.fixtureId=7})));
+    ctxGraphCases+=3;
+    // The canonical fixture still works throughout.
+    const fresh=owned();
+    assert(ctxProof(fresh).satisfied===true,'the canonical fixture stopped proving its conditions');
+    assert(api.createFixtureSnapshot(fresh)!==null,'the canonical fixture stopped snapshotting');
+    assert(api.renderIdhanSourceDirectFixture(fresh).rendered===true,'the canonical fixture stopped rendering');
+    api.renderResponseContext('');
+    ctxGraphCases+=3;ctxCases+=3;
+  }
+}
+/* ============================================================================
+   PHASE 3B0A REPAIR — CLOSED NESTED SCHEMAS, DERIVED-CACHE POLICY, FAIL-CLOSED LIVE
+   SNAPSHOT CREATION, AND THE SAFE-VIEW FIELD MANIFEST.
+
+   Everything above proved the full-graph materializer safe. An independent audit then found what
+   materialization alone does not give you, in three groups:
+
+     1. Closing the ROOT snapshot key set left the NESTED ones open. An unknown name at a token or
+        at token.grammar rode into the restored exercise — 6 of them directly, and 24 more as an
+        unknown "cache" key holding whatever a Date, RegExp, Map, Set, WeakMap, WeakSet, Promise,
+        ArrayBuffer, DataView, typed array, boxed primitive, URL or class instance had normalized
+        into. Both are now Policy A: an unknown nested key rejects.
+
+     2. createExerciseSnapshot took the LIVE graph through the same materializer, which made the
+        graph fresh but said nothing about its SHAPE. A hostile value at `tokens`, `tokens[0]`,
+        `token.components` or `relationships` normalized to an inert empty record, and the fresh-
+        but-malformed graph then met ordinary reads downstream: twelve distinct TypeErrors escaped
+        the boundary instead of the established null. Strict shape verification now runs between
+        materialization and validation.
+
+     3. The condition proof reads the fixture only through safeIdhanFixtureView, but nothing made
+        that CHECKABLE — a new raw read added beside the view was invisible to every test. The view
+        now has a frozen manifest, and the tests below prove both directions behaviorally.
+   ========================================================================== */
+let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,ctxRepairShapeRefusals=0;
+{
+  const LIVE=()=>api.buildTemplate(api.templates[0].id);
+  const CLEAN_LIVE=LIVE();
+  const CLEAN_SNAP=api.createExerciseSnapshot(CLEAN_LIVE);
+  assert(CLEAN_SNAP,'the repair block could not build a canonical snapshot');
+  const CLEAN_RESTORE=JSON.stringify(api.restoreExerciseSnapshot(clone(CLEAN_SNAP)));
+  assert(CLEAN_RESTORE!=='null','the repair block could not restore the canonical snapshot');
+  const CLEAN_SNAP_JSON=JSON.stringify(CLEAN_SNAP);
+  let getterHits=0;
+  const revoked=value=>{const handle=Proxy.revocable(value,{});handle.revoke();return handle.proxy};
+  /* Every call in this block goes through here, so an escaped exception is counted and named
+     rather than aborting the run with a bare stack. */
+  const guarded=(label,call)=>{
+    try{ return call(); }
+    catch(error){ ctxRepairThrows++; throw new Error('repair: '+label+' threw '+error.message) }
+  };
+
+  /* ---- A. The closed key lists cannot go stale ------------------------------------------
+     Asserted against the canonical builder's OWN output across all 82 templates, live and
+     snapshot. Adding a token or grammar field without listing it fails here; listing a name the
+     builder never writes fails here too. */
+  {
+    const liveToken=new Set(),liveGrammar=new Set();
+    for(const item of api.templates){
+      for(const graph of [api.buildTemplate(item.id),api.createExerciseSnapshot(api.buildTemplate(item.id))]){
+        assert(graph,'a canonical template stopped producing a graph');
+        for(const token of graph.tokens){
+          for(const key of Object.getOwnPropertyNames(token))liveToken.add(key);
+          for(const key of Object.getOwnPropertyNames(token.grammar))liveGrammar.add(key);
+        }
+      }
+    }
+    const sorted=value=>[...value].sort().join(',');
+    assert(sorted(liveToken)===sorted(api.EXERCISE_TOKEN_KEYS),
+      'EXERCISE_TOKEN_KEYS drifted from the canonical builder: builder ['+sorted(liveToken)
+      +'] vs list ['+sorted(api.EXERCISE_TOKEN_KEYS)+']');
+    assert(sorted(liveGrammar)===sorted(api.EXERCISE_GRAMMAR_KEYS),
+      'EXERCISE_GRAMMAR_KEYS drifted from the canonical builder: builder ['+sorted(liveGrammar)
+      +'] vs list ['+sorted(api.EXERCISE_GRAMMAR_KEYS)+']');
+    // The legacy Policy-B name is NOT something the builder writes; it exists only for old data.
+    assert(!liveGrammar.has('componentKinds'),'componentKinds is canonical output, not a legacy name');
+    assert(Object.isFrozen(api.EXERCISE_TOKEN_KEYS)&&Object.isFrozen(api.EXERCISE_GRAMMAR_KEYS),
+      'the nested key lists are mutable');
+    ctxRepairCases+=4;ctxCases+=4;
+  }
+
+  /* ---- B. The twelve TypeError paths ----------------------------------------------------
+     Three hostile values that all normalize to an inert EMPTY RECORD, at the four locations where
+     an empty record is not a valid container. Each one previously threw a TypeError out of
+     createExerciseSnapshot. Each must now return null, AND must be refused by the strict shape
+     check rather than by the narrow backstop — that is what `liveExerciseGraphFailure` asserts
+     here, so the repair cannot silently regress into "the catch handles it". */
+  {
+    const EMPTY_RECORD_SHAPED=[
+      ['get-trapping Proxy',()=>new Proxy({},{get(){ordinaryGets++;throw new Error('get trap')}})],
+      ['descriptor-trapping Proxy',()=>new Proxy({},{getOwnPropertyDescriptor(){throw new Error('descriptor trap')}})],
+      ['inherited accessor',()=>Object.create(Object.defineProperty({},'x',
+        {get(){getterHits++;throw new Error('inherited getter')},enumerable:true}))]
+    ];
+    const MALFORMED_AT=[
+      ['tokens',(data,value)=>{data.tokens=value},'tokens-not-an-array'],
+      ['tokens[0]',(data,value)=>{data.tokens[0]=value},'token-grammar-not-a-record'],
+      ['token.components',(data,value)=>{data.tokens[0].components=value},'token-components-not-an-array'],
+      ['relationships',(data,value)=>{data.relationships=value},'relationships-not-an-array']
+    ];
+    let ordinaryGets=0;
+    for(const [hostileName,make] of EMPTY_RECORD_SHAPED){
+      for(const [location,place,expectedReason] of MALFORMED_AT){
+        const where=hostileName+' @ '+location;
+        const data=clone(CLEAN_LIVE);
+        place(data,make());
+        getterHits=0;ordinaryGets=0;
+        const result=guarded('createExerciseSnapshot with '+where,()=>api.createExerciseSnapshot(data));
+        assert(result===null,'a malformed live graph produced a snapshot: '+where);
+        assert(getterHits===0,'a getter ran while refusing '+where);
+        // The materialized graph really is fresh-but-malformed, and the SHAPE check is what refuses it.
+        const materialized=api.safeMaterializedGraph(data,null);
+        assert(materialized!==null,'the malformed live graph did not materialize: '+where
+          +' — the case no longer reproduces the defect it covers');
+        const reason=api.liveExerciseGraphFailure(materialized);
+        assert(reason===expectedReason,'the shape check refused '+where+' as "'+reason
+          +'" (wanted "'+expectedReason+'")');
+        ctxRepairShapeRefusals++;ctxRepairCases++;ctxRepairAttacks++;ctxAttackCases++;
+      }
+    }
+    assert(ctxRepairShapeRefusals===12,'the twelve TypeError paths are no longer twelve: '+ctxRepairShapeRefusals);
+    /* And the same four malformations at the History boundary, which never threw but must stay
+       deterministic now that the shape is closed there too. `token.components` is the one Policy-B
+       case here: an empty record in a derived cache is discarded and the components are rebuilt
+       from frozen authority, so it restores — byte-identically to the canonical exercise. The
+       other three are containers the schema owns, and they reject. */
+    for(const [location,place] of MALFORMED_AT){
+      const snapshot=clone(CLEAN_SNAP);
+      place(snapshot,{});
+      const restored=guarded('restore with an empty-record container at '+location,
+        ()=>api.restoreExerciseSnapshot(snapshot));
+      if(location==='token.components'){
+        assert(restored!==null&&JSON.stringify(restored)===CLEAN_RESTORE,
+          'an empty-record components cache was not rebuilt canonically');
+      }else{
+        assert(restored===null,'a malformed container restored at '+location);
+      }
+      ctxRepairCases++;ctxRepairAttacks++;ctxAttackCases++;
+    }
+    ctxCases++;
+  }
+
+  /* ---- C. Unknown nested keys never survive restoration ----------------------------------
+     The six that did: token.futureArchitecture and token.grammar.futureArchitecture, each holding
+     a primitive, an empty record, or an exotic. Policy A — the snapshot is refused outright. */
+  {
+    const UNKNOWN_AT=[
+      ['token',(snapshot,value)=>{snapshot.tokens[0].futureArchitecture=value}],
+      ['token.grammar',(snapshot,value)=>{snapshot.tokens[0].grammar.futureArchitecture=value}]
+    ];
+    const UNKNOWN_VALUES=[['primitive',()=>7],['empty record',()=>({})],['exotic Date',()=>new Date()],
+      ['string',()=>'forged'],['nested record',()=>({deep:{deeper:1}})],['array',()=>[1,2]]];
+    for(const [where,place] of UNKNOWN_AT){
+      for(const [kind,make] of UNKNOWN_VALUES){
+        const snapshot=clone(CLEAN_SNAP);
+        place(snapshot,make());
+        const restored=guarded('restore unknown '+kind+' at '+where,()=>api.restoreExerciseSnapshot(snapshot));
+        assert(restored===null,'an unknown '+kind+' key survived restoration at '+where);
+        assert(api.isExerciseSnapshot(snapshot)===false,'the closed schema accepted an unknown key at '+where);
+        if(restored!==null)ctxRepairSurvivors++;
+        // The same unknown name on a LIVE graph cannot reach a snapshot either.
+        const data=clone(CLEAN_LIVE);
+        place(data,make());
+        assert(guarded('snapshot unknown '+kind+' at '+where,()=>api.createExerciseSnapshot(data))===null,
+          'an unknown '+kind+' key at '+where+' reached a live snapshot');
+        ctxRepairCases+=3;ctxRepairAttacks++;ctxAttackCases++;
+      }
+    }
+    /* Hostile unknown-key FORMS: an accessor, a revoked Proxy and a symbol key are refused by the
+       materializer before the schema ever sees them, and none of them invokes anything. */
+    for(const [label,install] of [
+      ['accessor',snapshot=>Object.defineProperty(snapshot.tokens[0],'futureArchitecture',
+        {get(){getterHits++;return 1},enumerable:true,configurable:true})],
+      ['revoked Proxy',snapshot=>{snapshot.tokens[0].futureArchitecture=revoked({})}],
+      ['symbol key',snapshot=>{snapshot.tokens[0][Symbol('futureArchitecture')]=1}]
+    ]){
+      const snapshot=clone(CLEAN_SNAP);
+      getterHits=0;install(snapshot);
+      assert(guarded('restore hostile unknown '+label,()=>api.restoreExerciseSnapshot(snapshot))===null,
+        'a hostile unknown key form was not refused: '+label);
+      assert(getterHits===0,'a hostile unknown key form invoked an accessor: '+label);
+      ctxRepairCases+=2;ctxRepairAttacks++;ctxAttackCases++;
+    }
+  }
+
+  /* ---- D + E. Exotic values, including every structurally compatible position -------------
+     An exotic normalizes to an empty record or a record of scraps. Under an UNKNOWN key that
+     record used to survive; under a KNOWN key it lands in a derived cache and must be rebuilt.
+     Neither may leave a trace: the restore is null, or it is byte-identical to the canonical one. */
+  {
+    const EXOTICS=[
+      ['Date',()=>new Date()],['RegExp',()=>/x/g],['Map',()=>new Map([['x',1]])],['Set',()=>new Set([1])],
+      ['WeakMap',()=>new WeakMap()],['WeakSet',()=>new WeakSet()],['Error',()=>new Error('x')],
+      ['Promise',()=>Promise.resolve(1)],['ArrayBuffer',()=>new ArrayBuffer(4)],
+      ['DataView',()=>new DataView(new ArrayBuffer(4))],['boxed String',()=>new String('x')],
+      ['boxed Number',()=>new Number(1)],['boxed Boolean',()=>new Boolean(true)],
+      ['empty class instance',()=>new (class Empty{})()],
+      ['own-field class instance',()=>new (class Own{constructor(){this.x=1}})()]
+    ];
+    for(const name of ['Int8Array','Uint8Array','Uint8ClampedArray','Int16Array','Uint16Array',
+      'Int32Array','Uint32Array','Float32Array','Float64Array','BigInt64Array','BigUint64Array']){
+      if(typeof globalThis[name]==='function')EXOTICS.push([name,()=>new globalThis[name](2)]);
+    }
+    if(typeof URL==='function')EXOTICS.push(['URL',()=>new URL('https://example.com/x')]);
+    const EXOTIC_AT=[
+      ['unknown token cache',(snapshot,value)=>{snapshot.tokens[0].futureArchitectureCache=value},
+        restored=>restored.tokens[0].futureArchitectureCache],
+      ['grammar.morphology',(snapshot,value)=>{snapshot.tokens[0].grammar.morphology=value},
+        restored=>restored.tokens[0].grammar.morphology],
+      ['token.relations',(snapshot,value)=>{snapshot.tokens[0].relations=value},
+        restored=>restored.tokens[0].relations],
+      ['token.lexeme',(snapshot,value)=>{snapshot.tokens[0].lexeme=value},
+        restored=>restored.tokens[0].lexeme],
+      ['token.components',(snapshot,value)=>{snapshot.tokens[0].components=value},
+        restored=>restored.tokens[0].components],
+      ['relationship metadata',(snapshot,value)=>{if(!snapshot.relationships.length)snapshot.relationships.push({});
+        snapshot.relationships[0].metadata=value},
+        restored=>restored.relationships[0]&&restored.relationships[0].metadata]
+    ];
+    let exoticCases=0;
+    for(const [exoticName,make] of EXOTICS){
+      for(const [where,place] of EXOTIC_AT){
+        const snapshot=clone(CLEAN_SNAP);
+        place(snapshot,make());
+        const restored=guarded('restore '+exoticName+' at '+where,()=>api.restoreExerciseSnapshot(snapshot));
+        if(restored!==null&&JSON.stringify(restored)!==CLEAN_RESTORE){
+          ctxRepairSurvivors++;
+          assert(false,exoticName+' survived restoration at '+where);
+        }
+        exoticCases++;ctxRepairCases++;ctxRepairAttacks++;ctxAttackCases++;
+      }
+    }
+    assert(exoticCases>=24,'the exotic sweep shrank below the 24 cases it covers: '+exoticCases);
+    ctxCases++;
+  }
+
+  /* ---- F. Derived caches are rebuilt from frozen authority, never carried ------------------
+     Untrusted snapshot data must not control a derived or presentation cache. Every one of these
+     is either refused or rebuilt, and the restored exercise is byte-identical either way. */
+  {
+    for(const [label,forge] of [
+      ['token.lexeme',snapshot=>{snapshot.tokens[0].lexeme={forged:true}}],
+      ['token.relations',snapshot=>{snapshot.tokens[0].relations={forged:true}}],
+      ['token.components',snapshot=>{snapshot.tokens[0].components=[{forged:true}]}],
+      ['grammar.morphology',snapshot=>{snapshot.tokens[0].grammar.morphology={forged:true}}],
+      ['token.ar',snapshot=>{snapshot.tokens[0].ar='FORGED'}],
+      ['token.en',snapshot=>{snapshot.tokens[0].en='FORGED'}],
+      ['token.why',snapshot=>{snapshot.tokens[0].why='FORGED'}],
+      ['token.phraseAr',snapshot=>{snapshot.tokens[0].phraseAr='FORGED'}],
+      ['token.phraseEn',snapshot=>{snapshot.tokens[0].phraseEn='FORGED'}],
+      ['token.phraseLabel',snapshot=>{snapshot.tokens[0].phraseLabel='FORGED'}],
+      ['token.word',snapshot=>{snapshot.tokens[0].word='FORGED'}],
+      ['token.expectedSurface',snapshot=>{snapshot.tokens[0].expectedSurface='FORGED'}],
+      ['sentence',snapshot=>{snapshot.sentence='FORGED'}],
+      ['relationship entry',snapshot=>{if(snapshot.relationships[0])snapshot.relationships[0].ruleId='FORGED'}]
+    ]){
+      const snapshot=clone(CLEAN_SNAP);
+      forge(snapshot);
+      const restored=guarded('restore forged '+label,()=>api.restoreExerciseSnapshot(snapshot));
+      if(restored!==null)assert(JSON.stringify(restored)===CLEAN_RESTORE,
+        'a forged derived cache changed the restored exercise: '+label);
+      ctxRepairCases++;ctxRepairAttacks++;ctxAttackCases++;
+    }
+    /* ---- The four presentation caches that are NOT rebuilt, pinned exactly ------------------
+       `token.gloss`, `token.enHint`, `token.surfaceHint` and the root `translation` survive a
+       stored forgery on the families rebuildCanonicalHistoryPresentation does not cover (gloss on
+       56 of 82 templates, the rest on all 82). Everything carrying grammatical meaning is safe:
+       `ar`, `en`, `why`, the phrase fields and `sentence` are rebuilt canonically above, and
+       `word` and `expectedSurface` are refused outright. A forgery here changes an English
+       vocabulary line and nothing else.
+
+       That is a real gap in "English presentation is never authority", and this phase REPORTS it
+       rather than repairing it: closing it means deriving canonical glosses and translations for
+       the 56 basic families from the noun and verb registries, which is a change to approved
+       English output, not a nested-schema or live-snapshot repair.
+
+       This pins the exact blast radius so the gap cannot quietly widen. The forgery must leave the
+       restored exercise VALID, must leave every grammatical, structural and identity-bearing field
+       untouched, and must not change the canonical exercise identity. If a future change ever
+       makes one of these four authoritative, this fails. */
+    {
+      const PRESENTATION_ONLY=[
+        ['token.gloss',snapshot=>{snapshot.tokens[0].gloss='FORGED_PRESENTATION'}],
+        ['token.enHint',snapshot=>{snapshot.tokens[0].enHint='FORGED_PRESENTATION'}],
+        ['token.surfaceHint',snapshot=>{snapshot.tokens[0].surfaceHint='FORGED_PRESENTATION'}],
+        ['translation',snapshot=>{snapshot.translation='FORGED_PRESENTATION'}]
+      ];
+      const structuralOf=exercise=>JSON.stringify(exercise.tokens.map(token=>[token.word,token.state,
+        token.sign,token.target,token.ar,token.en,token.why,token.ruleId,token.signRuleId,
+        token.expectedSurface,token.grammar,token.relations,token.components])
+        .concat([exercise.relationships,exercise.sentence,exercise.sentenceType]));
+      const canonicalStructure=structuralOf(JSON.parse(CLEAN_RESTORE));
+      let pinned=0;
+      for(const [label,forge] of PRESENTATION_ONLY){
+        const snapshot=clone(CLEAN_SNAP);
+        forge(snapshot);
+        const restored=guarded('restore forged '+label,()=>api.restoreExerciseSnapshot(snapshot));
+        if(restored===null)continue;
+        pinned++;
+        assert(api.validateExercise(restored).length===0,
+          'a forged '+label+' produced an exercise that no longer validates');
+        assert(structuralOf(restored)===canonicalStructure,
+          'a forged '+label+' reached a grammatical, structural or identity-bearing field — it is no '
+          +'longer presentation-only, and the restore path must now rebuild or refuse it');
+        assert(api.createExerciseSnapshot(restored)?.exerciseIdentity===CLEAN_SNAP.exerciseIdentity,
+          'a forged '+label+' changed the canonical exercise identity');
+        ctxRepairCases+=3;ctxRepairAttacks++;ctxAttackCases++;
+      }
+      assert(pinned===4,'the presentation-only pin covers '+pinned+' of its 4 fields — the set changed, '
+        +'so the reported gap must be re-measured');
+      ctxRepairCases++;
+    }
+    /* An unknown key planted INSIDE a Policy-B cache is discarded by canonical rebuilding rather
+       than rejected — the other half of the two-policy split, asserted rather than assumed. */
+    for(const [label,plant,read] of [
+      ['grammar.morphology',snapshot=>{snapshot.tokens.forEach(token=>{
+        if(token.grammar.type==='verb')token.grammar.morphology={...token.grammar.morphology,futureArchitecture:1}})},
+        restored=>restored.tokens.some(token=>token.grammar.morphology
+          &&Object.prototype.hasOwnProperty.call(token.grammar.morphology,'futureArchitecture'))],
+      ['token.relations',snapshot=>{snapshot.tokens[0].relations.futureArchitecture=1},
+        restored=>Object.prototype.hasOwnProperty.call(restored.tokens[0].relations,'futureArchitecture')],
+      ['token.components',snapshot=>{(snapshot.tokens[0].components||[]).forEach(item=>{item.futureArchitecture=1})},
+        restored=>(restored.tokens[0].components||[]).some(item=>
+          Object.prototype.hasOwnProperty.call(item,'futureArchitecture'))],
+      ['relationships[0]',snapshot=>{if(snapshot.relationships[0])snapshot.relationships[0].futureArchitecture=1},
+        restored=>restored.relationships.some(item=>Object.prototype.hasOwnProperty.call(item,'futureArchitecture'))]
+    ]){
+      const snapshot=clone(CLEAN_SNAP);
+      plant(snapshot);
+      const restored=guarded('restore cache-internal unknown key at '+label,
+        ()=>api.restoreExerciseSnapshot(snapshot));
+      if(restored!==null){
+        assert(!read(restored),'an unknown key inside the '+label+' cache survived canonical rebuilding');
+        assert(JSON.stringify(restored)===CLEAN_RESTORE,'the '+label+' cache rebuild changed the restored exercise');
+      }
+      ctxRepairCases+=2;ctxRepairAttacks++;ctxAttackCases++;
+    }
+  }
+
+  /* ---- G. The one declared legacy name, under Policy B ------------------------------------
+     `grammar.componentKinds` is accepted on a VERB grammar because materializeAuthoritativeMorphology
+     provably deletes it before canonical reconstruction; it must not survive. On a non-verb grammar
+     nothing would remove it, so there it is an unknown key and rejects. */
+  {
+    const verbTemplate=api.templates.find(item=>
+      api.buildTemplate(item.id).tokens.some(token=>token.grammar.type==='verb'));
+    assert(verbTemplate,'no verb template was available for the legacy-key test');
+    const verbSnapshot=clone(api.createExerciseSnapshot(api.buildTemplate(verbTemplate.id)));
+    const verbClean=JSON.stringify(api.restoreExerciseSnapshot(clone(verbSnapshot)));
+    const withLegacy=clone(verbSnapshot);
+    let planted=0;
+    withLegacy.tokens.forEach(token=>{if(token.grammar.type==='verb'){token.grammar.componentKinds=['taa-taniith-sakina'];planted++}});
+    assert(planted>0,'the legacy-key test planted nothing');
+    const legacyRestored=guarded('restore legacy componentKinds',()=>api.restoreExerciseSnapshot(withLegacy));
+    assert(legacyRestored!==null,'a legacy verb componentKinds snapshot was refused instead of repaired');
+    assert(!legacyRestored.tokens.some(token=>
+      Object.prototype.hasOwnProperty.call(token.grammar,'componentKinds')),
+      'the legacy componentKinds cache survived restoration');
+    assert(JSON.stringify(legacyRestored)===verbClean,'discarding componentKinds changed the restored exercise');
+    // The same name on a NON-verb grammar is an unknown key.
+    const onNoun=clone(verbSnapshot);
+    let nounPlanted=0;
+    onNoun.tokens.forEach(token=>{if(token.grammar.type!=='verb'){token.grammar.componentKinds=[];nounPlanted++}});
+    if(nounPlanted){
+      assert(guarded('restore componentKinds on a noun',()=>api.restoreExerciseSnapshot(onNoun))===null,
+        'componentKinds was tolerated on a non-verb grammar, where nothing discards it');
+      ctxRepairCases++;ctxRepairAttacks++;ctxAttackCases++;
+    }
+    ctxRepairCases+=3;ctxCases+=3;
+  }
+
+  /* ---- H. createExerciseSnapshot fail-closed over the whole nested surface -----------------
+     The sweep above ran against a SNAPSHOT, which stops at `data.validated` before validation is
+     reached. This one runs against a LIVE exercise, which is the path that actually reaches
+     validation, the identity calculation and serialization — the path where the twelve TypeErrors
+     lived. Nothing may throw, and nothing may produce a snapshot that is not the canonical one. */
+  {
+    const HOSTILE=[
+      ['revoked Proxy record',()=>revoked({})],['revoked Proxy array',()=>revoked([])],
+      ['get-trapping Proxy',()=>new Proxy({},{get(){throw new Error('get')}})],
+      ['ownKeys-trapping Proxy',()=>new Proxy({},{ownKeys(){throw new Error('ownKeys')}})],
+      ['descriptor-trapping Proxy',()=>new Proxy({},{getOwnPropertyDescriptor(){throw new Error('descriptor')}})],
+      ['own accessor',()=>Object.defineProperty({},'x',{get(){getterHits++;return 1},enumerable:true})],
+      ['inherited accessor',()=>Object.create(Object.defineProperty({},'x',
+        {get(){getterHits++;return 1},enumerable:true}))],
+      ['symbol-keyed record',()=>{const record={};record[Symbol('s')]=1;return record}],
+      ['cycle',()=>{const node={};node.self=node;return node}],
+      ['sparse array',()=>{const list=[];list[2]=1;return list}],
+      ['array with an extra property',()=>Object.assign([1],{extra:1})],
+      ['Date',()=>new Date()],['Map',()=>new Map()],['class instance',()=>new (class T{})()],
+      ['unknown-key record',()=>({futureArchitecture:1})]
+    ];
+    const AT=[
+      ['tokens',(data,value)=>{data.tokens=value}],
+      ['tokens[0]',(data,value)=>{data.tokens[0]=value}],
+      ['token.grammar',(data,value)=>{data.tokens[0].grammar=value}],
+      ['token.grammar.morphology',(data,value)=>{data.tokens[0].grammar.morphology=value}],
+      ['token.relations',(data,value)=>{data.tokens[0].relations=value}],
+      ['token.components',(data,value)=>{data.tokens[0].components=value}],
+      ['token.lexeme',(data,value)=>{data.tokens[0].lexeme=value}],
+      ['relationships',(data,value)=>{data.relationships=value}],
+      ['relationships[0]',(data,value)=>{if(!data.relationships.length)data.relationships.push({});
+        data.relationships[0]=value}],
+      ['unknown token cache',(data,value)=>{data.tokens[0].futureArchitectureCache=value}],
+      ['live root',(data,value)=>{data.futureArchitecture=value}]
+    ];
+    for(const [hostileName,make] of HOSTILE){
+      for(const [where,place] of AT){
+        const data=clone(CLEAN_LIVE);
+        try{ place(data,make()); }catch(error){ continue }
+        getterHits=0;
+        const snapshot=guarded('live createExerciseSnapshot '+hostileName+' @ '+where,
+          ()=>api.createExerciseSnapshot(data));
+        assert(getterHits===0,'a getter ran during live snapshot creation: '+hostileName+' @ '+where);
+        /* Either the graph is refused outright, or it is normalized — and a normalized DERIVED
+           cache (an emptied lexeme, relations or components) may differ in the snapshot itself
+           while still restoring to the canonical exercise, because restoration rebuilds every one
+           of them from frozen authority. Nothing between those two outcomes is acceptable. */
+        if(snapshot!==null){
+          const restored=guarded('round trip '+hostileName+' @ '+where,
+            ()=>api.restoreExerciseSnapshot(clone(snapshot)));
+          assert(restored!==null&&JSON.stringify(restored)===CLEAN_RESTORE,
+            'a hostile live value survived the round trip: '+hostileName+' @ '+where);
+          if(JSON.stringify(snapshot)!==CLEAN_SNAP_JSON)ctxInertWrappers++;
+        }
+        ctxRepairCases++;ctxRepairAttacks++;ctxAttackCases++;
+      }
+    }
+  }
+
+  /* ---- I. Mutation 7 — createExerciseSnapshot must validate the MATERIALIZED graph ---------
+     The only observable difference between the caller's graph and its materialization, once the
+     materializer has accepted the caller's graph at all, is the prototype: materialization drops
+     it, so an INHERITED field is present for an ordinary read of the original and absent from the
+     fresh copy. A verb whose `grammar.morphology` is inherited rather than owned is therefore
+     valid when read raw and invalid when read from the materialized graph — and the shape check
+     accepts it either way, so nothing else can mask the difference. Validating the original would
+     accept it and build a snapshot from a graph that has no morphology at all. */
+  {
+    const verbTemplate=api.templates.find(item=>
+      api.buildTemplate(item.id).tokens.some(token=>
+        token.grammar.type==='verb'&&token.grammar.morphology));
+    assert(verbTemplate,'no verb template carries a morphology cache for the mutation-7 test');
+    const data=api.buildTemplate(verbTemplate.id);
+    const grammar=data.tokens.find(token=>token.grammar.type==='verb'&&token.grammar.morphology).grammar;
+    const morphology=grammar.morphology;
+    delete grammar.morphology;
+    Object.setPrototypeOf(grammar,{morphology});
+    // The mutation is genuinely non-equivalent: raw reads see the field, the fresh copy does not.
+    assert(grammar.morphology===morphology,'the inherited morphology is not readable ordinarily');
+    assert(api.validateExercise(data).length===0,
+      'the mutation-7 case no longer validates when read raw — it would pass for the wrong reason');
+    const materialized=api.safeMaterializedGraph(data,null);
+    assert(materialized!==null,'the mutation-7 case did not materialize');
+    assert(materialized.tokens.every(token=>!Object.prototype.hasOwnProperty.call(token.grammar,'morphology')
+      ||token.grammar.morphology!==undefined),'the mutation-7 materialization is malformed');
+    assert(api.liveExerciseGraphFailure(materialized)==='',
+      'the mutation-7 case is refused by the shape check, which would mask the defect it covers');
+    assert(api.validateExercise(materialized).length>0,
+      'the mutation-7 materialized graph validates — the case proves nothing');
+    assert(guarded('mutation-7 snapshot',()=>api.createExerciseSnapshot(data))===null,
+      'createExerciseSnapshot validated the ORIGINAL graph: an inherited morphology authorized a '
+      +'snapshot built from a materialized graph that has none');
+    ctxRepairCases+=6;ctxRepairAttacks++;ctxAttackCases++;
+  }
+
+  /* ---- J. The safe fixture view's field manifest -------------------------------------------
+     Four properties, all behavioral:
+       J1  the view's key structure IS the manifest, in both directions;
+       J2  the resolver reads nothing off the exercise outside the view — proven with a recording
+           prototype on the exercise, its tokens and their grammar, so any raw read of a name the
+           exercise does not own is caught;
+       J3  every own field is read descriptor-only — replacing one with an accessor must not invoke
+           it, and a manifest field made unreadable must fail the proof CLOSED while a field outside
+           the manifest must leave the proof intact;
+       J4  every manifest field is load-bearing under a controlled semantic mutation. */
+  {
+    const MANIFEST=api.IDHAN_SAFE_VIEW_MANIFEST;
+    const sorted=value=>[...value].sort().join(',');
+    // J1 — structure equality, both directions, at all three levels.
+    {
+      const fixture=api.buildIdhanSourceDirectFixture();
+      const view=api.safeIdhanFixtureView(fixture);
+      assert(view,'the canonical fixture produced no safe view');
+      assert(sorted(Object.keys(view))===sorted(MANIFEST.exercise),
+        'the safe view top level drifted from its manifest: view ['+sorted(Object.keys(view))
+        +'] vs manifest ['+sorted(MANIFEST.exercise)+']');
+      assert(sorted(Object.keys(view.tokens[0]))===sorted(MANIFEST.token),
+        'the safe view token level drifted from its manifest: view ['+sorted(Object.keys(view.tokens[0]))
+        +'] vs manifest ['+sorted(MANIFEST.token)+']');
+      assert(sorted(Object.keys(view.tokens[0].grammar))===sorted(MANIFEST.grammar),
+        'the safe view grammar level drifted from its manifest: view ['
+        +sorted(Object.keys(view.tokens[0].grammar))+'] vs manifest ['+sorted(MANIFEST.grammar)+']');
+      assert(Object.isFrozen(MANIFEST)&&Object.isFrozen(MANIFEST.exercise)
+        &&Object.isFrozen(MANIFEST.token)&&Object.isFrozen(MANIFEST.grammar),'the safe-view manifest is mutable');
+      // An attacker-only field reaches no level of the view.
+      fixture.attackerOnly='x';fixture.tokens[0].attackerOnly='x';fixture.tokens[0].grammar.attackerOnly='x';
+      const dirty=api.safeIdhanFixtureView(fixture);
+      assert(dirty.attackerOnly===undefined&&dirty.tokens[0].attackerOnly===undefined
+        &&dirty.tokens[0].grammar.attackerOnly===undefined,'an attacker-only field entered the safe view');
+      ctxRepairCases+=5;ctxCases+=5;
+    }
+    // J2 — a recording prototype. Any raw read of a name the exercise does not OWN lands here.
+    {
+      const reads=[];
+      const recorder=label=>new Proxy({},{get(target,key){
+        if(typeof key==='string')reads.push(label+'.'+key);
+        return undefined;
+      }});
+      const fixture=api.buildIdhanSourceDirectFixture();
+      Object.setPrototypeOf(fixture,recorder('exercise'));
+      fixture.tokens.forEach((token,index)=>{
+        Object.setPrototypeOf(token.grammar,recorder('token['+index+'].grammar'));
+        Object.setPrototypeOf(token,recorder('token['+index+']'));
+      });
+      // Ownership is identity, so the fixture is still the registered object.
+      assert(api.isIdhanFixtureOwned(fixture),'installing a recording prototype lost ownership');
+      const proof=guarded('recording-prototype proof',()=>ctxProof(fixture));
+      assert(reads.length===0,'the resolver read '+reads.length+' field(s) off the exercise outside its '
+        +'safe view: '+reads.slice(0,6).join(', ')+' — add the read to safeIdhanFixtureView and to '
+        +'IDHAN_SAFE_VIEW_MANIFEST, or remove it');
+      assert(proof.satisfied===true,'a recording prototype changed the canonical proof');
+      ctxRepairCases+=3;ctxCases+=3;
+    }
+    // J3 — descriptor-only reads, and fail-closed for exactly the manifest fields.
+    {
+      const install=(target,field,onRead)=>{
+        const value=target[field];
+        Object.defineProperty(target,field,{get(){onRead();return value},enumerable:true,configurable:true});
+      };
+      /* Each level names every position the field can occupy, because a field is only load-bearing
+         where it carries something: `target` is false on the إِذَنْ head and true on the verb, so
+         making it unreadable matters at one position and not the other. A manifest field must fail
+         the proof closed at SOME position; a field outside the manifest must change nothing at
+         ANY position. Fields the canonical fixture does not own at all — `state` and `sign`, which
+         this phase authorizes on no fixture token — are covered by the semantic mutations in J4. */
+      const LEVELS=[
+        ['exercise',MANIFEST.exercise,fixture=>[fixture]],
+        ['token',MANIFEST.token,fixture=>fixture.tokens],
+        ['grammar',MANIFEST.grammar,fixture=>fixture.tokens.map(token=>token.grammar)]
+      ];
+      for(const [levelName,manifestFields,pick] of LEVELS){
+        const fields=new Set();
+        for(const target of pick(api.buildIdhanSourceDirectFixture()))
+          for(const field of Object.getOwnPropertyNames(target))fields.add(field);
+        for(const field of fields){
+          let failedSomewhere=false,positions=0;
+          for(let index=0;index<pick(api.buildIdhanSourceDirectFixture()).length;index++){
+            const fixture=api.buildIdhanSourceDirectFixture();
+            const target=pick(fixture)[index];
+            if(!Object.prototype.hasOwnProperty.call(target,field))continue;
+            positions++;
+            let invoked=0;
+            install(target,field,()=>{invoked++});
+            const proof=guarded('accessor at '+levelName+'['+index+'].'+field,()=>ctxProof(fixture));
+            assert(invoked===0,'the resolver invoked an accessor at '+levelName+'['+index+'].'+field
+              +' — that field is being read ordinarily instead of through the safe view');
+            if(proof.satisfied===false)failedSomewhere=true;
+            if(!manifestFields.includes(field))assert(proof.satisfied===true,
+              'a field outside the manifest changed the proof: '+levelName+'['+index+'].'+field
+              +' (reason "'+proof.reason+'") — it is consulted, so it belongs in IDHAN_SAFE_VIEW_MANIFEST');
+            ctxRepairCases+=2;ctxRepairAttacks++;ctxAttackCases++;
+          }
+          if(manifestFields.includes(field)&&positions)assert(failedSomewhere,
+            'an unreadable manifest field never failed the proof closed at any position: '
+            +levelName+'.'+field+' — it is listed as consulted but nothing consults it');
+        }
+      }
+    }
+    // J4 — every manifest field is load-bearing under a controlled semantic mutation.
+    {
+      const SEMANTIC=[
+        ['exercise','fixtureId',fixture=>{fixture.fixtureId='IDHAN_SOURCE_DIRECT_FIXTURE_2'}],
+        ['exercise','consumerId',fixture=>{fixture.consumerId='OTHER_CONSUMER'}],
+        ['exercise','responseContextId',fixture=>{fixture.responseContextId='OTHER_CONTEXT'}],
+        ['exercise','responsePairId',fixture=>{fixture.responsePairId='OTHER_PAIR'}],
+        ['exercise','sourceRuleId',fixture=>{fixture.sourceRuleId='G_OTHER_RULE'}],
+        ['exercise','productionStatus',fixture=>{fixture.productionStatus='production'}],
+        ['exercise','schemaVersion',fixture=>{fixture.schemaVersion=4}],
+        ['exercise','responseRelationships',fixture=>{fixture.responseRelationships=
+          fixture.responseRelationships.map(link=>({...link}))}],
+        ['exercise','tokens',fixture=>{fixture.tokens=[fixture.tokens[0]]}],
+        ['token','id',fixture=>{fixture.tokens[0].id='FORGED'}],
+        ['token','word',fixture=>{fixture.tokens[0].word='FORGED'}],
+        ['token','target',fixture=>{fixture.tokens[0].target=!fixture.tokens[0].target}],
+        ['token','tense',fixture=>{fixture.tokens[1].tense='past'}],
+        ['token','state',fixture=>{fixture.tokens[1].state='nasb'}],
+        ['token','sign',fixture=>{fixture.tokens[1].sign={id:'fatha',ar:'الْفَتْحَة',en:'fatḥah'}}],
+        ['token','grammar',fixture=>{fixture.tokens[0].grammar={type:'noun',role:'faail'}}],
+        ['grammar','type',fixture=>{fixture.tokens[0].grammar.type='noun'}],
+        ['grammar','role',fixture=>{fixture.tokens[0].grammar.role='faail'}],
+        ['grammar','particleType',fixture=>{fixture.tokens[0].grammar.particleType='nasb'}],
+        ['grammar','person',fixture=>{fixture.tokens[1].grammar.person='3ms'}],
+        ['grammar','morphology',fixture=>{fixture.tokens[1].grammar.morphology={person:'2ms'}}]
+      ];
+      const covered=new Set();
+      for(const [level,field,mutate] of SEMANTIC){
+        const fixture=api.buildIdhanSourceDirectFixture();
+        mutate(fixture);
+        const proof=guarded('semantic mutation of '+level+'.'+field,()=>ctxProof(fixture));
+        assert(proof.satisfied===false,'a controlled semantic mutation of '+level+'.'+field
+          +' left the proof satisfied — that manifest field is not load-bearing');
+        covered.add(level+'.'+field);
+        ctxRepairCases++;ctxRepairAttacks++;ctxAttackCases++;
+      }
+      for(const [level,fields] of [['exercise',MANIFEST.exercise],['token',MANIFEST.token],
+        ['grammar',MANIFEST.grammar]]){
+        for(const field of fields)assert(covered.has(level+'.'+field),
+          'manifest field '+level+'.'+field+' has no controlled semantic mutation');
+      }
+      ctxRepairCases++;ctxCases++;
+    }
+    // K — the identity seal is type-exact about schemaVersion. `Number('3')` used to equal 3.
+    for(const [label,value] of [['string',"3"],['boxed Number',null],['null',null],['absent',undefined]]){
+      const fixture=api.buildIdhanSourceDirectFixture();
+      if(label==='boxed Number')fixture.schemaVersion=new Number(3);
+      else if(label==='absent')delete fixture.schemaVersion;
+      else fixture.schemaVersion=value;
+      const proof=guarded('schemaVersion '+label,()=>ctxProof(fixture));
+      assert(proof.satisfied===false,'a schemaVersion of the wrong type ('+label+') still proved the conditions');
+      assert(guarded('schemaVersion '+label+' snapshot',()=>api.createFixtureSnapshot(fixture))===null,
+        'a schemaVersion of the wrong type ('+label+') still snapshotted');
+      ctxRepairCases+=2;ctxRepairAttacks++;ctxAttackCases++;
+    }
+    // The canonical fixture is untouched by all of the above.
+    const canonical=api.buildIdhanSourceDirectFixture();
+    assert(ctxProof(canonical).satisfied===true,'the canonical fixture stopped proving after the manifest tests');
+    assert(api.createFixtureSnapshot(canonical)!==null,'the canonical fixture stopped snapshotting');
+    assert(api.renderIdhanSourceDirectFixture(canonical).rendered===true,'the canonical fixture stopped rendering');
+    api.renderResponseContext('');
+    ctxRepairCases+=3;ctxCases+=3;
+  }
+
+  assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
+  assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
+  // Production is still isolated: nothing in this block created a live إِذَنْ surface.
+  assert(api.templates.length===82,'the repair block changed the production template count');
+  assert(api.SOURCE_REGISTRY.G_IDHAN_NASB===undefined,'G_IDHAN_NASB exists');
+  assert(elements.responseContext.hidden===true,'the repair block left learner-visible response context');
+  ctxRepairCases+=3;ctxCases+=3;
+}
+/* ============================================================================
+   PHASE 3B0A — CANONICAL ENGLISH HISTORY PRESENTATION.
+
+   Four learner-facing English fields used to ride out of raw History into a restored exercise:
+   token.gloss, token.enHint, token.surfaceHint and the root translation. None of them can change
+   grammar, identity, Arabic iʿrāb, Why, signs or relationships — that was measured, not assumed,
+   over every token of all 82 templates — but two of them rendered, and one of them could redirect
+   a lexeme lookup.
+
+   Two have an EXACT canonical source and are repaired here:
+
+     surfaceHint — a cache of the token's own `word`, which is already authority. A forgery used to
+       redirect authoritativeVerbMorphology / inflectNoun / inflectVerb onto a different vocabulary
+       record: 211 of 237 forgeries survived and 162 of them destroyed the token's lexeme outright.
+       Now rebuilt from `word` before the identity calculation, which is the first thing that reads
+       it. 0 survive.
+
+     enHint — a build-time hint with no reader after the build. Discarded rather than trusted, which
+       is what this repair's brief prescribes for a builder cache that nothing needs after
+       restoration. 197 of 237 forgeries survived. 0 survive.
+
+   gloss and translation are NOT repaired here and are pinned instead; see the note at the end of
+   this block for exactly why and exactly what remains.
+   ========================================================================== */
+let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDomLeaks=0;
+{
+  const domText=()=>{
+    const parts=[];
+    for(const id of ['sentence','translation','answers','historyList',
+      'responseContext','responseContextPromptAr','responseContextPromptEn']){
+      const node=elements[id];
+      if(!node)continue;
+      parts.push(String(node.innerHTML||''),String(node.textContent||''));
+    }
+    return parts.join('\n');
+  };
+  const MARK='ZZPRESFORGERY';
+  const guarded=(label,run)=>{
+    try{ return run(); }
+    catch(error){ ctxPresThrows++; throw new Error('presentation: '+label+' threw '+error.message) }
+  };
+  let accessorHits=0;
+
+  /* ---- A0. NO SECOND ENGLISH IMPLEMENTATION -------------------------------------------------
+     The canonical gloss resolver and the builders must agree byte for byte, for every token of
+     every template, across many random vocabulary selections. This is what makes the resolver an
+     extraction of the builders' own authority rather than a second English implementation written
+     beside them: if either side is ever edited alone, this fails. It also covers every authority
+     class at once — noun registry, verb registry, the preposition-action pools, innaSisters, the
+     closed particle vocabulary and the eight template-owned surfaces. */
+  {
+    let glossCells=0;
+    const byClassMissing=[];
+    for(let pass=0;pass<8;pass++){
+      for(const template of api.templates){
+        const built=api.buildTemplate(template.id);
+        const want=built.tokens.map(token=>token.gloss);
+        /* Every token must HAVE canonical authority: the resolver never leaves one unresolved. */
+        built.tokens.forEach((token,index)=>{
+          if(typeof api.resolveCanonicalTokenGloss(built,token,index)!==String.fromCharCode(115,116,114,105,110,103))
+            byClassMissing.push(template.stableId+String.fromCharCode(91)+index+String.fromCharCode(93)+token.word);
+        });
+        /* And the canonical rebuilding PATH as a whole — the resolver plus the advanced-family
+           presentation rebuild that owns the person-inflected wordings — must reproduce the
+           builder exactly. Comparing the whole path is what makes this an extraction rather than
+           a second English implementation, whichever authority owns a given family. */
+        const restored=api.restoreExerciseSnapshot(clone(api.createExerciseSnapshot(built)));
+        assert(restored,template.stableId+": the gloss agreement sweep could not restore");
+        restored.tokens.forEach((token,index)=>{
+          assert(token.gloss===want[index],
+            "canonical gloss disagrees with the builder at "+template.stableId+"["+index+"] word="
+            +token.word+": canonical="+JSON.stringify(token.gloss)+" builder="+JSON.stringify(want[index])
+            +" — the canonical rebuilding path and the builders have drifted apart");
+          glossCells++;
+        });
+      }
+    }
+    assert(byClassMissing.length===0,'tokens without canonical gloss authority: '+byClassMissing.slice(0,6));
+    assert(glossCells>=1800,'the gloss agreement sweep shrank to '+glossCells+' cells');
+    ctxPresCases+=glossCells;ctxCases++;
+    // The closed registries are frozen and own-property resolved.
+    assert(Object.isFrozen(api.GLOSS_CLOSED_PARTICLES)&&Object.isFrozen(api.GLOSS_FIXED_TOKENS),
+      'a gloss authority registry is mutable');
+    for(const record of Object.values(api.GLOSS_FIXED_TOKENS))
+      assert(Object.isFrozen(record),'a fixed-token gloss record is mutable');
+    assert(Object.keys(api.GLOSS_FIXED_TOKENS).length===8,
+      'the fixed-token gloss registry is no longer the eight measured surfaces');
+    assert(Object.keys(api.GLOSS_CLOSED_PARTICLES).length===10,
+      'the closed particle gloss registry changed size');
+    // Inherited names are not authority.
+    assert(api.resolveCanonicalTokenGloss({tokens:[]},
+      {word:'constructor',grammar:{type:'particle'}},0)===null,
+      'an inherited Object.prototype name resolved as a particle gloss');
+    ctxPresCases+=5;ctxCases+=5;
+  }
+
+  /* ---- A0T. THE CANONICAL TRANSLATION COMPOSER — ORACLE ONLY (T1A) ------------------------
+     The composer reproduces each builder's translation from frozen authority. It is NOT wired
+     into History yet: the stored translation is still trusted there, and the documented 46
+     survivals stand. What this proves is that the replacement authority is byte-exact before it
+     is allowed anywhere near restoration. */
+  {
+    const SHAPES=api.TRANSLATION_COMPOSER_SHAPES,MAP=api.TRANSLATION_STRUCTURE_MAP;
+    const registeredKeys=Object.keys(MAP),registeredShapes=Object.keys(SHAPES);
+    assert(registeredKeys.length===87,'the structural map holds '+registeredKeys.length+' keys, not 87');
+    assert(registeredShapes.length===22,'the shape registry holds '+registeredShapes.length+' shapes, not 22');
+    assert(Object.isFrozen(SHAPES)&&Object.isFrozen(MAP),'a composer registry is mutable');
+    for(const id of registeredShapes){
+      assert(Object.isFrozen(SHAPES[id])&&Object.isFrozen(SHAPES[id].parts),'shape '+id+' is mutable');
+      for(const part of SHAPES[id].parts)assert(Object.isFrozen(part),'a shape part is mutable');
+    }
+    for(const key of registeredKeys)assert(Object.isFrozen(MAP[key]),'mapping '+key+' is mutable');
+    // Every registered mapping names a real template and a real shape; no duplicates, no orphans.
+    const stableIds=new Set(api.templates.map(t=>t.stableId));
+    const mappedTemplates=new Set();
+    for(const key of registeredKeys){
+      const m=MAP[key];
+      assert(stableIds.has(m.templateId),'mapping '+key+' names an unknown template');
+      assert(registeredShapes.includes(m.shape),'mapping '+key+' names an unknown shape '+m.shape);
+      assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
+      mappedTemplates.add(m.templateId);
+    }
+    assert(mappedTemplates.size===82,'the map covers '+mappedTemplates.size+' templates, not 82');
+    // The five dual-structure templates carry exactly two lanes each; everything else exactly one.
+    const lanes=new Map();
+    for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
+    const dual=[...lanes].filter(([,n])=>n>1).map(([id])=>id).sort();
+    assert(dual.length===5,'expected 5 dual-structure templates, found '+dual.length+': '+dual);
+    for(const [id,n] of lanes)assert(n<=2,id+' has '+n+' lanes; only two are authorized');
+    ctxPresCases+=8;ctxCases+=8;
+
+    /* The oracle: byte-exact equality with the builder, over enough passes to reach the rare
+       adverbial lanes (60 passes observed only 86 of the 87 keys). */
+    const keysSeen=new Set(),shapesSeen=new Set(),slotKindsSeen=new Set();
+    let equalityChecks=0;
+    for(let pass=0;pass<220;pass++){
+      for(const template of api.templates){
+        const built=api.buildTemplate(template.id);
+        const key=api.translationStructureKey(built);
+        assert(typeof key==='string','no structural key for '+template.stableId);
+        assert(Object.prototype.hasOwnProperty.call(MAP,key),
+          'unmapped structural key '+key+' — a production lane has no authorized composer');
+        keysSeen.add(key);
+        const mapping=MAP[key];
+        shapesSeen.add(mapping.shape);
+        for(const part of SHAPES[mapping.shape].parts)
+          if(typeof part.slot==='string')slotKindsSeen.add(part.slot.split(':')[0]
+            +(part.slot.endsWith(':cap')?':cap':'')+(part.slot.startsWith('verb:')?'.'+part.slot.split(':')[2]:''));
+        const composed=api.composeCanonicalTranslation(built);
+        equalityChecks++;
+        if(composed!==built.translation){
+          const trace=SHAPES[mapping.shape].parts.map(p=>typeof p.lit==='string'
+            ?'lit '+JSON.stringify(p.lit)
+            :p.slot+' -> '+JSON.stringify(api.resolveTranslationSlot(built,mapping,p.slot))).join('\n        ');
+          assert(false,'canonical translation disagrees with the builder\n    template='+template.stableId
+            +'\n    key='+key+'\n    shape='+mapping.shape
+            +'\n    builder ='+JSON.stringify(built.translation)
+            +'\n    composed='+JSON.stringify(composed)+'\n    slots:\n        '+trace);
+        }
+      }
+    }
+    /* The rare adverbial lanes appear in roughly one build in a thousand, so a fixed 220-pass sweep
+       observed them only most of the time and this assertion was intermittently red. Any key the
+       sweep missed is now pursued directly on the template that owns it, under a bound that fails
+       loudly rather than a pass count that happens to be lucky. */
+    for(const key of Object.keys(MAP)){
+      if(keysSeen.has(key))continue;
+      const template=api.templates.find(item=>item.stableId===MAP[key].templateId);
+      assert(template,'unobserved key '+key+' names no live template');
+      let found=false;
+      for(let attempt=0;attempt<20000&&!found;attempt++){
+        const built=api.buildTemplate(template.id);
+        if(api.translationStructureKey(built)!==key)continue;
+        found=true;keysSeen.add(key);shapesSeen.add(MAP[key].shape);
+        assert(api.composeCanonicalTranslation(built)===built.translation,
+          'canonical translation disagrees with the builder on the rare lane '+key);
+        ctxPresCases++;
+      }
+      assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
+        +'registered but unreachable, or its lane changed');
+    }
+    assert(keysSeen.size===87,'only '+keysSeen.size+' of the 87 structural keys were observed');
+    assert(shapesSeen.size===22,'only '+shapesSeen.size+' of the 22 composer shapes were observed');
+    /* Every slot kind the registry actually references must be exercised. The list is taken FROM
+       the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
+       translation reads the token's canonical gloss, which already is the verb's pastEn. */
+    const registeredSlotKinds=new Set();
+    for(const id of registeredShapes)
+      for(const part of SHAPES[id].parts)
+        if(typeof part.slot==='string')registeredSlotKinds.add(part.slot.replace(/:\d+/,''));
+    const observedSlotKinds=new Set();
+    for(const key of keysSeen)
+      for(const part of SHAPES[MAP[key].shape].parts)
+        if(typeof part.slot==='string')observedSlotKinds.add(part.slot.replace(/:\d+/,''));
+    for(const kind of registeredSlotKinds)
+      assert(observedSlotKinds.has(kind),'slot-source kind "'+kind+'" was never exercised');
+    for(const kind of ['gloss','gloss:cap','innaLead','copula','verb:en','verb:third'])
+      assert(registeredSlotKinds.has(kind),'expected slot-source kind "'+kind+'" is not registered: '
+        +[...registeredSlotKinds].sort().join(', '));
+    ctxPresCases+=equalityChecks;ctxCases+=3;
+
+    /* Both lanes of every dual-structure template, and the desk/office readings, observed. */
+    const lanesSeen=new Map();
+    for(const key of keysSeen){const id=MAP[key].templateId;
+      if(!lanesSeen.has(id))lanesSeen.set(id,new Set());lanesSeen.get(id).add(key)}
+    for(const id of dual)assert(lanesSeen.get(id)&&lanesSeen.get(id).size===2,
+      id+': only one of its two structural lanes was exercised');
+    {
+      const HOMOGRAPH=String.fromCodePoint(0x627,0x644,0x652,0x645,0x64e,0x643,0x652,0x62a,0x64e,0x628,0x64e);
+      const readings=new Set();
+      for(let round=0;round<900&&readings.size<2;round++)
+        for(const template of api.templates){
+          const built=api.buildTemplate(template.id);
+          const i=built.tokens.findIndex(t=>t.word===HOMOGRAPH&&t.grammar.role==='object');
+          if(i<0)continue;
+          assert(api.composeCanonicalTranslation(built)===built.translation,
+            'the homograph broke composition at '+template.stableId);
+          readings.add(built.tokens[i].gloss);
+        }
+      assert(readings.has('the desk')&&readings.has('the office'),
+        'the composer did not exercise both homograph readings: '+[...readings]);
+      ctxPresCases+=2;
+    }
+    ctxPresCases+=dual.length;ctxCases+=2;
+
+    /* Fail-closed: thirteen malformed or unauthorized inputs must all return null. */
+    {
+      const good=api.buildTemplate(api.templates[0].id);
+      const clone2=v=>JSON.parse(JSON.stringify(v));
+      const firstKey=Object.keys(MAP)[0];
+      const REFUSALS=[
+        ['unknown template ID',()=>{const x=clone2(good);x.templateId='T_NOT_A_TEMPLATE';return x}],
+        ['unknown structural key',()=>{const x=clone2(good);x.tokens[0].grammar.role='zzUnknownRole';return x}],
+        ['missing structural mapping',()=>{const x=clone2(good);x.tokens.push(clone2(x.tokens[0]));return x}],
+        ['wrong token count',()=>{const x=clone2(good);x.tokens.pop();return x}],
+        ['wrong ordered token roles',()=>{const x=clone2(good);x.tokens.reverse();return x}],
+        ['missing slot value',()=>{const x=clone2(good);delete x.tokens[0].gloss;return x}],
+        ['empty slot value',()=>{const x=clone2(good);x.tokens[0].gloss='';return x}],
+        ['non-string slot value',()=>{const x=clone2(good);x.tokens[0].gloss=7;return x}],
+        ['missing grammar',()=>{const x=clone2(good);delete x.tokens[0].grammar;return x}],
+        ['no tokens',()=>{const x=clone2(good);x.tokens=[];return x}],
+        ['not an exercise',()=>null],
+        ['tokens not an array',()=>{const x=clone2(good);x.tokens={};return x}],
+        ['missing template ID',()=>{const x=clone2(good);delete x.templateId;return x}]
+      ];
+      let refused=0;
+      for(const [label,make] of REFUSALS){
+        let result;
+        try{ result=api.composeCanonicalTranslation(make()); }
+        catch(error){ assert(false,'composer threw on '+label+': '+error.message) }
+        assert(result===null,'the composer did not refuse '+label+': '+JSON.stringify(result));
+        refused++;ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+      }
+      assert(refused===13,'expected 13 malformed refusals, got '+refused);
+      // A dual-structure template driven through the wrong lane must not compose.
+      const other=api.templates.find(t=>t.stableId===dual[0]);
+      if(other){
+        const built=api.buildTemplate(other.id);
+        const wrongLane=clone2(built);
+        wrongLane.tokens[wrongLane.tokens.length-1].grammar.role=
+          wrongLane.tokens[wrongLane.tokens.length-1].grammar.role==='mudafIlayh'?'majrur':'mudafIlayh';
+        const composed=api.composeCanonicalTranslation(wrongLane);
+        assert(composed===null||composed===built.translation,
+          'the wrong structural lane produced a different translation for '+other.stableId);
+        ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+      }
+      ctxCases++;
+    }
+
+    /* ---- T1B HARDENING ---------------------------------------------------------------------
+       T1A proved the composer reproduces the builders. These prove it refuses everything else. */
+    {
+      const good=api.buildTemplate(api.templates[0].id);
+      const goodKey=api.translationStructureKey(good);
+      const clone3=v=>JSON.parse(JSON.stringify(v));
+      let refusals=0,composerThrows=0;
+      const refuse=(label,make)=>{
+        let result;
+        try{ result=api.composeCanonicalTranslation(make()); }
+        catch(error){ composerThrows++; assert(false,'composer threw on '+label+': '+error.message) }
+        assert(result===null,'the composer did not refuse '+label+': '+JSON.stringify(result));
+        refusals++;ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+      };
+
+      /* 1 — the authority graph is null-prototype, deeply frozen, and immune to pollution. */
+      assert(Object.getPrototypeOf(MAP)===null&&Object.getPrototypeOf(SHAPES)===null,
+        'a composer authority store has a prototype, so an inherited key could be consulted');
+      const pollutionKey='ZZPOLLUTE||noun:zz';
+      const pollutedExercise={templateId:'ZZPOLLUTE',tokens:[{word:'x',gloss:'x',grammar:{type:'noun',role:'zz'}}]};
+      assert(api.composeCanonicalTranslation(pollutedExercise)===null,'the pollution probe already composes');
+      Object.prototype[pollutionKey]=Object.freeze({templateId:'ZZPOLLUTE',structure:'noun:zz',
+        shape:Object.keys(SHAPES)[0],copulaPlural:false});
+      let polluted=null,pollutionThrew='';
+      try{ polluted=api.composeCanonicalTranslation(pollutedExercise); }
+      catch(error){ pollutionThrew=error.message }
+      delete Object.prototype[pollutionKey];
+      assert(pollutionThrew==='','prototype pollution made the composer throw: '+pollutionThrew);
+      assert(polluted===null,'an inherited structural mapping authorized a composition');
+      // Frozen records genuinely reject mutation.
+      const firstKey=Object.keys(MAP)[0],firstShape=Object.keys(SHAPES)[0];
+      const beforeShape=MAP[firstKey].shape;
+      try{ MAP[firstKey].shape='ZZ'; }catch(error){ /* strict-mode throw is also acceptable */ }
+      assert(MAP[firstKey].shape===beforeShape,'a frozen mapping record accepted a mutation');
+      const partCount=SHAPES[firstShape].parts.length;
+      try{ SHAPES[firstShape].parts.push({lit:'ZZ'}); }catch(error){ /* frozen array */ }
+      assert(SHAPES[firstShape].parts.length===partCount,'a frozen shape array accepted a push');
+      try{ MAP['ZZ||added']={templateId:'ZZ'}; }catch(error){ /* frozen store */ }
+      assert(!Object.prototype.hasOwnProperty.call(MAP,'ZZ||added'),'the frozen map accepted a new key');
+      ctxPresCases+=6;ctxCases+=6;
+
+      /* 2 — structural-key validation, including delimiter injection. */
+      const KEY_REFUSALS=[
+        ['missing template ID',()=>{const x=clone3(good);delete x.templateId;return x}],
+        ['non-string template ID',()=>{const x=clone3(good);x.templateId=7;return x}],
+        ['empty template ID',()=>{const x=clone3(good);x.templateId='';return x}],
+        ['missing tokens',()=>{const x=clone3(good);delete x.tokens;return x}],
+        ['empty tokens',()=>{const x=clone3(good);x.tokens=[];return x}],
+        ['tokens not an array',()=>{const x=clone3(good);x.tokens={0:x.tokens[0],length:1};return x}],
+        ['non-object token',()=>{const x=clone3(good);x.tokens[0]='x';return x}],
+        ['missing grammar',()=>{const x=clone3(good);delete x.tokens[0].grammar;return x}],
+        ['non-object grammar',()=>{const x=clone3(good);x.tokens[0].grammar='noun';return x}],
+        ['missing grammar.type',()=>{const x=clone3(good);delete x.tokens[0].grammar.type;return x}],
+        ['non-string grammar.type',()=>{const x=clone3(good);x.tokens[0].grammar.type=1;return x}],
+        ['empty grammar.type',()=>{const x=clone3(good);x.tokens[0].grammar.type='';return x}],
+        ['non-string grammar.role',()=>{const x=clone3(good);x.tokens[0].grammar.role=1;return x}],
+        ['colon injected into role',()=>{const x=clone3(good);x.tokens[0].grammar.role='a:b';return x}],
+        ['comma injected into role',()=>{const x=clone3(good);x.tokens[0].grammar.role='a,noun:khabar';return x}],
+        ['pipe injected into role',()=>{const x=clone3(good);x.tokens[0].grammar.role='a||b';return x}],
+        ['delimiter injected into type',()=>{const x=clone3(good);x.tokens[0].grammar.type='noun,noun';return x}],
+        ['delimiter injected into template ID',()=>{const x=clone3(good);x.templateId=x.templateId+'||zz';return x}],
+        ['extra token appended',()=>{const x=clone3(good);x.tokens.push(clone3(x.tokens[0]));return x}],
+        ['tokens reordered',()=>{const x=clone3(good);x.tokens.reverse();return x}]
+      ];
+      for(const [label,make] of KEY_REFUSALS)refuse(label,make);
+      /* A missing role encodes as empty, which no registered key uses, so it still refuses — but
+         it must never become the literal string "undefined". */
+      {
+        const x=clone3(good);delete x.tokens[0].grammar.role;
+        const key=api.translationStructureKey(x);
+        assert(typeof key==='string'&&!key.includes('undefined'),
+          'a missing role leaked the string "undefined" into the key: '+key);
+        assert(!Object.prototype.hasOwnProperty.call(MAP,key),'an empty-role key is registered');
+        refuse('missing grammar.role',()=>{const y=clone3(good);delete y.tokens[0].grammar.role;return y});
+        ctxPresCases+=2;
+      }
+
+      /* 3 — a VALID key must not authorize a mismatched structure. Forge the key of a real second
+         lane onto an exercise that does not have that lane's tokens. */
+      {
+        const dualId=dual[0];
+        const laneKeys=Object.keys(MAP).filter(k=>MAP[k].templateId===dualId);
+        assert(laneKeys.length===2,'the dual-lane fixture lost a lane');
+        const other=MAP[laneKeys[1]].structure.split(',');
+        const forged={templateId:dualId,tokens:other.map((part,i)=>({
+          word:'x',gloss:'x',grammar:{type:part.split(':')[0],role:part.split(':')[1]}}))};
+        /* The key now matches a registered lane. The composer WILL compose from it, and that is
+           the honest boundary: a gloss slot consumes the token's canonical gloss, so a synthetic
+           token carrying invented English composes that English back. What the composer guarantees
+           is that a forgery cannot borrow ANOTHER exercise's approved output; what rejects the
+           synthetic exercise itself is the canonical exercise boundary, exercised here rather than
+           assumed. This is the ordering obligation T2 inherits: gloss rebuilding must run before
+           translation composition, exactly as it already does for the other presentation caches. */
+        assert(api.translationStructureKey(forged)===laneKeys[1],'the lane forgery did not reproduce the key');
+        const composedForgery=api.composeCanonicalTranslation(forged);
+        const approved=new Set();
+        for(const template of api.templates)approved.add(api.buildTemplate(template.id).translation);
+        assert(composedForgery===null||!approved.has(composedForgery),
+          'a synthetic exercise composed another template\'s approved English: '+JSON.stringify(composedForgery));
+        /* The boundary is exercised through createExerciseSnapshot, which is the fail-closed
+           entry every caller-supplied exercise passes; validateExercise is not called directly
+           because it is documented to read a well-formed graph and throws on a synthetic one. */
+        const boundaryInput=clone3(forged);
+        boundaryInput.validated=true;boundaryInput.relationships=[];
+        let boundary,boundaryThrew='';
+        try{ boundary=api.createExerciseSnapshot(boundaryInput); }
+        catch(error){ boundaryThrew=error.message }
+        assert(boundaryThrew==='','the exercise boundary threw on a synthetic forgery: '+boundaryThrew);
+        assert(boundary===null,
+          'the canonical exercise boundary accepted a synthetic lane forgery — the composer is '
+          +'relying on a rejection that does not happen');
+        ctxPresCases+=3;ctxPresAttacks++;ctxAttackCases++;
+      }
+
+      /* 4 — slot resolution refuses every malformed address and never invents English. */
+      {
+        const mapping=MAP[goodKey];
+        const SLOTS=[
+          ['negative index','gloss:-1'],['fractional index','gloss:0.5'],['string index','gloss:abc'],
+          ['out-of-bounds index','gloss:999999'],['unknown slot kind','zzKind:0'],
+          ['inherited verb field','verb:0:constructor'],['verb field on a noun','verb:0:en'],
+          ['innaLead on a noun','innaLead:0'],['copula without an inna particle','copula'],
+          ['non-string spec',7],['empty spec','']
+        ];
+        for(const [label,spec] of SLOTS){
+          let value,threw='';
+          try{ value=api.resolveTranslationSlot(good,mapping,spec); }catch(error){ threw=error.message }
+          assert(threw==='','slot resolution threw on '+label+': '+threw);
+          assert(value===null,'slot resolution accepted '+label+': '+JSON.stringify(value));
+          refusals++;ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+        }
+        // An empty or non-string gloss must fail the whole composition, not render as "".
+        refuse('empty gloss',()=>{const x=clone3(good);x.tokens[0].gloss='';return x});
+        refuse('non-string gloss',()=>{const x=clone3(good);x.tokens[0].gloss={};return x});
+      }
+
+      /* 5 — the composer reads no stored English. */
+      {
+        const x=clone3(good);
+        const expected=api.composeCanonicalTranslation(x);
+        assert(typeof expected==='string','the baseline exercise stopped composing');
+        x.translation='ZZFORGED';
+        x.tokens.forEach(token=>{token.enHint='ZZFORGED';token.surfaceHint='ZZFORGED'});
+        assert(api.composeCanonicalTranslation(x)===expected,
+          'the composer consulted a stored translation, enHint or surfaceHint');
+        ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+      }
+
+      /* 6 — the oracle cannot pass vacuously: a deliberately wrong composition must be caught. */
+      {
+        const x=clone3(good);
+        const composed=api.composeCanonicalTranslation(x);
+        assert(composed===x.translation,'the anti-drift baseline is already broken');
+        x.translation=composed+' ';
+        assert(api.composeCanonicalTranslation(x)!==x.translation,
+          'the comparison is self-referential: the composer echoes the stored translation');
+        ctxPresCases+=2;
+      }
+      /* ---- T1B2: the five surviving-mutation guards, each made load-bearing ------------------ */
+      /* 18 — key components are own DATA strings: no coercion, no inheritance, no accessor. */
+      {
+        let getterHits=0,toStringHits=0;
+        const withGrammar=(field,define)=>{
+          const x=clone3(good);const grammar=x.tokens[0].grammar;
+          delete grammar[field];define(grammar,field);return x;
+        };
+        const BAD=[
+          ['missing',()=>{}],['undefined',(g,f)=>{g[f]=undefined}],['null',(g,f)=>{g[f]=null}],
+          ['number',(g,f)=>{g[f]=1}],['boolean',(g,f)=>{g[f]=true}],['empty string',(g,f)=>{g[f]=''}],
+          ['object with toString',(g,f)=>{g[f]={toString(){toStringHits++;return 'mubtada'}}}],
+          ['array',(g,f)=>{g[f]=['mubtada']}],
+          ['inherited',(g,f)=>{Object.setPrototypeOf(g,{[f]:'mubtada'})}],
+          ['accessor',(g,f)=>Object.defineProperty(g,f,
+            {get(){getterHits++;return 'mubtada'},enumerable:true,configurable:true})],
+          ['colon',(g,f)=>{g[f]='a:b'}],['comma',(g,f)=>{g[f]='a,b'}],['pipe',(g,f)=>{g[f]='a|b'}]
+        ];
+        for(const field of ['type','role'])for(const [label,define] of BAD){
+          /* A missing or undefined ROLE is legitimate structure: it encodes as empty and then
+             matches no registered key. Everything else, and every TYPE case, refuses outright. */
+          /* Missing, undefined and empty all encode a role-less token identically; that is
+             legitimate structure, and no registered key uses it. */
+          /* Missing, undefined and empty encode a role-less token identically. An inherited or
+             accessor-backed role is IGNORED by the own-data read, so it encodes the same way; what
+             matters is that the smuggled value never reaches the key. */
+          const legitimate=field==='role'
+            &&['missing','undefined','empty string','inherited','accessor'].includes(label);
+          const key=api.translationStructureKey(withGrammar(field,define));
+          if(legitimate){
+            assert(typeof key==='string','a missing role should still produce a key');
+            assert(!key.includes('undefined'),'a missing role leaked "undefined" into the key: '+key);
+            assert(!key.includes('mubtada')||label==='missing'||label==='undefined'||label==='empty string',
+              'a smuggled '+label+' role reached the key: '+key);
+            assert(!Object.prototype.hasOwnProperty.call(MAP,key),'an empty-role key is registered');
+          }else assert(key===null,'grammar.'+field+' as '+label+' produced a key: '+JSON.stringify(key));
+          ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+        }
+        for(const [label,make] of [
+          ['inherited templateId',()=>{const x=clone3(good);const v=x.templateId;delete x.templateId;
+            return Object.assign(Object.create({templateId:v}),x)}],
+          ['accessor templateId',()=>{const x=clone3(good);const v=x.templateId;
+            Object.defineProperty(x,'templateId',{get(){getterHits++;return v},configurable:true});return x}],
+          ['inherited tokens',()=>{const x=clone3(good);const v=x.tokens;delete x.tokens;
+            return Object.assign(Object.create({tokens:v}),x)}]
+        ]){
+          assert(api.translationStructureKey(make())===null,label+' produced a key');
+          ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+        }
+        assert(getterHits===0,'building a structural key invoked an accessor '+getterHits+' time(s)');
+        assert(toStringHits===0,'building a structural key invoked toString '+toStringHits+' time(s)');
+        ctxPresCases+=2;
+      }
+      /* 22 — delimiter injection reconstructed from a REAL registered key, so the guard stands on
+         its own rather than being rescued by the forged key happening to be unregistered. */
+      {
+        const multi=Object.keys(MAP).find(k=>MAP[k].structure.includes(','));
+        assert(multi,'no registered key carries two tokens');
+        const templateId=multi.slice(0,multi.indexOf('||'));
+        const structure=MAP[multi].structure;
+        const segments=structure.split(',');
+        const head=segments[0].split(':');
+        const spliced={templateId,tokens:[{word:'x',gloss:'x',
+          grammar:{type:head[0],role:head.slice(1).join(':')+','+segments.slice(1).join(',')}}]};
+        assert(api.translationStructureKey(spliced)===null,
+          'a role carrying delimiters forged the registered key '+multi);
+        assert(api.translationStructureKey({templateId,tokens:[{word:'x',gloss:'x',
+          grammar:{type:structure,role:''}}]})===null,'a type carrying delimiters forged a key');
+        assert(api.translationStructureKey({templateId:templateId+'||'+segments[0],
+          tokens:[{word:'x',gloss:'x',grammar:{type:head[0],role:head[1]}}]})===null,
+          'a templateId carrying delimiters forged a key');
+        ctxPresCases+=3;ctxPresAttacks+=3;ctxAttackCases+=3;
+      }
+      /* 23 — the freeze is asserted at every level, not merely attempted. */
+      {
+        assert(Object.isFrozen(MAP)&&Object.isFrozen(SHAPES),'a composer store is not frozen');
+        for(const key of Object.keys(MAP))assert(Object.isFrozen(MAP[key]),'mapping '+key+' is not frozen');
+        for(const id of Object.keys(SHAPES)){
+          assert(Object.isFrozen(SHAPES[id]),'shape '+id+' is not frozen');
+          assert(Object.isFrozen(SHAPES[id].parts),'shape '+id+' parts array is not frozen');
+          for(const part of SHAPES[id].parts)assert(Object.isFrozen(part),'a part of '+id+' is not frozen');
+        }
+        ctxPresCases+=3;
+      }
+      /* 19 — the conditions that make own-property lookup redundant, asserted permanently. */
+      {
+        assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
+          +'would consult inherited keys and own-property lookup is no longer redundant');
+        assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===87,'the mapping store changed');
+        ctxPresCases+=3;
+      }
+      /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
+      {
+        for(const key of Object.keys(MAP)){
+          const m=MAP[key];
+          assert(key===m.templateId+'||'+m.structure,'mapping '+key+' disagrees with its own fields');
+          const segments=m.structure.split(',');
+          for(const segment of segments){
+            const bits=segment.split(':');
+            assert(bits.length===2&&bits[0].length>0,
+              'mapping '+key+' has a malformed structure segment "'+segment+'"');
+          }
+          for(const part of SHAPES[m.shape].parts){
+            if(typeof part.slot!=='string'||part.slot==='copula')continue;
+            const index=Number(part.slot.split(':')[1]);
+            assert(Number.isInteger(index)&&index>=0&&index<segments.length,
+              'shape '+m.shape+' addresses token '+index+' but '+key+' declares only '+segments.length);
+          }
+        }
+        ctxPresCases+=Object.keys(MAP).length;
+      }
+      assert(composerThrows===0,'the composer threw '+composerThrows+' time(s)');
+      assert(refusals>=34,'the fail-closed matrix shrank to '+refusals+' refusals');
+      ctxCases+=4;
+    }
+
+    /* ---- T2: HISTORY IS ROUTED THROUGH THE CANONICAL COMPOSER --------------------------------
+       Raw History translation is no longer authority anywhere. These prove it per template, per
+       corruption class, on the restored data and on the rendered DOM. */
+    {
+      const clone4=v=>JSON.parse(JSON.stringify(v));
+      const MK='ZZT2MARK';
+      const domText=()=>['sentence','translation','answers','historyList','targetWord','analysis']
+        .map(id=>{const n=elements[id];return n?String(n.innerHTML||'')+'\n'+String(n.textContent||''):''}).join('\n');
+      let rebuiltCount=0,rejectedCount=0,survivors=0,domLeaks=0,accessorHits=0,cases=0;
+      const donor=api.buildTemplate(api.templates[1].id);
+      const CORRUPTIONS=[
+        ['correct',(s,b)=>{}],
+        ['forged string',s=>{s.translation=MK}],
+        ['missing',s=>{delete s.translation}],
+        ['empty',s=>{s.translation=''}],
+        ['number',s=>{s.translation=7}],
+        ['boolean',s=>{s.translation=true}],
+        ['null',s=>{s.translation=null}],
+        ['array',s=>{s.translation=[MK]}],
+        ['object',s=>{s.translation={a:MK}}],
+        ['cross-template',s=>{s.translation=donor.translation}],
+        ['cross-lexeme',s=>{s.translation='The elephant reads the mountain.'}],
+        ['forged gloss AND translation',s=>{s.translation=MK;s.tokens.forEach(t=>{t.gloss=MK})}]
+      ];
+      for(const template of api.templates){
+        const built=api.buildTemplate(template.id);
+        const want=built.translation;
+        const wantGlosses=built.tokens.map(t=>t.gloss);
+        const snapshot=api.createExerciseSnapshot(built);
+        assert(snapshot,template.stableId+': no snapshot for the T2 sweep');
+        for(const [label,corrupt] of CORRUPTIONS){
+          const forged=clone4(snapshot);
+          corrupt(forged,built);
+          const restored=guarded('T2 '+label+' @ '+template.stableId,
+            ()=>api.restoreExerciseSnapshot(forged));
+          cases++;ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+          if(restored===null){rejectedCount++;
+            assert(false,'a presentation-only translation corruption ('+label+') was REJECTED at '
+              +template.stableId+' — presentation corruption must rebuild, not reject');
+            continue;}
+          rebuiltCount++;
+          assert(restored.translation===want,
+            'History did not rebuild the canonical translation at '+template.stableId+' ('+label+')'
+            +'\n   want='+JSON.stringify(want)+'\n   got ='+JSON.stringify(restored.translation));
+          if(restored.translation===MK)survivors++;
+          restored.tokens.forEach((t,i)=>assert(t.gloss===wantGlosses[i],
+            'a forged gloss survived alongside the translation at '+template.stableId));
+          api.render(restored,'',false);
+          if(domText().includes(MK)){domLeaks++;
+            assert(false,'a forged translation reached the learner DOM at '+template.stableId+' ('+label+')')}
+        }
+      }
+      assert(survivors===0,survivors+' forged translations survived restoration');
+      assert(domLeaks===0,domLeaks+' forged translations reached the DOM');
+      assert(rebuiltCount===api.templates.length*CORRUPTIONS.length,
+        'the T2 sweep rebuilt '+rebuiltCount+' of '+(api.templates.length*CORRUPTIONS.length)+' cases');
+      ctxCases+=3;
+
+      /* Accessor- and Proxy-backed translations: never invoked, never escaping. */
+      {
+        const base=api.createExerciseSnapshot(api.buildTemplate(api.templates[0].id));
+        const wantT=api.restoreExerciseSnapshot(clone4(base)).translation;
+        for(const [label,install] of [
+          ['accessor',s=>Object.defineProperty(s,'translation',
+            {get(){accessorHits++;return MK},enumerable:true,configurable:true})],
+          ['throwing accessor',s=>Object.defineProperty(s,'translation',
+            {get(){accessorHits++;throw new Error('t')},enumerable:true,configurable:true})],
+          ['revoked Proxy',s=>{const h2=Proxy.revocable({},{});h2.revoke();s.translation=h2.proxy}],
+          ['get-trapping Proxy',s=>{s.translation=new Proxy({},{get(){throw new Error('t')}})}]
+        ]){
+          const forged=clone4(base);accessorHits=0;install(forged);
+          const restored=guarded('T2 '+label,()=>api.restoreExerciseSnapshot(forged));
+          assert(accessorHits===0,'a '+label+' translation was invoked during restoration');
+          if(restored!==null)assert(restored.translation===wantT,
+            'a '+label+' translation survived restoration');
+          ctxPresCases+=2;ctxPresAttacks++;ctxAttackCases++;
+        }
+      }
+
+      /* Semantic corruption still REJECTS rather than being presentation-repaired. */
+      {
+        const base=api.createExerciseSnapshot(api.buildTemplate(api.templates[0].id));
+        for(const [label,corrupt] of [
+          ['token word',s=>{s.tokens[0].word='FORGED';s.translation=MK}],
+          ['token order',s=>{s.tokens.reverse();s.translation=MK}],
+          ['exerciseIdentity',s=>{s.exerciseIdentity='nahw-exercise-v3:X';s.translation=MK}],
+          ['templateId',s=>{s.templateId='T_NOT_REAL';s.translation=MK}]
+        ]){
+          const forged=clone4(base);corrupt(forged);
+          const restored=guarded('T2 semantic '+label,()=>api.restoreExerciseSnapshot(forged));
+          assert(restored===null,'semantic corruption of '+label+' was presentation-repaired');
+          ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+        }
+      }
+
+      /* Desk and office survive History exactly, with both English fields forged. */
+      {
+        const HOMO=String.fromCodePoint(0x627,0x644,0x652,0x645,0x64e,0x643,0x652,0x62a,0x64e,0x628,0x64e);
+        const found=Object.create(null);
+        for(let round=0;round<900&&!(found['the desk']&&found['the office']);round++)
+          for(const template of api.templates){
+            const built=api.buildTemplate(template.id);
+            const i=built.tokens.findIndex(t=>t.word===HOMO&&t.grammar.role==='object');
+            if(i<0)continue;
+            const reading=built.tokens[i].gloss;
+            if(!found[reading])found[reading]={built,i,id:template.stableId};
+          }
+        for(const reading of ['the desk','the office']){
+          const hit=found[reading];
+          assert(hit,'no History fixture for the '+reading+' reading');
+          const snapshot=api.createExerciseSnapshot(hit.built);
+          const forged=clone4(snapshot);
+          forged.translation=MK;
+          forged.tokens.forEach(t=>{t.gloss=MK});
+          const restored=guarded('T2 homograph '+reading,()=>api.restoreExerciseSnapshot(forged));
+          assert(restored,'the '+reading+' History case did not restore');
+          assert(restored.tokens[hit.i].gloss===reading,
+            'the '+reading+' reading was lost through History');
+          assert(restored.translation===hit.built.translation,
+            'the '+reading+' translation was not rebuilt exactly');
+          api.render(restored,'',false);
+          assert(!domText().includes(MK),'a forged value reached the DOM for '+reading);
+          ctxPresCases+=4;ctxPresAttacks++;ctxAttackCases++;
+        }
+      }
+
+      /* Both structural lanes of the five dual-structure templates, through History. */
+      {
+        const laneKeys=new Map();
+        for(const key of Object.keys(MAP)){
+          const id=MAP[key].templateId;
+          if(!laneKeys.has(id))laneKeys.set(id,new Set());
+          laneKeys.get(id).add(key);
+        }
+        const dualIds=[...laneKeys].filter(([,s])=>s.size>1).map(([id])=>id);
+        assert(dualIds.length===5,'expected 5 dual-lane templates, found '+dualIds.length);
+        for(const id of dualIds){
+          const template=api.templates.find(t=>t.stableId===id);
+          const seen=new Set();
+          for(let attempt=0;attempt<20000&&seen.size<2;attempt++){
+            const built=api.buildTemplate(template.id);
+            const key=api.translationStructureKey(built);
+            if(seen.has(key))continue;
+            seen.add(key);
+            const forged=clone4(api.createExerciseSnapshot(built));
+            forged.translation=MK;
+            const restored=guarded('T2 lane '+key,()=>api.restoreExerciseSnapshot(forged));
+            assert(restored&&restored.translation===built.translation,
+              'lane '+key+' did not rebuild its canonical translation');
+            ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+          }
+          assert(seen.size===2,id+': only '+seen.size+' lane(s) exercised through History');
+        }
+      }
+
+      /* The History LIST is derived from restored exercises, not from stored English. */
+      {
+        const built=api.buildTemplate(api.templates[0].id);
+        const snapshot=api.createExerciseSnapshot(built);
+        const forged=clone4(snapshot);forged.translation=MK;
+        const restored=api.restoreExerciseSnapshot(forged);
+        assert(restored,'the preview fixture did not restore');
+        api.render(restored,'',false);
+        assert(!String(elements.historyList.innerHTML||'').includes(MK),
+          'a forged translation reached the History list');
+        ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+      }
+      assert(cases>=900,'the T2 sweep shrank to '+cases+' cases');
+      ctxCases+=4;
+    }
+
+    /* T2 ORDERING GUARD. Routing is now enabled, and the ordering is the safety argument: the
+       composer's slots consume canonical glosses, so composition must happen AFTER gloss
+       rebuilding. Asserted on the shipped source because it is a property of the call ORDER, which
+       no behavioural test can observe once both steps have run. */
+    {
+      const restore=script.slice(script.indexOf('function restoreExerciseSnapshot'),
+        script.indexOf('function loadSentenceHistory'));
+      assert(restore.length>0,'could not isolate restoreExerciseSnapshot');
+      const composeAt=restore.indexOf('composeCanonicalTranslation');
+      const glossAt=restore.indexOf('materializeCanonicalGlosses');
+      const presentationAt=restore.indexOf('rebuildCanonicalHistoryPresentation');
+      assert(composeAt>=0,'History restoration no longer routes through the canonical composer');
+      assert(glossAt>=0,'History restoration no longer rebuilds canonical glosses');
+      assert(glossAt<composeAt,
+        'the translation composer runs BEFORE canonical gloss rebuilding — its slots would consume '
+        +'attacker-controlled glosses');
+      assert(presentationAt<composeAt,
+        'the translation composer runs before the advanced-family presentation rebuild, which owns '
+        +'the person-inflected glosses its slots read');
+      // And nothing keeps the stored translation on the restore path.
+      assert(!/data\.translation\s*=\s*(?!canonicalTranslation)/.test(restore),
+        'History restoration assigns a translation from something other than the canonical composer');
+      /* A composition that cannot resolve must REJECT. Every registered key is reachable and every
+         validated exercise matches one, so this branch is unreachable from live data and cannot be
+         proven behaviourally; it is asserted on the source instead, because the alternative — a
+         silent fallback to the stored translation — is exactly the defect this phase removes. */
+      assert(/if\(typeof canonicalTranslation!=='string'\|\|!canonicalTranslation\)return null;/.test(restore),
+        'History restoration no longer REJECTS an unresolvable composition — a composer failure '
+        +'must never fall back to the stored translation');
+      ctxPresCases+=6;ctxCases+=6;
+    }
+  }
+
+  /* ---- A1. THE HOMOGRAPH, resolved through canonical lexical identity -----------------------
+     الْمَكْتَبَ is two different words that share an accusative spelling: "the desk" as a solid thing
+     and "the office" as a place. The governing verb authorizes the object and names a lexical
+     RECORD — an explicit `obj` list, or an object GROUP — so the record, not the spelling, decides
+     the English.
+
+     These fixtures are constructed deterministically rather than waited for: the office reading
+     occurs in roughly 3 of every 35,000 generated tokens, which is exactly why the earlier
+     agreement sweep was intermittently red. */
+  {
+    const HOMOGRAPH=String.fromCodePoint(0x627,0x644,0x652,0x645,0x64e,0x643,0x652,0x62a,0x64e,0x628,0x64e);
+    const thingVerb=String.fromCodePoint(0x631,0x64e,0x62a,0x651,0x64e,0x628,0x64e);
+    const placeVerb=String.fromCodePoint(0x647,0x64e,0x627,0x62c,0x64e,0x645,0x64e);
+    const objectToken={word:HOMOGRAPH,grammar:{type:'noun',role:'object'}};
+    const verbToken=surface=>({word:surface,tense:'past',grammar:{type:'verb',role:'past'}});
+    const exercise=surface=>({templateForm:'singular',tokens:[verbToken(surface),objectToken]});
+    const deskReading=api.resolveCanonicalTokenGloss(exercise(thingVerb),objectToken,1);
+    const officeReading=api.resolveCanonicalTokenGloss(exercise(placeVerb),objectToken,1);
+    assert(deskReading==='the desk',
+      'the thing-verb did not authorize the desk reading: '+JSON.stringify(deskReading));
+    assert(officeReading==='the office',
+      'the place-verb did not authorize the office reading: '+JSON.stringify(officeReading));
+    assert(deskReading!==officeReading,'both verbs resolve the homograph identically — the fixtures prove nothing');
+    // No governing verb at all: an ambiguous surface fails closed rather than guessing.
+    assert(api.resolveCanonicalTokenGloss({templateForm:'singular',tokens:[objectToken]},objectToken,0)===null,
+      'an ambiguous object surface with no authorizing verb did not fail closed — a majority or '
+      +'first-match reading was taken');
+    ctxPresCases+=4;ctxCases+=4;
+
+    /* Full round trips for BOTH readings, located by construction across the template set. */
+    /* The office reading appears in roughly 1 token in 12,000, so the search is narrowed to the
+       templates that can produce this surface at all and then given a real budget on those. */
+    const found=Object.create(null);
+    let homographBuilds=0;
+    for(let round=0;round<900&&!(found['the desk']&&found['the office']);round++){
+      for(const template of api.templates){
+        const built=api.buildTemplate(template.id);
+        const index=built.tokens.findIndex(t=>t.word===HOMOGRAPH&&t.grammar.role==='object');
+        if(index<0)continue;
+        homographBuilds++;
+        const reading=built.tokens[index].gloss;
+        if(!found[reading])found[reading]={template:template.stableId,built,index};
+      }
+    }
+    assert(homographBuilds>0,'no template produced the homograph surface at all');
+    for(const reading of ['the desk','the office']){
+      const hit=found[reading];
+      assert(hit,'no production template produced the "'+reading+'" reading — the round-trip '
+        +'fixture could not be constructed');
+      const snapshot=api.createExerciseSnapshot(hit.built);
+      assert(snapshot,hit.template+': the '+reading+' exercise did not snapshot');
+      const restored=api.restoreExerciseSnapshot(clone(snapshot));
+      assert(restored,hit.template+': the '+reading+' exercise did not restore');
+      assert(restored.tokens[hit.index].gloss===reading,
+        'the '+reading+' reading was not preserved through History at '+hit.template
+        +': got '+JSON.stringify(restored.tokens[hit.index].gloss));
+      assert(api.createExerciseSnapshot(restored)?.exerciseIdentity===snapshot.exerciseIdentity,
+        'the '+reading+' round trip changed the canonical identity');
+      // A forgery of the OTHER reading is rebuilt back to this one.
+      const other=reading==='the desk'?'the office':'the desk';
+      const forged=clone(snapshot);
+      forged.tokens[hit.index].gloss=other;
+      const repaired=api.restoreExerciseSnapshot(forged);
+      assert(repaired&&repaired.tokens[hit.index].gloss===reading,
+        'a forged "'+other+'" gloss was not rebuilt back to "'+reading+'" at '+hit.template);
+      for(let repeat=0;repeat<5;repeat++){
+        const again=api.restoreExerciseSnapshot(clone(snapshot));
+        assert(again&&again.tokens[hit.index].gloss===reading,
+          'the '+reading+' reading is not deterministic across repeated restores');
+      }
+      ctxPresCases+=9;ctxPresAttacks++;ctxAttackCases++;
+    }
+    ctxCases+=2;
+  }
+
+  /* ---- A. surfaceHint is a cache of `word`, on every token of every template ---------------- */
+  {
+    let tokensChecked=0;
+    for(const template of api.templates){
+      const built=api.buildTemplate(template.id);
+      for(const token of built.tokens){
+        assert(token.surfaceHint===token.word,
+          template.stableId+': the builder no longer writes surfaceHint===word for "'+token.word
+          +'" — the canonical source of surfaceHint changed and the rebuild must change with it');
+        tokensChecked++;
+      }
+    }
+    assert(tokensChecked===237,'the production token population changed: '+tokensChecked+' (was 237)');
+    ctxPresCases+=tokensChecked+1;ctxCases++;
+  }
+
+  /* ---- B/C/E/F/K/M. Every token of every template, both repaired fields -------------------- */
+  {
+    const FORGERIES=[
+      ['forged string',()=>MARK],
+      ['empty string',()=>''],
+      ['number',()=>7],
+      ['boolean',()=>true],
+      ['null',()=>null],
+      ['record',()=>({forged:MARK})],
+      ['array',()=>[MARK]]
+    ];
+    for(const template of api.templates){
+      const built=api.buildTemplate(template.id);
+      const snapshot=api.createExerciseSnapshot(built);
+      assert(snapshot,template.stableId+': no snapshot for the presentation sweep');
+      const cleanRestored=api.restoreExerciseSnapshot(clone(snapshot));
+      assert(cleanRestored,template.stableId+': the clean snapshot did not restore');
+      const cleanIdentity=api.createExerciseSnapshot(cleanRestored).exerciseIdentity;
+      const cleanJSON=JSON.stringify(cleanRestored);
+      // K — the rebuild is a no-op for clean input: every repaired field already canonical.
+      assert(cleanRestored.tokens.every(token=>token.surfaceHint===token.word),
+        template.stableId+': a clean restore did not carry surfaceHint===word');
+      /* enHint after a clean restore is either '' — discarded, because nothing reads it — or the
+         value rebuildCanonicalHistoryPresentation writes from frozen authority for the advanced
+         families. Both are canonical; neither comes from the snapshot. What must never happen is
+         the STORED value surviving, which the forgery sweep below proves against this baseline. */
+      const cleanEnHints=cleanRestored.tokens.map(token=>token.enHint);
+      assert(cleanEnHints.every(hint=>typeof hint==='string'),
+        template.stableId+': a restored enHint is not a string');
+      ctxPresCases+=2;
+
+      const cleanGlosses=cleanRestored.tokens.map(token=>token.gloss);
+      for(let index=0;index<snapshot.tokens.length;index++){
+        for(const field of ['surfaceHint','enHint','gloss']){
+          if(!Object.prototype.hasOwnProperty.call(snapshot.tokens[index],field))continue;
+          for(const [kind,make] of FORGERIES){
+            const forged=clone(snapshot);
+            forged.tokens[index][field]=make();
+            const restored=guarded(field+' '+kind+' @ '+template.stableId+'['+index+']',
+              ()=>api.restoreExerciseSnapshot(forged));
+            ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+            /* §9's repair contract: forged PRESENTATION is rebuilt, not refused, so a plain forged
+               string must still restore. (The rebuild is placed before the identity calculation
+               because that calculation reaches `surfaceHint` through authoritativeVerbMorphology.
+               That ordering is defence in depth rather than a load-bearing step today: moving the
+               rebuild after it is an equivalent mutation, because the morphology lookup falls back
+               to the token's word when the hint resolves to nothing. It is asserted here as a
+               contract, not claimed as a detection.) */
+            if(kind==='forged string')assert(restored!==null,
+              'a forged '+field+' was REJECTED rather than canonically rebuilt at '
+              +template.stableId+'['+index+'] — forged presentation must be repaired, and the '
+              +'rebuild must run before the identity calculation that reads it');
+            if(restored===null)continue;
+            /* The forged value cannot survive in any form: the restored field must be exactly what
+               a CLEAN restore of the same snapshot produces, which is the canonical rebuild. */
+            const survived=field==='surfaceHint'
+              ? restored.tokens[index].surfaceHint!==restored.tokens[index].word
+              : field==='gloss'
+                ? restored.tokens[index].gloss!==cleanGlosses[index]
+                : restored.tokens[index].enHint!==cleanEnHints[index];
+            if(survived){ctxPresSurvivors++;
+              assert(false,'a forged '+field+' ('+kind+') survived restoration at '
+                +template.stableId+'['+index+']: '+JSON.stringify(restored.tokens[index][field]))}
+            // M — and it changed nothing else at all.
+            assert(JSON.stringify(restored)===cleanJSON,
+              'a forged '+field+' ('+kind+') changed the restored exercise at '
+              +template.stableId+'['+index+']');
+            assert(api.createExerciseSnapshot(restored)?.exerciseIdentity===cleanIdentity,
+              'a forged '+field+' ('+kind+') changed the canonical identity at '+template.stableId);
+          }
+          // E — a MISSING value is rebuilt, not inherited from anywhere.
+          const missing=clone(snapshot);
+          delete missing.tokens[index][field];
+          const rebuilt=guarded('missing '+field+' @ '+template.stableId,
+            ()=>api.restoreExerciseSnapshot(missing));
+          ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+          /* Key ORDER differs here and only here: deleting a field and letting the rebuild re-add
+             it moves the name to the end of the record. The comparison is therefore key-order
+             insensitive — the value is what has to be canonical, not its position. */
+          if(rebuilt!==null)assert(stableHistoryJson(rebuilt)===stableHistoryJson(cleanRestored),
+            'a missing '+field+' was not rebuilt canonically at '+template.stableId+'['+index+']');
+        }
+      }
+    }
+  }
+
+  /* ---- G/H. Accessor and Proxy forms are refused by the materializer, uninvoked ------------- */
+  {
+    const base=api.buildTemplate(api.templates[0].id);
+    const snapshot=api.createExerciseSnapshot(base);
+    for(const field of ['surfaceHint','enHint']){
+      for(const [kind,install] of [
+        ['accessor',target=>Object.defineProperty(target,field,
+          {get(){accessorHits++;return MARK},enumerable:true,configurable:true})],
+        ['throwing accessor',target=>Object.defineProperty(target,field,
+          {get(){accessorHits++;throw new Error('presentation getter')},enumerable:true,configurable:true})],
+        ['revoked Proxy',target=>{const handle=Proxy.revocable({},{});handle.revoke();target[field]=handle.proxy}],
+        ['get-trapping Proxy',target=>{target[field]=new Proxy({},{get(){throw new Error('get')}})}]
+      ]){
+        const forged=clone(snapshot);
+        accessorHits=0;
+        install(forged.tokens[0]);
+        const restored=guarded(field+' '+kind,()=>api.restoreExerciseSnapshot(forged));
+        assert(accessorHits===0,'a '+field+' '+kind+' was invoked during restoration');
+        if(restored!==null){
+          assert(field==='surfaceHint'
+            ? restored.tokens[0].surfaceHint===restored.tokens[0].word
+            : restored.tokens[0].enHint==='',
+            'a '+field+' '+kind+' survived restoration');
+        }
+        ctxPresCases+=2;ctxPresAttacks++;ctxAttackCases++;
+      }
+    }
+  }
+
+  /* ---- I/J. Cross-template and cross-lexeme presentation copying ---------------------------- */
+  {
+    const donorTemplate=api.templates.find(item=>item.stableId!==api.templates[0].stableId);
+    const donor=api.createExerciseSnapshot(api.buildTemplate(donorTemplate.id));
+    const target=api.createExerciseSnapshot(api.buildTemplate(api.templates[0].id));
+    const cleanTarget=JSON.stringify(api.restoreExerciseSnapshot(clone(target)));
+    for(const [label,forge] of [
+      ['cross-template surfaceHint',snapshot=>{snapshot.tokens[0].surfaceHint=donor.tokens[0].word}],
+      ['cross-template enHint',snapshot=>{snapshot.tokens[0].enHint=donor.tokens[0].enHint||'donor hint'}],
+      ['cross-lexeme surfaceHint',snapshot=>{
+        const other=snapshot.tokens.find(token=>token.word!==snapshot.tokens[0].word);
+        if(other)snapshot.tokens[0].surfaceHint=other.word}]
+    ]){
+      const forged=clone(target);
+      forge(forged);
+      const restored=guarded(label,()=>api.restoreExerciseSnapshot(forged));
+      ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+      if(restored===null)continue;
+      assert(JSON.stringify(restored)===cleanTarget,
+        label+' changed the restored exercise — a donor presentation value became authority');
+    }
+  }
+
+  /* ---- L. The learner-visible DOM carries no forged marker for the repaired fields ---------- */
+  {
+    for(const template of api.templates){
+      const snapshot=api.createExerciseSnapshot(api.buildTemplate(template.id));
+      for(const field of ['surfaceHint','enHint']){
+        const forged=clone(snapshot);
+        forged.tokens.forEach(token=>{token[field]=MARK});
+        const restored=guarded('DOM '+field+' @ '+template.stableId,
+          ()=>api.restoreExerciseSnapshot(forged));
+        if(restored===null)continue;
+        api.render(restored,'',false);
+        if(domText().includes(MARK)){ctxPresDomLeaks++;
+          assert(false,'a forged '+field+' reached the learner-visible DOM at '+template.stableId)}
+        ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+      }
+    }
+    assert(ctxPresDomLeaks===0,'forged presentation reached the DOM '+ctxPresDomLeaks+' time(s)');
+  }
+
+  /* ---- N. Semantic corruption is still REJECTED, never repaired as presentation ------------- */
+  {
+    const snapshot=api.createExerciseSnapshot(api.buildTemplate(api.templates[0].id));
+    for(const [label,corrupt] of [
+      ['token word',s=>{s.tokens[0].word='FORGED'}],
+      ['expectedSurface',s=>{s.tokens[0].expectedSurface='FORGED'}],
+      ['exerciseIdentity',s=>{s.exerciseIdentity='nahw-exercise-v3:FORGED'}],
+      ['templateId',s=>{s.templateId='T_NOT_A_TEMPLATE'}],
+      ['token order',s=>{s.tokens.reverse()}]
+    ]){
+      const forged=clone(snapshot);
+      corrupt(forged);
+      const restored=guarded('semantic '+label,()=>api.restoreExerciseSnapshot(forged));
+      assert(restored===null,'semantic corruption of '+label+' was repaired as presentation '
+        +'instead of being rejected');
+      ctxPresCases++;ctxPresAttacks++;ctxAttackCases++;
+    }
+  }
+
+  /* ---- O. The non-production fixture is unaffected ------------------------------------------ */
+  {
+    const fixture=api.buildIdhanSourceDirectFixture();
+    assert(ctxProof(fixture).satisfied===true,'the fixture stopped proving after the presentation repair');
+    const rendered=api.renderIdhanSourceDirectFixture(fixture);
+    assert(rendered.rendered===true,'the fixture stopped rendering');
+    assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
+    const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
+    assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
+    assert(api.templates.length===82,'the presentation repair changed the template count');
+    api.renderResponseContext('');
+    ctxPresCases+=5;ctxCases+=5;
+  }
+
+  /* ---- The one field this phase did NOT canonicalize, pinned exactly ------------------------
+     token.gloss is now rebuilt from frozen vocabulary authority on every restore, so only the root
+     translation still rides out of raw History and renders: 46 of 82 templates (10 more are
+     rejected outright by the identity seal, and 26 are already rebuilt by
+     rebuildCanonicalHistoryPresentation for the advanced families).
+
+     It is not repaired here because this phase is gloss-only by charter, and because translation
+     has no recoverable canonical source: a sentence translation is composed at BUILD time from the
+     randomly selected vocabulary records, in 52 distinct shapes across the 82 builders, each
+     closing over its own records. Rebuilding it means factoring all 82 builders English into
+     replayable per-template composers: an English-composition subsystem, not a cache rebuild.
+
+     This pin holds the line meanwhile: translation must stay purely presentational. A forgery must
+     leave the exercise valid, must not touch any grammatical, structural or identity-bearing
+     field, and must not change the canonical identity, so if it ever becomes authority this
+     fails. */
+  {
+    const structuralOf=exercise=>JSON.stringify(exercise.tokens.map(token=>[token.word,token.state,
+      token.sign,token.target,token.ar,token.en,token.why,token.ruleId,token.signRuleId,
+      token.expectedSurface,token.surfaceHint,token.enHint,token.grammar,token.relations,token.components])
+      .concat([exercise.relationships,exercise.sentence,exercise.sentenceType]));
+    let pinnedGloss=0,pinnedTranslation=0;
+    for(const template of api.templates){
+      const snapshot=api.createExerciseSnapshot(api.buildTemplate(template.id));
+      const cleanRestored=api.restoreExerciseSnapshot(clone(snapshot));
+      const cleanStructure=structuralOf(cleanRestored);
+      const cleanIdentity=api.createExerciseSnapshot(cleanRestored).exerciseIdentity;
+      for(const [label,forge] of [
+        ['gloss',s=>{s.tokens.forEach(token=>{token.gloss=MARK})}],
+        ['translation',s=>{s.translation=MARK}]
+      ]){
+        const forged=clone(snapshot);
+        forge(forged);
+        const restored=guarded('pin '+label+' @ '+template.stableId,
+          ()=>api.restoreExerciseSnapshot(forged));
+        if(restored===null)continue;
+        /* Counted as a SURVIVAL only when the forged value is still there after restoration —
+           26 of the 82 translations are already rebuilt canonically by
+           rebuildCanonicalHistoryPresentation and 10 more are refused outright. */
+        const survived=label==='gloss'
+          ? restored.tokens.some(token=>token.gloss===MARK)
+          : restored.translation===MARK;
+        if(survived){if(label==='gloss')pinnedGloss++;else pinnedTranslation++}
+        assert(api.validateExercise(restored).length===0,
+          'a forged '+label+' produced an exercise that no longer validates at '+template.stableId);
+        assert(structuralOf(restored)===cleanStructure,
+          'a forged '+label+' reached a grammatical, structural or identity-bearing field at '
+          +template.stableId+' — it is no longer presentation-only and must now be rebuilt or refused');
+        assert(api.createExerciseSnapshot(restored)?.exerciseIdentity===cleanIdentity,
+          'a forged '+label+' changed the canonical identity at '+template.stableId);
+        ctxPresCases+=3;ctxPresAttacks++;ctxAttackCases++;
+      }
+    }
+    /* Every learner-facing English field is now canonical. The old accounting recorded a gap —
+       a forged gloss surviving in 56 of 82 templates and a forged translation in 46 — and both are
+       closed: gloss by the canonical gloss authority, translation by History routing through the
+       canonical composer. These assertions are the replacement, and they are absolute rather than
+       a measured gap, so any regression in either authority fails here. */
+    assert(pinnedGloss===0,'a forged gloss survived restoration in '+pinnedGloss
+      +' template(s) — canonical gloss authority regressed');
+    assert(pinnedTranslation===0,'a forged translation survived restoration in '+pinnedTranslation
+      +' template(s) — History translation authority regressed');
+    ctxPresCases+=2;ctxCases++;
+  }
+
+  assert(ctxPresThrows===0,'the presentation block saw '+ctxPresThrows+' escaped exceptions');
+  assert(ctxPresSurvivors===0,'the presentation block saw '+ctxPresSurvivors+' surviving forgeries');
+}
+/* Every declared resolver reason is now accounted for — asserted here, after the separator tests,
+   because three of the reasons are produced only by them. */
+{
+  for(const reason of api.IDHAN_PROOF_FAILURE_REASONS){
+    if(ctxUnreachableReasons.includes(reason))continue;
+    assert(ctxProofReasonsSeen.has(reason),'resolver reason "'+reason+'" is never exercised');
+    ctxCases++;
+  }
+  for(const reason of ctxUnreachableReasons)assert(!ctxProofReasonsSeen.has(reason),
+    'reason "'+reason+'" is documented unreachable but a test reached it — update the documentation');
+  assert(ctxProofReasonsSeen.size===api.IDHAN_PROOF_FAILURE_REASONS.length-ctxUnreachableReasons.length,
+    'the exercised-reason tally drifted: '+ctxProofReasonsSeen.size);
+  ctxCases++;
+}
+console.log('Phase-3B0A response-context architecture audit passed: '+ctxCases+' canonical checks and '+ctxAttackCases+' adversarial checks.');
+console.log('  phase-3B0A non-transferable ownership: '+ctxOwnershipCopyAttacks+' builder/restoration copy attacks rejected');
+console.log('  phase-3B0A hostile-object boundary checks: '+ctxHostileCases
+  +' (0 accessor invocations and 0 Proxy-trap invocations before ownership rejection, 0 escaped exceptions)');
+console.log('  phase-3B0A separator load-bearing checks: '+ctxSeparatorCases);
+console.log('  phase-3B0A full-graph materialization checks: '+ctxGraphCases
+  +'; inert normalized wrappers (Policy B): '+ctxInertWrappers
+  +'; 0 getter invocations, 0 escaped exceptions, 0 surviving original containers');
+console.log('  phase-3B0A resolver reasons: '+api.IDHAN_PROOF_FAILURE_REASONS.length+' declared, '
+  +ctxProofReasonsSeen.size+' reachable and exercised, '+ctxUnreachableReasons.length
+  +' structurally unreachable while one fixture is registered ('+ctxUnreachableReasons.join(', ')+')');
+console.log('  phase-3B0A claim vocabulary: '+api.RESPONSE_CONTEXT_CLAIM_FIELDS.length+' guarded names across 6 live surfaces and 5 raw-History surfaces');
+console.log('  phase-3B0A reason/code distribution: '+JSON.stringify(ctxCodeHist));
+console.log('  phase-3B0A canonical English History presentation: '+ctxPresCases+' checks and '
+  +ctxPresAttacks+' adversarial checks; gloss, surfaceHint and enHint rebuilt canonically on every token of '
+  +'all 82 templates; '+ctxPresSurvivors+' forgeries surviving, '+ctxPresDomLeaks+' reaching the DOM, '
+  +ctxPresThrows+' escaped exceptions');
+console.log('  phase-3B0A nested-schema + live-snapshot repair: '+ctxRepairCases+' checks and '
+  +ctxRepairAttacks+' adversarial checks; '+ctxRepairShapeRefusals
+  +' of the 12 former TypeError paths refused by strict shape verification; '
+  +ctxRepairSurvivors+' unknown or exotic values surviving restoration, '+ctxRepairThrows+' escaped exceptions');
+
 console.log('Phase-3B0-pre canonical sign-label audit passed: '+s0Cases+' canonical checks and '+s0AttackCases+' adversarial checks.');
 console.log('  sign fuzz accounting: '+JSON.stringify(s0FuzzReport)+'; no-ops excluded: '+s0NoOps+'; inert wrappers normalized away: '+s0InertCases);
 console.log('  direct helper accessor checks: '+s0DirectAccessorCases+'; rejected accessor invocations: 0; stale top-level outputs: 0');

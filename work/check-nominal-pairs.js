@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,responseContextId,responsePairIds,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,responseContextId,responsePairIds:[...responsePairIds],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -172,6 +172,29 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   isSourceRuleConsumerAuthorized,
   templateResponseContext,
   templateResponseFixtureId,
+  /* Phase 3B1 — the productive إِذَنْ lane. Same rule as the Phase 3B0A block above: these names
+     exist only in the harness's own copy of the script, so no production caller can reach them. */
+  PRODUCTION_RESPONSE_STATUS,
+  SOURCE_VERIFIED_AUDIT,
+  APPLICATION_COMPOSED_AUDIT,
+  IDHAN_PARTICLE_TYPE,
+  IDHAN_SURFACE,
+  IDHAN_CONDITION_RULE_ID,
+  IDHAN_GOVERNOR_RULE_ID,
+  IDHAN_PRODUCTION_TEMPLATE_ID,
+  IDHAN_PRODUCTION_CONSUMER,
+  IDHAN_PRODUCTION_PAIR_IDS,
+  IDHAN_PRODUCTION_REFUSAL_REASONS,
+  RESPONSE_SEMANTIC_RELATIONS,
+  PRODUCTION_CONTEXT_AUTHORITY_FIELDS,
+  productionContextAuthorityFailure,
+  productionPairAuthorityFailure,
+  observeIdhanResponseHead,
+  isConditionalGovernor,
+  deriveIdhanProductiveNasb,
+  exerciseIdhanProductiveAuthorization,
+  renderProductiveResponseContext,
+  WHY_IDHAN_CONDITIONS,
   responseContextClaim,
   responseContextClaimSite,
   RESPONSE_CONTEXT_CLAIM_FIELDS,
@@ -749,7 +772,9 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 // 65 through Phase 2b-C, plus Phase 3A1's three particle rules, Phase 3A2's two mabnī maḥall
 // rules, and Phase 3B0A's condition-only R_IDHAN_CONDITIONS. Plus
 // Phase 3A2's two governor-specific mabnī-present maḥall rules.
-assert(Object.keys(api.SOURCE_REGISTRY).length===71,`Expected 71 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+// Phase 3B1 adds exactly one: G_IDHAN_NASB, the particle's own identity and government, which is
+// a different claim from the conditions R_IDHAN_CONDITIONS already owns.
+assert(Object.keys(api.SOURCE_REGISTRY).length===72,`Expected 72 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -3860,9 +3885,20 @@ for(const [name,template] of Object.entries(p3Templates))assert(template,`Phase 
     'The كَيْ governor record is not canonical');
   // The lām is deliberately NOT a governor: being absent from this map is what stops it governing.
   assert(!governors.lamTalil,'lām al-taʿlīl must not be registered as a verb governor');
-  assert(!governors.idhan&&!governors.hatta&&!governors.faSababiyya,
-    'Deferred nawāṣib must not be registered as governors in Phase 3A1');
-  p3Cases+=4;
+  /* Phase 3B1 registers إِذَنْ as the first CONDITIONAL governor, so it is expected here now — but
+     the two genuinely deferred nawāṣib must still be absent, and إِذَنْ must be conditional, i.e.
+     bound to the condition set it may never govern without. An unconditional إِذَنْ would govern by
+     adjacency like every other entry in this table, which is exactly what p. 75 forbids. */
+  assert(!governors.hatta&&!governors.faSababiyya,
+    'Deferred nawāṣib must not be registered as governors');
+  assert(governors.idhan&&governors.idhan.surface===api.IDHAN_SURFACE&&governors.idhan.mood==='nasb'
+    &&governors.idhan.ruleId===api.IDHAN_GOVERNOR_RULE_ID
+    &&governors.idhan.conditionSetId===api.IDHAN_CONDITION_RULE_ID,
+    'The إِذَنْ governor record is not canonical');
+  assert(api.isConditionalGovernor(governors.idhan),'إِذَنْ is not registered as a conditional governor');
+  assert(['an','kay','lan','lam','sawfa'].every(name=>!api.isConditionalGovernor(governors[name])),
+    'An unconditional governor was reclassified as conditional');
+  p3Cases+=7;
 }
 
 /* --- Deterministic production: every template, both lanes, exact output. --- */
@@ -4132,10 +4168,17 @@ for(const [name,snapshot] of Object.entries(p3Snapshots)){
 {
   const ids=api.templates.map(t=>t.stableId);
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A1');
+  /* Phase 3B1 appends _04 (the productive إِذَنْ lane) to this tuple. The guarantee that matters —
+     the first three positions are byte-identical, so every saved snapshot still resolves to the
+     template it was built from — is asserted as a prefix, then the full membership is pinned. */
   assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb'&&t.sign==='fatha')
-    .map(t=>t.stableId).join(' | ')
+    .map(t=>t.stableId).slice(0,3).join(' | ')
     ==='T_PARTICLE_PRESENT_NASB_FATHA_01 | T_PARTICLE_PRESENT_NASB_FATHA_02 | T_PARTICLE_PRESENT_NASB_FATHA_03',
     'The particle/present/nasb/fatha stable-ID group changed');
+  assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb'&&t.sign==='fatha')
+    .map(t=>t.stableId).join(' | ')
+    ==='T_PARTICLE_PRESENT_NASB_FATHA_01 | T_PARTICLE_PRESENT_NASB_FATHA_02 | T_PARTICLE_PRESENT_NASB_FATHA_03 | T_PARTICLE_PRESENT_NASB_FATHA_04',
+    'The particle/present/nasb/fatha stable-ID group is not the expected Phase 3B1 membership');
   assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='fiveVerbs'&&t.state==='nasb'&&t.sign==='nunDropped')
     .map(t=>t.stableId).join(' | ')
     ==='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03',
@@ -4158,8 +4201,22 @@ for(const [name,snapshot] of Object.entries(p3Snapshots)){
   for(const t of api.templates)for(let i=0;i<12;i++){
     for(const token of api.buildTemplate(t.id).tokens)if(token.grammar.particleType)produced.add(token.grammar.particleType);
   }
-  assert(!produced.has('idhan')&&!produced.has('hatta')&&!produced.has('faSababiyya')&&!produced.has('wawMaiyya'),
+  /* Phase 3B1 makes إِذَنْ productive, so it is expected here now; the rest of the deferred class
+     is still unreachable. And إِذَنْ may reach production through EXACTLY ONE template — the
+     registered productive consumer — so the scan is repeated per template to prove no other
+     template can emit it. */
+  assert(!produced.has('hatta')&&!produced.has('faSababiyya')&&!produced.has('wawMaiyya'),
     'A deferred nāṣib reached production');
+  {
+    const idhanTemplates=new Set();
+    for(const t of api.templates)for(let i=0;i<12;i++){
+      for(const token of api.buildTemplate(t.id).tokens){
+        if(token.grammar.particleType===api.IDHAN_PARTICLE_TYPE)idhanTemplates.add(t.stableId);
+      }
+    }
+    assert(idhanTemplates.size===1&&idhanTemplates.has(api.IDHAN_PRODUCTION_TEMPLATE_ID),
+      'إِذَنْ is produced by a template other than its registered productive consumer');
+  }
   // Every produced كَيْ has its licensing lām; bare كَيْ is never generated.
   for(const t of api.templates)for(let i=0;i<12;i++){
     const data=api.buildTemplate(t.id);
@@ -5194,7 +5251,7 @@ for(const t of api.templates){
 {
   const ids=api.templates.map(t=>t.stableId);
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
-  assert(api.templates.length===82,`Expected 82 templates after Phase 3A2, found ${api.templates.length}`);
+  assert(api.templates.length===83,`Expected 83 templates after Phase 3B1, found ${api.templates.length}`);
   assert(Object.values(p4Templates).map(t=>t.stableId).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_04 | T_PARTICLE_SINGULAR_NASB_FATHA_05 | T_PARTICLE_SINGULAR_NASB_FATHA_06 | T_PARTICLE_SINGULAR_NASB_FATHA_07',
     'The Phase 3A2 stable IDs are not the four appended ones');
@@ -5204,8 +5261,10 @@ for(const t of api.templates){
         'T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01:lam','T_PARTICLE_PRESENT_NASB_FATHA_01:lan','T_PARTICLE_PRESENT_JAZM_SUKUN_01:lam',
         'T_PARTICLE_PRESENT_RAF_DAMMA_01:sawfa','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01:lan','T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01:lam',
         'T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01:sawfa','T_PARTICLE_PRESENT_NASB_FATHA_02:an','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02:an',
-        'T_PARTICLE_PRESENT_NASB_FATHA_03:kay','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03:kay'].join(' | '),
-    'A presentGovernor declaration changed in Phase 3A2');
+        'T_PARTICLE_PRESENT_NASB_FATHA_03:kay','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03:kay',
+        // Phase 3B1 appends exactly one declaration, and it is the only conditional one.
+        'T_PARTICLE_PRESENT_NASB_FATHA_04:idhan'].join(' | '),
+    'A presentGovernor declaration changed');
   assert(Object.values(p4Templates).every(t=>t.presentGovernor===''),'A Phase 3A2 template declared a muʿrab presentGovernor');
   p4Cases+=5;
 }
@@ -5227,9 +5286,12 @@ for(const t of api.templates){
       }
     });
   }
-  assert(!particleTypes.has('idhan')&&!particleTypes.has('hatta')&&!particleTypes.has('faSababiyya')
+  assert(!particleTypes.has('hatta')&&!particleTypes.has('faSababiyya')
     &&!particleTypes.has('wawMaiyya')&&!particleTypes.has('lamJuhud')&&!particleTypes.has('aw'),
-    'A deferred nāṣib reached production in Phase 3A2');
+    'A deferred nāṣib reached production');
+  /* Phase 3B1 opens إِذَنْ over the MUʿRAB lane only. The maḥall-rule set is what proves the mabnī
+     lane is untouched: a nūn-al-niswah form under إِذَنْ would need a maḥall rule of its own, and
+     none exists, so the set below must stay exactly the three Phase 2b-C/3A2 rules. */
   assert([...mahallRules].sort().join(',')===[P4_AN_MAHALL,P4_KAY_MAHALL,P4_LAN_MAHALL].sort().join(','),
     `Production reached an unexpected maḥall-rule set: ${[...mahallRules]}`);
   // No مبني nūn-al-niswah form under لَمْ or سَوْفَ, and no muʿrab form under a Phase 3A2 template.
@@ -6542,9 +6604,35 @@ function runOwnershipDerivativeSuite(label,original){
     assert(api.responseFixtureRecord(bad)===null,'fixture lookup accepted '+String(bad));
     ctxAttackCases+=3;
   }
-  assert(Object.keys(api.RESPONSE_CONTEXT_REGISTRY).join(',')===CTX_ID,'unexpected context registry contents');
-  assert(Object.keys(api.RESPONSE_PAIR_REGISTRY).join(',')===PAIR_ID,'unexpected pair registry contents');
+  /* Phase 3B1 registers three PRODUCTION exchanges in the same two stores, so the exact-contents
+     assertions now name every record rather than one. The fixture registry is untouched: the
+     productive lane has no fixture and may never acquire one, which is what keeps the source's own
+     example non-production. The status split is asserted immediately below, so a production record
+     can never be miscounted as the fixture's. */
+  assert(Object.keys(api.RESPONSE_CONTEXT_REGISTRY).join(',')
+    ===[CTX_ID,'IDHAN_PRODUCTION_READING','IDHAN_PRODUCTION_MEMORIZING','IDHAN_PRODUCTION_OPENING'].join(','),
+    'unexpected context registry contents');
+  assert(Object.keys(api.RESPONSE_PAIR_REGISTRY).join(',')
+    ===[PAIR_ID,...api.IDHAN_PRODUCTION_PAIR_IDS].join(','),'unexpected pair registry contents');
   assert(Object.keys(api.IDHAN_FIXTURE_REGISTRY).join(',')===FIXTURE_ID,'unexpected fixture registry contents');
+  // Exactly one record of each store is the architecture fixture's; the rest are production.
+  assert(Object.values(api.RESPONSE_CONTEXT_REGISTRY)
+    .filter(record=>record.productionStatus===api.ARCHITECTURE_FIXTURE_STATUS).length===1,
+    'more than one context is the architecture fixture’s');
+  assert(Object.values(api.RESPONSE_PAIR_REGISTRY)
+    .filter(record=>record.productionStatus===api.ARCHITECTURE_FIXTURE_STATUS).length===1,
+    'more than one pair is the architecture fixture’s');
+  assert(Object.values(api.RESPONSE_CONTEXT_REGISTRY).concat(Object.values(api.RESPONSE_PAIR_REGISTRY))
+    .every(record=>record.productionStatus===api.ARCHITECTURE_FIXTURE_STATUS
+      ||record.productionStatus===api.PRODUCTION_RESPONSE_STATUS),
+    'a response record carries an unknown production status');
+  // Only the fixture's own records may claim the SOURCE's audit status.
+  assert(Object.values(api.RESPONSE_PAIR_REGISTRY).filter(record=>record.auditStatus===api.SOURCE_VERIFIED_AUDIT)
+    .every(record=>record.productionStatus===api.ARCHITECTURE_FIXTURE_STATUS),
+    'a production pair claims the source-direct audit status');
+  assert(api.IDHAN_FIXTURE_REGISTRY[FIXTURE_ID].auditStatus===api.SOURCE_VERIFIED_AUDIT,
+    'the source-direct fixture lost its audit status');
+  ctxCases+=7;
   // The fixture ID is distinct from every other identifier class it could be confused with.
   assert(FIXTURE_ID!==CTX_ID&&FIXTURE_ID!==PAIR_ID&&FIXTURE_ID!==CONSUMER&&FIXTURE_ID!==RESPONSE_NODE_ID,
     'the fixture id collides with another identifier class');
@@ -6601,10 +6689,32 @@ function runOwnershipDerivativeSuite(label,original){
   assert(/future/.test(rule.topic),'the rule topic omits the future condition');
   assert(/separates|oath|vocative/.test(rule.topic),'the rule topic omits the separation condition');
   assert(/Condition authority only/.test(rule.conditions),'the rule does not disclaim particle/state/template authority');
-  assert(!api.GRAMMAR_RULES.governors.idhan,'إِذَنْ was registered as an active production governor');
-  assert(!api.SOURCE_REGISTRY.G_IDHAN_NASB,'G_IDHAN_NASB exists as a production record');
+  /* Phase 3B1 separates the two claims that p. 75 genuinely makes: the CONDITIONS stay
+     R_IDHAN_CONDITIONS, and the particle's identity and government become G_IDHAN_NASB. The
+     condition rule must still disclaim the particle analysis, the state and the sign, so that
+     citing it can never stand in for citing the governor rule — or for the sign rule, which is
+     the verb's own morphology and not the nāṣib's. */
+  assert(/authorizes neither the particle analysis/.test(rule.conditions),
+    'the condition rule no longer disclaims the particle analysis');
+  assert(/nor a naṣb state, nor a sign/.test(rule.conditions),'the condition rule no longer disclaims state and sign');
+  const governorRule=api.SOURCE_REGISTRY.G_IDHAN_NASB;
+  assert(governorRule&&governorRule.productionEnabled&&governorRule.basis==='nahw-rule','G_IDHAN_NASB is missing or disabled');
+  assert(JSON.stringify(governorRule.primarySource.pdfPages)===JSON.stringify([75]),
+    'G_IDHAN_NASB must cite exactly p. 75, found '+JSON.stringify(governorRule.primarySource.pdfPages));
+  assert(api.isSourceAuthorized('G_IDHAN_NASB'),'G_IDHAN_NASB is not source-authorized');
+  assert(/answer, recompense, and naṣb/.test(governorRule.topic),'G_IDHAN_NASB does not state the source’s own identity clause');
+  assert(/by itself/.test(governorRule.topic),'G_IDHAN_NASB does not state direct government');
+  assert(/but not the naṣb sign/.test(governorRule.conditions),'G_IDHAN_NASB claims the naṣb sign');
+  assert(/never be relied on without R_IDHAN_CONDITIONS/.test(governorRule.conditions),
+    'G_IDHAN_NASB does not bind itself to the condition rule');
+  assert(/does not cover a five-verb form, a mabnī nūn-al-niswah form, a concealed أَنْ/.test(governorRule.conditions),
+    'G_IDHAN_NASB does not exclude the lanes this phase leaves closed');
+  assert(governorRule!==rule&&api.SOURCE_REGISTRY.G_IDHAN_NASB!==api.SOURCE_REGISTRY.R_IDHAN_CONDITIONS,
+    'the governor rule and the condition rule are the same record');
+  // إِذَنْ is a muʿrab-lane governor only: the mabnī nūn-al-niswah lane stays closed to it.
   assert(!api.MABNI_PRESENT_GOVERNOR_MODES.includes('idhan'),'إِذَنْ became a mabnī governor mode');
-  ctxCases+=10;
+  assert(!api.MABNI_PRESENT_GOVERNORS.idhan,'إِذَنْ acquired a mabnī-present maḥall record');
+  ctxCases+=20;
 }
 
 /* --- B: the application-owned builder. --- */
@@ -7548,18 +7658,28 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===82,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===83,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
-  // X: the exact 82 stable IDs, unchanged.
-  assert([...ids].sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,'the set of stable template IDs changed');
-  ctxCases+=3;
+  /* X: the exact stable IDs. The 82 Phase 3B0A inherited are unchanged — asserted as a subset in
+     both directions against the original manifest — and Phase 3B1 appends exactly one. */
+  assert([...ids].filter(id=>id!==api.IDHAN_PRODUCTION_TEMPLATE_ID).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+    'the set of stable template IDs changed');
+  assert(ids.includes(api.IDHAN_PRODUCTION_TEMPLATE_ID),'the productive إِذَنْ template is not registered');
+  assert(!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(api.IDHAN_PRODUCTION_TEMPLATE_ID),
+    'the productive إِذَنْ template reused an inherited stable ID');
+  ctxCases+=5;
   const particleTypes=new Set();
   for(const template of api.templates)for(let attempt=0;attempt<10;attempt++){
     const data=api.buildTemplate(template.id);
+    const productive=template.stableId===api.IDHAN_PRODUCTION_TEMPLATE_ID;
     for(const item of data.tokens){
       if(item.grammar.particleType)particleTypes.add(item.grammar.particleType);
-      assert(item.word!==IDHAN,template.stableId+' produced إِذَنْ');
+      // Phase 3B1: إِذَنْ is produced by the productive template and by nothing else.
+      if(!productive)assert(item.word!==IDHAN,template.stableId+' produced إِذَنْ');
+      /* The SOURCE-DIRECT response verb stays fixture-only in every template, productive included:
+         it is 2ms, and 2ms is morphology authority only, so the source's own example can never
+         become a production exercise. */
       assert(item.word!==TANJAHA,template.stableId+' produced the fixture response verb');
       assert(item.ruleId!=='R_IDHAN_CONDITIONS',template.stableId+' cited R_IDHAN_CONDITIONS');
     }
@@ -7567,23 +7687,45 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
     assert(!data.sentence.includes(PROMPT_VERB),template.stableId+' produced the fixture prompt verb');
     assert(api.responseContextClaimSite(data)==='',template.stableId+' produced a discourse claim: '+api.responseContextClaimSite(data));
   }
-  assert(!particleTypes.has('idhan'),'the idhan particle type reached production');
+  assert(particleTypes.has('idhan'),'the productive idhan lane produced no idhan particle');
   assert(api.templates.every(template=>template.stableId!==CONSUMER),'a template claimed the fixture consumer id');
   // V: the deliberate 2ms production exclusion is untouched, even though the fixture is 2ms.
   assert(api.PRESENT_NON_PRODUCTION_PERSONS.includes('2ms'),'2ms production exclusion was removed');
   assert(PAIR.responsePerson==='2ms','the source fixture is not the source example person');
   assert(api.templates.every(template=>template.presentCapabilities.every(capability=>capability.person!=='2ms')),
     'a template gained a 2ms capability');
-  // The production display is context-free and byte-identical for all 82.
+  assert(api.IDHAN_PRODUCTION_PAIR_IDS.every(id=>api.RESPONSE_PAIR_REGISTRY[id].responsePerson!=='2ms'),
+    'a productive exchange claimed the source example person');
+  /* The production display: context-free and byte-identical for all 82 inherited templates, and
+     the productive one shows ITS OWN registered statement — never the fixture's. */
   for(const template of api.templates){
     const data=api.buildTemplate(template.id);
     api.render(data,'',false);
+    if(template.stableId===api.IDHAN_PRODUCTION_TEMPLATE_ID){
+      const authorization=api.exerciseIdhanProductiveAuthorization(data);
+      assert(authorization&&authorization.authorized,'the productive template did not authorize its own naṣb');
+      const context=api.responseContextRecord(authorization.contextId);
+      assert(elements.responseContext.hidden===false,'the productive template hid its own statement');
+      assert(elements.responseContextPromptAr.textContent===context.promptAr,'the displayed Arabic statement is not the authorized context’s');
+      assert(elements.responseContextPromptEn.textContent===context.promptEn,'the displayed English statement is not the authorized context’s');
+      assert(elements.responseContextPromptAr.textContent!==PROMPT,'the productive template displayed the fixture prompt');
+      assert(!elements.answers.innerHTML.includes(PROMPT),'the productive template rendered the fixture prompt');
+      ctxCases+=5;
+      continue;
+    }
     assert(elements.responseContext.hidden===true,template.stableId+' revealed the context block');
     assert(elements.responseContextPromptAr.textContent==='',template.stableId+' left Arabic context text');
     assert(elements.responseContextPromptEn.textContent==='',template.stableId+' left English context text');
     assert(!elements.answers.innerHTML.includes(PROMPT),template.stableId+' rendered the fixture prompt');
     ctxCases+=4;
   }
+  /* Leave the DOM in the context-free state the rest of this block assumes. Rendering ANY
+     non-productive template must clear the statement the productive one displayed — which is
+     itself the property that a stale context can never survive into another exercise. */
+  api.render(api.buildTemplate(api.templates[0].id),'',false);
+  assert(elements.responseContext.hidden===true&&elements.responseContextPromptAr.textContent===''
+    &&elements.responseContextPromptEn.textContent==='','a productive statement survived into the next exercise');
+  ctxCases++;
   const anySnapshot=api.createExerciseSnapshot(api.buildTemplate(api.templates[0].id));
   assert(anySnapshot.schemaVersion===3,'History schema is no longer v3');
   /* 30 before this repair, plus `separator-token-present` from the separator predicate and the
@@ -8847,8 +8989,14 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===82,'the repair block changed the production template count');
-  assert(api.SOURCE_REGISTRY.G_IDHAN_NASB===undefined,'G_IDHAN_NASB exists');
+  assert(api.templates.length===83,'the repair block changed the production template count');
+  /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
+     holds — this block builds only FIXTURE exercises, so none of them may carry the productive
+     governor's rule, and the fixture registry must still hold exactly one record. */
+  assert(api.SOURCE_REGISTRY.G_IDHAN_NASB!==undefined,'G_IDHAN_NASB is missing');
+  assert(api.buildIdhanSourceDirectFixture().tokens.every(item=>item.ruleId!==api.IDHAN_GOVERNOR_RULE_ID),
+    'the source-direct fixture cites the productive governor rule');
+  assert(Object.keys(api.IDHAN_FIXTURE_REGISTRY).length===1,'the repair block changed the fixture registry');
   assert(elements.responseContext.hidden===true,'the repair block left learner-visible response context');
   ctxRepairCases+=3;ctxCases+=3;
 }
@@ -8939,8 +9087,11 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(Object.isFrozen(record),'a fixed-token gloss record is mutable');
     assert(Object.keys(api.GLOSS_FIXED_TOKENS).length===8,
       'the fixed-token gloss registry is no longer the eight measured surfaces');
-    assert(Object.keys(api.GLOSS_CLOSED_PARTICLES).length===10,
+    // Phase 3B1 adds exactly one: إِذَنْ.
+    assert(Object.keys(api.GLOSS_CLOSED_PARTICLES).length===11,
       'the closed particle gloss registry changed size');
+    assert(api.GLOSS_CLOSED_PARTICLES[api.IDHAN_SURFACE]==='in that case',
+      'the إِذَنْ gloss is not its canonical wording');
     // Inherited names are not authority.
     assert(api.resolveCanonicalTokenGloss({tokens:[]},
       {word:'constructor',grammar:{type:'particle'}},0)===null,
@@ -8956,8 +9107,26 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
   {
     const SHAPES=api.TRANSLATION_COMPOSER_SHAPES,MAP=api.TRANSLATION_STRUCTURE_MAP;
     const registeredKeys=Object.keys(MAP),registeredShapes=Object.keys(SHAPES);
-    assert(registeredKeys.length===87,'the structural map holds '+registeredKeys.length+' keys, not 87');
-    assert(registeredShapes.length===22,'the shape registry holds '+registeredShapes.length+' shapes, not 22');
+    /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
+       two-token particle+verb structure this app has ever produced, so no existing shape addresses
+       it and none may be stretched to. */
+    assert(registeredKeys.length===88,'the structural map holds '+registeredKeys.length+' keys, not 88');
+    assert(registeredShapes.length===23,'the shape registry holds '+registeredShapes.length+' shapes, not 23');
+    assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
+      'the productive إِذَنْ structure has no registered composer');
+    /* The 87 inherited keys and 22 inherited shapes are untouched: Phase 3B1 APPENDS, it does not
+       re-map. Anything else would silently re-translate a pre-existing template. */
+    {
+      const inheritedKeys=registeredKeys.filter(k=>!k.startsWith(api.IDHAN_PRODUCTION_TEMPLATE_ID+'||'));
+      const inheritedShapes=registeredShapes.filter(id=>id!=='TS23');
+      assert(inheritedKeys.length===87,'the inherited structural-key set changed: '+inheritedKeys.length);
+      assert(inheritedShapes.length===22,'the inherited shape set changed: '+inheritedShapes.length);
+      assert(inheritedKeys.every(k=>MAP[k].shape!=='TS23'),'an inherited template was re-mapped onto the new shape');
+      assert(inheritedShapes.every(id=>SHAPES[id].parts.every(p=>typeof p.lit!=='string'||!/ he will /.test(p.lit))),
+        'an inherited shape acquired the new lane’s wording');
+      assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'].shape==='TS23',
+        'the productive structure is not mapped to its own shape');
+    }
     assert(Object.isFrozen(SHAPES)&&Object.isFrozen(MAP),'a composer registry is mutable');
     for(const id of registeredShapes){
       assert(Object.isFrozen(SHAPES[id])&&Object.isFrozen(SHAPES[id].parts),'shape '+id+' is mutable');
@@ -8974,7 +9143,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===82,'the map covers '+mappedTemplates.size+' templates, not 82');
+    assert(mappedTemplates.size===83,'the map covers '+mappedTemplates.size+' templates, not 83');
     // The five dual-structure templates carry exactly two lanes each; everything else exactly one.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -9033,8 +9202,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===87,'only '+keysSeen.size+' of the 87 structural keys were observed');
-    assert(shapesSeen.size===22,'only '+shapesSeen.size+' of the 22 composer shapes were observed');
+    assert(keysSeen.size===88,'only '+keysSeen.size+' of the 88 structural keys were observed');
+    assert(shapesSeen.size===23,'only '+shapesSeen.size+' of the 23 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -9368,7 +9537,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===87,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===88,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -9687,7 +9856,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         tokensChecked++;
       }
     }
-    assert(tokensChecked===237,'the production token population changed: '+tokensChecked+' (was 237)');
+    // Phase 3B1 adds one two-token template, so the population rises by exactly two.
+    assert(tokensChecked===239,'the production token population changed: '+tokensChecked+' (was 239)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -9876,7 +10046,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===82,'the presentation repair changed the template count');
+    assert(api.templates.length===83,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -9978,12 +10148,851 @@ console.log('  phase-3B0A claim vocabulary: '+api.RESPONSE_CONTEXT_CLAIM_FIELDS.
 console.log('  phase-3B0A reason/code distribution: '+JSON.stringify(ctxCodeHist));
 console.log('  phase-3B0A canonical English History presentation: '+ctxPresCases+' checks and '
   +ctxPresAttacks+' adversarial checks; gloss, surfaceHint and enHint rebuilt canonically on every token of '
-  +'all 82 templates; '+ctxPresSurvivors+' forgeries surviving, '+ctxPresDomLeaks+' reaching the DOM, '
+  +'all '+api.templates.length+' templates; '+ctxPresSurvivors+' forgeries surviving, '+ctxPresDomLeaks+' reaching the DOM, '
   +ctxPresThrows+' escaped exceptions');
 console.log('  phase-3B0A nested-schema + live-snapshot repair: '+ctxRepairCases+' checks and '
   +ctxRepairAttacks+' adversarial checks; '+ctxRepairShapeRefusals
   +' of the 12 former TypeError paths refused by strict shape verification; '
   +ctxRepairSurvivors+' unknown or exotic values surviving restoration, '+ctxRepairThrows+' escaped exceptions');
+
+/* ==========================================================================
+   PHASE 3B1 — THE PRODUCTIVE ORDINARY إِذَنْ LANE.
+
+   Phase 3B0A proved the three conditions of Al-Tuḥfah p. 75 for the source's own example and
+   deliberately reached no production template. This phase opens ONE productive lane — إِذَنْ +
+   an ordinary muʿrab present verb, manṣūb with the visible fatḥah, answering a registered
+   statement — and this block is its permanent evidence.
+
+   The property under test is never "إِذَنْ makes the verb after it manṣūb". It is: the naṣb is
+   assigned ONLY when all three conditions are proven from frozen application-owned authority, and
+   in every other case the exercise is REFUSED rather than quietly rendered. So the positive cases
+   below are outnumbered by the negative ones, and every negative one is produced by mutating a
+   genuine application-built exercise rather than by assembling a look-alike.
+   ========================================================================== */
+let p5Cases=0,p5Attacks=0;
+const p5Codes={},p5Reasons=new Set();
+const P5_TEMPLATE=api.templates.find(t=>t.stableId===api.IDHAN_PRODUCTION_TEMPLATE_ID);
+const P5_IDHAN=api.IDHAN_SURFACE;
+const p5Build=()=>api.buildTemplate(P5_TEMPLATE.id);
+/* One authorization call, so a test can never accidentally authorize itself by asking about the
+   wrong token: the verb index is always re-derived from the exercise's own token list. */
+function p5Authorize(data){
+  const index=data.tokens.findIndex(t=>t.grammar&&t.grammar.type==='verb');
+  return api.deriveIdhanProductiveNasb(data,index);
+}
+/* A tampered copy of an APPLICATION-built productive exercise: built by the builder, then
+   mutated. Everything except the mutation is genuine application output, so a rejection can only
+   be the mutation. */
+function p5Tampered(mutate){
+  const data=p5Build();
+  mutate(data);
+  return data;
+}
+/* A mutation must be REFUSED by the productive authority, for its own reason. */
+function p5Refuses(name,expectedReason,mutate){
+  let result;
+  try{ result=p5Authorize(p5Tampered(mutate)); }
+  catch(error){ throw new Error('Phase-3B1 attack "'+name+'" threw: '+error.message); }
+  assert(result&&result.authorized===false,'Phase-3B1 attack "'+name+'" was AUTHORIZED');
+  assert(Object.isFrozen(result),'Phase-3B1 refusal "'+name+'" is not frozen');
+  assert(result.templateId===''&&result.contextId===''&&result.pairId==='',
+    'Phase-3B1 refusal "'+name+'" leaked a binding');
+  if(expectedReason)assert(result.reason===expectedReason,
+    'Phase-3B1 attack "'+name+'" refused for "'+result.reason+'", expected "'+expectedReason+'"');
+  p5Reasons.add(result.reason);
+  p5Attacks++;
+}
+/* A mutation must be refused by validateExercise, with a specific error code. A refusal by the
+   authority that did NOT also fail validation would mean an unproven naṣb could still render. */
+function p5Rejects(name,expectedCode,mutate){
+  let failures;
+  try{ failures=api.validateExercise(p5Tampered(mutate)); }
+  catch(error){ throw new Error('Phase-3B1 validation attack "'+name+'" threw: '+error.message); }
+  assert(failures.length>0,'Phase-3B1 validation attack "'+name+'" produced a CLEAN exercise');
+  failures.forEach(f=>{p5Codes[f.code]=(p5Codes[f.code]||0)+1});
+  if(expectedCode)assert(failures.some(f=>f.code===expectedCode),
+    'Phase-3B1 validation attack "'+name+'" produced ['+failures.map(f=>f.code).join(',')
+    +'], expected '+expectedCode);
+  p5Attacks++;
+}
+
+/* --- §18-A/H/I: the registry, the source binding, and the two audit classes. --- */
+{
+  assert(api.IDHAN_PRODUCTION_PAIR_IDS.length===3,'the productive exchange count changed');
+  assert(Object.isFrozen(api.IDHAN_PRODUCTION_PAIR_IDS),'the productive pair list is mutable');
+  assert(api.IDHAN_PRODUCTION_CONSUMER===api.IDHAN_PRODUCTION_TEMPLATE_ID,
+    'the productive consumer is not the productive template');
+  /* The two consumer classes are exact inverses, and that is what keeps the lanes apart: the
+     FIXTURE consumer may never be a template stableId, the PRODUCTIVE consumer must be one. */
+  assert(api.templates.every(t=>t.stableId!==api.IDHAN_FIXTURE_CONSUMER),
+    'the fixture consumer became a template stable ID');
+  assert(api.templates.some(t=>t.stableId===api.IDHAN_PRODUCTION_CONSUMER),
+    'the productive consumer is not a template stable ID');
+  assert(api.RESTRICTED_SOURCE_RULE_OWNERS.R_IDHAN_CONDITIONS.join(',')
+    ===[api.IDHAN_FIXTURE_CONSUMER,api.IDHAN_PRODUCTION_CONSUMER].join(','),
+    'the condition rule’s consumer list is not the two authorized consumers');
+  assert(api.isSourceRuleConsumerAuthorized('R_IDHAN_CONDITIONS',api.IDHAN_PRODUCTION_CONSUMER),
+    'the productive consumer may not cite the condition rule');
+  for(const stranger of ['T_NOUN_SINGULAR_RAF_DAMMA_01','','x',api.IDHAN_PRODUCTION_TEMPLATE_ID+' ']){
+    assert(!api.isSourceRuleConsumerAuthorized('R_IDHAN_CONDITIONS',stranger),
+      'an unauthorized consumer may cite the condition rule: '+stranger);
+    p5Attacks++;
+  }
+  for(const pairId of api.IDHAN_PRODUCTION_PAIR_IDS){
+    const pair=api.RESPONSE_PAIR_REGISTRY[pairId];
+    const context=api.RESPONSE_CONTEXT_REGISTRY[pair.contextId];
+    assert(pair&&context,pairId+' is not bound to a registered context');
+    assert(pair.productionStatus===api.PRODUCTION_RESPONSE_STATUS
+      &&context.productionStatus===api.PRODUCTION_RESPONSE_STATUS,pairId+' is not a production record');
+    assert(pair.auditStatus===api.APPLICATION_COMPOSED_AUDIT,
+      pairId+' claims an audit status it has no source for');
+    assert(pair.auditStatus!==api.SOURCE_VERIFIED_AUDIT,pairId+' claims the source-direct audit status');
+    assert(pair.templateId===api.IDHAN_PRODUCTION_TEMPLATE_ID,pairId+' is not bound to the productive template');
+    assert(!Object.prototype.hasOwnProperty.call(pair,'fixtureId'),pairId+' names an architecture fixture');
+    assert(context.authorizedConsumers.length===1
+      &&context.authorizedConsumers[0]===api.IDHAN_PRODUCTION_TEMPLATE_ID,pairId+'’s context has the wrong consumer');
+    assert(context.sourceRuleId==='R_IDHAN_CONDITIONS'&&context.conditionSetId==='R_IDHAN_CONDITIONS',
+      pairId+'’s context does not cite the condition rule');
+    assert(context.sourcePdfPage===75&&pair.sourcePdfPage===75,pairId+' does not cite p. 75');
+    assert(context.separatorMode===api.SEPARATOR_MODES.none,pairId+' authorizes a separator');
+    assert(context.responseRelation===api.RESPONSE_RELATIONS.jawabJazaa,pairId+' has the wrong response relation');
+    assert(context.discoursePosition===api.DISCOURSE_POSITIONS.sadrJumlatAlJawab,pairId+' has the wrong discourse position');
+    assert(pair.responsePerson==='3ms',pairId+' is not the ordinary 3ms lane');
+    assert(api.PRESENT_MORPHOLOGY[pair.responsePerson].formClass==='ordinary',pairId+' is not an ordinary present form');
+    // §18-B/C: the pinned response verb is a REGISTERED accusative surface of a real lexeme.
+    const registered=api.verbFormIndex.get(pair.responseVerbAr);
+    assert(registered&&registered.form==='acc'&&registered.lexeme.acc===pair.responseVerbAr,
+      pairId+' pins a surface the vocabulary registry does not produce');
+    // The futurity evidence is the prompt's own Arabic sīn — verified structurally, never in English.
+    const evidence=api.FUTURE_EVIDENCE_KINDS[context.futureEvidenceId];
+    assert(evidence&&evidence.markerAr==='س',pairId+'’s future evidence is not the sīn');
+    assert(context.promptVerbAr.startsWith(evidence.markerAr),pairId+'’s prompt verb carries no future sīn');
+    assert(context.promptAr.startsWith(context.promptVerbAr),pairId+'’s prompt does not open with its verb');
+    assert(api.futureEvidenceFailure(context,api.FUTURE_EVIDENCE_KINDS)==='',pairId+' does not prove futurity');
+    // The reciprocal discourse graph lives on the PAIR, never on any exercise.
+    assert(api.responseGraphFailure(pair.responseRelationships,context.id,context.responseNodeId)==='',
+      pairId+' has an invalid discourse graph');
+    assert(api.productionContextAuthorityFailure(context,pair)==='',pairId+'’s context is not cross-checked clean');
+    assert(api.productionPairAuthorityFailure(pair,context)==='',pairId+' is not internally consistent');
+    p5Cases+=20;
+  }
+  // Every registered production context is reachable through exactly one pair.
+  const reachable=api.IDHAN_PRODUCTION_PAIR_IDS.map(id=>api.RESPONSE_PAIR_REGISTRY[id].contextId);
+  assert(new Set(reachable).size===reachable.length,'two productive pairs share one context');
+  assert(Object.values(api.RESPONSE_CONTEXT_REGISTRY)
+    .filter(r=>r.productionStatus===api.PRODUCTION_RESPONSE_STATUS).length===reachable.length,
+    'a productive context is registered but unreachable');
+  p5Cases+=8;
+}
+
+/* --- §18-B/C/G/J/K/L/P/Q: every productive exercise, end to end. --- */
+const p5Seen=new Map();
+{
+  for(let attempt=0;attempt<24;attempt++){
+    const data=p5Build();
+    const authorization=p5Authorize(data);
+    assert(authorization.authorized,'a productive build did not prove its conditions: '+authorization.reason);
+    assert(Object.isFrozen(authorization),'the productive authorization is not frozen');
+    const pair=api.RESPONSE_PAIR_REGISTRY[authorization.pairId];
+    const context=api.RESPONSE_CONTEXT_REGISTRY[authorization.contextId];
+    p5Seen.set(authorization.pairId,data);
+    // §18-G: the authorization names the productive template and nothing else.
+    assert(authorization.templateId===api.IDHAN_PRODUCTION_TEMPLATE_ID,'the authorization named another template');
+    assert(context.id===pair.contextId,'the authorization crossed a pair with another context');
+    // Exactly two tokens: the particle and its verb. A third would be a separator.
+    assert(data.tokens.length===2,'a productive exercise is not exactly particle + verb');
+    const [particle,verb]=data.tokens;
+    assert(particle.word===P5_IDHAN&&particle.grammar.particleType==='idhan','token 0 is not إِذَنْ');
+    assert(verb.word===pair.responseVerbAr,'the verb is not the authorized pair’s response verb');
+    assert(data.sentence===P5_IDHAN+' '+pair.responseVerbAr,'the composed sentence is not the authorized response');
+    // §18-I/J: explicit NASB state and the fatḥah sign, both from the canonical registries.
+    assert(verb.state==='nasb','the productive verb is not manṣūb');
+    assert(api.safeSignId(verb.sign)==='fatha','the productive verb does not take the fatḥah');
+    assert(verb.sign.ar===api.canonicalSign('fatha').ar&&verb.sign.en===api.canonicalSign('fatha').en,
+      'the productive verb’s sign labels are not the canonical ones');
+    assert(verb.ruleId===api.GRAMMAR_RULES.presentVerb.regular.nasb[1],
+      'the productive verb does not cite the canonical naṣb-sign rule');
+    assert(verb.inflection==='regular','the productive verb is not the ordinary muʿrab lane');
+    assert(verb.grammar.morphology.formClass==='ordinary'&&verb.grammar.morphology.person==='3ms',
+      'the productive verb is not an ordinary 3ms form');
+    // §18-G: the particle owns the governor rule; the condition rule is cited by nothing.
+    assert(particle.ruleId===api.IDHAN_GOVERNOR_RULE_ID,'the particle does not cite G_IDHAN_NASB');
+    assert(data.tokens.every(t=>t.ruleId!=='R_IDHAN_CONDITIONS'),'a token cited R_IDHAN_CONDITIONS');
+    assert(data.tokens.every(t=>!t.mahallRuleId),'a productive token claims a whole-word maḥall rule');
+    assert(verb.governorId===particle.id&&particle.relations.governsId===verb.id,
+      'the governor links are not reciprocal');
+    // §18-K: the rendered iʿrāb of both tokens.
+    /* The learner-facing iʿrāb, asserted clause by clause rather than as one hand-typed string:
+       the required content is «فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِـ«إِذَنْ»، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ
+       الظَّاهِرَةُ عَلَى آخِرِهِ», plus the ordinary lane's hidden-subject clause, and nothing else. */
+    assert(verb.ar.startsWith(verb.word+': فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِـ«'+P5_IDHAN+'»،'),
+      'the productive verb’s iʿrāb does not open with مَنْصُوبٌ بِـ«إِذَنْ»: '+verb.ar);
+    assert(verb.ar.includes('وَعَلَامَةُ نَصْبِهِ '+api.canonicalSign('fatha').ar),
+      'the productive verb’s iʿrāb does not name the canonical fatḥah: '+verb.ar);
+    assert(verb.ar.includes('وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا'),
+      'the productive verb’s iʿrāb lost the ordinary lane’s hidden-subject clause: '+verb.ar);
+    assert(!/مَحَلّ/.test(verb.ar),'the productive verb claims a maḥall it has no source for: '+verb.ar);
+    assert(particle.ar.startsWith(P5_IDHAN+': حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ'),
+      'the إِذَنْ particle’s iʿrāb is not the source’s own identity clause: '+particle.ar);
+    assert(particle.ar.includes('لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ'),
+      'the إِذَنْ particle’s iʿrāb omits its no-position clause: '+particle.ar);
+    assert(!/شَرْط|شُرُوط/.test(particle.ar),'the particle’s iʿrāb line states the conditions instead of the Why layer');
+    assert(/subjunctive because idhan governs it/.test(verb.en),'the English analysis does not name إِذَنْ');
+    // §18-M/N: the Why chain states all three conditions, in order, before the conclusion.
+    const ids=verb.why.ids;
+    assert(api.WHY_IDHAN_CONDITIONS.map(l=>l.id).every(id=>ids.includes(id)),'a condition line is missing from the Why');
+    assert(ids.indexOf('WHY_IDHAN_CONDITION_SADR')<ids.indexOf('WHY_IDHAN_CONDITION_ISTIQBAL')
+      &&ids.indexOf('WHY_IDHAN_CONDITION_ISTIQBAL')<ids.indexOf('WHY_IDHAN_CONDITION_LA_FASILA')
+      &&ids.indexOf('WHY_IDHAN_CONDITION_LA_FASILA')<ids.indexOf('WHY_STATE_VERB_IDHAN'),
+      'the Why states the conclusion before the conditions');
+    assert(ids.includes('WHY_SIGN_MUDARI_NASB')&&ids.includes('WHY_SUBJECT_HIDDEN_HUWA'),
+      'the Why omits the sign or the hidden subject');
+    /* The conclusion must not be a bare "a nāṣib precedes it": it has to say that the three
+       conditions are complete, which is the whole content of p. 75's شرط. */
+    const stateLine=verb.why.ar[ids.indexOf('WHY_STATE_VERB_IDHAN')];
+    assert(/شُرُوطُ نَصْبِهِ الثَّلَاثَةُ/.test(stateLine),'the naṣb conclusion does not rest on the three conditions');
+    assert(/three conditions are all met/.test(verb.why.en[ids.indexOf('WHY_STATE_VERB_IDHAN')]),
+      'the English conclusion does not rest on the three conditions');
+    assert(particle.why.ids.includes('WHY_PARTICLE_IDHAN'),'the particle has no Why of its own');
+    assert(/بِشُرُوطٍ ثَلَاثَةٍ/.test(particle.why.ar.join(' ')),'the particle Why does not say the government is conditional');
+    // §18-P/Q/R: canonical gloss, canonical translation, builder/composer equality.
+    assert(particle.gloss==='in that case','the particle gloss is not canonical');
+    assert(verb.gloss===api.verbFormIndex.get(verb.word).lexeme.en,'the verb gloss is not its registered English');
+    assert(api.resolveCanonicalTokenGloss(data,particle,0)===particle.gloss,'the particle gloss resolver disagrees with the builder');
+    assert(api.resolveCanonicalTokenGloss(data,verb,1)===verb.gloss,'the verb gloss resolver disagrees with the builder');
+    assert(api.composeCanonicalTranslation(data)===data.translation,
+      'the composer disagrees with the builder: '+api.composeCanonicalTranslation(data)+' / '+data.translation);
+    assert(data.translation===`In that case he will ${api.verbFormIndex.get(verb.word).lexeme.en}.`,
+      'the productive translation is not the canonical wording: '+data.translation);
+    // §18-AC: the exercise carries no discourse claim of any kind.
+    assert(api.responseContextClaimSite(data,null)==='','a productive exercise carries a discourse claim');
+    assert(data.fixtureId===undefined&&api.isIdhanFixtureOwned(data)===false,
+      'a productive exercise is fixture-owned');
+    assert(api.validateExercise(clone(data)).length===0,'a productive exercise does not validate');
+    p5Cases+=32;
+  }
+  assert(p5Seen.size===api.IDHAN_PRODUCTION_PAIR_IDS.length,
+    'the productive rotation reached only '+p5Seen.size+' of the registered exchanges');
+  p5Cases++;
+}
+
+/* --- §11/§18-L/N: render ORDER, and the deliberate absence of a combined analysis. --- */
+{
+  const data=p5Seen.values().next().value;
+  /* The productive answer is a particle and its verb: there is no mubtadaʾ–khabar, no iḍāfah and
+     no jārr-majrūr, so there is no CONSTRUCTION to analyse — and inventing one would be a claim
+     the source does not make. Both tokens must therefore carry no phrase analysis and no phrase
+     Why at all, rather than an empty-looking one. */
+  for(const token of data.tokens){
+    assert(!token.phraseAr&&!token.phraseEn&&!token.phraseLabel,'a productive token carries a combined analysis');
+    assert(!token.phraseWhy,'a productive token carries a combined Why');
+    assert(!token.components||token.components.length===0,'a productive token carries internal components');
+  }
+  /* The one relationship a productive answer has is the verb's own subject — its concealed هُوَ.
+     Anything else would be a construction this two-token answer does not contain. */
+  assert(data.relationships.map(r=>r.type).join(',')==='verbSubject',
+    'the productive exercise carries relationships it does not contain: '+data.relationships.map(r=>r.type).join(','));
+  assert(data.relationships[0].subjectType==='implicit'&&data.relationships[0].pronoun==='هُوَ',
+    'the productive verb’s subject is not the concealed هُوَ');
+  api.render(data,'',false);
+  const cards=elements.answers.innerHTML.split('<article').slice(1);
+  assert(cards.length===2,'the productive exercise rendered '+cards.length+' cards, not 2');
+  for(const card of cards){
+    /* The sacred order: whole-word iʿrāb → (components) → individual Why → (combined analysis) →
+       (combined Why). The two optional middle regions are absent here, so what is asserted is that
+       the two present regions keep their order and that neither optional region appeared. */
+    const iraabAt=card.indexOf('class="iraab"');
+    const whyAt=card.indexOf('class="why-wrap"');
+    assert(iraabAt>=0,'a productive card has no whole-word iʿrāb region');
+    assert(whyAt>iraabAt,'a productive card renders its Why before its iʿrāb');
+    assert(!card.includes('class="component-analysis"'),'a productive card rendered a component region');
+    assert(!card.includes('class="phrase-analysis"'),'a productive card rendered a combined-analysis region');
+    assert(card.indexOf('class="english en-only"')>iraabAt,'a productive card renders its English before its iʿrāb');
+    p5Cases+=5;
+  }
+  assert(cards[1].includes('word-card target'),'the productive focus card is not the verb');
+  assert(!cards[0].includes('word-card target'),'the إِذَنْ particle was marked as the focus word');
+  p5Cases+=6;
+}
+
+/* --- §16: the SOURCE-DIRECT example stays a non-production fixture, and is distinguished. --- */
+{
+  const fixture=api.buildIdhanSourceDirectFixture();
+  const proof=api.resolveIdhanConditionProof(fixture,CONSUMER,CTX_ID,PAIR_ID);
+  assert(proof.satisfied===true,'the source-direct fixture stopped proving its conditions');
+  assert(fixture.sentence===IDHAN+' '+TANJAHA,'the source-direct response drifted');
+  assert(CTX.promptAr===PROMPT,'the source-direct prompt drifted');
+  assert(PAIR.auditStatus===api.SOURCE_VERIFIED_AUDIT,'the source-direct pair lost its audit status');
+  assert(FIX.productionStatus===api.ARCHITECTURE_FIXTURE_STATUS,'the source-direct fixture became production');
+  // The fixture's own records may not authorize a production exercise, in either direction.
+  assert(api.productionPairAuthorityFailure(PAIR,CTX)!=='','the source-direct pair passed the PRODUCTION clause set');
+  assert(api.productionContextAuthorityFailure(CTX,PAIR)!=='','the source-direct context passed the PRODUCTION clause set');
+  assert(!api.IDHAN_PRODUCTION_PAIR_IDS.includes(PAIR_ID),'the source-direct pair entered the productive list');
+  assert(!P5_TEMPLATE.responsePairIds.includes(PAIR_ID),'the productive template may consume the source-direct pair');
+  // And a production record may not authorize the FIXTURE path.
+  for(const pairId of api.IDHAN_PRODUCTION_PAIR_IDS){
+    const pair=api.RESPONSE_PAIR_REGISTRY[pairId];
+    assert(api.resolveIdhanConditionProof(fixture,CONSUMER,pair.contextId,pairId).satisfied===false,
+      'a production record proved the source-direct fixture path');
+    assert(api.pairAuthorityFailure(pair,api.RESPONSE_CONTEXT_REGISTRY[pair.contextId],FIX)!=='',
+      'a production pair passed the FIXTURE clause set');
+    p5Attacks+=2;
+  }
+  /* §18-AC: the fixture is never a production template, its consumer is never a stable ID, and
+     the source's own 2ms response verb is never produced. */
+  assert(api.templates.every(t=>t.stableId!==FIXTURE_ID&&t.stableId!==CONSUMER),'the fixture reached the template list');
+  assert(api.PRESENT_NON_PRODUCTION_PERSONS.includes('2ms'),'2ms became producible, so the source example could enter production');
+  assert(P5_TEMPLATE.presentCapabilities.every(c=>c.person==='3ms'),'the productive template gained a second person');
+  p5Cases+=11;
+}
+
+/* --- §15/§18-S: CONDITION 1 — the response head. --- */
+{
+  /* A: a substantive token placed BEFORE إِذَنْ. The builder's own exercise is rebuilt with a
+     preceding noun, so إِذَنْ is no longer at the head; the government is never written, the
+     particle is left unlinked, and the exercise is refused. */
+  const fronted=api.completeNominalAnalysis;
+  p5Refuses('a token stands before إِذَنْ','idhan-not-at-response-head',data=>{
+    data.tokens.unshift(api.makeToken('الطَّالِبُ','the student',api.specs.mubtada('الطَّالِبُ')));
+  });
+  p5Refuses('إِذَنْ is not the first token','idhan-not-at-response-head',data=>{
+    data.tokens=[data.tokens[1],data.tokens[0]];
+  });
+  p5Refuses('the head is another particle','idhan-not-at-response-head',data=>{
+    data.tokens[0].word='أَنْ';data.tokens[0].grammar.particleType='an';
+  });
+  p5Refuses('the head is not a particle at all','idhan-not-at-response-head',data=>{
+    data.tokens[0].grammar.type='noun';
+  });
+  p5Refuses('the head surface is not إِذَنْ','idhan-not-at-response-head',data=>{data.tokens[0].word='إذن'});
+  // A forged head=true style claim is impossible: no such field exists, and every discourse name
+  // is refused on presence alone, on every surface.
+  for(const [where,plant] of [['exercise',(d,v)=>{d.responseHead=v}],
+                              ['token',(d,v)=>{d.tokens[0].responseHead=v}],
+                              ['token.grammar',(d,v)=>{d.tokens[0].grammar.sadrJumlatAlJawab=v}]]){
+    const planted=p5Tampered(d=>plant(d,true));
+    assert(api.responseContextClaimSite(planted,null)!=='','a forged head claim on '+where+' was not detected');
+    assert(api.createExerciseSnapshot(planted)===null,'a forged head claim on '+where+' still snapshotted');
+    p5Attacks+=2;
+  }
+  /* The full pipeline refuses it too. The stored governor link SURVIVES this mutation — nothing
+     re-inflects the tokens — so this is the exact case the condition gate exists for: adjacency
+     and a reciprocal link are both intact, and the naṣb is still refused because إِذَنْ no longer
+     heads the answer. E_FAKE_IDHAN fires alongside it, because the rendered iʿrāb still names
+     إِذَنْ as the cause of a naṣb its conditions no longer authorize. */
+  p5Rejects('a token stands before إِذَنْ (validation)','E_IDHAN_CONDITIONS',data=>{
+    data.tokens.unshift(api.makeToken('الطَّالِبُ','the student',api.specs.mubtada('الطَّالِبُ')));
+  });
+  p5Rejects('a token stands before إِذَنْ (fake cause)','E_FAKE_IDHAN',data=>{
+    data.tokens.unshift(api.makeToken('الطَّالِبُ','the student',api.specs.mubtada('الطَّالِبُ')));
+  });
+  // Rebuilt through the real builder, a non-head إِذَنْ never even acquires the naṣb.
+  {
+    let threw='';
+    try{
+      fronted({templateId:api.IDHAN_PRODUCTION_TEMPLATE_ID,templateStarts:'particle',templateForm:'present',
+        templateState:'nasb',templateSign:'fatha',sentence:'الطَّالِبُ إِذَنْ يَقْرَأَ',translation:'x',
+        tokens:[api.makeToken('الطَّالِبُ','the student',api.specs.mubtada('الطَّالِبُ')),
+                api.makeToken(P5_IDHAN,'in that case',api.specs.idhan(P5_IDHAN)),
+                api.makeToken('يَقْرَأَ','read',api.specs.presentPred('يَقْرَأَ'),'',true)]});
+    }catch(error){ threw=error.message; }
+    assert(threw,'a non-head إِذَنْ built a valid production exercise');
+    p5Attacks++;
+  }
+  p5Cases+=2;
+}
+
+/* --- §15/§18-T: CONDITION 2 — futurity. --- */
+{
+  /* The futurity proof is bound to the exact context the pair names, and its only evidence is the
+     prompt's own Arabic sīn. None of these mutations can be repaired by English. */
+  const context=api.RESPONSE_CONTEXT_REGISTRY[api.RESPONSE_PAIR_REGISTRY[api.IDHAN_PRODUCTION_PAIR_IDS[0]].contextId];
+  const withField=(field,value)=>Object.assign({},context,{[field]:value});
+  for(const [name,record,expected] of [
+    ['the prompt verb loses its sīn',withField('promptVerbAr','أَجْتَهِدُ'),'prompt-carries-no-future-marker'],
+    ['the prompt no longer opens with its verb',withField('promptAr','ثُمَّ '+context.promptAr),'prompt-does-not-open-with-its-verb'],
+    ['an unknown future evidence kind',withField('futureEvidenceId','englishWill'),'unknown-future-evidence'],
+    ['the evidence is not source-owned',withField('sourceRuleId','G_LAN_NASB'),'future-evidence-not-source-owned'],
+    ['the prompt verb is empty',withField('promptVerbAr',''),'prompt-carries-no-future-marker']
+  ]){
+    assert(api.futureEvidenceFailure(record,api.FUTURE_EVIDENCE_KINDS)===expected,
+      'futurity attack "'+name+'" gave "'+api.futureEvidenceFailure(record,api.FUTURE_EVIDENCE_KINDS)+'"');
+    p5Attacks++;
+  }
+  // An English "will" is not evidence: the evidence record carries no English field at all.
+  const evidence=api.FUTURE_EVIDENCE_KINDS[context.futureEvidenceId];
+  assert(!Object.keys(evidence).some(k=>/En$/.test(k)&&/prompt|marker/i.test(k)),
+    'the future evidence record acquired English authority');
+  assert(api.futureEvidenceFailure(withField('promptEn','I will definitely do it.'),api.FUTURE_EVIDENCE_KINDS)==='',
+    'changing the English changed the futurity proof');
+  assert(api.futureEvidenceFailure(Object.assign({},withField('promptVerbAr','أَجْتَهِدُ'),
+    {promptEn:'I will work hard.'}),api.FUTURE_EVIDENCE_KINDS)==='prompt-carries-no-future-marker',
+    'an English "will" repaired a missing sīn');
+  // A stored isFuture-style Boolean on the exercise is refused on presence alone.
+  for(const field of ['futureMeaning','futureEvidence','futureEvidenceId','futureMarker']){
+    const planted=p5Tampered(d=>{d.tokens[1][field]=true});
+    assert(api.responseContextClaimSite(planted,null)!=='','a forged futurity claim ('+field+') was not detected');
+    assert(api.createExerciseSnapshot(planted)===null,'a forged futurity claim ('+field+') still snapshotted');
+    p5Attacks+=2;
+  }
+  // A سـ token borrowed from ANOTHER exercise proves nothing: it is a third token, and a third
+  // token is a separator whatever it is.
+  p5Refuses('a سَوْفَ token borrowed from another exercise','separator-token-present',data=>{
+    data.tokens.splice(1,0,api.makeToken('سَوْفَ','will',api.specs.future('سَوْفَ')));
+  });
+  p5Cases+=3;
+}
+
+/* --- §15/§18-U: CONDITION 3 — no separator. --- */
+{
+  /* Any third token is a separator, whatever it is. The three the SOURCE permits — القسم، النداء،
+     «لا» النافية — are named by p. 75 and deliberately NOT implemented, so each must reject here
+     exactly like an ordinary intervening word. Making them pass is a later phase's work. */
+  for(const [name,extra] of [
+    ['a noun between إِذَنْ and its verb',()=>api.makeToken('الطَّالِبُ','the student',api.specs.mubtada('الطَّالِبُ'))],
+    ['an oath particle (deferred separator)',()=>api.makeToken('وَاللَّهِ','by God',api.specs.prep('وَاللَّهِ'))],
+    ['a vocative particle (deferred separator)',()=>api.makeToken('يَا','O',api.specs.prep('يَا'))],
+    ['the negating لا (deferred separator)',()=>api.makeToken('لَا','not',api.specs.prep('لَا'))],
+    ['a second إِذَنْ',()=>api.makeToken(P5_IDHAN,'in that case',api.specs.idhan(P5_IDHAN))]
+  ]){
+    p5Refuses(name,'separator-token-present',data=>{data.tokens.splice(1,0,extra())});
+    p5Rejects(name+' (validation)','',data=>{data.tokens.splice(1,0,extra())});
+  }
+  // A token AFTER the verb is not between إِذَنْ and the verb — but this phase authorizes exactly
+  // two tokens, so it rejects as well, and it rejects for the SEPARATOR reason, not another.
+  p5Refuses('a trailing object token','separator-token-present',data=>{
+    data.tokens.push(api.makeToken('الْكِتَابَ','the book',api.specs.object('الْكِتَابَ')));
+  });
+  // Whitespace is not a grammatical separator: the canonical sentence is a plain space-join and
+  // the proof reads the token list, never the string.
+  {
+    const data=p5Build();
+    assert(data.sentence.includes(' '),'the productive sentence has no space to test');
+    assert(p5Authorize(data).authorized,'a space between إِذَنْ and its verb was treated as a separator');
+    p5Cases++;
+  }
+  // The separator mode itself may not be widened without an implementation.
+  assert(Object.keys(api.SEPARATOR_MODES).join(',')==='none','a separator mode was added without an implementation');
+  assert(Object.values(api.RESPONSE_CONTEXT_REGISTRY).every(r=>r.separatorMode==='none'),
+    'a response context authorizes a separator this phase does not implement');
+  p5Cases+=2;
+}
+
+/* --- §15-D/I/J/§18-V/W/X: proof, context and source COPYING. --- */
+{
+  // D/J: the FIXTURE's own proof cannot be transferred to a production exercise. The two paths
+  // demand opposite production statuses, so neither can ever stand in for the other.
+  const fixture=api.buildIdhanSourceDirectFixture();
+  assert(api.resolveIdhanConditionProof(fixture,CONSUMER,CTX_ID,PAIR_ID).satisfied===true,'the fixture proof broke');
+  const productive=p5Build();
+  assert(api.resolveIdhanConditionProof(productive,CONSUMER,CTX_ID,PAIR_ID).satisfied===false,
+    'the fixture proof accepted a production exercise');
+  assert(api.resolveIdhanConditionProof(productive,api.IDHAN_PRODUCTION_CONSUMER,CTX_ID,PAIR_ID).satisfied===false,
+    'the fixture proof accepted the productive consumer');
+  assert(p5Authorize(fixture).authorized===false,'the productive authority accepted the source-direct fixture');
+  p5Attacks+=3;
+  // I/W: a target copied from ANOTHER response context. The verb of exchange A under the context
+  // of exchange B: the pair is selected BY the verb, so the wrong context can never attach.
+  const pairs=api.IDHAN_PRODUCTION_PAIR_IDS.map(id=>api.RESPONSE_PAIR_REGISTRY[id]);
+  for(const data of p5Seen.values()){
+    const own=p5Authorize(data);
+    for(const other of pairs){
+      if(other.id===own.pairId)continue;
+      const swapped=clone(data);
+      const result=p5Authorize(swapped);
+      assert(result.authorized&&result.pairId===own.pairId,'a clone resolved to a different exchange');
+      // Now actually cross the wires: the verb of THIS exercise, claimed under another exchange.
+      assert(other.responseVerbAr!==data.tokens[1].word,'two exchanges share a response verb');
+      p5Attacks++;
+    }
+  }
+  // A verb no registered exchange names cannot be authorized at all.
+  p5Refuses('an unregistered response verb','unknown-response-pair',data=>{
+    data.tokens[1].word='يَكْتُبَ';data.tokens[1].surfaceHint='يَكْتُبَ';data.tokens[1].expectedSurface='يَكْتُبَ';
+  });
+  // X: a forged source record. The context's rule must be source-authorized AND consumer-owned.
+  assert(!api.isSourceAuthorized('R_IDHAN_FORGED'),'an unregistered source rule is authorized');
+  assert(api.isRestrictedSourceRule('R_IDHAN_CONDITIONS'),'the condition rule stopped being restricted');
+  for(const forged of ['R_IDHAN_FORGED','G_LAN_NASB','']){
+    assert(!api.isSourceRuleConsumerAuthorized('R_IDHAN_CONDITIONS',forged)
+      ||forged===api.IDHAN_PRODUCTION_CONSUMER,'a forged consumer was authorized: '+forged);
+    p5Attacks++;
+  }
+  // A token wearing the condition rule is refused outright, on the productive template too.
+  p5Rejects('a token cites R_IDHAN_CONDITIONS','E_RESTRICTED_SOURCE_RULE',data=>{
+    data.tokens[0].ruleId='R_IDHAN_CONDITIONS';
+  });
+  p5Cases+=4;
+}
+
+/* --- §15-F/§18-Y/Z: governor, state and sign FORGERY. --- */
+{
+  p5Rejects('the particle drops its governor rule','E_PARTICLE_RULE_OWNER',d=>{d.tokens[0].ruleId='G_AN_NASB'});
+  p5Rejects('a noun wears the إِذَنْ governor rule','E_PARTICLE_RULE_OWNER',d=>{
+    d.tokens.push(api.makeToken('الْكِتَابَ','the book',api.specs.object('الْكِتَابَ')));
+    d.tokens[2].ruleId=api.IDHAN_GOVERNOR_RULE_ID;
+  });
+  p5Rejects('the verb wears the governor rule','E_VERB_RULE',d=>{d.tokens[1].ruleId=api.IDHAN_GOVERNOR_RULE_ID});
+  p5Rejects('the state is forged to rafʿ','E_VERB_MOOD',d=>{d.tokens[1].state='raf'});
+  p5Rejects('the state is forged to jazm','E_VERB_MOOD',d=>{d.tokens[1].state='jazm'});
+  p5Rejects('the sign is forged to ḍammah','E_VERB_SIGN',d=>{d.tokens[1].sign=api.canonicalSignCopy('damma')});
+  p5Rejects('the sign is forged to sukūn','E_VERB_SIGN',d=>{d.tokens[1].sign=api.canonicalSignCopy('sukun')});
+  p5Rejects('the sign labels are not canonical','E_SIGN_CANONICAL',d=>{d.tokens[1].sign={id:'fatha',ar:'x',en:'y'}});
+  p5Rejects('the governor link is cleared','E_MISSING_GOVERNOR',d=>{d.tokens[1].governorId=null});
+  p5Rejects('the reciprocal link is cleared','E_GOVERNOR_RECIPROCAL',d=>{d.tokens[0].relations.governsId=null});
+  p5Rejects('the particle surface is forged','E_PARTICLE_SURFACE',d=>{d.tokens[0].word='إذن'});
+  p5Rejects('the particle claims a sign','E_PARTICLE_SIGN',d=>{d.tokens[0].sign=api.canonicalSignCopy('fatha')});
+  p5Rejects('the particle type is swapped for أَنْ','E_FAKE_IDHAN',d=>{d.tokens[0].grammar.particleType='an'});
+  p5Rejects('the template ID is swapped','E_PRESENT_GOVERNOR_TEMPLATE',d=>{
+    d.templateId='T_PARTICLE_PRESENT_NASB_FATHA_02';
+  });
+  /* Z: the AUTHORITY itself must refuse a forged state or sign, not only the validator. An
+     authorization that says "إِذَنْ governs this" about a verb standing in rafʿ would be a true
+     sentence about the wrong word, and every caller that trusts the authorization — the renderer,
+     the Why engine, the statement display — would inherit it. The state is required to equal the
+     GOVERNOR's declared mood and the sign to equal the canonical matrix's entry for this verb's
+     own inflection, so neither is inferred from the other. */
+  p5Refuses('the state is forged to rafʿ (authority)','target-state-or-sign-not-canonical',d=>{d.tokens[1].state='raf'});
+  p5Refuses('the state is forged to jazm (authority)','target-state-or-sign-not-canonical',d=>{d.tokens[1].state='jazm'});
+  p5Refuses('the state is emptied (authority)','target-state-or-sign-not-canonical',d=>{d.tokens[1].state=''});
+  p5Refuses('the sign is forged to ḍammah (authority)','target-state-or-sign-not-canonical',d=>{
+    d.tokens[1].sign=api.canonicalSignCopy('damma');
+  });
+  p5Refuses('the sign is removed (authority)','target-state-or-sign-not-canonical',d=>{d.tokens[1].sign=null});
+  p5Refuses('the sign rule is forged (authority)','target-state-or-sign-not-canonical',d=>{
+    d.tokens[1].ruleId='R_MUDARI_RAF_DAMMA';
+  });
+  /* THE state-is-not-inferred-from-sign test. The three cases above each leave state and sign
+     DISAGREEING, so a resolver that derived one from the other would still catch them. This one
+     forges a fully self-consistent rafʿ — state, sign and sign rule all agreeing — and it must
+     still be refused, because إِذَنْ governs naṣb and rafʿ is not naṣb however tidy it looks. The
+     state is taken from the governor's declared mood; the sign is taken from the canonical
+     present-verb matrix; neither is read off the other. */
+  p5Refuses('a fully self-consistent rafʿ','target-state-or-sign-not-canonical',d=>{
+    d.tokens[1].state='raf';
+    d.tokens[1].sign=api.canonicalSignCopy('damma');
+    d.tokens[1].ruleId='R_MUDARI_RAF_DAMMA';
+  });
+  p5Refuses('a fully self-consistent jazm','target-state-or-sign-not-canonical',d=>{
+    d.tokens[1].state='jazm';
+    d.tokens[1].sign=api.canonicalSignCopy('sukun');
+    d.tokens[1].ruleId='R_MUDARI_JAZM_SUKUN';
+  });
+  // And the state the authority demands is the GOVERNOR's own declared mood, read from the table.
+  assert(api.GRAMMAR_RULES.governors[api.IDHAN_PARTICLE_TYPE].mood==='nasb','إِذَنْ stopped declaring naṣb');
+  assert(api.GRAMMAR_RULES.presentVerb.regular.nasb[0]==='fatha','the ordinary naṣb sign is no longer the fatḥah');
+  assert(api.GRAMMAR_RULES.presentVerb.regular.nasb[1]==='R_MUDARI_NASB_FATHA','the ordinary naṣb sign rule changed');
+  p5Cases+=3;
+  /* And the authority must be FAIL-CLOSED for a value it cannot inspect: it is reachable from
+     History, which arrives from localStorage and can be anything. A revoked Proxy, a trapping
+     Proxy and an own or inherited accessor must all be refused rather than throw, and none of
+     them may run caller code before the refusal. */
+  {
+    let getterCalls=0,getTraps=0,descriptorTraps=0;
+    const hostile=[
+      ['own accessor on tokens',()=>{const o={templateId:api.IDHAN_PRODUCTION_TEMPLATE_ID};
+        Object.defineProperty(o,'tokens',{get(){getterCalls++;return[]},enumerable:true});return o}],
+      ['inherited accessor on tokens',()=>Object.create({get tokens(){getterCalls++;return[]}},
+        {templateId:{value:api.IDHAN_PRODUCTION_TEMPLATE_ID,enumerable:true}})],
+      ['revoked proxy',()=>{const r=Proxy.revocable({tokens:[]},{});r.revoke();return r.proxy}],
+      ['get-trapping proxy',()=>new Proxy({tokens:[]},{get(){getTraps++;throw new Error('trap')}})],
+      ['descriptor-trapping proxy',()=>new Proxy({tokens:[]},{getOwnPropertyDescriptor(){descriptorTraps++;throw new Error('trap')}})],
+      ['null',()=>null],['a number',()=>7],['an array',()=>[]],['a string',()=>'x']
+    ];
+    for(const [name,make] of hostile){
+      const value=make();
+      let threw='';
+      let result,exercise,rendered;
+      try{
+        result=api.deriveIdhanProductiveNasb(value,1);
+        exercise=api.exerciseIdhanProductiveAuthorization(value);
+        rendered=api.renderProductiveResponseContext(value);
+      }catch(error){ threw=error.message; }
+      assert(!threw,'a hostile candidate escaped the productive authority: '+name+' — '+threw);
+      assert(result&&result.authorized===false,'a hostile candidate was authorized: '+name);
+      assert(exercise===null,'a hostile exercise was authorized: '+name);
+      assert(rendered!=='','a hostile candidate displayed a statement: '+name);
+      assert(elements.responseContext.hidden===true,'a hostile candidate left a visible statement: '+name);
+      p5Attacks+=5;
+    }
+    /* No accessor and no `get` trap runs: every top-level read is a guarded own-DATA-descriptor
+       read, exactly as in Phase 3B0A. The DESCRIPTOR trap is the one piece of caller code that can
+       run, because descriptor reflection is the only way to inspect a value without invoking it —
+       and it is inside the guard, so it produces the refusal above rather than an exception. It is
+       asserted to have fired, so this stays a measured property rather than an assumption. */
+    assert(getterCalls===0,'an accessor ran inside the productive authority ('+getterCalls+')');
+    assert(getTraps===0,'a Proxy get trap ran inside the productive authority ('+getTraps+')');
+    assert(descriptorTraps>0,'the descriptor-trapping proxy was never actually inspected');
+    p5Cases+=3;
+  }
+  // Z: the authority itself refuses a forged governor link, before validation is even consulted.
+  p5Refuses('the governor link is cleared (authority)','governor-link-not-canonical',d=>{d.tokens[1].governorId=null});
+  p5Refuses('the particle rule is forged (authority)','governor-link-not-canonical',d=>{d.tokens[0].ruleId='G_AN_NASB'});
+  // A non-canonical spelling is not إِذَنْ at all, so it fails condition 1 rather than the link check.
+  p5Refuses('the particle surface is forged (authority)','idhan-not-at-response-head',d=>{d.tokens[0].word='إذن'});
+  p5Refuses('a second token claims the same governor','governor-link-not-canonical',d=>{
+    d.tokens.push(api.makeToken('الْكِتَابَ','the book',api.specs.object('الْكِتَابَ')));
+    d.tokens[2].governorId=d.tokens[0].id;
+  });
+  p5Refuses('the template no longer declares إِذَنْ','template-declares-another-governor',d=>{
+    d.templateId='T_PARTICLE_PRESENT_NASB_FATHA_02';
+  });
+  p5Refuses('the template is unknown','unknown-template',d=>{d.templateId='T_NOT_A_TEMPLATE_99'});
+  p5Refuses('the template ID is not a string','unknown-template',d=>{d.templateId=7});
+  /* The frozen template CAPABILITY is a condition in its own right: the productive template
+     authorizes a 3ms form with a concealed subject, so a form whose authoritative morphology says
+     anything else — here, the same surface with an explicit noun fāʿil after it, which makes its
+     subjectMode 'explicit' — is refused before the three conditions are even consulted. */
+  p5Refuses('an explicit fāʿil changes the authorized subject mode','template-capability-mismatch',d=>{
+    d.tokens.push(api.makeToken('الطَّالِبُ','the student',api.specs.faail('الطَّالِبُ')));
+  });
+}
+
+/* --- §15-G/H/§18-AA/AB: a noun, and the wrong verb class, can never receive this governor. --- */
+{
+  // AA: إِذَنْ + a noun. The noun takes the state its ROLE gives it, never naṣb from إِذَنْ, and
+  // the particle is refused as an orphaned governor.
+  let nounFailures=null,nounExercise=null;
+  try{
+    api.completeNominalAnalysis({templateId:api.IDHAN_PRODUCTION_TEMPLATE_ID,templateStarts:'particle',
+      templateForm:'present',templateState:'nasb',templateSign:'fatha',sentence:P5_IDHAN+' الطَّالِبُ',translation:'x',
+      tokens:[api.makeToken(P5_IDHAN,'in that case',api.specs.idhan(P5_IDHAN)),
+              api.makeToken('الطَّالِبُ','the student',api.specs.mubtada('الطَّالِبُ'),'',true)]});
+  }catch(error){ nounFailures=error.failures||null;nounExercise=error.exercise||null; }
+  assert(nounFailures,'إِذَنْ + a noun produced a valid exercise');
+  const nounCodes=nounFailures.map(f=>f.code);
+  assert(nounCodes.includes('E_ORPHAN_VERB_GOVERNOR'),
+    'إِذَنْ before a noun was not rejected as an orphaned governor: '+nounCodes.join(','));
+  // The noun took the state its ROLE gives it. إِذَنْ contributed nothing to it.
+  const nounToken=nounExercise&&nounExercise.tokens[1];
+  assert(nounToken&&nounToken.state==='raf'&&!nounToken.governorId,
+    'إِذَنْ changed the state of the noun after it');
+  p5Attacks+=2;p5Cases++;
+  // The role table is what fixes a noun's state, and إِذَنْ appears nowhere in it.
+  assert(Object.values(api.GRAMMAR_RULES.roles).every(r=>r.ruleId!==api.IDHAN_GOVERNOR_RULE_ID),
+    'a noun role cites the إِذَنْ governor rule');
+  // AB: the五-verb and mabnī lanes are closed. Neither has a registered exchange, and the
+  // authority refuses them on the verb's own registry morphology.
+  p5Refuses('a five-verb form under إِذَنْ','not-an-ordinary-present-verb',d=>{
+    d.tokens[1].word='يَقْرَؤُوا';d.tokens[1].surfaceHint='يَقْرَؤُوا';d.tokens[1].expectedSurface='يَقْرَؤُوا';
+    d.tokens[1].inflection='afalKhamsa';
+    d.tokens[1].grammar=Object.assign({},d.tokens[1].grammar,{conjugation:'afalKhamsa',person:'3mp'});
+    d.tokens[1].grammar.morphology=api.authoritativeVerbMorphology(d.tokens[1],d);
+  });
+  p5Refuses('a mabnī nūn-al-niswah form under إِذَنْ','not-an-ordinary-present-verb',d=>{
+    d.tokens[1].word='يَقْرَأْنَ';d.tokens[1].surfaceHint='يَقْرَأْنَ';d.tokens[1].expectedSurface='يَقْرَأْنَ';
+    d.tokens[1].inflection=api.MABNI_NUUN_NISWAH;d.tokens[1].state='';d.tokens[1].sign=null;
+  });
+  p5Refuses('a past verb under إِذَنْ','not-a-present-verb',d=>{d.tokens[1].tense='past'});
+  p5Refuses('a rafʿ surface under إِذَنْ','not-a-registered-nasb-surface',d=>{
+    d.tokens[1].word='يَقْرَأُ';d.tokens[1].surfaceHint='يَقْرَأُ';d.tokens[1].expectedSurface='يَقْرَأُ';
+  });
+  // The mabnī governor table has no إِذَنْ entry, so no maḥall rule can ever be derived for it.
+  assert(!api.MABNI_PRESENT_GOVERNORS.idhan&&!api.MABNI_PRESENT_GOVERNOR_MODES.includes('idhan'),
+    'إِذَنْ acquired a mabnī-present maḥall lane');
+  p5Cases+=3;
+}
+
+/* --- §14/§18-O: History. The productive naṣb round-trips, and carries no authority. --- */
+{
+  for(const data of p5Seen.values()){
+    const snapshot=api.createExerciseSnapshot(data);
+    assert(snapshot&&snapshot.schemaVersion===3,'a productive exercise did not snapshot at schema v3');
+    // The snapshot carries no discourse claim: not the context, not the pair, not the conditions.
+    assert(api.responseContextClaimSite(snapshot,null)==='','a productive snapshot carries a discourse claim');
+    assert(Object.keys(snapshot).every(k=>api.SENTENCE_HISTORY_SNAPSHOT_KEYS.includes(k)),
+      'a productive snapshot added a root key');
+    const restored=api.restoreExerciseSnapshot(clone(snapshot));
+    assert(restored,'a productive exercise no longer round-trips');
+    assert(restored.sentence===data.sentence&&restored.translation===data.translation,
+      'the round trip changed the productive exercise');
+    assert(restored.tokens.map(t=>t.ar).join('|')===data.tokens.map(t=>t.ar).join('|'),
+      'the round trip changed the productive analysis');
+    assert(restored.tokens.map(t=>t.why.ids.join(',')).join('|')===data.tokens.map(t=>t.why.ids.join(',')).join('|'),
+      'the round trip changed the productive Why');
+    assert(restored.tokens[1].state==='nasb'&&api.safeSignId(restored.tokens[1].sign)==='fatha',
+      'the round trip lost the productive state or sign');
+    // The restored exercise is re-authorized from scratch — the naṣb is REBUILT, never restored.
+    assert(p5Authorize(restored).authorized,'a restored productive exercise cannot re-prove its conditions');
+    // The DOM statement is rebuilt from the frozen record, not from anything stored.
+    api.render(restored,'',false);
+    const authorization=p5Authorize(restored);
+    const context=api.responseContextRecord(authorization.contextId);
+    assert(elements.responseContextPromptAr.textContent===context.promptAr,
+      'a restored productive exercise displayed a statement that is not its context’s');
+    p5Cases+=10;
+  }
+  /* Every forged History claim, one at a time, over a genuine productive snapshot. A semantic
+     forgery must be REJECTED; a presentation forgery must be canonically REBUILT. */
+  const base=api.createExerciseSnapshot(p5Seen.values().next().value);
+  const p5History=(name,mutate,expect)=>{
+    const snapshot=clone(base);
+    mutate(snapshot);
+    let restored=null,threw='';
+    try{ restored=api.restoreExerciseSnapshot(snapshot); }
+    catch(error){ threw=error.message; }
+    assert(!threw,'Phase-3B1 History attack "'+name+'" threw: '+threw);
+    if(expect==='reject')assert(restored===null,'Phase-3B1 History attack "'+name+'" was RESTORED');
+    else{
+      assert(restored,'Phase-3B1 History repair "'+name+'" was rejected instead of rebuilt');
+      assert(restored.translation===`In that case he will ${api.verbFormIndex.get(restored.tokens[1].word).lexeme.en}.`,
+        'Phase-3B1 History repair "'+name+'" did not rebuild the canonical English');
+      assert(restored.tokens[0].gloss==='in that case','Phase-3B1 History repair "'+name+'" did not rebuild the gloss');
+      assert(p5Authorize(restored).authorized,'Phase-3B1 History repair "'+name+'" restored an unauthorized naṣb');
+      assert(api.WHY_IDHAN_CONDITIONS.every(line=>restored.tokens[1].why.ids.includes(line.id))
+        &&restored.tokens[1].why.ids.includes('WHY_STATE_VERB_IDHAN'),
+        'Phase-3B1 History repair "'+name+'" did not rebuild the three conditions');
+      assert(!restored.tokens[1].why.ids.includes('WHY_STATE_VERB_LAN'),
+        'Phase-3B1 History repair "'+name+'" left another governor’s Why wording in place');
+      assert(api.validateExercise(clone(restored)).length===0,
+        'Phase-3B1 History repair "'+name+'" restored an exercise that does not validate');
+    }
+    p5Attacks++;
+  };
+  // Semantic forgeries — rejected.
+  p5History('forged governor rule',s=>{s.tokens[0].ruleId='G_AN_NASB'},'reject');
+  p5History('forged particle type',s=>{s.tokens[0].grammar.particleType='an'},'reject');
+  p5History('forged state',s=>{s.tokens[1].state='raf'},'reject');
+  p5History('forged sign',s=>{s.tokens[1].sign={id:'damma',ar:'x',en:'x'}},'reject');
+  p5History('forged verb surface',s=>{s.tokens[1].word='يَكْتُبَ'},'reject');
+  p5History('forged token order',s=>{s.tokens=[s.tokens[1],s.tokens[0]]},'reject');
+  p5History('an inserted separator token',s=>{
+    s.tokens.splice(1,0,clone(s.tokens[0]));s.tokens[1].id=s.tokens[1].id+'X';
+  },'reject');
+  p5History('a forged G_IDHAN_NASB on the verb',s=>{s.tokens[1].ruleId=api.IDHAN_GOVERNOR_RULE_ID},'reject');
+  p5History('a forged R_IDHAN_CONDITIONS citation',s=>{s.tokens[0].ruleId='R_IDHAN_CONDITIONS'},'reject');
+  p5History('a forged mahallRuleId',s=>{s.tokens[1].mahallRuleId='R_PRESENT_NUUN_NISWAH_MAHALL_NASB_AN'},'reject');
+  p5History('a forged template ID',s=>{s.templateId='T_PARTICLE_PRESENT_NASB_FATHA_02'},'reject');
+  p5History('a forged exercise identity',s=>{s.exerciseIdentity=s.exerciseIdentity+'X'},'reject');
+  /* The Why is DERIVED presentation, rebuilt from the restored structure on every restoration, so
+     a forged one is repaired rather than rejected — the established behaviour since the combined
+     History+Why audit. What matters for this phase is that the rebuild puts the three conditions
+     back, so a stored Why can neither delete a condition nor smuggle another governor's wording in. */
+  p5History('a forged Why',s=>{s.tokens[1].why.ids=['WHY_STATE_VERB_LAN']},'repair');
+  p5History('a missing condition line in the Why',s=>{
+    s.tokens[1].why.ids=s.tokens[1].why.ids.filter(id=>id!=='WHY_IDHAN_CONDITION_SADR');
+    s.tokens[1].why.ar=s.tokens[1].why.ar.slice(1);s.tokens[1].why.en=s.tokens[1].why.en.slice(1);
+  },'repair');
+  // Every discourse claim, planted anywhere in raw History — rejected on presence alone.
+  for(const field of ['responseContextId','responsePairId','responsePairIds','conditionSatisfied',
+                      'conditionProof','futureEvidenceId','separatorMode','promptAr','promptEn',
+                      'auditStatus','productionStatus','sourceRuleId','responseVerbAr','semanticRelation']){
+    p5History('a forged '+field+' on the exercise',s=>{s[field]='x'},'reject');
+    p5History('a forged '+field+' on a token',s=>{s.tokens[0][field]='x'},'reject');
+  }
+  // Presentation forgeries — rebuilt canonically, never trusted.
+  p5History('a forged translation',s=>{s.translation='In that case he will conquer the world.'},'repair');
+  p5History('a forged gloss',s=>{s.tokens[0].gloss='therefore'},'repair');
+  p5History('a forged surfaceHint',s=>{s.tokens[1].surfaceHint='يَكْتُبَ'},'repair');
+  p5History('a forged enHint',s=>{s.tokens[0].enHint='forged'},'repair');
+  p5Cases+=4;
+}
+
+/* --- §19-support: the three conditions are LOAD-BEARING in the productive path. --- */
+{
+  /* Substituting a failing prover for any ONE condition must make the whole productive
+     authorization fail, at that condition's own layer. This is what makes "the condition was
+     deleted" distinguishable from "the condition passed" — with a plain if/return shape, removing
+     a branch would leave success unchanged. */
+  const data=p5Build();
+  const index=data.tokens.findIndex(t=>t.grammar.type==='verb');
+  const failing=reason=>()=>Object.freeze({ok:false,reason});
+  const tokenless=()=>Object.freeze({ok:true,reason:''});
+  const base=api.IDHAN_CONDITION_PROVERS;
+  assert(api.deriveIdhanProductiveNasb(data,index,base).authorized,'the default provers stopped authorizing');
+  for(const [slot,expected] of [['head','response-head-not-proven'],
+                                ['future','future-evidence-not-proven'],
+                                ['separator','separator-not-proven']]){
+    const swapped=Object.assign({},base,{[slot]:failing('forced-'+slot)});
+    const forced=api.deriveIdhanProductiveNasb(data,index,swapped);
+    assert(forced.authorized===false&&forced.reason==='forced-'+slot,
+      'the productive path ignored a failing '+slot+' prover: '+forced.reason);
+    const stripped=Object.assign({},base,{[slot]:tokenless});
+    const noToken=api.deriveIdhanProductiveNasb(data,index,stripped);
+    assert(noToken.authorized===false&&noToken.reason===expected,
+      'the productive path accepted a token-less '+slot+' proof: '+noToken.reason);
+    // A proof token belonging to ANOTHER condition, in this slot, must also fail.
+    const crossed=Object.assign({},base,{[slot]:(...args)=>base[slot==='head'?'separator':'head'](...args)});
+    assert(api.deriveIdhanProductiveNasb(data,index,crossed).authorized===false,
+      'a proof token from another condition authorized the '+slot+' slot');
+    p5Attacks+=3;p5Cases++;
+  }
+  // A hand-made "true" is not a proof.
+  for(const fake of [()=>true,()=>({ok:true,token:true}),()=>({ok:true,token:{condition:'laFasila'}}),()=>null]){
+    const swapped=Object.assign({},base,{separator:fake});
+    assert(api.deriveIdhanProductiveNasb(data,index,swapped).authorized===false,
+      'a forged separator proof authorized the productive naṣb');
+    p5Attacks++;
+  }
+}
+
+/* --- §18-AD: no later separator phase, and no concealed أَنْ, has begun. --- */
+{
+  const source=fs.readFileSync(file,'utf8');
+  assert(!/SEPARATOR_MODES=Object\.freeze\(\{[^}]*(oath|qasam|nida|vocative|laNafiya)/i.test(source),
+    'a separator mode beyond "none" was implemented');
+  assert(Object.keys(api.SEPARATOR_MODES).length===1,'the separator-mode registry grew');
+  assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS&&!api.SOURCE_REGISTRY.G_AN_MUDMARA
+    &&!api.SOURCE_REGISTRY.R_AN_CONCEALED,'a deferred phase registered a source rule');
+  assert(!api.GRAMMAR_RULES.governors.anMudmara,'a concealed أَنْ governor was registered');
+  assert(/It does not cover a concealed أَنْ or إِذَنْ/.test(api.SOURCE_REGISTRY.G_AN_NASB.conditions),
+    'G_AN_NASB stopped excluding the concealed أَنْ');
+  assert(/not a concealed أَنْ/.test(api.SOURCE_REGISTRY.R_PRESENT_NUUN_NISWAH_MAHALL_NASB_AN.conditions),
+    'the mabnī أَنْ maḥall rule stopped excluding the concealed أَنْ');
+  // Phase 4 (the jawāzim) is untouched: لَمْ remains the only jāzim in the governor table.
+  assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.mood==='jazm').length===1,
+    'a second jāzim entered the governor table');
+  p5Cases+=7;
+}
+
+/* --- Refusal-reason reconciliation, in the Phase 3B0A style: every declared reason is either
+       exercised above or STRUCTURALLY UNREACHABLE while the registries hold what they hold, and
+       the unreachable list is enumerated rather than left as a gap in the count. --- */
+const P5_UNREACHABLE_REASONS=[
+  /* Each of these is refused earlier by a load-bearing STARTUP invariant, so no exercise can put
+     the registries into the state that would produce it. They stay in the resolver because the
+     resolver may not assume its own startup checks ran — it is the last line, not the first. */
+  'template-authorizes-no-response-pair', // add() makes pairs and a conditional governor biconditional
+  'ambiguous-response-pair',              // startup forbids two exchanges sharing a verb+person
+  'unknown-context',                      // startup forbids a pair naming an unregistered context
+  'not-a-production-response',            // startup forbids a productive pair with fixture status
+  'pair-not-bound-to-this-template',      // startup forbids a pair naming another template
+  'unauthorized-consumer',                // startup forbids a context with another consumer
+  'unverified-source',                    // R_IDHAN_CONDITIONS is registered and enabled
+  'unauthorized-source-consumer',         // the productive template is a registered owner
+  'unverified-governor-source',           // G_IDHAN_NASB is registered and enabled
+  'governor-not-bound-to-its-conditions', // GRAMMAR_RULES is deeply frozen
+  'context-field-mismatch',               // startup cross-checks every context field
+  'pair-field-mismatch',                  // startup cross-checks every pair field
+  'response-graph-invalid',               // startup re-derives the reciprocal graph
+  'unreadable-response'                   // the view is extracted from an array already indexed as one
+];
+{
+  const declared=api.IDHAN_PRODUCTION_REFUSAL_REASONS;
+  assert(Object.isFrozen(declared),'the productive refusal-reason list is mutable');
+  for(const reason of P5_UNREACHABLE_REASONS)
+    assert(declared.includes(reason),'an unreachable reason is not declared: '+reason);
+  for(const reason of declared)
+    assert(p5Reasons.has(reason)||P5_UNREACHABLE_REASONS.includes(reason),
+      'declared refusal reason "'+reason+'" is neither exercised nor listed as unreachable');
+  for(const reason of p5Reasons)
+    assert(declared.includes(reason)||api.IDHAN_PROOF_FAILURE_REASONS.includes(reason),
+      'the productive resolver refused for an undeclared reason: '+reason);
+  assert(p5Reasons.size===declared.length-P5_UNREACHABLE_REASONS.length
+    +[...p5Reasons].filter(r=>!declared.includes(r)).length,
+    'the exercised-reason tally drifted: '+[...p5Reasons].join(','));
+  p5Cases+=4;
+}
+
+console.log('Phase-3B1 productive إِذَنْ audit passed: '+p5Cases+' canonical checks and '+p5Attacks+' adversarial checks.');
+console.log('  phase-3B1 productive exchanges: '+api.IDHAN_PRODUCTION_PAIR_IDS.length
+  +' registered, '+p5Seen.size+' reached by the builder; 1 production template, 0 unauthorized governors');
+console.log('  phase-3B1 refusal reasons: '+api.IDHAN_PRODUCTION_REFUSAL_REASONS.length+' declared, '
+  +[...p5Reasons].filter(r=>api.IDHAN_PRODUCTION_REFUSAL_REASONS.includes(r)).length+' reachable and exercised, '
+  +P5_UNREACHABLE_REASONS.length+' refused earlier by a startup invariant; plus '
+  +[...p5Reasons].filter(r=>!api.IDHAN_PRODUCTION_REFUSAL_REASONS.includes(r)).length
+  +' shared condition-clause reasons');
+console.log('  phase-3B1 validation error-code distribution: '+JSON.stringify(p5Codes));
 
 console.log('Phase-3B0-pre canonical sign-label audit passed: '+s0Cases+' canonical checks and '+s0AttackCases+' adversarial checks.');
 console.log('  sign fuzz accounting: '+JSON.stringify(s0FuzzReport)+'; no-ops excluded: '+s0NoOps+'; inert wrappers normalized away: '+s0InertCases);
@@ -10134,7 +11143,9 @@ const rejectionReasonsBeforeRandom={...api.grammarDiagnostics.rejectionReasons};
 const randomSentences=[];
 const openingWords=new Set();
 const openingParticles=new Set();
-const particleWords=new Set(['إِنَّ','لَكِنَّ','لَعَلَّ','لَيْتَ','فِي','عَنْ','إِلَى','لَنْ','لَمْ','سَوْفَ']);
+// Phase 3B1 adds إِذَنْ, so the live generator's reach into the productive lane is measured here
+// rather than assumed: it must actually open a randomly generated sentence.
+const particleWords=new Set([api.IDHAN_SURFACE,'إِنَّ','لَكِنَّ','لَعَلَّ','لَيْتَ','فِي','عَنْ','إِلَى','لَنْ','لَمْ','سَوْفَ']);
 let consecutiveRepeats=0;
 for(let iteration=0;iteration<3000;iteration++){
   context.nahwGenerate();
@@ -10162,7 +11173,8 @@ assert(runtimeRejectedCandidates===0,`Runtime generation rejected ${runtimeRejec
 assert(consecutiveRepeats===0,'A consecutive sentence repeat was generated');
 assert(uniqueRandomSentences>=2100,`Only ${uniqueRandomSentences} unique sentences in 3000 random generations`);
 assert(openingWords.size>=60,`Only ${openingWords.size} distinct opening words appeared`);
-assert(openingParticles.size>=9,`Only ${openingParticles.size} distinct opening particles appeared`);
+assert(openingParticles.size>=10,`Only ${openingParticles.size} distinct opening particles appeared`);
+assert(openingParticles.has(api.IDHAN_SURFACE),'The productive إِذَنْ lane was never reached by the live generator');
 assert(JSON.parse(storage.get('nahw-sentence-history-v1')).length===100,'Sentence history did not enforce its 100-entry limit');
 
 const additionalBlock=html.match(/const additionalVerbActions=\[([\s\S]*?)\n\];/)[1];
@@ -10518,7 +11530,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===82,`Expected 82 production templates, found ${api.templates.length}`);
+assert(api.templates.length===83,`Expected 83 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -10817,8 +11829,25 @@ function auditWhy(why,label,{max=4}={}){
     whyRuleIds.add(id);
   });
 }
-function auditTokenWhy(tok,label){
-  auditWhy(tok.why,label);
+function auditTokenWhy(tok,label,owner=null){
+  /* The four-statement conciseness budget holds everywhere except the one lane where the source
+     itself supplies more: إِذَنْ's naṣb rests on THREE separate شروط (Al-Tuḥfah p. 75), and each
+     needs its own line, because collapsing them would hide from the learner which condition a
+     given sentence actually turns on. So that verb gets 3 + state + sign + subject = 7, and every
+     other token in the app — including إِذَنْ's own particle card — keeps the budget of 4. */
+  const governedByIdhan=Boolean(owner&&tok.governorId
+    &&owner.find(item=>item.id===tok.governorId)?.grammar?.particleType===api.IDHAN_PARTICLE_TYPE);
+  auditWhy(tok.why,label,governedByIdhan?{max:7}:{});
+  if(governedByIdhan){
+    assert(api.WHY_IDHAN_CONDITIONS.every(line=>tok.why.ids.includes(line.id)),
+      `${label}: an إِذَنْ-governed verb omits one of the three conditions`);
+    assert(tok.why.ids.includes('WHY_STATE_VERB_IDHAN'),`${label}: an إِذَنْ-governed verb omits its state rule`);
+    const conditionPositions=api.WHY_IDHAN_CONDITIONS.map(line=>tok.why.ids.indexOf(line.id));
+    assert(conditionPositions.every((position,index)=>index===0||position>conditionPositions[index-1]),
+      `${label}: the three conditions are out of source order`);
+    assert(Math.max(...conditionPositions)<tok.why.ids.indexOf('WHY_STATE_VERB_IDHAN'),
+      `${label}: the naṣb conclusion precedes the conditions it rests on`);
+  }
   whyTokens++;
   const ar=bareAr(tok.why.ar.join(' '));
   if(tok.grammar.type==='noun'){
@@ -10871,7 +11900,7 @@ for(let tid=0;tid<api.templates.length;tid++){
     const data=api.buildTemplate(tid);
     api.renderExercise(data);
     data.tokens.forEach(tok=>{
-      auditTokenWhy(tok,`tpl${tid} «${tok.word}»`);
+      auditTokenWhy(tok,`tpl${tid} «${tok.word}»`,data.tokens);
       if(tok.phraseAr){auditWhy(tok.phraseWhy,`tpl${tid} phrase «${tok.word}»`,{max:3});whyRels++;}
       else assert(!tok.phraseWhy,`tpl${tid}: construction why without a construction analysis`);
     });
@@ -10886,7 +11915,7 @@ for(const [tStart,tForm,tState,tSign] of validTuples){
   context.nahwGenerate();
   const ex=api.currentExercise();
   ex.tokens.forEach(tok=>{
-    auditTokenWhy(tok,`tuple ${tStart}/${tForm}/${tState}/${tSign} «${tok.word}»`);
+    auditTokenWhy(tok,`tuple ${tStart}/${tForm}/${tState}/${tSign} «${tok.word}»`,ex.tokens);
     if(tok.phraseAr)auditWhy(tok.phraseWhy,`tuple phrase «${tok.word}»`,{max:3});
   });
   tupleRuns++;

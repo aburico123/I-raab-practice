@@ -975,7 +975,11 @@ const GLOSS_CLOSED_PARTICLES=Object.freeze({
     gloss is fixed. The paired case never reaches here: it is resolved earlier from the action
     record, where the same surface carries a different English gloss under a different verb.
     عَنْ is "about" here and "for" under يَبْحَثُ; إِلَى is "to" here and "at" under يَنْظُرُ. */
- 'فِي':'in','لَنْ':'will not','لَمْ':'did not','سَوْفَ':'will','أَنْ':'that','لِ':'so','كَيْ':'that','عَنْ':'about','إِلَى':'to','عَلَى':'to'
+ 'فِي':'in','لَنْ':'will not','لَمْ':'did not','سَوْفَ':'will','أَنْ':'that','لِ':'so','كَيْ':'that','عَنْ':'about','إِلَى':'to','عَلَى':'to',
+ /* Phase 3B1. «in that case» carries إِذَنْ's jawāb/jazāʾ meaning — it answers a statement and
+    states its consequence — and it is the whole modality of the answer, so the verb after it is
+    glossed bare, exactly as after لَنْ, أَنْ and سَوْفَ. */
+ 'إِذَنْ':'in that case'
 });
 /* The eight surfaces no vocabulary registry owns. Each is bound to the token TYPE that may carry
    it, so the same surface cannot borrow this gloss in another role. */
@@ -1025,7 +1029,7 @@ function prepActionFor(data,index){
 }
 /* The particle types whose English wording covers the verb that follows them. Frozen, and matched
    on the particle's own canonical `particleType`, never on its stored English. */
-const GLOSS_MODALITY_PARTICLE_TYPES=Object.freeze(['lan','lam','sawfa','an','kay','lamTalil']);
+const GLOSS_MODALITY_PARTICLE_TYPES=Object.freeze(['lan','lam','sawfa','an','kay','lamTalil','idhan']);
 /* The verb-focused families: the present verb is the exercise's subject of study, and both its
    own gloss and its object gloss are drawn from the verb-side pools rather than the noun registry. */
 function verbFocusedTemplateForm(data){
@@ -1233,7 +1237,14 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  TS19:Object.freeze({parts:Object.freeze([Object.freeze({lit:"They "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"verb:1:en"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
  TS20:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:1:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
  TS21:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" he "}),Object.freeze({slot:"verb:1:third"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
- TS22:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" he "}),Object.freeze({slot:"verb:2:third"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:3"}),Object.freeze({lit:"."})])})
+ TS22:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" he "}),Object.freeze({slot:"verb:2:third"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:3"}),Object.freeze({lit:"."})])}),
+ /* Phase 3B1 — the productive إِذَنْ answer. Two tokens, so two slots: the particle's canonical
+    gloss carries the answer's «in that case» meaning, and the verb's own registered English
+    carries the action. The «he will» between them is fixed wording, not a slot, because both
+    halves of it are fixed by the lane itself: the person is the 3ms hidden pronoun the ordinary
+    muʿrab lane conceals, and the future is the second of إِذَنْ's three conditions, which the
+    resolver has already proven for every exercise that reaches this composer. */
+ TS23:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" he will "}),Object.freeze({slot:"verb:1:en"}),Object.freeze({lit:"."})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1322,7 +1333,9 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_NOUN_SFP_JARR_KASRA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SFP_JARR_KASRA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
  "T_NOUN_SMP_JARR_YA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SMP_JARR_YA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
  "T_NOUN_BROKEN_JARR_KASRA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_BROKEN_JARR_KASRA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
- "T_NOUN_DUAL_JARR_YA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_DUAL_JARR_YA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true})
+ "T_NOUN_DUAL_JARR_YA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_DUAL_JARR_YA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
+ // Phase 3B1 — the productive إِذَنْ answer, the only two-token particle+verb structure.
+ "T_PARTICLE_PRESENT_NASB_FATHA_04||particle:particle,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_04",structure:"particle:particle,verb:present",shape:"TS23",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -3615,6 +3628,49 @@ const IDHAN_FIXTURE_ID='IDHAN_SOURCE_DIRECT_FIXTURE';
    points BACK. Giving it its own ID is what makes a one-way, self-linked or mis-targeted link
    detectable at all. */
 const IDHAN_RESPONSE_NODE_ID='IDHAN_SOURCE_DIRECT_RESPONSE';
+/* ===== Phase 3B1 — the PRODUCTIVE ordinary إِذَنْ lane ============================
+   Phase 3B0A proved the three conditions for Al-Tuḥfah's own worked example and deliberately
+   stopped there: no production template could reach the architecture. Phase 3B1 opens exactly ONE
+   productive lane and nothing else — إِذَنْ heading a direct answer, immediately followed by an
+   ordinary muʿrab present verb whose naṣb sign is the visible fatḥah, with no separator.
+
+   The FIXTURE and the PRODUCTION records are kept apart by `productionStatus`, and the separation
+   is enforced in both directions: the fixture resolver refuses anything that is not
+   'architecture-fixture', and the productive resolver refuses anything that is not
+   'production-response'. A fixture proof therefore cannot authorize a production exercise, and a
+   production record cannot authorize the fixture.
+
+   They are also kept apart by `auditStatus`, because the two make DIFFERENT claims.
+   'source-verified' means "Al-Tuḥfah p. 75 states this exact exchange", and only the fixture may
+   say it. 'application-composed' means "this exchange is the application's own, built to satisfy
+   the conditions p. 75 states". The source's own example is 2ms («إِذَنْ تَنْجَحَ»), and 2ms is
+   morphology authority only in this app — its surface is shared with 3fs, so no production
+   template may declare it — so the source-direct example necessarily stays fixture-only. Nothing
+   below is presented as the source's wording; the RULE is the source's, the exchanges are ours.
+
+   A production exercise carries NO discourse field of its own. Everything — which context, which
+   pair, the reciprocal graph, the prompt shown above the sentence — is resolved from frozen
+   application authority through the exercise's stable template ID and its own token structure. The
+   complete response-context claim vocabulary therefore stays banned on every production surface,
+   exactly as in Phase 3B0A, and History can carry no discourse claim at all. */
+const PRODUCTION_RESPONSE_STATUS='production-response';
+const SOURCE_VERIFIED_AUDIT='source-verified';
+const APPLICATION_COMPOSED_AUDIT='application-composed';
+const IDHAN_PARTICLE_TYPE='idhan';
+const IDHAN_SURFACE='إِذَنْ';
+const IDHAN_CONDITION_RULE_ID='R_IDHAN_CONDITIONS';
+const IDHAN_GOVERNOR_RULE_ID='G_IDHAN_NASB';
+/* The ONE production template authorized to consume the productive records. It is a template
+   stableId — the exact inversion of the fixture consumer, which may never be one — and startup
+   verifies that a template with this ID exists, declares إِذَنْ as its governor, and names exactly
+   the pairs registered below. `add()` hands stableIds out by registration order within a family,
+   and the three pre-existing particle/present/naṣb/fatḥah templates are …_01 (لَنْ), _02 (أَنْ) and
+   _03 (لِكَيْ), so this lane is _04 and every pre-existing stable ID is untouched. */
+const IDHAN_PRODUCTION_TEMPLATE_ID='T_PARTICLE_PRESENT_NASB_FATHA_04';
+const IDHAN_PRODUCTION_CONSUMER=IDHAN_PRODUCTION_TEMPLATE_ID;
+/* The semantic relation a registered exchange may assert. إِذَنْ is «حَرْفُ جَوَابٍ وَجَزَاءٍ»
+   (p. 75), so the answer states the CONSEQUENCE of the statement it answers. */
+const RESPONSE_SEMANTIC_RELATIONS=Object.freeze(['consequence']);
 const RESPONSE_CONTEXT_SOURCE={
  IDHAN_SOURCE_DIRECT:{
   id:'IDHAN_SOURCE_DIRECT',
@@ -3633,6 +3689,67 @@ const RESPONSE_CONTEXT_SOURCE={
   sourcePdfPage:75,
   authorizedConsumers:[IDHAN_FIXTURE_CONSUMER],
   productionStatus:ARCHITECTURE_FIXTURE_STATUS
+ },
+ /* ---- Phase 3B1 — the productive contexts ---------------------------------------
+    Each is a complete discourse frame: a statement the learner is shown ABOVE the exercise, and
+    the discourse facts that make the answer below it an answer. Every one carries the same three
+    condition-bearing facts the fixture does — jawāb/jazāʾ relation, ṣadr jumlat al-jawāb, no
+    separator — and the SAME future evidence kind, so the futurity of each answer is proven from
+    its own prompt's Arabic sīn and never from English. The prompts are the application's own
+    Arabic, built from vocabulary this project already uses; `auditStatus` says exactly that. */
+ IDHAN_PRODUCTION_READING:{
+  id:'IDHAN_PRODUCTION_READING',
+  contextType:'promptResponse',
+  promptAr:'سَأُعْطِي الطَّالِبَ الْكِتَابَ',
+  promptEn:'I will give the student the book.',
+  promptVerbAr:'سَأُعْطِي',
+  responseNodeId:'IDHAN_PRODUCTION_READING_RESPONSE',
+  futureEvidenceId:'sourcePromptFutureSin',
+  responseRelation:'jawabJazaa',
+  discoursePosition:'sadrJumlatAlJawab',
+  separatorMode:'none',
+  responseParticleAr:IDHAN_SURFACE,
+  conditionSetId:IDHAN_CONDITION_RULE_ID,
+  sourceRuleId:IDHAN_CONDITION_RULE_ID,
+  sourcePdfPage:75,
+  authorizedConsumers:[IDHAN_PRODUCTION_CONSUMER],
+  productionStatus:PRODUCTION_RESPONSE_STATUS
+ },
+ IDHAN_PRODUCTION_MEMORIZING:{
+  id:'IDHAN_PRODUCTION_MEMORIZING',
+  contextType:'promptResponse',
+  promptAr:'سَأَشْرَحُ الدَّرْسَ لِلطَّالِبِ',
+  promptEn:'I will explain the lesson to the student.',
+  promptVerbAr:'سَأَشْرَحُ',
+  responseNodeId:'IDHAN_PRODUCTION_MEMORIZING_RESPONSE',
+  futureEvidenceId:'sourcePromptFutureSin',
+  responseRelation:'jawabJazaa',
+  discoursePosition:'sadrJumlatAlJawab',
+  separatorMode:'none',
+  responseParticleAr:IDHAN_SURFACE,
+  conditionSetId:IDHAN_CONDITION_RULE_ID,
+  sourceRuleId:IDHAN_CONDITION_RULE_ID,
+  sourcePdfPage:75,
+  authorizedConsumers:[IDHAN_PRODUCTION_CONSUMER],
+  productionStatus:PRODUCTION_RESPONSE_STATUS
+ },
+ IDHAN_PRODUCTION_OPENING:{
+  id:'IDHAN_PRODUCTION_OPENING',
+  contextType:'promptResponse',
+  promptAr:'سَأُرْسِلُ الْمِفْتَاحَ إِلَى الْحَارِسِ',
+  promptEn:'I will send the key to the guard.',
+  promptVerbAr:'سَأُرْسِلُ',
+  responseNodeId:'IDHAN_PRODUCTION_OPENING_RESPONSE',
+  futureEvidenceId:'sourcePromptFutureSin',
+  responseRelation:'jawabJazaa',
+  discoursePosition:'sadrJumlatAlJawab',
+  separatorMode:'none',
+  responseParticleAr:IDHAN_SURFACE,
+  conditionSetId:IDHAN_CONDITION_RULE_ID,
+  sourceRuleId:IDHAN_CONDITION_RULE_ID,
+  sourcePdfPage:75,
+  authorizedConsumers:[IDHAN_PRODUCTION_CONSUMER],
+  productionStatus:PRODUCTION_RESPONSE_STATUS
  }
 };
 /* A prompt and a response may never be paired arbitrarily: a pair record names BOTH exact
@@ -3652,11 +3769,97 @@ const RESPONSE_PAIR_SOURCE={
   semanticRelation:'consequence',
   responseTransitivity:'intransitive',
   futureEvidenceId:'sourcePromptFutureSin',
-  auditStatus:'source-verified',
+  auditStatus:SOURCE_VERIFIED_AUDIT,
   sourcePdfPage:75,
   productionStatus:ARCHITECTURE_FIXTURE_STATUS
+ },
+ /* ---- Phase 3B1 — the productive pairs -------------------------------------------
+    A production pair is the productive analogue of the fixture record: it is what the resolver
+    authenticates. It names the one template that may consume it, the one context it answers, the
+    exact response construction (particle, verb surface, person), and the reciprocal discourse
+    graph. The GRAPH lives here rather than on the exercise, because a production exercise may
+    carry no discourse field at all — `responseRelationships` is a banned claim on every production
+    surface — so the graph is application authority end to end and there is nothing for a forger to
+    rewrite. Every field is re-checked by productionPairAuthorityFailure and none is decorative.
+
+    `responseVerbAr` is always a registered ACCUSATIVE surface of a lexeme this app already
+    produces, so the response verb's gloss, its English and its morphology come from the existing
+    vocabulary registry and no new verb family is introduced. */
+ IDHAN_PRODUCTION_READING_PAIR:{
+  id:'IDHAN_PRODUCTION_READING_PAIR',
+  contextId:'IDHAN_PRODUCTION_READING',
+  templateId:IDHAN_PRODUCTION_TEMPLATE_ID,
+  promptVerbAr:'سَأُعْطِي',
+  responseParticleAr:IDHAN_SURFACE,
+  responseVerbAr:'يَقْرَأَ',
+  responsePerson:'3ms',
+  responseNodeId:'IDHAN_PRODUCTION_READING_RESPONSE',
+  semanticRelation:'consequence',
+  futureEvidenceId:'sourcePromptFutureSin',
+  auditStatus:APPLICATION_COMPOSED_AUDIT,
+  sourcePdfPage:75,
+  productionStatus:PRODUCTION_RESPONSE_STATUS,
+  responseRelationships:[
+   {id:'REL_IDHAN_PRODUCTION_READING_CONTEXT_ANSWER',type:'contextAnswer',
+    fromId:'IDHAN_PRODUCTION_READING',toId:'IDHAN_PRODUCTION_READING_RESPONSE',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_READING_ANSWER_CONTEXT'},
+   {id:'REL_IDHAN_PRODUCTION_READING_ANSWER_CONTEXT',type:'answerContext',
+    fromId:'IDHAN_PRODUCTION_READING_RESPONSE',toId:'IDHAN_PRODUCTION_READING',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_READING_CONTEXT_ANSWER'}
+  ]
+ },
+ IDHAN_PRODUCTION_MEMORIZING_PAIR:{
+  id:'IDHAN_PRODUCTION_MEMORIZING_PAIR',
+  contextId:'IDHAN_PRODUCTION_MEMORIZING',
+  templateId:IDHAN_PRODUCTION_TEMPLATE_ID,
+  promptVerbAr:'سَأَشْرَحُ',
+  responseParticleAr:IDHAN_SURFACE,
+  responseVerbAr:'يَحْفَظَ',
+  responsePerson:'3ms',
+  responseNodeId:'IDHAN_PRODUCTION_MEMORIZING_RESPONSE',
+  semanticRelation:'consequence',
+  futureEvidenceId:'sourcePromptFutureSin',
+  auditStatus:APPLICATION_COMPOSED_AUDIT,
+  sourcePdfPage:75,
+  productionStatus:PRODUCTION_RESPONSE_STATUS,
+  responseRelationships:[
+   {id:'REL_IDHAN_PRODUCTION_MEMORIZING_CONTEXT_ANSWER',type:'contextAnswer',
+    fromId:'IDHAN_PRODUCTION_MEMORIZING',toId:'IDHAN_PRODUCTION_MEMORIZING_RESPONSE',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_MEMORIZING_ANSWER_CONTEXT'},
+   {id:'REL_IDHAN_PRODUCTION_MEMORIZING_ANSWER_CONTEXT',type:'answerContext',
+    fromId:'IDHAN_PRODUCTION_MEMORIZING_RESPONSE',toId:'IDHAN_PRODUCTION_MEMORIZING',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_MEMORIZING_CONTEXT_ANSWER'}
+  ]
+ },
+ IDHAN_PRODUCTION_OPENING_PAIR:{
+  id:'IDHAN_PRODUCTION_OPENING_PAIR',
+  contextId:'IDHAN_PRODUCTION_OPENING',
+  templateId:IDHAN_PRODUCTION_TEMPLATE_ID,
+  promptVerbAr:'سَأُرْسِلُ',
+  responseParticleAr:IDHAN_SURFACE,
+  responseVerbAr:'يَفْتَحَ',
+  responsePerson:'3ms',
+  responseNodeId:'IDHAN_PRODUCTION_OPENING_RESPONSE',
+  semanticRelation:'consequence',
+  futureEvidenceId:'sourcePromptFutureSin',
+  auditStatus:APPLICATION_COMPOSED_AUDIT,
+  sourcePdfPage:75,
+  productionStatus:PRODUCTION_RESPONSE_STATUS,
+  responseRelationships:[
+   {id:'REL_IDHAN_PRODUCTION_OPENING_CONTEXT_ANSWER',type:'contextAnswer',
+    fromId:'IDHAN_PRODUCTION_OPENING',toId:'IDHAN_PRODUCTION_OPENING_RESPONSE',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_OPENING_ANSWER_CONTEXT'},
+   {id:'REL_IDHAN_PRODUCTION_OPENING_ANSWER_CONTEXT',type:'answerContext',
+    fromId:'IDHAN_PRODUCTION_OPENING_RESPONSE',toId:'IDHAN_PRODUCTION_OPENING',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_OPENING_CONTEXT_ANSWER'}
+  ]
  }
 };
+/* The pair IDs the one production template may consume, frozen here beside the records so the
+   template metadata and the registry cannot drift apart; startup checks both directions. */
+const IDHAN_PRODUCTION_PAIR_IDS=Object.freeze([
+ 'IDHAN_PRODUCTION_READING_PAIR','IDHAN_PRODUCTION_MEMORIZING_PAIR','IDHAN_PRODUCTION_OPENING_PAIR'
+]);
 /* The application's own canonical fixture. This — not a harness literal, and not any object a
    caller can assemble — is what the resolver authenticates. It binds the fixture ID to its
    consumer, its context, its pair, the exact token spine (identity, order, focus), the exact
@@ -3746,13 +3949,18 @@ function responseContextRecord(id){return frozenStoreRecord(RESPONSE_CONTEXT_REG
 function responsePairRecord(id){return frozenStoreRecord(RESPONSE_PAIR_REGISTRY,id)}
 function responseFixtureRecord(id){return frozenStoreRecord(IDHAN_FIXTURE_REGISTRY,id)}
 /* Section 12 — consumer restriction encoded WITH the rule, not with its callers. Citing
-   R_IDHAN_CONDITIONS is a claim that the three discourse conditions have been checked, and only
-   the canonical fixture's consumer is ever in a position to have checked them. A production
-   template, an ordinary token, a relationship, another source rule or an arbitrary caller may not
-   wear it; validateExercise rejects the exercise outright, so a rejected attempt never reaches
-   the validByRule tally. */
+   R_IDHAN_CONDITIONS is a claim that the three discourse conditions have been checked, and only a
+   consumer that is actually in a position to have checked them may wear it. Phase 3B1 adds exactly
+   one such consumer, the productive template, and no more: an ordinary token, a relationship,
+   another source rule, any other template or an arbitrary caller may not wear it.
+
+   This list gates the CONTEXT RESOLVERS only. A TOKEN carrying R_IDHAN_CONDITIONS remains a hard
+   failure whoever it belongs to (E_RESTRICTED_SOURCE_RULE checks the rule, never the consumer), so
+   authorizing the productive template here does not let its tokens cite the condition rule. The
+   productive lane's tokens cite G_IDHAN_NASB and R_MUDARI_NASB_FATHA — the particle's own
+   government and the verb's own sign — and never the conditions. */
 const RESTRICTED_SOURCE_RULE_OWNERS=Object.freeze(Object.assign(Object.create(null),{
- R_IDHAN_CONDITIONS:Object.freeze([IDHAN_FIXTURE_CONSUMER])
+ R_IDHAN_CONDITIONS:Object.freeze([IDHAN_FIXTURE_CONSUMER,IDHAN_PRODUCTION_CONSUMER])
 }));
 function isRestrictedSourceRule(ruleId){
  return typeof ruleId==='string'&&Object.prototype.hasOwnProperty.call(RESTRICTED_SOURCE_RULE_OWNERS,ruleId);
@@ -4094,6 +4302,73 @@ function pairAuthorityFailure(pair,context,fixture){
  if(pair.futureEvidenceId!==context.futureEvidenceId)return 'futureEvidenceId';
  return '';
 }
+/* ---- Phase 3B1 — the same cross-checking, for the PRODUCTIVE records --------------
+   The productive lane has no fixture record: its PAIR is the authority the resolver
+   authenticates, so the pair plays the fixture's role and every context field is cross-checked
+   against it. The two clause sets are deliberately separate functions rather than one
+   parameterised one, because the two lanes assert different things — the fixture asserts "the
+   source states this exchange", the productive records assert "this exchange satisfies the
+   conditions the source states" — and one shared clause set would let either stand in for the
+   other. What they SHARE is everything that actually decides the grammar: the three condition
+   clauses, the three private proof tokens, the assembler, the discourse-graph clause, the
+   future-evidence table and the frozen registries. */
+const PRODUCTION_CONTEXT_AUTHORITY_FIELDS=Object.freeze([
+ ['id',pair=>pair.contextId],
+ ['contextType',()=>'promptResponse'],
+ ['promptVerbAr',pair=>pair.promptVerbAr],
+ ['responseNodeId',pair=>pair.responseNodeId],
+ ['futureEvidenceId',pair=>pair.futureEvidenceId],
+ ['responseRelation',()=>RESPONSE_RELATIONS.jawabJazaa],
+ ['discoursePosition',()=>DISCOURSE_POSITIONS.sadrJumlatAlJawab],
+ ['separatorMode',()=>SEPARATOR_MODES.none],
+ ['responseParticleAr',pair=>pair.responseParticleAr],
+ ['conditionSetId',()=>IDHAN_CONDITION_RULE_ID],
+ ['sourceRuleId',()=>IDHAN_CONDITION_RULE_ID],
+ ['sourcePdfPage',pair=>pair.sourcePdfPage],
+ ['productionStatus',pair=>pair.productionStatus]
+]);
+function productionContextAuthorityFailure(context,pair){
+ if(!context||typeof context!=='object')return 'record';
+ if(!pair||typeof pair!=='object')return 'pair';
+ for(const [field,expected] of PRODUCTION_CONTEXT_AUTHORITY_FIELDS)if(context[field]!==expected(pair))return field;
+ /* The two prompt surfaces have no second source to be cross-checked against — they ARE the
+    authority the display is rebuilt from — so they are checked for shape here and BOUND by the
+    futurity clause, which requires promptAr to open with promptVerbAr and that verb to carry the
+    sīn. Neither may be empty, because an empty prompt is not a preceding statement at all. */
+ if(typeof context.promptAr!=='string'||!context.promptAr.trim())return 'promptAr';
+ if(typeof context.promptEn!=='string'||!context.promptEn.trim())return 'promptEn';
+ if(!Array.isArray(context.authorizedConsumers)||context.authorizedConsumers.length!==1
+   ||context.authorizedConsumers[0]!==pair.templateId)return 'authorizedConsumers';
+ return '';
+}
+/* Every authority-bearing field of a PRODUCTION pair. `responseVerbAr` is checked against the
+   vocabulary registry rather than against a stored copy, so a pair can never pin a surface this
+   app does not actually produce, and `responsePerson` must be a registered ORDINARY present
+   person — the only lane Phase 3B1 opens. */
+function productionPairAuthorityFailure(pair,context){
+ if(!pair||typeof pair!=='object')return 'record';
+ if(!context||typeof context!=='object')return 'context';
+ if(pair.contextId!==context.id)return 'contextId';
+ if(pair.promptVerbAr!==context.promptVerbAr)return 'promptVerbAr';
+ if(pair.responseParticleAr!==context.responseParticleAr)return 'responseParticleAr';
+ if(pair.responseParticleAr!==IDHAN_SURFACE)return 'responseParticleAr';
+ if(pair.futureEvidenceId!==context.futureEvidenceId)return 'futureEvidenceId';
+ if(pair.responseNodeId!==context.responseNodeId)return 'responseNodeId';
+ if(pair.sourcePdfPage!==context.sourcePdfPage)return 'sourcePdfPage';
+ if(pair.productionStatus!==context.productionStatus)return 'productionStatus';
+ if(pair.productionStatus!==PRODUCTION_RESPONSE_STATUS)return 'productionStatus';
+ if(pair.auditStatus!==APPLICATION_COMPOSED_AUDIT)return 'auditStatus';
+ if(!RESPONSE_SEMANTIC_RELATIONS.includes(pair.semanticRelation))return 'semanticRelation';
+ if(pair.templateId!==IDHAN_PRODUCTION_TEMPLATE_ID)return 'templateId';
+ const morphology=PRESENT_MORPHOLOGY[pair.responsePerson];
+ if(!morphology||morphology.formClass!=='ordinary'||morphology.endingClass!=='none'
+   ||morphology.binaaClass)return 'responsePerson';
+ if(PRESENT_NON_PRODUCTION_PERSONS.includes(pair.responsePerson))return 'responsePerson';
+ const registered=verbFormIndex.get(pair.responseVerbAr);
+ if(!registered||registered.form!=='acc'||registered.lexeme?.acc!==pair.responseVerbAr)return 'responseVerbAr';
+ if(!Array.isArray(pair.responseRelationships)||pair.responseRelationships.length!==2)return 'responseRelationships';
+ return '';
+}
 /* The reciprocal discourse graph, re-derived rather than read in record order. */
 function responseGraphFailure(links,contextId,responseNodeId){
  if(!Array.isArray(links))return 'missing';
@@ -4398,12 +4673,64 @@ const IDHAN_PROOF_FAILURE_REASONS=Object.freeze([
   if(record.responseRelation!==RESPONSE_RELATIONS.jawabJazaa)throw new Error('Context '+id+' has an unknown response relation.');
   if(record.discoursePosition!==DISCOURSE_POSITIONS.sadrJumlatAlJawab)throw new Error('Context '+id+' has an unknown discourse position.');
   if(record.separatorMode!==SEPARATOR_MODES.none)throw new Error('Context '+id+' authorizes a separator this phase does not implement.');
-  if(record.productionStatus!==ARCHITECTURE_FIXTURE_STATUS)throw new Error('Context '+id+' is not marked a non-production fixture.');
+  /* Phase 3B1 — exactly two statuses exist, and each one binds its record to a different resolver.
+     Anything else is a status no resolver would accept, so it fails closed at load. */
+  if(record.productionStatus!==ARCHITECTURE_FIXTURE_STATUS&&record.productionStatus!==PRODUCTION_RESPONSE_STATUS){
+   throw new Error('Context '+id+' carries an unknown production status.');
+  }
+  if(record.responseParticleAr!==IDHAN_SURFACE)throw new Error('Context '+id+' is not an إِذَنْ response context.');
+  if(record.conditionSetId!==IDHAN_CONDITION_RULE_ID||record.sourceRuleId!==IDHAN_CONDITION_RULE_ID){
+   throw new Error('Context '+id+' does not cite the إِذَنْ condition rule.');
+  }
+  if(record.productionStatus===PRODUCTION_RESPONSE_STATUS){
+   if(record.authorizedConsumers.length!==1||record.authorizedConsumers[0]!==IDHAN_PRODUCTION_CONSUMER){
+    throw new Error('Production context '+id+' is not bound to the one productive consumer.');
+   }
+   if(!isSourceRuleConsumerAuthorized(record.sourceRuleId,IDHAN_PRODUCTION_CONSUMER)){
+    throw new Error('Production context '+id+' cites a rule its consumer does not own.');
+   }
+  }
  }
  for(const id of Object.keys(RESPONSE_PAIR_REGISTRY)){
   const pair=RESPONSE_PAIR_REGISTRY[id];
-  if(!responseContextRecord(pair.contextId))throw new Error('Pair '+id+' names an unknown context.');
-  if(!responseFixtureRecord(pair.fixtureId))throw new Error('Pair '+id+' names an unknown fixture.');
+  const context=responseContextRecord(pair.contextId);
+  if(!context)throw new Error('Pair '+id+' names an unknown context.');
+  if(pair.productionStatus!==context.productionStatus)throw new Error('Pair '+id+' and its context disagree about production status.');
+  if(pair.productionStatus===ARCHITECTURE_FIXTURE_STATUS){
+   if(pair.auditStatus!==SOURCE_VERIFIED_AUDIT)throw new Error('Fixture pair '+id+' is not marked source-verified.');
+   if(!responseFixtureRecord(pair.fixtureId))throw new Error('Pair '+id+' names an unknown fixture.');
+   continue;
+  }
+  /* Phase 3B1 — a production pair is authority in its own right: it plays the role the fixture
+     record plays for the source-direct lane, so it owns the reciprocal graph and the exact
+     response construction, and it may never claim the source's own audit status. */
+  if(pair.auditStatus!==APPLICATION_COMPOSED_AUDIT)throw new Error('Production pair '+id+' claims an audit status it has no source for.');
+  if(Object.prototype.hasOwnProperty.call(pair,'fixtureId'))throw new Error('Production pair '+id+' names an architecture fixture.');
+  if(pair.templateId!==IDHAN_PRODUCTION_TEMPLATE_ID)throw new Error('Production pair '+id+' is not bound to the productive template.');
+  if(!IDHAN_PRODUCTION_PAIR_IDS.includes(id))throw new Error('Production pair '+id+' is not in the productive template’s frozen pair list.');
+  const productionContextField=productionContextAuthorityFailure(context,pair);
+  if(productionContextField)throw new Error('Production pair '+id+' disagrees with its context at '+productionContextField+'.');
+  const productionGraphReason=responseGraphFailure(pair.responseRelationships,context.id,context.responseNodeId);
+  if(productionGraphReason)throw new Error('Production pair '+id+' has an invalid discourse graph: '+productionGraphReason+'.');
+  const futureReason=futureEvidenceFailure(context,FUTURE_EVIDENCE_KINDS);
+  if(futureReason)throw new Error('Production context '+context.id+' does not prove futurity: '+futureReason+'.');
+  /* productionPairAuthorityFailure is NOT run here: it resolves the response verb through the
+     vocabulary registry and the present-morphology table, neither of which exists yet at this
+     point in the script. The Phase 3B1 startup block at the foot of the file runs it, together
+     with the template binding, once every registry is built. */
+ }
+ for(const id of IDHAN_PRODUCTION_PAIR_IDS){
+  const pair=responsePairRecord(id);
+  if(!pair||pair.productionStatus!==PRODUCTION_RESPONSE_STATUS)throw new Error('The productive pair list names an unregistered pair: '+id+'.');
+ }
+ // One context per production pair, and one pair per context: a shared context would let two
+ // exchanges answer the same statement, which the response graph could not then distinguish.
+ {
+  const productionContextIds=IDHAN_PRODUCTION_PAIR_IDS.map(id=>responsePairRecord(id).contextId);
+  if(new Set(productionContextIds).size!==productionContextIds.length)throw new Error('Two productive pairs share one response context.');
+  const registeredProductionContexts=Object.keys(RESPONSE_CONTEXT_REGISTRY)
+   .filter(id=>RESPONSE_CONTEXT_REGISTRY[id].productionStatus===PRODUCTION_RESPONSE_STATUS);
+  if(registeredProductionContexts.length!==productionContextIds.length)throw new Error('A productive response context is registered but unreachable.');
  }
  for(const id of Object.keys(IDHAN_FIXTURE_REGISTRY)){
   const fixture=IDHAN_FIXTURE_REGISTRY[id];
@@ -4445,6 +4772,11 @@ const RESPONSE_CONTEXT_CLAIM_FIELDS=Object.freeze([
  'contextType','discoursePosition','sadrAlJawab','sadrJumlatAlJawab','responseRelation',
  'responseRelationships','semanticRelation','separatorMode','conditionSatisfied','conditionSet',
  'conditionSetId','isAnswer','isResponse','responseHead','responseSentenceHead',
+ /* Phase 3B1 — the one name the productive lane adds. It is frozen TEMPLATE metadata naming the
+    exchanges a template may consume; on an exercise it would be a second, forgeable source of
+    truth for which pair authorized the naṣb, so it is banned on every production surface exactly
+    like the rest of this vocabulary. */
+ 'responsePairIds',
  // Futurity — "the verb after the particle denotes the future".
  'futureMeaning','futureEvidence','futureEvidenceId','futureEvidenceKind','futureMarker',
  // Source and audit — the claims that would make all of the above look already checked.
@@ -4800,6 +5132,203 @@ function deriveMabniPresentMahall(data,tokenIndex){
  }
  return observation;
 }
+/* ===== Phase 3B1 — the productive إِذَنْ authorization =============================
+   إِذَنْ is unlike every governor before it: أَنْ, لَنْ, لَمْ and كَيْ govern whenever they stand
+   before the verb, but إِذَنْ governs only when three DISCOURSE conditions hold (Al-Tuḥfah p. 75).
+   So its entry in GRAMMAR_RULES.governors carries a `conditionSetId`, and that field — not a
+   hard-coded name — is what marks a governor as conditional. Two stages, exactly as Phase 3A2:
+
+     • observeIdhanResponseHead is a STRUCTURAL OBSERVATION, cheap enough to run inside
+       inflectVerb, where morphology is not materialized and relationships are not resolved. It
+       proposes the government from token adjacency and position alone.
+     • deriveIdhanProductiveNasb is THE AUTHORITY. It runs at validation, render and Why time,
+       when every registry, the frozen template and the authoritative morphology are all
+       available, and it yields an authorization only after every condition holds.
+
+   The two are not interchangeable and the difference is deliberate: the observation can only make
+   the builder produce a candidate; whether that candidate is grammar is settled by the authority,
+   and validateExercise REJECTS the exercise when it is not. So an إِذَنْ that fails any condition
+   never becomes a rendered naṣb — it becomes a refused exercise. */
+/* Structural only: is this verb the token immediately after an إِذَنْ that OPENS the sentence?
+   Position is read from the token list itself, never from an index carried on a token, never from
+   a caller Boolean, and never from the presence of إِذَنْ somewhere in the sentence. */
+function observeIdhanResponseHead(tokens,verbIndex){
+ if(!Array.isArray(tokens)||verbIndex!==1)return false;
+ const head=tokens[0];
+ return Boolean(head&&head.grammar&&head.grammar.type==='particle'
+  &&head.grammar.particleType===IDHAN_PARTICLE_TYPE
+  &&head.word===IDHAN_SURFACE);
+}
+/* Is this governor spec one whose government is conditional? Read from the spec, so a future
+   conditional governor inherits the gate automatically. */
+function isConditionalGovernor(spec){
+ return Boolean(spec&&typeof spec.conditionSetId==='string'&&spec.conditionSetId);
+}
+function idhanProductionRefusal(reason){
+ return Object.freeze({authorized:false,reason,templateId:'',contextId:'',pairId:''});
+}
+/* Every static reason the productive resolver can refuse for. Enumerated so the permanent tests
+   can assert they exercise them rather than counting by hand. */
+const IDHAN_PRODUCTION_REFUSAL_REASONS=Object.freeze([
+ 'not-a-present-verb','idhan-not-at-response-head','unknown-template','template-declares-another-governor',
+ 'template-authorizes-no-response-pair','not-an-ordinary-present-verb','not-a-registered-nasb-surface',
+ 'unknown-response-pair','ambiguous-response-pair','unknown-context','not-a-production-response',
+ 'pair-not-bound-to-this-template','unauthorized-consumer','unverified-source',
+ 'unauthorized-source-consumer','unverified-governor-source','governor-not-bound-to-its-conditions',
+ 'context-field-mismatch','pair-field-mismatch','response-graph-invalid','governor-link-not-canonical',
+ 'template-capability-mismatch','target-state-or-sign-not-canonical','unreadable-response'
+]);
+/* THE AUTHORITY. Fail-closed in every branch, and nothing it reads is a stored claim: the
+   template is RESOLVED by identity from the stable ID, the context and pair are own keys of the
+   frozen registries, the verb's person and form class come from the vocabulary registry through
+   authoritativeVerbMorphology, and the three conditions are proven by the SAME clauses, the same
+   three private success tokens and the same assembler the source-direct fixture uses. The
+   exercise contributes its token structure and nothing else — it carries no discourse field at
+   all, because every name that would be one is banned on production surfaces. */
+function deriveIdhanProductiveNasb(data,verbIndex,provers){
+ /* Fail-closed entry, on the Phase 3B0A pattern. This function is reachable from the renderer,
+    the Why engine, the validator and History, and the last of those receives a graph that arrived
+    from localStorage — so it must refuse a value it cannot inspect rather than throw out of a
+    grammar decision. A revoked Proxy, a trapping Proxy and an own or inherited accessor all end
+    here as a refusal, not an exception. */
+ try{return deriveIdhanProductiveNasbCore(data,verbIndex,provers)}
+ catch{return idhanProductionRefusal('unreadable-response')}
+}
+function deriveIdhanProductiveNasbCore(data,verbIndex,provers){
+ /* Descriptor-only at the top level: `tokens` and `templateId` are read from own DATA descriptors,
+    so no getter runs and no Proxy trap fires before the value has been vouched for. */
+ if(!safeIsObject(data))return idhanProductionRefusal('unreadable-response');
+ const tokens=safeOwnDataElements(safeOwnDataValue(data,'tokens'));
+ if(!tokens)return idhanProductionRefusal('unreadable-response');
+ const templateId=safeOwnDataValue(data,'templateId');
+ const verb=tokens[verbIndex];
+ if(!verb||verb.grammar?.type!=='verb'||verb.tense!=='present')return idhanProductionRefusal('not-a-present-verb');
+ /* 1 — CONDITION 1, structurally: إِذَنْ OPENS the answer. Only the head position is tested here,
+       deliberately not adjacency to the verb: conflating the two would let a separator be reported
+       as a head failure, and then the separator clause would never be the thing that rejected it.
+       Adjacency is condition 3's business and is settled by the separator clause below, which is
+       the same clause the source-direct fixture uses. */
+ const particle=tokens[0];
+ if(!particle||particle.grammar?.type!=='particle'
+   ||particle.grammar.particleType!==IDHAN_PARTICLE_TYPE
+   ||particle.word!==IDHAN_SURFACE)return idhanProductionRefusal('idhan-not-at-response-head');
+ // 2 — the frozen production template, resolved by IDENTITY from the exercise's stable ID.
+ const template=typeof templateId==='string'?templates.find(item=>item.stableId===templateId):null;
+ if(!template)return idhanProductionRefusal('unknown-template');
+ if(template.presentGovernor!==IDHAN_PARTICLE_TYPE)return idhanProductionRefusal('template-declares-another-governor');
+ const pairIds=safeIsArray(template.responsePairIds)?template.responsePairIds:[];
+ if(!pairIds.length)return idhanProductionRefusal('template-authorizes-no-response-pair');
+ // 3 — the verb must really be an ORDINARY muʿrab present verb, by registry authority. The five
+ //     verbs and the mabnī nūn-al-niswah form are other lanes and are not opened by this phase.
+ const morphology=authoritativeVerbMorphology(verb,data);
+ if(!morphology.registered||morphology.formClass!=='ordinary'||morphology.endingClass!=='none'
+   ||morphology.binaaClass||verb.inflection!=='regular'){
+  return idhanProductionRefusal('not-an-ordinary-present-verb');
+ }
+ const registered=verbFormIndex.get(verb.word);
+ if(!registered||registered.form!=='acc'||registered.lexeme?.acc!==verb.word){
+  return idhanProductionRefusal('not-a-registered-nasb-surface');
+ }
+ // 4 — exactly ONE authorized pair may claim this response construction. Zero is an unregistered
+ //     exchange; two would leave the discourse context undecidable, so both fail closed.
+ const matches=[];
+ for(const pairId of pairIds){
+  const candidate=responsePairRecord(pairId);
+  if(!candidate)continue;
+  if(candidate.responseVerbAr===verb.word&&candidate.responsePerson===morphology.person)matches.push(candidate);
+ }
+ if(matches.length!==1)return idhanProductionRefusal(matches.length?'ambiguous-response-pair':'unknown-response-pair');
+ const pair=matches[0];
+ const context=responseContextRecord(pair.contextId);
+ if(!context)return idhanProductionRefusal('unknown-context');
+ /* 5 — the two lanes are sealed against each other. A production exercise may be authorized only
+        by production records, so the architecture fixture's context and pair — whose own resolver
+        demands the fixture status — can never authorize anything a learner sees. */
+ if(pair.productionStatus!==PRODUCTION_RESPONSE_STATUS
+   ||context.productionStatus!==PRODUCTION_RESPONSE_STATUS)return idhanProductionRefusal('not-a-production-response');
+ if(pair.templateId!==template.stableId)return idhanProductionRefusal('pair-not-bound-to-this-template');
+ if(!safeIsArray(context.authorizedConsumers)||context.authorizedConsumers.length!==1
+   ||context.authorizedConsumers[0]!==template.stableId)return idhanProductionRefusal('unauthorized-consumer');
+ // 6 — source authority: the conditions rule, its consumer restriction, and the governor's own rule.
+ if(!isSourceAuthorized(context.sourceRuleId))return idhanProductionRefusal('unverified-source');
+ if(!isSourceRuleConsumerAuthorized(context.sourceRuleId,template.stableId))return idhanProductionRefusal('unauthorized-source-consumer');
+ if(!isSourceAuthorized(IDHAN_GOVERNOR_RULE_ID))return idhanProductionRefusal('unverified-governor-source');
+ /* The governor rule and the condition rule are two DIFFERENT claims — p. 75 states إِذَنْ's
+    identity and government, and separately states the three conditions — so the governor spec must
+    name the condition set this context proves. Without that binding, G_IDHAN_NASB would be an
+    unconditional nāṣib wearing a conditional rule's clothes. */
+ const governorSpec=GRAMMAR_RULES.governors[IDHAN_PARTICLE_TYPE];
+ if(!isConditionalGovernor(governorSpec)||governorSpec.ruleId!==IDHAN_GOVERNOR_RULE_ID
+   ||governorSpec.conditionSetId!==context.conditionSetId
+   ||governorSpec.conditionSetId!==context.sourceRuleId
+   ||governorSpec.mood!=='nasb'||governorSpec.surface!==IDHAN_SURFACE){
+  return idhanProductionRefusal('governor-not-bound-to-its-conditions');
+ }
+ // 7 — every authority-bearing field of both records, and the reciprocal discourse graph.
+ if(productionContextAuthorityFailure(context,pair))return idhanProductionRefusal('context-field-mismatch');
+ if(productionPairAuthorityFailure(pair,context))return idhanProductionRefusal('pair-field-mismatch');
+ if(responseGraphFailure(pair.responseRelationships,context.id,context.responseNodeId))return idhanProductionRefusal('response-graph-invalid');
+ // 8 — the governing particle must be canonical in surface, type and source rule, and the links
+ //     between it and its verb must be reciprocal and exclusive in both directions.
+ if(particle.grammar?.particleType!==IDHAN_PARTICLE_TYPE
+   ||particle.word!==governorSpec.surface
+   ||particle.ruleId!==IDHAN_GOVERNOR_RULE_ID
+   ||verb.governorId!==particle.id
+   ||particle.relations?.governsId!==verb.id
+   ||tokens.some(item=>item!==particle&&item?.relations?.governsId===verb.id)
+   ||tokens.some(item=>item!==verb&&item?.governorId===particle.id)){
+  return idhanProductionRefusal('governor-link-not-canonical');
+ }
+ // 9 — the template's own frozen present capability must authorize exactly this structure.
+ if(presentCapabilityFailure(template,morphology))return idhanProductionRefusal('template-capability-mismatch');
+ /* 9b — the target must ACTUALLY carry the government this authorization is about. The state comes
+         from the governor spec — explicitly NASB, never read off the sign — and the sign and its
+         rule come from the canonical present-verb matrix for this verb's own inflection. Nothing
+         is hard-coded and nothing is inferred in the other direction: an authorization that said
+         "إِذَنْ governs this" about a verb standing in rafʿ, or wearing the wrong sign, would be a
+         true statement about the wrong word. */
+ const moodRule=GRAMMAR_RULES.presentVerb[verb.inflection]?.[governorSpec.mood];
+ if(!moodRule||verb.state!==governorSpec.mood||safeSignId(verb.sign)!==moodRule[0]
+   ||verb.ruleId!==moodRule[1])return idhanProductionRefusal('target-state-or-sign-not-canonical');
+ /* 10 — THE THREE CONDITIONS, through the identical clauses, provers and assembler the fixture
+         uses, over a descriptor-only view of the exercise. The view is what makes a hostile
+         container fail closed instead of running caller code inside a grammar decision. */
+ const view=safeIdhanFixtureView(data);
+ if(!view)return idhanProductionRefusal('unreadable-response');
+ const active=provers||IDHAN_CONDITION_PROVERS;
+ const assembled=assembleIdhanConditionProof(
+  active.head(context,pair,view),      // 1 — صَدْرُ جُمْلَةِ الْجَوَاب
+  active.future(context),              // 2 — دَلَالَة عَلَى الِاسْتِقْبَال
+  active.separator(context,pair,view)  // 3 — لَا فَاصِلَ
+ );
+ if(!assembled.ok)return idhanProductionRefusal(assembled.reason);
+ return Object.freeze({authorized:true,reason:'',templateId:template.stableId,contextId:context.id,pairId:pair.id});
+}
+/* The authorization for ONE verb token, reached from the render-time back-references. Exactly the
+   shape deriveMabniPresentMahall's callers use: the whole exercise is needed, because the frozen
+   template is one of the conditions, and a bare {tokens} wrapper carries no templateId and would
+   make the resolver withhold from every honest exercise. */
+function idhanAuthorizationFor(token){
+ const owner=token&&safeIsArray(token._tokens)?token._tokens:[];
+ const exercise=token&&token._data&&safeIsArray(token._data.tokens)?token._data:{tokens:owner};
+ const index=(safeIsArray(exercise.tokens)?exercise.tokens:[]).indexOf(token);
+ if(index<0)return idhanProductionRefusal('not-a-present-verb');
+ return deriveIdhanProductiveNasb(exercise,index);
+}
+/* The productive authorization for a whole exercise, or null. Used by the renderer and by History
+   to decide whether a preceding statement may be displayed above the sentence; it finds the ONE
+   إِذَنْ-governed present verb and asks the authority about it. */
+function exerciseIdhanProductiveAuthorization(data){
+ // Descriptor-only, for the same reason the authority itself is: the renderer must be able to ask
+ // this about any value without running the caller's code.
+ const tokens=safeOwnDataElements(safeOwnDataValue(data,'tokens'));
+ if(!tokens)return null;
+ for(let index=0;index<tokens.length;index++){
+  const result=deriveIdhanProductiveNasb(data,index);
+  if(result.authorized)return result;
+ }
+ return null;
+}
 /* The one place a person is turned into an inflection lane. A مبني present form must never
    fall through to 'regular', which would hand it an iʿrāb ḍammah. */
 function presentConjugationFor(person){
@@ -4928,10 +5457,18 @@ const GRAMMAR_RULES=Object.freeze({
   sawfa:{surface:'سَوْفَ',mood:'raf',ruleId:'G_SAWFA_FUTURE'},
   /* Phase 3A1 — the two direct nāṣibs this phase produces. Al-Tuḥfah p. 75 puts أَنْ, لَنْ,
      إِذَنْ and كَيْ in «القسم الأول ـ وهو الذي يَنصُب الفعل المضارعَ بنفسه», i.e. they govern by
-     themselves, with no concealed أَنْ in between. إِذَنْ is deliberately absent: p. 75 makes its
-     naṣb conditional on three separate conditions that this app does not model. */
+     themselves, with no concealed أَنْ in between. */
   an:{surface:'أَنْ',mood:'nasb',ruleId:'G_AN_NASB'},
-  kay:{surface:'كَيْ',mood:'nasb',ruleId:'G_KAY_NASB'}
+  kay:{surface:'كَيْ',mood:'nasb',ruleId:'G_KAY_NASB'},
+  /* Phase 3B1 — إِذَنْ, the first CONDITIONAL governor in this table. p. 75 states its identity
+     and its direct government («وأما «إِذَنْ» فَحَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ», inside القسم
+     الأول), and then makes the naṣb depend on three conditions. `conditionSetId` is what carries
+     that dependency into the machinery: every other governor here governs by adjacency alone, and
+     the presence of this field — not a hard-coded name — is what makes the resolver demand a
+     proven condition set before the government may be written. G_IDHAN_NASB owns the particle's
+     identity and its government only; the conditions are R_IDHAN_CONDITIONS, and the naṣb SIGN is
+     R_MUDARI_NASB_FATHA, exactly as for أَنْ. */
+  idhan:{surface:'إِذَنْ',mood:'nasb',ruleId:'G_IDHAN_NASB',conditionSetId:'R_IDHAN_CONDITIONS'}
  }
 });
 /* Phase 3A1 — لِكَيْ. Al-Tuḥfah p. 76 makes كَيْ a direct nāṣib ONLY on a condition:
@@ -4969,9 +5506,10 @@ const PROCLITIC_PARTICLE_TYPES=Object.freeze([KAY_TALIL_LAM.particleType]);
    majrūr noun and the ism/khabar of inna legitimately carry them too. */
 const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',
  lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',an:'G_AN_NASB',kay:'G_KAY_NASB',
+ [IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId});
 const PARTICLE_EXCLUSIVE_RULE_IDS=Object.freeze(['G_LAN_NASB','G_LAM_JAZM','G_SAWFA_FUTURE',
- 'G_AN_NASB','G_KAY_NASB',KAY_TALIL_LAM.ruleId]);
+ 'G_AN_NASB','G_KAY_NASB',IDHAN_GOVERNOR_RULE_ID,KAY_TALIL_LAM.ruleId]);
 function particleRuleOwnerFailure(token){
  const owned=PARTICLE_RULE_OWNERS[token?.grammar?.particleType];
  if(token?.grammar?.type==='particle'&&owned)return token.ruleId!==owned;
@@ -5260,9 +5798,24 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
    rather than three: splitting them would assert three separate source claims the page does not
    make. This rule owns the CONDITIONS only — it authorizes no particle identity, no governed verb,
    no naṣb state and no template. Al-Tuḥfah's own worked example is the response «إِذَنْ تَنْجَحَ»
-   to the statement «سَأَجْتَهِدُ فِي دُرُوسِي», and that example is the sole context this phase
-   registers. No production template consumes this rule yet. */
- R_IDHAN_CONDITIONS:sourceRule('Idhan makes the present verb after it accusative by itself only when it heads the answer sentence, the following present verb denotes the future, and nothing separates them except an oath, a vocative, or the negating lā.',[75],'Condition authority only. It authorizes neither the particle analysis of إِذَنْ, nor a naṣb state, nor a maḥall, nor any production template: Phase 3B0A registers the architecture and Al-Tuḥfah'+String.fromCharCode(8217)+'s own source-direct example alone. The three permitted separators (القسم، النداء، «لا» النافية) are named by the source but are deliberately NOT authorized for production in this phase, and the estimated/concealed constructions are outside it entirely.'),
+   to the statement «سَأَجْتَهِدُ فِي دُرُوسِي», and that example remains the sole SOURCE-DIRECT
+   context, kept as a non-production fixture.
+
+   Phase 3B1 changes what may CONSUME this rule and nothing about what it says. The conditions
+   remain the whole of its content: it still authorizes no particle analysis, no naṣb state and no
+   sign. What it now also gates is the productive lane — the productive template is registered as a
+   second consumer precisely because it is the second thing in a position to have checked all
+   three — while the separator exception it names stays unimplemented. */
+ R_IDHAN_CONDITIONS:sourceRule('Idhan makes the present verb after it accusative by itself only when it heads the answer sentence, the following present verb denotes the future, and nothing separates them except an oath, a vocative, or the negating lā.',[75],'Condition authority only. It authorizes neither the particle analysis of إِذَنْ, nor a naṣb state, nor a sign, nor a maḥall: the particle'+String.fromCharCode(8217)+'s identity and its direct government are G_IDHAN_NASB, and the naṣb sign of an ordinary present verb is R_MUDARI_NASB_FATHA. It may be cited only by the registered non-production fixture consumer and by the one productive template that proves all three conditions from frozen application-owned discourse authority; no token may ever carry it. The three permitted separators (القسم، النداء، «لا» النافية) are named by the source but are deliberately NOT implemented, so any intervening token rejects, and the estimated/concealed constructions are outside this rule entirely.'),
+ /* Phase 3B1 — إِذَنْ's own identity and government, which is a DIFFERENT claim from its
+    conditions and therefore a different rule. Al-Tuḥfah p. 75 states the identity verbatim:
+    «وأما «إِذَنْ» فَحَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ», and places it in «القسم الأول ـ وهو الذي
+    يَنصُب الفعل المضارعَ بنفسه» — it governs by itself, with no concealed أَنْ in between. This
+    rule owns exactly that, and nothing else: the three conditions under which the government
+    actually takes effect are R_IDHAN_CONDITIONS, and the verb's naṣb SIGN is R_MUDARI_NASB_FATHA,
+    because the sign depends on the verb's own morphology and not on which nāṣib precedes it — the
+    same division of labour Phase 3A1 established for أَنْ and كَيْ. */
+ G_IDHAN_NASB:sourceRule('Idhan is a particle of answer, recompense, and naṣb that makes the present verb after it manṣūb by itself.',[75],'Only canonical إِذَنْ standing at the head of the answer sentence and immediately preceding the ordinary muʿrab present verb it governs, where that verb denotes the future and nothing whatever separates them. It authorizes the particle analysis and its direct government alone: for the ordinary muʿrab verb that means the naṣb state, but not the naṣb sign. It may never be relied on without R_IDHAN_CONDITIONS, whose three conditions are proven separately from frozen application-owned discourse authority; adjacency alone never authorizes it. It does not cover a five-verb form, a mabnī nūn-al-niswah form, a concealed أَنْ, or any of the three separators the source permits (القسم، النداء، «لا» النافية), none of which this phase implements, and it may never be used as a whole-word maḥall rule.'),
  G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs.'),
  G_SAWFA_FUTURE:sourceRule('Sawfa marks future meaning and enters only on the present verb.',[14,15,16],'It does not change the indicative mood in the generated construction.'),
  R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'Generated set: inna, lakinna, laʿalla, layta.',[IA_INNA]),
@@ -5531,6 +6084,7 @@ const AR={
  lam:w=>grammarSpec('particle','particle',{particleType:'lam',particleWord:w}),
  an:w=>grammarSpec('particle','particle',{particleType:'an',particleWord:w}),
  kay:w=>grammarSpec('particle','particle',{particleType:'kay',particleWord:w}),
+ idhan:w=>grammarSpec('particle','particle',{particleType:IDHAN_PARTICLE_TYPE,particleWord:w}),
  lamTalil:w=>grammarSpec('particle','particle',{particleType:KAY_TALIL_LAM.particleType,particleWord:w}),
  future:w=>grammarSpec('particle','particle',{particleType:'sawfa',particleWord:w}),
  presentFive:(w)=>grammarSpec('verb','present',{conjugation:'afalKhamsa',person:'3mp'}),
@@ -5669,7 +6223,18 @@ function inflectVerb(token,tokens,index){
   return;
  }
  const previous=tokens[index-1];
- const governor=previous?.grammar?.type==='particle'?GRAMMAR_RULES.governors[previous.grammar.particleType]:null;
+ const adjacentGovernor=previous?.grammar?.type==='particle'?GRAMMAR_RULES.governors[previous.grammar.particleType]:null;
+ /* Phase 3B1 — a CONDITIONAL governor does not govern by adjacency. Build time is far too early
+    to settle إِذَنْ's three conditions (morphology is not materialized, relationships are not
+    resolved, and the template's frozen authority has not been consulted), so only the structural
+    half is observed here: إِذَنْ must OPEN the sentence and this verb must be the very next token.
+    That proposes the government; deriveIdhanProductiveNasb decides it under full authority at
+    validation, render and Why time, and validateExercise refuses the exercise when the authority
+    withholds. An إِذَنْ that is not at the head therefore governs nothing at all here — the verb
+    stays مرفوع and the particle is left unlinked, so it is rejected as an orphaned governor
+    rather than silently making a verb manṣūb. */
+ const governor=adjacentGovernor&&isConditionalGovernor(adjacentGovernor)
+  &&!observeIdhanResponseHead(tokens,index)?null:adjacentGovernor;
  token.state=governor?.mood||'raf';
  token.governorId=governor?previous.id:null;
  if(governor){previous.relations.governsId=token.id;previous.ruleId=governor.ruleId}
@@ -5690,7 +6255,8 @@ function inflectVerb(token,tokens,index){
 function configureParticle(token){
  const type=token.grammar.particleType;
  token.ruleId={preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',
-  an:'G_AN_NASB',kay:'G_KAY_NASB',[KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId}[type]||'R_PARTICLE';
+  an:'G_AN_NASB',kay:'G_KAY_NASB',[IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
+  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId}[type]||'R_PARTICLE';
  // The lām of لِكَيْ is not a governor, so it carries its canonical surface here rather than in
  // GRAMMAR_RULES.governors — being absent from that map is exactly what stops it governing.
  token.expectedSurface=GRAMMAR_RULES.governors[type]?.surface
@@ -5883,8 +6449,15 @@ function renderVerbAnalysis(token){
  }
  const governor=token.governorId?token._tokens.find(item=>item.id===token.governorId):null;
  /* Phase 3A1 adds أَنْ and كَيْ. The clause names the DIRECT governor, which for لِكَيْ is كَيْ
-    and never the lām: the lām licenses كَيْ's government, it does not perform it. */
- const cause={lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»'}[governor?.grammar.particleType]||'';
+    and never the lām: the lām licenses كَيْ's government, it does not perform it.
+    Phase 3B1 adds إِذَنْ, and it is the one governor whose clause is EARNED rather than read off
+    adjacency: the resolver must authorize the productive occurrence before the verb may be called
+    «مَنْصُوبٌ بِـ«إِذَنْ»». An unauthorized occurrence gets no cause clause at all and is refused
+    by validateExercise, so it never reaches a learner in either form. */
+ const unconditionalCause={lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»'}[governor?.grammar.particleType]||'';
+ const idhanAuthorized=governor?.grammar.particleType===IDHAN_PARTICLE_TYPE
+  &&idhanAuthorizationFor(token).authorized;
+ const cause=idhanAuthorized?' بِـ«إِذَنْ»':unconditionalCause;
  const canonicalVerbSign=canonicalSign(safeSignId(token.sign));
  if(!canonicalVerbSign)throw new Error(`No canonical sign for present sign id “${safeSignId(token.sign)}”`);
  let arabic=`${token.word}: فِعْلٌ مُضَارِعٌ ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${canonicalVerbSign.ar}`;
@@ -5898,8 +6471,9 @@ function renderVerbAnalysis(token){
   arabic+=`، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ ${concealment.ar} تَقْدِيرُهُ «${token.relations.subjectPronoun}»`;
  }
  token.ar=`${arabic}.`;
- const causeEn={lan:' because lan governs it',lam:' because lam governs it',
-  an:' because an governs it',kay:' because kay governs it'}[governor?.grammar.particleType]||'';
+ const causeEn=idhanAuthorized?' because idhan governs it'
+  :{lan:' because lan governs it',lam:' because lam governs it',
+    an:' because an governs it',kay:' because kay governs it'}[governor?.grammar.particleType]||'';
  const hiddenSubjectEn={'أَنَا':'I','نَحْنُ':'we','هُوَ':'he','هِيَ':'she','أَنْتَ':'you'}[token.relations.subjectPronoun];
  const subjectEn=token.relations.subjectType==='implicit'
   ?` Its subject is a hidden pronoun, concealed ${PRESENT_CONCEALMENT[token.grammar.morphology?.person].en}, understood as “${hiddenSubjectEn}”.`
@@ -5917,6 +6491,12 @@ function renderParticleAnalysis(token){
     the bināʾ tail follows this project's established particle pattern, matching لَنْ exactly. */
  if(type==='an'){token.ar=`${token.word}: حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of maṣdar, naṣb, and future meaning.';return}
  if(type==='kay'){token.ar=`${token.word}: حَرْفُ مَصْدَرٍ وَنَصْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of maṣdar and naṣb.';return}
+ /* Phase 3B1. The identity clause is Al-Tuḥfah p. 75's own words — «حَرْفُ جَوَابٍ وَجَزَاءٍ
+    وَنَصْبٍ» — and the bināʾ tail follows this project's established particle pattern, matching
+    لَنْ, أَنْ and كَيْ exactly. The three conditions are NOT stated here: the iʿrāb line says what
+    the word IS, and why this occurrence is الناصبة belongs to the Why layer, where all three are
+    stated together. */
+ if(type===IDHAN_PARTICLE_TYPE){token.ar=`${token.word}: حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of answer, recompense, and naṣb.';return}
  /* The source names this lām «لام التعليل» and makes its explicit presence the condition for
     كَيْ's own government; it says nothing about the lām governing anything here, so neither does
     this line. Its licensing role is explained in the Why layer, never asserted as iʿrāb. */
@@ -6042,6 +6622,19 @@ function whyStateVerb(t,data){
     whySignVerb, which names no governor and so stays true here. */
  if(type==='an')return{id:'WHY_STATE_VERB_AN',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ يَنْصِبُ بِنَفْسِهِ، فَهُوَ مَنْصُوبٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of maṣdar, naṣb, and future meaning that governs by itself, so it is مَنْصُوبٌ.`};
  if(type==='kay')return{id:'WHY_STATE_VERB_KAY',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ يَنْصِبُ بِنَفْسِهِ؛ لِتَقَدُّمِ لَامِ التَّعْلِيلِ عَلَيْهِ لَفْظًا، فَهُوَ مَنْصُوبٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of maṣdar and naṣb that governs by itself because لَامُ التَّعْلِيلِ explicitly precedes it, so it is مَنْصُوبٌ.`};
+ /* Phase 3B1 — إِذَنْ. This is the ONE state Why that may not say merely "a nāṣib precedes it, so
+    it is منصوب": p. 75 makes the naṣb conditional, so the explanation has to say WHY THIS
+    OCCURRENCE is الناصبة. Each of the three conditions gets its own line, keyed to the authorized
+    proof, and the concluding line is what draws the naṣb from them. The lines are emitted only
+    when the resolver has actually authorized the occurrence — an unauthorized one is refused by
+    validateExercise and never reaches a learner. */
+ if(type===IDHAN_PARTICLE_TYPE){
+  const authorization=data?.tokens?deriveIdhanProductiveNasb(data,data.tokens.indexOf(t)):idhanAuthorizationFor(t);
+  if(!authorization.authorized)throw new Error(`WHY: إِذَنْ governs nothing here (${authorization.reason}).`);
+  return{id:'WHY_STATE_VERB_IDHAN',
+   ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ يَنْصِبُ بِنَفْسِهِ، وَقَدْ تَمَّتْ شُرُوطُ نَصْبِهِ الثَّلَاثَةُ، فَهُوَ مَنْصُوبٌ.`,
+   en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of answer, recompense, and naṣb that governs by itself, and its three conditions are all met, so it is مَنْصُوبٌ.`};
+ }
  if(type==='sawfa')return{id:'WHY_STATE_VERB_SAWFA',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} لِلِاسْتِقْبَالِ، وَهُوَ لَا يَنْصِبُ وَلَا يَجْزِمُ، فَبَقِيَ مَرْفُوعًا.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, which marks the future and neither makes it مَنْصُوبٌ nor مَجْزُومٌ, so it stays مَرْفُوعٌ.`};
  return{id:'WHY_STATE_VERB_FREE',ar:`${wq(t.word)} فِعْلٌ مُضَارِعٌ لَمْ يَسْبِقْهُ نَاصِبٌ وَلَا جَازِمٌ، فَهُوَ مَرْفُوعٌ.`,en:`${eq(t.word)} is a present-tense verb with no nāṣib or jāzim before it, so it is مَرْفُوعٌ.`};
 }
@@ -6108,8 +6701,29 @@ const WHY_PARTICLE=Object.freeze({
  an:t=>({id:'WHY_PARTICLE_AN',ar:`${wq(t.word)} حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ، يَنْصِبُ الْفِعْلَ الْمُضَارِعَ بِنَفْسِهِ.`,en:`${eq(t.word)} is a particle of maṣdar, naṣb, and future meaning; it makes the present verb مَنْصُوبٌ by itself.`}),
  kay:t=>({id:'WHY_PARTICLE_KAY',ar:`${wq(t.word)} حَرْفُ مَصْدَرٍ وَنَصْبٍ، وَإِنَّمَا نَصَبَتْ بِنَفْسِهَا لِأَنَّ لَامَ التَّعْلِيلِ تَقَدَّمَتْهَا لَفْظًا.`,en:`${eq(t.word)} is a particle of maṣdar and naṣb; it makes the present verb مَنْصُوبٌ by itself precisely because لَامُ التَّعْلِيلِ explicitly precedes it.`}),
  [KAY_TALIL_LAM.particleType]:t=>({id:'WHY_PARTICLE_LAM_TALIL',ar:`${wq(t.word)} لَامُ التَّعْلِيلِ، تَدُلُّ عَلَى الْغَرَضِ، وَبِظُهُورِهَا قَبْلَ «كَيْ» نَصَبَتْ «كَيْ» بِنَفْسِهَا.`,en:`${eq(t.word)} is لَامُ التَّعْلِيلِ, which indicates purpose; its explicit appearance before «كَيْ» is what lets «كَيْ» govern by itself.`}),
- sawfa:t=>({id:'WHY_PARTICLE_SAWFA',ar:`${wq(t.word)} حَرْفُ اسْتِقْبَالٍ يَدْخُلُ عَلَى الْمُضَارِعِ وَلَا يُغَيِّرُ إِعْرَابَهُ.`,en:`${eq(t.word)} is a particle of futurity that enters on the present verb without changing its iʿrāb.`})
+ sawfa:t=>({id:'WHY_PARTICLE_SAWFA',ar:`${wq(t.word)} حَرْفُ اسْتِقْبَالٍ يَدْخُلُ عَلَى الْمُضَارِعِ وَلَا يُغَيِّرُ إِعْرَابَهُ.`,en:`${eq(t.word)} is a particle of futurity that enters on the present verb without changing its iʿrāb.`}),
+ /* Phase 3B1. The particle's own line states its identity and that its government is CONDITIONAL —
+    which is the fact that distinguishes it from every other nāṣib in this app. The conditions
+    themselves are stated once, on the verb they actually govern, so a learner meets them where the
+    naṣb happens rather than twice in two places. */
+ [IDHAN_PARTICLE_TYPE]:t=>({id:'WHY_PARTICLE_IDHAN',ar:`${wq(t.word)} حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ، تَنْصِبُ الْفِعْلَ الْمُضَارِعَ بِنَفْسِهَا بِشُرُوطٍ ثَلَاثَةٍ.`,en:`${eq(t.word)} is a particle of answer, recompense, and naṣb; it makes the present verb مَنْصُوبٌ by itself, on three conditions.`})
 });
+/* Phase 3B1 — the three conditions of Al-Tuḥfah p. 75, one line each, stated as SATISFIED because
+   they are emitted only after the resolver has proven all three. They are deliberately three lines
+   and not one: the source states three separate شروط, and collapsing them would hide from the
+   learner which one a failing sentence actually breaks. Nothing here is read from stored data — the
+   prompt is quoted from the frozen context record the proof itself authorized. */
+const WHY_IDHAN_CONDITIONS=Object.freeze([
+ Object.freeze({id:'WHY_IDHAN_CONDITION_SADR',
+  ar:'وَقَعَتْ «إِذَنْ» فِي صَدْرِ جُمْلَةِ الْجَوَابِ، وَهَذَا هُوَ الشَّرْطُ الْأَوَّلُ.',
+  en:'«إِذَنْ» stands at the head of the answer sentence; that is the first condition.'}),
+ Object.freeze({id:'WHY_IDHAN_CONDITION_ISTIQBAL',
+  ar:'وَالْمُضَارِعُ بَعْدَهَا دَالٌّ عَلَى الِاسْتِقْبَالِ بِدَلِيلِ السِّينِ فِي الْجُمْلَةِ السَّابِقَةِ، وَهَذَا هُوَ الشَّرْطُ الثَّانِي.',
+  en:'The present verb after it denotes the future, on the evidence of the sīn in the preceding statement; that is the second condition.'}),
+ Object.freeze({id:'WHY_IDHAN_CONDITION_LA_FASILA',
+  ar:'وَلَمْ يَفْصِلْ بَيْنَهَا وَبَيْنَ الْمُضَارِعِ فَاصِلٌ، وَهَذَا هُوَ الشَّرْطُ الثَّالِثُ.',
+  en:'Nothing separates it from the present verb; that is the third condition.'})
+]);
 const WHY_MABNI_PARTICLE=Object.freeze({id:'WHY_MABNI_PARTICLE',ar:'وَهُوَ حَرْفٌ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'It is a مَبْنِيٌّ particle and has no position in iʿrāb.'});
 /* The maḥall line of a مبني present verb, one entry per authorized governor. Each says only what
    its own source rule says: the governor precedes, so the word occupies the position of naṣb —
@@ -6174,6 +6788,11 @@ function buildTokenWhy(token,data){
    }
    push(whyVerbSubject(token));
   }else{
+   /* Phase 3B1 — إِذَنْ is the only governor whose naṣb has to be EARNED, so its three conditions
+      are stated before the conclusion that draws the naṣb from them. whyStateVerb throws for an
+      unauthorized إِذَنْ, so these lines can never appear beside an unproven claim. */
+   const idhanGovernor=token.governorId?(data?.tokens||token._tokens||[]).find(item=>item.id===token.governorId):null;
+   if(idhanGovernor?.grammar?.particleType===IDHAN_PARTICLE_TYPE)WHY_IDHAN_CONDITIONS.forEach(push);
    push(whyStateVerb(token,data));
    push(whySignVerb(token));
    push(whyVerbSubject(token));
@@ -6556,6 +7175,19 @@ function validateExercise(data){
    if(productionTemplate&&(governor?.grammar?.particleType||'')!==productionTemplate.presentGovernor){
     fail('E_PRESENT_GOVERNOR_TEMPLATE','The governing particle disagrees with the one its production template declares.',token);
    }
+   /* Phase 3B1 — a CONDITIONAL governor's naṣb is not settled by adjacency. Every check above
+      asks whether the verb agrees with the governor beside it; this asks the prior question of
+      whether that governor governs at all. إِذَنْ makes the verb after it manṣūb only when it
+      heads the answer, the verb denotes the future, and nothing separates them (Al-Tuḥfah p. 75),
+      and none of the three is observable from the verb's own morphology. So the whole exercise is
+      refused when the authority withholds — an unproven condition can never become a rendered
+      naṣb, a stored snapshot or a Why line. */
+   if(isConditionalGovernor(GRAMMAR_RULES.governors[governor?.grammar?.particleType||''])){
+    const idhanAuthorization=deriveIdhanProductiveNasb(data,data.tokens.indexOf(token));
+    if(!idhanAuthorization.authorized){
+     fail('E_IDHAN_CONDITIONS',`Idhan does not govern this present verb: ${idhanAuthorization.reason}.`,token);
+    }
+   }
    }
   }
   if(token.grammar.type==='verb'&&token.tense==='past'){
@@ -6633,7 +7265,11 @@ function validateExercise(data){
      lane that could carry a sign object without any rule objecting. */
   if(token.grammar.type==='particle'&&carriesSignValue(token))fail('E_PARTICLE_SIGN','A particle is mabnī and may not carry an iʿrāb sign.',token);
   if(token.grammar.type==='particle'&&token.expectedSurface!==token.word)fail('E_PARTICLE_SURFACE','Particle surface disagrees with its grammatical identity.',token);
-  if(['lan','lam','sawfa','an','kay'].includes(token.grammar.particleType)){
+  /* Phase 3B1 adds إِذَنْ. A verb governor that governs nothing is an orphan whatever the reason:
+     for إِذَنْ that includes standing anywhere but the head of the answer, or standing before a
+     noun, a separator or a verb class this lane does not open — in each case the government is
+     never written, so the particle arrives here unlinked and the exercise is refused. */
+  if(['lan','lam','sawfa','an','kay',IDHAN_PARTICLE_TYPE].includes(token.grammar.particleType)){
    const governed=token.relations.governsId&&tokenById.get(token.relations.governsId);
    if(!governed||governed.grammar.type!=='verb'||governed.tense!=='present')fail('E_ORPHAN_VERB_GOVERNOR','Verb governor is not linked to the immediately following present verb.',token);
   }
@@ -6672,6 +7308,16 @@ function validateExercise(data){
   if(token.ar.includes('بِـ«أَنْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='أَنْ')fail('E_FAKE_AN','Explanation mentions an without a linked an.',token);
   if(token.ar.includes('بِـ«كَيْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='كَيْ')fail('E_FAKE_KAY','Explanation mentions kay without a linked kay.',token);
   if(token.ar.includes('بِـ«لَمْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='لَمْ')fail('E_FAKE_LAM','Explanation mentions lam without a linked lam.',token);
+  /* Phase 3B1 — the same guard for إِذَنْ, plus the one thing the others do not need: naming
+     إِذَنْ as the cause is a claim that its three conditions hold, so a linked إِذَنْ is not
+     enough. The authority must have authorized this exact occurrence. */
+  if(token.ar.includes('بِـ«'+IDHAN_SURFACE+'»')){
+   const named=data.tokens.find(item=>item.id===token.governorId);
+   if(named?.word!==IDHAN_SURFACE)fail('E_FAKE_IDHAN','Explanation mentions idhan without a linked idhan.',token);
+   else if(!deriveIdhanProductiveNasb(data,data.tokens.indexOf(token)).authorized){
+    fail('E_FAKE_IDHAN','Explanation names idhan as the cause of a naṣb its three conditions do not authorize.',token);
+   }
+  }
  });
  if(new Set(data.tokens.map(item=>item.id)).size!==data.tokens.length)fail('E_TOKEN_ID_DUPLICATE','Token IDs are not unique.');
  relationships.forEach(rel=>{
@@ -6796,6 +7442,32 @@ function add(starts,form,state,sign,build,metadata={}){
  if(presentGovernor&&!Object.hasOwn(GRAMMAR_RULES.governors,presentGovernor)){
   throw new Error(`Unknown present template governor: ${presentGovernor}`);
  }
+ /* Phase 3B1 — the discourse metadata, frozen here and nowhere else, and the ONLY road into the
+    response layer. A template whose governor is CONDITIONAL must name the exact registered
+    exchanges it may produce, because its government cannot be settled without them; every other
+    template must name none, so no ordinary template can reach the discourse layer at all.
+
+    The response CONTEXT is not named here. Each authorized pair names its own context, and the
+    context names this template as its sole authorized consumer, so the binding runs pair→context
+    and context→template with nothing for a template to assert about a context it is not bound to.
+    `responseContextId` remains the dormant Phase 3B0A seam and no template sets it. */
+ const responseContextId=metadata.responseContextId||'';
+ const responsePairIds=Object.freeze([...(metadata.responsePairIds||[])]);
+ const conditionalGovernor=isConditionalGovernor(GRAMMAR_RULES.governors[presentGovernor]);
+ if(conditionalGovernor!==Boolean(responsePairIds.length)){
+  throw new Error(`Template ${stableId} must declare response pairs exactly when its governor is conditional.`);
+ }
+ if(responseContextId&&!responseContextRecord(responseContextId)){
+  throw new Error(`Template ${stableId} names an unregistered response context: ${responseContextId}`);
+ }
+ if(responsePairIds.some((id,position)=>responsePairIds.indexOf(id)!==position)){
+  throw new Error(`Template ${stableId} names the same response pair twice.`);
+ }
+ responsePairIds.forEach(id=>{
+  const pair=responsePairRecord(id);
+  if(!pair)throw new Error(`Template ${stableId} names an unregistered response pair: ${id}`);
+  if(pair.templateId!==stableId)throw new Error(`Response pair ${id} is not bound to template ${stableId}.`);
+ });
  // An ambiguous surface is resolved by intersecting its readings with these capabilities, so
  // a template that claimed two readings of one surface would make the person unresolvable.
  Object.values(PRESENT_SURFACE_READINGS).forEach(readings=>{
@@ -6821,6 +7493,10 @@ function add(starts,form,state,sign,build,metadata={}){
      governor from adjacency and compares; the declaration is frozen here and never read off a
      token. The mabnī lane is excluded: its governor is settled by capability `governorMode`. */
   presentGovernor,
+  /* Phase 3B1 — the ONLY road into the discourse layer. templateResponseContext and the productive
+     resolver read these two and nothing else; no exercise may carry either name. */
+  responseContextId,
+  responsePairIds,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -7107,6 +7783,49 @@ add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('
 add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('3fp','kay'),presentTemplateMetadata('3fp','attached',true,'kay'));
 add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('2fp','kay'),presentTemplateMetadata('2fp','attached',true,'kay'));
 
+/* Phase 3B1 — the ONE productive إِذَنْ lane: إِذَنْ + an ordinary muʿrab present verb, manṣūb
+   with the visible fatḥah, answering a statement the learner is shown above it.
+
+   The exercise is exactly TWO tokens, which is not a simplification but the condition itself:
+   Al-Tuḥfah p. 75's third شرط is that nothing separates إِذَنْ from the present verb, and the
+   separator proof this lane reuses is the fixture's own — it requires the response to be the
+   particle and its verb and nothing else. That is also the shape of the source's own example
+   («إِذَنْ تَنْجَحَ»), so the productive lane is mechanically identical to it.
+
+   The exchange is never assembled at random. Each build selects a whole REGISTERED pair — one
+   prompt bound to one response verb — because a discourse exchange has to cohere: a randomly
+   chosen verb would answer a statement it has nothing to do with. The verb surfaces are ordinary
+   accusative forms of lexemes this app already produces, so no vocabulary is added and the gloss,
+   the English and the morphology all come from the existing registries.
+
+   Registered LAST, for the same stable-ID reason as Phase 2b-C, 3A1 and 3A2. */
+const IDHAN_RESPONSE_LEAD_EN='In that case';
+const IDHAN_RESPONSE_SUBJECT_EN='he';
+const idhanToken=()=>token(IDHAN_SURFACE,'in that case',AR.idhan(IDHAN_SURFACE),'A particle of answer, recompense, and naṣb; it governs on three conditions.');
+function buildIdhanProductiveExercise(){
+ /* The pair is chosen from the template's own frozen list, through the same deterministic
+    rotation every other template uses, and the verb is then read OUT of that pair — never picked
+    beside it. So the response can only ever be one of the registered exchanges. */
+ const pairId=pickVaried(IDHAN_PRODUCTION_PAIR_IDS,'idhan-production-pair',String);
+ const pair=responsePairRecord(pairId);
+ if(!pair)throw new Error(`The productive إِذَنْ pair ${pairId} is not registered.`);
+ const registered=verbFormIndex.get(pair.responseVerbAr);
+ if(!registered?.lexeme?.en)throw new Error(`The productive إِذَنْ verb ${pair.responseVerbAr} is not a registered lexeme.`);
+ return{
+  sentence:`${IDHAN_SURFACE} ${pair.responseVerbAr}`,
+  translation:`${IDHAN_RESPONSE_LEAD_EN} ${IDHAN_RESPONSE_SUBJECT_EN} will ${registered.lexeme.en}.`,
+  tokens:[
+   idhanToken(),
+   token(pair.responseVerbAr,registered.lexeme.en,AR.presentPred(pair.responseVerbAr),EN.present,true)
+  ]
+ };
+}
+add('particle','present','nasb','fatha',buildIdhanProductiveExercise,{
+ ...presentTemplateMetadata('3ms','implicit'),
+ presentGovernor:IDHAN_PARTICLE_TYPE,
+ responsePairIds:IDHAN_PRODUCTION_PAIR_IDS
+});
+
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;
 let current=null;
@@ -7268,6 +7987,37 @@ function buildIdhanSourceDirectFixture(){
    record, forged Arabic and forged English have no way in. Anything unresolvable clears the block
    and hides it, so all 82 production templates display byte-identically and context-free.
    Returns '' when a context was displayed, or the reason nothing was. */
+function clearResponseContext(){
+ const host=byId('responseContext');
+ if(!host)return;
+ const promptAr=byId('responseContextPromptAr');
+ const promptEn=byId('responseContextPromptEn');
+ if(promptAr)promptAr.textContent='';
+ if(promptEn)promptEn.textContent='';
+ host.hidden=true;
+}
+/* ---- Phase 3B1 — the PRODUCTIVE preceding statement -----------------------------
+   Same discipline as the fixture path, one step stricter about where the permission comes from:
+   the only input is a validated exercise, and the statement is displayed only after
+   deriveIdhanProductiveNasb has authorized that exercise's own naṣb. So the prompt a learner sees
+   above the sentence is always the very context whose three conditions made the verb below it
+   manṣūb — it cannot be a stored string, a copied record, or a context belonging to a different
+   exchange. Everything shown is read from the frozen context record.
+   Returns '' when a statement was displayed, or the reason nothing was. */
+function renderProductiveResponseContext(data){
+ const host=byId('responseContext');
+ if(!host)return 'no-host';
+ const authorization=exerciseIdhanProductiveAuthorization(data);
+ if(!authorization){clearResponseContext();return 'no-productive-authorization'}
+ const context=responseContextRecord(authorization.contextId);
+ if(!context){clearResponseContext();return 'unknown-context'}
+ if(context.productionStatus!==PRODUCTION_RESPONSE_STATUS){clearResponseContext();return 'not-a-production-response'}
+ if(!isSourceAuthorized(context.sourceRuleId)){clearResponseContext();return 'unverified-source'}
+ byId('responseContextPromptAr').textContent=context.promptAr;
+ byId('responseContextPromptEn').textContent=context.promptEn;
+ host.hidden=false;
+ return '';
+}
 function renderResponseContext(fixtureId){
  const host=byId('responseContext');
  if(!host)return 'no-host';
@@ -7379,8 +8129,13 @@ function render(data,notice='',shouldRecord=true){
  if(!data?.validated)throw new Error('Refusing to display an exercise that has not passed grammar validation.');
  /* A fixture ID resolved from the template's frozen metadata, never from the exercise's own
     fields, and never a record object. No production template names one, so this always clears
-    and hides the block and all 82 render context-free. */
+    and hides the block and every pre-existing template renders context-free.
+    Phase 3B1: the productive lane then gets its own chance, and it too takes its permission from
+    application authority — the authorized proof of this exercise's own naṣb — never from anything
+    the exercise stores. A template that is not the productive one authorizes nothing either way,
+    so all 82 pre-existing templates still clear and hide the block. */
  renderResponseContext(templateResponseFixtureId(templates.find(item=>item.stableId===data.templateId)));
+ renderProductiveResponseContext(data);
  current=data;
  byId('sentence').textContent=data.sentence;
  byId('translation').textContent=data.translation;
@@ -7551,6 +8306,51 @@ setFiltersExpanded(!((typeof matchMedia==='function')&&matchMedia('(max-width:64
  if(composeSentence(fixtureExercise.tokens)!==fixture.response.ar)throw new Error('The canonical إِذَنْ fixture surface drifted.');
  if(templates.some(template=>template.stableId===fixture.id||template.stableId===fixture.consumerId
    ||templateResponseFixtureId(template)))throw new Error('A production template reaches the إِذَنْ fixture.');
+})();
+/* Phase 3B1 startup verification. Everything the early registry invariant could not check —
+   because the vocabulary registry, the present-morphology table and the template list did not
+   exist yet — is checked here, once, before the first exercise is generated. */
+(()=>{
+ const productionTemplates=templates.filter(template=>template.responsePairIds.length);
+ if(productionTemplates.length!==1)throw new Error('Phase 3B1 authorizes exactly one productive إِذَنْ template.');
+ const template=productionTemplates[0];
+ if(template.stableId!==IDHAN_PRODUCTION_TEMPLATE_ID)throw new Error('The productive إِذَنْ template is not the registered consumer: '+template.stableId);
+ if(template.presentGovernor!==IDHAN_PARTICLE_TYPE)throw new Error('The productive إِذَنْ template does not declare إِذَنْ as its governor.');
+ if(template.responsePairIds.join(',')!==IDHAN_PRODUCTION_PAIR_IDS.join(','))throw new Error('The productive template and the pair registry disagree about which exchanges exist.');
+ if(!Object.isFrozen(template.responsePairIds))throw new Error('The productive template’s pair list is mutable.');
+ // No OTHER template may declare a conditional governor, and none may name a response context.
+ if(templates.some(item=>item!==template&&isConditionalGovernor(GRAMMAR_RULES.governors[item.presentGovernor]))){
+  throw new Error('A second template declares a conditional governor.');
+ }
+ if(templates.some(item=>item.responseContextId))throw new Error('A production template names a response context directly.');
+ for(const pairId of IDHAN_PRODUCTION_PAIR_IDS){
+  const pair=responsePairRecord(pairId);
+  const context=responseContextRecord(pair.contextId);
+  const pairField=productionPairAuthorityFailure(pair,context);
+  if(pairField)throw new Error('Production pair '+pairId+' is not internally consistent at '+pairField+'.');
+ }
+ /* Every registered exchange must actually BUILD, VALIDATE and prove its own conditions, and its
+    English must be the composer's — so a drift between the builder and the canonical composer
+    fails at load rather than in a learner's answer card. The build rotation is deterministic, so
+    running it once per registered pair reaches all of them. */
+ const seenPairs=new Set();
+ for(let attempt=0;attempt<IDHAN_PRODUCTION_PAIR_IDS.length*4&&seenPairs.size<IDHAN_PRODUCTION_PAIR_IDS.length;attempt++){
+  const exercise=completeNominalAnalysis(template.build());
+  const verbIndex=exercise.tokens.findIndex(item=>item.grammar?.type==='verb');
+  const authorization=deriveIdhanProductiveNasb(exercise,verbIndex);
+  if(!authorization.authorized)throw new Error('A productive إِذَنْ exercise does not prove its conditions: '+authorization.reason);
+  const verb=exercise.tokens[verbIndex];
+  if(verb.state!=='nasb')throw new Error('A productive إِذَنْ verb is not manṣūb.');
+  if(safeSignId(verb.sign)!=='fatha')throw new Error('A productive إِذَنْ verb does not take the fatḥah.');
+  if(verb.ruleId!=='R_MUDARI_NASB_FATHA')throw new Error('A productive إِذَنْ verb does not cite the fatḥah sign rule.');
+  if(exercise.tokens[0].ruleId!==IDHAN_GOVERNOR_RULE_ID)throw new Error('The productive إِذَنْ particle does not cite its own governor rule.');
+  if(exercise.tokens.some(item=>item.ruleId===IDHAN_CONDITION_RULE_ID))throw new Error('A productive token cites the إِذَنْ condition rule.');
+  if(responseContextClaimSite(exercise,null))throw new Error('A productive إِذَنْ exercise carries a response-context claim.');
+  const composed=composeCanonicalTranslation(exercise);
+  if(composed!==exercise.translation)throw new Error('The productive إِذَنْ builder and the canonical composer disagree: '+composed+' / '+exercise.translation);
+  seenPairs.add(authorization.pairId);
+ }
+ if(seenPairs.size!==IDHAN_PRODUCTION_PAIR_IDS.length)throw new Error('The productive إِذَنْ rotation does not reach every registered exchange.');
 })();
 window.nahwGenerate=generate;
 window.nahwReveal=toggleReveal;

@@ -1244,7 +1244,13 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
     halves of it are fixed by the lane itself: the person is the 3ms hidden pronoun the ordinary
     muʿrab lane conceals, and the future is the second of إِذَنْ's three conditions, which the
     resolver has already proven for every exercise that reaches this composer. */
- TS23:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" he will "}),Object.freeze({slot:"verb:1:en"}),Object.freeze({lit:"."})])})
+ TS23:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" he will "}),Object.freeze({slot:"verb:1:en"}),Object.freeze({lit:"."})])}),
+ /* Phase 3B2 — the productive إِذَنْ answer in the FIVE-VERB lane. Same two slots as TS23; the
+    fixed wording between them is plural because the lane's fāʿil is the attached wāw al-jamāʿah,
+    not a concealed singular pronoun. A separate shape rather than a slot: the person is pinned by
+    the lane, so "they" is as fixed here as "he" is in TS23, and making it a slot would invite a
+    lane to render with the wrong number. */
+ TS24:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" they will "}),Object.freeze({slot:"verb:1:en"}),Object.freeze({lit:"."})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1334,8 +1340,13 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_NOUN_SMP_JARR_YA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SMP_JARR_YA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
  "T_NOUN_BROKEN_JARR_KASRA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_BROKEN_JARR_KASRA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
  "T_NOUN_DUAL_JARR_YA_01||noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_DUAL_JARR_YA_01",structure:"noun:mubtada,verb:present,noun:adverb,noun:mudafIlayh",shape:"TS06",copulaPlural:true}),
- // Phase 3B1 — the productive إِذَنْ answer, the only two-token particle+verb structure.
- "T_PARTICLE_PRESENT_NASB_FATHA_04||particle:particle,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_04",structure:"particle:particle,verb:present",shape:"TS23",copulaPlural:false})
+ // Phase 3B1 — the productive إِذَنْ answer, the first two-token particle+verb structure.
+ "T_PARTICLE_PRESENT_NASB_FATHA_04||particle:particle,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_04",structure:"particle:particle,verb:present",shape:"TS23",copulaPlural:false}),
+ /* Phase 3B2 — the same two-token structure in the five-verb lane. The STRUCTURE string is
+    identical because the token types and roles are, which is exactly why the key is keyed by
+    template ID as well: the two lanes are distinguishable only by which template built them, and
+    that is what selects the singular or plural shape. */
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04||particle:particle,verb:present":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04",structure:"particle:particle,verb:present",shape:"TS24",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -3660,13 +3671,95 @@ const IDHAN_PARTICLE_TYPE='idhan';
 const IDHAN_SURFACE='إِذَنْ';
 const IDHAN_CONDITION_RULE_ID='R_IDHAN_CONDITIONS';
 const IDHAN_GOVERNOR_RULE_ID='G_IDHAN_NASB';
-/* The ONE production template authorized to consume the productive records. It is a template
-   stableId — the exact inversion of the fixture consumer, which may never be one — and startup
-   verifies that a template with this ID exists, declares إِذَنْ as its governor, and names exactly
-   the pairs registered below. `add()` hands stableIds out by registration order within a family,
-   and the three pre-existing particle/present/naṣb/fatḥah templates are …_01 (لَنْ), _02 (أَنْ) and
-   _03 (لِكَيْ), so this lane is _04 and every pre-existing stable ID is untouched. */
-const IDHAN_PRODUCTION_TEMPLATE_ID='T_PARTICLE_PRESENT_NASB_FATHA_04';
+/* ---- The productive LANES ---------------------------------------------------------
+   Phase 3B1 opened one lane; Phase 3B2 opens the second and last muʿrab one. A lane is a frozen
+   record of everything that distinguishes one governed verb class from another: the exact person,
+   the exact morphology contract, the exact registry form its surface must be, the template that
+   produces it, and the exact set of registered exchanges that template may consume.
+
+   The lane registry is what replaces the Phase 3B1 hard-coding. The productive resolver reads the
+   lane FROM the exercise's resolved template and then demands that the verb match that lane
+   exactly — so widening the app to a second verb class is an ADDITION of a lane, never a
+   relaxation of a check. Al-Tuḥfah p. 75 makes إِذَنْ's government a fact about the PARTICLE, not
+   about the verb's morphology, which is why one governor covers both lanes; what differs per lane
+   is only the naṣb SIGN, and that comes from the canonical present-verb matrix, never from here.
+
+   Each `templateId` is a stableId that `add()` hands out by registration order within its family.
+   The pre-existing particle/present/naṣb/fatḥah templates are …_01 (لَنْ), _02 (أَنْ), _03 (لِكَيْ)
+   and the ordinary إِذَنْ lane is _04; the pre-existing particle/fiveVerbs/naṣb/ḥadhf-al-nūn
+   templates are …_01 (لَنْ), _02 (أَنْ), _03 (كَيْ) and the five-verb إِذَنْ lane is _04. Every
+   inherited stable ID is untouched because both lanes are APPENDED to their families.
+
+   NOTE on person. Each lane pins ONE person. The ordinary lane is 3ms; the five-verb lane is 3mp
+   and 3mp only — GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated already excludes every other
+   five-verb person from random production, and 2ms/2d remain morphology authority only because
+   their surfaces are shared. A five-verb form of any other person therefore matches no lane and
+   can never be governed. */
+const IDHAN_PRODUCTIVE_LANES=Object.freeze(Object.assign(Object.create(null),{
+ ordinary:Object.freeze({
+  laneId:'ordinary',
+  templateId:'T_PARTICLE_PRESENT_NASB_FATHA_04',
+  templateForm:'present',
+  templateSign:'fatha',
+  person:'3ms',
+  formClass:'ordinary',
+  endingClass:'none',
+  /* Two subject modes, because the two authorities report different things for the same person.
+     PRESENT_MORPHOLOGY stores 3ms as 'contextual' — the surface alone cannot say whether the
+     subject is an explicit following noun or a concealed pronoun — while
+     authoritativeVerbMorphology RESOLVES that against the token list and reports 'implicit' when
+     no explicit fāʿil follows. A lane must therefore pin both, or a pair-level check comparing
+     against the raw table would reject the very person it authorizes. */
+  tableSubjectMode:'contextual',
+  resolvedSubjectMode:'implicit',
+  inflection:'regular',
+  registeredForm:'acc',
+  lexemeField:'acc',
+  pairIds:Object.freeze(['IDHAN_PRODUCTION_READING_PAIR','IDHAN_PRODUCTION_MEMORIZING_PAIR',
+   'IDHAN_PRODUCTION_OPENING_PAIR'])
+ }),
+ afalKhamsa:Object.freeze({
+  laneId:'afalKhamsa',
+  templateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04',
+  templateForm:'fiveVerbs',
+  templateSign:'nunDropped',
+  person:'3mp',
+  formClass:'afalKhamsa',
+  endingClass:'waw-jamaaah',
+  // 3mp is 'attached' in both authorities: its fāʿil is the wāw, which the surface itself carries.
+  tableSubjectMode:'attached',
+  resolvedSubjectMode:'attached',
+  inflection:'afalKhamsa',
+  registeredForm:'fiveSub',
+  lexemeField:'fiveSub',
+  pairIds:Object.freeze(['IDHAN_PRODUCTION_STUDENTS_READING_PAIR',
+   'IDHAN_PRODUCTION_STUDENTS_MEMORIZING_PAIR','IDHAN_PRODUCTION_GUARDS_OPENING_PAIR'])
+ })
+}));
+/* A lane is resolved by OWN-PROPERTY search over the frozen registry, never by a name a caller
+   supplies, and a template that is not a registered lane consumer resolves to null. */
+function idhanLaneForTemplate(templateId){
+ if(typeof templateId!=='string'||!templateId)return null;
+ for(const laneId of Object.keys(IDHAN_PRODUCTIVE_LANES)){
+  const lane=IDHAN_PRODUCTIVE_LANES[laneId];
+  if(lane.templateId===templateId)return lane;
+ }
+ return null;
+}
+function idhanLaneForPair(pairId){
+ if(typeof pairId!=='string'||!pairId)return null;
+ for(const laneId of Object.keys(IDHAN_PRODUCTIVE_LANES)){
+  const lane=IDHAN_PRODUCTIVE_LANES[laneId];
+  if(lane.pairIds.includes(pairId))return lane;
+ }
+ return null;
+}
+/* Every template stableId that may cite R_IDHAN_CONDITIONS, and nothing else. */
+const IDHAN_PRODUCTION_CONSUMERS=Object.freeze(
+ Object.keys(IDHAN_PRODUCTIVE_LANES).map(laneId=>IDHAN_PRODUCTIVE_LANES[laneId].templateId));
+/* Retained Phase 3B1 names, now documented as the ORDINARY lane's. Nothing reads them as "the"
+   productive template any more; the lane registry above is the authority. */
+const IDHAN_PRODUCTION_TEMPLATE_ID=IDHAN_PRODUCTIVE_LANES.ordinary.templateId;
 const IDHAN_PRODUCTION_CONSUMER=IDHAN_PRODUCTION_TEMPLATE_ID;
 /* The semantic relation a registered exchange may assert. إِذَنْ is «حَرْفُ جَوَابٍ وَجَزَاءٍ»
    (p. 75), so the answer states the CONSEQUENCE of the statement it answers. */
@@ -3712,7 +3805,7 @@ const RESPONSE_CONTEXT_SOURCE={
   conditionSetId:IDHAN_CONDITION_RULE_ID,
   sourceRuleId:IDHAN_CONDITION_RULE_ID,
   sourcePdfPage:75,
-  authorizedConsumers:[IDHAN_PRODUCTION_CONSUMER],
+  authorizedConsumers:[IDHAN_PRODUCTIVE_LANES.ordinary.templateId],
   productionStatus:PRODUCTION_RESPONSE_STATUS
  },
  IDHAN_PRODUCTION_MEMORIZING:{
@@ -3730,7 +3823,7 @@ const RESPONSE_CONTEXT_SOURCE={
   conditionSetId:IDHAN_CONDITION_RULE_ID,
   sourceRuleId:IDHAN_CONDITION_RULE_ID,
   sourcePdfPage:75,
-  authorizedConsumers:[IDHAN_PRODUCTION_CONSUMER],
+  authorizedConsumers:[IDHAN_PRODUCTIVE_LANES.ordinary.templateId],
   productionStatus:PRODUCTION_RESPONSE_STATUS
  },
  IDHAN_PRODUCTION_OPENING:{
@@ -3748,7 +3841,69 @@ const RESPONSE_CONTEXT_SOURCE={
   conditionSetId:IDHAN_CONDITION_RULE_ID,
   sourceRuleId:IDHAN_CONDITION_RULE_ID,
   sourcePdfPage:75,
-  authorizedConsumers:[IDHAN_PRODUCTION_CONSUMER],
+  authorizedConsumers:[IDHAN_PRODUCTIVE_LANES.ordinary.templateId],
+  productionStatus:PRODUCTION_RESPONSE_STATUS
+ },
+ /* ---- Phase 3B2 — the five-verb contexts -----------------------------------------
+    Identical discourse architecture to the ordinary lane above; the only difference is that the
+    preceding statement introduces a PLURAL referent, because the answer's fāʿil is the attached
+    wāw al-jamāʿah and «they» must have something to refer back to. Every noun below is already in
+    this app's audited vocabulary (الطُّلَّاب and الْحُرَّاس in brokenHuman, الْكُتُب in
+    brokenThings, الدَّرْس and الْمِفْتَاح in the singular registries), so no word is invented and
+    no vocabulary dimension moves. The prompts remain the application's own composition — the RULE
+    is Al-Tuḥfah's, the exchanges are ours — which is exactly what `auditStatus` records. */
+ IDHAN_PRODUCTION_STUDENTS_READING:{
+  id:'IDHAN_PRODUCTION_STUDENTS_READING',
+  contextType:'promptResponse',
+  promptAr:'سَأُعْطِي الطُّلَّابَ الْكُتُبَ',
+  promptEn:'I will give the students the books.',
+  promptVerbAr:'سَأُعْطِي',
+  responseNodeId:'IDHAN_PRODUCTION_STUDENTS_READING_RESPONSE',
+  futureEvidenceId:'sourcePromptFutureSin',
+  responseRelation:'jawabJazaa',
+  discoursePosition:'sadrJumlatAlJawab',
+  separatorMode:'none',
+  responseParticleAr:IDHAN_SURFACE,
+  conditionSetId:IDHAN_CONDITION_RULE_ID,
+  sourceRuleId:IDHAN_CONDITION_RULE_ID,
+  sourcePdfPage:75,
+  authorizedConsumers:[IDHAN_PRODUCTIVE_LANES.afalKhamsa.templateId],
+  productionStatus:PRODUCTION_RESPONSE_STATUS
+ },
+ IDHAN_PRODUCTION_STUDENTS_MEMORIZING:{
+  id:'IDHAN_PRODUCTION_STUDENTS_MEMORIZING',
+  contextType:'promptResponse',
+  promptAr:'سَأَشْرَحُ الدَّرْسَ لِلطُّلَّابِ',
+  promptEn:'I will explain the lesson to the students.',
+  promptVerbAr:'سَأَشْرَحُ',
+  responseNodeId:'IDHAN_PRODUCTION_STUDENTS_MEMORIZING_RESPONSE',
+  futureEvidenceId:'sourcePromptFutureSin',
+  responseRelation:'jawabJazaa',
+  discoursePosition:'sadrJumlatAlJawab',
+  separatorMode:'none',
+  responseParticleAr:IDHAN_SURFACE,
+  conditionSetId:IDHAN_CONDITION_RULE_ID,
+  sourceRuleId:IDHAN_CONDITION_RULE_ID,
+  sourcePdfPage:75,
+  authorizedConsumers:[IDHAN_PRODUCTIVE_LANES.afalKhamsa.templateId],
+  productionStatus:PRODUCTION_RESPONSE_STATUS
+ },
+ IDHAN_PRODUCTION_GUARDS_OPENING:{
+  id:'IDHAN_PRODUCTION_GUARDS_OPENING',
+  contextType:'promptResponse',
+  promptAr:'سَأُرْسِلُ الْمِفْتَاحَ إِلَى الْحُرَّاسِ',
+  promptEn:'I will send the key to the guards.',
+  promptVerbAr:'سَأُرْسِلُ',
+  responseNodeId:'IDHAN_PRODUCTION_GUARDS_OPENING_RESPONSE',
+  futureEvidenceId:'sourcePromptFutureSin',
+  responseRelation:'jawabJazaa',
+  discoursePosition:'sadrJumlatAlJawab',
+  separatorMode:'none',
+  responseParticleAr:IDHAN_SURFACE,
+  conditionSetId:IDHAN_CONDITION_RULE_ID,
+  sourceRuleId:IDHAN_CONDITION_RULE_ID,
+  sourcePdfPage:75,
+  authorizedConsumers:[IDHAN_PRODUCTIVE_LANES.afalKhamsa.templateId],
   productionStatus:PRODUCTION_RESPONSE_STATUS
  }
 };
@@ -3853,13 +4008,89 @@ const RESPONSE_PAIR_SOURCE={
     fromId:'IDHAN_PRODUCTION_OPENING_RESPONSE',toId:'IDHAN_PRODUCTION_OPENING',
     relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_OPENING_CONTEXT_ANSWER'}
   ]
+ },
+ /* ---- Phase 3B2 — the five-verb pairs ---------------------------------------------
+    Same record shape and same authority as the ordinary pairs; what differs is only the lane the
+    pair belongs to, and that is settled by `templateId` — idhanLaneForPair resolves the lane from
+    the frozen lane registry, and productionPairAuthorityFailure then demands the person and the
+    registry form the lane names. `responseVerbAr` is a registered fiveSub surface of a lexeme this
+    app already produces, so the wāw al-jamāʿah component, the gloss, the English and the
+    morphology all come from the existing registries and no verb family is added. */
+ IDHAN_PRODUCTION_STUDENTS_READING_PAIR:{
+  id:'IDHAN_PRODUCTION_STUDENTS_READING_PAIR',
+  contextId:'IDHAN_PRODUCTION_STUDENTS_READING',
+  templateId:IDHAN_PRODUCTIVE_LANES.afalKhamsa.templateId,
+  promptVerbAr:'سَأُعْطِي',
+  responseParticleAr:IDHAN_SURFACE,
+  responseVerbAr:'يَقْرَؤُوا',
+  responsePerson:'3mp',
+  responseNodeId:'IDHAN_PRODUCTION_STUDENTS_READING_RESPONSE',
+  semanticRelation:'consequence',
+  futureEvidenceId:'sourcePromptFutureSin',
+  auditStatus:APPLICATION_COMPOSED_AUDIT,
+  sourcePdfPage:75,
+  productionStatus:PRODUCTION_RESPONSE_STATUS,
+  responseRelationships:[
+   {id:'REL_IDHAN_PRODUCTION_STUDENTS_READING_CONTEXT_ANSWER',type:'contextAnswer',
+    fromId:'IDHAN_PRODUCTION_STUDENTS_READING',toId:'IDHAN_PRODUCTION_STUDENTS_READING_RESPONSE',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_STUDENTS_READING_ANSWER_CONTEXT'},
+   {id:'REL_IDHAN_PRODUCTION_STUDENTS_READING_ANSWER_CONTEXT',type:'answerContext',
+    fromId:'IDHAN_PRODUCTION_STUDENTS_READING_RESPONSE',toId:'IDHAN_PRODUCTION_STUDENTS_READING',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_STUDENTS_READING_CONTEXT_ANSWER'}
+  ]
+ },
+ IDHAN_PRODUCTION_STUDENTS_MEMORIZING_PAIR:{
+  id:'IDHAN_PRODUCTION_STUDENTS_MEMORIZING_PAIR',
+  contextId:'IDHAN_PRODUCTION_STUDENTS_MEMORIZING',
+  templateId:IDHAN_PRODUCTIVE_LANES.afalKhamsa.templateId,
+  promptVerbAr:'سَأَشْرَحُ',
+  responseParticleAr:IDHAN_SURFACE,
+  responseVerbAr:'يَحْفَظُوا',
+  responsePerson:'3mp',
+  responseNodeId:'IDHAN_PRODUCTION_STUDENTS_MEMORIZING_RESPONSE',
+  semanticRelation:'consequence',
+  futureEvidenceId:'sourcePromptFutureSin',
+  auditStatus:APPLICATION_COMPOSED_AUDIT,
+  sourcePdfPage:75,
+  productionStatus:PRODUCTION_RESPONSE_STATUS,
+  responseRelationships:[
+   {id:'REL_IDHAN_PRODUCTION_STUDENTS_MEMORIZING_CONTEXT_ANSWER',type:'contextAnswer',
+    fromId:'IDHAN_PRODUCTION_STUDENTS_MEMORIZING',toId:'IDHAN_PRODUCTION_STUDENTS_MEMORIZING_RESPONSE',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_STUDENTS_MEMORIZING_ANSWER_CONTEXT'},
+   {id:'REL_IDHAN_PRODUCTION_STUDENTS_MEMORIZING_ANSWER_CONTEXT',type:'answerContext',
+    fromId:'IDHAN_PRODUCTION_STUDENTS_MEMORIZING_RESPONSE',toId:'IDHAN_PRODUCTION_STUDENTS_MEMORIZING',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_STUDENTS_MEMORIZING_CONTEXT_ANSWER'}
+  ]
+ },
+ IDHAN_PRODUCTION_GUARDS_OPENING_PAIR:{
+  id:'IDHAN_PRODUCTION_GUARDS_OPENING_PAIR',
+  contextId:'IDHAN_PRODUCTION_GUARDS_OPENING',
+  templateId:IDHAN_PRODUCTIVE_LANES.afalKhamsa.templateId,
+  promptVerbAr:'سَأُرْسِلُ',
+  responseParticleAr:IDHAN_SURFACE,
+  responseVerbAr:'يَفْتَحُوا',
+  responsePerson:'3mp',
+  responseNodeId:'IDHAN_PRODUCTION_GUARDS_OPENING_RESPONSE',
+  semanticRelation:'consequence',
+  futureEvidenceId:'sourcePromptFutureSin',
+  auditStatus:APPLICATION_COMPOSED_AUDIT,
+  sourcePdfPage:75,
+  productionStatus:PRODUCTION_RESPONSE_STATUS,
+  responseRelationships:[
+   {id:'REL_IDHAN_PRODUCTION_GUARDS_OPENING_CONTEXT_ANSWER',type:'contextAnswer',
+    fromId:'IDHAN_PRODUCTION_GUARDS_OPENING',toId:'IDHAN_PRODUCTION_GUARDS_OPENING_RESPONSE',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_GUARDS_OPENING_ANSWER_CONTEXT'},
+   {id:'REL_IDHAN_PRODUCTION_GUARDS_OPENING_ANSWER_CONTEXT',type:'answerContext',
+    fromId:'IDHAN_PRODUCTION_GUARDS_OPENING_RESPONSE',toId:'IDHAN_PRODUCTION_GUARDS_OPENING',
+    relation:'jawabJazaa',reciprocalId:'REL_IDHAN_PRODUCTION_GUARDS_OPENING_CONTEXT_ANSWER'}
+  ]
  }
 };
-/* The pair IDs the one production template may consume, frozen here beside the records so the
-   template metadata and the registry cannot drift apart; startup checks both directions. */
-const IDHAN_PRODUCTION_PAIR_IDS=Object.freeze([
- 'IDHAN_PRODUCTION_READING_PAIR','IDHAN_PRODUCTION_MEMORIZING_PAIR','IDHAN_PRODUCTION_OPENING_PAIR'
-]);
+/* Every productive pair ID across every lane, derived from the lane registry so the two can never
+   drift apart. Per-LANE ownership stays in `lane.pairIds`; this flat union is only what the
+   registry-wide invariants iterate. */
+const IDHAN_PRODUCTION_PAIR_IDS=Object.freeze(
+ Object.keys(IDHAN_PRODUCTIVE_LANES).flatMap(laneId=>[...IDHAN_PRODUCTIVE_LANES[laneId].pairIds]));
 /* The application's own canonical fixture. This — not a harness literal, and not any object a
    caller can assemble — is what the resolver authenticates. It binds the fixture ID to its
    consumer, its context, its pair, the exact token spine (identity, order, focus), the exact
@@ -3960,7 +4191,9 @@ function responseFixtureRecord(id){return frozenStoreRecord(IDHAN_FIXTURE_REGIST
    productive lane's tokens cite G_IDHAN_NASB and R_MUDARI_NASB_FATHA — the particle's own
    government and the verb's own sign — and never the conditions. */
 const RESTRICTED_SOURCE_RULE_OWNERS=Object.freeze(Object.assign(Object.create(null),{
- R_IDHAN_CONDITIONS:Object.freeze([IDHAN_FIXTURE_CONSUMER,IDHAN_PRODUCTION_CONSUMER])
+ /* Phase 3B2: one entry per PRODUCTIVE LANE, derived from the lane registry rather than listed by
+    hand, so a lane cannot be added to the grammar without inheriting the consumer restriction. */
+ R_IDHAN_CONDITIONS:Object.freeze([IDHAN_FIXTURE_CONSUMER,...IDHAN_PRODUCTION_CONSUMERS])
 }));
 function isRestrictedSourceRule(ruleId){
  return typeof ruleId==='string'&&Object.prototype.hasOwnProperty.call(RESTRICTED_SOURCE_RULE_OWNERS,ruleId);
@@ -4343,8 +4576,14 @@ function productionContextAuthorityFailure(context,pair){
 }
 /* Every authority-bearing field of a PRODUCTION pair. `responseVerbAr` is checked against the
    vocabulary registry rather than against a stored copy, so a pair can never pin a surface this
-   app does not actually produce, and `responsePerson` must be a registered ORDINARY present
-   person — the only lane Phase 3B1 opens. */
+   app does not actually produce.
+
+   Phase 3B2 makes the verb-class half LANE-DRIVEN rather than pinned to one class. The pair's own
+   `templateId` resolves a frozen lane, and the lane then dictates the exact person, the exact
+   morphology contract and the exact registry form — so the check is a WHITELIST of two named
+   lanes, not a relaxation. A pair naming a template that is not a registered lane consumer, or a
+   person/surface its own lane does not name, still fails here. The lane must also be the one that
+   actually lists this pair, so a pair cannot borrow the other lane's template. */
 function productionPairAuthorityFailure(pair,context){
  if(!pair||typeof pair!=='object')return 'record';
  if(!context||typeof context!=='object')return 'context';
@@ -4359,13 +4598,18 @@ function productionPairAuthorityFailure(pair,context){
  if(pair.productionStatus!==PRODUCTION_RESPONSE_STATUS)return 'productionStatus';
  if(pair.auditStatus!==APPLICATION_COMPOSED_AUDIT)return 'auditStatus';
  if(!RESPONSE_SEMANTIC_RELATIONS.includes(pair.semanticRelation))return 'semanticRelation';
- if(pair.templateId!==IDHAN_PRODUCTION_TEMPLATE_ID)return 'templateId';
+ const lane=idhanLaneForTemplate(pair.templateId);
+ if(!lane)return 'templateId';
+ // Both directions: the lane the template names must be the lane that lists this pair.
+ if(idhanLaneForPair(pair.id)!==lane)return 'templateId';
  const morphology=PRESENT_MORPHOLOGY[pair.responsePerson];
- if(!morphology||morphology.formClass!=='ordinary'||morphology.endingClass!=='none'
-   ||morphology.binaaClass)return 'responsePerson';
+ if(!morphology||pair.responsePerson!==lane.person
+   ||morphology.formClass!==lane.formClass||morphology.endingClass!==lane.endingClass
+   ||morphology.subjectMode!==lane.tableSubjectMode||morphology.binaaClass)return 'responsePerson';
  if(PRESENT_NON_PRODUCTION_PERSONS.includes(pair.responsePerson))return 'responsePerson';
  const registered=verbFormIndex.get(pair.responseVerbAr);
- if(!registered||registered.form!=='acc'||registered.lexeme?.acc!==pair.responseVerbAr)return 'responseVerbAr';
+ if(!registered||registered.form!==lane.registeredForm
+   ||registered.lexeme?.[lane.lexemeField]!==pair.responseVerbAr)return 'responseVerbAr';
  if(!Array.isArray(pair.responseRelationships)||pair.responseRelationships.length!==2)return 'responseRelationships';
  return '';
 }
@@ -4683,10 +4927,15 @@ const IDHAN_PROOF_FAILURE_REASONS=Object.freeze([
    throw new Error('Context '+id+' does not cite the إِذَنْ condition rule.');
   }
   if(record.productionStatus===PRODUCTION_RESPONSE_STATUS){
-   if(record.authorizedConsumers.length!==1||record.authorizedConsumers[0]!==IDHAN_PRODUCTION_CONSUMER){
-    throw new Error('Production context '+id+' is not bound to the one productive consumer.');
+   /* Phase 3B2 — a production context names exactly ONE consumer, and that consumer must be a
+      registered LANE template. Two lanes exist, but no context may be shared between them: a
+      context belongs to the lane whose template answers it, and idhanLaneForTemplate is what
+      says which. */
+   if(record.authorizedConsumers.length!==1
+     ||!idhanLaneForTemplate(record.authorizedConsumers[0])){
+    throw new Error('Production context '+id+' is not bound to exactly one productive lane consumer.');
    }
-   if(!isSourceRuleConsumerAuthorized(record.sourceRuleId,IDHAN_PRODUCTION_CONSUMER)){
+   if(!isSourceRuleConsumerAuthorized(record.sourceRuleId,record.authorizedConsumers[0])){
     throw new Error('Production context '+id+' cites a rule its consumer does not own.');
    }
   }
@@ -4706,8 +4955,12 @@ const IDHAN_PROOF_FAILURE_REASONS=Object.freeze([
      response construction, and it may never claim the source's own audit status. */
   if(pair.auditStatus!==APPLICATION_COMPOSED_AUDIT)throw new Error('Production pair '+id+' claims an audit status it has no source for.');
   if(Object.prototype.hasOwnProperty.call(pair,'fixtureId'))throw new Error('Production pair '+id+' names an architecture fixture.');
-  if(pair.templateId!==IDHAN_PRODUCTION_TEMPLATE_ID)throw new Error('Production pair '+id+' is not bound to the productive template.');
-  if(!IDHAN_PRODUCTION_PAIR_IDS.includes(id))throw new Error('Production pair '+id+' is not in the productive template’s frozen pair list.');
+  /* Phase 3B2 — LANE ownership, checked from both directions. The pair's template must resolve to
+     a registered lane, and that lane must be the one whose frozen pair list actually contains this
+     pair; a pair borrowing the other lane's template fails here. */
+  const pairLane=idhanLaneForTemplate(pair.templateId);
+  if(!pairLane)throw new Error('Production pair '+id+' is not bound to a registered productive lane template.');
+  if(idhanLaneForPair(id)!==pairLane)throw new Error('Production pair '+id+' is listed by a different lane than its template names.');
   const productionContextField=productionContextAuthorityFailure(context,pair);
   if(productionContextField)throw new Error('Production pair '+id+' disagrees with its context at '+productionContextField+'.');
   const productionGraphReason=responseGraphFailure(pair.responseRelationships,context.id,context.responseNodeId);
@@ -5171,7 +5424,8 @@ function idhanProductionRefusal(reason){
    can assert they exercise them rather than counting by hand. */
 const IDHAN_PRODUCTION_REFUSAL_REASONS=Object.freeze([
  'not-a-present-verb','idhan-not-at-response-head','unknown-template','template-declares-another-governor',
- 'template-authorizes-no-response-pair','not-an-ordinary-present-verb','not-a-registered-nasb-surface',
+ 'template-authorizes-no-response-pair','template-declares-no-productive-lane',
+ 'verb-outside-the-template-lane','lane-pair-list-mismatch','not-a-registered-nasb-surface',
  'unknown-response-pair','ambiguous-response-pair','unknown-context','not-a-production-response',
  'pair-not-bound-to-this-template','unauthorized-consumer','unverified-source',
  'unauthorized-source-consumer','unverified-governor-source','governor-not-bound-to-its-conditions',
@@ -5218,15 +5472,32 @@ function deriveIdhanProductiveNasbCore(data,verbIndex,provers){
  if(template.presentGovernor!==IDHAN_PARTICLE_TYPE)return idhanProductionRefusal('template-declares-another-governor');
  const pairIds=safeIsArray(template.responsePairIds)?template.responsePairIds:[];
  if(!pairIds.length)return idhanProductionRefusal('template-authorizes-no-response-pair');
- // 3 — the verb must really be an ORDINARY muʿrab present verb, by registry authority. The five
- //     verbs and the mabnī nūn-al-niswah form are other lanes and are not opened by this phase.
+ /* 3 — the verb must really belong to THIS TEMPLATE'S LANE, by registry authority. The lane is a
+        frozen whitelist entry, so Phase 3B2's second verb class is an added lane rather than a
+        loosened check: the person, the form class, the ending class, the subject mode, the
+        inflection and the registry form must all be exactly what the lane names. The mabnī
+        nūn-al-niswah form matches no lane and can never be governed here; nor can a five-verb
+        person other than the one its lane pins, nor an ordinary verb under the five-verb template
+        or the reverse. */
+ const lane=idhanLaneForTemplate(template.stableId);
+ if(!lane)return idhanProductionRefusal('template-declares-no-productive-lane');
+ /* The template's frozen metadata and the lane registry must name the SAME exchanges. They are two
+    independent records of one fact, so a drift between them is a defect, not a preference — and
+    the resolver refuses rather than picking a winner. */
+ if(pairIds.length!==lane.pairIds.length
+   ||pairIds.some((id,position)=>id!==lane.pairIds[position])){
+  return idhanProductionRefusal('lane-pair-list-mismatch');
+ }
  const morphology=authoritativeVerbMorphology(verb,data);
- if(!morphology.registered||morphology.formClass!=='ordinary'||morphology.endingClass!=='none'
-   ||morphology.binaaClass||verb.inflection!=='regular'){
-  return idhanProductionRefusal('not-an-ordinary-present-verb');
+ if(!morphology.registered||morphology.person!==lane.person
+   ||morphology.formClass!==lane.formClass||morphology.endingClass!==lane.endingClass
+   ||morphology.subjectMode!==lane.resolvedSubjectMode
+   ||morphology.binaaClass||verb.inflection!==lane.inflection){
+  return idhanProductionRefusal('verb-outside-the-template-lane');
  }
  const registered=verbFormIndex.get(verb.word);
- if(!registered||registered.form!=='acc'||registered.lexeme?.acc!==verb.word){
+ if(!registered||registered.form!==lane.registeredForm
+   ||registered.lexeme?.[lane.lexemeField]!==verb.word){
   return idhanProductionRefusal('not-a-registered-nasb-surface');
  }
  // 4 — exactly ONE authorized pair may claim this response construction. Zero is an unregistered
@@ -5712,10 +5983,19 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_FIVE_NOUNS_JARR_YA:sourceRule('Yāʾ is the khafḍ sign of the five nouns.',[32,66,67],'Only singular, non-diminutive forms in iḍāfah to something other than yāʾ al-mutakallim.'),
 
  R_MUDARI_RAF_DAMMA:sourceRule('A regular present verb free of a nāṣib or jāzim is raised with visible ḍammah.',[39,70,71,72],'Only sound-final present verbs with a visible ending and no attached five-verb ending.'),
- R_MUDARI_NASB_FATHA:sourceRule('A regular sound-final present verb after lan is accusative with visible fatḥah.',[47,73,74],'Only the explicitly stored lan forms.'),
+ /* The conditions text below was written when لَنْ was the only nāṣib this app produced. Phases
+    3A1, 3B1 and 3B2 added أَنْ, explicit لِكَيْ and إِذَنْ, all of which take this same sign, so the
+    old wording ("Only the explicitly stored lan forms") had become false. Corrected here as a
+    TRUTHFULNESS repair only: the pages, the evidence and the grammatical claim are untouched —
+    the sign has always depended on the verb's own morphology and never on which nāṣib precedes
+    it, which is precisely why one rule serves them all. */
+ R_MUDARI_NASB_FATHA:sourceRule('A regular sound-final present verb after lan is accusative with visible fatḥah.',[47,73,74],'Only an explicitly stored ordinary muʿrab present form standing in naṣb under a nāṣib this app produces: لَنْ, أَنْ, explicit لِكَيْ, or إِذَنْ once its three conditions are proven. The sign follows the verb’s own morphology, not the identity of the nāṣib; the particle’s own government is a separate rule in every case.'),
  R_MUDARI_JAZM_SUKUN:sourceRule('A regular sound-final present verb after lam is jussive with visible sukūn.',[58,79,80],'Only the explicitly stored lam forms.'),
  R_AFAL5_RAF_NUN:sourceRule('Retention of nūn is the nominative sign of the five verbs.',[38,39,67,72],'Rafʿ production includes only the explicitly registered, surface-unambiguous 3md, 3mp, 2mp, and 2fs patterns.'),
- R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74],'Only after the visible nāṣib lan.'),
+ /* Same truthfulness repair as R_MUDARI_NASB_FATHA above, and for the same reason: أَنْ and
+    explicit لِكَيْ have taken this sign since Phase 3A1, and Phase 3B2 adds إِذَنْ. Pages and
+    evidence unchanged; the claim is unchanged; only the stale enumeration of nāṣibs is corrected. */
+ R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74],'Only an explicitly stored five-verb form standing in naṣb under a visible nāṣib this app produces: لَنْ, أَنْ, explicit لِكَيْ, or إِذَنْ once its three conditions are proven. The sign follows the verb’s own five-verb morphology, not the identity of the nāṣib.'),
  R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80],'Only after the visible jāzim lam.'),
  R_PAST_FATH_VISIBLE:sourceRule('A sound-final past verb has visible fatḥ unless wāw al-jamāʿah or a moving rafʿ pronoun is attached.',[71],'Generated scope: bare third-person masculine, the existing sākinah feminine tāʾ forms, and the explicitly stored dual-alif forms.'),
  R_PAST_FATH_EST_MUNASABAH:sourceRule('A past verb attached to wāw al-jamāʿah has estimated fatḥ because the position is occupied by the vowel of munāsabah.',[71,72],'Generated scope: explicitly stored third-person masculine-plural past forms only.'),
@@ -5815,7 +6095,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     actually takes effect are R_IDHAN_CONDITIONS, and the verb's naṣb SIGN is R_MUDARI_NASB_FATHA,
     because the sign depends on the verb's own morphology and not on which nāṣib precedes it — the
     same division of labour Phase 3A1 established for أَنْ and كَيْ. */
- G_IDHAN_NASB:sourceRule('Idhan is a particle of answer, recompense, and naṣb that makes the present verb after it manṣūb by itself.',[75],'Only canonical إِذَنْ standing at the head of the answer sentence and immediately preceding the ordinary muʿrab present verb it governs, where that verb denotes the future and nothing whatever separates them. It authorizes the particle analysis and its direct government alone: for the ordinary muʿrab verb that means the naṣb state, but not the naṣb sign. It may never be relied on without R_IDHAN_CONDITIONS, whose three conditions are proven separately from frozen application-owned discourse authority; adjacency alone never authorizes it. It does not cover a five-verb form, a mabnī nūn-al-niswah form, a concealed أَنْ, or any of the three separators the source permits (القسم، النداء، «لا» النافية), none of which this phase implements, and it may never be used as a whole-word maḥall rule.'),
+ G_IDHAN_NASB:sourceRule('Idhan is a particle of answer, recompense, and naṣb that makes the present verb after it manṣūb by itself.',[75],'Only canonical إِذَنْ standing at the head of the answer sentence and immediately preceding the muʿrab present verb it governs, where that verb denotes the future and nothing whatever separates them. Two muʿrab lanes are produced: an ordinary sound-final present verb (3ms) and a five-verb form (3mp). It authorizes the particle analysis and its direct government alone — that means the naṣb STATE, never the naṣb sign, which is R_MUDARI_NASB_FATHA for the ordinary lane and R_AFAL5_NASB_DELETE_NUN for the five verbs and follows the verb’s own morphology. It may never be relied on without R_IDHAN_CONDITIONS, whose three conditions are proven separately from frozen application-owned discourse authority; adjacency alone never authorizes it. It does not cover a mabnī nūn-al-niswah form, any five-verb person other than 3mp, a concealed أَنْ, or any of the three separators the source permits (القسم، النداء، «لا» النافية), none of which is implemented, and it may never be used as a whole-word maḥall rule.'),
  G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs.'),
  G_SAWFA_FUTURE:sourceRule('Sawfa marks future meaning and enters only on the present verb.',[14,15,16],'It does not change the indicative mood in the generated construction.'),
  R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'Generated set: inna, lakinna, laʿalla, layta.',[IA_INNA]),
@@ -7783,47 +8063,71 @@ add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('
 add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('3fp','kay'),presentTemplateMetadata('3fp','attached',true,'kay'));
 add('particle','singular','nasb','fatha',()=>buildMabniGovernedPresentExercise('2fp','kay'),presentTemplateMetadata('2fp','attached',true,'kay'));
 
-/* Phase 3B1 — the ONE productive إِذَنْ lane: إِذَنْ + an ordinary muʿrab present verb, manṣūb
-   with the visible fatḥah, answering a statement the learner is shown above it.
+/* Phase 3B1/3B2 — the productive إِذَنْ lanes: إِذَنْ + a muʿrab present verb it governs,
+   answering a statement the learner is shown above it. Phase 3B1 opened the ordinary lane (manṣūb
+   with the visible fatḥah); Phase 3B2 opens the five-verb lane (manṣūb by ḥadhf al-nūn).
 
-   The exercise is exactly TWO tokens, which is not a simplification but the condition itself:
+   Each exercise is exactly TWO tokens, which is not a simplification but the condition itself:
    Al-Tuḥfah p. 75's third شرط is that nothing separates إِذَنْ from the present verb, and the
-   separator proof this lane reuses is the fixture's own — it requires the response to be the
+   separator proof both lanes reuse is the fixture's own — it requires the response to be the
    particle and its verb and nothing else. That is also the shape of the source's own example
-   («إِذَنْ تَنْجَحَ»), so the productive lane is mechanically identical to it.
+   («إِذَنْ تَنْجَحَ»), so both productive lanes are mechanically identical to it.
 
-   The exchange is never assembled at random. Each build selects a whole REGISTERED pair — one
-   prompt bound to one response verb — because a discourse exchange has to cohere: a randomly
-   chosen verb would answer a statement it has nothing to do with. The verb surfaces are ordinary
-   accusative forms of lexemes this app already produces, so no vocabulary is added and the gloss,
-   the English and the morphology all come from the existing registries.
+   The exchange is never assembled at random. Each build selects a whole REGISTERED pair from its
+   own lane — one prompt bound to one response verb — because a discourse exchange has to cohere: a
+   randomly chosen verb would answer a statement it has nothing to do with. The verb surfaces are
+   registered accusative (or ḥadhf-al-nūn) forms of lexemes this app already produces, so no
+   vocabulary is added and the gloss, the English and the morphology all come from the existing
+   registries.
 
-   Registered LAST, for the same stable-ID reason as Phase 2b-C, 3A1 and 3A2. */
+   Registered LAST within their families, for the same stable-ID reason as Phase 2b-C, 3A1 and 3A2:
+   both are …_04 appended to a family whose _01/_02/_03 belong to لَنْ, أَنْ and كَيْ. */
 const IDHAN_RESPONSE_LEAD_EN='In that case';
-const IDHAN_RESPONSE_SUBJECT_EN='he';
+const IDHAN_LANE_SUBJECT_EN=Object.freeze({ordinary:'he',afalKhamsa:'they'});
 const idhanToken=()=>token(IDHAN_SURFACE,'in that case',AR.idhan(IDHAN_SURFACE),'A particle of answer, recompense, and naṣb; it governs on three conditions.');
-function buildIdhanProductiveExercise(){
- /* The pair is chosen from the template's own frozen list, through the same deterministic
-    rotation every other template uses, and the verb is then read OUT of that pair — never picked
-    beside it. So the response can only ever be one of the registered exchanges. */
- const pairId=pickVaried(IDHAN_PRODUCTION_PAIR_IDS,'idhan-production-pair',String);
+/* One builder for both lanes. The lane decides which exchanges may be drawn, which grammar spec
+   the verb token carries, how it is glossed, and which English subject the translation uses —
+   all read from the frozen lane record, never from a caller argument. */
+function buildIdhanProductiveExercise(laneId){
+ const lane=IDHAN_PRODUCTIVE_LANES[laneId];
+ if(!lane)throw new Error(`Unknown productive إِذَنْ lane: ${laneId}`);
+ /* The pair is chosen from the LANE's own frozen list, through the same deterministic rotation
+    every other template uses, and the verb is then read OUT of that pair — never picked beside
+    it. So the response can only ever be one of that lane's registered exchanges. */
+ const pairId=pickVaried(lane.pairIds,`idhan-production-pair:${lane.laneId}`,String);
  const pair=responsePairRecord(pairId);
  if(!pair)throw new Error(`The productive إِذَنْ pair ${pairId} is not registered.`);
+ if(pair.templateId!==lane.templateId)throw new Error(`The productive إِذَنْ pair ${pairId} belongs to another lane.`);
  const registered=verbFormIndex.get(pair.responseVerbAr);
  if(!registered?.lexeme?.en)throw new Error(`The productive إِذَنْ verb ${pair.responseVerbAr} is not a registered lexeme.`);
+ /* The five-verb lane glosses its verb "they …", exactly as every other five-verb builder does
+    and exactly as resolveCanonicalTokenGloss rebuilds it for a 3mp form. */
+ const isFive=lane.laneId==='afalKhamsa';
+ const verbGloss=isFive?`they ${registered.lexeme.en}`:registered.lexeme.en;
  return{
   sentence:`${IDHAN_SURFACE} ${pair.responseVerbAr}`,
-  translation:`${IDHAN_RESPONSE_LEAD_EN} ${IDHAN_RESPONSE_SUBJECT_EN} will ${registered.lexeme.en}.`,
+  translation:`${IDHAN_RESPONSE_LEAD_EN} ${IDHAN_LANE_SUBJECT_EN[lane.laneId]} will ${registered.lexeme.en}.`,
   tokens:[
    idhanToken(),
-   token(pair.responseVerbAr,registered.lexeme.en,AR.presentPred(pair.responseVerbAr),EN.present,true)
+   token(pair.responseVerbAr,verbGloss,
+    isFive?AR.presentFive(pair.responseVerbAr):AR.presentPred(pair.responseVerbAr),
+    isFive?EN.fiveVerb:EN.present,true)
   ]
  };
 }
-add('particle','present','nasb','fatha',buildIdhanProductiveExercise,{
- ...presentTemplateMetadata('3ms','implicit'),
+add('particle','present','nasb','fatha',()=>buildIdhanProductiveExercise('ordinary'),{
+ ...presentTemplateMetadata(IDHAN_PRODUCTIVE_LANES.ordinary.person,IDHAN_PRODUCTIVE_LANES.ordinary.resolvedSubjectMode),
  presentGovernor:IDHAN_PARTICLE_TYPE,
- responsePairIds:IDHAN_PRODUCTION_PAIR_IDS
+ responsePairIds:IDHAN_PRODUCTIVE_LANES.ordinary.pairIds
+});
+/* Phase 3B2 — إِذَنْ + الأفعال الخمسة, 3mp only. The verb carries a real state and a real sign
+   (naṣb, ḥadhf al-nūn), so unlike the mabnī lane it can be the learner's target itself and the
+   exercise stays at two tokens. Its fāʿil is the attached wāw al-jamāʿah, which the existing
+   component and Why authority already analyse. */
+add('particle','fiveVerbs','nasb','nunDropped',()=>buildIdhanProductiveExercise('afalKhamsa'),{
+ ...presentTemplateMetadata(IDHAN_PRODUCTIVE_LANES.afalKhamsa.person,IDHAN_PRODUCTIVE_LANES.afalKhamsa.resolvedSubjectMode),
+ presentGovernor:IDHAN_PARTICLE_TYPE,
+ responsePairIds:IDHAN_PRODUCTIVE_LANES.afalKhamsa.pairIds
 });
 
 const recent=[]; const HISTORY=40;
@@ -8307,20 +8611,57 @@ setFiltersExpanded(!((typeof matchMedia==='function')&&matchMedia('(max-width:64
  if(templates.some(template=>template.stableId===fixture.id||template.stableId===fixture.consumerId
    ||templateResponseFixtureId(template)))throw new Error('A production template reaches the إِذَنْ fixture.');
 })();
-/* Phase 3B1 startup verification. Everything the early registry invariant could not check —
+/* Phase 3B1/3B2 startup verification. Everything the early registry invariant could not check —
    because the vocabulary registry, the present-morphology table and the template list did not
-   exist yet — is checked here, once, before the first exercise is generated. */
+   exist yet — is checked here, once, before the first exercise is generated.
+
+   Phase 3B2 makes this PER LANE rather than "the one productive template". The check is not a
+   widened count: every lane is resolved by identity, must own exactly one template, must own its
+   own pairs exclusively, and must produce the exact state and sign the canonical matrix gives its
+   own verb class. Two lanes existing is a fact the registry states; nothing here would pass if a
+   third appeared unregistered, or if a lane's template went missing. */
 (()=>{
+ const laneIds=Object.keys(IDHAN_PRODUCTIVE_LANES);
  const productionTemplates=templates.filter(template=>template.responsePairIds.length);
- if(productionTemplates.length!==1)throw new Error('Phase 3B1 authorizes exactly one productive إِذَنْ template.');
- const template=productionTemplates[0];
- if(template.stableId!==IDHAN_PRODUCTION_TEMPLATE_ID)throw new Error('The productive إِذَنْ template is not the registered consumer: '+template.stableId);
- if(template.presentGovernor!==IDHAN_PARTICLE_TYPE)throw new Error('The productive إِذَنْ template does not declare إِذَنْ as its governor.');
- if(template.responsePairIds.join(',')!==IDHAN_PRODUCTION_PAIR_IDS.join(','))throw new Error('The productive template and the pair registry disagree about which exchanges exist.');
- if(!Object.isFrozen(template.responsePairIds))throw new Error('The productive template’s pair list is mutable.');
+ if(productionTemplates.length!==laneIds.length){
+  throw new Error('The productive إِذَنْ template count does not match the registered lanes: '+productionTemplates.length);
+ }
+ // Every productive template must BE a registered lane's template, and no two may share a lane.
+ const claimedLanes=new Set();
+ for(const template of productionTemplates){
+  const lane=idhanLaneForTemplate(template.stableId);
+  if(!lane)throw new Error('A productive template is not a registered lane consumer: '+template.stableId);
+  if(claimedLanes.has(lane.laneId))throw new Error('Two templates claim the productive lane '+lane.laneId+'.');
+  claimedLanes.add(lane.laneId);
+  if(template.presentGovernor!==IDHAN_PARTICLE_TYPE)throw new Error('Productive template '+template.stableId+' does not declare إِذَنْ as its governor.');
+  if(template.form!==lane.templateForm||template.state!=='nasb'||template.sign!==lane.templateSign){
+   throw new Error('Productive template '+template.stableId+' does not declare its lane’s form/state/sign.');
+  }
+  if(!Object.isFrozen(template.responsePairIds))throw new Error('Productive template '+template.stableId+' has a mutable pair list.');
+  if(template.responsePairIds.join(',')!==lane.pairIds.join(',')){
+   throw new Error('Productive template '+template.stableId+' and its lane disagree about which exchanges exist.');
+  }
+  if(template.presentCapabilities.length!==1||template.presentCapabilities[0].person!==lane.person){
+   throw new Error('Productive template '+template.stableId+' does not pin exactly its lane’s person.');
+  }
+ }
+ if(claimedLanes.size!==laneIds.length)throw new Error('A registered productive lane has no template.');
+ // No pair may be shared between lanes, and every registered production pair belongs to a lane.
+ {
+  const seen=new Set();
+  for(const laneId of laneIds)for(const pairId of IDHAN_PRODUCTIVE_LANES[laneId].pairIds){
+   if(seen.has(pairId))throw new Error('Productive pair '+pairId+' is claimed by two lanes.');
+   seen.add(pairId);
+  }
+  for(const id of Object.keys(RESPONSE_PAIR_REGISTRY)){
+   const pair=RESPONSE_PAIR_REGISTRY[id];
+   if(pair.productionStatus!==PRODUCTION_RESPONSE_STATUS)continue;
+   if(!seen.has(id))throw new Error('Production pair '+id+' belongs to no registered lane.');
+  }
+ }
  // No OTHER template may declare a conditional governor, and none may name a response context.
- if(templates.some(item=>item!==template&&isConditionalGovernor(GRAMMAR_RULES.governors[item.presentGovernor]))){
-  throw new Error('A second template declares a conditional governor.');
+ if(templates.some(item=>!item.responsePairIds.length&&isConditionalGovernor(GRAMMAR_RULES.governors[item.presentGovernor]))){
+  throw new Error('A template declares a conditional governor without any registered exchange.');
  }
  if(templates.some(item=>item.responseContextId))throw new Error('A production template names a response context directly.');
  for(const pairId of IDHAN_PRODUCTION_PAIR_IDS){
@@ -8329,28 +8670,48 @@ setFiltersExpanded(!((typeof matchMedia==='function')&&matchMedia('(max-width:64
   const pairField=productionPairAuthorityFailure(pair,context);
   if(pairField)throw new Error('Production pair '+pairId+' is not internally consistent at '+pairField+'.');
  }
- /* Every registered exchange must actually BUILD, VALIDATE and prove its own conditions, and its
-    English must be the composer's — so a drift between the builder and the canonical composer
-    fails at load rather than in a learner's answer card. The build rotation is deterministic, so
-    running it once per registered pair reaches all of them. */
- const seenPairs=new Set();
- for(let attempt=0;attempt<IDHAN_PRODUCTION_PAIR_IDS.length*4&&seenPairs.size<IDHAN_PRODUCTION_PAIR_IDS.length;attempt++){
-  const exercise=completeNominalAnalysis(template.build());
-  const verbIndex=exercise.tokens.findIndex(item=>item.grammar?.type==='verb');
-  const authorization=deriveIdhanProductiveNasb(exercise,verbIndex);
-  if(!authorization.authorized)throw new Error('A productive إِذَنْ exercise does not prove its conditions: '+authorization.reason);
-  const verb=exercise.tokens[verbIndex];
-  if(verb.state!=='nasb')throw new Error('A productive إِذَنْ verb is not manṣūb.');
-  if(safeSignId(verb.sign)!=='fatha')throw new Error('A productive إِذَنْ verb does not take the fatḥah.');
-  if(verb.ruleId!=='R_MUDARI_NASB_FATHA')throw new Error('A productive إِذَنْ verb does not cite the fatḥah sign rule.');
-  if(exercise.tokens[0].ruleId!==IDHAN_GOVERNOR_RULE_ID)throw new Error('The productive إِذَنْ particle does not cite its own governor rule.');
-  if(exercise.tokens.some(item=>item.ruleId===IDHAN_CONDITION_RULE_ID))throw new Error('A productive token cites the إِذَنْ condition rule.');
-  if(responseContextClaimSite(exercise,null))throw new Error('A productive إِذَنْ exercise carries a response-context claim.');
-  const composed=composeCanonicalTranslation(exercise);
-  if(composed!==exercise.translation)throw new Error('The productive إِذَنْ builder and the canonical composer disagree: '+composed+' / '+exercise.translation);
-  seenPairs.add(authorization.pairId);
+ /* Every registered exchange, in every lane, must actually BUILD, VALIDATE and prove its own
+    conditions, and its English must be the composer's — so a drift between the builder and the
+    canonical composer fails at load rather than in a learner's answer card. The state comes from
+    the governor's mood and the sign from the canonical matrix for the lane's own inflection, so
+    neither is asserted as a literal here. */
+ for(const laneId of laneIds){
+  const lane=IDHAN_PRODUCTIVE_LANES[laneId];
+  const template=templates.find(item=>item.stableId===lane.templateId);
+  const moodRule=GRAMMAR_RULES.presentVerb[lane.inflection]?.[GRAMMAR_RULES.governors[IDHAN_PARTICLE_TYPE].mood];
+  if(!moodRule)throw new Error('Lane '+laneId+' has no canonical naṣb sign.');
+  const seenPairs=new Set();
+  for(let attempt=0;attempt<lane.pairIds.length*4&&seenPairs.size<lane.pairIds.length;attempt++){
+   const exercise=completeNominalAnalysis(template.build());
+   const verbIndex=exercise.tokens.findIndex(item=>item.grammar?.type==='verb');
+   const authorization=deriveIdhanProductiveNasb(exercise,verbIndex);
+   if(!authorization.authorized)throw new Error('A productive إِذَنْ exercise ('+laneId+') does not prove its conditions: '+authorization.reason);
+   if(idhanLaneForPair(authorization.pairId)!==lane)throw new Error('Lane '+laneId+' authorized another lane’s exchange.');
+   const verb=exercise.tokens[verbIndex];
+   if(exercise.tokens.length!==2)throw new Error('A productive إِذَنْ exercise ('+laneId+') is not exactly particle + verb.');
+   if(verb.state!==GRAMMAR_RULES.governors[IDHAN_PARTICLE_TYPE].mood)throw new Error('A productive إِذَنْ verb ('+laneId+') is not manṣūb.');
+   if(safeSignId(verb.sign)!==moodRule[0])throw new Error('A productive إِذَنْ verb ('+laneId+') does not take its canonical naṣb sign.');
+   if(verb.ruleId!==moodRule[1])throw new Error('A productive إِذَنْ verb ('+laneId+') does not cite its canonical sign rule.');
+   if(verb.grammar.morphology.person!==lane.person)throw new Error('A productive إِذَنْ verb ('+laneId+') is not the lane’s person.');
+   if(exercise.tokens[0].ruleId!==IDHAN_GOVERNOR_RULE_ID)throw new Error('The productive إِذَنْ particle does not cite its own governor rule.');
+   if(exercise.tokens.some(item=>item.ruleId===IDHAN_CONDITION_RULE_ID))throw new Error('A productive token cites the إِذَنْ condition rule.');
+   if(responseContextClaimSite(exercise,null))throw new Error('A productive إِذَنْ exercise carries a response-context claim.');
+   const composed=composeCanonicalTranslation(exercise);
+   if(composed!==exercise.translation)throw new Error('The productive إِذَنْ builder and the canonical composer disagree ('+laneId+'): '+composed+' / '+exercise.translation);
+   seenPairs.add(authorization.pairId);
+  }
+  if(seenPairs.size!==lane.pairIds.length)throw new Error('The productive إِذَنْ rotation ('+laneId+') does not reach every registered exchange.');
  }
- if(seenPairs.size!==IDHAN_PRODUCTION_PAIR_IDS.length)throw new Error('The productive إِذَنْ rotation does not reach every registered exchange.');
+ /* The mabnī nūn-al-niswah lane stays CLOSED. Phase 3B2 opens the second muʿrab lane and no
+    more: إِذَنْ acquires no mabnī-present maḥall record and no governor mode, so no maḥall can
+    ever be derived for it. Phase 3B3 generalizes the separator clause; the mabnī lane waits for
+    the three-token shape that comes with it. */
+ if(MABNI_PRESENT_GOVERNORS[IDHAN_PARTICLE_TYPE]||MABNI_PRESENT_GOVERNOR_MODES.includes(IDHAN_PARTICLE_TYPE)){
+  throw new Error('إِذَنْ acquired a mabnī-present lane.');
+ }
+ if(Object.keys(SEPARATOR_MODES).length!==1||SEPARATOR_MODES.none!=='none'){
+  throw new Error('A separator mode was registered before its phase.');
+ }
 })();
 window.nahwGenerate=generate;
 window.nahwReveal=toggleReveal;

@@ -184,6 +184,11 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   IDHAN_PRODUCTION_TEMPLATE_ID,
   IDHAN_PRODUCTION_CONSUMER,
   IDHAN_PRODUCTION_PAIR_IDS,
+  /* Phase 3B2 — the productive LANE registry and its resolvers. */
+  IDHAN_PRODUCTIVE_LANES,
+  IDHAN_PRODUCTION_CONSUMERS,
+  idhanLaneForTemplate,
+  idhanLaneForPair,
   IDHAN_PRODUCTION_REFUSAL_REASONS,
   RESPONSE_SEMANTIC_RELATIONS,
   PRODUCTION_CONTEXT_AUTHORITY_FIELDS,
@@ -4179,10 +4184,17 @@ for(const [name,snapshot] of Object.entries(p3Snapshots)){
     .map(t=>t.stableId).join(' | ')
     ==='T_PARTICLE_PRESENT_NASB_FATHA_01 | T_PARTICLE_PRESENT_NASB_FATHA_02 | T_PARTICLE_PRESENT_NASB_FATHA_03 | T_PARTICLE_PRESENT_NASB_FATHA_04',
     'The particle/present/nasb/fatha stable-ID group is not the expected Phase 3B1 membership');
+  /* Phase 3B2 appends _04 (the productive إِذَنْ five-verb lane) to this tuple, exactly as Phase
+     3B1 appended _04 to the ordinary one. The inherited first three positions are asserted as a
+     prefix first, then the full membership is pinned. */
   assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='fiveVerbs'&&t.state==='nasb'&&t.sign==='nunDropped')
-    .map(t=>t.stableId).join(' | ')
+    .map(t=>t.stableId).slice(0,3).join(' | ')
     ==='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03',
     'The particle/fiveVerbs/nasb/nunDropped stable-ID group changed');
+  assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='fiveVerbs'&&t.state==='nasb'&&t.sign==='nunDropped')
+    .map(t=>t.stableId).join(' | ')
+    ==='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04',
+    'The particle/fiveVerbs/nasb/nunDropped stable-ID group is not the expected Phase 3B2 membership');
   /* Phase 2b-C's group is untouched by the Phase 3A1 registrations: Phase 3A1 added nothing to
      this filter tuple at all. Phase 3A2 later appends four members to it, so the guarantee that
      matters here — the first three positions are unchanged — is asserted as a prefix. */
@@ -4214,8 +4226,11 @@ for(const [name,snapshot] of Object.entries(p3Snapshots)){
         if(token.grammar.particleType===api.IDHAN_PARTICLE_TYPE)idhanTemplates.add(t.stableId);
       }
     }
-    assert(idhanTemplates.size===1&&idhanTemplates.has(api.IDHAN_PRODUCTION_TEMPLATE_ID),
-      'إِذَنْ is produced by a template other than its registered productive consumer');
+    /* Phase 3B2: إِذَنْ is produced by exactly the registered LANE templates and by nothing else.
+       Asserted as set equality in both directions, so neither an extra producer nor a missing lane
+       can slip through. */
+    assert([...idhanTemplates].sort().join(',')===[...api.IDHAN_PRODUCTION_CONSUMERS].sort().join(','),
+      'إِذَنْ is produced by templates other than its registered productive lane consumers: '+[...idhanTemplates].join(','));
   }
   // Every produced كَيْ has its licensing lām; bare كَيْ is never generated.
   for(const t of api.templates)for(let i=0;i<12;i++){
@@ -5251,7 +5266,7 @@ for(const t of api.templates){
 {
   const ids=api.templates.map(t=>t.stableId);
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
-  assert(api.templates.length===83,`Expected 83 templates after Phase 3B1, found ${api.templates.length}`);
+  assert(api.templates.length===84,`Expected 84 templates after Phase 3B2, found ${api.templates.length}`);
   assert(Object.values(p4Templates).map(t=>t.stableId).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_04 | T_PARTICLE_SINGULAR_NASB_FATHA_05 | T_PARTICLE_SINGULAR_NASB_FATHA_06 | T_PARTICLE_SINGULAR_NASB_FATHA_07',
     'The Phase 3A2 stable IDs are not the four appended ones');
@@ -5262,9 +5277,15 @@ for(const t of api.templates){
         'T_PARTICLE_PRESENT_RAF_DAMMA_01:sawfa','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01:lan','T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01:lam',
         'T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01:sawfa','T_PARTICLE_PRESENT_NASB_FATHA_02:an','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02:an',
         'T_PARTICLE_PRESENT_NASB_FATHA_03:kay','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03:kay',
-        // Phase 3B1 appends exactly one declaration, and it is the only conditional one.
-        'T_PARTICLE_PRESENT_NASB_FATHA_04:idhan'].join(' | '),
+        /* Phase 3B1 appends the ordinary إِذَنْ lane and Phase 3B2 the five-verb one. These are
+           the only two conditional-governor declarations, and both are إِذَنْ. */
+        'T_PARTICLE_PRESENT_NASB_FATHA_04:idhan',
+        'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04:idhan'].join(' | '),
     'A presentGovernor declaration changed');
+  // Exactly the two registered lanes declare the conditional governor, and nothing else does.
+  assert(api.templates.filter(t=>api.isConditionalGovernor(api.GRAMMAR_RULES.governors[t.presentGovernor]))
+    .map(t=>t.stableId).sort().join(',')===[...api.IDHAN_PRODUCTION_CONSUMERS].sort().join(','),
+    'the conditional-governor templates are not exactly the registered lanes');
   assert(Object.values(p4Templates).every(t=>t.presentGovernor===''),'A Phase 3A2 template declared a muʿrab presentGovernor');
   p4Cases+=5;
 }
@@ -6610,7 +6631,9 @@ function runOwnershipDerivativeSuite(label,original){
      example non-production. The status split is asserted immediately below, so a production record
      can never be miscounted as the fixture's. */
   assert(Object.keys(api.RESPONSE_CONTEXT_REGISTRY).join(',')
-    ===[CTX_ID,'IDHAN_PRODUCTION_READING','IDHAN_PRODUCTION_MEMORIZING','IDHAN_PRODUCTION_OPENING'].join(','),
+    ===[CTX_ID,'IDHAN_PRODUCTION_READING','IDHAN_PRODUCTION_MEMORIZING','IDHAN_PRODUCTION_OPENING',
+        'IDHAN_PRODUCTION_STUDENTS_READING','IDHAN_PRODUCTION_STUDENTS_MEMORIZING',
+        'IDHAN_PRODUCTION_GUARDS_OPENING'].join(','),
     'unexpected context registry contents');
   assert(Object.keys(api.RESPONSE_PAIR_REGISTRY).join(',')
     ===[PAIR_ID,...api.IDHAN_PRODUCTION_PAIR_IDS].join(','),'unexpected pair registry contents');
@@ -6704,11 +6727,30 @@ function runOwnershipDerivativeSuite(label,original){
   assert(api.isSourceAuthorized('G_IDHAN_NASB'),'G_IDHAN_NASB is not source-authorized');
   assert(/answer, recompense, and naṣb/.test(governorRule.topic),'G_IDHAN_NASB does not state the source’s own identity clause');
   assert(/by itself/.test(governorRule.topic),'G_IDHAN_NASB does not state direct government');
-  assert(/but not the naṣb sign/.test(governorRule.conditions),'G_IDHAN_NASB claims the naṣb sign');
+  /* Phase 3B2: the rule now covers TWO muʿrab lanes, so it must disclaim the sign for both and
+     name the two sign rules that actually own them — the sign follows the verb's morphology, never
+     the nāṣib. It must still exclude everything that stays closed. */
+  assert(/never the naṣb sign/.test(governorRule.conditions),'G_IDHAN_NASB claims the naṣb sign');
+  assert(/R_MUDARI_NASB_FATHA/.test(governorRule.conditions)&&/R_AFAL5_NASB_DELETE_NUN/.test(governorRule.conditions),
+    'G_IDHAN_NASB does not name the two sign rules that own its lanes');
   assert(/never be relied on without R_IDHAN_CONDITIONS/.test(governorRule.conditions),
     'G_IDHAN_NASB does not bind itself to the condition rule');
-  assert(/does not cover a five-verb form, a mabnī nūn-al-niswah form, a concealed أَنْ/.test(governorRule.conditions),
+  assert(/does not cover a mabnī nūn-al-niswah form, any five-verb person other than 3mp, a concealed أَنْ/.test(governorRule.conditions),
     'G_IDHAN_NASB does not exclude the lanes this phase leaves closed');
+  /* The two sign rules must no longer claim لَنْ is their only nāṣib — that wording was already
+     false after Phase 3A1 and would be more so now. Pages and evidence are unchanged. */
+  for(const signRuleId of ['R_MUDARI_NASB_FATHA','R_AFAL5_NASB_DELETE_NUN']){
+    const signRule=api.SOURCE_REGISTRY[signRuleId];
+    assert(!/^Only (the explicitly stored lan forms|after the visible nāṣib lan)\.$/.test(signRule.conditions),
+      signRuleId+' still claims لَنْ is its only nāṣib');
+    assert(/إِذَنْ/.test(signRule.conditions),signRuleId+' does not acknowledge the إِذَنْ lane');
+    assert(/not the identity of the nāṣib|not the identity of the nāṣib/.test(signRule.conditions),
+      signRuleId+' does not say the sign follows the verb’s own morphology');
+  }
+  assert(JSON.stringify(api.SOURCE_REGISTRY.R_MUDARI_NASB_FATHA.primarySource.pdfPages)===JSON.stringify([47,73,74]),
+    'R_MUDARI_NASB_FATHA pages changed');
+  assert(JSON.stringify(api.SOURCE_REGISTRY.R_AFAL5_NASB_DELETE_NUN.primarySource.pdfPages)===JSON.stringify([47,67,74]),
+    'R_AFAL5_NASB_DELETE_NUN pages changed');
   assert(governorRule!==rule&&api.SOURCE_REGISTRY.G_IDHAN_NASB!==api.SOURCE_REGISTRY.R_IDHAN_CONDITIONS,
     'the governor rule and the condition rule are the same record');
   // إِذَنْ is a muʿrab-lane governor only: the mabnī nūn-al-niswah lane stays closed to it.
@@ -7658,21 +7700,21 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===83,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===84,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
-  /* X: the exact stable IDs. The 82 Phase 3B0A inherited are unchanged — asserted as a subset in
-     both directions against the original manifest — and Phase 3B1 appends exactly one. */
-  assert([...ids].filter(id=>id!==api.IDHAN_PRODUCTION_TEMPLATE_ID).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  /* X: the exact stable IDs. The 82 Phase 3B0A inherited are unchanged — asserted in both
+     directions against the original manifest — and the productive LANES append exactly one each. */
+  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
-  assert(ids.includes(api.IDHAN_PRODUCTION_TEMPLATE_ID),'the productive إِذَنْ template is not registered');
-  assert(!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(api.IDHAN_PRODUCTION_TEMPLATE_ID),
-    'the productive إِذَنْ template reused an inherited stable ID');
+  assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
+  assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
+    'a productive إِذَنْ template reused an inherited stable ID');
   ctxCases+=5;
   const particleTypes=new Set();
   for(const template of api.templates)for(let attempt=0;attempt<10;attempt++){
     const data=api.buildTemplate(template.id);
-    const productive=template.stableId===api.IDHAN_PRODUCTION_TEMPLATE_ID;
+    const productive=api.IDHAN_PRODUCTION_CONSUMERS.includes(template.stableId);
     for(const item of data.tokens){
       if(item.grammar.particleType)particleTypes.add(item.grammar.particleType);
       // Phase 3B1: إِذَنْ is produced by the productive template and by nothing else.
@@ -7701,9 +7743,12 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
   for(const template of api.templates){
     const data=api.buildTemplate(template.id);
     api.render(data,'',false);
-    if(template.stableId===api.IDHAN_PRODUCTION_TEMPLATE_ID){
+    if(api.IDHAN_PRODUCTION_CONSUMERS.includes(template.stableId)){
       const authorization=api.exerciseIdhanProductiveAuthorization(data);
       assert(authorization&&authorization.authorized,'the productive template did not authorize its own naṣb');
+      // Each lane may only ever authorize an exchange from its OWN frozen pair list.
+      assert(api.idhanLaneForPair(authorization.pairId)===api.idhanLaneForTemplate(template.stableId),
+        template.stableId+' authorized another lane’s exchange');
       const context=api.responseContextRecord(authorization.contextId);
       assert(elements.responseContext.hidden===false,'the productive template hid its own statement');
       assert(elements.responseContextPromptAr.textContent===context.promptAr,'the displayed Arabic statement is not the authorized context’s');
@@ -8989,7 +9034,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===83,'the repair block changed the production template count');
+  assert(api.templates.length===84,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -9110,22 +9155,33 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===88,'the structural map holds '+registeredKeys.length+' keys, not 88');
-    assert(registeredShapes.length===23,'the shape registry holds '+registeredShapes.length+' shapes, not 23');
+    assert(registeredKeys.length===89,'the structural map holds '+registeredKeys.length+' keys, not 89');
+    assert(registeredShapes.length===24,'the shape registry holds '+registeredShapes.length+' shapes, not 24');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
     /* The 87 inherited keys and 22 inherited shapes are untouched: Phase 3B1 APPENDS, it does not
        re-map. Anything else would silently re-translate a pre-existing template. */
     {
-      const inheritedKeys=registeredKeys.filter(k=>!k.startsWith(api.IDHAN_PRODUCTION_TEMPLATE_ID+'||'));
-      const inheritedShapes=registeredShapes.filter(id=>id!=='TS23');
+      const laneKeys=api.IDHAN_PRODUCTION_CONSUMERS.map(id=>id+'||particle:particle,verb:present');
+      const laneShapes=['TS23','TS24'];
+      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k));
+      const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===87,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===22,'the inherited shape set changed: '+inheritedShapes.length);
-      assert(inheritedKeys.every(k=>MAP[k].shape!=='TS23'),'an inherited template was re-mapped onto the new shape');
-      assert(inheritedShapes.every(id=>SHAPES[id].parts.every(p=>typeof p.lit!=='string'||!/ he will /.test(p.lit))),
-        'an inherited shape acquired the new lane’s wording');
-      assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'].shape==='TS23',
-        'the productive structure is not mapped to its own shape');
+      assert(inheritedKeys.every(k=>!laneShapes.includes(MAP[k].shape)),'an inherited template was re-mapped onto a productive shape');
+      assert(inheritedShapes.every(id=>SHAPES[id].parts.every(p=>typeof p.lit!=='string'||!/ (he|they) will /.test(p.lit))),
+        'an inherited shape acquired a productive lane’s wording');
+      /* Each lane maps to its OWN shape. The two structures are the same token string, so the
+         template ID in the key is what separates them — and the singular/plural wording must not
+         be able to cross over. */
+      assert(MAP[api.IDHAN_PRODUCTIVE_LANES.ordinary.templateId+'||particle:particle,verb:present'].shape==='TS23',
+        'the ordinary productive structure is not mapped to TS23');
+      assert(MAP[api.IDHAN_PRODUCTIVE_LANES.afalKhamsa.templateId+'||particle:particle,verb:present'].shape==='TS24',
+        'the five-verb productive structure is not mapped to TS24');
+      assert(SHAPES.TS23.parts.some(p=>p.lit===' he will ')&&SHAPES.TS24.parts.some(p=>p.lit===' they will '),
+        'the productive shapes do not carry their own number');
+      assert(!SHAPES.TS23.parts.some(p=>p.lit===' they will ')&&!SHAPES.TS24.parts.some(p=>p.lit===' he will '),
+        'a productive shape carries the other lane’s number');
     }
     assert(Object.isFrozen(SHAPES)&&Object.isFrozen(MAP),'a composer registry is mutable');
     for(const id of registeredShapes){
@@ -9143,7 +9199,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===83,'the map covers '+mappedTemplates.size+' templates, not 83');
+    assert(mappedTemplates.size===84,'the map covers '+mappedTemplates.size+' templates, not 84');
     // The five dual-structure templates carry exactly two lanes each; everything else exactly one.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -9202,8 +9258,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===88,'only '+keysSeen.size+' of the 88 structural keys were observed');
-    assert(shapesSeen.size===23,'only '+shapesSeen.size+' of the 23 composer shapes were observed');
+    assert(keysSeen.size===89,'only '+keysSeen.size+' of the 89 structural keys were observed');
+    assert(shapesSeen.size===24,'only '+shapesSeen.size+' of the 24 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -9537,7 +9593,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===88,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===89,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -9857,7 +9913,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       }
     }
     // Phase 3B1 adds one two-token template, so the population rises by exactly two.
-    assert(tokensChecked===239,'the production token population changed: '+tokensChecked+' (was 239)');
+    assert(tokensChecked===241,'the production token population changed: '+tokensChecked+' (was 241)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -10046,7 +10102,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===83,'the presentation repair changed the template count');
+    assert(api.templates.length===84,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -10173,6 +10229,11 @@ let p5Cases=0,p5Attacks=0;
 const p5Codes={},p5Reasons=new Set();
 const P5_TEMPLATE=api.templates.find(t=>t.stableId===api.IDHAN_PRODUCTION_TEMPLATE_ID);
 const P5_IDHAN=api.IDHAN_SURFACE;
+/* Phase 3B2 note: this block remains the ORDINARY lane's evidence, unchanged in what it proves.
+   `IDHAN_PRODUCTION_PAIR_IDS` is now the union across lanes, so where this block means "the
+   exchanges THIS template may produce" it reads the ordinary lane's own frozen list instead. The
+   five-verb lane and every cross-lane property have their own block further down. */
+const P5_PAIRS=api.IDHAN_PRODUCTIVE_LANES.ordinary.pairIds;
 const p5Build=()=>api.buildTemplate(P5_TEMPLATE.id);
 /* One authorization call, so a test can never accidentally authorize itself by asking about the
    wrong token: the verb index is always re-derived from the exercise's own token list. */
@@ -10218,7 +10279,7 @@ function p5Rejects(name,expectedCode,mutate){
 
 /* --- §18-A/H/I: the registry, the source binding, and the two audit classes. --- */
 {
-  assert(api.IDHAN_PRODUCTION_PAIR_IDS.length===3,'the productive exchange count changed');
+  assert(P5_PAIRS.length===3,'the ordinary productive exchange count changed');
   assert(Object.isFrozen(api.IDHAN_PRODUCTION_PAIR_IDS),'the productive pair list is mutable');
   assert(api.IDHAN_PRODUCTION_CONSUMER===api.IDHAN_PRODUCTION_TEMPLATE_ID,
     'the productive consumer is not the productive template');
@@ -10228,9 +10289,14 @@ function p5Rejects(name,expectedCode,mutate){
     'the fixture consumer became a template stable ID');
   assert(api.templates.some(t=>t.stableId===api.IDHAN_PRODUCTION_CONSUMER),
     'the productive consumer is not a template stable ID');
+  /* Phase 3B2: the owner list is the fixture consumer plus ONE consumer per productive lane, and
+     nothing else. The expectation is derived from the lane registry too, so a lane added to the
+     grammar without a consumer entry — or a consumer entry with no lane — fails here. */
   assert(api.RESTRICTED_SOURCE_RULE_OWNERS.R_IDHAN_CONDITIONS.join(',')
-    ===[api.IDHAN_FIXTURE_CONSUMER,api.IDHAN_PRODUCTION_CONSUMER].join(','),
-    'the condition rule’s consumer list is not the two authorized consumers');
+    ===[api.IDHAN_FIXTURE_CONSUMER,...api.IDHAN_PRODUCTION_CONSUMERS].join(','),
+    'the condition rule’s consumer list is not the fixture plus the registered lanes');
+  assert(api.IDHAN_PRODUCTION_CONSUMERS.length===Object.keys(api.IDHAN_PRODUCTIVE_LANES).length,
+    'the consumer list and the lane registry disagree');
   assert(api.isSourceRuleConsumerAuthorized('R_IDHAN_CONDITIONS',api.IDHAN_PRODUCTION_CONSUMER),
     'the productive consumer may not cite the condition rule');
   for(const stranger of ['T_NOUN_SINGULAR_RAF_DAMMA_01','','x',api.IDHAN_PRODUCTION_TEMPLATE_ID+' ']){
@@ -10247,22 +10313,35 @@ function p5Rejects(name,expectedCode,mutate){
     assert(pair.auditStatus===api.APPLICATION_COMPOSED_AUDIT,
       pairId+' claims an audit status it has no source for');
     assert(pair.auditStatus!==api.SOURCE_VERIFIED_AUDIT,pairId+' claims the source-direct audit status');
-    assert(pair.templateId===api.IDHAN_PRODUCTION_TEMPLATE_ID,pairId+' is not bound to the productive template');
+    /* Phase 3B2 — LANE ownership. Every production pair belongs to exactly one registered lane,
+       its template must be that lane's template, and its context must name that same template as
+       its sole consumer. Resolved in both directions so a pair cannot borrow the other lane's. */
+    const lane=api.idhanLaneForPair(pairId);
+    assert(lane,pairId+' belongs to no registered productive lane');
+    assert(pair.templateId===lane.templateId,pairId+' is not bound to its own lane’s template');
+    assert(api.idhanLaneForTemplate(pair.templateId)===lane,pairId+'’s template resolves to another lane');
     assert(!Object.prototype.hasOwnProperty.call(pair,'fixtureId'),pairId+' names an architecture fixture');
     assert(context.authorizedConsumers.length===1
-      &&context.authorizedConsumers[0]===api.IDHAN_PRODUCTION_TEMPLATE_ID,pairId+'’s context has the wrong consumer');
+      &&context.authorizedConsumers[0]===lane.templateId,pairId+'’s context has the wrong consumer');
     assert(context.sourceRuleId==='R_IDHAN_CONDITIONS'&&context.conditionSetId==='R_IDHAN_CONDITIONS',
       pairId+'’s context does not cite the condition rule');
     assert(context.sourcePdfPage===75&&pair.sourcePdfPage===75,pairId+' does not cite p. 75');
     assert(context.separatorMode===api.SEPARATOR_MODES.none,pairId+' authorizes a separator');
     assert(context.responseRelation===api.RESPONSE_RELATIONS.jawabJazaa,pairId+' has the wrong response relation');
     assert(context.discoursePosition===api.DISCOURSE_POSITIONS.sadrJumlatAlJawab,pairId+' has the wrong discourse position');
-    assert(pair.responsePerson==='3ms',pairId+' is not the ordinary 3ms lane');
-    assert(api.PRESENT_MORPHOLOGY[pair.responsePerson].formClass==='ordinary',pairId+' is not an ordinary present form');
-    // §18-B/C: the pinned response verb is a REGISTERED accusative surface of a real lexeme.
+    /* The person and the surface must be exactly what the pair's own LANE pins: 3ms + a registered
+       accusative form for the ordinary lane, 3mp + a registered ḥadhf-al-nūn form for the five
+       verbs. Neither lane may borrow the other's person or form. */
+    assert(pair.responsePerson===lane.person,pairId+' is not its lane’s person');
+    assert(api.PRESENT_MORPHOLOGY[pair.responsePerson].formClass===lane.formClass,
+      pairId+' is not its lane’s present form class');
+    assert(!api.PRESENT_NON_PRODUCTION_PERSONS.includes(pair.responsePerson),
+      pairId+' pins a non-production person');
+    // §18-B/C: the pinned response verb is a REGISTERED surface of a real lexeme, in its lane's form.
     const registered=api.verbFormIndex.get(pair.responseVerbAr);
-    assert(registered&&registered.form==='acc'&&registered.lexeme.acc===pair.responseVerbAr,
-      pairId+' pins a surface the vocabulary registry does not produce');
+    assert(registered&&registered.form===lane.registeredForm
+      &&registered.lexeme[lane.lexemeField]===pair.responseVerbAr,
+      pairId+' pins a surface the vocabulary registry does not produce for its lane');
     // The futurity evidence is the prompt's own Arabic sīn — verified structurally, never in English.
     const evidence=api.FUTURE_EVIDENCE_KINDS[context.futureEvidenceId];
     assert(evidence&&evidence.markerAr==='س',pairId+'’s future evidence is not the sīn');
@@ -10371,7 +10450,7 @@ const p5Seen=new Map();
     assert(api.validateExercise(clone(data)).length===0,'a productive exercise does not validate');
     p5Cases+=32;
   }
-  assert(p5Seen.size===api.IDHAN_PRODUCTION_PAIR_IDS.length,
+  assert(p5Seen.size===P5_PAIRS.length,
     'the productive rotation reached only '+p5Seen.size+' of the registered exchanges');
   p5Cases++;
 }
@@ -10506,7 +10585,7 @@ const p5Seen=new Map();
 {
   /* The futurity proof is bound to the exact context the pair names, and its only evidence is the
      prompt's own Arabic sīn. None of these mutations can be repaired by English. */
-  const context=api.RESPONSE_CONTEXT_REGISTRY[api.RESPONSE_PAIR_REGISTRY[api.IDHAN_PRODUCTION_PAIR_IDS[0]].contextId];
+  const context=api.RESPONSE_CONTEXT_REGISTRY[api.RESPONSE_PAIR_REGISTRY[P5_PAIRS[0]].contextId];
   const withField=(field,value)=>Object.assign({},context,{[field]:value});
   for(const [name,record,expected] of [
     ['the prompt verb loses its sīn',withField('promptVerbAr','أَجْتَهِدُ'),'prompt-carries-no-future-marker'],
@@ -10593,7 +10672,7 @@ const p5Seen=new Map();
   p5Attacks+=3;
   // I/W: a target copied from ANOTHER response context. The verb of exchange A under the context
   // of exchange B: the pair is selected BY the verb, so the wrong context can never attach.
-  const pairs=api.IDHAN_PRODUCTION_PAIR_IDS.map(id=>api.RESPONSE_PAIR_REGISTRY[id]);
+  const pairs=P5_PAIRS.map(id=>api.RESPONSE_PAIR_REGISTRY[id]);
   for(const data of p5Seen.values()){
     const own=p5Authorize(data);
     for(const other of pairs){
@@ -10743,7 +10822,11 @@ const p5Seen=new Map();
      authorizes a 3ms form with a concealed subject, so a form whose authoritative morphology says
      anything else — here, the same surface with an explicit noun fāʿil after it, which makes its
      subjectMode 'explicit' — is refused before the three conditions are even consulted. */
-  p5Refuses('an explicit fāʿil changes the authorized subject mode','template-capability-mismatch',d=>{
+  /* Phase 3B2 moved the subject mode into the LANE contract, which is checked before the frozen
+     template capability — so this attack is now refused one step earlier and more specifically.
+     The property is unchanged: an explicit fāʿil makes the verb's authoritative subjectMode
+     'explicit', which is not what the ordinary lane pins, so no naṣb is authorized. */
+  p5Refuses('an explicit fāʿil changes the authorized subject mode','verb-outside-the-template-lane',d=>{
     d.tokens.push(api.makeToken('الطَّالِبُ','the student',api.specs.faail('الطَّالِبُ')));
   });
 }
@@ -10773,13 +10856,13 @@ const p5Seen=new Map();
     'a noun role cites the إِذَنْ governor rule');
   // AB: the五-verb and mabnī lanes are closed. Neither has a registered exchange, and the
   // authority refuses them on the verb's own registry morphology.
-  p5Refuses('a five-verb form under إِذَنْ','not-an-ordinary-present-verb',d=>{
+  p5Refuses('a five-verb form under the ORDINARY lane','verb-outside-the-template-lane',d=>{
     d.tokens[1].word='يَقْرَؤُوا';d.tokens[1].surfaceHint='يَقْرَؤُوا';d.tokens[1].expectedSurface='يَقْرَؤُوا';
     d.tokens[1].inflection='afalKhamsa';
     d.tokens[1].grammar=Object.assign({},d.tokens[1].grammar,{conjugation:'afalKhamsa',person:'3mp'});
     d.tokens[1].grammar.morphology=api.authoritativeVerbMorphology(d.tokens[1],d);
   });
-  p5Refuses('a mabnī nūn-al-niswah form under إِذَنْ','not-an-ordinary-present-verb',d=>{
+  p5Refuses('a mabni nuun-al-niswah form under idhan','verb-outside-the-template-lane',d=>{
     d.tokens[1].word='يَقْرَأْنَ';d.tokens[1].surfaceHint='يَقْرَأْنَ';d.tokens[1].expectedSurface='يَقْرَأْنَ';
     d.tokens[1].inflection=api.MABNI_NUUN_NISWAH;d.tokens[1].state='';d.tokens[1].sign=null;
   });
@@ -10965,11 +11048,28 @@ const P5_UNREACHABLE_REASONS=[
   'context-field-mismatch',               // startup cross-checks every context field
   'pair-field-mismatch',                  // startup cross-checks every pair field
   'response-graph-invalid',               // startup re-derives the reciprocal graph
-  'unreadable-response'                   // the view is extracted from an array already indexed as one
+  /* Phase 3B2 additions. Both are startup-guarded for the same reason as the rest: every
+     productive template IS a registered lane consumer, and the lane's frozen pair list and the
+     template's frozen metadata are asserted equal at load. */
+  'template-declares-no-productive-lane', // startup: every productive template resolves to a lane
+  'lane-pair-list-mismatch',              // startup: template.responsePairIds === lane.pairIds
+  /* Newly shadowed by the lane contract. presentCapabilityFailure compares the same morphology the
+     lane already pinned, and startup asserts the lane and the capability agree, so anything that
+     would fail the capability now fails the lane check one step earlier. The guard stays because
+     the resolver may not assume its own startup checks ran. */
+  'template-capability-mismatch'
 ];
 {
   const declared=api.IDHAN_PRODUCTION_REFUSAL_REASONS;
   assert(Object.isFrozen(declared),'the productive refusal-reason list is mutable');
+  /* `unreadable-response` WAS listed unreachable in Phase 3B1; that was wrong — a non-object
+     candidate reaches it directly. Exercised here so the tally reflects real coverage. */
+  {
+    const unreadable=api.deriveIdhanProductiveNasb(null,1);
+    assert(unreadable.authorized===false&&unreadable.reason==='unreadable-response',
+      'a non-object candidate no longer refuses as unreadable-response: '+unreadable.reason);
+    p5Reasons.add(unreadable.reason);p5Attacks++;
+  }
   for(const reason of P5_UNREACHABLE_REASONS)
     assert(declared.includes(reason),'an unreachable reason is not declared: '+reason);
   for(const reason of declared)
@@ -10985,14 +11085,521 @@ const P5_UNREACHABLE_REASONS=[
 }
 
 console.log('Phase-3B1 productive إِذَنْ audit passed: '+p5Cases+' canonical checks and '+p5Attacks+' adversarial checks.');
-console.log('  phase-3B1 productive exchanges: '+api.IDHAN_PRODUCTION_PAIR_IDS.length
-  +' registered, '+p5Seen.size+' reached by the builder; 1 production template, 0 unauthorized governors');
+console.log('  phase-3B1 ordinary lane: '+api.IDHAN_PRODUCTIVE_LANES.ordinary.pairIds.length
+  +' exchanges registered, '+p5Seen.size+' reached by the builder; 0 unauthorized governors');
 console.log('  phase-3B1 refusal reasons: '+api.IDHAN_PRODUCTION_REFUSAL_REASONS.length+' declared, '
   +[...p5Reasons].filter(r=>api.IDHAN_PRODUCTION_REFUSAL_REASONS.includes(r)).length+' reachable and exercised, '
   +P5_UNREACHABLE_REASONS.length+' refused earlier by a startup invariant; plus '
   +[...p5Reasons].filter(r=>!api.IDHAN_PRODUCTION_REFUSAL_REASONS.includes(r)).length
   +' shared condition-clause reasons');
 console.log('  phase-3B1 validation error-code distribution: '+JSON.stringify(p5Codes));
+
+/* ==========================================================================
+   PHASE 3B2 — THE PRODUCTIVE FIVE-VERB إِذَنْ LANE, AND THE LANE BOUNDARY.
+
+   Phase 3B1 opened the ordinary muʿrab lane. This phase opens the second and last one —
+   إِذَنْ + الأفعال الخمسة, 3mp only, manṣūb by ḥadhf al-nūn — and the property this block exists
+   to prove is not "a five-verb form can now be governed". It is that the widening is a WHITELIST:
+   each lane authorizes exactly its own verb class, its own person and its own exchanges, neither
+   lane can authorize the other's, and everything outside both lanes — the mabnī form, any other
+   five-verb person, 2ms, a rafʿ surface, a separator — is still refused.
+   ========================================================================== */
+let p6Cases=0,p6Attacks=0;
+const p6Codes={},p6Reasons=new Set();
+const P6_LANES=api.IDHAN_PRODUCTIVE_LANES;
+const P6_FIVE=P6_LANES.afalKhamsa;
+const P6_ORDINARY=P6_LANES.ordinary;
+const p6TemplateFor=lane=>api.templates.find(t=>t.stableId===lane.templateId);
+const p6Build=lane=>api.buildTemplate(p6TemplateFor(lane).id);
+const p6Authorize=data=>api.deriveIdhanProductiveNasb(data,data.tokens.findIndex(t=>t.grammar&&t.grammar.type==='verb'));
+function p6Refuses(name,expectedReason,lane,mutate){
+  const data=p6Build(lane);
+  mutate(data);
+  let result;
+  try{ result=p6Authorize(data); }
+  catch(error){ throw new Error('Phase-3B2 attack "'+name+'" threw: '+error.message); }
+  assert(result&&result.authorized===false,'Phase-3B2 attack "'+name+'" was AUTHORIZED');
+  assert(Object.isFrozen(result),'Phase-3B2 refusal "'+name+'" is not frozen');
+  assert(result.templateId===''&&result.contextId===''&&result.pairId==='',
+    'Phase-3B2 refusal "'+name+'" leaked a binding');
+  if(expectedReason)assert(result.reason===expectedReason,
+    'Phase-3B2 attack "'+name+'" refused for "'+result.reason+'", expected "'+expectedReason+'"');
+  p6Reasons.add(result.reason);
+  const failures=api.validateExercise(data);
+  assert(failures.length>0,'Phase-3B2 attack "'+name+'" produced a CLEAN exercise');
+  failures.forEach(f=>{p6Codes[f.code]=(p6Codes[f.code]||0)+1});
+  p6Attacks++;
+  return result;
+}
+
+/* --- The inherited five-verb naṣb wording, taken from the app, never hand-typed. -------------
+   The لَنْ five-verb naṣb template (…_01 of the same family this lane appends to as _04) already
+   renders the canonical reason clause after its sign. Build it, cut its rendered iʿrāb at the
+   canonical ḥadhf-al-nūn wording, and keep the exact tail. There is therefore ONE Arabic wording
+   authority for the five-verb clause — the app's own renderer — and this phase's lane is required
+   below to end identically to it. */
+const P6_INHERITED_FIVE_TEMPLATE_ID='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01';
+const P6_FIVE_SUFFIX=(()=>{
+  const inherited=api.templates.find(t=>t.stableId===P6_INHERITED_FIVE_TEMPLATE_ID);
+  assert(inherited,'the inherited لَنْ five-verb naṣb template is missing: '+P6_INHERITED_FIVE_TEMPLATE_ID);
+  assert(inherited.stableId!==P6_FIVE.templateId,'the inherited five-verb template IS the إِذَنْ lane');
+  const data=api.buildTemplate(inherited.id);
+  const verb=data.tokens.find(t=>t.grammar&&t.grammar.type==='verb');
+  assert(verb&&verb.inflection==='afalKhamsa'&&verb.state==='nasb',
+    'the inherited five-verb template did not produce a manṣūb five-verb');
+  const signAr=api.canonicalSign('nunDropped').ar;
+  const at=verb.ar.indexOf('وَعَلَامَةُ نَصْبِهِ '+signAr);
+  assert(at>=0,'the inherited five-verb iʿrāb does not name ḥadhf al-nūn: '+verb.ar);
+  const suffix=verb.ar.slice(at+('وَعَلَامَةُ نَصْبِهِ '+signAr).length);
+  assert(suffix.length>0,'the inherited five-verb iʿrāb renders nothing after its sign');
+  assert(!suffix.includes(verb.word),'the derived five-verb suffix is lexeme-specific: '+suffix);
+  return suffix;
+})();
+
+/* --- The lane registry itself: two lanes, disjoint, frozen, each owning one template. --- */
+{
+  const laneIds=Object.keys(P6_LANES);
+  assert(laneIds.length===2,'the productive lane count changed: '+laneIds.length);
+  assert(Object.isFrozen(P6_LANES),'the lane registry is mutable');
+  assert(Object.getPrototypeOf(P6_LANES)===null,'the lane registry has a prototype');
+  for(const laneId of laneIds){
+    const lane=P6_LANES[laneId];
+    assert(Object.isFrozen(lane)&&Object.isFrozen(lane.pairIds),laneId+' is not deeply frozen');
+    assert(lane.laneId===laneId,laneId+' is not bound to its own key');
+    assert(api.idhanLaneForTemplate(lane.templateId)===lane,laneId+' does not resolve from its template');
+    for(const pairId of lane.pairIds)assert(api.idhanLaneForPair(pairId)===lane,pairId+' does not resolve to '+laneId);
+    const template=p6TemplateFor(lane);
+    assert(template,laneId+' has no registered template');
+    assert(template.form===lane.templateForm&&template.state==='nasb'&&template.sign===lane.templateSign,
+      laneId+' template does not declare its lane’s form/state/sign');
+    assert(template.responsePairIds.join(',')===lane.pairIds.join(','),laneId+' template/lane pair lists disagree');
+    p6Cases+=6;
+  }
+  // Disjoint: no pair, context or template is shared between lanes.
+  const ordinaryPairs=new Set(P6_ORDINARY.pairIds),fivePairs=new Set(P6_FIVE.pairIds);
+  assert([...ordinaryPairs].every(id=>!fivePairs.has(id)),'the two lanes share an exchange');
+  assert(P6_ORDINARY.templateId!==P6_FIVE.templateId,'the two lanes share a template');
+  const ordinaryContexts=P6_ORDINARY.pairIds.map(id=>api.RESPONSE_PAIR_REGISTRY[id].contextId);
+  const fiveContexts=P6_FIVE.pairIds.map(id=>api.RESPONSE_PAIR_REGISTRY[id].contextId);
+  assert(ordinaryContexts.every(id=>!fiveContexts.includes(id)),'the two lanes share a response context');
+  // The lanes really are different verb classes, persons and signs.
+  assert(P6_ORDINARY.person==='3ms'&&P6_FIVE.person==='3mp','the lane persons are not 3ms/3mp');
+  assert(P6_ORDINARY.formClass==='ordinary'&&P6_FIVE.formClass==='afalKhamsa','the lane form classes drifted');
+  assert(P6_ORDINARY.registeredForm==='acc'&&P6_FIVE.registeredForm==='fiveSub','the lane registry forms drifted');
+  assert(api.GRAMMAR_RULES.presentVerb[P6_FIVE.inflection].nasb[0]==='nunDropped'
+    &&api.GRAMMAR_RULES.presentVerb[P6_FIVE.inflection].nasb[1]==='R_AFAL5_NASB_DELETE_NUN',
+    'the canonical five-verb naṣb sign is not ḥadhf al-nūn');
+  p6Cases+=7;
+}
+
+/* --- Every five-verb exchange, end to end. --- */
+const p6Seen=new Map();
+{
+  const moodRule=api.GRAMMAR_RULES.presentVerb[P6_FIVE.inflection].nasb;
+  for(let attempt=0;attempt<24;attempt++){
+    const data=p6Build(P6_FIVE);
+    const authorization=p6Authorize(data);
+    assert(authorization.authorized,'a five-verb build was not authorized: '+authorization.reason);
+    assert(api.idhanLaneForPair(authorization.pairId)===P6_FIVE,'a five-verb build authorized another lane’s exchange');
+    p6Seen.set(authorization.pairId,data);
+    const pair=api.RESPONSE_PAIR_REGISTRY[authorization.pairId];
+    const context=api.RESPONSE_CONTEXT_REGISTRY[authorization.contextId];
+    const [particle,verb]=data.tokens;
+    // Two tokens: the zero-separator proof is unchanged and still load-bearing for this lane.
+    assert(data.tokens.length===2,'a five-verb productive exercise is not exactly particle + verb');
+    assert(particle.word===api.IDHAN_SURFACE&&particle.grammar.particleType==='idhan','token 0 is not إِذَنْ');
+    assert(verb.word===pair.responseVerbAr,'the verb is not the authorized pair’s response verb');
+    assert(data.sentence===api.IDHAN_SURFACE+' '+pair.responseVerbAr,'the composed sentence is not the authorized response');
+    // State from the governor's mood; sign and sign rule from the canonical five-verb matrix.
+    assert(verb.state==='nasb','the five-verb target is not manṣūb');
+    assert(api.safeSignId(verb.sign)===moodRule[0],'the five-verb target does not take ḥadhf al-nūn');
+    assert(verb.ruleId===moodRule[1],'the five-verb target does not cite R_AFAL5_NASB_DELETE_NUN');
+    assert(verb.inflection==='afalKhamsa','the five-verb target is not in the afalKhamsa lane');
+    assert(verb.grammar.morphology.person==='3mp','the five-verb target is not 3mp');
+    assert(particle.ruleId===api.IDHAN_GOVERNOR_RULE_ID,'the particle does not cite G_IDHAN_NASB');
+    assert(data.tokens.every(t=>t.ruleId!=='R_IDHAN_CONDITIONS'),'a token cited the condition rule');
+    assert(data.tokens.every(t=>!t.mahallRuleId),'a five-verb token claims a whole-word maḥall rule');
+    assert(verb.governorId===particle.id&&particle.relations.governsId===verb.id,'the governor links are not reciprocal');
+    // Rendered iʿrāb: the project's existing five-verb wording, plus the إِذَنْ cause clause.
+    assert(verb.ar.startsWith(verb.word+': فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِـ«'+api.IDHAN_SURFACE+'»،'),
+      'the five-verb iʿrāb does not open with مَنْصُوبٌ بِـ«إِذَنْ»: '+verb.ar);
+    assert(verb.ar.includes('وَعَلَامَةُ نَصْبِهِ '+api.canonicalSign('nunDropped').ar),
+      'the five-verb iʿrāb does not name the canonical ḥadhf al-nūn: '+verb.ar);
+    /* The five-verb reason clause must be the project's EXISTING canonical wording, not a new
+       phrasing. Rather than hand-typing it, take the suffix an inherited five-verb naṣb template
+       (the لَنْ one) actually renders after its sign, and require this lane to end identically. */
+    assert(verb.ar.endsWith(P6_FIVE_SUFFIX),
+      'the five-verb iʿrāb does not end with the canonical five-verb clause: '+verb.ar);
+    assert(!/مَحَلّ/.test(verb.ar),'the five-verb target claims a maḥall');
+    assert(!/مُسْتَتِر/.test(verb.ar),'the five-verb target claims a concealed subject instead of the wāw');
+    assert(/because idhan governs it/.test(verb.en),'the English analysis does not name إِذَنْ');
+    // The attached subject: the wāw al-jamāʿah, analysed by the existing component authority.
+    /* A manṣūb 3mp five-verb carries TWO inherited components, not one: the wāw al-jamāʿah and,
+       because naṣb deletes the nūn and leaves the written alif, the ألف فارقة. Both come from the
+       existing structural derivation (PRESENT_ENDING_COMPONENTS + the naṣb/jazm alif rule), so
+       this lane must show exactly the inherited pair, in the inherited order. */
+    assert(verb.components.map(c=>c.kind).join(',')==='waw-jamaaah,alif-fariqa',
+      'the five-verb target does not carry exactly wāw al-jamāʿah + alif fāriqah: '
+      +verb.components.map(c=>c.kind).join(','));
+    assert(verb.components[0].mahall==='raf'&&verb.components[0].syntacticRole==='fail'
+      &&verb.components[0].category==='pronoun'&&verb.components[0].ruleId==='C_WAW_JAMAAH_FAIL',
+      'the wāw is not analysed as fāʿil in the position of rafʿ');
+    // The alif keeps its inherited orthographic, position-less treatment: it is never a subject.
+    assert(verb.components[1].category==='orthographic'&&verb.components[1].syntacticRole==='notApplicable'
+      &&verb.components[1].mahall==='notApplicable'&&verb.components[1].ruleId==='C_ALIF_FARIQA',
+      'the alif fāriqah is not the inherited orthographic, position-less component');
+    assert(verb.components.every(c=>c.id===verb.id+':C'+(verb.components.indexOf(c)+1)),
+      'the five-verb component ids are not the canonical owner/index ids');
+    const subjectRelation=data.relationships.find(r=>r.type==='verbSubject');
+    assert(subjectRelation&&subjectRelation.subjectType==='attached','the five-verb subject is not attached');
+    // Why: the three إِذَنْ conditions reused verbatim, then the five-verb sign and subject rules.
+    assert(verb.why.ids.join(',')==='WHY_IDHAN_CONDITION_SADR,WHY_IDHAN_CONDITION_ISTIQBAL,'
+      +'WHY_IDHAN_CONDITION_LA_FASILA,WHY_STATE_VERB_IDHAN,WHY_SIGN_AFAL5_NASB,WHY_SUBJECT_ATTACHED',
+      'the five-verb Why chain is not the reused canonical sequence: '+verb.why.ids.join(','));
+    assert(particle.why.ids.join(',')==='WHY_PARTICLE_IDHAN,WHY_MABNI_PARTICLE','the particle Why changed');
+    // Canonical English: gloss from the registry, translation from the composer, plural wording.
+    assert(particle.gloss==='in that case','the particle gloss is not canonical');
+    assert(verb.gloss==='they '+api.verbFormIndex.get(verb.word).lexeme.en,'the five-verb gloss is not "they …"');
+    assert(api.resolveCanonicalTokenGloss(data,verb,1)===verb.gloss,'the gloss resolver disagrees with the builder');
+    assert(api.composeCanonicalTranslation(data)===data.translation,'the composer disagrees with the builder');
+    assert(data.translation==='In that case they will '+api.verbFormIndex.get(verb.word).lexeme.en+'.',
+      'the five-verb translation is not the canonical plural wording: '+data.translation);
+    // No discourse claim, not fixture-owned, validates clean.
+    assert(api.responseContextClaimSite(data,null)==='','a five-verb exercise carries a discourse claim');
+    assert(api.isIdhanFixtureOwned(data)===false,'a five-verb exercise is fixture-owned');
+    assert(api.validateExercise(clone(data)).length===0,'a five-verb exercise does not validate');
+    // DOM: its own registered statement, sacred render order, the verb is the focus.
+    api.render(data,'',false);
+    assert(elements.responseContextPromptAr.textContent===context.promptAr,'the displayed statement is not the authorized context’s');
+    assert(elements.responseContextPromptEn.textContent===context.promptEn,'the displayed English statement is wrong');
+    assert(elements.responseContextPromptAr.textContent!==PROMPT,'the fixture prompt was displayed');
+    const cards=elements.answers.innerHTML.split('<article').slice(1);
+    assert(cards.length===2,'the five-verb exercise rendered '+cards.length+' cards');
+    const verbCard=cards[1];
+    const iraabAt=verbCard.indexOf('class="iraab"');
+    const componentAt=verbCard.indexOf('class="component-analysis"');
+    const whyAt=verbCard.indexOf('class="why-wrap"');
+    assert(iraabAt>=0&&componentAt>iraabAt&&whyAt>componentAt,
+      'sacred render order violated: iʿrāb → components → Why');
+    assert(!verbCard.includes('class="phrase-analysis"'),'a combined-analysis region appeared');
+    assert(verbCard.includes('word-card target')&&!cards[0].includes('word-card target'),'the focus card is not the verb');
+    p6Cases+=36;
+  }
+  assert(p6Seen.size===P6_FIVE.pairIds.length,'only '+p6Seen.size+' of the five-verb exchanges were reached');
+  for(const id of P6_FIVE.pairIds)assert(p6Seen.has(id),'five-verb exchange never produced: '+id);
+  p6Cases+=4;
+}
+
+/* --- The lane boundary: neither lane may authorize the other's verb, person or exchange. --- */
+{
+  // A five-verb surface under the ORDINARY template, and an ordinary surface under the FIVE-VERB one.
+  p6Refuses('five-verb surface under the ordinary lane','verb-outside-the-template-lane',P6_ORDINARY,d=>{
+    d.tokens[1].word='يَقْرَؤُوا';d.tokens[1].surfaceHint='يَقْرَؤُوا';d.tokens[1].expectedSurface='يَقْرَؤُوا';
+    d.tokens[1].inflection='afalKhamsa';
+    d.tokens[1].grammar=Object.assign({},d.tokens[1].grammar,{conjugation:'afalKhamsa',person:'3mp'});
+    d.tokens[1].grammar.morphology=api.authoritativeVerbMorphology(d.tokens[1],d);
+  });
+  p6Refuses('ordinary surface under the five-verb lane','verb-outside-the-template-lane',P6_FIVE,d=>{
+    d.tokens[1].word='يَقْرَأَ';d.tokens[1].surfaceHint='يَقْرَأَ';d.tokens[1].expectedSurface='يَقْرَأَ';
+    d.tokens[1].inflection='regular';
+    d.tokens[1].grammar=Object.assign({},d.tokens[1].grammar,{conjugation:'regular',person:'3ms'});
+    d.tokens[1].grammar.morphology=api.authoritativeVerbMorphology(d.tokens[1],d);
+  });
+  // Each lane's template ID swapped onto the other lane's exercise.
+  p6Refuses('five-verb exercise filed under the ordinary template','verb-outside-the-template-lane',P6_FIVE,d=>{
+    d.templateId=P6_ORDINARY.templateId;
+  });
+  p6Refuses('ordinary exercise filed under the five-verb template','verb-outside-the-template-lane',P6_ORDINARY,d=>{
+    d.templateId=P6_FIVE.templateId;
+  });
+  /* An exchange from the other lane. The pair is selected BY the verb from the template's own
+     frozen list, so the other lane's verb simply matches no authorized pair. */
+  p6Refuses('the ordinary lane’s verb offered to the five-verb lane','verb-outside-the-template-lane',P6_FIVE,d=>{
+    d.tokens[1].word='يَحْفَظَ';d.tokens[1].surfaceHint='يَحْفَظَ';d.tokens[1].expectedSurface='يَحْفَظَ';
+    d.tokens[1].inflection='regular';
+    d.tokens[1].grammar=Object.assign({},d.tokens[1].grammar,{conjugation:'regular',person:'3ms'});
+    d.tokens[1].grammar.morphology=api.authoritativeVerbMorphology(d.tokens[1],d);
+  });
+  // A five-verb surface of an UNREGISTERED lexeme: right lane, wrong exchange.
+  p6Refuses('an unregistered five-verb exchange','unknown-response-pair',P6_FIVE,d=>{
+    d.tokens[1].word='يَكْتُبُوا';d.tokens[1].surfaceHint='يَكْتُبُوا';d.tokens[1].expectedSurface='يَكْتُبُوا';
+  });
+  p6Cases+=2;
+}
+
+/* --- 3mp ONLY: no other five-verb person may be governed. --- */
+{
+  /* The lane pins 3mp. Every other five-verb person is refused, and the project's existing
+     non-generation policy is untouched — no template gained a capability for one. */
+  for(const [person,surface] of [['3md','يَقْرَآ'],['2mp','تَقْرَؤُوا'],['2fs','تَقْرَئِي'],['3fd','تَقْرَآ']]){
+    p6Refuses('a five-verb '+person+' form under إِذَنْ','verb-outside-the-template-lane',P6_FIVE,d=>{
+      d.tokens[1].word=surface;d.tokens[1].surfaceHint=surface;d.tokens[1].expectedSurface=surface;
+      d.tokens[1].grammar=Object.assign({},d.tokens[1].grammar,{person});
+      d.tokens[1].grammar.morphology=api.authoritativeVerbMorphology(d.tokens[1],d);
+    });
+  }
+  assert(P6_FIVE.pairIds.every(id=>api.RESPONSE_PAIR_REGISTRY[id].responsePerson==='3mp'),
+    'a five-verb exchange pins a person other than 3mp');
+  assert(p6TemplateFor(P6_FIVE).presentCapabilities.length===1
+    &&p6TemplateFor(P6_FIVE).presentCapabilities[0].person==='3mp',
+    'the five-verb template authorizes more than 3mp');
+  assert(api.templates.every(t=>t.presentCapabilities.every(c=>!['2ms','2d'].includes(c.person))),
+    'a template gained a non-production person');
+  assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.some(x=>/five-verb person patterns other than/.test(x)),
+    'the five-verb non-generation policy was removed');
+  p6Cases+=4;
+}
+
+/* --- State and sign, controls A–E of the brief, on the five-verb lane. --- */
+{
+  p6Refuses('A: five-verb target forced to rafʿ','target-state-or-sign-not-canonical',P6_FIVE,d=>{d.tokens[1].state='raf'});
+  p6Refuses('B: naṣb with ثُبُوت النون instead of حذف','target-state-or-sign-not-canonical',P6_FIVE,d=>{
+    d.tokens[1].sign=api.canonicalSignCopy('nunKept');
+  });
+  p6Refuses('D: ordinary fatḥah sign on a five-verb target','target-state-or-sign-not-canonical',P6_FIVE,d=>{
+    d.tokens[1].sign=api.canonicalSignCopy('fatha');
+  });
+  p6Refuses('C: ḥadhf al-nūn with the governor link cleared','governor-link-not-canonical',P6_FIVE,d=>{d.tokens[1].governorId=null});
+  /* The state-is-not-derived-from-sign test for this lane: a FULLY self-consistent rafʿ — state,
+     sign and sign rule all agreeing — must still be refused, because إِذَنْ governs naṣb. */
+  p6Refuses('a fully self-consistent five-verb rafʿ','target-state-or-sign-not-canonical',P6_FIVE,d=>{
+    d.tokens[1].state='raf';
+    d.tokens[1].sign=api.canonicalSignCopy('nunKept');
+    d.tokens[1].ruleId='R_AFAL5_RAF_NUN';
+  });
+  p6Refuses('a fully self-consistent five-verb jazm','target-state-or-sign-not-canonical',P6_FIVE,d=>{
+    d.tokens[1].state='jazm';
+    d.tokens[1].sign=api.canonicalSignCopy('nunDropped');
+    d.tokens[1].ruleId='R_AFAL5_JAZM_DELETE_NUN';
+  });
+  // E: a rafʿ five-verb SURFACE (nūn retained) is not a registered naṣb surface at all.
+  p6Refuses('E: the rafʿ five-verb surface','not-a-registered-nasb-surface',P6_FIVE,d=>{
+    d.tokens[1].word='يَقْرَؤُونَ';d.tokens[1].surfaceHint='يَقْرَؤُونَ';d.tokens[1].expectedSurface='يَقْرَؤُونَ';
+  });
+  // The mabnī lane stays closed to BOTH lanes.
+  p6Refuses('a mabnī nūn-al-niswah form under the five-verb lane','verb-outside-the-template-lane',P6_FIVE,d=>{
+    d.tokens[1].word='يَقْرَأْنَ';d.tokens[1].surfaceHint='يَقْرَأْنَ';d.tokens[1].expectedSurface='يَقْرَأْنَ';
+    d.tokens[1].inflection=api.MABNI_NUUN_NISWAH;d.tokens[1].state='';d.tokens[1].sign=null;
+  });
+}
+
+/* --- The three conditions, unchanged and still load-bearing for the new lane. --- */
+{
+  const head=p6Refuses('a token before إِذَنْ (five-verb lane)','idhan-not-at-response-head',P6_FIVE,d=>{
+    d.tokens.unshift(api.makeToken('الطَّالِبُ','the student',api.specs.mubtada('الطَّالِبُ')));
+  });
+  assert(head.reason==='idhan-not-at-response-head','head condition reason drifted');
+  /* Separator: a third token still fails through the SEPARATOR clause, not the head clause. The
+     zero-separator proof is untouched by this phase. */
+  for(const [name,make] of [
+    ['a noun separator',()=>api.makeToken('الطَّالِبُ','the student',api.specs.mubtada('الطَّالِبُ'))],
+    ['a deferred oath separator',()=>api.makeToken('وَاللَّهِ','by God',api.specs.prep('وَاللَّهِ'))],
+    ['a deferred vocative separator',()=>api.makeToken('يَا','O',api.specs.prep('يَا'))],
+    ['a deferred لا separator',()=>api.makeToken('لَا','not',api.specs.prep('لَا'))],
+    ['a trailing object',()=>api.makeToken('الْكِتَابَ','the book',api.specs.object('الْكِتَابَ'))]]){
+    const insert=name==='a trailing object';
+    const result=p6Refuses(name+' (five-verb lane)','separator-token-present',P6_FIVE,
+      d=>{insert?d.tokens.push(make()):d.tokens.splice(1,0,make())});
+    assert(result.reason==='separator-token-present',name+' did not fail through the separator clause');
+  }
+  // Futurity is still the prompt's own Arabic sīn for every five-verb context.
+  for(const pairId of P6_FIVE.pairIds){
+    const context=api.RESPONSE_CONTEXT_REGISTRY[api.RESPONSE_PAIR_REGISTRY[pairId].contextId];
+    assert(api.futureEvidenceFailure(context,api.FUTURE_EVIDENCE_KINDS)==='',pairId+' does not prove futurity');
+    assert(api.futureEvidenceFailure(Object.assign({},context,{promptVerbAr:'أَجْتَهِدُ',promptEn:'I will work hard.'}),
+      api.FUTURE_EVIDENCE_KINDS)==='prompt-carries-no-future-marker','an English "will" repaired a missing sīn');
+    assert(api.futureEvidenceFailure(Object.assign({},context,{promptEn:''}),api.FUTURE_EVIDENCE_KINDS)==='',
+      'English text is load-bearing for futurity');
+    p6Cases+=3;
+  }
+  // SEPARATOR_MODES is untouched by this phase.
+  assert(Object.keys(api.SEPARATOR_MODES).join(',')==='none','a separator mode was registered in Phase 3B2');
+  p6Cases+=2;
+}
+
+/* --- The three conditions are LOAD-BEARING on the SECOND lane too. -------------------------
+   Phase 3B1 proved this for the ordinary lane through the prover seam. The five-verb lane reaches
+   the same assembler by the same path, but "reaches it" is exactly what has to be demonstrated
+   rather than assumed: a lane that computed the three proofs and then ignored one of them would
+   pass every other check in this block. So substitute, per condition, a failing prover, a
+   token-less "success", another condition's token and a hand-made truthy value — each must sink
+   the whole five-verb authorization, at that condition's own layer. */
+{
+  const data=p6Build(P6_FIVE);
+  const index=data.tokens.findIndex(t=>t.grammar.type==='verb');
+  const base=api.IDHAN_CONDITION_PROVERS;
+  const failing=reason=>()=>Object.freeze({ok:false,reason});
+  const tokenless=()=>Object.freeze({ok:true,reason:''});
+  assert(api.deriveIdhanProductiveNasb(data,index,base).authorized,
+    'the default provers stopped authorizing the five-verb lane');
+  for(const [slot,expected] of [['head','response-head-not-proven'],
+                                ['future','future-evidence-not-proven'],
+                                ['separator','separator-not-proven']]){
+    const forced=api.deriveIdhanProductiveNasb(data,index,Object.assign({},base,{[slot]:failing('forced-'+slot)}));
+    assert(forced.authorized===false&&forced.reason==='forced-'+slot,
+      'the five-verb path ignored a failing '+slot+' prover: '+forced.reason);
+    const noToken=api.deriveIdhanProductiveNasb(data,index,Object.assign({},base,{[slot]:tokenless}));
+    assert(noToken.authorized===false&&noToken.reason===expected,
+      'the five-verb path accepted a token-less '+slot+' proof: '+noToken.reason);
+    const crossed=Object.assign({},base,{[slot]:(...args)=>base[slot==='head'?'separator':'head'](...args)});
+    assert(api.deriveIdhanProductiveNasb(data,index,crossed).authorized===false,
+      'a proof token from another condition authorized the five-verb '+slot+' slot');
+    p6Attacks+=3;p6Cases++;
+  }
+  for(const fake of [()=>true,()=>({ok:true,token:true}),()=>({ok:true,token:{condition:'laFasila'}}),
+                     ()=>null,()=>undefined]){
+    for(const slot of ['head','future','separator']){
+      assert(api.deriveIdhanProductiveNasb(data,index,Object.assign({},base,{[slot]:fake})).authorized===false,
+        'a forged '+slot+' proof authorized the five-verb naṣb');
+      p6Attacks++;
+    }
+  }
+  p6Cases++;
+}
+
+/* --- Fixture separation, extended to the second lane. --- */
+{
+  const fixture=api.buildIdhanSourceDirectFixture();
+  const five=p6Build(P6_FIVE);
+  const ordinary=p6Build(P6_ORDINARY);
+  assert(!p6Authorize(fixture).authorized,'the productive authority accepted the fixture');
+  assert(!api.resolveIdhanConditionProof(five,api.IDHAN_FIXTURE_CONSUMER,CTX_ID,PAIR_ID).satisfied,
+    'the fixture proof accepted a five-verb exercise');
+  assert(!api.isIdhanFixtureOwned(five),'a five-verb exercise is fixture-owned');
+  for(const pairId of P6_FIVE.pairIds){
+    const pair=api.RESPONSE_PAIR_REGISTRY[pairId];
+    assert(!api.resolveIdhanConditionProof(fixture,api.IDHAN_FIXTURE_CONSUMER,pair.contextId,pairId).satisfied,
+      'a five-verb record proved the fixture path');
+    assert(api.productionPairAuthorityFailure(pair,api.RESPONSE_CONTEXT_REGISTRY.IDHAN_SOURCE_DIRECT)!=='',
+      'a five-verb pair passed against the fixture context');
+    // Cross-lane record mixing must fail too.
+    const otherContext=api.RESPONSE_CONTEXT_REGISTRY[api.RESPONSE_PAIR_REGISTRY[P6_ORDINARY.pairIds[0]].contextId];
+    assert(api.productionPairAuthorityFailure(pair,otherContext)!=='','a five-verb pair passed against an ordinary context');
+    p6Attacks+=3;
+  }
+  assert(api.RESPONSE_PAIR_REGISTRY.IDHAN_SOURCE_DIRECT_PAIR.auditStatus===api.SOURCE_VERIFIED_AUDIT,
+    'the fixture lost its source-verified audit status');
+  assert(P6_FIVE.pairIds.every(id=>api.RESPONSE_PAIR_REGISTRY[id].auditStatus===api.APPLICATION_COMPOSED_AUDIT),
+    'a five-verb exchange claims the source-direct audit status');
+  assert(five.tokens.every(t=>t.word!=='تَنْجَحَ'),'the five-verb lane produced the fixture response verb');
+  assert(ordinary.tokens[1].state==='nasb'&&api.safeSignId(ordinary.tokens[1].sign)==='fatha',
+    'the ordinary Phase 3B1 lane regressed');
+  p6Cases+=6;
+}
+
+/* --- History for the five-verb lane. --- */
+{
+  const data=p6Seen.values().next().value;
+  /* The forged surfaces below must actually DIFFER from this exercise's own. p6Seen is filled in
+     builder rotation order, so a hard-coded surface silently coincides with the snapshot's verb
+     whenever that exchange is drawn first, turning the attack into a no-op that "restores". Take
+     another registered five-verb response surface instead: a real, authorized surface of the same
+     lane, which this snapshot's stored pair still may not license. */
+  const p6ForeignVerb=P6_FIVE.pairIds.map(id=>api.RESPONSE_PAIR_REGISTRY[id].responseVerbAr)
+    .find(word=>word!==data.tokens[1].word);
+  assert(p6ForeignVerb,'no second five-verb response surface is registered to forge with');
+  const snapshot=api.createExerciseSnapshot(data);
+  assert(snapshot&&snapshot.schemaVersion===3,'a five-verb exercise did not snapshot at schema v3');
+  assert(api.responseContextClaimSite(snapshot,null)==='','a five-verb snapshot carries a discourse claim');
+  const restored=api.restoreExerciseSnapshot(clone(snapshot));
+  assert(restored,'a five-verb exercise did not restore');
+  assert(restored.sentence===data.sentence&&restored.translation===data.translation,'the round trip changed the exercise');
+  assert(restored.tokens.map(t=>t.ar).join('|')===data.tokens.map(t=>t.ar).join('|'),'the round trip changed the iʿrāb');
+  assert(restored.tokens[1].components.map(c=>c.kind).join(',')==='waw-jamaaah,alif-fariqa',
+    'the round trip lost the canonical wāw al-jamāʿah + alif fāriqah components: '
+    +restored.tokens[1].components.map(c=>c.kind).join(','));
+  assert(p6Authorize(restored).authorized,'a restored five-verb exercise cannot re-prove its conditions');
+  api.render(restored,'',false);
+  assert(elements.responseContextPromptAr.textContent!=='','a restored five-verb exercise showed no statement');
+  const p6History=(name,mutate,expect)=>{
+    const s=clone(snapshot);mutate(s);
+    let out=null,threw='';
+    try{ out=api.restoreExerciseSnapshot(s); }catch(e){ threw=e.message; }
+    assert(!threw,'Phase-3B2 History attack "'+name+'" threw: '+threw);
+    if(expect==='reject')assert(out===null,'Phase-3B2 History attack "'+name+'" was RESTORED');
+    else{
+      assert(out,'Phase-3B2 History repair "'+name+'" was rejected instead of rebuilt');
+      assert(out.translation===data.translation&&out.tokens[0].gloss==='in that case'
+        &&out.tokens[1].gloss===data.tokens[1].gloss&&out.tokens[1].surfaceHint===out.tokens[1].word,
+        'Phase-3B2 History repair "'+name+'" did not rebuild canonically');
+      assert(p6Authorize(out).authorized,'Phase-3B2 History repair "'+name+'" restored an unauthorized naṣb');
+      assert(api.validateExercise(clone(out)).length===0,'Phase-3B2 History repair "'+name+'" does not validate');
+    }
+    p6Attacks++;
+  };
+  for(const [name,mutate] of [
+    ['forged governor rule',s=>{s.tokens[0].ruleId='G_AN_NASB'}],
+    ['forged state',s=>{s.tokens[1].state='raf'}],
+    ['forged sign',s=>{s.tokens[1].sign={id:'nunKept',ar:'x',en:'x'}}],
+    ['forged person',s=>{s.tokens[1].grammar.person='2mp'}],
+    ['forged form class',s=>{s.tokens[1].inflection='regular'}],
+    ['forged verb surface',s=>{s.tokens[1].word=p6ForeignVerb}],
+    ['forged template ID',s=>{s.templateId=P6_ORDINARY.templateId}],
+    ['forged stable identity',s=>{s.exerciseIdentity+='X'}],
+    ['forged grammar type',s=>{s.tokens[1].grammar.type='noun'}],
+    ['forged grammar role',s=>{s.tokens[1].grammar.role='object'}],
+    ['forged target link',s=>{s.tokens[1].governorId=null}],
+    ['forged source authority',s=>{s.tokens[0].ruleId='R_IDHAN_CONDITIONS'}],
+    ['forged responsePairIds',s=>{s.responsePairIds=[...P6_FIVE.pairIds]}],
+    ['forged responsePairIds on a token',s=>{s.tokens[1].responsePairIds=['x']}],
+    ['forged condition Boolean',s=>{s.conditionSatisfied=true}],
+    ['forged response context',s=>{s.responseContextId='IDHAN_PRODUCTION_STUDENTS_READING'}],
+    ['forged proof claim',s=>{s.tokens[1].conditionProof=true}],
+    ['an inserted separator',s=>{const t=clone(s.tokens[0]);t.id+='X';s.tokens.splice(1,0,t)}]
+  ])p6History(name,mutate,'reject');
+  for(const [name,mutate] of [
+    ['forged gloss',s=>{s.tokens[1].gloss='they conquer'}],
+    ['forged translation',s=>{s.translation='In that case he will read.'}],
+    ['forged enHint',s=>{s.tokens[0].enHint='forged'}],
+    ['forged surfaceHint',s=>{s.tokens[1].surfaceHint=p6ForeignVerb}]
+  ])p6History(name,mutate,'repair');
+  p6Cases+=9;
+}
+
+/* --- Hostile input on the second lane. --- */
+{
+  let getters=0;
+  for(const [name,make] of [
+    ['own accessor on tokens',()=>{const o={templateId:P6_FIVE.templateId};
+      Object.defineProperty(o,'tokens',{get(){getters++;return[]},enumerable:true});return o}],
+    ['inherited accessor',()=>Object.create({get tokens(){getters++;return[]}},
+      {templateId:{value:P6_FIVE.templateId,enumerable:true}})],
+    ['get-trapping proxy',()=>new Proxy({tokens:[]},{get(){throw new Error('trap')}})],
+    ['revoked proxy',()=>{const r=Proxy.revocable({tokens:[]},{});r.revoke();return r.proxy}],
+    ['null',()=>null],['a number',()=>7],['a string',()=>'x'],['an array',()=>[]]]){
+    const value=make();
+    let threw='',result,exercise,rendered;
+    try{
+      result=api.deriveIdhanProductiveNasb(value,1);
+      exercise=api.exerciseIdhanProductiveAuthorization(value);
+      rendered=api.renderProductiveResponseContext(value);
+    }catch(error){ threw=error.message; }
+    assert(!threw,'a hostile candidate escaped the productive authority: '+name+' — '+threw);
+    assert(result&&result.authorized===false&&Object.isFrozen(result),'a hostile candidate was authorized: '+name);
+    assert(!result.templateId&&!result.contextId&&!result.pairId,'a hostile refusal leaked a binding: '+name);
+    assert(exercise===null,'a hostile exercise was authorized: '+name);
+    assert(rendered!=='','a hostile candidate displayed a statement: '+name);
+    p6Attacks+=5;
+  }
+  assert(getters===0,'an accessor ran inside the productive authority ('+getters+')');
+  assert(elements.responseContext.hidden===true,'a hostile candidate left a visible statement');
+  p6Cases+=2;
+}
+
+/* --- Reason accounting for the new lane. --- */
+{
+  for(const reason of p6Reasons)
+    assert(api.IDHAN_PRODUCTION_REFUSAL_REASONS.includes(reason)||api.IDHAN_PROOF_FAILURE_REASONS.includes(reason),
+      'the five-verb lane refused for an undeclared reason: '+reason);
+  p6Cases++;
+}
+
+console.log('Phase-3B2 five-verb إِذَنْ audit passed: '+p6Cases+' canonical checks and '+p6Attacks+' adversarial checks.');
+console.log('  phase-3B2 lanes: '+Object.keys(P6_LANES).length+' registered ('
+  +Object.keys(P6_LANES).map(id=>id+'='+P6_LANES[id].person+'/'+P6_LANES[id].templateSign).join(', ')
+  +'); five-verb exchanges '+P6_FIVE.pairIds.length+' registered, '+p6Seen.size+' reached');
+console.log('  phase-3B2 refusal reasons exercised: '+[...p6Reasons].sort().join(', '));
+console.log('  phase-3B2 validation error-code distribution: '+JSON.stringify(p6Codes));
 
 console.log('Phase-3B0-pre canonical sign-label audit passed: '+s0Cases+' canonical checks and '+s0AttackCases+' adversarial checks.');
 console.log('  sign fuzz accounting: '+JSON.stringify(s0FuzzReport)+'; no-ops excluded: '+s0NoOps+'; inert wrappers normalized away: '+s0InertCases);
@@ -11530,7 +12137,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===83,`Expected 83 production templates, found ${api.templates.length}`);
+assert(api.templates.length===84,`Expected 84 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);

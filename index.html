@@ -4730,26 +4730,118 @@ function safeIdhanFixtureView(exercise){
    consumer restriction; the full reciprocal graph; the token spine; and only then the three
    conditions themselves. Caller-supplied IDs authorize nothing on their own: every one of them
    must agree with a fixture the caller could not have manufactured. The result is frozen. */
+/* ---- Phase 3B3A — the separator CONSTRUCTION registry ----------------------------
+   Al-Tuḥfah p. 75's third شرط is not "nothing may intervene"; it is "nothing may intervene EXCEPT
+   القسم، النداء، «لا» النافية". Phase 3B0A implemented the strict reading because a separator has
+   to be CLASSIFIED before it can be excepted, and there was no machinery to classify one. This
+   registry is that machinery, and nothing more: it turns the condition from a token COUNT into a
+   structural classification of the interval between إِذَنْ and its target.
+
+   Three levels, deliberately separate, because collapsing any two of them would make a Boolean the
+   authority:
+     DECLARED    — the source names this exception category. That claim is already owned by
+                   R_IDHAN_CONDITIONS; the records below restate nothing and add no page.
+     IMPLEMENTED — this app can classify the construction's tokens (`tokenSpecs` is an array).
+     PRODUCTION  — the mode is a member of the frozen SEPARATOR_PRODUCTION_MODES set below.
+   The three named exceptions are DECLARED only. Their `tokenSpecs` is null and their `sourceRuleId`
+   is null because this app has no page that analyses لا، يا/المنادى or واو القسم in their own right,
+   and inventing one to make a test pass would be exactly the fabrication this project refuses. They
+   are here so that "the source names three exceptions and this app implements none of them" is a
+   structural fact the tests can read, rather than a comment that can go stale.
+
+   NOTE on the government bridge. Classifying an authorized non-empty interval is one thing;
+   letting إِذَنْ GOVERN across it is another, and that second half is deliberately NOT in this
+   phase. `inflectVerb` still links a present verb only to the token immediately before it, for
+   every governor including this one. So a non-empty interval can be classified and refused here,
+   but no non-empty interval can ever be authorized while SEPARATOR_PRODUCTION_MODES holds only
+   `none` — the positive branch below is structurally unreachable and is enumerated as such. It
+   ships now so the classification has one shape rather than two, and the bridge lands with the
+   first real construction, which is the only thing that can prove it. */
+const SEPARATOR_CONSTRUCTIONS=Object.freeze(Object.assign(Object.create(null),{
+ none:Object.freeze({
+  id:'none',
+  mode:SEPARATOR_MODES.none,
+  category:'noSeparator',
+  /* An empty spec list is the whole of the canonical no-separator construction: the target sits at
+     index 1 and the exercise is exactly particle + verb. Written as a spec list rather than as a
+     hard-coded `2` so that the count is DERIVED from the construction, never asserted beside it. */
+  tokenSpecs:Object.freeze([]),
+  sourceRuleId:IDHAN_CONDITION_RULE_ID
+ }),
+ /* The three the source names. Declared, unimplemented, unsourced, never production-enabled. */
+ qasam:Object.freeze({id:'qasam',mode:'qasam',category:'oath',tokenSpecs:null,sourceRuleId:null}),
+ nida:Object.freeze({id:'nida',mode:'nida',category:'vocative',tokenSpecs:null,sourceRuleId:null}),
+ laNafiya:Object.freeze({id:'laNafiya',mode:'laNafiya',category:'negation',tokenSpecs:null,sourceRuleId:null})
+}));
+/* Production enablement is a SET, not a field on the record: a flag on a record is one edit away
+   from enabling a construction, whereas membership here has to be added deliberately and is what
+   the closure invariant reads. `none` is the only member, and this phase adds none. */
+const SEPARATOR_PRODUCTION_MODES=Object.freeze([SEPARATOR_MODES.none]);
+function isSeparatorModeProductionEnabled(mode){
+ return typeof mode==='string'&&SEPARATOR_PRODUCTION_MODES.includes(mode);
+}
+/* Resolved by OWN-PROPERTY search over the frozen registry against the CONTEXT's mode — never from
+   a name a caller supplies, never from a field on an exercise, and never from a snapshot. */
+function separatorConstructionForMode(mode){
+ if(typeof mode!=='string'||!mode)return null;
+ for(const id of Object.keys(SEPARATOR_CONSTRUCTIONS)){
+  const construction=SEPARATOR_CONSTRUCTIONS[id];
+  if(construction.mode===mode)return construction;
+ }
+ return null;
+}
+/* Does the interval between إِذَنْ and its target match this construction token for token? The
+   comparison is by explicit SPEC, not by category sniffing: a token that merely looks like the
+   right kind of word cannot pass, because every field the spec names must agree. */
+function separatorIntervalFailure(interval,construction){
+ const specs=construction.tokenSpecs;
+ if(!safeIsArray(specs))return 'separator-mode-not-implemented';
+ if(!safeIsArray(interval)||interval.length!==specs.length)return 'separator-construction-mismatch';
+ for(let position=0;position<specs.length;position++){
+  const spec=specs[position],token=interval[position];
+  if(!token||typeof token!=='object')return 'separator-construction-mismatch';
+  if(token.word!==spec.word)return 'separator-construction-mismatch';
+  if(token.grammar?.type!==spec.type)return 'separator-construction-mismatch';
+  if(spec.particleType!==undefined&&token.grammar?.particleType!==spec.particleType)return 'separator-construction-mismatch';
+  if(spec.role!==undefined&&token.grammar?.role!==spec.role)return 'separator-construction-mismatch';
+  if(spec.ruleId!==undefined&&token.ruleId!==spec.ruleId)return 'separator-construction-mismatch';
+ }
+ return '';
+}
 /* ---- Section 10 — Condition 3: أَنْ لَا يَفْصِلَ بَيْنَهَا وَبَيْنَ الْمُضَارِعِ فَاصِلٌ ----------
-   This phase authorizes ONLY إِذَنْ immediately followed by the exact paired present verb, under
-   separatorMode 'none'. Adjacency is proven from the token list itself, never from a stored flag.
-   Al-Tuḥfah p. 75 permits three separators — القسم، النداء، «لا» النافية — but Phase 3B0A does not
-   implement any of them, so an oath, a vocative or a negating لا is a separator like any other and
-   rejects here. Nothing in this phase makes a separator lane productive. */
+   The clause now CLASSIFIES the interval instead of counting tokens. The target is located from the
+   authorized pair's own identity — its response verb and its response person — at the index the
+   resolved construction fixes, so "where the target is" is an answer the registry gives rather than
+   an assumption the shape makes. With `none` resolved, that index is 1 and the exercise must be
+   exactly particle + verb, which is byte-for-byte the behaviour Phase 3B0A/3B1/3B2 proved: an oath,
+   a vocative or a negating لا is still a separator like any other and still rejects, because none
+   of the three is implemented or production-enabled. */
 function separatorFailure(context,pair,exercise){
  if(!context||!pair)return 'unknown-context';
- if(context.separatorMode!==SEPARATOR_MODES.none)return 'separator-mode-not-implemented';
+ const construction=separatorConstructionForMode(context.separatorMode);
+ /* A mode with no record, an unimplemented one, or one outside the production set all fail here
+    rather than falling through to a shape test — an unauthorized mode must never reach the token
+    list at all. Source ownership is re-checked independently of the context's own claim. */
+ if(!construction||!safeIsArray(construction.tokenSpecs))return 'separator-mode-not-implemented';
+ if(!isSeparatorModeProductionEnabled(construction.mode))return 'separator-mode-not-implemented';
+ if(construction.sourceRuleId!==context.sourceRuleId
+   ||!isSourceAuthorized(construction.sourceRuleId))return 'separator-not-authorized';
  const tokens=exercise&&safeIsArray(exercise.tokens)?exercise.tokens:null;
  if(!tokens||tokens.length<2)return 'no-response-tokens';
- /* Exactly two tokens. Any third token is a separator, whatever it is: a noun, a pronoun, an
-    adverb, a prepositional phrase, a punctuation token, an object, a second إِذَنْ, an oath, a
-    vocative or the negating لا. Naming them individually would invite the list to go stale. */
- if(tokens.length!==2)return 'separator-token-present';
- const head=tokens[0],verb=tokens[1];
+ /* The target index is DERIVED from the construction, never scanned for. Anything longer than the
+    construction allows is a separator, whatever it is: a noun, a pronoun, an adverb, a
+    prepositional phrase, an object, a second إِذَنْ, an oath, a vocative or the negating لا. */
+ const targetIndex=1+construction.tokenSpecs.length;
+ if(tokens.length!==targetIndex+1)return 'separator-token-present';
+ const head=tokens[0],verb=tokens[targetIndex];
  if(!head||head.word!==pair.responseParticleAr)return 'response-head-not-idhan';
  if(!verb||verb.grammar?.type!=='verb'||verb.tense!=='present')return 'no-adjacent-present-verb';
  if(verb.word!==pair.responseVerbAr)return 'response-verb-not-the-paired-construction';
  if(verb.grammar?.person!==pair.responsePerson)return 'response-person-mismatch';
+ const intervalReason=separatorIntervalFailure(tokens.slice(1,targetIndex),construction);
+ if(intervalReason)return intervalReason;
+ // Exactly one token may answer to the paired construction, so a second copy of it cannot hide.
+ if(tokens.filter(item=>item&&item.word===pair.responseVerbAr).length!==1)return 'separator-construction-mismatch';
  return '';
 }
 /* ---- Sections 8–9 — the three conditions as REQUIRED proof results --------------
@@ -4893,7 +4985,12 @@ const IDHAN_PROOF_FAILURE_REASONS=Object.freeze([
  'prompt-carries-no-future-marker','prompt-does-not-open-with-its-verb','separator-mode-not-implemented',
  'separator-token-present','no-adjacent-present-verb','response-verb-not-the-paired-construction',
  'response-person-mismatch','response-head-not-proven','future-evidence-not-proven','separator-not-proven',
- 'fixture-identity-mismatch'
+ 'fixture-identity-mismatch',
+ /* Phase 3B3A — the two the classification can now distinguish that a token count could not: a mode
+    whose construction is not source-owned, and material that is the right length but the wrong
+    shape. Keeping them apart is the point: "you may not separate at all" and "that is not the
+    separator you claimed" are different diagnoses. */
+ 'separator-not-authorized','separator-construction-mismatch'
 ]);
 /* Startup invariant: the stores are deeply frozen, prototype-free, self-consistent, and bound to
    one another in both directions. */
@@ -5405,12 +5502,27 @@ function deriveMabniPresentMahall(data,tokenIndex){
 /* Structural only: is this verb the token immediately after an إِذَنْ that OPENS the sentence?
    Position is read from the token list itself, never from an index carried on a token, never from
    a caller Boolean, and never from the presence of إِذَنْ somewhere in the sentence. */
-function observeIdhanResponseHead(tokens,verbIndex){
- if(!Array.isArray(tokens)||verbIndex!==1)return false;
+/* Phase 3B3A — the two halves this used to conflate, now named separately.
+
+   HEAD is a fact about position 0 and nothing else: is canonical إِذَنْ what opens the answer? That
+   is condition 1, and it is the whole of condition 1. Where the governed verb sits is condition 3's
+   business — the separator clause locates the target from the authorized pair and the resolved
+   construction. Conflating them is what made «إِذَنْ + material + verb» indistinguishable from
+   «X + إِذَنْ + verb» at this level, and the two must keep failing for different reasons. */
+function idhanHeadsResponse(tokens){
+ if(!Array.isArray(tokens))return false;
  const head=tokens[0];
  return Boolean(head&&head.grammar&&head.grammar.type==='particle'
   &&head.grammar.particleType===IDHAN_PARTICLE_TYPE
   &&head.word===IDHAN_SURFACE);
+}
+/* Build-time government observation. This is deliberately still HEAD **and adjacency**: Phase 3B3A
+   classifies intervals but does NOT open the government bridge, so a present verb is linked to a
+   governor only when that governor is the token immediately before it — the same invariant لَنْ,
+   لَمْ, أَنْ and كَيْ have always obeyed. When a real separator construction ships, this is the one
+   call site that widens, and it will widen against a proven construction rather than a token count. */
+function observeIdhanResponseHead(tokens,verbIndex){
+ return verbIndex===1&&idhanHeadsResponse(tokens);
 }
 /* Is this governor spec one whose government is conditional? Read from the spec, so a future
    conditional governor inherits the gate automatically. */
@@ -8711,6 +8823,55 @@ setFiltersExpanded(!((typeof matchMedia==='function')&&matchMedia('(max-width:64
  }
  if(Object.keys(SEPARATOR_MODES).length!==1||SEPARATOR_MODES.none!=='none'){
   throw new Error('A separator mode was registered before its phase.');
+ }
+ /* Phase 3B3A closure. The construction registry exists so a separator can be CLASSIFIED; none of
+    the three the source names may be produced by it. Three independent facts are checked, because
+    any one of them alone could be satisfied while the app still shipped a separator: the registry
+    must be immutable, exactly one construction may be production-enabled and it must be the
+    canonical empty one, and a construction this app cannot analyse must carry no source rule. */
+ if(!Object.isFrozen(SEPARATOR_CONSTRUCTIONS)||Object.getPrototypeOf(SEPARATOR_CONSTRUCTIONS)!==null){
+  throw new Error('The separator-construction registry is mutable or inherits.');
+ }
+ if(!Object.isFrozen(SEPARATOR_PRODUCTION_MODES))throw new Error('The separator production-mode set is mutable.');
+ {
+  const enabled=[];
+  for(const id of Object.keys(SEPARATOR_CONSTRUCTIONS)){
+   const construction=SEPARATOR_CONSTRUCTIONS[id];
+   if(!Object.isFrozen(construction))throw new Error('Separator construction '+id+' is mutable.');
+   if(construction.id!==id)throw new Error('Separator construction '+id+' does not own its key.');
+   const implemented=Array.isArray(construction.tokenSpecs);
+   if(implemented&&!Object.isFrozen(construction.tokenSpecs)){
+    throw new Error('Separator construction '+id+' has a mutable token spec.');
+   }
+   /* Unimplemented means unsourced, and unsourced means unproducible. A declared category that
+      acquired a source rule would be one edit from production, so it fails at load instead. */
+   if(!implemented&&construction.sourceRuleId!==null){
+    throw new Error('Unimplemented separator construction '+id+' claims a source rule.');
+   }
+   if(implemented&&!isSourceAuthorized(construction.sourceRuleId)){
+    throw new Error('Separator construction '+id+' cites an unverified source rule.');
+   }
+   if(isSeparatorModeProductionEnabled(construction.mode)){
+    if(!implemented)throw new Error('Unimplemented separator construction '+id+' is production-enabled.');
+    enabled.push(id);
+   }
+  }
+  if(enabled.length!==1||enabled[0]!=='none'){
+   throw new Error('A separator construction beyond the canonical empty one is production-enabled: '+enabled.join(','));
+  }
+  const canonical=SEPARATOR_CONSTRUCTIONS.none;
+  if(canonical.mode!==SEPARATOR_MODES.none||canonical.tokenSpecs.length!==0
+    ||canonical.sourceRuleId!==IDHAN_CONDITION_RULE_ID){
+   throw new Error('The canonical no-separator construction was widened.');
+  }
+  // Every production context must resolve to that one construction, and to nothing else.
+  for(const id of Object.keys(RESPONSE_CONTEXT_REGISTRY)){
+   const record=RESPONSE_CONTEXT_REGISTRY[id];
+   if(record.productionStatus!==PRODUCTION_RESPONSE_STATUS)continue;
+   if(separatorConstructionForMode(record.separatorMode)!==canonical){
+    throw new Error('Production context '+id+' does not resolve to the canonical no-separator construction.');
+   }
+  }
  }
 })();
 window.nahwGenerate=generate;

@@ -119,6 +119,15 @@ script=script.replace(exportNeedle,`window.__nahwTest={
      are deliberately NOT exported: tests obtain them only as the provers' return values, exactly
      as the assembler does. */
   separatorFailure,
+  /* Phase 3B3A — the separator CLASSIFICATION authority. Same rule as the blocks above: these
+     names exist only in the harness's own copy of the script, so no production caller can reach
+     them. The registry itself is exported so the tests can prove its closure directly. */
+  SEPARATOR_CONSTRUCTIONS,
+  SEPARATOR_PRODUCTION_MODES,
+  isSeparatorModeProductionEnabled,
+  separatorConstructionForMode,
+  separatorIntervalFailure,
+  idhanHeadsResponse,
   proveResponseHead,
   proveFutureEvidence,
   proveNoSeparator,
@@ -7244,9 +7253,14 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
      by identity; it does not freeze it. A caller holding the builder's own fixture can rewrite
      `fixtureId` afterwards, and the resolver then correctly reports that the exercise names no
      registered fixture. It is exercised directly below. */
+  /* Phase 3B3A adds two more to the same category, and for the same reason as the two separator
+     entries above: a registered context always resolves to the canonical no-separator construction,
+     whose source rule IS the context's own and whose interval is empty, so neither classification
+     failure can be produced through the public proof. Both are proven directly against the
+     predicate below, exactly as `separator-token-present` is. */
   ctxUnreachableReasons=Object.freeze(['unknown-pair','unauthorized-consumer',
     'unverified-source','unauthorized-source-consumer','separator-mode-not-implemented',
-    'separator-token-present']);
+    'separator-token-present','separator-not-authorized','separator-construction-mismatch']);
   /* The exercised/unreachable tally itself is asserted at the very END of this phase's block:
      three of the reasons are produced by the separator-load-bearing tests, which run last. */
   // …and the conditions those seven stand for, proven directly.
@@ -7774,8 +7788,9 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
   const anySnapshot=api.createExerciseSnapshot(api.buildTemplate(api.templates[0].id));
   assert(anySnapshot.schemaVersion===3,'History schema is no longer v3');
   /* 30 before this repair, plus `separator-token-present` from the separator predicate and the
-     three assembler reasons that make an absent condition proof detectable. */
-  assert(api.IDHAN_PROOF_FAILURE_REASONS.length===34,'the resolver reason count changed: '+api.IDHAN_PROOF_FAILURE_REASONS.length);
+     three assembler reasons that make an absent condition proof detectable; plus the two Phase
+     3B3A classification reasons a token count could not express. */
+  assert(api.IDHAN_PROOF_FAILURE_REASONS.length===36,'the resolver reason count changed: '+api.IDHAN_PROOF_FAILURE_REASONS.length);
   ctxCases+=8;
 }
 /* ============================================================================
@@ -8133,6 +8148,45 @@ let ctxHostileCases=0,ctxSeparatorCases=0;
       &&api.separatorFailure(CTX,null,clean())==='unknown-context','the separator clause is not fail-closed');
     assert(Object.keys(api.SEPARATOR_MODES).join(',')==='none','a separator lane was added to SEPARATOR_MODES');
     ctxSeparatorCases+=2;ctxCases+=2;
+    /* --- Phase 3B3A: the two diagnoses a token count could not make. ---
+       The clause no longer counts tokens, it classifies the interval, so it can now distinguish
+       "you may not separate at all" from "that is not the separator you claimed". Both are reached
+       only through the predicate — a registered context can never produce either — so both are
+       proven here, directly, exactly as the two reasons above them are. */
+    {
+      // A mode whose construction is not the source rule the context itself cites.
+      assert(api.separatorFailure({...CTX,sourceRuleId:'R_MUDARI_NASB_FATHA'},PAIR,clean())==='separator-not-authorized',
+        'the separator clause admitted a construction its context does not source-own');
+      assert(api.separatorFailure({...CTX,sourceRuleId:'R_NOT_A_RULE'},PAIR,clean())==='separator-not-authorized',
+        'the separator clause admitted an unverified source rule');
+      ctxSeparatorCases+=2;ctxAttackCases+=2;
+      /* Shape mismatch, proven on the interval matcher itself. The canonical construction admits
+         exactly the empty interval; a construction that DID name tokens must match every field of
+         every spec, so a token that merely looks the part cannot masquerade as one. */
+      const none=api.SEPARATOR_CONSTRUCTIONS.none;
+      assert(api.separatorIntervalFailure([],none)==='','the empty interval failed the canonical construction');
+      for(const [name,interval] of [
+        ['one noun',[{word:'زَيْدٌ',grammar:{type:'noun',role:'mubtada'}}]],
+        ['one particle',[{word:'فِي',grammar:{type:'particle',role:'particle',particleType:'preposition'}}]],
+        ['two tokens',[{word:'يَا',grammar:{type:'particle'}},{word:'زَيْدُ',grammar:{type:'noun'}}]],
+        ['a hole',[null]],
+        ['a string',['زَيْدٌ']]
+      ]){
+        assert(api.separatorIntervalFailure(interval,none)==='separator-construction-mismatch',
+          'the canonical construction admitted an interval of '+name);
+        ctxSeparatorCases++;ctxAttackCases++;
+      }
+      assert(api.separatorIntervalFailure(null,none)==='separator-construction-mismatch',
+        'the interval matcher admitted a non-array interval');
+      // An UNIMPLEMENTED construction can never match anything, empty interval included.
+      for(const id of ['qasam','nida','laNafiya']){
+        const declared=api.SEPARATOR_CONSTRUCTIONS[id];
+        assert(api.separatorIntervalFailure([],declared)==='separator-mode-not-implemented',
+          'the unimplemented construction '+id+' matched an empty interval');
+        ctxSeparatorCases++;ctxAttackCases++;
+      }
+      ctxSeparatorCases++;ctxCases++;
+    }
   }
 }
 /* ============================================================================
@@ -11009,12 +11063,23 @@ const p5Seen=new Map();
   }
 }
 
-/* --- §18-AD: no later separator phase, and no concealed أَنْ, has begun. --- */
+/* --- §18-AD: no separator CONSTRUCTION, and no concealed أَنْ, has shipped. ---------------
+   Phase 3B3A changed what this block can honestly claim. The separator ARCHITECTURE now exists —
+   constructions are classified rather than counted — so "no separator phase has begun" is no longer
+   true and asserting it would be a lie that happens to pass. What must still hold, and what is
+   asserted instead, is the thing that actually protects the learner: not one of the three
+   constructions the source names is implemented, sourced or production-enabled. */
 {
   const source=fs.readFileSync(file,'utf8');
   assert(!/SEPARATOR_MODES=Object\.freeze\(\{[^}]*(oath|qasam|nida|vocative|laNafiya)/i.test(source),
     'a separator mode beyond "none" was implemented');
   assert(Object.keys(api.SEPARATOR_MODES).length===1,'the separator-mode registry grew');
+  assert(api.SEPARATOR_PRODUCTION_MODES.join(',')==='none','a separator construction became production-enabled');
+  for(const id of ['qasam','nida','laNafiya']){
+    const declared=api.SEPARATOR_CONSTRUCTIONS[id];
+    assert(declared&&declared.tokenSpecs===null&&declared.sourceRuleId===null,
+      'the declared separator construction '+id+' gained an implementation or a source');
+  }
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS&&!api.SOURCE_REGISTRY.G_AN_MUDMARA
     &&!api.SOURCE_REGISTRY.R_AN_CONCEALED,'a deferred phase registered a source rule');
   assert(!api.GRAMMAR_RULES.governors.anMudmara,'a concealed أَنْ governor was registered');
@@ -11593,6 +11658,412 @@ const p6Seen=new Map();
       'the five-verb lane refused for an undeclared reason: '+reason);
   p6Cases++;
 }
+
+/* ==========================================================================
+   PHASE 3B3A — SEPARATOR AUTHORITY (architecture only).
+
+   Al-Tuḥfah p. 75's third شرط permits three separators — القسم، النداء، «لا» النافية — and every
+   phase so far implemented the strict reading, because a separator has to be CLASSIFIED before it
+   can be excepted. This phase builds that classification and NOTHING that uses it: the condition
+   stops being a token count and becomes a structural question about the interval between إِذَنْ and
+   its target, while the three exceptions stay unimplemented, unsourced and unproducible.
+
+   Two things this block exists to prove, because they are what a reader would doubt:
+     • the widening is a WHITELIST — one construction is production-enabled, it is the canonical
+       EMPTY one, and every production context resolves to exactly it, so the learner-facing output
+       is byte-for-byte what Phase 3B1/3B2 shipped;
+     • the government BRIDGE is deliberately absent — إِذَنْ still governs only across zero tokens,
+       exactly as لَنْ, لَمْ, أَنْ and كَيْ do, so nothing here can make a separated verb manṣūb.
+   ========================================================================== */
+let p7Cases=0,p7Attacks=0;
+const p7Reasons=new Set();
+const P7_CONSTRUCTIONS=api.SEPARATOR_CONSTRUCTIONS;
+const P7_NONE=P7_CONSTRUCTIONS.none;
+const p7Build=lane=>api.buildTemplate(api.templates.find(t=>t.stableId===lane.templateId).id);
+const p7VerbIndex=d=>d.tokens.findIndex(t=>t.grammar&&t.grammar.type==='verb');
+const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
+
+/* --- The registry itself: frozen, prototype-free, and closed. --- */
+{
+  assert(Object.isFrozen(P7_CONSTRUCTIONS),'the separator-construction registry is mutable');
+  assert(Object.getPrototypeOf(P7_CONSTRUCTIONS)===null,'the separator-construction registry has a prototype');
+  assert(Object.isFrozen(api.SEPARATOR_PRODUCTION_MODES),'the separator production-mode set is mutable');
+  assert(api.SEPARATOR_PRODUCTION_MODES.join(',')==='none',
+    'the production separator modes are '+api.SEPARATOR_PRODUCTION_MODES.join(','));
+  assert(Object.keys(api.SEPARATOR_MODES).join(',')==='none','SEPARATOR_MODES grew beyond none');
+  const ids=Object.keys(P7_CONSTRUCTIONS).sort().join(',');
+  assert(ids==='laNafiya,nida,none,qasam','the construction registry holds '+ids);
+  for(const id of Object.keys(P7_CONSTRUCTIONS)){
+    const construction=P7_CONSTRUCTIONS[id];
+    assert(Object.isFrozen(construction),'construction '+id+' is mutable');
+    assert(construction.id===id,'construction '+id+' does not own its key');
+    p7Cases++;
+  }
+  /* The three the source NAMES are declared and nothing more. Unimplemented, so they can classify
+     nothing; unsourced, because no page in this project analyses لا, يا/المنادى or واو القسم in its
+     own right and inventing one to make a test pass is the fabrication this project refuses. */
+  for(const id of ['qasam','nida','laNafiya']){
+    const declared=P7_CONSTRUCTIONS[id];
+    assert(declared.tokenSpecs===null,'declared construction '+id+' gained a token spec');
+    assert(declared.sourceRuleId===null,'declared construction '+id+' claims a source rule');
+    assert(!api.isSeparatorModeProductionEnabled(declared.mode),'declared construction '+id+' is production-enabled');
+    p7Cases+=3;
+  }
+  // Exactly one construction may be produced, and it is the canonical empty one.
+  const enabled=Object.keys(P7_CONSTRUCTIONS).filter(id=>api.isSeparatorModeProductionEnabled(P7_CONSTRUCTIONS[id].mode));
+  assert(enabled.join(',')==='none','production-enabled constructions: '+enabled.join(','));
+  assert(P7_NONE.mode===api.SEPARATOR_MODES.none&&P7_NONE.category==='noSeparator','the canonical construction drifted');
+  assert(Array.isArray(P7_NONE.tokenSpecs)&&P7_NONE.tokenSpecs.length===0,'the canonical construction is not empty');
+  assert(Object.isFrozen(P7_NONE.tokenSpecs),'the canonical token spec is mutable');
+  assert(P7_NONE.sourceRuleId==='R_IDHAN_CONDITIONS'&&api.isSourceAuthorized(P7_NONE.sourceRuleId),
+    'the canonical construction is not owned by the إِذَنْ condition rule');
+  p7Cases+=5;
+  // Resolution is own-property only: a prototype name resolves to nothing.
+  for(const name of ['toString','constructor','__proto__','hasOwnProperty','','none ',null,undefined,7,{}]){
+    assert(api.separatorConstructionForMode(name)===null,'a non-own mode resolved: '+String(name));
+    assert(!api.isSeparatorModeProductionEnabled(name),'a non-own mode is production-enabled: '+String(name));
+    p7Attacks+=2;
+  }
+  assert(api.separatorConstructionForMode('none')===P7_NONE,'the canonical mode does not resolve to its record');
+  p7Cases++;
+}
+
+/* --- Every production context resolves to the canonical empty construction, and to nothing else. --- */
+{
+  let production=0;
+  for(const id of Object.keys(api.RESPONSE_CONTEXT_REGISTRY)){
+    const record=api.RESPONSE_CONTEXT_REGISTRY[id];
+    if(record.productionStatus!==api.PRODUCTION_RESPONSE_STATUS)continue;
+    production++;
+    assert(api.separatorConstructionForMode(record.separatorMode)===P7_NONE,
+      'production context '+id+' does not resolve to the canonical construction');
+    assert(record.sourceRuleId===P7_NONE.sourceRuleId,
+      'production context '+id+' does not source-own its construction');
+    p7Cases+=2;
+  }
+  assert(production===6,'the production context count changed: '+production);
+  p7Cases++;
+}
+
+/* --- The learner-facing output is unchanged: both lanes still build exactly particle + verb. --- */
+{
+  for(const lane of [api.IDHAN_PRODUCTIVE_LANES.ordinary,api.IDHAN_PRODUCTIVE_LANES.afalKhamsa]){
+    for(let attempt=0;attempt<8;attempt++){
+      const data=p7Build(lane);
+      const authorization=p7Authorize(data);
+      assert(authorization.authorized,lane.laneId+' stopped authorizing: '+authorization.reason);
+      const pair=api.RESPONSE_PAIR_REGISTRY[authorization.pairId];
+      const context=api.RESPONSE_CONTEXT_REGISTRY[authorization.contextId];
+      /* The target index is now DERIVED from the resolved construction rather than assumed, and for
+         the canonical construction that index is 1 — which is what makes this phase output-neutral. */
+      const construction=api.separatorConstructionForMode(context.separatorMode);
+      assert(construction===P7_NONE,'a productive exercise resolved a non-canonical construction');
+      assert(data.tokens.length===1+construction.tokenSpecs.length+1,
+        'a productive exercise is not particle + verb: '+data.tokens.length+' tokens');
+      assert(data.tokens[1+construction.tokenSpecs.length].word===pair.responseVerbAr,
+        'the target is not at the index its construction fixes');
+      assert(api.separatorFailure(context,pair,data)==='','a productive exercise failed the separator clause');
+      assert(api.proveNoSeparator(context,pair,data).ok===true,'the separator prover refused a productive exercise');
+      p7Cases+=5;
+    }
+  }
+}
+
+/* --- NONE stays EXACT: nothing may be added anywhere in or around the pair. --- */
+{
+  const p7Refuses=(name,lane,mutate,expected)=>{
+    const data=p7Build(lane);
+    mutate(data);
+    let result;
+    try{ result=p7Authorize(data); }
+    catch(error){ throw new Error('Phase-3B3A attack "'+name+'" threw: '+error.message); }
+    assert(result&&result.authorized===false,'Phase-3B3A attack "'+name+'" was AUTHORIZED');
+    assert(Object.isFrozen(result)&&!result.templateId&&!result.contextId&&!result.pairId,
+      'Phase-3B3A refusal "'+name+'" leaked a binding');
+    if(expected)assert(result.reason===expected,
+      'Phase-3B3A attack "'+name+'" refused for "'+result.reason+'", expected "'+expected+'"');
+    p7Reasons.add(result.reason);
+    assert(api.validateExercise(clone(data)).length>0,'Phase-3B3A attack "'+name+'" produced a CLEAN exercise');
+    p7Attacks++;
+    return result;
+  };
+  const ORD=api.IDHAN_PRODUCTIVE_LANES.ordinary,FIVE=api.IDHAN_PRODUCTIVE_LANES.afalKhamsa;
+  const noun=[...api.nounFormIndex.keys()][0];
+  const nounToken=()=>api.makeToken(noun,'a noun',api.specs.mubtada(noun));
+  for(const lane of [ORD,FIVE]){
+    p7Refuses('one token between إِذَنْ and its target ('+lane.laneId+')',lane,
+      d=>{d.tokens.splice(1,0,nounToken())},'separator-token-present');
+    p7Refuses('two tokens between إِذَنْ and its target ('+lane.laneId+')',lane,
+      d=>{d.tokens.splice(1,0,nounToken());d.tokens.splice(1,0,nounToken())},'separator-token-present');
+    p7Refuses('a trailing token after the target ('+lane.laneId+')',lane,
+      d=>{d.tokens.push(nounToken())},'separator-token-present');
+    /* A SECOND copy of the paired target cannot hide behind the first. With its governor link
+       intact the copy is caught EARLIER, by the exclusivity half of the governor-link clause — two
+       tokens may not claim one particle — so that is the honest expectation here; with the link
+       cleared it falls through to the shape test. Both refuse; neither collapses into the other. */
+    p7Refuses('a duplicated target, link intact ('+lane.laneId+')',lane,
+      d=>{const copy=clone(d.tokens[1]);copy.id+='X';d.tokens.push(copy)},'governor-link-not-canonical');
+    p7Refuses('a duplicated target, link cleared ('+lane.laneId+')',lane,
+      d=>{const copy=clone(d.tokens[1]);copy.id+='X';copy.governorId=null;d.tokens.push(copy)},
+      'separator-token-present');
+    /* A token BEFORE إِذَنْ is a head failure, not a separator failure. Keeping the two diagnoses
+       apart is the whole point of splitting idhanHeadsResponse out of the adjacency observation. */
+    p7Refuses('a token before إِذَنْ ('+lane.laneId+')',lane,
+      d=>{d.tokens.unshift(nounToken())},'idhan-not-at-response-head');
+  }
+  assert(p7Reasons.has('separator-token-present')&&p7Reasons.has('idhan-not-at-response-head'),
+    'the separator and head diagnoses collapsed into one');
+  p7Cases+=2;
+}
+
+/* --- Nothing an exercise CARRIES may steer the classification. -----------------------------
+   The classification reads the frozen context and the token list, and nothing else. That is easy
+   to claim and easy to lose, because the cheapest way to widen a separator later is to let the
+   exercise say which construction it is. These tests state the property as an OUTCOME: attaching
+   every separator-shaped field a future phase might invent must leave the authorization exactly
+   as it was — authorized when the shape is canonical, refused when it is not. */
+{
+  const ORD=api.IDHAN_PRODUCTIVE_LANES.ordinary,FIVE=api.IDHAN_PRODUCTIVE_LANES.afalKhamsa;
+  const CARRIED=[
+    ['separatorMode','qasam'],['separatorConstructionId','qasam'],['separatorProven',true],
+    ['hasValidSeparator',true],['targetIndex',2],['authorizedSeparator',true],['separatorCategory','oath']
+  ];
+  for(const lane of [ORD,FIVE]){
+    for(const [field,value] of CARRIED){
+      const clean=p7Build(lane);
+      const before=p7Authorize(clean);
+      assert(before.authorized,'a canonical exercise stopped authorizing before the carried-field test');
+      clean[field]=value;
+      const after=p7Authorize(clean);
+      assert(after.authorized&&after.pairId===before.pairId&&after.contextId===before.contextId,
+        'a carried "'+field+'" changed the authorization of a canonical exercise');
+      // …and on a token, where a future phase would be just as tempted to put it.
+      const onToken=p7Build(lane);
+      onToken.tokens[0][field]=value;onToken.tokens[1][field]=value;
+      assert(p7Authorize(onToken).authorized,'a carried token-level "'+field+'" changed the authorization');
+      p7Attacks+=2;
+    }
+    /* The other direction: a carried field must not RESCUE a shape the classification refuses.
+       `targetIndex` is the dangerous one — it is exactly what a caller would forge to move the
+       target past its own separator — so it is driven with the value that would work if trusted. */
+    const noun=[...api.nounFormIndex.keys()][0];
+    for(const [field,value] of [['targetIndex',2],['separatorMode','none'],['hasValidSeparator',true],
+                                ['separatorProven',true],['separatorConstructionId','none']]){
+      const separated=p7Build(lane);
+      separated.tokens.splice(1,0,api.makeToken(noun,'a noun',api.specs.mubtada(noun)));
+      separated[field]=value;
+      const result=p7Authorize(separated);
+      assert(result.authorized===false,'a carried "'+field+'" rescued a separated exercise');
+      p7Reasons.add(result.reason);
+      p7Attacks++;
+    }
+  }
+  p7Cases+=2;
+}
+
+/* --- The interval matcher is exact, field by field. -----------------------------------------
+   The canonical construction names no tokens, so its matcher can only ever be exercised on the
+   empty interval through the registry. It is a pure function, though, and Phase 3B3B will hand it
+   real specs — so it is proven here against a LOCAL spec object. That object is a test argument,
+   not a registered construction: it authorizes nothing, enters no registry, and reaches no
+   learner. What it proves is that matching is by explicit field, not by category resemblance. */
+{
+  const spec=Object.freeze({
+    id:'probe-only',mode:'probe-only',category:'probe-only',sourceRuleId:null,
+    tokenSpecs:Object.freeze([
+      Object.freeze({word:'ص',type:'particle',particleType:'probeParticle',ruleId:'R_PROBE'}),
+      Object.freeze({word:'ن',type:'noun',role:'mubtada'})
+    ])
+  });
+  const good=()=>[
+    {word:'ص',ruleId:'R_PROBE',grammar:{type:'particle',particleType:'probeParticle'}},
+    {word:'ن',grammar:{type:'noun',role:'mubtada'}}
+  ];
+  assert(api.separatorIntervalFailure(good(),spec)==='','the exact interval failed its own spec');
+  p7Cases++;
+  /* Each field, broken one at a time. A matcher that sniffed the CATEGORY — "a particle then a
+     noun" — would pass every one of these, which is precisely the failure mode being excluded. */
+  for(const [name,breaks] of [
+    ['the first surface',i=>{i[0].word='x'}],
+    ['the second surface',i=>{i[1].word='x'}],
+    ['the particle type',i=>{i[0].grammar.particleType='preposition'}],
+    ['the particle rule',i=>{i[0].ruleId='R_HARF_JARR'}],
+    ['the first token type',i=>{i[0].grammar.type='noun'}],
+    ['the second token role',i=>{i[1].grammar.role='object'}],
+    ['the order',i=>{const first=i[0];i[0]=i[1];i[1]=first}],
+    ['the length, short',i=>{i.pop()}],
+    ['the length, long',i=>{i.push({word:'ن',grammar:{type:'noun',role:'mubtada'}})}],
+    ['a hole',i=>{i[0]=null}],
+    ['a string',i=>{i[1]='ن'}]
+  ]){
+    const interval=good();breaks(interval);
+    assert(api.separatorIntervalFailure(interval,spec)==='separator-construction-mismatch',
+      'the interval matcher admitted an interval with '+name+' broken');
+    p7Attacks++;
+  }
+}
+
+/* --- The head/separator split, at the predicate level. --- */
+{
+  const data=p7Build(api.IDHAN_PRODUCTIVE_LANES.ordinary);
+  assert(api.idhanHeadsResponse(data.tokens)===true,'a productive exercise does not head its response');
+  // HEAD is a fact about position 0 alone: adding material AFTER إِذَنْ leaves the head intact.
+  const separated=clone(data);
+  separated.tokens.splice(1,0,{word:'x',grammar:{type:'noun',role:'mubtada'}});
+  assert(api.idhanHeadsResponse(separated.tokens)===true,'the head test became sensitive to what follows it');
+  // …while a token BEFORE إِذَنْ destroys the head, whatever follows.
+  const fronted=clone(data);
+  fronted.tokens.unshift({word:'x',grammar:{type:'noun',role:'mubtada'}});
+  assert(api.idhanHeadsResponse(fronted.tokens)===false,'a fronted token left إِذَنْ at the head');
+  for(const junk of [null,undefined,'x',7,{},[]])
+    assert(api.idhanHeadsResponse(junk)===false,'the head test admitted '+String(junk));
+  /* The BRIDGE is deferred: government observation still requires the verb to be the very next
+     token, exactly as it does for every other governor. This is the assertion that would fail the
+     day the bridge lands, which is precisely when it should be revisited. */
+  assert(api.observeIdhanResponseHead(data.tokens,1)===true,'the canonical adjacency observation broke');
+  assert(api.observeIdhanResponseHead(separated.tokens,2)===false,
+    'إِذَنْ proposed government across an interval — the Phase 3B3B bridge has landed early');
+  p7Cases+=5;p7Attacks+=6;
+}
+
+/* --- The bridge is absent in PRACTICE: a STORED link across an interval authorizes nothing. ---
+   Splicing a token into a built exercise leaves the verb's `governorId` pointing at إِذَنْ, because
+   the link was written when the verb still was the next token. That stale link is the strongest
+   available version of this test: the exercise arrives carrying exactly the link a working bridge
+   would have written, and it is still refused — because the authority re-derives the government
+   from the token list rather than reading what the exercise claims about it. */
+{
+  const data=p7Build(api.IDHAN_PRODUCTIVE_LANES.ordinary);
+  const noun=[...api.nounFormIndex.keys()][0];
+  data.tokens.splice(1,0,api.makeToken(noun,'a noun',api.specs.mubtada(noun)));
+  const verb=data.tokens[2];
+  assert(verb.governorId===data.tokens[0].id&&data.tokens[0].relations.governsId===verb.id,
+    'the stale-link fixture did not survive the splice — this test no longer proves anything');
+  assert(!p7Authorize(data).authorized,'a stored link across an interval authorized the naṣb');
+  assert(api.validateExercise(clone(data)).length>0,'a separated exercise validated clean');
+  assert(api.separatorFailure(api.RESPONSE_CONTEXT_REGISTRY[api.RESPONSE_PAIR_REGISTRY[
+    api.IDHAN_PRODUCTIVE_LANES.ordinary.pairIds[0]].contextId],
+    api.RESPONSE_PAIR_REGISTRY[api.IDHAN_PRODUCTIVE_LANES.ordinary.pairIds[0]],data)!=='',
+    'the separator clause admitted a stored link across an interval');
+  p7Cases+=4;p7Attacks++;
+}
+
+/* --- Phase 3B3A must not have touched any OTHER governor's adjacency. --- */
+{
+  const GOVERNORS=[
+    ['لَنْ','T_PARTICLE_PRESENT_NASB_FATHA_01'],
+    ['أَنْ','T_PARTICLE_PRESENT_NASB_FATHA_02'],
+    ['لِكَيْ','T_PARTICLE_PRESENT_NASB_FATHA_03'],
+    ['لَمْ','T_PARTICLE_PRESENT_JAZM_SUKUN_01']
+  ];
+  const noun=[...api.nounFormIndex.keys()][0];
+  for(const [name,stableId] of GOVERNORS){
+    const template=api.templates.find(t=>t.stableId===stableId);
+    assert(template,'the inherited '+name+' template is missing: '+stableId);
+    const clean=api.buildTemplate(template.id);
+    assert(api.validateExercise(clone(clean)).length===0,'the inherited '+name+' exercise stopped validating');
+    const governed=clean.tokens.find(t=>t.grammar?.type==='verb'&&t.governorId);
+    assert(governed,'the inherited '+name+' exercise has no governed verb');
+    assert(clean.tokens[clean.tokens.indexOf(governed)-1].id===governed.governorId,
+      name+' stopped governing the token immediately after it');
+    // Insert a token between the governor and its verb: the government must NOT survive.
+    const split=api.buildTemplate(template.id);
+    const verbIndex=split.tokens.findIndex(t=>t.grammar?.type==='verb'&&t.governorId);
+    split.tokens.splice(verbIndex,0,api.makeToken(noun,'a noun',api.specs.mubtada(noun)));
+    const failures=api.validateExercise(clone(split));
+    assert(failures.length>0,name+' accepted a separated verb');
+    assert(failures.some(f=>f.code==='E_GOVERNOR_ADJACENCY'||f.code==='E_SENTENCE_SURFACE'
+      ||f.code==='E_ORPHAN_VERB_GOVERNOR'||f.code==='E_GOVERNOR_RECIPROCAL'),
+      name+' separated verb failed for an unrelated reason: '+failures.map(f=>f.code).join(','));
+    /* And the إِذَنْ separator authority never transfers: the classification is reached only through
+       a registered response context, which no other governor's template has. */
+    assert(!api.templates.find(t=>t.stableId===stableId).responsePairIds.length,
+      name+' acquired a response pair list');
+    p7Cases+=4;p7Attacks++;
+  }
+}
+
+/* --- History: no stored separator field may ever become authority. --- */
+{
+  const data=p7Build(api.IDHAN_PRODUCTIVE_LANES.afalKhamsa);
+  const snapshot=api.createExerciseSnapshot(data);
+  assert(snapshot&&snapshot.schemaVersion===3,'Phase 3B3A changed the History schema version');
+  assert(api.restoreExerciseSnapshot(clone(snapshot)),'a productive exercise stopped restoring');
+  /* The root, token and grammar key sets are CLOSED (Policy A), so a separator claim cannot even be
+     spelled onto a snapshot — it rejects as an unknown key rather than being ignored. That is the
+     property that makes "History can never authorize a separator" structural rather than defensive. */
+  for(const [name,mutate] of [
+    ['a stored separator Boolean',s=>{s.hasValidSeparator=true}],
+    ['a stored separator mode',s=>{s.separatorMode='qasam'}],
+    ['a stored construction id',s=>{s.separatorConstructionId='qasam'}],
+    ['a stored proof claim',s=>{s.separatorProven=true}],
+    ['a stored target index',s=>{s.targetIndex=2}],
+    ['a token-level separator flag',s=>{s.tokens[0].separatorMode='none'}],
+    ['a grammar-level separator flag',s=>{s.tokens[1].grammar.separator='qasam'}]
+  ]){
+    const forged=clone(snapshot);mutate(forged);
+    let out=null,threw='';
+    try{ out=api.restoreExerciseSnapshot(forged); }catch(error){ threw=error.message; }
+    assert(!threw,'Phase-3B3A History attack "'+name+'" threw: '+threw);
+    assert(out===null,'Phase-3B3A History attack "'+name+'" was RESTORED');
+    p7Attacks++;
+  }
+  /* Shape forgeries. The stored keys above cannot even be spelled; these can, because they are
+     ordinary tokens — so restoration has to RE-PROVE the construction rather than accept a token
+     list that once was canonical. Each of these was a valid snapshot before it was moved. */
+  const spare=()=>{const t=clone(snapshot.tokens[0]);t.id+=String(Math.random()).slice(2,7);t.word='x';return t};
+  const OTHER=api.IDHAN_PRODUCTIVE_LANES.ordinary;
+  for(const [name,mutate] of [
+    ['an inserted separator',s=>{s.tokens.splice(1,0,spare())}],
+    ['a token after the target',s=>{s.tokens.push(spare())}],
+    ['a token before إِذَنْ',s=>{s.tokens.unshift(spare())}],
+    ['a second copy of the target',s=>{const t=clone(s.tokens[1]);t.id+='Z';s.tokens.push(t)}],
+    ['the target moved past a separator',s=>{const verb=s.tokens[1];s.tokens=[s.tokens[0],spare(),verb]}],
+    ['a cross-lane response pair',s=>{s.responsePairIds=[...OTHER.pairIds]}],
+    ['a cross-lane response context',s=>{s.responseContextId=api.RESPONSE_PAIR_REGISTRY[OTHER.pairIds[0]].contextId}],
+    ['a cross-lane template',s=>{s.templateId=OTHER.templateId}],
+    /* A look-alike proof object. The three success tokens are module-private frozen objects the
+       assembler compares by IDENTITY, so a structurally identical copy carried in on a snapshot is
+       still not the token — and cannot be, because it never leaves the module. */
+    ['a look-alike proof object',s=>{s.tokens[1].conditionProof={condition:'laFasila'}}],
+    ['a copied construction record',s=>{s.tokens[1].separatorConstruction={
+      id:'none',mode:'none',category:'noSeparator',tokenSpecs:[],sourceRuleId:'R_IDHAN_CONDITIONS'}}]
+  ]){
+    const forged=clone(snapshot);mutate(forged);
+    let out=null,threw='';
+    try{ out=api.restoreExerciseSnapshot(forged); }catch(error){ threw=error.message; }
+    assert(!threw,'Phase-3B3A History shape attack "'+name+'" threw: '+threw);
+    assert(out===null,'Phase-3B3A History shape attack "'+name+'" was RESTORED');
+    p7Attacks++;
+  }
+  p7Cases+=2;
+}
+
+/* --- Closure: no real separator construction shipped, and no later phase began. --- */
+{
+  const source=fs.readFileSync(file,'utf8');
+  assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
+    'a real separator construction became production-enabled');
+  assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===72,'the source-rule count moved in an architecture-only phase');
+  assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
+    &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
+    'إِذَنْ acquired a mabnī-present lane');
+  assert(!api.GRAMMAR_RULES.governors.anMudmara,'a concealed أَنْ governor was registered');
+  assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.mood==='jazm').length===1,
+    'a second jāzim entered the governor table');
+  assert(api.templates.length===84,'an architecture-only phase changed the template count');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===89
+    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===24,
+    'an architecture-only phase moved the composer authority');
+  p7Cases+=8;
+}
+
+console.log('Phase-3B3A separator-authority audit passed: '+p7Cases+' canonical checks and '+p7Attacks+' adversarial checks.');
+console.log('  phase-3B3A constructions: '+Object.keys(P7_CONSTRUCTIONS).length+' registered ('
+  +Object.keys(P7_CONSTRUCTIONS).map(id=>id+'='+(Array.isArray(P7_CONSTRUCTIONS[id].tokenSpecs)?'implemented':'declared')).join(', ')
+  +'); production-enabled: '+api.SEPARATOR_PRODUCTION_MODES.join(',')+'; government bridge: deferred to 3B3B');
+console.log('  phase-3B3A refusal reasons exercised: '+[...p7Reasons].sort().join(', '));
 
 console.log('Phase-3B2 five-verb إِذَنْ audit passed: '+p6Cases+' canonical checks and '+p6Attacks+' adversarial checks.');
 console.log('  phase-3B2 lanes: '+Object.keys(P6_LANES).length+' registered ('

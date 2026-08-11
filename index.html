@@ -715,10 +715,10 @@ const SENTENCE_HISTORY_SNAPSHOT_KEYS=Object.freeze(['schemaVersion','templateId'
 const EXERCISE_TOKEN_KEYS=Object.freeze(['ar','components','en','enHint','expectedSurface','gloss',
  'governorId','grammar','id','inflection','lexeme','mahallRuleId','phraseAr','phraseEn','phraseLabel',
  'phraseWhy','relations','ruleId','sign','signRuleId','state','subjectRuleId','surfaceHint','target',
- 'tense','why','word']);
+ 'tense','voiceRuleId','why','word']);
 const EXERCISE_GRAMMAR_KEYS=Object.freeze(['attachedKaf','conjugation','delayed','exactPresentRaf',
  'governorWord','inflection','isMudaf','kanaKhabar','morphology','particleIraab','particleType','particleWord',
- 'person','role','type']);
+ 'person','role','type','voice']);
 /* One declared LEGACY name, accepted under Policy B rather than Policy A. Pre-Phase-2 snapshots
    stored a `componentKinds` array on a verb's grammar. It is never consulted — internal components
    are derived from structural morphology alone — and materializeAuthoritativeMorphology DELETES it
@@ -956,6 +956,15 @@ function mahallRuleOwnerFailure(token,data){
  if(token.grammar?.type!=='verb'||token.tense!=='present')return true;
  return authoritativeVerbMorphology(token,data).formClass!=='mabniPresent';
 }
+/* Passive form rules are independent source claims, not identity labels. Only the exact verb in a
+   canonical passive construction may own the tense-matching rule. */
+function voiceRuleOwnerFailure(token,data){
+ if(!token?.voiceRuleId)return false;
+ const authority=derivePassiveConstructionAuthority(data);
+ const expected=token.tense==='past'?'R_PASSIVE_PAST_FORM':token.tense==='present'?'R_PASSIVE_PRESENT_FORM':'';
+ return !authority.authorized||authority.verbId!==token.id||token.grammar?.voice!==PASSIVE_VOICE
+  ||token.voiceRuleId!==expected;
+}
 /* ---- Phase 3B0A-G — canonical token-gloss authority --------------------------------------
    A stored `gloss` used to ride out of raw History into the answer cards: 169 token cases across
    56 templates, learner-visible. It is presentation, so it is rebuilt here from the same frozen
@@ -1189,7 +1198,17 @@ function resolveCanonicalTokenGloss(data,token,index){
   const byCase=nounEnglish(surface,'acc');
   return byCase==='the noun'?null:byCase;
  }
- /* 7 — a verb takes the registered field its tense selects. The person-inflected and negated
+ /* 7 — a passive verb is glossed from the exact capability authorized by the construction. */
+ if(type==='verb'&&token.grammar.voice===PASSIVE_VOICE){
+ const authority=derivePassiveConstructionAuthority(data);
+  const capability=authority.authorized&&authority.verbId===token.id?PASSIVE_VERB_CAPABILITIES[authority.capabilityKey]:null;
+  if(!capability)return null;
+  const pair=PASSIVE_DEPUTY_PAIRS[authority.pairKey];
+  const plural=['broken','dual','smp','sfp'].includes(pair.inflection);
+  const copula=token.tense==='past'?(plural?'were':'was'):(plural?'are':'is');
+  return`${copula} ${capability.participleEn}`;
+ }
+ /* 8 — an active verb takes the registered field its tense selects. The person-inflected and negated
     wordings belong to the advanced families, whose canonical presentation is rebuilt by
     rebuildCanonicalHistoryPresentation immediately after this pass and overrides what is set here. */
  if(type==='verb'){
@@ -1305,7 +1324,9 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  /* البدل — one shape for all three hosts and all four kinds, exactly as TS37 serves tawkīd: the
     English is composed by the canonical badal translator from the registered pair, so a new label
     never earns a new shape. */
- TS38:Object.freeze({parts:Object.freeze([Object.freeze({slot:'badalSentence'})])})
+ TS38:Object.freeze({parts:Object.freeze([Object.freeze({slot:'badalSentence'})])}),
+ /* نائب الفاعل — the canonical translator derives tense, passive capability and deputy pair. */
+ TS39:Object.freeze({parts:Object.freeze([Object.freeze({slot:'passiveSentence'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1439,7 +1460,17 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_VERB_FIVENOUNS_NASB_ALIF_01||verb:past,noun:faail,noun:object,noun:badal":Object.freeze({templateId:"T_VERB_FIVENOUNS_NASB_ALIF_01",structure:"verb:past,noun:faail,noun:object,noun:badal",shape:"TS38",copulaPlural:false}),
  "T_PARTICLE_FIVENOUNS_JARR_YA_02||particle:particle,noun:majrur,noun:badal,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_FIVENOUNS_JARR_YA_02",structure:"particle:particle,noun:majrur,noun:badal,noun:mubtada",shape:"TS38",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_19||verb:past,noun:faail,noun:object,noun:badal":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_19",structure:"verb:past,noun:faail,noun:object,noun:badal",shape:"TS38",copulaPlural:false}),
- "T_PARTICLE_SINGULAR_JARR_KASRA_05||particle:particle,noun:majrur,noun:badal,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_05",structure:"particle:particle,noun:majrur,noun:badal,noun:mubtada",shape:"TS38",copulaPlural:false})
+ "T_PARTICLE_SINGULAR_JARR_KASRA_05||particle:particle,noun:majrur,noun:badal,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_05",structure:"particle:particle,noun:majrur,noun:badal,noun:mubtada",shape:"TS38",copulaPlural:false}),
+ "T_VERB_SINGULAR_RAF_DAMMA_04||verb:past,noun:naibFail":Object.freeze({templateId:"T_VERB_SINGULAR_RAF_DAMMA_04",structure:"verb:past,noun:naibFail",shape:"TS39",copulaPlural:false}),
+ "T_VERB_SINGULAR_RAF_DAMMA_05||verb:present,noun:naibFail":Object.freeze({templateId:"T_VERB_SINGULAR_RAF_DAMMA_05",structure:"verb:present,noun:naibFail",shape:"TS39",copulaPlural:false}),
+ "T_VERB_BROKEN_RAF_DAMMA_03||verb:past,noun:naibFail":Object.freeze({templateId:"T_VERB_BROKEN_RAF_DAMMA_03",structure:"verb:past,noun:naibFail",shape:"TS39",copulaPlural:true}),
+ "T_VERB_BROKEN_RAF_DAMMA_04||verb:present,noun:naibFail":Object.freeze({templateId:"T_VERB_BROKEN_RAF_DAMMA_04",structure:"verb:present,noun:naibFail",shape:"TS39",copulaPlural:true}),
+ "T_VERB_DUAL_RAF_ALIF_03||verb:past,noun:naibFail":Object.freeze({templateId:"T_VERB_DUAL_RAF_ALIF_03",structure:"verb:past,noun:naibFail",shape:"TS39",copulaPlural:true}),
+ "T_VERB_DUAL_RAF_ALIF_04||verb:present,noun:naibFail":Object.freeze({templateId:"T_VERB_DUAL_RAF_ALIF_04",structure:"verb:present,noun:naibFail",shape:"TS39",copulaPlural:true}),
+ "T_VERB_SMP_RAF_WAW_03||verb:past,noun:naibFail":Object.freeze({templateId:"T_VERB_SMP_RAF_WAW_03",structure:"verb:past,noun:naibFail",shape:"TS39",copulaPlural:true}),
+ "T_VERB_SMP_RAF_WAW_04||verb:present,noun:naibFail":Object.freeze({templateId:"T_VERB_SMP_RAF_WAW_04",structure:"verb:present,noun:naibFail",shape:"TS39",copulaPlural:true}),
+ "T_VERB_FIVENOUNS_RAF_WAW_03||verb:past,noun:naibFail":Object.freeze({templateId:"T_VERB_FIVENOUNS_RAF_WAW_03",structure:"verb:past,noun:naibFail",shape:"TS39",copulaPlural:false}),
+ "T_VERB_FIVENOUNS_RAF_WAW_04||verb:present,noun:naibFail":Object.freeze({templateId:"T_VERB_FIVENOUNS_RAF_WAW_04",structure:"verb:present,noun:naibFail",shape:"TS39",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -1488,6 +1519,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='atfSentence')return canonicalAtfTranslation(exercise);
  if(bits[0]==='tawkidSentence')return canonicalTawkidTranslation(exercise);
  if(bits[0]==='badalSentence')return canonicalBadalTranslation(exercise);
+ if(bits[0]==='passiveSentence')return canonicalPassiveTranslation(exercise);
  if(bits[0]==='copula'){
   const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
   if(!particle)return null;
@@ -3627,6 +3659,42 @@ const objectGroups={
 };
 const generalVerbActions=[...verbs,...additionalVerbActions];
 
+/* Productive نائب الفاعل — explicit passive authority only. Al-Tuḥfah pp. 96–98 requires the
+   original fāʿil to be omitted, the verb to be changed to the passive form, and the former object
+   to become marfūʿ. None of those facts is inferred from an Arabic string. Every productive verb
+   below is an existing, transitive, sound Form-I family with both passive surfaces written out;
+   weak, doubled, hamzated and derived families remain outside this registry.
+
+   The pair registry is the second half of the authority: it names the exact former-object lexeme
+   and its existing declension class. That gives the builder five ordinary rafʿ lanes without a
+   passive-only sign table. Feminine deputies are intentionally absent because a truthful lane
+   needs feminine passive-verb agreement surfaces as a separate morphology expansion. */
+const PASSIVE_VOICE='passive';
+const PASSIVE_VERB_CAPABILITIES=Object.freeze(Object.assign(Object.create(null),{
+ kataba:Object.freeze({key:'kataba',activePast:'كَتَبَ',pastSurface:'كُتِبَ',presentSurface:'يُكْتَبُ',participleEn:'written'}),
+ fataha:Object.freeze({key:'fataha',activePast:'فَتَحَ',pastSurface:'فُتِحَ',presentSurface:'يُفْتَحُ',participleEn:'opened'}),
+ hamala:Object.freeze({key:'hamala',activePast:'حَمَلَ',pastSurface:'حُمِلَ',presentSurface:'يُحْمَلُ',participleEn:'carried'}),
+ ghasala:Object.freeze({key:'ghasala',activePast:'غَسَلَ',pastSurface:'غُسِلَ',presentSurface:'يُغْسَلُ',participleEn:'washed'}),
+ sharaha:Object.freeze({key:'sharaha',activePast:'شَرَحَ',pastSurface:'شُرِحَ',presentSurface:'يُشْرَحُ',participleEn:'explained'}),
+ nasaha:Object.freeze({key:'nasaha',activePast:'نَصَحَ',pastSurface:'نُصِحَ',presentSurface:'يُنْصَحُ',participleEn:'advised'})
+}));
+function passiveDeputyLexeme(pool,en){
+ const found=pool.find(item=>item.en===en);
+ if(!found)throw new Error(`Missing passive deputy lexeme: ${en}`);
+ return Object.freeze({...found});
+}
+const PASSIVE_DEPUTY_PAIRS=Object.freeze(Object.assign(Object.create(null),{
+ katabaLesson:Object.freeze({capabilityKey:'kataba',deputy:passiveDeputyLexeme(singularThings,'the lesson'),inflection:'singular'}),
+ fatahaDoor:Object.freeze({capabilityKey:'fataha',deputy:passiveDeputyLexeme(singularThings,'the door'),inflection:'singular'}),
+ hamalaBook:Object.freeze({capabilityKey:'hamala',deputy:passiveDeputyLexeme(singularThings,'the book'),inflection:'singular'}),
+ ghasalaGarment:Object.freeze({capabilityKey:'ghasala',deputy:passiveDeputyLexeme(singularThings,'the garment'),inflection:'singular'}),
+ sharahaLesson:Object.freeze({capabilityKey:'sharaha',deputy:passiveDeputyLexeme(singularThings,'the lesson'),inflection:'singular'}),
+ nasahaStudent:Object.freeze({capabilityKey:'nasaha',deputy:passiveDeputyLexeme(singularPeople,'the student'),inflection:'singular'}),
+ nasahaStudents:Object.freeze({capabilityKey:'nasaha',deputy:passiveDeputyLexeme(brokenHuman,'the students'),inflection:'broken'}),
+ katabaTwoBooks:Object.freeze({capabilityKey:'kataba',deputy:passiveDeputyLexeme(duals,'the two books'),inflection:'dual'}),
+ nasahaTeachers:Object.freeze({capabilityKey:'nasaha',deputy:passiveDeputyLexeme(smp,'the teachers'),inflection:'smp'}),
+ nasahaFather:Object.freeze({capabilityKey:'nasaha',deputy:passiveDeputyLexeme(fiveNouns,'your father'),inflection:'fiveNouns'})
+}));
 const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...feminineHumanSingulars,...feminineHumanDuals,...fiveNouns];
 function nounEnglish(word,caseName='acc'){
  return allCaseNouns.find(item=>item[caseName]===word)?.en||'the noun';
@@ -6124,6 +6192,10 @@ const GENERIC_PRESENT_PERSONS=Object.freeze([...new Set(Object.values(LEGACY_PRE
 function authoritativeVerbMorphology(token,data=null){
  const registered=token?.grammar?.type==='verb'?verbFormIndex.get(token.word):null;
  if(token?.tense==='present'){
+  if(registered?.form==='passivePresent'){
+   return{...PRESENT_MORPHOLOGY['3ms'],subjectMode:'deputy',voice:PASSIVE_VOICE,
+    capabilityKey:registered.morphology.capabilityKey,registered:true,feminineTaa:false};
+  }
   const legacyPerson=LEGACY_PRESENT_PERSON[registered?.form];
   // An explicitly registered surface never reports its person from the stored token; it is
   // resolved from the frozen reading set against the canonical template, and an ambiguous
@@ -6143,6 +6215,10 @@ function authoritativeVerbMorphology(token,data=null){
   return result;
  }
  if(token?.tense!=='past')return{feminineTaa:false};
+ if(registered?.form==='passivePast'){
+  return{...PAST_MORPHOLOGY['3ms'],subjectMode:'deputy',voice:PASSIVE_VOICE,
+   capabilityKey:registered.morphology.capabilityKey,registered:true};
+ }
  if(registered?.form!=='past')return{registered:false,feminineTaa:false};
  const person=registered.morphology?.pastPerson||'3ms';
  const base=PAST_MORPHOLOGY[person];
@@ -6168,6 +6244,9 @@ function materializeAuthoritativeMorphology(data){
   if(token.tense==='present'&&token.grammar.morphology.registered){
    token.grammar.person=token.grammar.morphology.person;
   }
+  const passive=token.grammar.morphology.voice===PASSIVE_VOICE;
+  if(passive)token.voiceRuleId=token.tense==='past'?'R_PASSIVE_PAST_FORM':'R_PASSIVE_PRESENT_FORM';
+  else delete token.voiceRuleId;
  });
 }
 function materializeComponents(data){
@@ -6215,6 +6294,7 @@ const GRAMMAR_RULES=Object.freeze({
   mubtada:{state:'raf',ruleId:'R_MUBTADA_RAF',en:'The mubtadaʾ; nominative.'},
   khabar:{state:'raf',ruleId:'R_KHABAR_RAF',en:'The khabar; nominative.'},
   faail:{state:'raf',ruleId:'R_FAIL_RAF',en:'The subject of the verb; nominative.'},
+  naibFail:{state:'raf',ruleId:'R_NAIB_FAIL_RAF',en:'The deputy subject of an authorized passive verb; nominative.'},
   object:{state:'nasb',ruleId:'R_MAFUL_NASB',en:'The direct object; accusative.'},
   majrur:{state:'jarr',ruleId:'R_HARF_JARR',en:'A noun governed by a preposition; genitive.'},
   mudafIlayh:{state:'jarr',ruleId:'R_MUDAF_ILAYH',en:'The second term of an iḍāfah; genitive.'},
@@ -6328,8 +6408,8 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
- roles:['mubtada','khabar','faail','object','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf'],
- relationships:['mubtadaKhabar','verbSubject','verbObject','preposition','idafa','inna','kana','concealedAn','follower'],
+ roles:['mubtada','khabar','faail','naibFail','object','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf'],
+ relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
@@ -6338,7 +6418,7 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  'imperative','diptote','naat sababi','atf bayan','badal al-badaa and badal al-nisyan',
  'badal of a verb from a verb',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
-  'feminine-dual past forms','passive and deputy-subject constructions',
+  'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
  ]
 });
@@ -6473,6 +6553,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_MUBTADA_RAF:sourceRule('The mubtadaʾ is nominative by ibtidāʾ.',[85,86,99,100],'Only an explicit nominal-sentence mubtadaʾ, including a delayed mubtadaʾ.',[IA_NOMINAL]),
  R_KHABAR_RAF:sourceRule('A single-word khabar is nominative by the mubtadaʾ.',[85,86,99,100,101],'Only a directly inflected, single-word khabar.',[IA_NOMINAL]),
  R_FAIL_RAF:sourceRule('The subject to which a verb is ascribed is nominative.',[87,88,89,90,91,92,93,97],'Explicit noun subjects use noun inflection; attached or hidden pronouns are built forms.'),
+ R_NAIB_FAIL_RAF:sourceRule('When the original fāʿil is omitted and the verb is made passive, the former object takes its place as a marfūʿ deputy subject.',[96,97,98],'Productive scope: a visible noun in one of the exact registered passive pairs; deputy-subject pronouns and feminine agreement are deferred.'),
  // Al-Tuḥfah p.81 supplies the wājib model and its exact wording for the addressee
  // («وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ فِيهِ وُجُوبًا تَقْدِيرُهُ أَنْتَ»); Daʿkūr supplies the
  // exact speaker claims «أَكْتُبُ»/«نَكْتُبُ». Only 1s and 1p are production-enabled here.
@@ -6542,6 +6623,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_FIVE_NOUNS_JARR_YA:sourceRule('Yāʾ is the khafḍ sign of the five nouns.',[32,66,67],'Only singular, non-diminutive forms in iḍāfah to something other than yāʾ al-mutakallim.'),
 
  R_MUDARI_RAF_DAMMA:sourceRule('A regular present verb free of a nāṣib or jāzim is raised with visible ḍammah.',[39,70,71,72],'Only sound-final present verbs with a visible ending and no attached five-verb ending.'),
+ R_PASSIVE_PRESENT_FORM:sourceRule('A present verb is changed to the passive by ḍamm on its first letter and fatḥ on the letter before its last.',[96,97,98],'Only the explicit passive-present surfaces in PASSIVE_VERB_CAPABILITIES; no string transformation is performed.'),
  /* The conditions text below was written when لَنْ was the only nāṣib this app produced. Phases
     3A1, 3B1 and 3B2 added أَنْ, explicit لِكَيْ and إِذَنْ, all of which take this same sign, so the
     old wording ("Only the explicitly stored lan forms") had become false. Corrected here as a
@@ -6557,6 +6639,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74,75,76,77,78],'Only an explicitly stored five-verb form standing in naṣb under a nāṣib this app produces: لَنْ, أَنْ, explicit لِكَيْ, إِذَنْ once its three conditions are proven, or one of the six frozen constructions licensing concealed أَنْ. The sign follows the verb’s own five-verb morphology, not the identity of the nāṣib.'),
  R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80],'Only after the visible jāzim lam.'),
  R_PAST_FATH_VISIBLE:sourceRule('A sound-final past verb has visible fatḥ unless wāw al-jamāʿah or a moving rafʿ pronoun is attached.',[71],'Generated scope: bare third-person masculine, the existing sākinah feminine tāʾ forms, and the explicitly stored dual-alif forms.'),
+ R_PASSIVE_PAST_FORM:sourceRule('A past verb is changed to the passive by ḍamm on its first letter and kasr on the letter before its last.',[96,97,98],'Only the explicit passive-past surfaces in PASSIVE_VERB_CAPABILITIES; no string transformation is performed.'),
  R_PAST_FATH_EST_MUNASABAH:sourceRule('A past verb attached to wāw al-jamāʿah has estimated fatḥ because the position is occupied by the vowel of munāsabah.',[71,72],'Generated scope: explicitly stored third-person masculine-plural past forms only.'),
  R_PAST_FATH_EST_INCIDENTAL_SUKUN:sourceRule('A past verb attached to a moving rafʿ pronoun has estimated fatḥ whose appearance is prevented by incidental sukūn, avoiding four successive vowels in what is like one word.',[72],'Generated scope: explicitly stored 1s, 2ms, 2fs, 1p, and 3fp past forms only.'),
  C_WAW_JAMAAH_FAIL:sourceRule('Wāw al-jamāʿah is a connected pronoun built on sukūn, in the place of rafʿ as the fāʿil.',[38,67,71,72,91],'Workspace scan p.38 directly analyzes the present-attached wāw as a fāʿil built on sukūn in the position of rafʿ; p.72 gives the parallel past analysis, and pp.67 and 91 attest the existing five-verb path.'),
@@ -6672,6 +6755,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_PREPOSITION_GOVERNS_JARR:sourceRule('A preposition governs khafḍ in the immediately following noun.',[13,174,175,176,177],'The internal legacy ID says JARR; output uses Al-Tuḥfah’s term khafḍ.'),
  RL_IDAFA_GOVERNS_JARR:sourceRule('Iḍāfah governs khafḍ in the second noun.',[174,175,177,178],'The internal legacy ID says JARR; output uses Al-Tuḥfah’s term khafḍ.'),
  RL_VERB_REQUIRES_SUBJECT:sourceRule('Every generated verb has an explicit, attached, or permitted hidden subject.',[38,39,87,88,89,90,91,92,93,97],'Hidden huwa is limited to supported third-person masculine singular forms; advanced 1s and 1p present forms use the person-bound hidden pronouns anā and naḥnu.'),
+ RL_PASSIVE_DEPUTY:sourceRule('An authorized passive verb is linked to the visible former object that replaces the omitted fāʿil and becomes marfūʿ.',[96,97,98],'Exactly one passive verb followed by exactly one registered visible deputy subject; no active fāʿil remains.'),
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
  RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
@@ -6905,6 +6989,20 @@ function registerAdvancedPresentSet(items){
   });
  });
 }
+function registerPassiveVerbCapabilities(){
+ Object.values(PASSIVE_VERB_CAPABILITIES).forEach(capability=>{
+  const active=generalVerbActions.find(lexeme=>lexeme.past===capability.activePast);
+  if(!active)throw new Error(`Passive capability names an unregistered active family: ${capability.activePast}`);
+  if(verbFormIndex.has(capability.pastSurface)||verbFormIndex.has(capability.presentSurface)){
+   throw new Error(`Passive capability collides with an existing verb surface: ${capability.key}`);
+  }
+  const lexeme=Object.freeze({...active,passiveCapability:capability});
+  verbFormIndex.set(capability.pastSurface,{lexeme,form:'passivePast',surface:capability.pastSurface,
+   morphology:Object.freeze({pastPerson:'3ms',voice:PASSIVE_VOICE,capabilityKey:capability.key})});
+  verbFormIndex.set(capability.presentSurface,{lexeme,form:'passivePresent',surface:capability.presentSurface,
+   morphology:Object.freeze({presentPerson:'3ms',voice:PASSIVE_VOICE,capabilityKey:capability.key})});
+ });
+}
 /* Exactly one authorized person, or nothing. A single-reading surface resolves on its own;
    an ambiguous surface resolves only through the canonical template's frozen capabilities,
    and zero matches or more than one match both reject. */
@@ -6927,6 +7025,7 @@ registerVerbSet(femininePastActions,{pastPerson:'3fs-explicit'});
 registerVerbSet(brokenObjectActions);
 registerAdvancedPastSet(advancedPastActions);
 registerAdvancedPresentSet(advancedPresentActions);
+registerPassiveVerbCapabilities();
 
 const grammarSpec=(type,role,extra={})=>({type,role,...extra});
 const AR={
@@ -6941,7 +7040,10 @@ const AR={
  presentPred:(w)=>grammarSpec('verb','present',{conjugation:'regular',person:'3ms'}),
  presentAdvanced:(w,person)=>grammarSpec('verb','present',{conjugation:presentConjugationFor(person),person,exactPresentRaf:true}),
  past:(w,opts={})=>grammarSpec('verb','past',{person:opts.person||'3ms'}),
+ passivePast:w=>grammarSpec('verb','past',{person:'3ms',voice:PASSIVE_VOICE}),
+ passivePresent:w=>grammarSpec('verb','present',{conjugation:'regular',person:'3ms',voice:PASSIVE_VOICE}),
  faail:(w)=>grammarSpec('noun','faail'),
+ naibFail:w=>grammarSpec('noun','naibFail'),
  particle:p=>grammarSpec('particle','particle',{particleType:'inna',particleWord:p.ar,particleIraab:p.iraab}),
  ismInna:(w,p)=>grammarSpec('noun','ismInna',{governorWord:p}),
  khabarInna:(w,p)=>grammarSpec('noun','khabarInna',{governorWord:p}),
@@ -7199,12 +7301,68 @@ function canonicalNaatPhraseEnglish(data,followedIndex){
  const found=naatPairAt(data,followedIndex+1);
  return found?.pair?.phraseEn||null;
 }
+function passiveTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.passiveTense?template:null;
+}
+function passivePairAt(data){
+ const template=passiveTemplateRecord(data),tokens=data?.tokens;
+ if(!template||!Array.isArray(tokens)||tokens.length!==2)return null;
+ const verb=tokens[0],deputy=tokens[1];
+ if(verb?.grammar?.type!=='verb'||verb.grammar.role!==template.passiveTense
+   ||verb.grammar.voice!==PASSIVE_VOICE||deputy?.grammar?.type!=='noun'||deputy.grammar.role!=='naibFail')return null;
+ for(const key of template.passivePairKeys){
+  const pair=PASSIVE_DEPUTY_PAIRS[key],capability=pair&&PASSIVE_VERB_CAPABILITIES[pair.capabilityKey];
+  const surface=template.passiveTense==='past'?capability?.pastSurface:capability?.presentSurface;
+  if(pair&&surface&&verb.surfaceHint===surface&&verb.word===surface&&deputy.surfaceHint===pair.deputy.nom
+    &&deputy.word===pair.deputy.nom)return{key,pair,capability,template,verb,deputy};
+ }
+ return null;
+}
+/* Structural authority, not a label: exactly two tokens, an explicitly registered passive surface,
+   no active fāʿil or object role, and the exact former-object lexeme in rafʿ. Relationship caches
+   and stored authorization booleans are not consulted. */
+function derivePassiveConstructionAuthority(data){
+ const found=passivePairAt(data);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-template-pair-or-surface'});
+ const {key,pair,capability,template,verb,deputy}=found;
+ const registered=verbFormIndex.get(verb.word);
+ const requiredForm=template.passiveTense==='past'?'passivePast':'passivePresent';
+ if(registered?.form!==requiredForm||registered.morphology?.capabilityKey!==capability.key
+   ||registered.lexeme?.passiveCapability!==capability){
+  return Object.freeze({authorized:false,reason:'passive-capability-mismatch'});
+ }
+ const noun=nounFormIndex.get(deputy.word);
+ if(noun?.lexeme?.nom!==pair.deputy.nom||noun.inflection!==pair.inflection){
+  return Object.freeze({authorized:false,reason:'deputy-lexeme-mismatch'});
+ }
+ if(deputy.state&&deputy.state!=='raf')return Object.freeze({authorized:false,reason:'deputy-not-raf'});
+ if(deputy.inflection&&deputy.inflection!==pair.inflection)return Object.freeze({authorized:false,reason:'deputy-inflection-mismatch'});
+ if(data.tokens.some(token=>token.grammar?.role==='faail'||token.grammar?.role==='object')){
+  return Object.freeze({authorized:false,reason:'active-subject-or-object-remains'});
+ }
+ return Object.freeze({authorized:true,reason:'',tense:template.passiveTense,pairKey:key,
+  capabilityKey:capability.key,activePast:capability.activePast,passiveSurface:verb.word,
+  formerObjectAcc:pair.deputy.acc,verbId:verb.id,deputyId:deputy.id,inflection:pair.inflection});
+}
+function canonicalPassiveTranslation(data){
+ const authority=derivePassiveConstructionAuthority(data);
+ if(!authority.authorized)return null;
+ const pair=PASSIVE_DEPUTY_PAIRS[authority.pairKey];
+ const capability=PASSIVE_VERB_CAPABILITIES[authority.capabilityKey];
+ const plural=['broken','dual','smp','sfp'].includes(pair.inflection);
+ const copula=authority.tense==='past'?(plural?'were':'was'):(plural?'are':'is');
+ return`${cap(pair.deputy.en)} ${copula} ${capability.participleEn}.`;
+}
 function inflectNoun(token,tokens,index,data){
  const registered=nounFormIndex.get(token.surfaceHint);
  token.lexeme=registered?.lexeme||null;
  token.inflection=token.grammar.inflection||registered?.inflection||inferNounInflection(token.surfaceHint);
  const roleRule=GRAMMAR_RULES.roles[token.grammar.role];
  if(!roleRule) throw new Error(`Unknown noun role: ${token.grammar.role}`);
+ if(token.grammar.role==='naibFail'&&!derivePassiveConstructionAuthority(data).authorized){
+  throw new Error('The deputy subject is not licensed by a canonical passive construction.');
+ }
  if(roleRule.state==='inherited'){
   const followed=tokens[index-(token.grammar.role==='atf'?2:1)];
   if(!followed?.state)throw new Error('A follower has no preceding inflected head.');
@@ -7261,9 +7419,12 @@ function inflectVerb(token,tokens,index){
  token.tense=token.grammar.role;
  if(token.tense==='past'){
   const pastPerson=registered?.morphology?.pastPerson||'3ms';
-  const morphology=registered?.form==='past'?PAST_MORPHOLOGY[pastPerson]:null;
+  const passive=registered?.form==='passivePast'&&token.grammar.voice===PASSIVE_VOICE;
+  const morphology=registered?.form==='past'||passive?PAST_MORPHOLOGY[pastPerson]:null;
   if(!morphology)throw new Error(`Unregistered past surface: ${token.surfaceHint}`);
   token.ruleId=PAST_BINAA_RULE_IDS[morphology.binaaClass];
+  if(passive)token.voiceRuleId='R_PASSIVE_PAST_FORM';
+  else delete token.voiceRuleId;
   token.expectedSurface=registered.surface;
   token.word=token.expectedSurface;
   return;
@@ -7338,12 +7499,15 @@ function inflectVerb(token,tokens,index){
  if(!moodRule) throw new Error(`No present-verb rule for ${token.inflection}/${token.state}`);
  token.sign=canonicalSignCopy(moodRule[0]);
  token.ruleId=moodRule[1];
+ if(registered?.form==='passivePresent'&&token.grammar.voice===PASSIVE_VOICE)token.voiceRuleId='R_PASSIVE_PRESENT_FORM';
+ else delete token.voiceRuleId;
  if(registered?.form==='presentRaf'&&token.grammar.exactPresentRaf){
   // The person must be one the surface can genuinely carry. Which single reading is correct
   // is settled later by resolvePresentReading against the canonical template.
   if(token.state!=='raf'||!registered.morphology.presentPersonCandidates?.includes(token.grammar.person))throw new Error(`Exact present surface is not authorized for this person/state: ${token.surfaceHint}`);
   token.expectedSurface=registered.surface;
- }else if(token.inflection==='afalKhamsa') token.expectedSurface=inflectFiveVerb(token.lexeme,token.grammar.person,token.state,false);
+ }else if(registered?.form==='passivePresent'&&token.grammar.voice===PASSIVE_VOICE)token.expectedSurface=registered.surface;
+ else if(token.inflection==='afalKhamsa') token.expectedSurface=inflectFiveVerb(token.lexeme,token.grammar.person,token.state,false);
  else token.expectedSurface=token.lexeme?.[{raf:'pres',nasb:'acc',jazm:'juss'}[token.state]]||token.surfaceHint;
  token.word=token.expectedSurface;
 }
@@ -7370,6 +7534,7 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({
  preposition:'RL_PREPOSITION_GOVERNS_JARR',
  idafa:'RL_IDAFA_GOVERNS_JARR',
  verbSubject:'RL_VERB_REQUIRES_SUBJECT',
+ passiveDeputy:'RL_PASSIVE_DEPUTY',
  verbObject:'RL_TRANSITIVE_VERB_OBJECT',
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
@@ -7409,6 +7574,20 @@ function resolveRelationships(data){
  });
  tokens.forEach((verb,index)=>{
   if(verb.grammar.type!=='verb'||verb.tense==='kana')return;
+   const passiveAuthority=derivePassiveConstructionAuthority(data);
+   const passiveRegistered=['passivePast','passivePresent'].includes(verbFormIndex.get(verb.word)?.form);
+   if(passiveAuthority.authorized&&passiveAuthority.verbId===verb.id){
+    const deputy=tokens.find(item=>item.id===passiveAuthority.deputyId);
+    const relation=addRelationship(data,'passiveDeputy',{verbId:verb.id,deputyId:deputy.id,
+     capabilityKey:passiveAuthority.capabilityKey,pairKey:passiveAuthority.pairKey,
+     activePast:passiveAuthority.activePast,formerObjectAcc:passiveAuthority.formerObjectAcc});
+    verb.relations.deputyId=deputy.id;verb.relations.passiveRelationshipId=relation.id;
+    deputy.relations.passiveVerbId=verb.id;deputy.relations.passiveRelationshipId=relation.id;
+    return;
+   }
+   /* A passive surface or passive voice claim that failed authority must not receive an active
+      hidden/explicit fāʿil as a fallback. Validation reports the precise passive failure. */
+   if(passiveRegistered||verb.grammar.voice===PASSIVE_VOICE)return;
    const explicit=tokens.slice(index+1).find(candidate=>candidate.grammar.role==='faail');
    const morphology=verb.grammar.morphology;
    if(morphology?.subjectMode==='attached'){
@@ -7530,6 +7709,7 @@ function nounRoleArabic(token){
  if(role==='mubtada')return token.grammar.delayed?'مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ بِالِابْتِدَاءِ':'مُبْتَدَأٌ مَرْفُوعٌ بِالِابْتِدَاءِ';
  if(role==='khabar')return'خَبَرٌ مَرْفُوعٌ بِالْمُبْتَدَأِ';
  if(role==='faail')return'فَاعِلٌ مَرْفُوعٌ';
+ if(role==='naibFail')return'نَائِبُ فَاعِلٍ مَرْفُوعٌ';
  if(role==='object')return'مَفْعُولٌ بِهِ مَنْصُوبٌ بِالْفِعْلِ';
  if(role==='majrur')return`اسْمٌ مَخْفُوضٌ بِـ«${token.grammar.governorWord}»`;
  if(role==='mudafIlayh')return'مُضَافٌ إِلَيْهِ مَخْفُوضٌ بِالْإِضَافَةِ';
@@ -7579,6 +7759,11 @@ function renderNounAnalysis(token){
 }
 function renderVerbAnalysis(token){
  if(token.tense==='past'){
+  if(token.grammar.voice===PASSIVE_VOICE){
+   token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ عَلَى آخِرِهِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
+   token.en='A passive-voice past verb built on the visible fatḥ at its end, with no syntactic position of its own.';
+   return;
+  }
   const binaaClass=token.grammar.morphology?.binaaClass;
   if(binaaClass==='visible-fath'){
    token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ عَلَى آخِرِهِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
@@ -7610,6 +7795,13 @@ function renderVerbAnalysis(token){
   const governed=mabniMahall&&mabniMahall.mahall==='nasb'?mabniMahall:null;
   token.ar=`${token.word}: فِعْلٌ مُضَارِعٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنُونِ النِّسْوَةِ${governed?`، فِي مَحَلِّ نَصْبٍ ${governed.causeAr}`:''}.`;
   token.en=`A present-tense verb built on sukūn because nūn al-niswah is directly attached to it.${governed?` It is in the position of naṣb ${governed.causeEn}; its bināʾ and its spelling do not change.`:''}`;
+  return;
+ }
+ if(token.grammar.voice===PASSIVE_VOICE){
+  const canonicalVerbSign=canonicalSign(safeSignId(token.sign));
+  if(!canonicalVerbSign)throw new Error(`No canonical sign for passive-present sign id “${safeSignId(token.sign)}”`);
+  token.ar=`${token.word}: فِعْلٌ مُضَارِعٌ مَبْنِيٌّ لِلْمَجْهُولِ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ ${canonicalVerbSign.ar}.`;
+  token.en=`A passive-voice present verb in the indicative; its sign is ${canonicalVerbSign.en}.`;
   return;
  }
  const governor=token.governorId?token._tokens.find(item=>item.id===token.governorId):null;
@@ -7775,6 +7967,11 @@ const WHY_ROLE=Object.freeze({
   ar:t=>`${wq(t.word)} هُوَ الَّذِي أُسْنِدَ إِلَيْهِ الْفِعْلُ، فَهُوَ الْفَاعِلُ.`,
   en:t=>`${eq(t.word)} is the doer of the action, so it is the فَاعِلٌ.`,
   stateId:()=>'WHY_STATE_FAIL',stateAr:()=>'وَالْفَاعِلُ مَرْفُوعٌ.',stateEn:()=>'The فَاعِلٌ is مَرْفُوعٌ.'},
+ naibFail:{
+  id:()=>'WHY_ROLE_NAIB_FAIL',
+  ar:t=>`حُذِفَ فَاعِلُ الْفِعْلِ الْمَبْنِيِّ لِلْمَجْهُولِ، فَأُقِيمَ ${wq(t.word)} مَقَامَهُ، فَهُوَ نَائِبُ فَاعِلٍ.`,
+  en:t=>`The passive verb's agent is omitted, so ${eq(t.word)}, formerly its object, takes the agent's place as نَائِبُ فَاعِلٍ.`,
+  stateId:()=>'WHY_STATE_NAIB_FAIL',stateAr:()=>'وَنَائِبُ الْفَاعِلِ مَرْفُوعٌ.',stateEn:()=>'The نَائِبُ الْفَاعِلِ is مَرْفُوعٌ.'},
  object:{
   id:()=>'WHY_ROLE_OBJECT',
   ar:t=>`${wq(t.word)} وَقَعَ عَلَيْهِ فِعْلُ الْفَاعِلِ، فَهُوَ الْمَفْعُولُ بِهِ.`,
@@ -8052,12 +8249,15 @@ function buildTokenWhy(token,data){
    :{id:'WHY_MUDAF',ar:'وَهُوَ مُضَافٌ إِلَى مَا بَعْدَهُ.',en:'It is also a مُضَافٌ joined to what follows it.'});
  }else if(type==='verb'){
   if(token.tense==='past'){
-   push({id:'WHY_PAST_VERB',ar:`${wq(token.word)} فِعْلٌ مَاضٍ.`,en:`${eq(token.word)} is a past-tense verb.`});
+   push(token.grammar.voice===PASSIVE_VOICE
+    ?{id:'WHY_PAST_VERB_PASSIVE',ar:`${wq(token.word)} فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ.`,en:`${eq(token.word)} is a passive-voice past verb.`}
+    :{id:'WHY_PAST_VERB',ar:`${wq(token.word)} فِعْلٌ مَاضٍ.`,en:`${eq(token.word)} is a past-tense verb.`});
+   if(token.grammar.voice===PASSIVE_VOICE)push({id:'WHY_PASSIVE_PAST_FORM',ar:'ضُمَّ أَوَّلُهُ وَكُسِرَ مَا قَبْلَ آخِرِهِ لِبِنَائِهِ لِلْمَجْهُولِ.',en:'Its first letter is ḍammah and its penultimate letter kasrah because it is built for the passive.'});
    if(token.grammar.morphology?.binaaClass==='visible-fath')push({id:'WHY_PAST_FATH_VISIBLE',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ عَلَى الْفَتْحِ، وَالْفَتْحُ هُنَا ظَاهِرٌ عَلَى آخِرِهِ.',en:'The past verb is مَبْنِيٌّ on fatḥ, and here that fatḥ is visible at its end.'});
    else if(token.grammar.morphology?.binaaClass==='estimated-fath-munasabah')push({id:'WHY_PAST_FATH_EST_MUNASABAH',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ؛ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ لِوَاوِ الْجَمَاعَةِ.',en:'The past verb is مَبْنِيٌّ on an estimated fatḥ because the position is occupied by the vowel suitable for wāw al-jamāʿah.'});
    else if(token.grammar.morphology?.binaaClass==='estimated-fath-incidental-sukun')push({id:'WHY_PAST_FATH_EST_INCIDENTAL_SUKUN',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ؛ لِاشْتِغَالِ الْمَحَلِّ بِالسُّكُونِ الْعَارِضِ لِدَفْعِ كَرَاهَةِ تَوَالِي أَرْبَعِ مُتَحَرِّكَاتٍ فِيمَا هُوَ كَالْكَلِمَةِ الْوَاحِدَةِ.',en:'The past verb is مَبْنِيٌّ on an estimated fatḥ because incidental sukūn occupies the position, avoiding four successive vowels in what functions like one word.'});
    else throw new Error(`WHY: unknown past bināʾ class “${token.grammar.morphology?.binaaClass}”`);
-   push(whyVerbSubject(token));
+   if(token.grammar.voice!==PASSIVE_VOICE)push(whyVerbSubject(token));
   }else if(token.tense==='kana'){
    /* Phase QP1 — the same rule, now naming the operator actually present. The CLAIM is unchanged
       (كان وأخواتها ترفع الاسم وتنصب الخبر), so this stays one Why rule rather than one per sister. */
@@ -8083,6 +8283,11 @@ function buildTokenWhy(token,data){
     push(whyLine);
    }
    push(whyVerbSubject(token));
+  }else if(token.grammar.voice===PASSIVE_VOICE){
+   push({id:'WHY_PRESENT_VERB_PASSIVE',ar:`${wq(token.word)} فِعْلٌ مُضَارِعٌ مَبْنِيٌّ لِلْمَجْهُولِ.`,en:`${eq(token.word)} is a passive-voice present verb.`});
+   push({id:'WHY_PASSIVE_PRESENT_FORM',ar:'ضُمَّ أَوَّلُهُ وَفُتِحَ مَا قَبْلَ آخِرِهِ لِبِنَائِهِ لِلْمَجْهُولِ.',en:'Its first letter is ḍammah and its penultimate letter fatḥah because it is built for the passive.'});
+   push(whyStateVerb(token,data));
+   push(whySignVerb(token));
   }else{
    /* Phase 3B1 — إِذَنْ is the only governor whose naṣb has to be EARNED, so its three conditions
       are stated before the conclusion that draws the naṣb from them. whyStateVerb throws for an
@@ -8106,6 +8311,13 @@ function buildTokenWhy(token,data){
 function buildRelationshipWhy(rel,data){
  const ids=[],ar=[],en=[];
  const push=s=>{ids.push(s.id);ar.push(s.ar);en.push(s.en)};
+ if(rel.type==='passiveDeputy'){
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const deputy=data.tokens.find(item=>item.id===rel.deputyId);
+  if(!verb||!deputy)return{ids,ar,en};
+  push({id:'WHY_REL_PASSIVE_DEPUTY',ar:`لَمَّا حُذِفَ فَاعِلُ ${wq(verb.word)} أُقِيمَ ${wq(deputy.word)} مَقَامَهُ وَأُعْطِيَ حُكْمَهُ فِي الرَّفْعِ.`,en:`When the agent of ${eq(verb.word)} was omitted, ${eq(deputy.word)} took its place and received its rule of rafʿ.`});
+  return{ids,ar,en};
+ }
  if(rel.type==='concealedAn'){
   const construction=CONCEALED_AN_CONSTRUCTIONS[rel.construction];
   const mode=CONCEALED_AN_MODES[rel.mode];
@@ -8176,6 +8388,11 @@ function buildRelationshipWhy(rel,data){
 function attachWhyExplanations(data){
  data.tokens.forEach(token=>{token.why=buildTokenWhy(token,data)});
  data.relationships.forEach(rel=>{
+  if(rel.type==='passiveDeputy'){
+   const recipient=data.tokens.find(item=>item.id===rel.verbId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='concealedAn'){
    const recipient=data.tokens.find(item=>item.id===rel.verbId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -8192,6 +8409,14 @@ function attachWhyExplanations(data){
  });
 }
 function renderRelationshipAnalysis(data){
+ data.relationships.filter(rel=>rel.type==='passiveDeputy').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const deputy=data.tokens.find(item=>item.id===rel.deputyId);
+  if(!verb||!deputy)return;
+  verb.phraseAr=`وَالتَّرْكِيبُ «${verb.word} ${deputy.word}»: فِعْلٌ مَبْنِيٌّ لِلْمَجْهُولِ حُذِفَ فَاعِلُهُ، وَنَائِبُ فَاعِلٍ مَرْفُوعٌ أُقِيمَ مَقَامَهُ.`;
+  verb.phraseEn=`Together, “${verb.word} ${deputy.word}” is a passive verb whose agent is omitted and a raised deputy subject taking its place.`;
+  verb.phraseLabel='Passive construction';
+ });
  data.relationships.filter(rel=>rel.type==='concealedAn').forEach(rel=>{
   const verb=data.tokens.find(item=>item.id===rel.verbId);
   const licensor=data.tokens.find(item=>item.id===rel.licensorId);
@@ -8407,7 +8632,7 @@ function validateExercise(data){
  data.tokens.forEach(token=>{
   if(!['noun','verb','particle'].includes(token.grammar?.type))fail('E_GRAMMAR_TYPE','Token has an unknown grammar type.',token);
   if(!token.id||!token.ruleId||!token.ar||!token.en)fail('E_TOKEN_INCOMPLETE','Token metadata or explanation is incomplete.',token);
-  [token.ruleId,token.signRuleId,token.subjectRuleId,token.mahallRuleId].filter(Boolean).forEach(ruleId=>{
+  [token.ruleId,token.signRuleId,token.subjectRuleId,token.mahallRuleId,token.voiceRuleId].filter(Boolean).forEach(ruleId=>{
    if(!isSourceAuthorized(ruleId))fail('E_SOURCE_UNVERIFIED',`Rule ${ruleId} is missing, disabled, or not source-verified.`,token);
    /* Phase 3B0A section 12 — a restricted rule is source-verified AND owned. R_IDHAN_CONDITIONS
       states three DISCOURSE conditions, so citing it is a claim that they were checked, and only
@@ -8419,6 +8644,10 @@ function validateExercise(data){
   // Being source-authorized is not the same as being OWNED: only the governed mabnī-present
   // lane may carry a whole-word maḥall rule at all.
   if(mahallRuleOwnerFailure(token,data))fail('E_MAHALL_RULE_OWNER','This token may not carry a whole-word maḥall rule; only a governed mabnī-present verb owns that field.',token);
+  if(voiceRuleOwnerFailure(token,data))fail('E_VOICE_RULE_OWNER','This token does not own the passive-form source rule it carries.',token);
+  if(Object.prototype.hasOwnProperty.call(token.grammar||{},'voice')&&token.grammar.voice!==PASSIVE_VOICE){
+   fail('E_VOICE_OWNER','A token may carry a voice field only for the canonical passive voice.',token);
+  }
   /* …and it may carry one only in the `mahallRuleId` FIELD. A maḥall rule worn as a token's own
      rule, sign rule, or concealment rule would still be source-authorized and would still be
      counted in validByRule as a legitimate production use of a real source rule — the same hole
@@ -8444,7 +8673,11 @@ function validateExercise(data){
   if(token.expectedSurface&&token.word!==token.expectedSurface)fail('E_SURFACE_FORM','Surface form disagrees with the grammar structure.',token);
   if(token.grammar.type==='noun'){
    const roleRule=GRAMMAR_RULES.roles[token.grammar.role];
-   if(token.grammar.role==='naat'){
+   if(token.grammar.role==='naibFail'){
+    const authority=derivePassiveConstructionAuthority(data);
+    if(!authority.authorized||authority.deputyId!==token.id)fail('E_NAIB_FAIL_AUTHORITY',`Deputy-subject authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_NAIB_FAIL_RAF')fail('E_NAIB_FAIL_RULE','The deputy subject is not bound to its source rule.',token);
+   }else if(token.grammar.role==='naat'){
     const authority=deriveNaatFollowerAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_NAAT_AUTHORITY',`True naʿt authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_NAAT_HAQIQI')fail('E_NAAT_RULE','The true naʿt is not bound to its source rule.',token);
@@ -8559,8 +8792,9 @@ function validateExercise(data){
    if(token.inflection==='afalKhamsa'&&token.state==='raf'&&!/ن[َِ]$/u.test(token.word))fail('E_AFAL5_RAF_NUN','A five-verb form in rafʿ must retain its nūn.',token);
    const authoritativeInflection=authoritative.formClass==='afalKhamsa'?'afalKhamsa':'regular';
    if(token.inflection!==authoritativeInflection)fail('E_PRESENT_FORM_CLASS','Present inflection disagrees with the authoritative person/form class.',token);
+   const passiveAuthority=derivePassiveConstructionAuthority(data);
    const authorizedForms=token.inflection==='regular'
-    ?{raf:['pres','presentRaf'],nasb:['acc'],jazm:['juss']}[token.state]
+    ?{raf:['pres','presentRaf',...(passiveAuthority.authorized&&passiveAuthority.verbId===token.id?['passivePresent']:[])],nasb:['acc'],jazm:['juss']}[token.state]
     :{raf:['five','presentRaf'],nasb:['fiveSub'],jazm:['fiveSub']}[token.state];
    if(!authorizedForms?.includes(registered?.form))fail('E_PRESENT_FORM_STATE','Registered present surface does not belong to its claimed form class and state.',token);
    /* Only re-derive the five-verb surface when the AUTHORITATIVE morphology really is a five
@@ -8612,6 +8846,15 @@ function validateExercise(data){
    if(productionTemplate&&!templateAuthorizesPastMorphology(productionTemplate,authoritative))fail('E_PAST_TEMPLATE_AUTHORIZATION','Past person and subject mode are not authorized by the production template.',token);
   }
   if(token.grammar.type==='verb'&&token.tense!=='kana'){
+   const passiveAuthority=derivePassiveConstructionAuthority(data);
+   const claimsPassive=token.grammar.voice===PASSIVE_VOICE||['passivePast','passivePresent'].includes(verbFormIndex.get(token.word)?.form);
+   if(claimsPassive){
+    if(!passiveAuthority.authorized||passiveAuthority.verbId!==token.id)fail('E_PASSIVE_AUTHORITY',`Passive construction authority failed: ${passiveAuthority.reason}.`,token);
+    const passiveRels=relationships.filter(rel=>rel.type==='passiveDeputy'&&rel.verbId===token.id);
+    if(passiveRels.length!==1||passiveRels[0].deputyId!==passiveAuthority.deputyId)fail('E_PASSIVE_RELATION','Passive verb does not have exactly one canonical deputy-subject relationship.',token);
+    if(relationships.some(rel=>rel.type==='verbSubject'&&rel.verbId===token.id))fail('E_PASSIVE_ACTIVE_SUBJECT','A passive verb may not carry an active fāʿil relationship.',token);
+    if(token.voiceRuleId!==(token.tense==='past'?'R_PASSIVE_PAST_FORM':'R_PASSIVE_PRESENT_FORM'))fail('E_PASSIVE_VOICE_RULE','Passive verb lacks its exact tense-specific form rule.',token);
+   }else{
    const subjectRel=relationships.find(rel=>rel.type==='verbSubject'&&rel.verbId===token.id);
    if(!subjectRel)fail('E_VERB_NO_SUBJECT','Verb has no explicit, attached, or implicit subject relationship.',token);
    if(token.tense==='present'){
@@ -8633,17 +8876,18 @@ function validateExercise(data){
     }else if(morphology.subjectMode==='explicit'&&subjectRel?.subjectType!=='explicit')fail('E_PAST_EXPLICIT_SUBJECT','This past form requires its following explicit noun fāʿil.',token);
     else if(morphology.subjectMode==='implicit'&&subjectRel?.subjectType!=='implicit')fail('E_PAST_IMPLICIT_SUBJECT','This past form requires its permitted hidden subject.',token);
    }
+   }
   }
   // Word-internal components (Phase 0): only verbs carry them; each must match the registry,
   // be source-verified, and the set must equal what the structural metadata expects.
   if(token.grammar.type!=='verb'&&token.components&&token.components.length)fail('E_COMPONENT_OWNER','Only verbs carry internal components.',token);
   if(token.grammar.type==='verb'){
    const authoritativeMorphology=authoritativeVerbMorphology(token,data);
-   const morphologyFields=token.tense==='past'
+   const morphologyFields=(token.tense==='past'
     ?['registered','tense','person','subjectMode','endingClass','binaaClass','feminineTaa']
     :token.tense==='present'
      ?['registered','tense','person','subjectMode','formClass','endingClass','binaaClass','feminineTaa']
-     :['feminineTaa'];
+     :['feminineTaa']).concat(token.grammar.voice===PASSIVE_VOICE?['voice','capabilityKey']:[]);
    if(morphologyFields.some(field=>token.grammar.morphology?.[field]!==authoritativeMorphology[field]))fail('E_VERB_MORPHOLOGY','Stored verb morphology disagrees with the registered production morphology.',token);
    const expectedKinds=verbComponentKinds(token,data);
    const actualKinds=(token.components||[]).map(component=>component.kind);
@@ -8690,6 +8934,7 @@ function validateExercise(data){
   if(token.grammar.particleType==='preposition'&&!token.relations.governsId)fail('E_ORPHAN_PREPOSITION','Preposition is not linked to an immediately following genitive noun.',token);
   if(token.grammar.role==='object'&&(!token.relations.verbId||!relationships.some(rel=>rel.type==='verbObject'&&rel.objectId===token.id&&rel.verbId===token.relations.verbId)))fail('E_ORPHAN_OBJECT','Direct object is not linked to a verb.',token);
   if(token.grammar.role==='faail'&&(!token.relations.verbId||!relationships.some(rel=>rel.type==='verbSubject'&&rel.subjectId===token.id&&rel.verbId===token.relations.verbId)))fail('E_ORPHAN_SUBJECT','Explicit subject is not linked to a verb.',token);
+  if(token.grammar.role==='naibFail'&&(!token.relations.passiveVerbId||!relationships.some(rel=>rel.type==='passiveDeputy'&&rel.deputyId===token.id&&rel.verbId===token.relations.passiveVerbId)))fail('E_ORPHAN_NAIB_FAIL','Deputy subject is not linked to its passive verb.',token);
   if(token.grammar.role==='majrur'){
    const preposition=token.relations.governorId&&tokenById.get(token.relations.governorId);
    if(!preposition||!relationships.some(rel=>rel.type==='preposition'&&rel.nounId===token.id&&rel.governorId===preposition.id))fail('E_ORPHAN_MAJRUR','Genitive noun is not linked to a visible preposition.',token);
@@ -8753,6 +8998,14 @@ function validateExercise(data){
   if(isRestrictedSourceRule(rel.ruleId))fail('E_RESTRICTED_SOURCE_RULE',`Relationship rule ${rel.ruleId} may be cited only by its registered non-production consumer.`);
   const ids=Object.entries(rel).filter(([key])=>key!=='ruleId'&&key!=='id'&&/(?:Id|Ids)$/.test(key)).flatMap(([,value])=>Array.isArray(value)?value:[value]).filter(Boolean);
   ids.forEach(id=>{if(!tokenById.has(id)&&!String(id).includes(':R'))fail('E_RELATION_TOKEN','Relationship points to a missing token.');});
+  if(rel.type==='passiveDeputy'){
+   const authority=derivePassiveConstructionAuthority(data);
+   if(!authority.authorized||rel.verbId!==authority.verbId||rel.deputyId!==authority.deputyId
+     ||rel.capabilityKey!==authority.capabilityKey||rel.pairKey!==authority.pairKey
+     ||rel.activePast!==authority.activePast||rel.formerObjectAcc!==authority.formerObjectAcc){
+    fail('E_PASSIVE_RELATION','Passive-deputy relationship is not the canonical proof.',tokenById.get(rel.deputyId));
+   }
+  }
   if(rel.type==='follower'){
    const follower=tokenById.get(rel.followerId);
    const authority=rel.kind===ATF_KIND?deriveAtfFollowerAuthority(data,data.tokens.indexOf(follower))
@@ -8881,7 +9134,7 @@ function completeNominalAnalysis(data){
   grammarDiagnostics.valid++;
   grammarDiagnostics.validByTemplate[data.templateId]=(grammarDiagnostics.validByTemplate[data.templateId]||0)+1;
   data.tokens.forEach(item=>{
-   [item.ruleId,item.signRuleId,item.subjectRuleId,item.mahallRuleId].filter(Boolean).forEach(ruleId=>{grammarDiagnostics.validByRule[ruleId]=(grammarDiagnostics.validByRule[ruleId]||0)+1});
+   [item.ruleId,item.signRuleId,item.subjectRuleId,item.mahallRuleId,item.voiceRuleId].filter(Boolean).forEach(ruleId=>{grammarDiagnostics.validByRule[ruleId]=(grammarDiagnostics.validByRule[ruleId]||0)+1});
   });
   data.relationships.forEach(rel=>{grammarDiagnostics.validByRule[rel.ruleId]=(grammarDiagnostics.validByRule[rel.ruleId]||0)+1});
   return data;
@@ -8903,7 +9156,7 @@ function add(starts,form,state,sign,build,metadata={}){
  templateIdCounts.set(family,ordinal);
  const stableId=`T_${family}_${String(ordinal).padStart(2,'0')}`;
  const pastCapabilities=Object.freeze((metadata.pastCapabilities||[]).map(capability=>{
-  if(!PAST_MORPHOLOGY[capability.person]||!['explicit','attached','implicit'].includes(capability.subjectMode)){
+  if(!PAST_MORPHOLOGY[capability.person]||!['explicit','attached','implicit','deputy'].includes(capability.subjectMode)){
    throw new Error(`Invalid past template capability: ${capability.person}/${capability.subjectMode}`);
   }
   return Object.freeze({person:capability.person,subjectMode:capability.subjectMode});
@@ -8911,7 +9164,7 @@ function add(starts,form,state,sign,build,metadata={}){
  const presentCapabilities=Object.freeze((metadata.presentCapabilities||[]).map(capability=>{
   const morphology=PRESENT_MORPHOLOGY[capability.person];
   const permittedMode=morphology?.subjectMode==='contextual'
-   ?['explicit','implicit'].includes(capability.subjectMode)
+   ?['explicit','implicit','deputy'].includes(capability.subjectMode)
    :morphology?.subjectMode===capability.subjectMode;
   if(!morphology||!permittedMode||capability.formClass!==morphology.formClass||capability.endingClass!==morphology.endingClass
     ||(capability.binaaClass||'')!==(morphology.binaaClass||'')){
@@ -8955,6 +9208,19 @@ function add(starts,form,state,sign,build,metadata={}){
     `responseContextId` remains the dormant Phase 3B0A seam and no template sets it. */
  const responseContextId=metadata.responseContextId||'';
  const responsePairIds=Object.freeze([...(metadata.responsePairIds||[])]);
+ const passiveTense=metadata.passiveTense||'';
+ const passivePairKeys=Object.freeze([...(metadata.passivePairKeys||[])]);
+ if(Boolean(passiveTense)!==Boolean(passivePairKeys.length)||passiveTense&&!['past','present'].includes(passiveTense)){
+  throw new Error(`Template ${stableId} has an invalid passive declaration.`);
+ }
+ if(passivePairKeys.some((key,position)=>passivePairKeys.indexOf(key)!==position||!PASSIVE_DEPUTY_PAIRS[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered passive pair.`);
+ }
+ if(passiveTense==='past'&&(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='deputy')||presentCapabilities.length)
+   ||passiveTense==='present'&&(!presentCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='deputy')||pastCapabilities.length)
+   ||!passiveTense&&(pastCapabilities.some(item=>item.subjectMode==='deputy')||presentCapabilities.some(item=>item.subjectMode==='deputy'))){
+  throw new Error(`Template ${stableId} has passive deputy morphology without matching passive authority.`);
+ }
  const followerKind=metadata.followerKind||'';
  const followerPairKeys=Object.freeze([...(metadata.followerPairKeys||[])]);
  const followerConjunctionKeys=Object.freeze([...(metadata.followerConjunctionKeys||[])]);
@@ -9018,6 +9284,8 @@ function add(starts,form,state,sign,build,metadata={}){
      resolver read these two and nothing else; no exercise may carry either name. */
   responseContextId,
   responsePairIds,
+  passiveTense,
+  passivePairKeys,
   followerKind,
   followerPairKeys,
   followerConjunctionKeys,
@@ -9810,6 +10078,52 @@ add('verb','singular','nasb','fatha',()=>pickedBadal(BADAL_SINGULAR_NASB_KEYS,'b
  badalMetadata(BADAL_SINGULAR_NASB_KEYS,pastTemplateMetadata('3ms','explicit')));
 add('particle','singular','jarr','kasra',()=>pickedBadal(BADAL_SINGULAR_JARR_KEYS,'badal-jarr','jarr'),
  badalMetadata(BADAL_SINGULAR_JARR_KEYS));
+
+/* نائب الفاعل — one canonical builder over explicit verb/deputy pairs. The active fāʿil is absent,
+   the former object is the visible target in rafʿ, and both verb surfaces come only from the
+   passive capability registry. */
+const PASSIVE_PAIR_KEYS_BY_INFLECTION=Object.freeze(Object.fromEntries(
+ ['singular','broken','dual','smp','fiveNouns'].map(inflection=>[inflection,Object.freeze(
+  Object.keys(PASSIVE_DEPUTY_PAIRS).filter(key=>PASSIVE_DEPUTY_PAIRS[key].inflection===inflection))])
+));
+function buildPassiveExercise(pairKey,tense){
+ const pair=PASSIVE_DEPUTY_PAIRS[pairKey],capability=pair&&PASSIVE_VERB_CAPABILITIES[pair.capabilityKey];
+ if(!pair||!capability||!['past','present'].includes(tense))throw new Error(`Unknown passive construction: ${pairKey}/${tense}`);
+ const surface=tense==='past'?capability.pastSurface:capability.presentSurface;
+ const plural=['broken','dual','smp','sfp'].includes(pair.inflection);
+ const copula=tense==='past'?(plural?'were':'was'):(plural?'are':'is');
+ return{
+  sentence:`${surface} ${pair.deputy.nom}`,
+  translation:`${cap(pair.deputy.en)} ${copula} ${capability.participleEn}.`,
+  tokens:[
+   token(surface,`${copula} ${capability.participleEn}`,tense==='past'?AR.passivePast(surface):AR.passivePresent(surface),'An explicitly registered passive-voice form.'),
+   token(pair.deputy.nom,pair.deputy.en,AR.naibFail(pair.deputy.nom),'The raised deputy subject of the passive verb.',true)
+  ]
+ };
+}
+const passiveTemplateMetadata=(tense,pairKeys)=>tense==='past'
+ ?{passiveTense:tense,passivePairKeys:pairKeys,pastCapabilities:[{person:'3ms',subjectMode:'deputy'}]}
+ :{passiveTense:tense,passivePairKeys:pairKeys,presentCapabilities:[{person:'3ms',subjectMode:'deputy',
+   formClass:PRESENT_MORPHOLOGY['3ms'].formClass,endingClass:PRESENT_MORPHOLOGY['3ms'].endingClass,
+   binaaClass:PRESENT_MORPHOLOGY['3ms'].binaaClass,governorMode:'none'}]};
+const pickedPassive=(inflection,tense)=>{
+ const keys=PASSIVE_PAIR_KEYS_BY_INFLECTION[inflection];
+ return buildPassiveExercise(pickVaried(keys,`passive:${inflection}:${tense}`,String),tense);
+};
+const addPassiveLane=(form,sign,tense)=>{
+ const keys=PASSIVE_PAIR_KEYS_BY_INFLECTION[form];
+ add('verb',form,'raf',sign,()=>pickedPassive(form,tense),passiveTemplateMetadata(tense,keys));
+};
+addPassiveLane('singular','damma','past');
+addPassiveLane('singular','damma','present');
+addPassiveLane('broken','damma','past');
+addPassiveLane('broken','damma','present');
+addPassiveLane('dual','alif','past');
+addPassiveLane('dual','alif','present');
+addPassiveLane('smp','waw','past');
+addPassiveLane('smp','waw','present');
+addPassiveLane('fiveNouns','waw','past');
+addPassiveLane('fiveNouns','waw','present');
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

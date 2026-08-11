@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds,followerKind,followerPairKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],followerKind,followerPairKeys:[...followerPairKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -67,6 +67,12 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   authoritativeVerbMorphology,
   verbFormIndex,
   nounFormIndex,
+  NAAT_KIND,
+  NAAT_AGREEMENT_DIMENSIONS,
+  NAAT_PAIR_REGISTRY,
+  deriveNaatFollowerAuthority,
+  canonicalNaatPhraseEnglish,
+  buildNaatExercise,
   canonicalExerciseIdentityV3Phase1,
   isPhase1V3IdentityCandidate,
   REVIEWED_SOURCE_AUTHORITIES,
@@ -339,6 +345,91 @@ vm.runInContext(script,context,{filename:'index.html'});
 
 const api=context.__nahwTest;
 assert(api&&typeof api.completeNominalAnalysis==='function','Nominal validator was not exported to the test harness');
+function runNaatFocusedTests(){
+  const templateIds={
+    singularRaf:'T_NOUN_SINGULAR_RAF_DAMMA_03',dualRaf:'T_NOUN_DUAL_RAF_ALIF_02',
+    smpRaf:'T_NOUN_SMP_RAF_WAW_02',sfpRaf:'T_NOUN_SFP_RAF_DAMMA_02',
+    singularNasb:'T_PARTICLE_SINGULAR_NASB_FATHA_08',sfpNasb:'T_PARTICLE_SFP_NASB_KASRASUB_02',
+    singularJarr:'T_PARTICLE_SINGULAR_JARR_KASRA_02'
+  };
+  const cases=[];
+  for(const pairKey of ['singularDefM','singularIndefM','singularDefF','singularIndefF']){
+    cases.push([pairKey,'raf',templateIds.singularRaf],[pairKey,'nasb',templateIds.singularNasb],
+      [pairKey,'jarr',templateIds.singularJarr]);
+  }
+  cases.push(['dualDefM','raf',templateIds.dualRaf],['smpDefM','raf',templateIds.smpRaf],
+    ['brokenDefM','raf',templateIds.smpRaf],['sfpDefF','raf',templateIds.sfpRaf],
+    ['sfpDefF','nasb',templateIds.sfpNasb]);
+  const built=new Map();
+  for(const [pairKey,host,templateId] of cases){
+    const template=api.templates.find(item=>item.stableId===templateId);
+    assert(template&&template.followerKind===api.NAAT_KIND&&template.followerPairKeys.includes(pairKey),
+      pairKey+'/'+host+' is not reachable through frozen template authority');
+    const data=api.completeNominalAnalysis({...api.buildNaatExercise(pairKey,host),
+      templateId,templateStarts:template.starts,templateForm:template.form,
+      templateState:template.state,templateSign:template.sign});
+    const followerIndex=data.tokens.findIndex(token=>token.grammar.role==='naat');
+    const follower=data.tokens[followerIndex],followed=data.tokens[followerIndex-1];
+    const authority=api.deriveNaatFollowerAuthority(data,followerIndex);
+    const pair=api.NAAT_PAIR_REGISTRY[pairKey];
+    assert(Object.isFrozen(pair)&&Object.isFrozen(pair.followed)&&Object.isFrozen(pair.follower),
+      pairKey+' is not immutable lexical authority');
+    assert(authority.authorized&&authority.followedId===followed.id&&authority.followerId===follower.id,
+      pairKey+'/'+host+' lost follower/manut identity');
+    assert(authority.state===followed.state&&follower.state===followed.state,
+      pairKey+'/'+host+' did not inherit state');
+    assert(authority.definiteness===pair.definiteness&&authority.gender===pair.gender&&authority.number===pair.number,
+      pairKey+'/'+host+' lost an agreement dimension');
+    assert(authority.agreementDimensions.join('|')===api.NAAT_AGREEMENT_DIMENSIONS.join('|'),
+      pairKey+'/'+host+' does not expose the complete agreement contract');
+    const expectedSign=api.GRAMMAR_RULES.nounInflection[follower.inflection][follower.state][0];
+    assert(api.safeSignId(follower.sign)===expectedSign,
+      pairKey+'/'+host+' bypassed the canonical noun sign matrix');
+    const relation=data.relationships.find(item=>item.type==='follower');
+    assert(relation&&relation.followedId===followed.id&&relation.followerId===follower.id
+      &&relation.state===authority.state&&relation.definiteness===pair.definiteness
+      &&relation.gender===pair.gender&&relation.number===pair.number,
+      pairKey+'/'+host+' has no canonical follower relationship');
+    assert(follower.ruleId==='R_NAAT_HAQIQI'&&relation.ruleId==='RL_FOLLOWER_AGREEMENT'
+      &&api.isSourceAuthorized(follower.ruleId)&&api.isSourceAuthorized(relation.ruleId),
+      pairKey+'/'+host+' lost source ownership');
+    assert(follower.why.ids.includes('WHY_ROLE_NAAT_HAQIQI')
+      &&follower.why.ids.includes('WHY_STATE_NAAT_INHERITED')
+      &&followed.phraseWhy?.ids.includes('WHY_REL_NAAT_AGREEMENT'),
+      pairKey+'/'+host+' has no dependency-aware Why chain');
+    assert(api.composeCanonicalTranslation(data)===data.translation,
+      pairKey+'/'+host+' builder translation differs from the canonical composer');
+    const snapshot=api.createExerciseSnapshot(data);
+    const restored=snapshot&&api.restoreExerciseSnapshot(snapshot);
+    assert(restored&&api.validateExercise(JSON.parse(JSON.stringify(restored))).length===0,
+      pairKey+'/'+host+' failed its History round trip');
+    const restoredFollower=restored.tokens.find(token=>token.grammar.role==='naat');
+    assert(restoredFollower?.word===follower.word
+      &&restored.relationships.some(item=>item.type==='follower'&&item.followerId===restoredFollower.id),
+      pairKey+'/'+host+' did not rebuild follower authority after History');
+    built.set(pairKey+'/'+host,data);
+  }
+  const clone=value=>JSON.parse(JSON.stringify(value));
+  const mustReject=(label,source,mutate,code='E_NAAT_AUTHORITY')=>{
+    const data=clone(source);mutate(data);
+    const failures=api.validateExercise(data);
+    assert(failures.some(item=>item.code===code),label+' was accepted: '+failures.map(item=>item.code).join(','));
+  };
+  const base=built.get('singularDefM/raf');
+  mustReject('wrong inherited state',base,data=>{data.tokens[1].state='nasb'});
+  mustReject('wrong definiteness',base,data=>{data.tokens[1].word=api.NAAT_PAIR_REGISTRY.singularIndefM.follower.nom});
+  mustReject('wrong gender',base,data=>{data.tokens[1].word=api.NAAT_PAIR_REGISTRY.singularDefF.follower.nom});
+  mustReject('wrong number',base,data=>{data.tokens[1].word=api.NAAT_PAIR_REGISTRY.dualDefM.follower.nom});
+  const ordinary=api.buildTemplate(api.templates.find(item=>item.stableId==='T_NOUN_SINGULAR_RAF_DAMMA_01').id);
+  mustReject('arbitrary adjective promoted to naat',ordinary,data=>{data.tokens[1].grammar.role='naat';data.tokens[1].ruleId='R_NAAT_HAQIQI'});
+  mustReject('follower linked to unrelated noun',base,data=>{
+    const relation=data.relationships.find(item=>item.type==='follower');
+    relation.followedId=data.tokens[3].id;data.tokens[1].relations.followedId=data.tokens[3].id;
+  },'E_FOLLOWER_RELATION');
+  console.log('Naat focused tests: 17 canonical builds, 17 History round trips, 6 negative boundaries — green');
+}
+runNaatFocusedTests();
+if(process.env.NAHW_FOCUSED_NAAT==='1')process.exit(0);
 function runConcealedAnFocusedTests(){
   const constructions=Object.values(api.CONCEALED_AN_CONSTRUCTIONS);
   assert(constructions.length===6,'The concealed-an registry does not contain exactly six constructions');
@@ -873,7 +964,7 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 // Phase 3A2's two governor-specific mabnī-present maḥall rules.
 // Phase 3B1 adds exactly one: G_IDHAN_NASB, the particle's own identity and government, which is
 // a different claim from the conditions R_IDHAN_CONDITIONS already owns.
-assert(Object.keys(api.SOURCE_REGISTRY).length===81,`Expected 81 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===83,`Expected 83 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -3471,7 +3562,7 @@ c2Attack('hidden subject relation','يَكْتُبْنَ',(d,v)=>{const r=d.rela
     return ['an','kay'].includes(mode)?`:${mode}-${t.presentPerson}`:':inna';
   };
   assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='singular'&&t.state==='nasb'&&t.sign==='fatha')
-    .map(t=>t.stableId+groupKind(t)).join(' | ')
+    .slice(0,7).map(t=>t.stableId+groupKind(t)).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_01:inna | T_PARTICLE_SINGULAR_NASB_FATHA_02:lan | T_PARTICLE_SINGULAR_NASB_FATHA_03:lan'
       +' | T_PARTICLE_SINGULAR_NASB_FATHA_04:an-3fp | T_PARTICLE_SINGULAR_NASB_FATHA_05:an-2fp'
       +' | T_PARTICLE_SINGULAR_NASB_FATHA_06:kay-3fp | T_PARTICLE_SINGULAR_NASB_FATHA_07:kay-2fp',
@@ -3637,10 +3728,10 @@ c3Live('component moved onto the object',c3Golden,1,'E_COMPONENT_OWNER',(d,v)=>{
   assert(group.slice(0,3).map(t=>`${t.stableId}:${t.governedPresent?'governed-'+t.presentPerson:'inna'}`).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_01:inna | T_PARTICLE_SINGULAR_NASB_FATHA_02:governed-3fp | T_PARTICLE_SINGULAR_NASB_FATHA_03:governed-2fp',
     'The particle/singular/nasb/fatha stable-ID mapping changed');
-  assert(group.slice(3).map(t=>`${t.stableId}:${t.presentCapabilities[0].governorMode}-${t.presentPerson}`).join(' | ')
+  assert(group.slice(3,7).map(t=>`${t.stableId}:${t.presentCapabilities[0].governorMode}-${t.presentPerson}`).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_04:an-3fp | T_PARTICLE_SINGULAR_NASB_FATHA_05:an-2fp | T_PARTICLE_SINGULAR_NASB_FATHA_06:kay-3fp | T_PARTICLE_SINGULAR_NASB_FATHA_07:kay-2fp',
     'The Phase-3A2 templates were not appended after the Phase-2b-C group');
-  assert(group.slice(3).every(t=>!t.governedPresent&&!t.frontedPresent&&!t.presentGovernor),
+  assert(group.slice(3,7).every(t=>!t.governedPresent&&!t.frontedPresent&&!t.presentGovernor),
     'A Phase-3A2 template reached a rebuilder or governor contract that is not its own');
 }
 {
@@ -5371,7 +5462,7 @@ for(const t of api.templates){
 {
   const ids=api.templates.map(t=>t.stableId);
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
-  assert(api.templates.length===96,`Expected 96 templates after the concealed-an fast-track, found ${api.templates.length}`);
+  assert(api.templates.length===103,`Expected 103 templates after the naat fast-track, found ${api.templates.length}`);
   assert(Object.values(p4Templates).map(t=>t.stableId).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_04 | T_PARTICLE_SINGULAR_NASB_FATHA_05 | T_PARTICLE_SINGULAR_NASB_FATHA_06 | T_PARTICLE_SINGULAR_NASB_FATHA_07',
     'The Phase 3A2 stable IDs are not the four appended ones');
@@ -7816,13 +7907,14 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===96,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===103,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
-  /* X: the exact stable IDs. The 82 Phase 3B0A inherited are unchanged — asserted in both
-     directions against the original manifest — and the productive LANES append exactly one each. */
+  /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
+     true-naʿt templates are appended and excluded from the inherited manifest comparison. */
   const concealedTemplateIds=Object.values(api.CONCEALED_AN_CONSTRUCTIONS).flatMap(item=>[item.ordinaryTemplateId,item.fiveTemplateId]);
-  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  const naatTemplateIds=api.templates.filter(item=>item.followerKind===api.NAAT_KIND).map(item=>item.stableId);
+  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
@@ -9191,7 +9283,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===96,'the repair block changed the production template count');
+  assert(api.templates.length===103,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -9312,18 +9404,20 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===101,'the structural map holds '+registeredKeys.length+' keys, not 101');
-    assert(registeredShapes.length===32,'the shape registry holds '+registeredShapes.length+' shapes, not 32');
+    assert(registeredKeys.length===108,'the structural map holds '+registeredKeys.length+' keys, not 108');
+    assert(registeredShapes.length===35,'the shape registry holds '+registeredShapes.length+' shapes, not 35');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
-    /* The 87 inherited keys and 22 inherited shapes are untouched: Phase 3B1 APPENDS, it does not
-       re-map. Anything else would silently re-translate a pre-existing template. */
+    /* The 87 inherited keys and 22 inherited shapes are untouched: later productive lanes append
+       their own keys and shapes rather than re-mapping older templates. */
     {
       const laneKeys=api.IDHAN_PRODUCTION_CONSUMERS.map(id=>id+'||particle:particle,verb:present');
       const concealedTemplateIds=Object.values(api.CONCEALED_AN_CONSTRUCTIONS).flatMap(item=>[item.ordinaryTemplateId,item.fiveTemplateId]);
       const concealedKeys=registeredKeys.filter(key=>concealedTemplateIds.some(id=>key.startsWith(id+'||')));
-      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32'];
-      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k));
+      const naatTemplateIds=api.templates.filter(item=>item.followerKind===api.NAAT_KIND).map(item=>item.stableId);
+      const naatKeys=registeredKeys.filter(key=>naatTemplateIds.some(id=>key.startsWith(id+'||')));
+      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35'];
+      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===87,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===22,'the inherited shape set changed: '+inheritedShapes.length);
@@ -9358,7 +9452,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===96,'the map covers '+mappedTemplates.size+' templates, not 96');
+    assert(mappedTemplates.size===103,'the map covers '+mappedTemplates.size+' templates, not 103');
     // The five dual-structure templates carry exactly two lanes each; everything else exactly one.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -9417,8 +9511,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===101,'only '+keysSeen.size+' of the 101 structural keys were observed');
-    assert(shapesSeen.size===32,'only '+shapesSeen.size+' of the 32 composer shapes were observed');
+    assert(keysSeen.size===108,'only '+keysSeen.size+' of the 108 structural keys were observed');
+    assert(shapesSeen.size===35,'only '+shapesSeen.size+' of the 35 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -9752,7 +9846,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===101,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===108,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -10071,8 +10165,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         tokensChecked++;
       }
     }
-    // The six ordinary/five-verb concealed-أَنْ pairs add 68 tokens to the inherited 241.
-    assert(tokensChecked===309,'the production token population changed: '+tokensChecked+' (expected 309)');
+    // The seven true-naʿt templates append 28 tokens to the established 309-token population.
+    assert(tokensChecked===337,'the production token population changed: '+tokensChecked+' (expected 337)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -10261,7 +10355,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===96,'the presentation repair changed the template count');
+    assert(api.templates.length===103,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -12153,17 +12247,17 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===81,'the source-rule count does not include the nine fast-track rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===83,'the source-rule count does not include the follower rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
   assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.concealedAnMode).length===6,'the shared concealed-an registry is not exactly six governors');
   assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.mood==='jazm').length===1,
     'a second jāzim entered the governor table');
-  assert(api.templates.length===96,'the concealed-an templates are not exactly twelve additions');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===101
-    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===32,
-    'the composer authority does not include the twelve fast-track mappings');
+  assert(api.templates.length===103,'the production template count does not include the naat additions');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===108
+    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===35,
+    'the composer authority does not include the naat mappings');
   p7Cases+=8;
 }
 
@@ -12929,7 +13023,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===96,`Expected 96 production templates, found ${api.templates.length}`);
+assert(api.templates.length===103,`Expected 103 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -13252,7 +13346,8 @@ function auditTokenWhy(tok,label,owner=null){
   whyTokens++;
   const ar=bareAr(tok.why.ar.join(' '));
   if(tok.grammar.type==='noun'){
-    assert(tok.state===WHY_ROLE_STATE[tok.grammar.role],`${label}: role/state mismatch`);
+    const expectedRoleState=tok.grammar.role==='naat'?owner?.[owner.indexOf(tok)-1]?.state:WHY_ROLE_STATE[tok.grammar.role];
+    assert(tok.state===expectedRoleState,`${label}: role/state mismatch`);
     assert(tok.state!=='jazm'&&!ar.includes('مجزوم'),`${label}: noun described with jazm`);
     const signRule=`WHY_SIGN_${tok.inflection.toUpperCase()}_${tok.state.toUpperCase()}`;
     assert(tok.why.ids.includes(signRule),`${label}: missing sign rule ${signRule}`);

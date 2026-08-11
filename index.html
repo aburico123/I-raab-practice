@@ -1139,6 +1139,13 @@ function resolveCanonicalTokenGloss(data,token,index){
   const sister=kanaSisterRecord(surface);
   return sister?sister.en:null;
  }
+ /* 4c — a productive true naʿt gets its adjective gloss from the exact authorized pair. Shared
+    surfaces keep their older noun-entry glosses, so this role-and-template proof is necessary and
+    prevents the follower vocabulary from repainting pre-existing exercises. */
+ if(type==='noun'&&token.grammar.role==='naat'){
+  const found=naatPairAt(data,index);
+  return found?.pair?.follower?.en||null;
+ }
  /* 5 — an object noun, resolved through its GOVERNING VERB rather than through its surface.
     Two vocabulary records can share one accusative surface with different English, so a bare
     surface lookup would have to choose between them. The verb that governs the object is what
@@ -1271,7 +1278,10 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  TS29:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:1:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'verb:0:third'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' until he '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])}),
  TS30:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:1:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'verb:0:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' until they '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])}),
  TS31:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' was not going to '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])}),
- TS32:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' were not going to '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])})
+ TS32:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' were not going to '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])}),
+ TS33:Object.freeze({parts:Object.freeze([Object.freeze({slot:'followerPhrase:0:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerCopula:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])}),
+ TS34:Object.freeze({parts:Object.freeze([Object.freeze({slot:'innaLead:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerPhrase:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerCopula:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])}),
+ TS35:Object.freeze({parts:Object.freeze([Object.freeze({lit:'There is '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerPhrase:1'}),Object.freeze({lit:'.'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1379,7 +1389,14 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_PARTICLE_PRESENT_NASB_FATHA_09||particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_09",structure:"particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS27",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09||particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09",structure:"particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS28",copulaPlural:true}),
  "T_PARTICLE_PRESENT_NASB_FATHA_10||verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_10",structure:"verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object",shape:"TS29",copulaPlural:false}),
- "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10||verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10",structure:"verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object",shape:"TS30",copulaPlural:true})
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10||verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10",structure:"verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object",shape:"TS30",copulaPlural:true}),
+ "T_NOUN_SINGULAR_RAF_DAMMA_03||noun:mubtada,noun:naat,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_03",structure:"noun:mubtada,noun:naat,particle:particle,noun:majrur",shape:"TS33",copulaPlural:false}),
+ "T_NOUN_DUAL_RAF_ALIF_02||noun:mubtada,noun:naat,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_DUAL_RAF_ALIF_02",structure:"noun:mubtada,noun:naat,particle:particle,noun:majrur",shape:"TS33",copulaPlural:true}),
+ "T_NOUN_SMP_RAF_WAW_02||noun:mubtada,noun:naat,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SMP_RAF_WAW_02",structure:"noun:mubtada,noun:naat,particle:particle,noun:majrur",shape:"TS33",copulaPlural:true}),
+ "T_NOUN_SFP_RAF_DAMMA_02||noun:mubtada,noun:naat,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SFP_RAF_DAMMA_02",structure:"noun:mubtada,noun:naat,particle:particle,noun:majrur",shape:"TS33",copulaPlural:true}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_08||particle:particle,noun:ismInna,noun:naat,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_08",structure:"particle:particle,noun:ismInna,noun:naat,noun:khabarInna",shape:"TS34",copulaPlural:false}),
+ "T_PARTICLE_SFP_NASB_KASRASUB_02||particle:particle,noun:ismInna,noun:naat,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_SFP_NASB_KASRASUB_02",structure:"particle:particle,noun:ismInna,noun:naat,noun:khabarInna",shape:"TS34",copulaPlural:true}),
+ "T_PARTICLE_SINGULAR_JARR_KASRA_02||particle:particle,noun:majrur,noun:naat,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_02",structure:"particle:particle,noun:majrur,noun:naat,noun:mubtada",shape:"TS35",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -1440,6 +1457,16 @@ function resolveTranslationSlot(exercise,mapping,spec){
   const gloss=token.gloss;
   if(typeof gloss!=='string'||!gloss)return null;
   return bits[2]==='cap'?cap(gloss):gloss;
+ }
+ if(bits[0]==='followerPhrase'){
+  const phrase=canonicalNaatPhraseEnglish(exercise,index);
+  if(typeof phrase!=='string'||!phrase)return null;
+  return bits[2]==='cap'?cap(phrase):phrase;
+ }
+ if(bits[0]==='followerCopula'){
+  const found=naatPairAt(exercise,index+1);
+  if(!found)return null;
+  return found.pair.number==='singular'?'is':'are';
  }
  if(bits[0]==='innaLead'){
   if(!token.grammar||token.grammar.particleType!=='inna')return null;
@@ -2918,6 +2945,42 @@ const feminineHumanDuals=[
  {nom:'الْمُعَلِّمَتَانِ',acc:'الْمُعَلِّمَتَيْنِ',gen:'الْمُعَلِّمَتَيْنِ',en:'the two female teachers'},
  {nom:'الْمُسْلِمَتَانِ',acc:'الْمُسْلِمَتَيْنِ',gen:'الْمُسْلِمَتَيْنِ',en:'the two Muslim women'}
 ];
+/* Productive النعت الحقيقي. Al-Tuḥfah pp. 116–118 distinguishes true naʿt from
+   sababi naʿt and makes the true follower agree with its manʿūt in one value from each of four
+   axes: iʿrāb state, definiteness, gender, and number. The frozen pairs below are the lexical
+   authority for the exact combinations this phase can spell. They are deliberately pairs rather
+   than independent adjective choices: matching neighbouring surfaces cannot create a follower. */
+const NAAT_KIND='naatHaqiqi';
+const NAAT_AGREEMENT_DIMENSIONS=Object.freeze(['state','definiteness','gender','number']);
+const NAAT_LEXEMES=Object.freeze({
+ studentIndef:Object.freeze({nom:'طَالِبٌ',acc:'طَالِبًا',gen:'طَالِبٍ',en:'a student'}),
+ studentFIndef:Object.freeze({nom:'طَالِبَةٌ',acc:'طَالِبَةً',gen:'طَالِبَةٍ',en:'a female student'}),
+ hardworkingDefM:Object.freeze({nom:'الْمُجْتَهِدُ',acc:'الْمُجْتَهِدَ',gen:'الْمُجْتَهِدِ',en:'hardworking'}),
+ hardworkingIndefM:Object.freeze({nom:'مُجْتَهِدٌ',acc:'مُجْتَهِدًا',gen:'مُجْتَهِدٍ',en:'hardworking'}),
+ hardworkingDefF:Object.freeze({nom:'الْمُجْتَهِدَةُ',acc:'الْمُجْتَهِدَةَ',gen:'الْمُجْتَهِدَةِ',en:'hardworking'}),
+ hardworkingIndefF:Object.freeze({nom:'مُجْتَهِدَةٌ',acc:'مُجْتَهِدَةً',gen:'مُجْتَهِدَةٍ',en:'hardworking'}),
+ hardworkingDual:Object.freeze({nom:'الْمُجْتَهِدَانِ',acc:'الْمُجْتَهِدَيْنِ',gen:'الْمُجْتَهِدَيْنِ',en:'hardworking'}),
+ hardworkingSmp:Object.freeze({nom:'الْمُجْتَهِدُونَ',acc:'الْمُجْتَهِدِينَ',gen:'الْمُجْتَهِدِينَ',en:'hardworking'}),
+ hardworkingSfp:Object.freeze({nom:'الْمُجْتَهِدَاتُ',acc:'الْمُجْتَهِدَاتِ',gen:'الْمُجْتَهِدَاتِ',en:'hardworking'})
+});
+const NAAT_PAIR_REGISTRY=Object.freeze({
+ singularDefM:Object.freeze({followed:Object.freeze({...singularPeople[0]}),follower:NAAT_LEXEMES.hardworkingDefM,
+  followedInflection:'singular',followerInflection:'singular',definiteness:'definite',gender:'masculine',number:'singular',phraseEn:'the hardworking student'}),
+ singularIndefM:Object.freeze({followed:NAAT_LEXEMES.studentIndef,follower:NAAT_LEXEMES.hardworkingIndefM,
+  followedInflection:'singular',followerInflection:'singular',definiteness:'indefinite',gender:'masculine',number:'singular',phraseEn:'a hardworking student'}),
+ singularDefF:Object.freeze({followed:Object.freeze({...feminineHumanSingulars[0]}),follower:NAAT_LEXEMES.hardworkingDefF,
+  followedInflection:'singular',followerInflection:'singular',definiteness:'definite',gender:'feminine',number:'singular',phraseEn:'the hardworking female student'}),
+ singularIndefF:Object.freeze({followed:NAAT_LEXEMES.studentFIndef,follower:NAAT_LEXEMES.hardworkingIndefF,
+  followedInflection:'singular',followerInflection:'singular',definiteness:'indefinite',gender:'feminine',number:'singular',phraseEn:'a hardworking female student'}),
+ dualDefM:Object.freeze({followed:Object.freeze({...duals[0]}),follower:NAAT_LEXEMES.hardworkingDual,
+  followedInflection:'dual',followerInflection:'dual',definiteness:'definite',gender:'masculine',number:'dual',phraseEn:'the two hardworking students'}),
+ smpDefM:Object.freeze({followed:Object.freeze({...smp[1]}),follower:NAAT_LEXEMES.hardworkingSmp,
+  followedInflection:'smp',followerInflection:'smp',definiteness:'definite',gender:'masculine',number:'plural',phraseEn:'the hardworking Muslims'}),
+ brokenDefM:Object.freeze({followed:Object.freeze({...brokenHuman[0]}),follower:NAAT_LEXEMES.hardworkingSmp,
+  followedInflection:'broken',followerInflection:'smp',definiteness:'definite',gender:'masculine',number:'plural',phraseEn:'the hardworking students'}),
+ sfpDefF:Object.freeze({followed:Object.freeze({...sfp[0]}),follower:NAAT_LEXEMES.hardworkingSfp,
+  followedInflection:'sfp',followerInflection:'sfp',definiteness:'definite',gender:'feminine',number:'plural',phraseEn:'the hardworking female students'})
+});
 const fiveNouns=[
  {nom:'أَبُوكَ',acc:'أَبَاكَ',gen:'أَبِيكَ',en:'your father',base:'أب'},
  {nom:'أَخُوكَ',acc:'أَخَاكَ',gen:'أَخِيكَ',en:'your brother',base:'أخ'},
@@ -6008,6 +6071,7 @@ const GRAMMAR_RULES=Object.freeze({
   khabarInna:{state:'raf',ruleId:'R_KHABAR_INNA_RAF',en:'The khabar of inna or one of its sisters; nominative.'},
   ismKana:{state:'raf',ruleId:'R_ISM_KANA_RAF',en:'The noun of kāna; nominative.'},
   khabarKana:{state:'nasb',ruleId:'R_KHABAR_KANA_NASB',en:'The khabar of kāna; accusative.'},
+  naat:{state:'inherited',ruleId:'R_NAAT_HAQIQI',en:'A true naʿt following its manʿūt.'},
   adverb:{state:'nasb',ruleId:'R_ZARF_NASB',en:'An accusative adverb.'}
  },
  nounInflection:{
@@ -6105,10 +6169,10 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
- roles:['mubtada','khabar','faail','object','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana'],
- relationships:['mubtadaKhabar','verbSubject','verbObject','preposition','idafa','inna','kana','concealedAn'],
+ roles:['mubtada','khabar','faail','object','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat'],
+ relationships:['mubtadaKhabar','verbSubject','verbObject','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
- 'imperative','diptote','naat','coordination','substitute and coordinated followers',
+ 'imperative','diptote','naat sababi','coordination','emphasis and substitute followers',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
   'feminine-dual past forms','passive and deputy-subject constructions',
   'five-verb person patterns other than third-person masculine plural in random templates'
@@ -6273,6 +6337,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_ISM_KANA_RAF:sourceRule('Kāna and its sisters raise their noun.',[76,105,106,107,108],'A visible single noun after one of the registered unconditional operators, plus the exact negated كَانَ frame used for lām al-juḥūd. The other conditional operators and the weak-final أَمْسَى / أَضْحَى are not produced.' ,[IA_KANA]),
  R_KHABAR_KANA_NASB:sourceRule('Kāna and its sisters make their khabar accusative.',[105,106,107,108],'Only a visible single-word khabar after one of the registered unconditional operators: كَانَ, أَصْبَحَ, صَارَ, ظَلَّ, بَاتَ, لَيْسَ.',[IA_KANA]),
  R_ZARF_NASB:sourceRule('A time/place adverb used as mafʿūl fīh is accusative.',[148,149,151,152,153],'Only verified adverb lexemes used with a meaning of fī.'),
+ R_NAAT_HAQIQI:sourceRule('A true naʿt follows its manʿūt in iʿrāb state, definiteness, gender, and number.',[116,117,118,121,123],'Only the registered adjacent true-naʿt pairs. Sababi naʿt is explicitly excluded.'),
 
  R_SINGULAR_RAF_DAMMA:sourceRule('Visible ḍammah raises a regular singular noun.',[26],'Only nouns whose ending accepts a visible ḍammah.'),
  R_SINGULAR_NASB_FATHA:sourceRule('Visible fatḥah makes a regular singular noun accusative.',[48],'Only nouns whose ending accepts a visible fatḥah.'),
@@ -6428,7 +6493,8 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
  RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
  RL_KANA_NOUN_KHABAR:sourceRule('Kāna and its sisters require a linked noun and khabar with their governed states.',[76,105,106,107,108],'Complete ordered single-noun/single-khabar structures, plus the exact negated-kāna lām al-juḥūd frame whose verbal clause is the khabar.',[IA_KANA])
- ,RL_CONCEALED_AN_LICENSE:sourceRule('A licensed visible construction connects its present verb to concealed أَنْ and records whether concealment is permissible or obligatory.',[76,77,78],'Only the six frozen productive construction frames; the relationship is derived from their visible token structure and never restored as authority.')
+ ,RL_CONCEALED_AN_LICENSE:sourceRule('A licensed visible construction connects its present verb to concealed أَنْ and records whether concealment is permissible or obligatory.',[76,77,78],'Only the six frozen productive construction frames; the relationship is derived from their visible token structure and never restored as authority.'),
+ RL_FOLLOWER_AGREEMENT:sourceRule('A true naʿt is a follower linked to its manʿūt and inherits its iʿrāb state while agreeing in definiteness, gender, and number.',[116,117,118,121,123],'Only an adjacent registered true-naʿt pair authorized by frozen template metadata; no matching neighbours can create the relation by themselves.')
 });
 /* Canonical evidence is constructed once from the reviewed definitions and bound to the
    owning SOURCE_REGISTRY key. Public bibliography strings are descriptive only: neither a
@@ -6590,6 +6656,20 @@ registerNounSet(feminineThingPredicates,'singular');
 registerNounSet(feminineHumanSingulars,'singular');
 registerNounSet(feminineHumanDuals,'dual');
 registerNounSet(fiveNouns,'fiveNouns');
+/* Add only surfaces the existing vocabulary does not already own. Shared adjective surfaces keep
+   their historic lexeme/gloss authority; the naʿt-specific English is resolved through the pair
+   registry, not by overwriting an older noun-form entry. */
+function registerMissingNaatForms(items,inflection){
+ items.forEach(lexeme=>['nom','acc','gen'].forEach(form=>{
+  if(lexeme[form]&&!nounFormIndex.has(lexeme[form]))nounFormIndex.set(lexeme[form],{lexeme,inflection});
+ }));
+}
+registerMissingNaatForms([NAAT_LEXEMES.studentIndef,NAAT_LEXEMES.studentFIndef],'singular');
+registerMissingNaatForms([NAAT_LEXEMES.hardworkingDefM,NAAT_LEXEMES.hardworkingIndefM,
+ NAAT_LEXEMES.hardworkingDefF,NAAT_LEXEMES.hardworkingIndefF],'singular');
+registerMissingNaatForms([NAAT_LEXEMES.hardworkingDual],'dual');
+registerMissingNaatForms([NAAT_LEXEMES.hardworkingSmp],'smp');
+registerMissingNaatForms([NAAT_LEXEMES.hardworkingSfp],'sfp');
 function registerVerbSet(items,morphology={}){
  items.forEach(lexeme=>{
   ['past','pres','acc','juss','five','fiveSub'].forEach(form=>{
@@ -6698,7 +6778,8 @@ const AR={
  adverbMudaf:w=>grammarSpec('noun','adverb',{isMudaf:true}),
  kana:w=>grammarSpec('verb','kana',{person:'3ms'}),
  ismKana:w=>grammarSpec('noun','ismKana'),
- khabarKana:w=>grammarSpec('noun','khabarKana')
+ khabarKana:w=>grammarSpec('noun','khabarKana'),
+ naat:w=>grammarSpec('noun','naat')
 };
 const EN={mubtada:'',khabar:'',object:'',prep:'',majrur:'',mudaf:'',mudafIlayh:'',present:'',fiveVerb:'',fiveNoun:''};
 function token(word,gloss,grammar,enHint='',target=false){
@@ -6724,13 +6805,57 @@ function inferNounInflection(word){
  if(/َات[ُِ]$/u.test(word)) return'sfp';
  return'singular';
 }
-function inflectNoun(token){
+function naatTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.followerKind===NAAT_KIND?template:null;
+}
+function naatPairAt(data,index){
+ const template=naatTemplateRecord(data);
+ const follower=data?.tokens?.[index],followed=data?.tokens?.[index-1];
+ if(!template||!follower||!followed||follower.grammar?.role!=='naat'
+   ||followed.grammar?.type!=='noun'||followed.grammar?.role==='naat')return null;
+ const state=followed.state||follower.state;
+ const formKey={raf:'nom',nasb:'acc',jarr:'gen'}[state];
+ if(!formKey)return null;
+ for(const key of template.followerPairKeys){
+  const pair=NAAT_PAIR_REGISTRY[key];
+  if(pair&&pair.followed[formKey]===followed.word&&pair.follower[formKey]===follower.word)return{key,pair,state,followed,follower};
+ }
+ return null;
+}
+/* The reusable follower proof is deliberately narrow: template ownership + exact registered pair
+   + adjacency + all four agreements. The relationship cache is not consulted, so History can
+   discard and rebuild it without turning stored links into authority. */
+function deriveNaatFollowerAuthority(data,index){
+ const found=naatPairAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
+ const {key,pair,state,followed,follower}=found;
+ if(follower.state!==state)return Object.freeze({authorized:false,reason:'state-mismatch'});
+ if(followed.inflection!==pair.followedInflection||follower.inflection!==pair.followerInflection){
+  return Object.freeze({authorized:false,reason:'inflection-mismatch'});
+ }
+ return Object.freeze({authorized:true,reason:'',kind:NAAT_KIND,pairKey:key,state,
+  followedId:followed.id,followerId:follower.id,definiteness:pair.definiteness,
+  gender:pair.gender,number:pair.number,agreementDimensions:NAAT_AGREEMENT_DIMENSIONS});
+}
+function canonicalNaatPhraseEnglish(data,followedIndex){
+ const found=naatPairAt(data,followedIndex+1);
+ return found?.pair?.phraseEn||null;
+}
+function inflectNoun(token,tokens,index,data){
  const registered=nounFormIndex.get(token.surfaceHint);
  token.lexeme=registered?.lexeme||null;
  token.inflection=token.grammar.inflection||registered?.inflection||inferNounInflection(token.surfaceHint);
  const roleRule=GRAMMAR_RULES.roles[token.grammar.role];
  if(!roleRule) throw new Error(`Unknown noun role: ${token.grammar.role}`);
- token.state=roleRule.state;
+ if(roleRule.state==='inherited'){
+  const followed=tokens[index-1];
+  if(!followed?.state)throw new Error('A follower has no preceding inflected manʿūt.');
+  token.state=followed.state;
+  /* At build time the exact surfaces must already be authorized by this template. This prevents
+     AR.naat from promoting an arbitrary matching adjective into grammatical truth. */
+  if(!naatPairAt(data,index))throw new Error('The naʿt/manʿūt pair is not canonically registered for this template.');
+ }else token.state=roleRule.state;
  token.ruleId=roleRule.ruleId;
  const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
  if(!signRule) throw new Error(`No noun rule for ${token.inflection}/${token.state}`);
@@ -6884,7 +7009,8 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
  kana:'RL_KANA_NOUN_KHABAR',
- concealedAn:'RL_CONCEALED_AN_LICENSE'
+ concealedAn:'RL_CONCEALED_AN_LICENSE',
+ follower:'RL_FOLLOWER_AGREEMENT'
 });
 function addRelationship(data,type,fields){
  const relationship={id:`${data.templateId}:R${data.relationships.length+1}`,type,ruleId:RELATIONSHIP_RULE_IDS[type],...fields};
@@ -7000,6 +7126,19 @@ function resolveRelationships(data){
   kana.relations.ismId=ismKana.id;kana.relations.khabarId=kanaKhabar.id;ismKana.relations.governorId=kana.id;ismKana.relations.khabarId=kanaKhabar.id;kanaKhabar.relations.kanaId=kana.id;kanaKhabar.relations.ismKanaId=ismKana.id;
  }
  tokens.forEach((item,index)=>{
+  if(item.grammar?.role!=='naat')return;
+  const authority=deriveNaatFollowerAuthority(data,index);
+  if(!authority.authorized)return;
+  const relation=addRelationship(data,'follower',{kind:authority.kind,followedId:authority.followedId,
+   followerId:authority.followerId,state:authority.state,definiteness:authority.definiteness,
+   gender:authority.gender,number:authority.number});
+  const followed=tokens[index-1];
+  followed.relations.followerId=item.id;
+  followed.relations.followerRelationshipId=relation.id;
+  item.relations.followedId=followed.id;
+  item.relations.followerRelationshipId=relation.id;
+ });
+ tokens.forEach((item,index)=>{
   const authorization=deriveConcealedAnNasb(data,index);
   if(!authorization.authorized)return;
   const relation=addRelationship(data,'concealedAn',{licensorId:authorization.particleId,verbId:item.id,
@@ -7019,6 +7158,7 @@ function nounRoleArabic(token){
  if(role==='khabarInna')return`خَبَرُ «${token.grammar.governorWord}» مَرْفُوعٌ بِهِ`;
  if(role==='ismKana')return'اسْمُ «كَانَ» مَرْفُوعٌ بِهَا';
  if(role==='khabarKana')return'خَبَرُ «كَانَ» مَنْصُوبٌ بِهَا';
+ if(role==='naat')return`نَعْتٌ ${stateArabic(token.state)} تَابِعٌ لِمَنْعُوتِهِ`;
  if(role==='adverb')return'ظَرْفٌ مَنْصُوبٌ';
  throw new Error(`Unknown noun role: ${role}`);
 }
@@ -7230,6 +7370,13 @@ const WHY_ROLE=Object.freeze({
   ar:t=>`${wq(t.word)} أَخْبَرَ عَنِ اسْمِ «كَانَ»، فَهُوَ خَبَرُهَا.`,
   en:t=>`${eq(t.word)} gives information about اسْم «كَانَ», so it is its خَبَر.`,
   stateId:()=>'WHY_STATE_KHABAR_KANA',stateAr:()=>'وَخَبَرُ «كَانَ» مَنْصُوبٌ.',stateEn:()=>'خَبَرُ «كَانَ» is مَنْصُوبٌ.'},
+ naat:{
+  id:()=>'WHY_ROLE_NAAT_HAQIQI',
+  ar:t=>`${wq(t.word)} وَصَفَ الِاسْمَ الَّذِي قَبْلَهُ، فَهُوَ نَعْتٌ حَقِيقِيٌّ لَهُ.`,
+  en:t=>`${eq(t.word)} describes the noun immediately before it, so it is that noun's true نَعْتٌ.`,
+  stateId:()=>'WHY_STATE_NAAT_INHERITED',
+  stateAr:t=>`وَالنَّعْتُ يَتْبَعُ مَنْعُوتَهُ فِي الْإِعْرَابِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
+  stateEn:t=>`A نَعْتٌ follows its manʿūt in iʿrāb state, so this one is ${stateArabic(t.state)} like it.`},
  adverb:{
   id:t=>WHY_ZARF_SENSE[t.word]?'WHY_ROLE_ZARF':'WHY_ROLE_ZARF_GENERIC',
   ar:t=>`${wq(t.word)} ظَرْفٌ ${whyZarfSense(t).ar}.`,
@@ -7482,6 +7629,15 @@ function buildRelationshipWhy(rel,data){
   push({id:'WHY_REL_CONCEALED_AN_LICENSE',ar:`رَبَطَ هَذَا التَّرْكِيبُ ${construction.nameAr} بِالْفِعْلِ، فَكَانَ نَاصِبُهُ «أَنْ» الْمُضْمَرَةَ ${mode.ar}.`,en:`This construction links ${construction.nameEn} to the verb, whose nāṣib is a concealed أَنْ (${mode.en}).`});
   return{ids,ar,en};
  }
+ if(rel.type==='follower'){
+  const followed=data.tokens.find(item=>item.id===rel.followedId);
+  const follower=data.tokens.find(item=>item.id===rel.followerId);
+  if(!followed||!follower)return{ids,ar,en};
+  push({id:'WHY_REL_NAAT_AGREEMENT',
+   ar:`${wq(follower.word)} نَعْتٌ حَقِيقِيٌّ لِـ${wq(followed.word)}، وَقَدْ وَافَقَهُ فِي الْإِعْرَابِ وَالتَّعْرِيفِ أَوِ التَّنْكِيرِ وَالتَّذْكِيرِ أَوِ التَّأْنِيثِ وَالْإِفْرَادِ أَوِ التَّثْنِيَةِ أَوِ الْجَمْعِ.`,
+   en:`${eq(follower.word)} is the true naʿt of ${eq(followed.word)} and agrees with it in iʿrāb state, definiteness, gender, and number.`});
+  return{ids,ar,en};
+ }
  const mubtada=data.tokens.find(item=>item.id===rel.mubtadaId);
  const anchor=data.tokens.find(item=>item.id===(rel.khabarId||rel.anchorId));
  const phrase=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)?.word).filter(Boolean).join(' ');
@@ -7519,6 +7675,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='follower'){
+   const recipient=data.tokens.find(item=>item.id===rel.followedId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type!=='mubtadaKhabar'||rel.khabarKind==='single')return;
   const recipient=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)).filter(Boolean).at(-1);
   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -7534,6 +7695,14 @@ function renderRelationshipAnalysis(data){
   verb.phraseAr=`وَالتَّرْكِيبُ «${licensor.word}${verb.word}» رَبَطَ ${construction.nameAr} بِالْمُضَارِعِ، وَنَاصِبُهُ «أَنْ» مُضْمَرَةٌ ${mode.ar}.`;
   verb.phraseEn=`Together, the licensed ${construction.nameEn} construction supplies a concealed أَنْ (${mode.en}) as the verb's nāṣib.`;
   verb.phraseLabel='Construction';
+ });
+ data.relationships.filter(rel=>rel.type==='follower').forEach(rel=>{
+  const followed=data.tokens.find(item=>item.id===rel.followedId);
+  const follower=data.tokens.find(item=>item.id===rel.followerId);
+  if(!followed||!follower)return;
+  followed.phraseAr=`وَالتَّرْكِيبُ «${followed.word} ${follower.word}»: مَنْعُوتٌ وَنَعْتٌ حَقِيقِيٌّ تَابِعٌ لَهُ فِي الْإِعْرَابِ وَالتَّعْرِيفِ أَوِ التَّنْكِيرِ وَالتَّذْكِيرِ أَوِ التَّأْنِيثِ وَالْإِفْرَادِ أَوِ التَّثْنِيَةِ أَوِ الْجَمْعِ.`;
+  followed.phraseEn=`Together, “${followed.word} ${follower.word}” is a manʿūt with its true naʿt, agreeing in state, definiteness, gender, and number.`;
+  followed.phraseLabel='Follower';
  });
  data.relationships.filter(rel=>rel.type==='mubtadaKhabar').forEach(rel=>{
   const mubtada=data.tokens.find(item=>item.id===rel.mubtadaId);
@@ -7747,7 +7916,11 @@ function validateExercise(data){
   if(token.expectedSurface&&token.word!==token.expectedSurface)fail('E_SURFACE_FORM','Surface form disagrees with the grammar structure.',token);
   if(token.grammar.type==='noun'){
    const roleRule=GRAMMAR_RULES.roles[token.grammar.role];
-   if(token.state!==roleRule?.state)fail('E_ROLE_CASE',`Role ${token.grammar.role} requires ${roleRule?.state}, not ${token.state}.`,token);
+   if(token.grammar.role==='naat'){
+    const authority=deriveNaatFollowerAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_NAAT_AUTHORITY',`True naʿt authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_NAAT_HAQIQI')fail('E_NAAT_RULE','The true naʿt is not bound to its source rule.',token);
+   }else if(token.state!==roleRule?.state)fail('E_ROLE_CASE',`Role ${token.grammar.role} requires ${roleRule?.state}, not ${token.state}.`,token);
    const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
    if(safeSignId(token.sign)!==signRule?.[0])fail('E_NOUN_SIGN','Noun sign disagrees with case and declension.',token);
   }
@@ -8040,6 +8213,26 @@ function validateExercise(data){
   if(isRestrictedSourceRule(rel.ruleId))fail('E_RESTRICTED_SOURCE_RULE',`Relationship rule ${rel.ruleId} may be cited only by its registered non-production consumer.`);
   const ids=Object.entries(rel).filter(([key])=>key!=='ruleId'&&key!=='id'&&/(?:Id|Ids)$/.test(key)).flatMap(([,value])=>Array.isArray(value)?value:[value]).filter(Boolean);
   ids.forEach(id=>{if(!tokenById.has(id)&&!String(id).includes(':R'))fail('E_RELATION_TOKEN','Relationship points to a missing token.');});
+  if(rel.type==='follower'){
+   const follower=tokenById.get(rel.followerId);
+   const authority=deriveNaatFollowerAuthority(data,data.tokens.indexOf(follower));
+   if(!authority.authorized||rel.kind!==authority.kind||rel.followedId!==authority.followedId
+     ||rel.followerId!==authority.followerId||rel.state!==authority.state
+     ||rel.definiteness!==authority.definiteness||rel.gender!==authority.gender||rel.number!==authority.number){
+    fail('E_FOLLOWER_RELATION','Follower relationship is not the canonical naʿt/manʿūt agreement proof.',follower);
+   }
+  }
+ });
+ data.tokens.filter(item=>item.grammar.role==='naat').forEach(item=>{
+  const rel=relationships.find(candidate=>candidate.id===item.relations.followerRelationshipId&&candidate.type==='follower');
+  const followed=tokenById.get(item.relations.followedId);
+  if(!rel||rel.followerId!==item.id||rel.followedId!==followed?.id
+    ||followed?.relations.followerId!==item.id||followed?.relations.followerRelationshipId!==rel.id){
+   fail('E_NAAT_RELATION','A naʿt must have exactly one reciprocal canonical link to its manʿūt.',item);
+  }
+  if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
+   fail('E_NAAT_RELATION_COUNT','A naʿt must have exactly one follower relationship.',item);
+  }
  });
  data.tokens.filter(item=>item.grammar.role==='mubtada').forEach(item=>{
   const rel=relationships.find(candidate=>candidate.id===item.relations.khabarRelationshipId&&candidate.type==='mubtadaKhabar');
@@ -8090,7 +8283,7 @@ function completeNominalAnalysis(data){
   if(!data.templateId)throw new GrammarValidationError({...data,templateId:'UNIDENTIFIED'},[{code:'E_TEMPLATE_ID',message:'Exercise has no stable template ID.'}]);
   data.tokens.forEach((item,index)=>{item.id=`${data.templateId}:T${index+1}`;item.relations={}});
   data.tokens.forEach((item,index)=>{
-   if(item.grammar.type==='noun')inflectNoun(item);
+   if(item.grammar.type==='noun')inflectNoun(item,data.tokens,index,data);
    else if(item.grammar.type==='verb')inflectVerb(item,data.tokens,index);
    else configureParticle(item);
   });
@@ -8179,6 +8372,14 @@ function add(starts,form,state,sign,build,metadata={}){
     `responseContextId` remains the dormant Phase 3B0A seam and no template sets it. */
  const responseContextId=metadata.responseContextId||'';
  const responsePairIds=Object.freeze([...(metadata.responsePairIds||[])]);
+ const followerKind=metadata.followerKind||'';
+ const followerPairKeys=Object.freeze([...(metadata.followerPairKeys||[])]);
+ if(Boolean(followerKind)!==Boolean(followerPairKeys.length)||followerKind&&followerKind!==NAAT_KIND){
+  throw new Error(`Template ${stableId} has an invalid follower declaration.`);
+ }
+ if(followerPairKeys.some((key,position)=>followerPairKeys.indexOf(key)!==position||!NAAT_PAIR_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered naʿt pair.`);
+ }
  const conditionalGovernor=isConditionalGovernor(GRAMMAR_RULES.governors[presentGovernor]);
  if(conditionalGovernor!==Boolean(responsePairIds.length)){
   throw new Error(`Template ${stableId} must declare response pairs exactly when its governor is conditional.`);
@@ -8224,6 +8425,8 @@ function add(starts,form,state,sign,build,metadata={}){
      resolver read these two and nothing else; no exercise may carry either name. */
   responseContextId,
   responsePairIds,
+  followerKind,
+  followerPairKeys,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -8638,6 +8841,54 @@ for(const constructionId of Object.keys(CONCEALED_AN_CONSTRUCTIONS)){
  add('particle','present','nasb','fatha',()=>buildConcealedAnExercise(constructionId,'ordinary'),concealedAnTemplateMetadata(constructionId,'ordinary'));
  add('particle','fiveVerbs','nasb','nunDropped',()=>buildConcealedAnExercise(constructionId,'afalKhamsa'),concealedAnTemplateMetadata(constructionId,'afalKhamsa'));
 }
+
+/* One small builder over three existing hosts. The chosen pair supplies every variable Arabic
+   surface; the host supplies only the manʿūt's role/state. This keeps rafʿ, naṣb and khafḍ on the
+   ordinary noun matrix and gives later follower types a single relation seam to reuse. */
+const NAAT_SINGULAR_PAIR_KEYS=Object.freeze(['singularDefM','singularIndefM','singularDefF','singularIndefF']);
+function buildNaatExercise(pairKey,host){
+ const pair=NAAT_PAIR_REGISTRY[pairKey];
+ if(!pair)throw new Error(`Unknown productive naʿt pair: ${pairKey}`);
+ const state={raf:'raf',nasb:'nasb',jarr:'jarr'}[host];
+ const formKey={raf:'nom',nasb:'acc',jarr:'gen'}[state];
+ if(!formKey)throw new Error(`Unknown productive naʿt host: ${host}`);
+ const followedWord=pair.followed[formKey],followerWord=pair.follower[formKey];
+ if(host==='raf'){
+  const place=places.find(item=>item.nom==='الْفَصْلُ');
+  return{sentence:'',translation:`${cap(pair.phraseEn)} ${pair.number==='singular'?'is':'are'} in ${place.en}.`,tokens:[
+   token(followedWord,pair.followed.en,AR.mubtada(followedWord),'The manʿūt; nominative.'),
+   token(followerWord,pair.follower.en,AR.naat(followerWord),'A true naʿt following its manʿūt.',true),
+   token('فِي','in',AR.prep('فِي'),EN.prep),token(place.gen,place.en,AR.majrur(place.gen,'فِي'),EN.majrur)
+  ]};
+ }
+ if(host==='nasb'){
+  const particle=innaSisters.find(item=>item.ar==='إِنَّ');
+  const predicate=pair.gender==='feminine'
+   ?(pair.number==='plural'?femininePluralPredicates.find(item=>item.en==='present'):feminineThingPredicates.find(item=>item.en==='useful'))
+   :singularPredicates.find(item=>item.en==='present');
+  return{sentence:'',translation:`${particle.meaning} ${pair.phraseEn} ${pair.number==='singular'?'is':'are'} ${predicate.en}.`,tokens:[
+   token(particle.ar,particle.gloss,AR.particle(particle),'A particle that makes its noun accusative.'),
+   token(followedWord,pair.followed.en,AR.ismInna(followedWord,particle.ar),'The manʿūt and noun of inna; accusative.'),
+   token(followerWord,pair.follower.en,AR.naat(followerWord),'A true naʿt following its manʿūt.',true),
+   token(predicate.nom,predicate.en,AR.khabarInna(predicate.nom,particle.ar),'The khabar of inna; nominative.')
+  ]};
+ }
+ return{sentence:'',translation:`There is a question in ${pair.phraseEn}.`,tokens:[
+  token('فِي','in',AR.prep('فِي'),EN.prep),
+  token(followedWord,pair.followed.en,AR.majrur(followedWord,'فِي'),'The manʿūt governed by the preposition.'),
+  token(followerWord,pair.follower.en,AR.naat(followerWord),'A true naʿt following its manʿūt.',true),
+  token('سُؤَالٌ','a question',AR.delayedMubtada('سُؤَالٌ'),'A delayed mubtadaʾ; nominative.')
+ ]};
+}
+const naatMetadata=keys=>({followerKind:NAAT_KIND,followerPairKeys:keys});
+const pickedNaat=(keys,label,host)=>buildNaatExercise(pickVaried(keys,label,String),host);
+add('noun','singular','raf','damma',()=>pickedNaat(NAAT_SINGULAR_PAIR_KEYS,'naat-raf-singular','raf'),naatMetadata(NAAT_SINGULAR_PAIR_KEYS));
+add('noun','dual','raf','alif',()=>buildNaatExercise('dualDefM','raf'),naatMetadata(['dualDefM']));
+add('noun','smp','raf','waw',()=>pickedNaat(['smpDefM','brokenDefM'],'naat-raf-plural-masculine','raf'),naatMetadata(['smpDefM','brokenDefM']));
+add('noun','sfp','raf','damma',()=>buildNaatExercise('sfpDefF','raf'),naatMetadata(['sfpDefF']));
+add('particle','singular','nasb','fatha',()=>pickedNaat(NAAT_SINGULAR_PAIR_KEYS,'naat-nasb-singular','nasb'),naatMetadata(NAAT_SINGULAR_PAIR_KEYS));
+add('particle','sfp','nasb','kasraSub',()=>buildNaatExercise('sfpDefF','nasb'),naatMetadata(['sfpDefF']));
+add('particle','singular','jarr','kasra',()=>pickedNaat(NAAT_SINGULAR_PAIR_KEYS,'naat-jarr-singular','jarr'),naatMetadata(NAAT_SINGULAR_PAIR_KEYS));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

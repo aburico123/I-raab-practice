@@ -1151,6 +1151,12 @@ function resolveCanonicalTokenGloss(data,token,index){
   const found=naatPairAt(data,index);
   return found?.pair?.follower?.en||null;
  }
+ /* 4d — tawkīd words are curriculum-owned follower forms, not free vocabulary. Their gloss is
+    available only after the exact template/pair/subtype authority has recognized the token. */
+ if(type==='noun'&&token.grammar.role==='tawkid'){
+  const found=tawkidPairAt(data,index);
+  return found?.pair?.follower?.en||null;
+ }
  /* 5 — an object noun, resolved through its GOVERNING VERB rather than through its surface.
     Two vocabulary records can share one accusative surface with different English, so a bare
     surface lookup would have to choose between them. The verb that governs the object is what
@@ -1287,7 +1293,8 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  TS33:Object.freeze({parts:Object.freeze([Object.freeze({slot:'followerPhrase:0:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerCopula:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])}),
  TS34:Object.freeze({parts:Object.freeze([Object.freeze({slot:'innaLead:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerPhrase:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerCopula:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])}),
  TS35:Object.freeze({parts:Object.freeze([Object.freeze({lit:'There is '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerPhrase:1'}),Object.freeze({lit:'.'})])}),
- TS36:Object.freeze({parts:Object.freeze([Object.freeze({slot:'atfSentence'})])})
+ TS36:Object.freeze({parts:Object.freeze([Object.freeze({slot:'atfSentence'})])}),
+ TS37:Object.freeze({parts:Object.freeze([Object.freeze({slot:'tawkidSentence'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1411,7 +1418,10 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_VERB_SINGULAR_NASB_FATHA_17||verb:past,noun:faail,noun:object,particle:particle,noun:atf":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_17",structure:"verb:past,noun:faail,noun:object,particle:particle,noun:atf",shape:"TS36",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_17||particle:particle,verb:past,noun:faail,noun:object,particle:particle,noun:atf":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_17",structure:"particle:particle,verb:past,noun:faail,noun:object,particle:particle,noun:atf",shape:"TS36",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_17||verb:past,noun:faail,particle:particle,noun:object,particle:particle,noun:atf":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_17",structure:"verb:past,noun:faail,particle:particle,noun:object,particle:particle,noun:atf",shape:"TS36",copulaPlural:false}),
- "T_PARTICLE_SINGULAR_JARR_KASRA_03||particle:particle,noun:majrur,particle:particle,noun:atf,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_03",structure:"particle:particle,noun:majrur,particle:particle,noun:atf,noun:mubtada",shape:"TS36",copulaPlural:false})
+ "T_PARTICLE_SINGULAR_JARR_KASRA_03||particle:particle,noun:majrur,particle:particle,noun:atf,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_03",structure:"particle:particle,noun:majrur,particle:particle,noun:atf,noun:mubtada",shape:"TS36",copulaPlural:false}),
+ "T_VERB_SINGULAR_RAF_DAMMA_03||verb:past,noun:faail,noun:tawkid,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_RAF_DAMMA_03",structure:"verb:past,noun:faail,noun:tawkid,noun:object",shape:"TS37",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_18||verb:past,noun:faail,noun:object,noun:tawkid":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_18",structure:"verb:past,noun:faail,noun:object,noun:tawkid",shape:"TS37",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_JARR_KASRA_04||particle:particle,noun:majrur,noun:tawkid,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_04",structure:"particle:particle,noun:majrur,noun:tawkid,noun:mubtada",shape:"TS37",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -1458,6 +1468,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(typeof spec!=='string')return null;
  const bits=spec.split(':');
  if(bits[0]==='atfSentence')return canonicalAtfTranslation(exercise);
+ if(bits[0]==='tawkidSentence')return canonicalTawkidTranslation(exercise);
  if(bits[0]==='copula'){
   const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
   if(!particle)return null;
@@ -3048,7 +3059,51 @@ const ATF_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
  singularPlaces:Object.freeze({followed:Object.freeze({...places.find(item=>item.nom==='الْفَصْلُ')}),follower:Object.freeze({...places.find(item=>item.nom==='الْمَكْتَبُ')}),
   followedInflection:'singular',followerInflection:'singular'}),
  singularEndpoint:Object.freeze({followed:Object.freeze({...singularPeople.find(item=>item.nom==='الضَّيْفُ')}),follower:Object.freeze({...singularPeople.find(item=>item.nom==='الطِّفْلُ')}),
-  followedInflection:'singular',followerInflection:'singular'})
+ followedInflection:'singular',followerInflection:'singular'})
+}));
+/* Productive التوكيد. Al-Tuḥfah pp. 131–134 divides emphasis into lafẓī and maʿnawī,
+   makes either kind inherit the muʾakkad's iʿrāb, and gives the attached-pronoun conditions
+   for the maʿnawī words. This phase intentionally registers only forms the existing singular
+   noun matrix can spell without estimation or new declensional machinery. Exact repetition,
+   exact semantic word, exact suffix, and exact antecedent are one frozen pair authority; a
+   repeated neighbouring surface or a hand-written نَفْس/كُلّ token proves nothing by itself. */
+const TAWKID_KIND='tawkid';
+const TAWKID_SUBTYPES=Object.freeze({lafzi:'lafzi',manawi:'manawi'});
+const TAWKID_ATTACHED_PRONOUNS=Object.freeze(Object.assign(Object.create(null),{
+ hu:Object.freeze({id:'hu',gender:'masculine',number:'singular',nameAr:'هَاءُ الْغَائِبِ',nameEn:'the attached third-person masculine singular pronoun',
+  surfaceByState:Object.freeze({raf:'هُ',nasb:'هُ',jarr:'هِ'}),
+  binaaByState:Object.freeze({raf:'الضَّمِّ',nasb:'الضَّمِّ',jarr:'الْكَسْرِ'})}),
+ hum:Object.freeze({id:'hum',gender:'masculine',number:'plural',nameAr:'ضَمِيرُ جَمَاعَةِ الْغَائِبِينَ',nameEn:'the attached third-person masculine plural pronoun',
+  surfaceByState:Object.freeze({raf:'هُمْ',nasb:'هُمْ',jarr:'هِمْ'}),
+  binaaByState:Object.freeze({raf:'السُّكُونِ',nasb:'السُّكُونِ',jarr:'السُّكُونِ'})})
+}));
+const TAWKID_LEXEMES=Object.freeze({
+ nafsHu:Object.freeze({nom:'نَفْسُهُ',acc:'نَفْسَهُ',gen:'نَفْسِهِ',en:'himself'}),
+ aynHu:Object.freeze({nom:'عَيْنُهُ',acc:'عَيْنَهُ',gen:'عَيْنِهِ',en:'himself'}),
+ kullHu:Object.freeze({nom:'كُلُّهُ',acc:'كُلَّهُ',gen:'كُلِّهِ',en:'the whole of it'}),
+ jamiiHum:Object.freeze({nom:'جَمِيعُهُمْ',acc:'جَمِيعَهُمْ',gen:'جَمِيعِهِمْ',en:'all of them'})
+});
+const TAWKID_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ lafziStudent:Object.freeze({subtype:TAWKID_SUBTYPES.lafzi,semanticKey:'exactRepetition',
+  followed:Object.freeze({...singularPeople[0]}),follower:Object.freeze({...singularPeople[0]}),
+  followedInflection:'singular',followerInflection:'singular',pronounId:'',
+  conditionAr:'لِأَنَّ اللَّفْظَ نَفْسَهُ أُعِيدَ لِلتَّقْوِيَةِ',conditionEn:'the identical noun is repeated to strengthen it',phraseEn:'the very student'}),
+ nafsSingularM:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'nafs',
+  followed:Object.freeze({...singularPeople.find(item=>item.en==='the teacher')}),follower:TAWKID_LEXEMES.nafsHu,
+  followedInflection:'singular',followerInflection:'singular',pronounId:'hu',antecedentGender:'masculine',antecedentNumber:'singular',
+  conditionAr:'لِأَنَّ لَفْظَ «النَّفْسِ» مُضَافٌ إِلَى ضَمِيرٍ يُطَابِقُ الْمُؤَكَّدَ',conditionEn:'nafs carries an attached pronoun agreeing with its masculine singular antecedent',phraseEn:'the teacher himself'}),
+ aynSingularM:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'ayn',
+  followed:Object.freeze({...singularPeople.find(item=>item.en==='the guest')}),follower:TAWKID_LEXEMES.aynHu,
+  followedInflection:'singular',followerInflection:'singular',pronounId:'hu',antecedentGender:'masculine',antecedentNumber:'singular',
+  conditionAr:'لِأَنَّ لَفْظَ «الْعَيْنِ» مُضَافٌ إِلَى ضَمِيرٍ يُطَابِقُ الْمُؤَكَّدَ',conditionEn:'ʿayn carries an attached pronoun agreeing with its masculine singular antecedent',phraseEn:'the guest himself'}),
+ kullBook:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'kull',
+  followed:Object.freeze({...singularThings.find(item=>item.en==='the book')}),follower:TAWKID_LEXEMES.kullHu,
+  followedInflection:'singular',followerInflection:'singular',pronounId:'hu',antecedentGender:'masculine',antecedentNumber:'singular',
+  conditionAr:'لِأَنَّ لَفْظَ «كُلٍّ» أَحَاطَ بِأَجْزَاءِ الْمُؤَكَّدِ وَأُضِيفَ إِلَى ضَمِيرِهِ',conditionEn:'kull emphasizes the whole of a divisible antecedent and carries its agreeing pronoun',phraseEn:'the entire book'}),
+ jamiiStudents:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'jamii',
+  followed:Object.freeze({...brokenHuman.find(item=>item.en==='the students')}),follower:TAWKID_LEXEMES.jamiiHum,
+  followedInflection:'broken',followerInflection:'singular',pronounId:'hum',antecedentGender:'masculine',antecedentNumber:'plural',
+  conditionAr:'لِأَنَّ لَفْظَ «جَمِيعٍ» أُضِيفَ إِلَى ضَمِيرِ جَمْعٍ يُطَابِقُ الْمُؤَكَّدَ',conditionEn:'jamīʿ carries an attached masculine plural pronoun agreeing with the group antecedent',phraseEn:'all the students'})
 }));
 const fiveNouns=[
  {nom:'أَبُوكَ',acc:'أَبَاكَ',gen:'أَبِيكَ',en:'your father',base:'أب'},
@@ -6142,6 +6197,7 @@ const GRAMMAR_RULES=Object.freeze({
   khabarKana:{state:'nasb',ruleId:'R_KHABAR_KANA_NASB',en:'The khabar of kāna; accusative.'},
   naat:{state:'inherited',ruleId:'R_NAAT_HAQIQI',en:'A true naʿt following its manʿūt.'},
   atf:{state:'inherited',ruleId:'R_ATF_NASAQ',en:'A maʿṭūf following its maʿṭūf ʿalayh.'},
+  tawkid:{state:'inherited',ruleId:'R_TAWKID',en:'A tawkīd following its muʾakkad in iʿrāb.'},
   adverb:{state:'nasb',ruleId:'R_ZARF_NASB',en:'An accusative adverb.'}
  },
  nounInflection:{
@@ -6424,6 +6480,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_ATF_LA:sourceRule('Conjunctive lā denies for the follower the judgment established for the word before it.',[124,127],'Only the registered noun-coordination frame; lā al-nāfiyah and lā al-nāhiyah are distinct identities.'),
  R_ATF_LAKIN:sourceRule('Conjunctive lakin follows negation or prohibition, is not preceded by wāw, and coordinates a single word.',[124,127],'Only the exact registered negated single-noun frame; لَكِنَّ الناسخة is a distinct identity.'),
  R_ATF_HATTA:sourceRule('Conjunctive ḥattā indicates gradation to the final included member.',[124,127],'Only the registered endpoint pair; the ḥattā that licenses concealed أَنْ before a present verb is a distinct identity.'),
+ R_TAWKID:sourceRule('A registered lafẓī or maʿnawī tawkīd follows its muʾakkad in iʿrāb; maʿnawī forms use the source-required word, antecedent meaning, and agreeing attached pronoun.',[131,132,133,134],'Productive scope: exact noun repetition; singular masculine نَفْس/عَيْن; divisible singular كُلّ; masculine-plural جَمِيع. أَجْمَع and its dependent strengthening forms are not independently produced.'),
 
  R_SINGULAR_RAF_DAMMA:sourceRule('Visible ḍammah raises a regular singular noun.',[26],'Only nouns whose ending accepts a visible ḍammah.'),
  R_SINGULAR_NASB_FATHA:sourceRule('Visible fatḥah makes a regular singular noun accusative.',[48],'Only nouns whose ending accepts a visible fatḥah.'),
@@ -6580,7 +6637,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
  RL_KANA_NOUN_KHABAR:sourceRule('Kāna and its sisters require a linked noun and khabar with their governed states.',[76,105,106,107,108],'Complete ordered single-noun/single-khabar structures, plus the exact negated-kāna lām al-juḥūd frame whose verbal clause is the khabar.',[IA_KANA])
  ,RL_CONCEALED_AN_LICENSE:sourceRule('A licensed visible construction connects its present verb to concealed أَنْ and records whether concealment is permissible or obligatory.',[76,77,78],'Only the six frozen productive construction frames; the relationship is derived from their visible token structure and never restored as authority.'),
- RL_FOLLOWER_AGREEMENT:sourceRule('A registered follower is linked to the word it follows and inherits its iʿrāb state; true naʿt additionally agrees in definiteness, gender, and number.',[116,117,118,121,123,124,125,126,127,128,129],'Only exact registered naʿt or ʿaṭf structures authorized by frozen template metadata; neighbouring surfaces cannot create a relation by themselves.')
+ RL_FOLLOWER_AGREEMENT:sourceRule('A registered follower is linked to the word it follows and inherits its iʿrāb state; true naʿt additionally agrees in definiteness, gender, and number, while maʿnawī tawkīd obeys its own pronoun and semantic conditions.',[116,117,118,121,123,124,125,126,127,128,129,131,132,133,134],'Only exact registered naʿt, ʿaṭf, or tawkīd structures authorized by frozen template metadata; neighbouring surfaces cannot create a relation by themselves.')
 });
 /* Canonical evidence is constructed once from the reviewed definitions and bound to the
    owning SOURCE_REGISTRY key. Public bibliography strings are descriptive only: neither a
@@ -6745,17 +6802,18 @@ registerNounSet(fiveNouns,'fiveNouns');
 /* Add only surfaces the existing vocabulary does not already own. Shared adjective surfaces keep
    their historic lexeme/gloss authority; the naʿt-specific English is resolved through the pair
    registry, not by overwriting an older noun-form entry. */
-function registerMissingNaatForms(items,inflection){
+function registerMissingFollowerForms(items,inflection){
  items.forEach(lexeme=>['nom','acc','gen'].forEach(form=>{
   if(lexeme[form]&&!nounFormIndex.has(lexeme[form]))nounFormIndex.set(lexeme[form],{lexeme,inflection});
  }));
 }
-registerMissingNaatForms([NAAT_LEXEMES.studentIndef,NAAT_LEXEMES.studentFIndef],'singular');
-registerMissingNaatForms([NAAT_LEXEMES.hardworkingDefM,NAAT_LEXEMES.hardworkingIndefM,
+registerMissingFollowerForms([NAAT_LEXEMES.studentIndef,NAAT_LEXEMES.studentFIndef],'singular');
+registerMissingFollowerForms([NAAT_LEXEMES.hardworkingDefM,NAAT_LEXEMES.hardworkingIndefM,
  NAAT_LEXEMES.hardworkingDefF,NAAT_LEXEMES.hardworkingIndefF],'singular');
-registerMissingNaatForms([NAAT_LEXEMES.hardworkingDual],'dual');
-registerMissingNaatForms([NAAT_LEXEMES.hardworkingSmp],'smp');
-registerMissingNaatForms([NAAT_LEXEMES.hardworkingSfp],'sfp');
+registerMissingFollowerForms([NAAT_LEXEMES.hardworkingDual],'dual');
+registerMissingFollowerForms([NAAT_LEXEMES.hardworkingSmp],'smp');
+registerMissingFollowerForms([NAAT_LEXEMES.hardworkingSfp],'sfp');
+registerMissingFollowerForms(Object.values(TAWKID_LEXEMES),'singular');
 function registerVerbSet(items,morphology={}){
  items.forEach(lexeme=>{
   ['past','pres','acc','juss','five','fiveSub'].forEach(form=>{
@@ -6867,6 +6925,7 @@ const AR={
  khabarKana:w=>grammarSpec('noun','khabarKana'),
  naat:w=>grammarSpec('noun','naat'),
  atf:w=>grammarSpec('noun','atf'),
+ tawkid:w=>grammarSpec('noun','tawkid'),
  atfParticle:record=>grammarSpec('particle','particle',{particleType:record.particleType,particleWord:record.surface})
 };
 const EN={mubtada:'',khabar:'',object:'',prep:'',majrur:'',mudaf:'',mudafIlayh:'',present:'',fiveVerb:'',fiveNoun:''};
@@ -6995,7 +7054,54 @@ function deriveAtfFollowerAuthority(data,index){
  if(contextFailure)return Object.freeze({authorized:false,reason:contextFailure});
  return Object.freeze({authorized:true,reason:'',kind:ATF_KIND,pairKey:key,state,
   followedId:followed.id,conjunctionId:conjunction.id,conjunctionKey:conjunctionRecord.id,
-  followerId:follower.id});
+ followerId:follower.id});
+}
+function tawkidTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.followerKind===TAWKID_KIND?template:null;
+}
+function tawkidPairAt(data,index){
+ const template=tawkidTemplateRecord(data);
+ const follower=data?.tokens?.[index],followed=data?.tokens?.[index-1];
+ if(!template||!follower||!followed||follower.grammar?.role!=='tawkid'
+   ||followed.grammar?.type!=='noun'||['naat','atf','tawkid'].includes(followed.grammar?.role))return null;
+ const state=followed.state||follower.state;
+ const formKey={raf:'nom',nasb:'acc',jarr:'gen'}[state];
+ if(!formKey)return null;
+ for(const key of template.followerPairKeys){
+  const pair=TAWKID_PAIR_REGISTRY[key];
+  if(pair&&pair.followed[formKey]===followed.word&&pair.follower[formKey]===follower.word){
+   return{key,pair,state,followed,follower};
+  }
+ }
+ return null;
+}
+/* Tawkīd authority follows the same cache-independent follower contract as naʿt and ʿaṭf.
+   Lafẓī authorization requires the exact registered repetition. Maʿnawī authorization additionally
+   proves the word-specific semantic lane and the exact suffix whose gender/number return to the
+   registered antecedent. No relationship label or stored boolean participates. */
+function deriveTawkidFollowerAuthority(data,index){
+ const found=tawkidPairAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
+ const {key,pair,state,followed,follower}=found;
+ if(follower.state!==state)return Object.freeze({authorized:false,reason:'state-mismatch'});
+ if(followed.inflection!==pair.followedInflection||follower.inflection!==pair.followerInflection){
+  return Object.freeze({authorized:false,reason:'inflection-mismatch'});
+ }
+ if(pair.subtype===TAWKID_SUBTYPES.lafzi){
+  if(followed.word!==follower.word)return Object.freeze({authorized:false,reason:'lafzi-not-exact-repetition'});
+ }else if(pair.subtype===TAWKID_SUBTYPES.manawi){
+  const pronoun=TAWKID_ATTACHED_PRONOUNS[pair.pronounId];
+  if(!pronoun||pronoun.gender!==pair.antecedentGender||pronoun.number!==pair.antecedentNumber){
+   return Object.freeze({authorized:false,reason:'pronoun-agreement-mismatch'});
+  }
+  const suffix=pronoun.surfaceByState[state];
+  if(!suffix||!follower.word.endsWith(suffix))return Object.freeze({authorized:false,reason:'attached-pronoun-mismatch'});
+ }else return Object.freeze({authorized:false,reason:'unknown-subtype'});
+ return Object.freeze({authorized:true,reason:'',kind:TAWKID_KIND,pairKey:key,subtype:pair.subtype,
+  semanticKey:pair.semanticKey,state,followedId:followed.id,followerId:follower.id,
+  pronounKey:pair.pronounId,antecedentGender:pair.antecedentGender||'',antecedentNumber:pair.antecedentNumber||'',
+  conditionAr:pair.conditionAr,conditionEn:pair.conditionEn});
 }
 function canonicalNaatPhraseEnglish(data,followedIndex){
  const found=naatPairAt(data,followedIndex+1);
@@ -7014,7 +7120,8 @@ function inflectNoun(token,tokens,index,data){
   /* At build time the exact surfaces must already be authorized by this template. This prevents
      AR.naat from promoting an arbitrary matching adjective into grammatical truth. */
   const authorized=token.grammar.role==='naat'?Boolean(naatPairAt(data,index))
-   :token.grammar.role==='atf'?deriveAtfFollowerAuthority(data,index).authorized:false;
+   :token.grammar.role==='atf'?deriveAtfFollowerAuthority(data,index).authorized
+   :token.grammar.role==='tawkid'?deriveTawkidFollowerAuthority(data,index).authorized:false;
   if(!authorized)throw new Error('The follower structure is not canonically registered for this template.');
  }else token.state=roleRule.state;
  token.ruleId=roleRule.ruleId;
@@ -7291,14 +7398,17 @@ function resolveRelationships(data){
   kana.relations.ismId=ismKana.id;kana.relations.khabarId=kanaKhabar.id;ismKana.relations.governorId=kana.id;ismKana.relations.khabarId=kanaKhabar.id;kanaKhabar.relations.kanaId=kana.id;kanaKhabar.relations.ismKanaId=ismKana.id;
  }
  tokens.forEach((item,index)=>{
-  if(!['naat','atf'].includes(item.grammar?.role))return;
+  if(!['naat','atf','tawkid'].includes(item.grammar?.role))return;
   const authority=item.grammar.role==='naat'?deriveNaatFollowerAuthority(data,index)
-   :deriveAtfFollowerAuthority(data,index);
+   :item.grammar.role==='atf'?deriveAtfFollowerAuthority(data,index)
+   :deriveTawkidFollowerAuthority(data,index);
   if(!authority.authorized)return;
   const fields={kind:authority.kind,followedId:authority.followedId,followerId:authority.followerId,state:authority.state};
   if(authority.kind===NAAT_KIND)Object.assign(fields,{definiteness:authority.definiteness,
    gender:authority.gender,number:authority.number});
-  else Object.assign(fields,{conjunctionId:authority.conjunctionId,conjunctionKey:authority.conjunctionKey});
+  else if(authority.kind===ATF_KIND)Object.assign(fields,{conjunctionId:authority.conjunctionId,conjunctionKey:authority.conjunctionKey});
+  else Object.assign(fields,{pairKey:authority.pairKey,subtype:authority.subtype,semanticKey:authority.semanticKey,
+   pronounKey:authority.pronounKey,antecedentGender:authority.antecedentGender,antecedentNumber:authority.antecedentNumber});
   const relation=addRelationship(data,'follower',fields);
   const followed=tokens.find(token=>token.id===authority.followedId);
   followed.relations.followerId=item.id;
@@ -7335,6 +7445,12 @@ function nounRoleArabic(token){
  if(role==='khabarKana')return'خَبَرُ «كَانَ» مَنْصُوبٌ بِهَا';
  if(role==='naat')return`نَعْتٌ ${stateArabic(token.state)} تَابِعٌ لِمَنْعُوتِهِ`;
  if(role==='atf')return`مَعْطُوفٌ ${stateArabic(token.state)} عَلَى مَعْطُوفٍ عَلَيْهِ`;
+ if(role==='tawkid'){
+  const data=token._data,authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render unauthorized tawkīd: ${authority.reason}`);
+  const subtype=authority.subtype===TAWKID_SUBTYPES.lafzi?'لَفْظِيٌّ':'مَعْنَوِيٌّ';
+  return`تَوْكِيدٌ ${subtype} ${stateArabic(token.state)} تَابِعٌ لِمُؤَكَّدِهِ`;
+ }
  if(role==='adverb')return'ظَرْفٌ مَنْصُوبٌ';
  throw new Error(`Unknown noun role: ${role}`);
 }
@@ -7347,8 +7463,20 @@ function renderNounAnalysis(token){
  let arabic=`${token.word}: ${nounRoleArabic(token)}، وَعَلَامَةُ ${signActionArabic(token.state)} ${canonical.ar}${reason}`;
  if(token.grammar.isMudaf)arabic+='، وَهُوَ مُضَافٌ';
  if(token.grammar.attachedKaf)arabic+='، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ';
+ let english=roleRule.en;
+ if(token.grammar.role==='tawkid'){
+  const data=token._data,authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render unauthorized tawkīd: ${authority.reason}`);
+  english=`A ${authority.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd following its muʾakkad in iʿrāb.`;
+  if(authority.pronounKey){
+   const pronoun=TAWKID_ATTACHED_PRONOUNS[authority.pronounKey];
+   const suffix=pronoun.surfaceByState[token.state],binaa=pronoun.binaaByState[token.state];
+   arabic+=`، وَهُوَ مُضَافٌ، وَ«${suffix}» ${pronoun.nameAr} ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى ${binaa} فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ`;
+   english+=` It is a مُضَافٌ; ${pronoun.nameEn} is its attached pronoun in the position of khafḍ as مُضَافٌ إِلَيْهِ.`;
+  }
+ }
  token.ar=`${arabic}.`;
- token.en=`${roleRule.en} Its sign is ${canonical.en}.`;
+ token.en=`${english} Its sign is ${canonical.en}.`;
 }
 function renderVerbAnalysis(token){
  if(token.tense==='past'){
@@ -7500,6 +7628,17 @@ const WHY_ZARF_SENSE=Object.freeze({
  'مَعَ':{ar:'يَدُلُّ عَلَى مُصَاحَبَةِ الْفِعْلِ',en:'shows accompaniment with the action'}
 });
 function whyZarfSense(t){return WHY_ZARF_SENSE[t.word]||{ar:'يُبَيِّنُ زَمَانَ الْفِعْلِ أَوْ مَكَانَهُ',en:'tells when or where the action happens'}}
+function tawkidWhyAuthority(token,data){
+ const authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`WHY: tawkīd is not authorized (${authority.reason}).`);
+ return authority;
+}
+function whyTawkidCondition(token,data){
+ const authority=tawkidWhyAuthority(token,data);
+ return{id:`WHY_TAWKID_${authority.semanticKey.toUpperCase()}`,
+  ar:`وَصَحَّ هَذَا التَّوْكِيدُ؛ ${authority.conditionAr}.`,
+  en:`This tawkīd is valid because ${authority.conditionEn}.`};
+}
 /* Role registry: why the word holds this role, and why that role fixes this state. */
 const WHY_ROLE=Object.freeze({
  mubtada:{
@@ -7570,6 +7709,17 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_ATF_INHERITED',
   stateAr:t=>`وَالْمَعْطُوفُ يَتْبَعُ الْمَعْطُوفَ عَلَيْهِ فِي الْإِعْرَابِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A maʿṭūf follows its maʿṭūf ʿalayh in iʿrāb state, so this one is ${stateArabic(t.state)} like it.`},
+ tawkid:{
+  id:(t,data)=>tawkidWhyAuthority(t,data).subtype===TAWKID_SUBTYPES.lafzi?'WHY_ROLE_TAWKID_LAFZI':'WHY_ROLE_TAWKID_MANAWI',
+  ar:(t,data)=>tawkidWhyAuthority(t,data).subtype===TAWKID_SUBTYPES.lafzi
+   ?`${wq(t.word)} أُعِيدَ لَفْظُهُ لِلتَّقْوِيَةِ، فَهُوَ تَوْكِيدٌ لَفْظِيٌّ.`
+   :`${wq(t.word)} مِنْ أَلْفَاظِ التَّوْكِيدِ الْمَعْنَوِيِّ فِي تَرْكِيبِهِ الْمُسَجَّلِ، فَهُوَ تَوْكِيدٌ مَعْنَوِيٌّ.`,
+  en:(t,data)=>tawkidWhyAuthority(t,data).subtype===TAWKID_SUBTYPES.lafzi
+   ?`${eq(t.word)} repeats the muʾakkad's own wording for strength, so it is تَوْكِيدٌ لَفْظِيٌّ.`
+   :`${eq(t.word)} is a source-licensed semantic-emphasis word in this registered construction, so it is تَوْكِيدٌ مَعْنَوِيٌّ.`,
+  stateId:()=>'WHY_STATE_TAWKID_INHERITED',
+  stateAr:t=>`وَالتَّوْكِيدُ يَتْبَعُ مُؤَكَّدَهُ فِي الْإِعْرَابِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
+  stateEn:t=>`A tawkīd follows its muʾakkad in iʿrāb state, so this one is ${stateArabic(t.state)} like it.`},
  adverb:{
   id:t=>WHY_ZARF_SENSE[t.word]?'WHY_ROLE_ZARF':'WHY_ROLE_ZARF_GENERIC',
   ar:t=>`${wq(t.word)} ظَرْفٌ ${whyZarfSense(t).ar}.`,
@@ -7760,9 +7910,12 @@ function buildTokenWhy(token,data){
  if(type==='noun'){
   const role=WHY_ROLE[token.grammar.role];
   if(!role)throw new Error(`WHY: no rule for noun role “${token.grammar.role}”`);
-  push({id:role.id(token),ar:role.ar(token),en:role.en(token)});
-  push({id:role.stateId(token),ar:role.stateAr(token),en:role.stateEn(token)});
+  push({id:role.id(token,data),ar:role.ar(token,data),en:role.en(token,data)});
+  push({id:role.stateId(token,data),ar:role.stateAr(token,data),en:role.stateEn(token,data)});
   push(whySignNoun(token));
+  if(token.grammar.role==='tawkid'){
+   push(whyTawkidCondition(token,data));
+  }
   // The five nouns carry their muḍāf ilayh as an attached kāf, so the generic “joined to what
   // follows it” wording would be wrong for them; the engine already flags this via attachedKaf.
   if(token.grammar.isMudaf)push(token.grammar.attachedKaf
@@ -7843,6 +7996,13 @@ function buildRelationshipWhy(rel,data){
     en:`${eq(follower.word)} is maʿṭūf by ${eq(conjunction.word)} on ${eq(followed.word)}, so it inherits its iʿrāb state and is ${stateArabic(follower.state)} like it.`});
    return{ids,ar,en};
   }
+  if(rel.kind===TAWKID_KIND){
+   const subtype=rel.subtype===TAWKID_SUBTYPES.lafzi?'لَفْظِيٌّ':'مَعْنَوِيٌّ';
+   push({id:'WHY_REL_TAWKID_STATE_INHERITANCE',
+    ar:`${wq(follower.word)} تَوْكِيدٌ ${subtype} لِـ${wq(followed.word)}، فَتَبِعَهُ فِي حُكْمِهِ الْإِعْرَابِيِّ وَصَارَ ${stateArabic(follower.state)} مِثْلَهُ.`,
+    en:`${eq(follower.word)} is ${rel.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd of ${eq(followed.word)}, so it inherits its iʿrāb state and is ${stateArabic(follower.state)} like it.`});
+   return{ids,ar,en};
+  }
   push({id:'WHY_REL_NAAT_AGREEMENT',
    ar:`${wq(follower.word)} نَعْتٌ حَقِيقِيٌّ لِـ${wq(followed.word)}، وَقَدْ وَافَقَهُ فِي الْإِعْرَابِ وَالتَّعْرِيفِ أَوِ التَّنْكِيرِ وَالتَّذْكِيرِ أَوِ التَّأْنِيثِ وَالْإِفْرَادِ أَوِ التَّثْنِيَةِ أَوِ الْجَمْعِ.`,
    en:`${eq(follower.word)} is the true naʿt of ${eq(followed.word)} and agrees with it in iʿrāb state, definiteness, gender, and number.`});
@@ -7915,6 +8075,13 @@ function renderRelationshipAnalysis(data){
    if(!conjunction)return;
    followed.phraseAr=`وَالتَّرْكِيبُ «${followed.word} ${conjunction.word} ${follower.word}»: مَعْطُوفٌ عَلَيْهِ، وَحَرْفُ عَطْفٍ، وَمَعْطُوفٌ تَابِعٌ لَهُ فِي الْإِعْرَابِ.`;
    followed.phraseEn=`Together, “${followed.word} ${conjunction.word} ${follower.word}” is a maʿṭūf ʿalayh, a conjunction, and a maʿṭūf inheriting its state.`;
+   followed.phraseLabel='Follower';
+   return;
+  }
+  if(rel.kind===TAWKID_KIND){
+   const subtype=rel.subtype===TAWKID_SUBTYPES.lafzi?'لَفْظِيٌّ':'مَعْنَوِيٌّ';
+   followed.phraseAr=`وَالتَّرْكِيبُ «${followed.word} ${follower.word}»: مُؤَكَّدٌ وَتَوْكِيدٌ ${subtype} تَابِعٌ لَهُ فِي الْإِعْرَابِ.`;
+   followed.phraseEn=`Together, “${followed.word} ${follower.word}” is a muʾakkad with its ${rel.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd inheriting its state.`;
    followed.phraseLabel='Follower';
    return;
   }
@@ -8142,6 +8309,10 @@ function validateExercise(data){
     const authority=deriveAtfFollowerAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_ATF_AUTHORITY',`ʿAṭf authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_ATF_NASAQ')fail('E_ATF_RULE','The maʿṭūf is not bound to its source rule.',token);
+   }else if(token.grammar.role==='tawkid'){
+    const authority=deriveTawkidFollowerAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_TAWKID_AUTHORITY',`Tawkīd authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_TAWKID')fail('E_TAWKID_RULE','The tawkīd is not bound to its source rule.',token);
    }else if(token.state!==roleRule?.state)fail('E_ROLE_CASE',`Role ${token.grammar.role} requires ${roleRule?.state}, not ${token.state}.`,token);
    const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
    if(safeSignId(token.sign)!==signRule?.[0])fail('E_NOUN_SIGN','Noun sign disagrees with case and declension.',token);
@@ -8438,11 +8609,15 @@ function validateExercise(data){
   if(rel.type==='follower'){
    const follower=tokenById.get(rel.followerId);
    const authority=rel.kind===ATF_KIND?deriveAtfFollowerAuthority(data,data.tokens.indexOf(follower))
+    :rel.kind===TAWKID_KIND?deriveTawkidFollowerAuthority(data,data.tokens.indexOf(follower))
     :deriveNaatFollowerAuthority(data,data.tokens.indexOf(follower));
    if(!authority.authorized||rel.kind!==authority.kind||rel.followedId!==authority.followedId
      ||rel.followerId!==authority.followerId||rel.state!==authority.state
      ||rel.kind===NAAT_KIND&&(rel.definiteness!==authority.definiteness||rel.gender!==authority.gender||rel.number!==authority.number)
-     ||rel.kind===ATF_KIND&&(rel.conjunctionId!==authority.conjunctionId||rel.conjunctionKey!==authority.conjunctionKey)){
+     ||rel.kind===ATF_KIND&&(rel.conjunctionId!==authority.conjunctionId||rel.conjunctionKey!==authority.conjunctionKey)
+     ||rel.kind===TAWKID_KIND&&(rel.pairKey!==authority.pairKey||rel.subtype!==authority.subtype
+       ||rel.semanticKey!==authority.semanticKey||rel.pronounKey!==authority.pronounKey
+       ||rel.antecedentGender!==authority.antecedentGender||rel.antecedentNumber!==authority.antecedentNumber)){
     fail('E_FOLLOWER_RELATION','Follower relationship is not the canonical follower proof.',follower);
    }
   }
@@ -8470,6 +8645,17 @@ function validateExercise(data){
   }
   if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
    fail('E_ATF_RELATION_COUNT','A maʿṭūf must have exactly one follower relationship.',item);
+  }
+ });
+ data.tokens.filter(item=>item.grammar.role==='tawkid').forEach(item=>{
+  const rel=relationships.find(candidate=>candidate.id===item.relations.followerRelationshipId&&candidate.type==='follower');
+  const followed=tokenById.get(item.relations.followedId);
+  if(!rel||rel.kind!==TAWKID_KIND||rel.followerId!==item.id||rel.followedId!==followed?.id
+    ||followed?.relations.followerId!==item.id||followed?.relations.followerRelationshipId!==rel.id){
+   fail('E_TAWKID_RELATION','A tawkīd must have exactly one reciprocal canonical link to its muʾakkad.',item);
+  }
+  if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
+   fail('E_TAWKID_RELATION_COUNT','A tawkīd must have exactly one follower relationship.',item);
   }
  });
  data.tokens.filter(item=>item.grammar.role==='mubtada').forEach(item=>{
@@ -8614,12 +8800,13 @@ function add(starts,form,state,sign,build,metadata={}){
  const followerPairKeys=Object.freeze([...(metadata.followerPairKeys||[])]);
  const followerConjunctionKeys=Object.freeze([...(metadata.followerConjunctionKeys||[])]);
  if(Boolean(followerKind)!==Boolean(followerPairKeys.length)
-   ||followerKind&&![NAAT_KIND,ATF_KIND].includes(followerKind)
-   ||followerKind===NAAT_KIND&&followerConjunctionKeys.length
+   ||followerKind&&![NAAT_KIND,ATF_KIND,TAWKID_KIND].includes(followerKind)
+   ||followerKind!==ATF_KIND&&followerConjunctionKeys.length
    ||followerKind===ATF_KIND&&!followerConjunctionKeys.length){
   throw new Error(`Template ${stableId} has an invalid follower declaration.`);
  }
- const followerRegistry=followerKind===ATF_KIND?ATF_PAIR_REGISTRY:NAAT_PAIR_REGISTRY;
+ const followerRegistry=followerKind===ATF_KIND?ATF_PAIR_REGISTRY
+  :followerKind===TAWKID_KIND?TAWKID_PAIR_REGISTRY:NAAT_PAIR_REGISTRY;
  if(followerPairKeys.some((key,position)=>followerPairKeys.indexOf(key)!==position||!followerRegistry[key])){
   throw new Error(`Template ${stableId} names a duplicate or unregistered follower pair.`);
  }
@@ -9236,6 +9423,63 @@ add('verb','singular','nasb','fatha',()=>pickedAtf(ATF_ALL_CONJUNCTION_KEYS,'sin
  atfPastMetadata(['singularPeople','singularEndpoint'],ATF_ALL_CONJUNCTION_KEYS));
 add('particle','singular','jarr','kasra',()=>buildAtfExercise('waw','singularPlaces','jarr'),
  atfMetadata(['singularPlaces'],['waw']));
+
+/* One productive noun-focused tawkīd family over the shared follower seam. All follower words in
+   this phase use existing singular case signs; the antecedent may itself be singular or plural,
+   because maʿnawī agreement is carried by the attached pronoun rather than by pretending the
+   emphasis word is a naʿt. */
+const TAWKID_RAF_PAIR_KEYS=Object.freeze(['lafziStudent','nafsSingularM','aynSingularM','jamiiStudents']);
+const TAWKID_ALL_PAIR_KEYS=Object.freeze(Object.keys(TAWKID_PAIR_REGISTRY));
+function tawkidTranslationFor(pair,host){
+ if(host==='raf')return`${cap(pair.phraseEn)} visited the friend.`;
+ if(host==='jarr')return`There is a question about ${pair.phraseEn}.`;
+ return pair.semanticKey==='kull'?`The student read ${pair.phraseEn}.`
+  :`The student visited ${pair.phraseEn}.`;
+}
+function buildTawkidExercise(pairKey,host){
+ const pair=TAWKID_PAIR_REGISTRY[pairKey];
+ if(!pair)throw new Error(`Unknown productive tawkīd pair: ${pairKey}`);
+ const state={raf:'raf',nasb:'nasb',jarr:'jarr'}[host],formKey={raf:'nom',nasb:'acc',jarr:'gen'}[state];
+ if(!formKey)throw new Error(`Unknown productive tawkīd host: ${host}`);
+ const followedWord=pair.followed[formKey],followerWord=pair.follower[formKey];
+ const follower=token(followerWord,pair.follower.en,AR.tawkid(followerWord),
+  `A ${pair.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd inheriting its muʾakkad's state.`,true);
+ if(host==='jarr')return{sentence:'',translation:tawkidTranslationFor(pair,host),tokens:[
+  token('عَنْ','about',AR.prep('عَنْ'),EN.prep),
+  token(followedWord,pair.followed.en,AR.majrur(followedWord,'عَنْ'),'The muʾakkad governed by the preposition.'),
+  follower,token('سُؤَالٌ','a question',AR.delayedMubtada('سُؤَالٌ'),'A delayed mubtadaʾ; nominative.')
+ ]};
+ if(host==='raf'){
+  const verb=verbs.find(item=>item.past==='زَارَ');
+  return{sentence:'',translation:tawkidTranslationFor(pair,host),tokens:[
+   token(verb.past,verb.pastEn,AR.past(verb.past),'A past-tense verb built on its canonical ending.'),
+   token(followedWord,pair.followed.en,AR.faail(followedWord),'The muʾakkad and explicit subject.'),
+   follower,token('الصَّدِيقَ','the friend',AR.object('الصَّدِيقَ'),EN.object)
+  ]};
+ }
+ const verb=verbs.find(item=>item.past===(pair.semanticKey==='kull'?'قَرَأَ':'زَارَ'));
+ return{sentence:'',translation:tawkidTranslationFor(pair,host),tokens:[
+  token(verb.past,verb.pastEn,AR.past(verb.past),'A past-tense verb built on its canonical ending.'),
+  token('الطَّالِبُ','the student',AR.faail('الطَّالِبُ'),'The explicit subject.'),
+  token(followedWord,pair.followed.en,AR.object(followedWord),'The muʾakkad and direct object.'),follower
+ ]};
+}
+function canonicalTawkidTranslation(data){
+ const followerIndex=data?.tokens?.findIndex(token=>token.grammar?.role==='tawkid')??-1;
+ const authority=deriveTawkidFollowerAuthority(data,followerIndex);
+ if(!authority.authorized)return null;
+ const template=tawkidTemplateRecord(data),pair=TAWKID_PAIR_REGISTRY[authority.pairKey];
+ const host={raf:'raf',nasb:'nasb',jarr:'jarr'}[template.state];
+ return host?tawkidTranslationFor(pair,host):null;
+}
+const tawkidMetadata=(keys,extra={})=>({...extra,followerKind:TAWKID_KIND,followerPairKeys:keys});
+const pickedTawkid=(keys,label,host)=>buildTawkidExercise(pickVaried(keys,label,String),host);
+add('verb','singular','raf','damma',()=>pickedTawkid(TAWKID_RAF_PAIR_KEYS,'tawkid-raf','raf'),
+ tawkidMetadata(TAWKID_RAF_PAIR_KEYS,pastTemplateMetadata('3ms','explicit')));
+add('verb','singular','nasb','fatha',()=>pickedTawkid(TAWKID_ALL_PAIR_KEYS,'tawkid-nasb','nasb'),
+ tawkidMetadata(TAWKID_ALL_PAIR_KEYS,pastTemplateMetadata('3ms','explicit')));
+add('particle','singular','jarr','kasra',()=>pickedTawkid(TAWKID_ALL_PAIR_KEYS,'tawkid-jarr','jarr'),
+ tawkidMetadata(TAWKID_ALL_PAIR_KEYS));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

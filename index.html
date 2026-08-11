@@ -1173,6 +1173,12 @@ function resolveCanonicalTokenGloss(data,token,index){
   const found=badalPairAt(data,index);
   return found?.pair?.follower?.en||null;
  }
+ /* 4f — a maṣdar used as a mafʿūl muṭlaq is curriculum-owned in exactly the same way. Its English
+    comes from the authorized pair's own registered lexeme, never from a bare surface lookup. */
+ if(type==='noun'&&token.grammar.role==='mafulMutlaq'){
+  const found=mutlaqPairAt(data,index);
+  return found?.masdarLexeme?.en||null;
+ }
  /* 5 — an object noun, resolved through its GOVERNING VERB rather than through its surface.
     Two vocabulary records can share one accusative surface with different English, so a bare
     surface lookup would have to choose between them. The verb that governs the object is what
@@ -1326,7 +1332,10 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
     never earns a new shape. */
  TS38:Object.freeze({parts:Object.freeze([Object.freeze({slot:'badalSentence'})])}),
  /* نائب الفاعل — the canonical translator derives tense, passive capability and deputy pair. */
- TS39:Object.freeze({parts:Object.freeze([Object.freeze({slot:'passiveSentence'})])})
+ TS39:Object.freeze({parts:Object.freeze([Object.freeze({slot:'passiveSentence'})])}),
+ /* المفعول المطلق — one shape for all five lanes, as TS37 and TS38 serve their chapters: the
+    whole sentence is settled by the authorized pair, so a lane never earns a shape of its own. */
+ TS40:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mutlaqSentence'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1470,7 +1479,12 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_VERB_SMP_RAF_WAW_03||verb:past,noun:naibFail":Object.freeze({templateId:"T_VERB_SMP_RAF_WAW_03",structure:"verb:past,noun:naibFail",shape:"TS39",copulaPlural:true}),
  "T_VERB_SMP_RAF_WAW_04||verb:present,noun:naibFail":Object.freeze({templateId:"T_VERB_SMP_RAF_WAW_04",structure:"verb:present,noun:naibFail",shape:"TS39",copulaPlural:true}),
  "T_VERB_FIVENOUNS_RAF_WAW_03||verb:past,noun:naibFail":Object.freeze({templateId:"T_VERB_FIVENOUNS_RAF_WAW_03",structure:"verb:past,noun:naibFail",shape:"TS39",copulaPlural:false}),
- "T_VERB_FIVENOUNS_RAF_WAW_04||verb:present,noun:naibFail":Object.freeze({templateId:"T_VERB_FIVENOUNS_RAF_WAW_04",structure:"verb:present,noun:naibFail",shape:"TS39",copulaPlural:false})
+ "T_VERB_FIVENOUNS_RAF_WAW_04||verb:present,noun:naibFail":Object.freeze({templateId:"T_VERB_FIVENOUNS_RAF_WAW_04",structure:"verb:present,noun:naibFail",shape:"TS39",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_20||verb:past,noun:faail,noun:object,noun:mafulMutlaq":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_20",structure:"verb:past,noun:faail,noun:object,noun:mafulMutlaq",shape:"TS40",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_21||verb:past,noun:faail,noun:mafulMutlaq":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_21",structure:"verb:past,noun:faail,noun:mafulMutlaq",shape:"TS40",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_22||verb:past,noun:faail,noun:mafulMutlaq,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_22",structure:"verb:past,noun:faail,noun:mafulMutlaq,noun:mudafIlayh",shape:"TS40",copulaPlural:false}),
+ "T_VERB_DUAL_NASB_YA_02||verb:past,noun:faail,noun:mafulMutlaq":Object.freeze({templateId:"T_VERB_DUAL_NASB_YA_02",structure:"verb:past,noun:faail,noun:mafulMutlaq",shape:"TS40",copulaPlural:false}),
+ "T_VERB_DUAL_NASB_YA_03||verb:past,noun:faail,noun:object,noun:mafulMutlaq":Object.freeze({templateId:"T_VERB_DUAL_NASB_YA_03",structure:"verb:past,noun:faail,noun:object,noun:mafulMutlaq",shape:"TS40",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -1520,6 +1534,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='tawkidSentence')return canonicalTawkidTranslation(exercise);
  if(bits[0]==='badalSentence')return canonicalBadalTranslation(exercise);
  if(bits[0]==='passiveSentence')return canonicalPassiveTranslation(exercise);
+ if(bits[0]==='mutlaqSentence')return canonicalMutlaqTranslation(exercise);
  if(bits[0]==='copula'){
   const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
   if(!particle)return null;
@@ -3694,6 +3709,116 @@ const PASSIVE_DEPUTY_PAIRS=Object.freeze(Object.assign(Object.create(null),{
  katabaTwoBooks:Object.freeze({capabilityKey:'kataba',deputy:passiveDeputyLexeme(duals,'the two books'),inflection:'dual'}),
  nasahaTeachers:Object.freeze({capabilityKey:'nasaha',deputy:passiveDeputyLexeme(smp,'the teachers'),inflection:'smp'}),
  nasahaFather:Object.freeze({capabilityKey:'nasaha',deputy:passiveDeputyLexeme(fiveNouns,'your father'),inflection:'fiveNouns'})
+}));
+/* Productive المفعول المطلق — Al-Tuḥfah pp. 146–147. باب المصدر defines المصدر as «الاسْمُ
+   الْمَنْصُوبُ الَّذِي يَجِيءُ ثَالِثًا فِي تَصْرِيفِ الْفِعْلِ», and the شرح states the chapter's real
+   purpose outright: the مفعول مطلق is «مَا لَيْسَ خَبَرًا مِمَّا دَلَّ عَلَى تَأْكِيدِ عَامِلِهِ، أَوْ
+   نَوْعِهِ، أَوْ عَدَدِهِ» (p. 146). The same page works out the three أنواع — «حَفِظْتُ الدَّرْسَ
+   حِفْظًا» (تأكيد), «وَقَفْتُ لِلْأُسْتَاذِ وُقُوفَ الْمُؤَدَّبِ» (نوع) and «ضَرَبْتُ الْكَسُولَ
+   ضَرْبَتَيْنِ» (عدد). p. 147 then divides that same maṣdar a SECOND, independent way: لفظي, whose
+   letters are its verb's own («قَعَدْتُ قُعُودًا»), and معنوي, which agrees in meaning alone
+   («جَلَسْتُ قُعُودًا», «قُمْتُ وُقُوفًا»).
+
+   The two divisions are separate registered facts on every pair, because they answer separate
+   questions and a word can be لفظي while being مبيّنًا للنوع. Neither is inferred from the two
+   Arabic words — although the لفظي/معنوي claim IS checked against the surfaces, so a pair cannot
+   declare a division its own letters contradict.
+
+   Nothing here is derived morphologically. Every maṣdar surface is written out, and the four
+   intransitive ʿāmils the source's own examples need form their own small capability registry
+   rather than entering the transitive vocabulary pools, which templates draw objects from. */
+const MUTLAQ_PURPOSES=Object.freeze({tawkid:'tawkid',naw:'naw',adad:'adad'});
+const MUTLAQ_AGREEMENTS=Object.freeze({lafzi:'lafzi',manawi:'manawi'});
+const MUTLAQ_PURPOSE_LABELS=Object.freeze({
+ tawkid:Object.freeze({ar:'الْمُؤَكِّدُ لِعَامِلِهِ',en:'the mafʿūl muṭlaq that confirms its ʿāmil',
+  clauseAr:'يُؤَكِّدُ مَعْنَاهُ',clauseEn:'confirming what it says'}),
+ naw:Object.freeze({ar:'الْمُبَيِّنُ لِلنَّوْعِ',en:'the mafʿūl muṭlaq that makes its kind clear',
+  clauseAr:'يُبَيِّنُ نَوْعَهُ',clauseEn:'making clear what kind of action it was'}),
+ adad:Object.freeze({ar:'الْمُبَيِّنُ لِلْعَدَدِ',en:'the mafʿūl muṭlaq that states its number',
+  clauseAr:'يُبَيِّنُ عَدَدَهُ',clauseEn:'stating how many times it happened'})
+});
+const MUTLAQ_AGREEMENT_LABELS=Object.freeze({
+ lafzi:Object.freeze({ar:'لَفْظِيٌّ',en:'lafẓī'}),
+ manawi:Object.freeze({ar:'مَعْنَوِيٌّ',en:'maʿnawī'})
+});
+/* p. 147 calls the ʿāmil «الفعل الناصب له», so its لفظي test is a test on the two SURFACES: the
+   maṣdar must be «مشتملًا على حروفه», i.e. carry the verb's letters in order. Short vowels and
+   tanwīn are not letters, and the hamzah seats are one letter written several ways, so both are
+   normalized away before the comparison (mutlaqBareLetters, below with the authority). */
+const MUTLAQ_NON_LETTERS=/[ً-ْـ]/gu;
+/* The ʿāmils the source's own examples need that the transitive pools do not carry. Only the 3ms
+   past surface is registered: these families exist to govern a maṣdar, never to be conjugated,
+   and none of them may ever be handed an object. */
+const MUTLAQ_VERB_CAPABILITIES=Object.freeze(Object.assign(Object.create(null),{
+ qaada:Object.freeze({key:'qaada',past:'قَعَدَ',en:'sit',third:'sits',pastEn:'sat'}),
+ jalasa:Object.freeze({key:'jalasa',past:'جَلَسَ',en:'sit down',third:'sits down',pastEn:'sat down'}),
+ qaama:Object.freeze({key:'qaama',past:'قَامَ',en:'rise',third:'rises',pastEn:'rose'}),
+ waqafa:Object.freeze({key:'waqafa',past:'وَقَفَ',en:'stand',third:'stands',pastEn:'stood'}),
+ sajada:Object.freeze({key:'sajada',past:'سَجَدَ',en:'prostrate',third:'prostrates',pastEn:'prostrated'})
+}));
+/* The maṣdar surfaces themselves, plus the one qualifier noun p. 146's نوع example annexes to.
+   Indefinite maṣdars carry tanwīn and the muḍāf one does not, so «وُقُوفٌ» and «وُقُوفُ» are two
+   separate lexemes rather than one lexeme inflected two ways. */
+const MUTLAQ_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ hifz:Object.freeze({nom:'حِفْظٌ',acc:'حِفْظًا',gen:'حِفْظٍ',en:'a memorizing',inflection:'singular'}),
+ quud:Object.freeze({nom:'قُعُودٌ',acc:'قُعُودًا',gen:'قُعُودٍ',en:'a sitting',inflection:'singular'}),
+ wuquuf:Object.freeze({nom:'وُقُوفٌ',acc:'وُقُوفًا',gen:'وُقُوفٍ',en:'a standing',inflection:'singular'}),
+ wuquufMudaf:Object.freeze({nom:'وُقُوفُ',acc:'وُقُوفَ',gen:'وُقُوفِ',en:'the standing',inflection:'singular'}),
+ sajdatan:Object.freeze({nom:'سَجْدَتَانِ',acc:'سَجْدَتَيْنِ',gen:'سَجْدَتَيْنِ',en:'two prostrations',inflection:'dual'}),
+ qiraatan:Object.freeze({nom:'قِرَاءَتَانِ',acc:'قِرَاءَتَيْنِ',gen:'قِرَاءَتَيْنِ',en:'two readings',inflection:'dual'}),
+ muaddab:Object.freeze({nom:'الْمُؤَدَّبُ',acc:'الْمُؤَدَّبَ',gen:'الْمُؤَدَّبِ',en:'the well-mannered man',inflection:'singular'})
+}));
+/* Each pair names its ʿāmil, its subject, its optional direct object, its maṣdar, and — for the
+   نوع lane — the noun the maṣdar is annexed to. The English of the whole sentence is frozen here
+   too, so the canonical translator composes it from registered authority rather than from a
+   builder's local wording. */
+const MUTLAQ_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ /* التأكيد — «حَفِظْتُ الدَّرْسَ حِفْظًا» (p. 146), moved to the 3ms explicit-fāʿil lane this app
+    produces. لفظي: the maṣdar carries the verb's own letters. */
+ hifzDars:Object.freeze({purpose:MUTLAQ_PURPOSES.tawkid,agreement:MUTLAQ_AGREEMENTS.lafzi,
+  verbPast:'حَفِظَ',subject:'الطَّالِبُ',object:'الدَّرْسَ',masdarKey:'hifz',qualifierKey:'',
+  conditionAr:'لِأَنَّ لَفْظَ الْمَصْدَرِ هُوَ لَفْظُ فِعْلِهِ، وَلَمْ يُؤْتَ بِهِ إِلَّا لِتَقْوِيَةِ عَامِلِهِ',
+  conditionEn:'the maṣdar carries the very letters of its verb and is brought only to strengthen it',
+  sentenceEn:'The student memorized the lesson, memorizing it indeed.'}),
+ /* «قَعَدْتُ قُعُودًا» (p. 147) — the شرح's own لفظي example. */
+ quudLafzi:Object.freeze({purpose:MUTLAQ_PURPOSES.tawkid,agreement:MUTLAQ_AGREEMENTS.lafzi,
+  verbPast:'قَعَدَ',subject:'الطَّالِبُ',object:'',masdarKey:'quud',qualifierKey:'',
+  conditionAr:'لِأَنَّ لَفْظَ الْمَصْدَرِ هُوَ لَفْظُ فِعْلِهِ، وَلَمْ يُؤْتَ بِهِ إِلَّا لِتَقْوِيَةِ عَامِلِهِ',
+  conditionEn:'the maṣdar carries the very letters of its verb and is brought only to strengthen it',
+  sentenceEn:'The student sat, sitting indeed.'}),
+ /* «جَلَسْتُ قُعُودًا» (p. 147) — the شرح's own معنوي example: القعود is the meaning of جَلَسَ, and
+    «ليست حروف الكلمتين واحدة». */
+ quudManawi:Object.freeze({purpose:MUTLAQ_PURPOSES.tawkid,agreement:MUTLAQ_AGREEMENTS.manawi,
+  verbPast:'جَلَسَ',subject:'الطَّالِبُ',object:'',masdarKey:'quud',qualifierKey:'',
+  conditionAr:'لِأَنَّ الْقُعُودَ هُوَ مَعْنَى «جَلَسَ» وَإِنْ لَمْ تَكُنْ حُرُوفُ الْكَلِمَتَيْنِ وَاحِدَةً',
+  conditionEn:'sitting is the meaning of jalasa even though the two words do not share their letters',
+  sentenceEn:'The student sat down, sitting indeed.'}),
+ /* «قُمْتُ وُقُوفًا» (p. 147) — the second معنوي example. */
+ wuquufManawi:Object.freeze({purpose:MUTLAQ_PURPOSES.tawkid,agreement:MUTLAQ_AGREEMENTS.manawi,
+  verbPast:'قَامَ',subject:'الطَّالِبُ',object:'',masdarKey:'wuquuf',qualifierKey:'',
+  conditionAr:'لِأَنَّ الْوُقُوفَ هُوَ مَعْنَى «قَامَ» وَإِنْ لَمْ تَكُنْ حُرُوفُ الْكَلِمَتَيْنِ وَاحِدَةً',
+  conditionEn:'standing is the meaning of qāma even though the two words do not share their letters',
+  sentenceEn:'The student rose, standing indeed.'}),
+ /* بيان النوع — «وَقَفْتُ لِلْأُسْتَاذِ وُقُوفَ الْمُؤَدَّبِ» (p. 146). The kind is carried by the
+    iḍāfah: the maṣdar alone would only confirm the verb, and it is what it is annexed to that says
+    WHICH standing it was. The lām phrase is dropped because it is not part of the ruling. */
+ wuquufMuaddab:Object.freeze({purpose:MUTLAQ_PURPOSES.naw,agreement:MUTLAQ_AGREEMENTS.lafzi,
+  verbPast:'وَقَفَ',subject:'الطَّالِبُ',object:'',masdarKey:'wuquufMudaf',qualifierKey:'muaddab',
+  conditionAr:'لِأَنَّ الْمَصْدَرَ أُضِيفَ إِلَى مَا يُبَيِّنُ هَيْئَةَ الْوُقُوفِ، فَدَلَّ عَلَى نَوْعِ عَامِلِهِ',
+  conditionEn:'the maṣdar is annexed to what describes the manner of the standing, so it makes the kind of the action clear',
+  sentenceEn:'The student stood the standing of a well-mannered man.'}),
+ /* بيان العدد — the source's own شكل is «ضَرَبْتُ الْكَسُولَ ضَرْبَتَيْنِ» (p. 146): a dual maṣdar of
+    مَرَّة counts the occurrences. Both productive pairs are built on that pattern. */
+ sajdatanAdad:Object.freeze({purpose:MUTLAQ_PURPOSES.adad,agreement:MUTLAQ_AGREEMENTS.lafzi,
+  verbPast:'سَجَدَ',subject:'الْإِمَامُ',object:'',masdarKey:'sajdatan',qualifierKey:'',
+  conditionAr:'لِأَنَّ الْمَصْدَرَ جَاءَ مُثَنًّى، فَدَلَّ عَلَى عَدَدِ مَرَّاتِ عَامِلِهِ',
+  conditionEn:'the maṣdar comes in the dual, so it states how many times the action happened',
+  sentenceEn:'The imam prostrated two prostrations.'}),
+ qiraatanAdad:Object.freeze({purpose:MUTLAQ_PURPOSES.adad,agreement:MUTLAQ_AGREEMENTS.lafzi,
+  verbPast:'قَرَأَ',subject:'الطَّالِبُ',object:'الْكِتَابَ',masdarKey:'qiraatan',qualifierKey:'',
+  conditionAr:'لِأَنَّ الْمَصْدَرَ جَاءَ مُثَنًّى، فَدَلَّ عَلَى عَدَدِ مَرَّاتِ عَامِلِهِ',
+  conditionEn:'the maṣdar comes in the dual, so it states how many times the action happened',
+  sentenceEn:'The student read the book two readings.'})
 }));
 const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...feminineHumanSingulars,...feminineHumanDuals,...fiveNouns];
 function nounEnglish(word,caseName='acc'){
@@ -6296,6 +6421,7 @@ const GRAMMAR_RULES=Object.freeze({
   faail:{state:'raf',ruleId:'R_FAIL_RAF',en:'The subject of the verb; nominative.'},
   naibFail:{state:'raf',ruleId:'R_NAIB_FAIL_RAF',en:'The deputy subject of an authorized passive verb; nominative.'},
   object:{state:'nasb',ruleId:'R_MAFUL_NASB',en:'The direct object; accusative.'},
+  mafulMutlaq:{state:'nasb',ruleId:'R_MAFUL_MUTLAQ_NASB',en:'A maṣdar confirming its ʿāmil, or making its kind or its number clear; accusative.'},
   majrur:{state:'jarr',ruleId:'R_HARF_JARR',en:'A noun governed by a preposition; genitive.'},
   mudafIlayh:{state:'jarr',ruleId:'R_MUDAF_ILAYH',en:'The second term of an iḍāfah; genitive.'},
   ismInna:{state:'nasb',ruleId:'R_ISM_INNA_NASB',en:'The noun of inna or one of its sisters; accusative.'},
@@ -6408,8 +6534,8 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
- roles:['mubtada','khabar','faail','naibFail','object','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf'],
- relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','preposition','idafa','inna','kana','concealedAn','follower'],
+ roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf'],
+ relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
@@ -6417,6 +6543,14 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
     turn on a speaker's prior belief or change of mind, which no sentence surface carries. */
  'imperative','diptote','naat sababi','atf bayan','badal al-badaa and badal al-nisyan',
  'badal of a verb from a verb',
+ /* المفعول المطلق ships with its three meanings (تأكيد، نوع، عدد) and both divisions
+    (لفظي، معنوي). What is named here is everything p. 146–147 mentions that no productive lane
+    covers: an ʿāmil that is not a visible past verb, a kind stated by an adjective rather than by
+    iḍāfah, and the numeric «ثَلَاثَ ضَرَبَاتٍ» frame, whose focus is a number in iḍāfah to a plural
+    maṣdar rather than a maṣdar itself. */
+ 'mafʿūl muṭlaq with an omitted ʿāmil, or an ʿāmil that is a maṣdar or a descriptive noun',
+ 'mafʿūl muṭlaq specifying its kind by an adjective instead of by iḍāfah',
+ 'the numeric iḍāfah frame of the counting mafʿūl muṭlaq (ثلاث ضربات)',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
   'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
@@ -6572,6 +6706,17 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
   'Only a singular absent person with no explicit fāʿil following the verb. 3ms uses its existing implicit-subject contexts; 3fs is produced only in the fronted feminine-mubtadaʾ construction, where the hidden pronoun is the rābiṭ returning to the mubtadaʾ.',
   [DAKUR_HIDDEN_JAWAZ]),
  R_MAFUL_NASB:sourceRule('A direct object is accusative when the subject’s action is connected to it.',[140,141],'Only objects of lexically transitive verbs generated by the app.'),
+ /* Al-Tuḥfah pp. 146–147, باب المصدر. The matn makes the maṣdar «الاسم المنصوب الذي يجيء ثالثًا في
+    تصريف الفعل», and the شرح says plainly that the chapter exists for the مفعول مطلق, «وهو عبارة عن
+    مَا لَيْسَ خَبَرًا مِمَّا دَلَّ عَلَى تَأْكِيدِ عَامِلِهِ، أَوْ نَوْعِهِ، أَوْ عَدَدِهِ», then works the
+    three أنواع out one by one. The «ليس خبرًا» exclusion is not a productive concern here: no lane
+    puts a maṣdar in a khabar position. */
+ R_MAFUL_MUTLAQ_NASB:sourceRule('A maṣdar that is not a khabar and that confirms its ʿāmil, or makes its kind or its number clear, is a mafʿūl muṭlaq and is accusative.',[146,147],'Productive scope: the registered pairs only, each naming its own visible past-tense ʿāmil, its maṣdar surface, and — for the kind-specifying lane — the noun the maṣdar is annexed to. The purpose is read from the frozen pair, never inferred from the words. Not produced: an omitted or non-verbal ʿāmil, a kind specified by an adjective rather than by iḍāfah, and the numeric ثلاث ضربات frame.'),
+ /* p. 147, أنواع المفعول المطلق. A SECOND and independent division of the same word, so it is a
+    rule of its own: the matn splits the maṣdar into لفظي and معنوي, and the شرح fixes the test —
+    «ما يوافق الفعل الناصب له في لفظه، بأن يكون مشتملًا على حروفه» against «ما يوافق الفعل الناصب له
+    في معناه، ولا يوافقه في حروفه». Each pair declares its division and the letters are checked. */
+ R_MUTLAQ_LAFZI_MANAWI:sourceRule('A mafʿūl muṭlaq is lafẓī when its wording carries the letters of the verb that makes it accusative, and maʿnawī when it agrees with that verb in meaning only.',[147],'Only the registered pairs; every declared division is verified against the two surfaces, so a pair cannot claim a division its own letters contradict. It states the division alone and never the naṣb, which is R_MAFUL_MUTLAQ_NASB.'),
  R_HARF_JARR:sourceRule('A noun after a verified preposition is khafḍ (genitive).',[13,174,175,176,177],'The internal legacy ID says JARR; displayed terminology follows Al-Tuḥfah and says khafḍ.'),
  R_MUDAF_ILAYH:sourceRule('A muḍāf ilayh is khafḍ by iḍāfah.',[174,175,177,178],'The immediately following second noun, or an attached pronoun, completes the iḍāfah.'),
  R_ISM_INNA_NASB:sourceRule('Inna and its sisters make their noun accusative.',[105,109,110],'Only the four explicitly generated sisters and a visible single noun.'),
@@ -6757,6 +6902,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_VERB_REQUIRES_SUBJECT:sourceRule('Every generated verb has an explicit, attached, or permitted hidden subject.',[38,39,87,88,89,90,91,92,93,97],'Hidden huwa is limited to supported third-person masculine singular forms; advanced 1s and 1p present forms use the person-bound hidden pronouns anā and naḥnu.'),
  RL_PASSIVE_DEPUTY:sourceRule('An authorized passive verb is linked to the visible former object that replaces the omitted fāʿil and becomes marfūʿ.',[96,97,98],'Exactly one passive verb followed by exactly one registered visible deputy subject; no active fāʿil remains.'),
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
+ RL_VERB_ABSOLUTE_OBJECT:sourceRule('A verb is linked to the maṣdar of its own action that follows it and makes it accusative as a mafʿūl muṭlaq.',[146,147],'Only an exact registered pair authorized by frozen template metadata: the ʿāmil is the nearest preceding visible past verb, and the maṣdar, its optional direct object and its optional muḍāf ilayh are all the ones that pair names. Adjacency alone never creates the relation.'),
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
  RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
  RL_KANA_NOUN_KHABAR:sourceRule('Kāna and its sisters require a linked noun and khabar with their governed states.',[76,105,106,107,108],'Complete ordered single-noun/single-khabar structures, plus the exact negated-kāna lām al-juḥūd frame whose verbal clause is the khabar.',[IA_KANA])
@@ -7003,6 +7149,33 @@ function registerPassiveVerbCapabilities(){
    morphology:Object.freeze({presentPerson:'3ms',voice:PASSIVE_VOICE,capabilityKey:capability.key})});
  });
 }
+/* المفعول المطلق. Two small registrations, both fail-closed on collision, because a maṣdar surface
+   or an intransitive ʿāmil already owned by another lexeme would silently inherit that lexeme's
+   authority. The ʿāmils register their PAST surface only: these families exist to govern a maṣdar
+   and are never conjugated, so no present, naṣb or jazm form of them enters the index at all. */
+function registerMutlaqVerbCapabilities(){
+ Object.values(MUTLAQ_VERB_CAPABILITIES).forEach(capability=>{
+  if(verbFormIndex.has(capability.past)){
+   throw new Error(`Mafʿūl-muṭlaq ʿāmil collides with an existing verb surface: ${capability.key}`);
+  }
+  const lexeme=Object.freeze({past:capability.past,en:capability.en,third:capability.third,
+   pastEn:capability.pastEn,mutlaqCapability:capability});
+  verbFormIndex.set(capability.past,{lexeme,form:'past',surface:capability.past,
+   morphology:Object.freeze({pastPerson:'3ms',capabilityKey:capability.key})});
+ });
+}
+function registerMutlaqNounForms(){
+ Object.values(MUTLAQ_LEXEMES).forEach(lexeme=>['nom','acc','gen'].forEach(form=>{
+  const surface=lexeme[form];
+  if(!surface)return;
+  const existing=nounFormIndex.get(surface);
+  // A dual's naṣb and khafḍ share one surface; anything else already registered is a clash.
+  if(existing&&existing.lexeme!==lexeme){
+   throw new Error(`Mafʿūl-muṭlaq lexeme collides with an existing noun surface: ${surface}`);
+  }
+  nounFormIndex.set(surface,{lexeme,inflection:lexeme.inflection});
+ }));
+}
 /* Exactly one authorized person, or nothing. A single-reading surface resolves on its own;
    an ambiguous surface resolves only through the canonical template's frozen capabilities,
    and zero matches or more than one match both reject. */
@@ -7026,6 +7199,43 @@ registerVerbSet(brokenObjectActions);
 registerAdvancedPastSet(advancedPastActions);
 registerAdvancedPresentSet(advancedPresentActions);
 registerPassiveVerbCapabilities();
+registerMutlaqVerbCapabilities();
+registerMutlaqNounForms();
+/* Every surface a mafʿūl-muṭlaq pair names must already resolve in the registries it borrows from.
+   Arabic literals that LOOK identical can differ in combining-mark order, and an unresolvable
+   surface would otherwise build a valid-looking exercise with no gloss authority behind it,
+   failing only later on a History restore. This makes that a load-time failure instead. */
+function verifyMutlaqPairRegistry(){
+ Object.entries(MUTLAQ_PAIR_REGISTRY).forEach(([key,pair])=>{
+  const verb=verbFormIndex.get(pair.verbPast);
+  if(verb?.form!=='past'||typeof verb.lexeme?.pastEn!=='string'){
+   throw new Error(`Mafʿūl-muṭlaq pair ${key} names an unregistered past ʿāmil: ${pair.verbPast}`);
+  }
+  const subject=nounFormIndex.get(pair.subject);
+  if(subject?.lexeme?.nom!==pair.subject||typeof subject.lexeme.en!=='string'){
+   throw new Error(`Mafʿūl-muṭlaq pair ${key} names an unregistered nominative subject: ${pair.subject}`);
+  }
+  if(pair.object&&!(Array.isArray(verb.lexeme.obj)&&verb.lexeme.obj.includes(pair.object))){
+   throw new Error(`Mafʿūl-muṭlaq pair ${key} names an object its ʿāmil does not license: ${pair.object}`);
+  }
+  const masdar=MUTLAQ_LEXEMES[pair.masdarKey];
+  if(!masdar||nounFormIndex.get(masdar.acc)?.lexeme!==masdar){
+   throw new Error(`Mafʿūl-muṭlaq pair ${key} names an unregistered maṣdar: ${pair.masdarKey}`);
+  }
+  const qualifier=pair.qualifierKey?MUTLAQ_LEXEMES[pair.qualifierKey]:null;
+  if(pair.qualifierKey&&(!qualifier||nounFormIndex.get(qualifier.gen)?.lexeme!==qualifier)){
+   throw new Error(`Mafʿūl-muṭlaq pair ${key} names an unregistered muḍāf ilayh: ${pair.qualifierKey}`);
+  }
+  if(!MUTLAQ_PURPOSE_LABELS[pair.purpose]||!MUTLAQ_AGREEMENT_LABELS[pair.agreement]){
+   throw new Error(`Mafʿūl-muṭlaq pair ${key} declares an unregistered purpose or division.`);
+  }
+  // p. 147's division, proven at load time as well as at authority time.
+  if(mutlaqSharesVerbLetters(pair.verbPast,masdar.acc)!==(pair.agreement===MUTLAQ_AGREEMENTS.lafzi)){
+   throw new Error(`Mafʿūl-muṭlaq pair ${key} declares a division its own letters contradict.`);
+  }
+ });
+}
+verifyMutlaqPairRegistry();
 
 const grammarSpec=(type,role,extra={})=>({type,role,...extra});
 const AR={
@@ -7033,6 +7243,8 @@ const AR={
  delayedMubtada:(w)=>grammarSpec('noun','mubtada',{delayed:true}),
  khabar:(w)=>grammarSpec('noun','khabar'),
  object:(w)=>grammarSpec('noun','object'),
+ mafulMutlaq:w=>grammarSpec('noun','mafulMutlaq'),
+ mafulMutlaqMudaf:w=>grammarSpec('noun','mafulMutlaq',{isMudaf:true}),
  prep:w=>grammarSpec('particle','particle',{particleType:'preposition',particleWord:w}),
  majrur:(w,p)=>grammarSpec('noun','majrur',{governorWord:p}),
  mudaf:w=>grammarSpec('noun','mubtada',{isMudaf:true}),
@@ -7354,6 +7566,95 @@ function canonicalPassiveTranslation(data){
  const copula=authority.tense==='past'?(plural?'were':'was'):(plural?'are':'is');
  return`${cap(pair.deputy.en)} ${copula} ${capability.participleEn}.`;
 }
+/* ---- المفعول المطلق: the authority ---------------------------------------------------------
+   Same shape as the passive and follower authorities: frozen template ownership + an exact
+   registered pair + the real token structure. Nothing is read from a relationship cache or from a
+   stored authorization flag, so History can discard and rebuild both without turning either into
+   authority. */
+function mutlaqTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.mutlaqPairKeys?.length?template:null;
+}
+function mutlaqBareLetters(word){
+ return String(word||'').replace(MUTLAQ_NON_LETTERS,'').replace(/^ال/u,'').replace(/[أإآؤئ]/gu,'ء');
+}
+function mutlaqSharesVerbLetters(verbPast,masdarSurface){
+ const masdarLetters=[...mutlaqBareLetters(masdarSurface)];
+ let cursor=0;
+ for(const letter of mutlaqBareLetters(verbPast)){
+  const found=masdarLetters.indexOf(letter,cursor);
+  if(found<0)return false;
+  cursor=found+1;
+ }
+ return true;
+}
+function mutlaqPairAt(data,index){
+ const template=mutlaqTemplateRecord(data);
+ const tokens=data?.tokens;
+ const masdar=Array.isArray(tokens)?tokens[index]:null;
+ if(!template||!masdar||masdar.grammar?.type!=='noun'||masdar.grammar.role!=='mafulMutlaq')return null;
+ /* The ʿāmil is the NEAREST preceding verb. A maṣdar may not reach past an intervening verb to a
+    further one, so the search stops at the first verb rather than looking for the pair's own. */
+ const verb=[...tokens.slice(0,index)].reverse().find(item=>item.grammar?.type==='verb');
+ if(!verb||verb.grammar.role!=='past'||verb.grammar.voice)return null;
+ const objects=tokens.filter(item=>item.grammar?.role==='object');
+ const object=objects.length===1?objects[0]:null;
+ const qualifier=tokens[index+1]?.grammar?.role==='mudafIlayh'?tokens[index+1]:null;
+ for(const key of template.mutlaqPairKeys){
+  const pair=MUTLAQ_PAIR_REGISTRY[key];
+  const masdarLexeme=pair&&MUTLAQ_LEXEMES[pair.masdarKey];
+  const qualifierLexeme=pair&&pair.qualifierKey?MUTLAQ_LEXEMES[pair.qualifierKey]:null;
+  if(!pair||!masdarLexeme||pair.qualifierKey&&!qualifierLexeme)continue;
+  if(verb.word!==pair.verbPast||verb.surfaceHint!==pair.verbPast)continue;
+  if(masdar.word!==masdarLexeme.acc||masdar.surfaceHint!==masdarLexeme.acc)continue;
+  if(objects.length!==(pair.object?1:0)||object&&object.word!==pair.object)continue;
+  if(Boolean(qualifier)!==Boolean(qualifierLexeme)||qualifier&&qualifier.word!==qualifierLexeme.gen)continue;
+  // Verb, fāʿil, maṣdar, and the two optional slots: nothing else may stand in this structure.
+  if(tokens.length!==3+(pair.object?1:0)+(qualifierLexeme?1:0))continue;
+  if(tokens[0]!==verb||tokens[1]?.grammar?.role!=='faail'||tokens[1].word!==pair.subject)continue;
+  return{key,pair,verb,masdar,object,qualifier,masdarLexeme,qualifierLexeme};
+ }
+ return null;
+}
+function deriveMutlaqAuthority(data,index){
+ const found=mutlaqPairAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-template-pair-or-structure'});
+ const {key,pair,verb,masdar,object,qualifier,masdarLexeme,qualifierLexeme}=found;
+ if(masdar.state&&masdar.state!=='nasb')return Object.freeze({authorized:false,reason:'masdar-not-nasb'});
+ if(masdar.inflection&&masdar.inflection!==masdarLexeme.inflection){
+  return Object.freeze({authorized:false,reason:'masdar-inflection-mismatch'});
+ }
+ const registeredMasdar=nounFormIndex.get(masdar.word);
+ if(registeredMasdar?.lexeme!==masdarLexeme||registeredMasdar.inflection!==masdarLexeme.inflection){
+  return Object.freeze({authorized:false,reason:'masdar-lexeme-mismatch'});
+ }
+ // The iḍāfah is the نوع lane's whole mechanism, so declaring it is part of the claim.
+ if(Boolean(masdar.grammar.isMudaf)!==Boolean(qualifierLexeme)){
+  return Object.freeze({authorized:false,reason:'idafa-declaration-mismatch'});
+ }
+ if(qualifier&&nounFormIndex.get(qualifier.word)?.lexeme!==qualifierLexeme){
+  return Object.freeze({authorized:false,reason:'qualifier-lexeme-mismatch'});
+ }
+ const registeredVerb=verbFormIndex.get(verb.word);
+ if(registeredVerb?.form!=='past'||registeredVerb.surface!==pair.verbPast){
+  return Object.freeze({authorized:false,reason:'amil-not-a-registered-past-verb'});
+ }
+ if(!MUTLAQ_PURPOSE_LABELS[pair.purpose]||!MUTLAQ_AGREEMENT_LABELS[pair.agreement]){
+  return Object.freeze({authorized:false,reason:'unregistered-purpose-or-agreement'});
+ }
+ // p. 147's division is a claim ABOUT the two words, so it is proven against them, not declared.
+ if(mutlaqSharesVerbLetters(pair.verbPast,masdarLexeme.acc)!==(pair.agreement===MUTLAQ_AGREEMENTS.lafzi)){
+  return Object.freeze({authorized:false,reason:'agreement-division-contradicts-the-surfaces'});
+ }
+ return Object.freeze({authorized:true,reason:'',pairKey:key,purpose:pair.purpose,agreement:pair.agreement,
+  verbPast:pair.verbPast,verbId:verb.id,masdarId:masdar.id,objectId:object?object.id:'',
+  qualifierId:qualifier?qualifier.id:'',inflection:masdarLexeme.inflection});
+}
+function canonicalMutlaqTranslation(data){
+ const index=data?.tokens?.findIndex(token=>token.grammar?.role==='mafulMutlaq')??-1;
+ const authority=deriveMutlaqAuthority(data,index);
+ return authority.authorized?MUTLAQ_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
+}
 function inflectNoun(token,tokens,index,data){
  const registered=nounFormIndex.get(token.surfaceHint);
  token.lexeme=registered?.lexeme||null;
@@ -7362,6 +7663,12 @@ function inflectNoun(token,tokens,index,data){
  if(!roleRule) throw new Error(`Unknown noun role: ${token.grammar.role}`);
  if(token.grammar.role==='naibFail'&&!derivePassiveConstructionAuthority(data).authorized){
   throw new Error('The deputy subject is not licensed by a canonical passive construction.');
+ }
+ /* Structural only at build time — state and inflection are not written yet — exactly as the naʿt
+    lane does. deriveMutlaqAuthority re-decides under full authority at render, Why and validation
+    time, and validateExercise refuses the exercise when it withholds. */
+ if(token.grammar.role==='mafulMutlaq'&&!mutlaqPairAt(data,index)){
+  throw new Error('The absolute object is not a canonically registered mafʿūl-muṭlaq construction for this template.');
  }
  if(roleRule.state==='inherited'){
   const followed=tokens[index-(token.grammar.role==='atf'?2:1)];
@@ -7536,6 +7843,7 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({
  verbSubject:'RL_VERB_REQUIRES_SUBJECT',
  passiveDeputy:'RL_PASSIVE_DEPUTY',
  verbObject:'RL_TRANSITIVE_VERB_OBJECT',
+ absoluteObject:'RL_VERB_ABSOLUTE_OBJECT',
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
  kana:'RL_KANA_NOUN_KHABAR',
@@ -7615,6 +7923,19 @@ function resolveRelationships(data){
   const index=tokens.indexOf(object);
   const verb=[...tokens.slice(0,index)].reverse().find(candidate=>candidate.grammar.type==='verb'&&candidate.tense!=='kana');
   if(verb){addRelationship(data,'verbObject',{verbId:verb.id,objectId:object.id});verb.relations.objectId=object.id;object.relations.verbId=verb.id;}
+ });
+ tokens.forEach((item,index)=>{
+  if(item.grammar.role!=='mafulMutlaq')return;
+  const authority=deriveMutlaqAuthority(data,index);
+  if(!authority.authorized)return;
+  const verb=tokens.find(candidate=>candidate.id===authority.verbId);
+  const relation=addRelationship(data,'absoluteObject',{verbId:verb.id,masdarId:item.id,
+   qualifierId:authority.qualifierId,pairKey:authority.pairKey,
+   purpose:authority.purpose,agreement:authority.agreement});
+  verb.relations.absoluteObjectId=item.id;
+  verb.relations.absoluteObjectRelationshipId=relation.id;
+  item.relations.amilId=verb.id;
+  item.relations.absoluteObjectRelationshipId=relation.id;
  });
  const mubtadas=tokens.filter(item=>item.grammar.role==='mubtada');
  const directKhabars=tokens.filter(item=>item.grammar.role==='khabar');
@@ -7711,6 +8032,7 @@ function nounRoleArabic(token){
  if(role==='faail')return'فَاعِلٌ مَرْفُوعٌ';
  if(role==='naibFail')return'نَائِبُ فَاعِلٍ مَرْفُوعٌ';
  if(role==='object')return'مَفْعُولٌ بِهِ مَنْصُوبٌ بِالْفِعْلِ';
+ if(role==='mafulMutlaq')return'مَفْعُولٌ مُطْلَقٌ مَنْصُوبٌ بِعَامِلِهِ';
  if(role==='majrur')return`اسْمٌ مَخْفُوضٌ بِـ«${token.grammar.governorWord}»`;
  if(role==='mudafIlayh')return'مُضَافٌ إِلَيْهِ مَخْفُوضٌ بِالْإِضَافَةِ';
  if(role==='ismInna')return`اسْمُ «${token.grammar.governorWord}» مَنْصُوبٌ بِهِ`;
@@ -7743,6 +8065,14 @@ function renderNounAnalysis(token){
  if(token.grammar.isMudaf)arabic+='، وَهُوَ مُضَافٌ';
  if(token.grammar.attachedKaf)arabic+='، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ';
  let english=roleRule.en;
+ /* The role table's English has to cover all three أنواع at once, which makes it a disjunction.
+    The authorized exercise knows which one this is, so the learner is told that instead. */
+ if(token.grammar.role==='mafulMutlaq'){
+  const data=token._data,authority=deriveMutlaqAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl muṭlaq: ${authority.reason}`);
+  const purpose=MUTLAQ_PURPOSE_LABELS[authority.purpose],division=MUTLAQ_AGREEMENT_LABELS[authority.agreement];
+  english=`A maṣdar accusative as ${purpose.en}; it is ${division.en}.`;
+ }
  if(token.grammar.role==='tawkid'){
   const data=token._data,authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
   if(!authority.authorized)throw new Error(`Cannot render unauthorized tawkīd: ${authority.reason}`);
@@ -7944,6 +8274,31 @@ function whyBadalCondition(token,data){
   ar:`وَصَحَّ هَذَا الْبَدَلُ؛ ${authority.conditionAr}.`,
   en:`This badal is valid because ${authority.conditionEn}.`};
 }
+function mutlaqWhyAuthority(token,data){
+ const authority=deriveMutlaqAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`WHY: the mafʿūl muṭlaq is not authorized (${authority.reason}).`);
+ return authority;
+}
+/* Two separate lines, because pp. 146 and 147 make two separate claims about the same word: WHICH
+   of the three أنواع it is, and whether it agrees with its ʿāmil in wording or in meaning only. */
+function whyMutlaqPurpose(token,data){
+ const authority=mutlaqWhyAuthority(token,data);
+ const pair=MUTLAQ_PAIR_REGISTRY[authority.pairKey];
+ return{id:`WHY_MUTLAQ_PURPOSE_${authority.purpose.toUpperCase()}`,
+  ar:`وَصَحَّ أَنَّهُ ${MUTLAQ_PURPOSE_LABELS[authority.purpose].ar}؛ ${pair.conditionAr}.`,
+  en:`It is ${MUTLAQ_PURPOSE_LABELS[authority.purpose].en} because ${pair.conditionEn}.`};
+}
+function whyMutlaqDivision(token,data){
+ const authority=mutlaqWhyAuthority(token,data);
+ const division=MUTLAQ_AGREEMENT_LABELS[authority.agreement];
+ return{id:`WHY_MUTLAQ_DIVISION_${authority.agreement.toUpperCase()}`,
+  ar:authority.agreement===MUTLAQ_AGREEMENTS.lafzi
+   ?`وَهُوَ مَصْدَرٌ ${division.ar}؛ لِأَنَّ لَفْظَهُ مُشْتَمِلٌ عَلَى حُرُوفِ فِعْلِهِ ${wq(authority.verbPast)}.`
+   :`وَهُوَ مَصْدَرٌ ${division.ar}؛ لِأَنَّهُ وَافَقَ فِعْلَهُ ${wq(authority.verbPast)} فِي مَعْنَاهُ دُونَ حُرُوفِهِ.`,
+  en:authority.agreement===MUTLAQ_AGREEMENTS.lafzi
+   ?`It is a ${division.en} maṣdar: its wording carries the letters of its verb ${eq(authority.verbPast)}.`
+   :`It is a ${division.en} maṣdar: it agrees with its verb ${eq(authority.verbPast)} in meaning, not in its letters.`};
+}
 const BADAL_KIND_LABELS=Object.freeze({
  mutabiq:Object.freeze({ar:'بَدَلُ الْكُلِّ مِنَ الْكُلِّ',en:'badal al-kull min al-kull (the matching badal)'}),
  baad:Object.freeze({ar:'بَدَلُ الْبَعْضِ مِنَ الْكُلِّ',en:'badal al-baʿḍ min al-kull (part for whole)'}),
@@ -7977,6 +8332,11 @@ const WHY_ROLE=Object.freeze({
   ar:t=>`${wq(t.word)} وَقَعَ عَلَيْهِ فِعْلُ الْفَاعِلِ، فَهُوَ الْمَفْعُولُ بِهِ.`,
   en:t=>`${eq(t.word)} receives the action, so it is the مَفْعُولٌ بِهِ.`,
   stateId:()=>'WHY_STATE_OBJECT',stateAr:()=>'وَالْمَفْعُولُ بِهِ مَنْصُوبٌ.',stateEn:()=>'The مَفْعُولُ بِهِ is مَنْصُوبٌ.'},
+ mafulMutlaq:{
+  id:(t,data)=>`WHY_ROLE_MAFUL_MUTLAQ_${mutlaqWhyAuthority(t,data).purpose.toUpperCase()}`,
+  ar:(t,data)=>`${wq(t.word)} مَصْدَرُ الْفِعْلِ ${wq(mutlaqWhyAuthority(t,data).verbPast)} جَاءَ بَعْدَهُ ${MUTLAQ_PURPOSE_LABELS[mutlaqWhyAuthority(t,data).purpose].clauseAr}، فَهُوَ الْمَفْعُولُ الْمُطْلَقُ.`,
+  en:(t,data)=>`${eq(t.word)} is the maṣdar of the verb ${eq(mutlaqWhyAuthority(t,data).verbPast)} and follows it, ${MUTLAQ_PURPOSE_LABELS[mutlaqWhyAuthority(t,data).purpose].clauseEn}, so it is the مَفْعُولٌ مُطْلَقٌ.`,
+  stateId:()=>'WHY_STATE_MAFUL_MUTLAQ',stateAr:()=>'وَالْمَفْعُولُ الْمُطْلَقُ مَنْصُوبٌ.',stateEn:()=>'The مَفْعُولٌ مُطْلَقٌ is مَنْصُوبٌ.'},
  majrur:{
   id:()=>'WHY_ROLE_MAJRUR',
   ar:t=>`${wq(t.word)} جَاءَ بَعْدَ حَرْفِ الْخَفْضِ ${wq(t.grammar.governorWord)}.`,
@@ -8242,6 +8602,10 @@ function buildTokenWhy(token,data){
   if(token.grammar.role==='badal'){
    push(whyBadalCondition(token,data));
   }
+  if(token.grammar.role==='mafulMutlaq'){
+   push(whyMutlaqPurpose(token,data));
+   push(whyMutlaqDivision(token,data));
+  }
   // The five nouns carry their muḍāf ilayh as an attached kāf, so the generic “joined to what
   // follows it” wording would be wrong for them; the engine already flags this via attachedKaf.
   if(token.grammar.isMudaf)push(token.grammar.attachedKaf
@@ -8316,6 +8680,17 @@ function buildRelationshipWhy(rel,data){
   const deputy=data.tokens.find(item=>item.id===rel.deputyId);
   if(!verb||!deputy)return{ids,ar,en};
   push({id:'WHY_REL_PASSIVE_DEPUTY',ar:`لَمَّا حُذِفَ فَاعِلُ ${wq(verb.word)} أُقِيمَ ${wq(deputy.word)} مَقَامَهُ وَأُعْطِيَ حُكْمَهُ فِي الرَّفْعِ.`,en:`When the agent of ${eq(verb.word)} was omitted, ${eq(deputy.word)} took its place and received its rule of rafʿ.`});
+  return{ids,ar,en};
+ }
+ if(rel.type==='absoluteObject'){
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const masdar=data.tokens.find(item=>item.id===rel.masdarId);
+  if(!verb||!masdar)return{ids,ar,en};
+  const purpose=MUTLAQ_PURPOSE_LABELS[rel.purpose];
+  if(!purpose)return{ids,ar,en};
+  push({id:'WHY_REL_ABSOLUTE_OBJECT',
+   ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(masdar.word)} مَصْدَرُهُ ${purpose.clauseAr}، فَنَصَبَهُ عَلَى الْمَفْعُولِيَّةِ الْمُطْلَقَةِ.`,
+   en:`${eq(verb.word)} is the ʿāmil and ${eq(masdar.word)} is its own maṣdar, ${purpose.clauseEn}, so the verb makes it accusative as its mafʿūl muṭlaq.`});
   return{ids,ar,en};
  }
  if(rel.type==='concealedAn'){
@@ -8398,6 +8773,13 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  /* The maṣdar carries the combined analysis, not the verb: the ʿāmil can stand several tokens
+     earlier, and the combined block belongs beside the word the exercise is actually about. */
+  if(rel.type==='absoluteObject'){
+   const recipient=data.tokens.find(item=>item.id===rel.masdarId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='follower'){
    const recipient=data.tokens.find(item=>item.id===rel.followedId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -8416,6 +8798,19 @@ function renderRelationshipAnalysis(data){
   verb.phraseAr=`وَالتَّرْكِيبُ «${verb.word} ${deputy.word}»: فِعْلٌ مَبْنِيٌّ لِلْمَجْهُولِ حُذِفَ فَاعِلُهُ، وَنَائِبُ فَاعِلٍ مَرْفُوعٌ أُقِيمَ مَقَامَهُ.`;
   verb.phraseEn=`Together, “${verb.word} ${deputy.word}” is a passive verb whose agent is omitted and a raised deputy subject taking its place.`;
   verb.phraseLabel='Passive construction';
+ });
+ data.relationships.filter(rel=>rel.type==='absoluteObject').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const masdar=data.tokens.find(item=>item.id===rel.masdarId);
+  const purpose=MUTLAQ_PURPOSE_LABELS[rel.purpose],division=MUTLAQ_AGREEMENT_LABELS[rel.agreement];
+  if(!verb||!masdar||!purpose||!division)return;
+  /* The نوع lane's maṣdar is a muḍāf, and quoting it without what it is annexed to would show the
+     learner half a construction — the iḍāfah is the very thing that makes the kind clear. */
+  const qualifier=rel.qualifierId?data.tokens.find(item=>item.id===rel.qualifierId):null;
+  const phrase=`${verb.word} ${masdar.word}${qualifier?` ${qualifier.word}`:''}`;
+  masdar.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: عَامِلٌ وَمَصْدَرُهُ الْمَنْصُوبُ عَلَى الْمَفْعُولِيَّةِ الْمُطْلَقَةِ، وَهُوَ ${purpose.ar}، وَهُوَ مَصْدَرٌ ${division.ar}.`;
+  masdar.phraseEn=`Together, “${phrase}” is an ʿāmil with its own maṣdar accusative as ${purpose.en}; the maṣdar is ${division.en}.`;
+  masdar.phraseLabel='Absolute object';
  });
  data.relationships.filter(rel=>rel.type==='concealedAn').forEach(rel=>{
   const verb=data.tokens.find(item=>item.id===rel.verbId);
@@ -8693,6 +9088,14 @@ function validateExercise(data){
     const authority=deriveBadalFollowerAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_BADAL_AUTHORITY',`Badal authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_BADAL')fail('E_BADAL_RULE','The badal is not bound to its source rule.',token);
+   }else if(token.grammar.role==='mafulMutlaq'){
+    /* Unlike the followers, this role's state is fixed by the rule table rather than inherited,
+       so the state is checked here too — the authority proving the construction does not by
+       itself prove that the token was written manṣūb. */
+    const authority=deriveMutlaqAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_MUTLAQ_AUTHORITY',`Absolute-object authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_MAFUL_MUTLAQ_NASB')fail('E_MUTLAQ_RULE','The absolute object is not bound to its source rule.',token);
+    if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mafulMutlaq requires nasb, not ${token.state}.`,token);
    }else if(token.state!==roleRule?.state)fail('E_ROLE_CASE',`Role ${token.grammar.role} requires ${roleRule?.state}, not ${token.state}.`,token);
    const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
    if(safeSignId(token.sign)!==signRule?.[0])fail('E_NOUN_SIGN','Noun sign disagrees with case and declension.',token);
@@ -8935,6 +9338,7 @@ function validateExercise(data){
   if(token.grammar.role==='object'&&(!token.relations.verbId||!relationships.some(rel=>rel.type==='verbObject'&&rel.objectId===token.id&&rel.verbId===token.relations.verbId)))fail('E_ORPHAN_OBJECT','Direct object is not linked to a verb.',token);
   if(token.grammar.role==='faail'&&(!token.relations.verbId||!relationships.some(rel=>rel.type==='verbSubject'&&rel.subjectId===token.id&&rel.verbId===token.relations.verbId)))fail('E_ORPHAN_SUBJECT','Explicit subject is not linked to a verb.',token);
   if(token.grammar.role==='naibFail'&&(!token.relations.passiveVerbId||!relationships.some(rel=>rel.type==='passiveDeputy'&&rel.deputyId===token.id&&rel.verbId===token.relations.passiveVerbId)))fail('E_ORPHAN_NAIB_FAIL','Deputy subject is not linked to its passive verb.',token);
+  if(token.grammar.role==='mafulMutlaq'&&(!token.relations.amilId||!relationships.some(rel=>rel.type==='absoluteObject'&&rel.masdarId===token.id&&rel.verbId===token.relations.amilId)))fail('E_ORPHAN_MAFUL_MUTLAQ','Absolute object is not linked to the ʿāmil that makes it accusative.',token);
   if(token.grammar.role==='majrur'){
    const preposition=token.relations.governorId&&tokenById.get(token.relations.governorId);
    if(!preposition||!relationships.some(rel=>rel.type==='preposition'&&rel.nounId===token.id&&rel.governorId===preposition.id))fail('E_ORPHAN_MAJRUR','Genitive noun is not linked to a visible preposition.',token);
@@ -9006,6 +9410,15 @@ function validateExercise(data){
     fail('E_PASSIVE_RELATION','Passive-deputy relationship is not the canonical proof.',tokenById.get(rel.deputyId));
    }
   }
+  if(rel.type==='absoluteObject'){
+   const masdar=tokenById.get(rel.masdarId);
+   const authority=deriveMutlaqAuthority(data,data.tokens.indexOf(masdar));
+   if(!authority.authorized||rel.verbId!==authority.verbId||rel.masdarId!==authority.masdarId
+     ||rel.qualifierId!==authority.qualifierId||rel.pairKey!==authority.pairKey
+     ||rel.purpose!==authority.purpose||rel.agreement!==authority.agreement){
+    fail('E_MUTLAQ_RELATION','Absolute-object relationship is not the canonical proof.',masdar);
+   }
+  }
   if(rel.type==='follower'){
    const follower=tokenById.get(rel.followerId);
    const authority=rel.kind===ATF_KIND?deriveAtfFollowerAuthority(data,data.tokens.indexOf(follower))
@@ -9068,6 +9481,17 @@ function validateExercise(data){
   }
   if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
    fail('E_BADAL_RELATION_COUNT','A badal must have exactly one follower relationship.',item);
+  }
+ });
+ data.tokens.filter(item=>item.grammar.role==='mafulMutlaq').forEach(item=>{
+  const rel=relationships.find(candidate=>candidate.id===item.relations.absoluteObjectRelationshipId&&candidate.type==='absoluteObject');
+  const amil=tokenById.get(item.relations.amilId);
+  if(!rel||rel.masdarId!==item.id||rel.verbId!==amil?.id
+    ||amil?.relations.absoluteObjectId!==item.id||amil?.relations.absoluteObjectRelationshipId!==rel.id){
+   fail('E_MUTLAQ_RELATION','A mafʿūl muṭlaq must have exactly one reciprocal canonical link to its ʿāmil.',item);
+  }
+  if(relationships.filter(candidate=>candidate.type==='absoluteObject'&&candidate.masdarId===item.id).length!==1){
+   fail('E_MUTLAQ_RELATION_COUNT','A mafʿūl muṭlaq must have exactly one ʿāmil relationship.',item);
   }
  });
  data.tokens.filter(item=>item.grammar.role==='mubtada').forEach(item=>{
@@ -9239,6 +9663,24 @@ function add(starts,form,state,sign,build,metadata={}){
  if(followerConjunctionKeys.some((key,position)=>followerConjunctionKeys.indexOf(key)!==position||!ATF_CONJUNCTION_REGISTRY[key])){
   throw new Error(`Template ${stableId} names a duplicate or unregistered conjunction.`);
  }
+ /* المفعول المطلق. A template owns one نوع and one structural shape: mixing purposes would let a
+    تأكيد pair be drawn where the exercise claims to be teaching النوع, and mixing the object or
+    iḍāfah slots would make the composer's structural key ambiguous for the same template. */
+ const mutlaqPairKeys=Object.freeze([...(metadata.mutlaqPairKeys||[])]);
+ if(mutlaqPairKeys.some((key,position)=>mutlaqPairKeys.indexOf(key)!==position||!MUTLAQ_PAIR_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered mafʿūl-muṭlaq pair.`);
+ }
+ if(mutlaqPairKeys.length){
+  const shapes=new Set(mutlaqPairKeys.map(key=>{
+   const pair=MUTLAQ_PAIR_REGISTRY[key];
+   return `${pair.purpose}|${pair.object?'object':'bare'}|${pair.qualifierKey?'mudaf':'alone'}|${MUTLAQ_LEXEMES[pair.masdarKey].inflection}`;
+  }));
+  if(shapes.size!==1)throw new Error(`Template ${stableId} mixes mafʿūl-muṭlaq purposes or structures.`);
+  if(![...shapes][0].endsWith(`|${form}`))throw new Error(`Template ${stableId} declares a mafʿūl-muṭlaq maṣdar of the wrong declension.`);
+  if(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
+   throw new Error(`Template ${stableId} produces a mafʿūl muṭlaq without its explicit past ʿāmil.`);
+  }
+ }
  const conditionalGovernor=isConditionalGovernor(GRAMMAR_RULES.governors[presentGovernor]);
  if(conditionalGovernor!==Boolean(responsePairIds.length)){
   throw new Error(`Template ${stableId} must declare response pairs exactly when its governor is conditional.`);
@@ -9289,6 +9731,7 @@ function add(starts,form,state,sign,build,metadata={}){
   followerKind,
   followerPairKeys,
   followerConjunctionKeys,
+  mutlaqPairKeys,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -10124,6 +10567,60 @@ addPassiveLane('smp','waw','past');
 addPassiveLane('smp','waw','present');
 addPassiveLane('fiveNouns','waw','past');
 addPassiveLane('fiveNouns','waw','present');
+
+/* المفعول المطلق — one builder over the frozen pairs. The exercise is fully determined by its
+   pair: the ʿāmil, the subject, the optional object, the maṣdar and the optional muḍāf ilayh are
+   all named there, so variety comes from choosing among pairs and never from composing a sentence
+   at run time. The maṣdar is the focus token in every lane. */
+function mutlaqVerbLexeme(verbPast){
+ const registered=verbFormIndex.get(verbPast);
+ if(registered?.form!=='past'||registered.surface!==verbPast){
+  throw new Error(`The mafʿūl-muṭlaq pair names an unregistered past ʿāmil: ${verbPast}`);
+ }
+ return registered.lexeme;
+}
+function buildMutlaqExercise(pairKey){
+ const pair=MUTLAQ_PAIR_REGISTRY[pairKey];
+ if(!pair)throw new Error(`Unknown productive mafʿūl-muṭlaq pair: ${pairKey}`);
+ const lexeme=mutlaqVerbLexeme(pair.verbPast);
+ const masdar=MUTLAQ_LEXEMES[pair.masdarKey];
+ const qualifier=pair.qualifierKey?MUTLAQ_LEXEMES[pair.qualifierKey]:null;
+ if(!masdar||pair.qualifierKey&&!qualifier)throw new Error(`The mafʿūl-muṭlaq pair ${pairKey} names an unregistered lexeme.`);
+ const tokens=[
+  token(pair.verbPast,lexeme.pastEn,AR.past(pair.verbPast),'A past-tense verb built on its canonical ending.'),
+  token(pair.subject,nounEnglish(pair.subject,'nom'),AR.faail(pair.subject),'The explicit subject of the verb.')
+ ];
+ if(pair.object)tokens.push(token(pair.object,objectEnglish(pair.object),AR.object(pair.object),EN.object));
+ tokens.push(token(masdar.acc,masdar.en,qualifier?AR.mafulMutlaqMudaf(masdar.acc):AR.mafulMutlaq(masdar.acc),
+  'The verb’s own maṣdar, accusative as its absolute object.',true));
+ if(qualifier)tokens.push(token(qualifier.gen,qualifier.en,AR.mudafIlayh(qualifier.gen),EN.mudafIlayh));
+ return{sentence:'',translation:pair.sentenceEn,tokens};
+}
+const MUTLAQ_ALL_PAIR_KEYS=Object.freeze(Object.keys(MUTLAQ_PAIR_REGISTRY));
+/* Lane membership is computed from the pairs' own declarations, so a template can never draw a
+   construction whose نوع, object slot, iḍāfah or declension it was not built for. */
+const mutlaqKeys=(purpose,inflection,hasObject,hasQualifier)=>Object.freeze(MUTLAQ_ALL_PAIR_KEYS.filter(key=>{
+ const pair=MUTLAQ_PAIR_REGISTRY[key];
+ return pair.purpose===purpose&&MUTLAQ_LEXEMES[pair.masdarKey].inflection===inflection
+  &&Boolean(pair.object)===hasObject&&Boolean(pair.qualifierKey)===hasQualifier;
+}));
+const MUTLAQ_TAWKID_OBJECT_KEYS=mutlaqKeys(MUTLAQ_PURPOSES.tawkid,'singular',true,false);
+const MUTLAQ_TAWKID_BARE_KEYS=mutlaqKeys(MUTLAQ_PURPOSES.tawkid,'singular',false,false);
+const MUTLAQ_NAW_KEYS=mutlaqKeys(MUTLAQ_PURPOSES.naw,'singular',false,true);
+const MUTLAQ_ADAD_BARE_KEYS=mutlaqKeys(MUTLAQ_PURPOSES.adad,'dual',false,false);
+const MUTLAQ_ADAD_OBJECT_KEYS=mutlaqKeys(MUTLAQ_PURPOSES.adad,'dual',true,false);
+const mutlaqMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),mutlaqPairKeys:keys});
+const pickedMutlaq=(keys,label)=>buildMutlaqExercise(pickVaried(keys,label,String));
+add('verb','singular','nasb','fatha',()=>pickedMutlaq(MUTLAQ_TAWKID_OBJECT_KEYS,'mutlaq-tawkid-object'),
+ mutlaqMetadata(MUTLAQ_TAWKID_OBJECT_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedMutlaq(MUTLAQ_TAWKID_BARE_KEYS,'mutlaq-tawkid-bare'),
+ mutlaqMetadata(MUTLAQ_TAWKID_BARE_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedMutlaq(MUTLAQ_NAW_KEYS,'mutlaq-naw'),
+ mutlaqMetadata(MUTLAQ_NAW_KEYS));
+add('verb','dual','nasb','ya',()=>pickedMutlaq(MUTLAQ_ADAD_BARE_KEYS,'mutlaq-adad-bare'),
+ mutlaqMetadata(MUTLAQ_ADAD_BARE_KEYS));
+add('verb','dual','nasb','ya',()=>pickedMutlaq(MUTLAQ_ADAD_OBJECT_KEYS,'mutlaq-adad-object'),
+ mutlaqMetadata(MUTLAQ_ADAD_OBJECT_KEYS));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

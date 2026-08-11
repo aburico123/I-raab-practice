@@ -1179,6 +1179,11 @@ function resolveCanonicalTokenGloss(data,token,index){
   const found=mutlaqPairAt(data,index);
   return found?.masdarLexeme?.en||null;
  }
+ /* 4g — a ẓarf is curriculum-owned vocabulary too. «مَعَ» keeps resolving at step 4 above, where
+    the fixed-token table has always owned it, so the inherited lane's English is untouched. */
+ if(type==='noun'&&token.grammar.role===MAFUL_FIH_ROLE){
+  return MAFUL_FIH_BY_SURFACE[surface]?.en||null;
+ }
  /* 5 — an object noun, resolved through its GOVERNING VERB rather than through its surface.
     Two vocabulary records can share one accusative surface with different English, so a bare
     surface lookup would have to choose between them. The verb that governs the object is what
@@ -1335,7 +1340,9 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  TS39:Object.freeze({parts:Object.freeze([Object.freeze({slot:'passiveSentence'})])}),
  /* المفعول المطلق — one shape for all five lanes, as TS37 and TS38 serve their chapters: the
     whole sentence is settled by the authorized pair, so a lane never earns a shape of its own. */
- TS40:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mutlaqSentence'})])})
+ TS40:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mutlaqSentence'})])}),
+ /* المفعول فيه — one shape for both halves; the authorized pair settles the whole sentence. */
+ TS41:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulFihSentence'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1484,7 +1491,10 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_VERB_SINGULAR_NASB_FATHA_21||verb:past,noun:faail,noun:mafulMutlaq":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_21",structure:"verb:past,noun:faail,noun:mafulMutlaq",shape:"TS40",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_22||verb:past,noun:faail,noun:mafulMutlaq,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_22",structure:"verb:past,noun:faail,noun:mafulMutlaq,noun:mudafIlayh",shape:"TS40",copulaPlural:false}),
  "T_VERB_DUAL_NASB_YA_02||verb:past,noun:faail,noun:mafulMutlaq":Object.freeze({templateId:"T_VERB_DUAL_NASB_YA_02",structure:"verb:past,noun:faail,noun:mafulMutlaq",shape:"TS40",copulaPlural:false}),
- "T_VERB_DUAL_NASB_YA_03||verb:past,noun:faail,noun:object,noun:mafulMutlaq":Object.freeze({templateId:"T_VERB_DUAL_NASB_YA_03",structure:"verb:past,noun:faail,noun:object,noun:mafulMutlaq",shape:"TS40",copulaPlural:false})
+ "T_VERB_DUAL_NASB_YA_03||verb:past,noun:faail,noun:object,noun:mafulMutlaq":Object.freeze({templateId:"T_VERB_DUAL_NASB_YA_03",structure:"verb:past,noun:faail,noun:object,noun:mafulMutlaq",shape:"TS40",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_23||verb:past,noun:faail,noun:object,noun:adverb":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_23",structure:"verb:past,noun:faail,noun:object,noun:adverb",shape:"TS41",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_24||verb:past,noun:faail,noun:object,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_24",structure:"verb:past,noun:faail,noun:object,noun:adverb,noun:mudafIlayh",shape:"TS41",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_25||verb:past,noun:faail,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_25",structure:"verb:past,noun:faail,noun:adverb,noun:mudafIlayh",shape:"TS41",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -1535,6 +1545,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='badalSentence')return canonicalBadalTranslation(exercise);
  if(bits[0]==='passiveSentence')return canonicalPassiveTranslation(exercise);
  if(bits[0]==='mutlaqSentence')return canonicalMutlaqTranslation(exercise);
+ if(bits[0]==='mafulFihSentence')return canonicalMafulFihTranslation(exercise);
  if(bits[0]==='copula'){
   const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
   if(!particle)return null;
@@ -3820,6 +3831,203 @@ const MUTLAQ_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
   conditionEn:'the maṣdar comes in the dual, so it states how many times the action happened',
   sentenceEn:'The student read the book two readings.'})
 }));
+/* Productive المفعول فيه — Al-Tuḥfah pp. 148–152, باب ظرف الزمان وظرف المكان. The matn defines
+   both halves identically in form: «ظَرْفُ الزَّمَانِ هُوَ اسْمُ الزَّمَانِ الْمَنْصُوبُ بِتَقْدِيرِ فِي»
+   (p. 148) and «وَظَرْفُ الْمَكَانِ هُوَ اسْمُ الْمَكَانِ الْمَنْصُوبُ بِتَقْدِيرِ فِي» (p. 151). The شرح
+   names the whole chapter «الْمَفْعُولُ فِيهِ، وَهُوَ نَوْعَانِ: الْأَوَّلُ ظَرْفُ الزَّمَانِ، وَالثَّانِي
+   ظَرْفُ الْمَكَانِ» (p. 149) — which is why one role serves both and the two are subtypes, not
+   separate engines.
+
+   The شرح then divides EACH half into مختص and مبهم, and the two divisions do NOT have the same
+   consequence — this is the single most load-bearing fact in the chapter:
+
+     • Time (p. 149): «وكل واحد من هذين النوعين يجوز انتصابه على أنه مفعول فيه» — both may be
+       manṣūb, so the classification here is informative only.
+     • Place (p. 151): «ولا يجوز أن يُنْصَبَ على أنه مفعول فيه من هذين القسمين إلا الثاني، وهو
+       المُبْهَمُ؛ أما الأول ـ وهو المختصُّ ـ فيجب جرُّهُ بحرف جر يدل على المراد، نحو: اعتكفت في
+       المسجد» — a bounded place is a REFUSAL, not a ẓarf.
+
+   So every place lexeme below is one of the thirteen the شرح lists at p. 152, all of them مبهم,
+   and the source's own مختص places (المسجد، الحديقة) are registered as a refusal set that the
+   authority rejects outright. The مختص/مبهم label is never inferred from an Arabic word.
+
+   Byte discipline: nothing here hand-types a surface the lexicon already owns. Subjects, objects,
+   muḍāf-ilayh hosts and ʿāmils are all named in English and resolved to their canonical records,
+   so a combining-mark typo cannot silently produce an unregistered surface. Only the ẓarf lexemes
+   themselves — genuinely new vocabulary — are written out, and verifyMafulFihRegistry checks each
+   one round-trips through the noun index at load time. */
+const MAFUL_FIH_ROLE='adverb';
+const MAFUL_FIH_KINDS=Object.freeze({time:'time',place:'place'});
+const MAFUL_FIH_CLASSES=Object.freeze({mukhtass:'mukhtass',mubham:'mubham'});
+const MAFUL_FIH_KIND_LABELS=Object.freeze({
+ time:Object.freeze({ar:'ظَرْفُ زَمَانٍ',en:'ẓarf of time',
+  clauseAr:'وَقَعَ فِيهِ الْفِعْلُ',clauseEn:'names the time in which the action happened'}),
+ place:Object.freeze({ar:'ظَرْفُ مَكَانٍ',en:'ẓarf of place',
+  clauseAr:'وَقَعَ فِيهِ الْفِعْلُ',clauseEn:'names the place in which the action happened'})
+});
+/* Indefinite and nominative, because the only place these labels are used is as the ṣifah of
+   «ظَرْفُ زَمَانٍ» / «ظَرْفُ مَكَانٍ» in the Why line, where a definite or genitive form would not
+   agree with its mawṣūf. */
+const MAFUL_FIH_CLASS_LABELS=Object.freeze({
+ mukhtass:Object.freeze({ar:'مُخْتَصٌّ',en:'mukhtaṣṣ'}),
+ mubham:Object.freeze({ar:'مُبْهَمٌ',en:'mubham'})
+});
+/* The legacy ẓarf surface «مَعَ» already lives in the preposition-action pool and is produced by
+   five inherited templates. It is READ from that record rather than retyped, so the migration
+   cannot introduce a second, byte-different مَعَ. */
+function legacyMaaSurface(){
+ const action=humanPrepActions.find(item=>item.adverb===true);
+ if(!action||!action.prep)throw new Error('The legacy adverbial ẓarf action is missing.');
+ return action.prep;
+}
+const zarfLexeme=(fields,kind,zarfClass,sense)=>Object.freeze({...fields,inflection:'singular',
+ indexed:fields.indexed!==false,kind,zarfClass,senseAr:sense.ar,senseEn:sense.en});
+/* Time ẓarfs. Every sense below is the شرح's own definition of that word at pp. 149–150; the
+   مختص/مبهم labels are given ONLY where the source itself classifies the word — «اليوم» appears in
+   its مختص example list (p. 149) and «حينًا» is defined as «اسمٌ لزمانٍ مُبْهَم» (p. 150). The other
+   words are left unclassified because the source does not classify them, and inventing a class for
+   them would be exactly the fabrication this chapter's rules forbid. */
+const MAFUL_FIH_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ alyawm:zarfLexeme({nom:'الْيَوْمُ',acc:'الْيَوْمَ',gen:'الْيَوْمِ',en:'today',mudaf:false},
+  MAFUL_FIH_KINDS.time,MAFUL_FIH_CLASSES.mukhtass,
+  {ar:'وَهُوَ مِنْ طُلُوعِ الْفَجْرِ إِلَى غُرُوبِ الشَّمْسِ',en:'from daybreak to sunset'}),
+ laylatan:zarfLexeme({nom:'لَيْلَةٌ',acc:'لَيْلَةً',gen:'لَيْلَةٍ',en:'one night',mudaf:false},
+  MAFUL_FIH_KINDS.time,'',
+  {ar:'وَهِيَ مِنْ غُرُوبِ الشَّمْسِ إِلَى طُلُوعِ الْفَجْرِ',en:'from sunset to daybreak'}),
+ saharan:zarfLexeme({nom:'سَحَرٌ',acc:'سَحَرًا',gen:'سَحَرٍ',en:'just before dawn',mudaf:false},
+  MAFUL_FIH_KINDS.time,'',
+  {ar:'وَهُوَ آخِرُ اللَّيْلِ قُبَيْلَ الْفَجْرِ',en:'the last part of the night, just before dawn'}),
+ sabahan:zarfLexeme({nom:'صَبَاحٌ',acc:'صَبَاحًا',gen:'صَبَاحٍ',en:'in the morning',mudaf:false},
+  MAFUL_FIH_KINDS.time,'',
+  {ar:'وَهُوَ مِنْ أَوَّلِ النِّصْفِ الثَّانِي مِنَ اللَّيْلِ إِلَى الزَّوَالِ',en:'from the start of the second half of the night to midday'}),
+ masaaan:zarfLexeme({nom:'مَسَاءٌ',acc:'مَسَاءً',gen:'مَسَاءٍ',en:'in the evening',mudaf:false},
+  MAFUL_FIH_KINDS.time,'',
+  {ar:'وَهُوَ مِنَ الزَّوَالِ إِلَى نِصْفِ اللَّيْلِ',en:'from midday to midnight'}),
+ hinan:zarfLexeme({nom:'حِينٌ',acc:'حِينًا',gen:'حِينٍ',en:'for a while',mudaf:false},
+  MAFUL_FIH_KINDS.time,MAFUL_FIH_CLASSES.mubham,
+  {ar:'وَهُوَ اسْمٌ لِزَمَانٍ مُبْهَمٍ غَيْرِ مَعْلُومِ الِابْتِدَاءِ وَلَا الِانْتِهَاءِ',en:'a stretch of time with no known beginning or end'}),
+ /* The chapter's headline construction: «صُمْتُ يَوْمَ الِاثْنَيْنِ» (p. 149), a ẓarf in iḍāfah. */
+ yawmaMudaf:zarfLexeme({nom:'يَوْمُ',acc:'يَوْمَ',gen:'يَوْمِ',en:'on the day of',mudaf:true},
+  MAFUL_FIH_KINDS.time,MAFUL_FIH_CLASSES.mukhtass,
+  {ar:'وَهُوَ مِنْ طُلُوعِ الْفَجْرِ إِلَى غُرُوبِ الشَّمْسِ',en:'from daybreak to sunset'}),
+ laylataMudaf:zarfLexeme({nom:'لَيْلَةُ',acc:'لَيْلَةَ',gen:'لَيْلَةِ',en:'on the night of',mudaf:true},
+  MAFUL_FIH_KINDS.time,'',
+  {ar:'وَهِيَ مِنْ غُرُوبِ الشَّمْسِ إِلَى طُلُوعِ الْفَجْرِ',en:'from sunset to daybreak'}),
+ /* Place. All six are from the شرح's list of thirteen at p. 152, and all are مبهم — «ومثلُ هذه
+    الألفاظ كلُّ ما دل على مكانٍ مبهم». None has a rafʿ form in this usage, so none is registered.
+    ثَمَّ and هُنَا are in the same list but are mabnī, which the noun matrix does not model, so they
+    are not produced. */
+ amama:zarfLexeme({acc:'أَمَامَ',gen:'أَمَامِ',en:'in front of',mudaf:true},
+  MAFUL_FIH_KINDS.place,MAFUL_FIH_CLASSES.mubham,
+  {ar:'وَهُوَ مِمَّا لَيْسَ لَهُ صُورَةٌ وَلَا حُدُودٌ مَحْصُورَةٌ',en:'it has no shape and no bounded limits'}),
+ khalfa:zarfLexeme({acc:'خَلْفَ',gen:'خَلْفِ',en:'behind',mudaf:true},
+  MAFUL_FIH_KINDS.place,MAFUL_FIH_CLASSES.mubham,
+  {ar:'وَهُوَ مِمَّا لَيْسَ لَهُ صُورَةٌ وَلَا حُدُودٌ مَحْصُورَةٌ',en:'it has no shape and no bounded limits'}),
+ fawqa:zarfLexeme({acc:'فَوْقَ',gen:'فَوْقِ',en:'on top of',mudaf:true},
+  MAFUL_FIH_KINDS.place,MAFUL_FIH_CLASSES.mubham,
+  {ar:'وَهُوَ مِمَّا لَيْسَ لَهُ صُورَةٌ وَلَا حُدُودٌ مَحْصُورَةٌ',en:'it has no shape and no bounded limits'}),
+ tahta:zarfLexeme({acc:'تَحْتَ',gen:'تَحْتِ',en:'under',mudaf:true},
+  MAFUL_FIH_KINDS.place,MAFUL_FIH_CLASSES.mubham,
+  {ar:'وَهُوَ مِمَّا لَيْسَ لَهُ صُورَةٌ وَلَا حُدُودٌ مَحْصُورَةٌ',en:'it has no shape and no bounded limits'}),
+ inda:zarfLexeme({acc:'عِنْدَ',gen:'عِنْدِ',en:'with',mudaf:true},
+  MAFUL_FIH_KINDS.place,MAFUL_FIH_CLASSES.mubham,
+  {ar:'وَهُوَ مِمَّا لَيْسَ لَهُ صُورَةٌ وَلَا حُدُودٌ مَحْصُورَةٌ',en:'it has no shape and no bounded limits'}),
+ /* «مَعَ» is deliberately NOT added to the noun index. Five inherited templates already produce it,
+    and a lexeme record there would change their canonical History identity — which stores the
+    noun record's three case forms — for no grammatical gain. Its ẓarf authority comes from this
+    registry, exactly as every other entry's does; only its lexicon status is left alone. */
+ maa:zarfLexeme({acc:legacyMaaSurface(),en:'with',mudaf:true,indexed:false},
+  MAFUL_FIH_KINDS.place,MAFUL_FIH_CLASSES.mubham,
+  {ar:'وَهُوَ مِمَّا لَيْسَ لَهُ صُورَةٌ وَلَا حُدُودٌ مَحْصُورَةٌ',en:'it has no shape and no bounded limits'})
+}));
+const MAFUL_FIH_LEXEME_KEYS=Object.freeze(Object.keys(MAFUL_FIH_LEXEMES));
+const MAFUL_FIH_BY_SURFACE=Object.freeze(Object.assign(Object.create(null),
+ Object.fromEntries(MAFUL_FIH_LEXEME_KEYS.map(key=>[MAFUL_FIH_LEXEMES[key].acc,MAFUL_FIH_LEXEMES[key]]))));
+/* The two weekday nouns the time-iḍāfah lanes annex to. They are ordinary nouns, not ẓarfs, and
+   they exist only because the source's own examples («يَوْمَ الْخَمِيسِ», «لَيْلَةَ الْجُمُعَةِ») need
+   them and the lexicon does not carry weekdays. */
+const MAFUL_FIH_WEEKDAYS=Object.freeze(Object.assign(Object.create(null),{
+ alkhamis:Object.freeze({nom:'الْخَمِيسُ',acc:'الْخَمِيسَ',gen:'الْخَمِيسِ',en:'Thursday',inflection:'singular'}),
+ aljumua:Object.freeze({nom:'الْجُمُعَةُ',acc:'الْجُمُعَةَ',gen:'الْجُمُعَةِ',en:'Friday',inflection:'singular'})
+}));
+/* p. 151's refusal set, in the source's own words: a place with «صُورةٌ وَحُدُودٌ محصورة» may not be
+   manṣūb on ẓarfiyyah at all — it «يجب جرُّهُ بحرف جر». These are named by English and resolved
+   from the existing lexicon, so the refusal is bound to the real records the app already produces
+   as مخفوض بحرف الخفض, which is exactly what the collision must be proven against. */
+const MAFUL_FIH_MUKHTASS_PLACE_ENGLISH=Object.freeze(['the mosque','the garden','the house']);
+/* Resolvers, not literals. A pair names WHAT it wants in English; the canonical record supplies the
+   Arabic. An ambiguous or missing English is a load-time throw rather than a silent wrong pick. */
+const MAFUL_FIH_POOLS=Object.freeze({singularPeople,singularThings,places});
+function mafulFihNoun(poolName,en){
+ const pool=MAFUL_FIH_POOLS[poolName];
+ if(!pool)throw new Error(`The mafʿūl-fīh registry names an unknown noun pool: ${poolName}`);
+ const matches=pool.filter(item=>item.en===en);
+ if(matches.length!==1)throw new Error(`The mafʿūl-fīh registry matched ${matches.length} ${poolName} entries for “${en}”.`);
+ return matches[0];
+}
+/* The ʿāmil, likewise resolved: either one of the intransitive capabilities the مفعول مطلق chapter
+   registered, or a transitive family named by its English. Nothing is retyped in Arabic. */
+function mafulFihVerb(spec){
+ if(spec.capabilityKey){
+  const capability=MUTLAQ_VERB_CAPABILITIES[spec.capabilityKey];
+  if(!capability)throw new Error(`The mafʿūl-fīh registry names an unregistered ʿāmil capability: ${spec.capabilityKey}`);
+  return Object.freeze({past:capability.past,pastEn:capability.pastEn,obj:null});
+ }
+ const matches=generalVerbActions.filter(item=>item.en===spec.verbEn);
+ if(matches.length!==1)throw new Error(`The mafʿūl-fīh registry matched ${matches.length} verb families for “${spec.verbEn}”.`);
+ return Object.freeze({past:matches[0].past,pastEn:matches[0].pastEn,obj:matches[0].obj||null});
+}
+/* Every productive construction. The ẓarf is the focus token in all of them, and each pair states
+   the whole sentence's English so the canonical translator composes it from frozen authority. */
+const MAFUL_FIH_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ /* ظرف الزمان, bare — the شرح's own worked examples at p. 150 moved onto the 3ms explicit-fāʿil
+    lane this app produces: «ذَاكَرْتُ دَرْسِي سَحَرًا», «سَافَرَ أَخِي صَبَاحًا», «وَصَلَ الْقِطَارُ بِنَا
+    مَسَاءً», «صُمْتُ الْيَوْمَ», «صَاحَبْتُ عَلِيًّا حِينًا مِنَ الدَّهْرِ». */
+ saharStudy:Object.freeze({lexemeKey:'saharan',verb:Object.freeze({verbEn:'study'}),
+  subjectEn:'the student',objectEn:'the lesson',qualifier:null,
+  sentenceEn:'The student studied the lesson just before dawn.'}),
+ sabahanVisit:Object.freeze({lexemeKey:'sabahan',verb:Object.freeze({verbEn:'visit'}),
+  subjectEn:'the friend',objectEn:'the teacher',qualifier:null,
+  sentenceEn:'The friend visited the teacher in the morning.'}),
+ masaaRead:Object.freeze({lexemeKey:'masaaan',verb:Object.freeze({verbEn:'read'}),
+  subjectEn:'the student',objectEn:'the book',qualifier:null,
+  sentenceEn:'The student read the book in the evening.'}),
+ alyawmMemorize:Object.freeze({lexemeKey:'alyawm',verb:Object.freeze({verbEn:'memorize'}),
+  subjectEn:'the student',objectEn:'the lesson',qualifier:null,
+  sentenceEn:'The student memorized the lesson today.'}),
+ hinanStudy:Object.freeze({lexemeKey:'hinan',verb:Object.freeze({verbEn:'study'}),
+  subjectEn:'the student',objectEn:'the Qurʾān',qualifier:null,
+  sentenceEn:'The student studied the Qurʾān for a while.'}),
+ laylatanRead:Object.freeze({lexemeKey:'laylatan',verb:Object.freeze({verbEn:'read'}),
+  subjectEn:'the student',objectEn:'the Qurʾān',qualifier:null,
+  sentenceEn:'The student read the Qurʾān one night.'}),
+ /* ظرف الزمان in iḍāfah — «صُمْتُ يَوْمَ الْخَمِيسِ» (p. 150) and «اعْتَكَفْتُ لَيْلَةَ الْجُمُعَةِ». */
+ yawmaKhamisMemorize:Object.freeze({lexemeKey:'yawmaMudaf',verb:Object.freeze({verbEn:'memorize'}),
+  subjectEn:'the student',objectEn:'the Qurʾān',qualifier:Object.freeze({weekday:'alkhamis'}),
+  sentenceEn:'The student memorized the Qurʾān on Thursday.'}),
+ laylataJumuaRead:Object.freeze({lexemeKey:'laylataMudaf',verb:Object.freeze({verbEn:'read'}),
+  subjectEn:'the student',objectEn:'the Qurʾān',qualifier:Object.freeze({weekday:'aljumua'}),
+  sentenceEn:'The student read the Qurʾān on Friday night.'}),
+ /* ظرف المكان — all مبهم, all in iḍāfah, and the first two are the شرح's own p. 152 examples
+    «جَلَسْتُ أَمَامَ الْأُسْتَاذِ» and «جَلَسْتُ فَوْقَ الْكُرْسِيِّ». The ʿāmils are intransitive, so no
+    مفعول به can stand beside the ẓarf and be mistaken for it. */
+ amamaTeacher:Object.freeze({lexemeKey:'amama',verb:Object.freeze({capabilityKey:'jalasa'}),
+  subjectEn:'the student',objectEn:'',qualifier:Object.freeze({pool:'singularPeople',en:'the teacher'}),
+  sentenceEn:'The student sat down in front of the teacher.'}),
+ fawqaChair:Object.freeze({lexemeKey:'fawqa',verb:Object.freeze({capabilityKey:'jalasa'}),
+  subjectEn:'the student',objectEn:'',qualifier:Object.freeze({pool:'singularThings',en:'the chair'}),
+  sentenceEn:'The student sat down on top of the chair.'}),
+ khalfaDoor:Object.freeze({lexemeKey:'khalfa',verb:Object.freeze({capabilityKey:'waqafa'}),
+  subjectEn:'the guest',objectEn:'',qualifier:Object.freeze({pool:'singularThings',en:'the door'}),
+  sentenceEn:'The guest stood behind the door.'}),
+ tahtaTree:Object.freeze({lexemeKey:'tahta',verb:Object.freeze({capabilityKey:'qaada'}),
+  subjectEn:'the student',objectEn:'',qualifier:Object.freeze({pool:'singularThings',en:'the tree'}),
+  sentenceEn:'The student sat under the tree.'}),
+ indaTeacher:Object.freeze({lexemeKey:'inda',verb:Object.freeze({capabilityKey:'qaada'}),
+  subjectEn:'the student',objectEn:'',qualifier:Object.freeze({pool:'singularPeople',en:'the teacher'}),
+  sentenceEn:'The student sat with the teacher.'})
+}));
+const MAFUL_FIH_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_FIH_PAIR_REGISTRY));
 const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...feminineHumanSingulars,...feminineHumanDuals,...fiveNouns];
 function nounEnglish(word,caseName='acc'){
  return allCaseNouns.find(item=>item[caseName]===word)?.en||'the noun';
@@ -6432,7 +6640,11 @@ const GRAMMAR_RULES=Object.freeze({
   atf:{state:'inherited',ruleId:'R_ATF_NASAQ',en:'A maʿṭūf following its maʿṭūf ʿalayh.'},
   tawkid:{state:'inherited',ruleId:'R_TAWKID',en:'A tawkīd following its muʾakkad in iʿrāb.'},
   badal:{state:'inherited',ruleId:'R_BADAL',en:'A badal following its mubdal minhu in iʿrāb.'},
-  adverb:{state:'nasb',ruleId:'R_ZARF_NASB',en:'An accusative adverb.'}
+  /* Legacy internal id, canonical grammar: `adverb` is the identifier five inherited templates and
+     their stored History already use, and renaming it would break them for no grammatical gain —
+     the same trade R_HARF_JARR documents. Everything the learner sees, and every authority behind
+     it, is المفعول فيه. */
+  adverb:{state:'nasb',ruleId:'R_ZARF_NASB',en:'A mafʿūl fīh: a noun of time or place naming when or where the action happened; accusative.'}
  },
  nounInflection:{
   singular:{raf:['damma','R_SINGULAR_RAF_DAMMA'],nasb:['fatha','R_SINGULAR_NASB_FATHA'],jarr:['kasra','R_SINGULAR_JARR_KASRA']},
@@ -6535,7 +6747,7 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
  roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf'],
- relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','preposition','idafa','inna','kana','concealedAn','follower'],
+ relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
@@ -6551,6 +6763,14 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  'mafʿūl muṭlaq with an omitted ʿāmil, or an ʿāmil that is a maṣdar or a descriptive noun',
  'mafʿūl muṭlaq specifying its kind by an adjective instead of by iḍāfah',
  'the numeric iḍāfah frame of the counting mafʿūl muṭlaq (ثلاث ضربات)',
+ /* المفعول فيه ships BOTH halves — ẓarf al-zamān and ẓarf al-makān — because pp. 148–152 of the
+    verified copy cover both. What is named here is what those pages mention and no lane produces:
+    the mabnī members of the place list, the time words whose meaning fights a past-tense ʿāmil,
+    and the mukhtaṣṣ place, which the source itself refuses the accusative to. */
+ 'the mabnī place ẓarfs ثَمَّ and هُنَا, which the noun sign matrix does not model',
+ 'the future-only time ẓarfs غدًا, أبدًا and أمدًا, which no past-tense ʿāmil lane can host truthfully',
+ 'the time ẓarfs غدوة, بكرة and عتمة, registered by the source but given no productive host here',
+ 'mukhtaṣṣ place nouns as accusative ẓarfs, which Al-Tuḥfah p. 151 refuses outright',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
   'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
@@ -6726,7 +6946,16 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     widen with the scope and the claim sentence is unchanged. */
  R_ISM_KANA_RAF:sourceRule('Kāna and its sisters raise their noun.',[76,105,106,107,108],'A visible single noun after one of the registered unconditional operators, plus the exact negated كَانَ frame used for lām al-juḥūd. The other conditional operators and the weak-final أَمْسَى / أَضْحَى are not produced.' ,[IA_KANA]),
  R_KHABAR_KANA_NASB:sourceRule('Kāna and its sisters make their khabar accusative.',[105,106,107,108],'Only a visible single-word khabar after one of the registered unconditional operators: كَانَ, أَصْبَحَ, صَارَ, ظَلَّ, بَاتَ, لَيْسَ.',[IA_KANA]),
- R_ZARF_NASB:sourceRule('A time/place adverb used as mafʿūl fīh is accusative.',[148,149,151,152,153],'Only verified adverb lexemes used with a meaning of fī.'),
+ /* Al-Tuḥfah pp. 148–152, باب ظرف الزمان وظرف المكان. The matn defines both halves with the same
+    formula — «الْمَنْصُوبُ بِتَقْدِيرِ فِي» — and the شرح names the chapter «الْمَفْعُولُ فِيهِ، وَهُوَ
+    نَوْعَانِ» (p. 149), which is why the shared naṣb claim is one rule and each half's own
+    definition and conditions are separate ones. The internal role id still reads `adverb`; the
+    displayed terminology follows the source and says مفعول فيه. */
+ R_ZARF_NASB:sourceRule('A noun of time or of place is accusative as a mafʿūl fīh when the action is understood to have occurred in it, with the meaning of «fī» estimated.',[148,149,151],'Only the registered ẓarf lexemes, each standing under a real ʿāmil: a preceding verb, or the omitted khabar the source’s own verbless examples attach to. A noun does not become a ẓarf by being accusative, and a temporal or locative surface outside this registry never takes the role.'),
+ R_ZARF_ZAMAN:sourceRule('Ẓarf al-zamān is the noun of time made accusative by the word denoting the meaning that occurred in it; the mukhtaṣṣ, which states a defined measure of time, and the mubham, which does not, may both be accusative as mafʿūl fīh.',[148,149,150],'Only the registered time lexemes, each carrying the شرح’s own definition of that word. The mukhtaṣṣ/mubham label is recorded only for the words the source itself classifies — «اليوم» in its mukhtaṣṣ examples and «حينًا» defined as a mubham time — and is left unstated for the rest rather than invented.'),
+ /* p. 151 is the whole reason place cannot simply mirror time: «ولا يجوز أن يُنْصَبَ على أنه مفعول
+    فيه من هذين القسمين إلا الثاني، وهو المُبْهَمُ؛ أما الأول ـ وهو المختصُّ ـ فيجب جرُّهُ بحرف جر». */
+ R_ZARF_MAKAN:sourceRule('Ẓarf al-makān is the noun of place made accusative with the meaning of «fī»; only the mubham, which has no shape and no bounded limits, may be accusative as mafʿūl fīh, while a mukhtaṣṣ place must instead be khafḍ by a particle of khafḍ.',[151,152],'Only mubham place lexemes drawn from the thirteen the شرح lists at p. 152. The mabnī members of that list, ثَمَّ and هُنَا, are not produced because the noun sign matrix models no bināʾ. The source’s own mukhtaṣṣ places are registered as a refusal set and can never take the role.'),
  R_NAAT_HAQIQI:sourceRule('A true naʿt follows its manʿūt in iʿrāb state, definiteness, gender, and number.',[116,117,118,121,123],'Only the registered adjacent true-naʿt pairs. Sababi naʿt is explicitly excluded.'),
  R_ATF_NASAQ:sourceRule('A maʿṭūf connected by one of the ten registered conjunctions follows its maʿṭūf ʿalayh in iʿrāb state.',[124,125,126,127,128,129],'Only the exact registered noun pair, conjunction identity, source-valid context, and template-owned follower construction.'),
  R_ATF_WAW:sourceRule('Conjunctive wāw combines its two sides without itself asserting which came first.',[124,125],'Only the registered عطف النسق templates; it is distinct from wāw al-maʿiyyah and every attached wāw component.'),
@@ -6902,6 +7131,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_VERB_REQUIRES_SUBJECT:sourceRule('Every generated verb has an explicit, attached, or permitted hidden subject.',[38,39,87,88,89,90,91,92,93,97],'Hidden huwa is limited to supported third-person masculine singular forms; advanced 1s and 1p present forms use the person-bound hidden pronouns anā and naḥnu.'),
  RL_PASSIVE_DEPUTY:sourceRule('An authorized passive verb is linked to the visible former object that replaces the omitted fāʿil and becomes marfūʿ.',[96,97,98],'Exactly one passive verb followed by exactly one registered visible deputy subject; no active fāʿil remains.'),
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
+ RL_VERB_ZARF:sourceRule('A verb is linked to the ẓarf of time or place that follows it and makes it accusative as a mafʿūl fīh.',[148,149,151,152],'Only a registered ẓarf lexeme whose ʿāmil is a visible verb earlier in the same sentence. A ẓarf whose ʿāmil is an omitted khabar carries no such link, because there is no verb to link it to; that shape keeps the existing attachment analysis instead.'),
  RL_VERB_ABSOLUTE_OBJECT:sourceRule('A verb is linked to the maṣdar of its own action that follows it and makes it accusative as a mafʿūl muṭlaq.',[146,147],'Only an exact registered pair authorized by frozen template metadata: the ʿāmil is the nearest preceding visible past verb, and the maṣdar, its optional direct object and its optional muḍāf ilayh are all the ones that pair names. Adjacency alone never creates the relation.'),
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
  RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
@@ -7236,6 +7466,107 @@ function verifyMutlaqPairRegistry(){
  });
 }
 verifyMutlaqPairRegistry();
+/* المفعول فيه. The ẓarf lexemes and the two weekday nouns are genuinely new vocabulary, so they
+   enter the noun index here; «مَعَ» is the one documented exception and stays out of it. */
+function registerMafulFihNounForms(){
+ const entries=[...Object.values(MAFUL_FIH_LEXEMES).filter(lexeme=>lexeme.indexed),
+  ...Object.values(MAFUL_FIH_WEEKDAYS)];
+ entries.forEach(lexeme=>['nom','acc','gen'].forEach(form=>{
+  const surface=lexeme[form];
+  if(!surface)return;
+  const existing=nounFormIndex.get(surface);
+  if(existing&&existing.lexeme!==lexeme){
+   throw new Error(`Mafʿūl-fīh lexeme collides with an existing noun surface: ${surface}`);
+  }
+  nounFormIndex.set(surface,{lexeme,inflection:lexeme.inflection});
+ }));
+}
+registerMafulFihNounForms();
+/* Load-time byte and coherence gate, the same discipline verifyMutlaqPairRegistry applies. Two
+   Arabic strings can look identical and differ in combining-mark order, and an unresolvable
+   surface would build a valid-looking exercise with no authority behind it. Everything a pair
+   names is resolved here, and the source's own place restriction is enforced on the registry
+   itself rather than only at run time. */
+function verifyMafulFihRegistry(){
+ Object.entries(MAFUL_FIH_LEXEMES).forEach(([key,lexeme])=>{
+  if(!lexeme.acc)throw new Error(`Mafʿūl-fīh lexeme ${key} has no accusative surface.`);
+  if(!MAFUL_FIH_KIND_LABELS[lexeme.kind])throw new Error(`Mafʿūl-fīh lexeme ${key} has no registered kind.`);
+  if(lexeme.zarfClass&&!MAFUL_FIH_CLASS_LABELS[lexeme.zarfClass]){
+   throw new Error(`Mafʿūl-fīh lexeme ${key} declares an unregistered class.`);
+  }
+  /* p. 151 — a place ẓarf may be manṣūb on ẓarfiyyah only if it is مبهم, so an unclassified or
+     مختص place lexeme may not exist in this registry at all. Time takes both classes and may
+     also be left unclassified, because the source classifies only some of its words. */
+  if(lexeme.kind===MAFUL_FIH_KINDS.place&&lexeme.zarfClass!==MAFUL_FIH_CLASSES.mubham){
+   throw new Error(`Mafʿūl-fīh place lexeme ${key} is not registered as مبهم; only مبهم may be manṣūb.`);
+  }
+  if(MAFUL_FIH_BY_SURFACE[lexeme.acc]!==lexeme){
+   throw new Error(`Mafʿūl-fīh lexeme ${key} shares its accusative surface with another entry.`);
+  }
+  if(lexeme.indexed&&nounFormIndex.get(lexeme.acc)?.lexeme!==lexeme){
+   throw new Error(`Mafʿūl-fīh lexeme ${key} did not round-trip through the noun index.`);
+  }
+  if(!lexeme.indexed&&nounFormIndex.has(lexeme.acc)){
+   throw new Error(`Mafʿūl-fīh lexeme ${key} is declared unindexed but the noun index owns its surface.`);
+  }
+  if(!lexeme.senseAr||!lexeme.senseEn)throw new Error(`Mafʿūl-fīh lexeme ${key} carries no source sense.`);
+ });
+ // The legacy surface must still be the one the inherited templates actually emit, byte for byte.
+ if(MAFUL_FIH_LEXEMES.maa.acc!==legacyMaaSurface()){
+  throw new Error('The legacy adverbial ẓarf surface drifted from its production record.');
+ }
+ if(GLOSS_FIXED_TOKENS[MAFUL_FIH_LEXEMES.maa.acc]?.en!==MAFUL_FIH_LEXEMES.maa.en){
+  throw new Error('The legacy adverbial ẓarf gloss disagrees with its fixed-token record.');
+ }
+ MAFUL_FIH_MUKHTASS_PLACE_ENGLISH.forEach(en=>{
+  const noun=mafulFihNoun('places',en);
+  if(MAFUL_FIH_BY_SURFACE[noun.acc]){
+   throw new Error(`A مختص place is registered as a productive ẓarf: ${en}`);
+  }
+ });
+ Object.entries(MAFUL_FIH_PAIR_REGISTRY).forEach(([key,pair])=>{
+  const lexeme=MAFUL_FIH_LEXEMES[pair.lexemeKey];
+  if(!lexeme)throw new Error(`Mafʿūl-fīh pair ${key} names an unregistered ẓarf: ${pair.lexemeKey}`);
+  const verb=mafulFihVerb(pair.verb);
+  const registeredVerb=verbFormIndex.get(verb.past);
+  if(registeredVerb?.form!=='past'||typeof registeredVerb.lexeme?.pastEn!=='string'){
+   throw new Error(`Mafʿūl-fīh pair ${key} names an unregistered past ʿāmil: ${verb.past}`);
+  }
+  const subject=mafulFihNoun('singularPeople',pair.subjectEn);
+  if(nounFormIndex.get(subject.nom)?.lexeme?.nom!==subject.nom){
+   throw new Error(`Mafʿūl-fīh pair ${key} names an unregistered subject: ${pair.subjectEn}`);
+  }
+  if(pair.objectEn){
+   if(!Array.isArray(verb.obj))throw new Error(`Mafʿūl-fīh pair ${key} gives an object to an ʿāmil that licenses none.`);
+   const object=[...singularThings,...singularPeople].filter(item=>item.en===pair.objectEn);
+   if(object.length!==1||!verb.obj.includes(object[0].acc)){
+    throw new Error(`Mafʿūl-fīh pair ${key} names an object its ʿāmil does not license: ${pair.objectEn}`);
+   }
+  }
+  if(Boolean(pair.qualifier)!==Boolean(lexeme.mudaf)){
+   throw new Error(`Mafʿūl-fīh pair ${key} disagrees with its ẓarf's iḍāfah declaration.`);
+  }
+  if(pair.qualifier){
+   const qualifier=mafulFihQualifier(pair.qualifier);
+   if(!qualifier.gen)throw new Error(`Mafʿūl-fīh pair ${key} names a muḍāf ilayh with no khafḍ form.`);
+   if(nounFormIndex.get(qualifier.gen)?.lexeme!==qualifier){
+    throw new Error(`Mafʿūl-fīh pair ${key} names a muḍāf ilayh outside the noun index: ${qualifier.gen}`);
+   }
+  }
+  if(typeof pair.sentenceEn!=='string'||!pair.sentenceEn.trim()){
+   throw new Error(`Mafʿūl-fīh pair ${key} carries no canonical English.`);
+  }
+ });
+}
+function mafulFihQualifier(spec){
+ if(spec.weekday){
+  const weekday=MAFUL_FIH_WEEKDAYS[spec.weekday];
+  if(!weekday)throw new Error(`The mafʿūl-fīh registry names an unregistered weekday: ${spec.weekday}`);
+  return weekday;
+ }
+ return mafulFihNoun(spec.pool,spec.en);
+}
+verifyMafulFihRegistry();
 
 const grammarSpec=(type,role,extra={})=>({type,role,...extra});
 const AR={
@@ -7274,6 +7605,7 @@ const AR={
  fiveNounAcc:w=>grammarSpec('noun','object',{inflection:'fiveNouns',isMudaf:true,attachedKaf:true}),
  fiveNounGen:(w,p)=>grammarSpec('noun','majrur',{inflection:'fiveNouns',isMudaf:true,attachedKaf:true,governorWord:p}),
  adverbMudaf:w=>grammarSpec('noun','adverb',{isMudaf:true}),
+ adverbBare:w=>grammarSpec('noun','adverb'),
  kana:w=>grammarSpec('verb','kana',{person:'3ms'}),
  ismKana:w=>grammarSpec('noun','ismKana'),
  khabarKana:w=>grammarSpec('noun','khabarKana'),
@@ -7655,6 +7987,109 @@ function canonicalMutlaqTranslation(data){
  const authority=deriveMutlaqAuthority(data,index);
  return authority.authorized?MUTLAQ_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
 }
+/* ---- المفعول فيه: one authority for both halves and for the inherited lane ------------------
+   This authority is LEXICAL, not construction-bound, and that is the point of the migration: the
+   chapter's claim is that a registered ẓarf noun standing after an ʿāmil, with the meaning of «في»,
+   is manṣūb on ẓarfiyyah. The five inherited «مَعَ» templates satisfy exactly that claim, so they
+   pass through the same authority as the new lanes instead of keeping a second, vaguer one.
+
+   A template that DECLARES pairs is additionally held to them: the semantic vetting of which verb
+   may take which ẓarf lives in the frozen pair registry, and a pair-declaring template may not
+   wander outside it. */
+function mafulFihTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.mafulFihPairKeys?.length?template:null;
+}
+/* The ʿāmil is the nearest preceding verb when there is one. When there is none, the source's own
+   examples still stand — «لِمُحَمَّدٍ مَنْزِلَةٌ عِنْدَ الْأُسْتَاذِ» and «لَنَا دَارٌ إِزَاءَ النِّيلِ»
+   (p. 152) have no visible verb at all — and the app already analyses that shape as a ẓarf attached
+   to an omitted khabar. So an omitted-khabar ʿāmil is authorized, but only where the sentence
+   actually offers one: a mubtadaʾ standing before the ẓarf. */
+function mafulFihAmilFor(tokens,index){
+ const verb=[...tokens.slice(0,index)].reverse().find(item=>item?.grammar?.type==='verb');
+ if(verb)return{kind:'verb',token:verb};
+ const mubtada=tokens.slice(0,index).find(item=>item?.grammar?.role==='mubtada');
+ return mubtada?{kind:'omittedKhabar',token:null}:null;
+}
+function mafulFihPairAt(data,index){
+ const template=mafulFihTemplateRecord(data);
+ const tokens=data?.tokens;
+ const zarf=Array.isArray(tokens)?tokens[index]:null;
+ if(!template||!zarf||zarf.grammar?.role!==MAFUL_FIH_ROLE)return null;
+ const amil=mafulFihAmilFor(tokens,index)?.token;
+ if(!amil)return null;
+ const objects=tokens.filter(item=>item.grammar?.role==='object');
+ const qualifier=tokens[index+1]?.grammar?.role==='mudafIlayh'?tokens[index+1]:null;
+ for(const key of template.mafulFihPairKeys){
+  const pair=MAFUL_FIH_PAIR_REGISTRY[key];
+  const lexeme=pair&&MAFUL_FIH_LEXEMES[pair.lexemeKey];
+  if(!pair||!lexeme||zarf.word!==lexeme.acc||zarf.surfaceHint!==lexeme.acc)continue;
+  const verb=mafulFihVerb(pair.verb);
+  if(amil.word!==verb.past||amil.surfaceHint!==verb.past)continue;
+  const subject=mafulFihNoun('singularPeople',pair.subjectEn);
+  if(tokens[0]!==amil||tokens[1]?.grammar?.role!=='faail'||tokens[1].word!==subject.nom)continue;
+  if(objects.length!==(pair.objectEn?1:0))continue;
+  if(pair.objectEn){
+   const object=[...singularThings,...singularPeople].find(item=>item.en===pair.objectEn);
+   if(!object||objects[0].word!==object.acc)continue;
+  }
+  const registeredQualifier=pair.qualifier?mafulFihQualifier(pair.qualifier):null;
+  if(Boolean(qualifier)!==Boolean(registeredQualifier))continue;
+  if(qualifier&&qualifier.word!==registeredQualifier.gen)continue;
+  if(tokens.length!==3+(pair.objectEn?1:0)+(registeredQualifier?1:0))continue;
+  return{key,pair,lexeme,amil,zarf,qualifier,registeredQualifier};
+ }
+ return null;
+}
+function deriveMafulFihAuthority(data,index){
+ const tokens=data?.tokens;
+ const zarf=Array.isArray(tokens)?tokens[index]:null;
+ if(!zarf||zarf.grammar?.type!=='noun'||zarf.grammar.role!==MAFUL_FIH_ROLE){
+  return Object.freeze({authorized:false,reason:'not-a-zarf-token'});
+ }
+ const lexeme=MAFUL_FIH_BY_SURFACE[zarf.word];
+ if(!lexeme||zarf.surfaceHint!==lexeme.acc){
+  return Object.freeze({authorized:false,reason:'unregistered-zarf-lexeme'});
+ }
+ /* p. 151, the chapter's one refusal: a bounded place is never a ẓarf. It is unreachable from this
+    registry by construction, and it is re-checked here so a forged token cannot reach the role. */
+ if(lexeme.kind===MAFUL_FIH_KINDS.place&&lexeme.zarfClass!==MAFUL_FIH_CLASSES.mubham){
+  return Object.freeze({authorized:false,reason:'mukhtass-place-must-take-a-particle-of-khafd'});
+ }
+ if(zarf.state&&zarf.state!=='nasb')return Object.freeze({authorized:false,reason:'zarf-not-nasb'});
+ if(zarf.inflection&&zarf.inflection!==lexeme.inflection){
+  return Object.freeze({authorized:false,reason:'zarf-inflection-mismatch'});
+ }
+ if(lexeme.indexed&&nounFormIndex.get(zarf.word)?.lexeme!==lexeme){
+  return Object.freeze({authorized:false,reason:'zarf-lexeme-mismatch'});
+ }
+ const amil=mafulFihAmilFor(tokens,index);
+ if(!amil)return Object.freeze({authorized:false,reason:'no-amil-for-the-zarf'});
+ if(Boolean(zarf.grammar.isMudaf)!==Boolean(lexeme.mudaf)){
+  return Object.freeze({authorized:false,reason:'idafa-declaration-mismatch'});
+ }
+ if(lexeme.mudaf&&tokens[index+1]?.grammar?.role!=='mudafIlayh'){
+  return Object.freeze({authorized:false,reason:'mudaf-zarf-without-its-complement'});
+ }
+ // A pair-declaring template may produce only what its frozen pairs license.
+ const template=mafulFihTemplateRecord(data);
+ const found=template?mafulFihPairAt(data,index):null;
+ if(template&&!found)return Object.freeze({authorized:false,reason:'outside-the-templates-registered-pairs'});
+ if(found&&MAFUL_FIH_LEXEMES[found.pair.lexemeKey]!==lexeme){
+  return Object.freeze({authorized:false,reason:'pair-lexeme-mismatch'});
+ }
+ return Object.freeze({authorized:true,reason:'',kind:lexeme.kind,zarfClass:lexeme.zarfClass,
+  lexemeKey:MAFUL_FIH_LEXEME_KEYS.find(key=>MAFUL_FIH_LEXEMES[key]===lexeme)||'',
+  pairKey:found?found.key:'',amilKind:amil.kind,amilId:amil.token?amil.token.id:'',
+  amilWord:amil.token?amil.token.word:'',zarfId:zarf.id,
+  qualifierId:lexeme.mudaf&&tokens[index+1]?.id?tokens[index+1].id:''});
+}
+function canonicalMafulFihTranslation(data){
+ const index=data?.tokens?.findIndex(token=>token.grammar?.role===MAFUL_FIH_ROLE)??-1;
+ const authority=deriveMafulFihAuthority(data,index);
+ if(!authority.authorized||!authority.pairKey)return null;
+ return MAFUL_FIH_PAIR_REGISTRY[authority.pairKey].sentenceEn;
+}
 function inflectNoun(token,tokens,index,data){
  const registered=nounFormIndex.get(token.surfaceHint);
  token.lexeme=registered?.lexeme||null;
@@ -7669,6 +8104,11 @@ function inflectNoun(token,tokens,index,data){
     time, and validateExercise refuses the exercise when it withholds. */
  if(token.grammar.role==='mafulMutlaq'&&!mutlaqPairAt(data,index)){
   throw new Error('The absolute object is not a canonically registered mafʿūl-muṭlaq construction for this template.');
+ }
+ /* The ẓarf's lexical licence and its ʿāmil are settled here; state and inflection are written
+    below, so the authority checks them only when they are already present. */
+ if(token.grammar.role===MAFUL_FIH_ROLE&&!deriveMafulFihAuthority(data,index).authorized){
+  throw new Error(`The ẓarf is not a canonically licensed mafʿūl fīh: ${deriveMafulFihAuthority(data,index).reason}.`);
  }
  if(roleRule.state==='inherited'){
   const followed=tokens[index-(token.grammar.role==='atf'?2:1)];
@@ -7844,6 +8284,7 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({
  passiveDeputy:'RL_PASSIVE_DEPUTY',
  verbObject:'RL_TRANSITIVE_VERB_OBJECT',
  absoluteObject:'RL_VERB_ABSOLUTE_OBJECT',
+ zarf:'RL_VERB_ZARF',
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
  kana:'RL_KANA_NOUN_KHABAR',
@@ -7923,6 +8364,19 @@ function resolveRelationships(data){
   const index=tokens.indexOf(object);
   const verb=[...tokens.slice(0,index)].reverse().find(candidate=>candidate.grammar.type==='verb'&&candidate.tense!=='kana');
   if(verb){addRelationship(data,'verbObject',{verbId:verb.id,objectId:object.id});verb.relations.objectId=object.id;object.relations.verbId=verb.id;}
+ });
+ tokens.forEach((item,index)=>{
+  if(item.grammar.role!==MAFUL_FIH_ROLE)return;
+  const authority=deriveMafulFihAuthority(data,index);
+  // Only a VERB ʿāmil earns a link; an omitted-khabar ʿāmil has no token to link to.
+  if(!authority.authorized||authority.amilKind!=='verb')return;
+  const amil=tokens.find(candidate=>candidate.id===authority.amilId);
+  const relation=addRelationship(data,'zarf',{verbId:amil.id,zarfId:item.id,
+   kind:authority.kind,zarfClass:authority.zarfClass,lexemeKey:authority.lexemeKey});
+  amil.relations.zarfId=item.id;
+  amil.relations.zarfRelationshipId=relation.id;
+  item.relations.amilId=amil.id;
+  item.relations.zarfRelationshipId=relation.id;
  });
  tokens.forEach((item,index)=>{
   if(item.grammar.role!=='mafulMutlaq')return;
@@ -8052,7 +8506,11 @@ function nounRoleArabic(token){
   if(!authority.authorized)throw new Error(`Cannot render unauthorized badal: ${authority.reason}`);
   return`${BADAL_KIND_LABELS[authority.subtype].ar} ${stateArabic(token.state)} تَابِعٌ لِلْمُبْدَلِ مِنْهُ`;
  }
- if(role==='adverb')return'ظَرْفٌ مَنْصُوبٌ';
+ if(role===MAFUL_FIH_ROLE){
+  const data=token._data,authority=deriveMafulFihAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl fīh: ${authority.reason}`);
+  return`مَفْعُولٌ فِيهِ ${MAFUL_FIH_KIND_LABELS[authority.kind].ar} مَنْصُوبٌ`;
+ }
  throw new Error(`Unknown noun role: ${role}`);
 }
 function renderNounAnalysis(token){
@@ -8072,6 +8530,12 @@ function renderNounAnalysis(token){
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl muṭlaq: ${authority.reason}`);
   const purpose=MUTLAQ_PURPOSE_LABELS[authority.purpose],division=MUTLAQ_AGREEMENT_LABELS[authority.agreement];
   english=`A maṣdar accusative as ${purpose.en}; it is ${division.en}.`;
+ }
+ if(token.grammar.role===MAFUL_FIH_ROLE){
+  const data=token._data,authority=deriveMafulFihAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl fīh: ${authority.reason}`);
+  const kind=MAFUL_FIH_KIND_LABELS[authority.kind];
+  english=`A mafʿūl fīh: a ${kind.en} that ${kind.clauseEn}, accusative with the meaning of «fī».`;
  }
  if(token.grammar.role==='tawkid'){
   const data=token._data,authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
@@ -8243,12 +8707,34 @@ const WHY_STATE=Object.freeze({
  jazm:{ar:'مَجْزُومٌ',sign:'جَزْمِهِ',en:'jussive',signEn:'jazm'}
 });
 const wq=w=>`«${w}»`,eq=w=>`“${w}”`;
-/* Each ẓarf actually generated gets its own accurate sense. The generic place/time wording
-   below is a defensive default only; the harness proves production never falls back to it. */
-const WHY_ZARF_SENSE=Object.freeze({
- 'مَعَ':{ar:'يَدُلُّ عَلَى مُصَاحَبَةِ الْفِعْلِ',en:'shows accompaniment with the action'}
-});
-function whyZarfSense(t){return WHY_ZARF_SENSE[t.word]||{ar:'يُبَيِّنُ زَمَانَ الْفِعْلِ أَوْ مَكَانَهُ',en:'tells when or where the action happens'}}
+function mafulFihWhyAuthority(token,data){
+ const authority=deriveMafulFihAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`WHY: the mafʿūl fīh is not authorized (${authority.reason}).`);
+ return authority;
+}
+/* One line, and which line it is depends on what the source actually says about this word. For a
+   place ẓarf that line is load-bearing — p. 151 lets only the مبهم be manṣūb — so it states the
+   restriction. For a time ẓarf the classification changes nothing (p. 149 permits both), so the
+   line reports the class when the source gives one and the word's own source definition when it
+   does not. Nothing here is generic filler: every wording comes from the registry entry. */
+function whyMafulFihSense(token,data){
+ const authority=mafulFihWhyAuthority(token,data);
+ const lexeme=MAFUL_FIH_LEXEMES[authority.lexemeKey];
+ if(authority.kind===MAFUL_FIH_KINDS.place){
+  return{id:'WHY_MAFUL_FIH_PLACE_MUBHAM',
+   ar:`وَهُوَ ظَرْفُ مَكَانٍ ${MAFUL_FIH_CLASS_LABELS.mubham.ar}، ${lexeme.senseAr}، وَالْمُبْهَمُ وَحْدَهُ هُوَ الَّذِي يُنْصَبُ عَلَى الظَّرْفِيَّةِ، وَأَمَّا الْمُخْتَصُّ فَيَجِبُ خَفْضُهُ بِحَرْفِ خَفْضٍ.`,
+   en:`It is a mubham ẓarf of place — ${lexeme.senseEn} — and only the mubham is accusative on ẓarfiyyah; a bounded place must instead be khafḍ by a particle of khafḍ.`};
+ }
+ if(authority.zarfClass){
+  const label=MAFUL_FIH_CLASS_LABELS[authority.zarfClass];
+  return{id:`WHY_MAFUL_FIH_TIME_${authority.zarfClass.toUpperCase()}`,
+   ar:`وَهُوَ ظَرْفُ زَمَانٍ ${label.ar}، ${lexeme.senseAr}، وَكِلَا الْقِسْمَيْنِ يَجُوزُ نَصْبُهُ عَلَى أَنَّهُ مَفْعُولٌ فِيهِ.`,
+   en:`It is a ${label.en} time — ${lexeme.senseEn} — and both classes of time may be accusative as a mafʿūl fīh.`};
+ }
+ return{id:'WHY_MAFUL_FIH_TIME_SENSE',
+  ar:`وَ${wq(token.word)} اسْمُ زَمَانٍ، ${lexeme.senseAr}.`,
+  en:`${eq(token.word)} is a noun of time: ${lexeme.senseEn}.`};
+}
 function tawkidWhyAuthority(token,data){
  const authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
  if(!authority.authorized)throw new Error(`WHY: tawkīd is not authorized (${authority.reason}).`);
@@ -8404,10 +8890,24 @@ const WHY_ROLE=Object.freeze({
   stateAr:t=>`وَالْبَدَلُ يَتْبَعُ الْمُبْدَلَ مِنْهُ فِي جَمِيعِ إِعْرَابِهِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A badal follows its mubdal minhu in all of its iʿrāb, so this one is ${stateArabic(t.state)} like it.`},
  adverb:{
-  id:t=>WHY_ZARF_SENSE[t.word]?'WHY_ROLE_ZARF':'WHY_ROLE_ZARF_GENERIC',
-  ar:t=>`${wq(t.word)} ظَرْفٌ ${whyZarfSense(t).ar}.`,
-  en:t=>`${eq(t.word)} is a ظَرْفٌ that ${whyZarfSense(t).en}.`,
-  stateId:()=>'WHY_STATE_ZARF',stateAr:()=>'وَالظَّرْفُ مَنْصُوبٌ.',stateEn:()=>'The ظَرْفٌ is مَنْصُوبٌ.'}
+  id:(t,data)=>`WHY_ROLE_MAFUL_FIH_${mafulFihWhyAuthority(t,data).kind.toUpperCase()}`,
+  ar:(t,data)=>{
+   const authority=mafulFihWhyAuthority(t,data);
+   const kind=MAFUL_FIH_KIND_LABELS[authority.kind];
+   return authority.amilKind==='verb'
+    ?`${wq(t.word)} ${kind.ar} ${kind.clauseAr} ${wq(authority.amilWord)}، فَهُوَ مَفْعُولٌ فِيهِ.`
+    :`${wq(t.word)} ${kind.ar} ${kind.clauseAr} الْمُتَعَلِّقُ بِخَبَرٍ مَحْذُوفٍ، فَهُوَ مَفْعُولٌ فِيهِ.`;
+  },
+  en:(t,data)=>{
+   const authority=mafulFihWhyAuthority(t,data);
+   const kind=MAFUL_FIH_KIND_LABELS[authority.kind];
+   return authority.amilKind==='verb'
+    ?`${eq(t.word)} is a ${kind.en} that ${kind.clauseEn} of ${eq(authority.amilWord)}, so it is a مَفْعُولٌ فِيهِ.`
+    :`${eq(t.word)} is a ${kind.en} that ${kind.clauseEn} of the omitted khabar it attaches to, so it is a مَفْعُولٌ فِيهِ.`;
+  },
+  stateId:()=>'WHY_STATE_MAFUL_FIH',
+  stateAr:()=>'وَالْمَفْعُولُ فِيهِ مَنْصُوبٌ بِتَقْدِيرِ «فِي».',
+  stateEn:()=>'The مَفْعُولٌ فِيهِ is مَنْصُوبٌ, with the meaning of «fī» estimated.'}
 });
 function whySignNoun(t){
  const form=WHY_FORM[t.inflection],sign=WHY_SIGN_NAME[safeSignId(t.sign)],st=WHY_STATE[t.state];
@@ -8606,6 +9106,9 @@ function buildTokenWhy(token,data){
    push(whyMutlaqPurpose(token,data));
    push(whyMutlaqDivision(token,data));
   }
+  if(token.grammar.role===MAFUL_FIH_ROLE){
+   push(whyMafulFihSense(token,data));
+  }
   // The five nouns carry their muḍāf ilayh as an attached kāf, so the generic “joined to what
   // follows it” wording would be wrong for them; the engine already flags this via attachedKaf.
   if(token.grammar.isMudaf)push(token.grammar.attachedKaf
@@ -8680,6 +9183,16 @@ function buildRelationshipWhy(rel,data){
   const deputy=data.tokens.find(item=>item.id===rel.deputyId);
   if(!verb||!deputy)return{ids,ar,en};
   push({id:'WHY_REL_PASSIVE_DEPUTY',ar:`لَمَّا حُذِفَ فَاعِلُ ${wq(verb.word)} أُقِيمَ ${wq(deputy.word)} مَقَامَهُ وَأُعْطِيَ حُكْمَهُ فِي الرَّفْعِ.`,en:`When the agent of ${eq(verb.word)} was omitted, ${eq(deputy.word)} took its place and received its rule of rafʿ.`});
+  return{ids,ar,en};
+ }
+ if(rel.type==='zarf'){
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const zarf=data.tokens.find(item=>item.id===rel.zarfId);
+  const kind=MAFUL_FIH_KIND_LABELS[rel.kind];
+  if(!verb||!zarf||!kind)return{ids,ar,en};
+  push({id:'WHY_REL_VERB_ZARF',
+   ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(zarf.word)} ${kind.ar} ${kind.clauseAr}، فَنَصَبَهُ عَلَى الظَّرْفِيَّةِ بِتَقْدِيرِ «فِي».`,
+   en:`${eq(verb.word)} is the ʿāmil and ${eq(zarf.word)} is the ${kind.en} that ${kind.clauseEn}, so the verb makes it accusative on ẓarfiyyah with the meaning of «fī».`});
   return{ids,ar,en};
  }
  if(rel.type==='absoluteObject'){
@@ -8780,6 +9293,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='zarf'){
+   const recipient=data.tokens.find(item=>item.id===rel.zarfId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='follower'){
    const recipient=data.tokens.find(item=>item.id===rel.followedId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -8798,6 +9316,18 @@ function renderRelationshipAnalysis(data){
   verb.phraseAr=`وَالتَّرْكِيبُ «${verb.word} ${deputy.word}»: فِعْلٌ مَبْنِيٌّ لِلْمَجْهُولِ حُذِفَ فَاعِلُهُ، وَنَائِبُ فَاعِلٍ مَرْفُوعٌ أُقِيمَ مَقَامَهُ.`;
   verb.phraseEn=`Together, “${verb.word} ${deputy.word}” is a passive verb whose agent is omitted and a raised deputy subject taking its place.`;
   verb.phraseLabel='Passive construction';
+ });
+ data.relationships.filter(rel=>rel.type==='zarf').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const zarf=data.tokens.find(item=>item.id===rel.zarfId);
+  const kind=MAFUL_FIH_KIND_LABELS[rel.kind];
+  if(!verb||!zarf||!kind)return;
+  /* A muḍāf ẓarf is quoted with what it is annexed to: «فَوْقَ» alone names no place. */
+  const complement=zarf.grammar.isMudaf?data.tokens[data.tokens.indexOf(zarf)+1]:null;
+  const phrase=`${verb.word} ${zarf.word}${complement?` ${complement.word}`:''}`;
+  zarf.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: عَامِلٌ وَ${kind.ar} مَنْصُوبٌ عَلَى الظَّرْفِيَّةِ بِتَقْدِيرِ «فِي».`;
+  zarf.phraseEn=`Together, “${phrase}” is an ʿāmil with a ${kind.en} accusative on ẓarfiyyah, carrying the meaning of «fī».`;
+  zarf.phraseLabel='Ẓarf construction';
  });
  data.relationships.filter(rel=>rel.type==='absoluteObject').forEach(rel=>{
   const verb=data.tokens.find(item=>item.id===rel.verbId);
@@ -9088,6 +9618,13 @@ function validateExercise(data){
     const authority=deriveBadalFollowerAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_BADAL_AUTHORITY',`Badal authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_BADAL')fail('E_BADAL_RULE','The badal is not bound to its source rule.',token);
+   }else if(token.grammar.role===MAFUL_FIH_ROLE){
+    /* Like the absolute object, this role's state comes from the rule table rather than being
+       inherited, so the state is checked here in addition to the lexical licence. */
+    const authority=deriveMafulFihAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_MAFUL_FIH_AUTHORITY',`Mafʿūl-fīh authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_ZARF_NASB')fail('E_MAFUL_FIH_RULE','The mafʿūl fīh is not bound to its source rule.',token);
+    if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mafulFih requires nasb, not ${token.state}.`,token);
    }else if(token.grammar.role==='mafulMutlaq'){
     /* Unlike the followers, this role's state is fixed by the rule table rather than inherited,
        so the state is checked here too — the authority proving the construction does not by
@@ -9410,6 +9947,15 @@ function validateExercise(data){
     fail('E_PASSIVE_RELATION','Passive-deputy relationship is not the canonical proof.',tokenById.get(rel.deputyId));
    }
   }
+  if(rel.type==='zarf'){
+   const zarf=tokenById.get(rel.zarfId);
+   const authority=deriveMafulFihAuthority(data,data.tokens.indexOf(zarf));
+   if(!authority.authorized||authority.amilKind!=='verb'||rel.verbId!==authority.amilId
+     ||rel.zarfId!==authority.zarfId||rel.kind!==authority.kind
+     ||rel.zarfClass!==authority.zarfClass||rel.lexemeKey!==authority.lexemeKey){
+    fail('E_MAFUL_FIH_RELATION','Ẓarf relationship is not the canonical proof.',zarf);
+   }
+  }
   if(rel.type==='absoluteObject'){
    const masdar=tokenById.get(rel.masdarId);
    const authority=deriveMutlaqAuthority(data,data.tokens.indexOf(masdar));
@@ -9482,6 +10028,23 @@ function validateExercise(data){
   if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
    fail('E_BADAL_RELATION_COUNT','A badal must have exactly one follower relationship.',item);
   }
+ });
+ data.tokens.filter(item=>item.grammar.role===MAFUL_FIH_ROLE).forEach(item=>{
+  const authority=deriveMafulFihAuthority(data,data.tokens.indexOf(item));
+  const links=relationships.filter(candidate=>candidate.type==='zarf'&&candidate.zarfId===item.id);
+  /* A verb-governed ẓarf must carry exactly one reciprocal link; an omitted-khabar ẓarf must
+     carry none, because inventing one would name a governor the sentence does not contain. */
+  if(authority.authorized&&authority.amilKind==='verb'){
+   const rel=relationships.find(candidate=>candidate.id===item.relations.zarfRelationshipId&&candidate.type==='zarf');
+   const amil=tokenById.get(item.relations.amilId);
+   if(!rel||rel.zarfId!==item.id||rel.verbId!==amil?.id
+     ||amil?.relations.zarfId!==item.id||amil?.relations.zarfRelationshipId!==rel.id){
+    fail('E_MAFUL_FIH_RELATION','A verb-governed mafʿūl fīh must have exactly one reciprocal canonical link to its ʿāmil.',item);
+   }
+  }else if(links.length){
+   fail('E_MAFUL_FIH_RELATION','A mafʿūl fīh whose ʿāmil is an omitted khabar may not carry a verb link.',item);
+  }
+  if(links.length>1)fail('E_MAFUL_FIH_RELATION_COUNT','A mafʿūl fīh may have at most one ʿāmil relationship.',item);
  });
  data.tokens.filter(item=>item.grammar.role==='mafulMutlaq').forEach(item=>{
   const rel=relationships.find(candidate=>candidate.id===item.relations.absoluteObjectRelationshipId&&candidate.type==='absoluteObject');
@@ -9681,6 +10244,25 @@ function add(starts,form,state,sign,build,metadata={}){
    throw new Error(`Template ${stableId} produces a mafʿūl muṭlaq without its explicit past ʿāmil.`);
   }
  }
+ /* المفعول فيه. A template owns one half of the chapter and one structural shape, so a place ẓarf
+    can never be drawn where the exercise claims to teach time, and the composer's structural key
+    stays unambiguous for the template. Declaring no pairs is what the five inherited «مَعَ»
+    templates do: they are held to the lexical authority alone, exactly as before. */
+ const mafulFihPairKeys=Object.freeze([...(metadata.mafulFihPairKeys||[])]);
+ if(mafulFihPairKeys.some((key,position)=>mafulFihPairKeys.indexOf(key)!==position||!MAFUL_FIH_PAIR_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered mafʿūl-fīh pair.`);
+ }
+ if(mafulFihPairKeys.length){
+  const shapes=new Set(mafulFihPairKeys.map(key=>{
+   const pair=MAFUL_FIH_PAIR_REGISTRY[key];
+   const lexeme=MAFUL_FIH_LEXEMES[pair.lexemeKey];
+   return `${lexeme.kind}|${pair.objectEn?'object':'bare'}|${lexeme.mudaf?'mudaf':'alone'}`;
+  }));
+  if(shapes.size!==1)throw new Error(`Template ${stableId} mixes mafʿūl-fīh kinds or structures.`);
+  if(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
+   throw new Error(`Template ${stableId} produces a mafʿūl fīh without its explicit past ʿāmil.`);
+  }
+ }
  const conditionalGovernor=isConditionalGovernor(GRAMMAR_RULES.governors[presentGovernor]);
  if(conditionalGovernor!==Boolean(responsePairIds.length)){
   throw new Error(`Template ${stableId} must declare response pairs exactly when its governor is conditional.`);
@@ -9732,6 +10314,7 @@ function add(starts,form,state,sign,build,metadata={}){
   followerPairKeys,
   followerConjunctionKeys,
   mutlaqPairKeys,
+  mafulFihPairKeys,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -10621,6 +11204,51 @@ add('verb','dual','nasb','ya',()=>pickedMutlaq(MUTLAQ_ADAD_BARE_KEYS,'mutlaq-ada
  mutlaqMetadata(MUTLAQ_ADAD_BARE_KEYS));
 add('verb','dual','nasb','ya',()=>pickedMutlaq(MUTLAQ_ADAD_OBJECT_KEYS,'mutlaq-adad-object'),
  mutlaqMetadata(MUTLAQ_ADAD_OBJECT_KEYS));
+
+/* المفعول فيه — one builder over the frozen pairs. Every Arabic surface here is READ from a
+   canonical record: the ʿāmil from the verb index, the subject, object and muḍāf ilayh from the
+   lexicon by their English, and the ẓarf from its own registry. Nothing is retyped, so no
+   combining-mark difference can produce a surface the authority will not recognize. */
+function buildMafulFihExercise(pairKey){
+ const pair=MAFUL_FIH_PAIR_REGISTRY[pairKey];
+ if(!pair)throw new Error(`Unknown productive mafʿūl-fīh pair: ${pairKey}`);
+ const lexeme=MAFUL_FIH_LEXEMES[pair.lexemeKey];
+ const verb=mafulFihVerb(pair.verb);
+ const registeredVerb=verbFormIndex.get(verb.past);
+ if(registeredVerb?.form!=='past')throw new Error(`The mafʿūl-fīh pair ${pairKey} names an unregistered ʿāmil.`);
+ const subject=mafulFihNoun('singularPeople',pair.subjectEn);
+ const qualifier=pair.qualifier?mafulFihQualifier(pair.qualifier):null;
+ const tokens=[
+  token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),'A past-tense verb built on its canonical ending.'),
+  token(subject.nom,subject.en,AR.faail(subject.nom),'The explicit subject of the verb.')
+ ];
+ if(pair.objectEn){
+  const object=[...singularThings,...singularPeople].find(item=>item.en===pair.objectEn);
+  if(!object)throw new Error(`The mafʿūl-fīh pair ${pairKey} names an unregistered object.`);
+  tokens.push(token(object.acc,object.en,AR.object(object.acc),EN.object));
+ }
+ tokens.push(token(lexeme.acc,lexeme.en,lexeme.mudaf?AR.adverbMudaf(lexeme.acc):AR.adverbBare(lexeme.acc),
+  'A noun of time or place, accusative as the mafʿūl fīh of its ʿāmil.',true));
+ if(qualifier)tokens.push(token(qualifier.gen,qualifier.en,AR.mudafIlayh(qualifier.gen),EN.mudafIlayh));
+ return{sentence:'',translation:pair.sentenceEn,tokens};
+}
+/* Lane membership comes from the pairs' own declarations, so a template cannot draw a ẓarf of the
+   wrong half of the chapter or of the wrong structural shape. */
+const mafulFihKeys=(kind,hasObject,isMudaf)=>Object.freeze(MAFUL_FIH_ALL_PAIR_KEYS.filter(key=>{
+ const pair=MAFUL_FIH_PAIR_REGISTRY[key],lexeme=MAFUL_FIH_LEXEMES[pair.lexemeKey];
+ return lexeme.kind===kind&&Boolean(pair.objectEn)===hasObject&&Boolean(lexeme.mudaf)===isMudaf;
+}));
+const MAFUL_FIH_TIME_BARE_KEYS=mafulFihKeys(MAFUL_FIH_KINDS.time,true,false);
+const MAFUL_FIH_TIME_MUDAF_KEYS=mafulFihKeys(MAFUL_FIH_KINDS.time,true,true);
+const MAFUL_FIH_PLACE_KEYS=mafulFihKeys(MAFUL_FIH_KINDS.place,false,true);
+const mafulFihMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),mafulFihPairKeys:keys});
+const pickedMafulFih=(keys,label)=>buildMafulFihExercise(pickVaried(keys,label,String));
+add('verb','singular','nasb','fatha',()=>pickedMafulFih(MAFUL_FIH_TIME_BARE_KEYS,'maful-fih-time-bare'),
+ mafulFihMetadata(MAFUL_FIH_TIME_BARE_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedMafulFih(MAFUL_FIH_TIME_MUDAF_KEYS,'maful-fih-time-mudaf'),
+ mafulFihMetadata(MAFUL_FIH_TIME_MUDAF_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedMafulFih(MAFUL_FIH_PLACE_KEYS,'maful-fih-place'),
+ mafulFihMetadata(MAFUL_FIH_PLACE_KEYS));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

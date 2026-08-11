@@ -1184,6 +1184,11 @@ function resolveCanonicalTokenGloss(data,token,index){
  if(type==='noun'&&token.grammar.role===MAFUL_FIH_ROLE){
   return MAFUL_FIH_BY_SURFACE[surface]?.en||null;
  }
+ /* 4h — a haal adjective is authorized only by its exact template-owned event/owner pair. */
+ if(type==='noun'&&token.grammar.role===HAAL_ROLE){
+  const found=haalPairAt(data,index);
+  return found?.haalEntry?.lexeme?.en||null;
+ }
  /* 5 — an object noun, resolved through its GOVERNING VERB rather than through its surface.
     Two vocabulary records can share one accusative surface with different English, so a bare
     surface lookup would have to choose between them. The verb that governs the object is what
@@ -1342,7 +1347,9 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
     whole sentence is settled by the authorized pair, so a lane never earns a shape of its own. */
  TS40:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mutlaqSentence'})])}),
  /* المفعول فيه — one shape for both halves; the authorized pair settles the whole sentence. */
- TS41:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulFihSentence'})])})
+ TS41:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulFihSentence'})])}),
+ /* الحال المفردة — the frozen pair owns natural English for both صاحب lanes. */
+ TS42:Object.freeze({parts:Object.freeze([Object.freeze({slot:'haalSentence'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1495,6 +1502,8 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_VERB_SINGULAR_NASB_FATHA_23||verb:past,noun:faail,noun:object,noun:adverb":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_23",structure:"verb:past,noun:faail,noun:object,noun:adverb",shape:"TS41",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_24||verb:past,noun:faail,noun:object,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_24",structure:"verb:past,noun:faail,noun:object,noun:adverb,noun:mudafIlayh",shape:"TS41",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_25||verb:past,noun:faail,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_25",structure:"verb:past,noun:faail,noun:adverb,noun:mudafIlayh",shape:"TS41",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_26||verb:past,noun:faail,noun:haal":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_26",structure:"verb:past,noun:faail,noun:haal",shape:"TS42",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_27||verb:past,noun:faail,noun:object,noun:haal":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_27",structure:"verb:past,noun:faail,noun:object,noun:haal",shape:"TS42",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -1546,6 +1555,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='passiveSentence')return canonicalPassiveTranslation(exercise);
  if(bits[0]==='mutlaqSentence')return canonicalMutlaqTranslation(exercise);
  if(bits[0]==='mafulFihSentence')return canonicalMafulFihTranslation(exercise);
+ if(bits[0]==='haalSentence')return canonicalHaalTranslation(exercise);
  if(bits[0]==='copula'){
   const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
   if(!particle)return null;
@@ -4028,6 +4038,65 @@ const MAFUL_FIH_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
   sentenceEn:'The student sat with the teacher.'})
 }));
 const MAFUL_FIH_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_FIH_PAIR_REGISTRY));
+/* Productive الحال المفردة — Al-Tuḥfah pp. 153–157. The source defines الحال as the
+   accusative noun that makes an otherwise unclear condition explicit, then states the productive
+   defaults used here: the haal is indefinite, it follows a complete clause, and its صاحب is
+   definite. It may describe the fāʿil or the mafʿūl bihi (pp. 154, 156–157).
+
+   This registry is intentionally pairs, not an adjective pool. A canonical adjective surface is
+   available as haal only when the same frozen record names its event and its صاحب. That keeps an
+   arbitrary manṣūb adjective from becoming grammatical truth, and it keeps haal separate from
+   naʿt: the former owns naṣb while the latter inherits its manʿūt's state. The source examples
+   instantiate gender/number agreement but do not formulate a general agreement rule in this
+   section, so this first productive lane is honestly limited to masculine singular pairs. */
+const HAAL_ROLE='haal';
+const HAAL_OWNER_ROLES=Object.freeze({subject:'faail',object:'object'});
+function uniqueHaalLexeme(pool,en){
+ const matches=pool.filter(item=>item.en===en);
+ if(matches.length!==1)throw new Error(`The haal registry matched ${matches.length} canonical adjective records for “${en}”.`);
+ return matches[0];
+}
+const HAAL_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ smiling:Object.freeze({lexeme:uniqueHaalLexeme(adjectives,'smiling'),inflection:'singular',gender:'masculine',number:'singular'}),
+ happy:Object.freeze({lexeme:uniqueHaalLexeme(adjectives,'happy'),inflection:'singular',gender:'masculine',number:'singular'}),
+ calm:Object.freeze({lexeme:uniqueHaalLexeme(adjectives,'calm'),inflection:'singular',gender:'masculine',number:'singular'}),
+ new:Object.freeze({lexeme:uniqueHaalLexeme(masculineThingPredicates,'new'),inflection:'singular',gender:'masculine',number:'singular'})
+}));
+function haalNoun(poolName,en){
+ const pool={singularPeople,singularThings}[poolName];
+ if(!pool)throw new Error(`The haal registry names an unknown noun pool: ${poolName}`);
+ const matches=pool.filter(item=>item.en===en);
+ if(matches.length!==1)throw new Error(`The haal registry matched ${matches.length} ${poolName} records for “${en}”.`);
+ return matches[0];
+}
+function haalVerb(spec){
+ if(spec.capabilityKey){
+  const capability=MUTLAQ_VERB_CAPABILITIES[spec.capabilityKey];
+  if(!capability)throw new Error(`The haal registry names an unknown intransitive capability: ${spec.capabilityKey}`);
+  return Object.freeze({past:capability.past,pastEn:capability.pastEn,obj:null,group:''});
+ }
+ const matches=generalVerbActions.filter(item=>item.en===spec.verbEn);
+ if(matches.length!==1)throw new Error(`The haal registry matched ${matches.length} verb records for “${spec.verbEn}”.`);
+ return matches[0];
+}
+const HAAL_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ studentSmiling:Object.freeze({verb:Object.freeze({capabilityKey:'jalasa'}),subjectEn:'the student',
+  objectEn:'',ownerRole:HAAL_OWNER_ROLES.subject,haalKey:'smiling',gender:'masculine',number:'singular',
+  sentenceEn:'The student sat down smiling.'}),
+ guestHappy:Object.freeze({verb:Object.freeze({capabilityKey:'waqafa'}),subjectEn:'the guest',
+  objectEn:'',ownerRole:HAAL_OWNER_ROLES.subject,haalKey:'happy',gender:'masculine',number:'singular',
+  sentenceEn:'The guest stood up happy.'}),
+ teacherCalm:Object.freeze({verb:Object.freeze({capabilityKey:'qaada'}),subjectEn:'the teacher',
+  objectEn:'',ownerRole:HAAL_OWNER_ROLES.subject,haalKey:'calm',gender:'masculine',number:'singular',
+  sentenceEn:'The teacher sat calmly.'}),
+ garmentNew:Object.freeze({verb:Object.freeze({verbEn:'wear'}),subjectEn:'the student',
+  objectEn:'the garment',ownerRole:HAAL_OWNER_ROLES.object,haalKey:'new',gender:'masculine',number:'singular',
+  sentenceEn:'The student wore the garment while it was new.'}),
+ bookNew:Object.freeze({verb:Object.freeze({verbEn:'find'}),subjectEn:'the student',
+  objectEn:'the book',ownerRole:HAAL_OWNER_ROLES.object,haalKey:'new',gender:'masculine',number:'singular',
+  sentenceEn:'The student found the book in new condition.'})
+}));
+const HAAL_ALL_PAIR_KEYS=Object.freeze(Object.keys(HAAL_PAIR_REGISTRY));
 const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...feminineHumanSingulars,...feminineHumanDuals,...fiveNouns];
 function nounEnglish(word,caseName='acc'){
  return allCaseNouns.find(item=>item[caseName]===word)?.en||'the noun';
@@ -6644,7 +6713,8 @@ const GRAMMAR_RULES=Object.freeze({
      their stored History already use, and renaming it would break them for no grammatical gain —
      the same trade R_HARF_JARR documents. Everything the learner sees, and every authority behind
      it, is المفعول فيه. */
-  adverb:{state:'nasb',ruleId:'R_ZARF_NASB',en:'A mafʿūl fīh: a noun of time or place naming when or where the action happened; accusative.'}
+  adverb:{state:'nasb',ruleId:'R_ZARF_NASB',en:'A mafʿūl fīh: a noun of time or place naming when or where the action happened; accusative.'},
+  haal:{state:'nasb',ruleId:'R_HAAL_NASB',en:'A haal describing its صاحب at the time of the event; accusative.'}
  },
  nounInflection:{
   singular:{raf:['damma','R_SINGULAR_RAF_DAMMA'],nasb:['fatha','R_SINGULAR_NASB_FATHA'],jarr:['kasra','R_SINGULAR_JARR_KASRA']},
@@ -6746,8 +6816,8 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
- roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf'],
- relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','preposition','idafa','inna','kana','concealedAn','follower'],
+ roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
+ relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
@@ -6771,6 +6841,12 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  'the future-only time ẓarfs غدًا, أبدًا and أمدًا, which no past-tense ʿāmil lane can host truthfully',
  'the time ẓarfs غدوة, بكرة and عتمة, registered by the source but given no productive host here',
  'mukhtaṣṣ place nouns as accusative ẓarfs, which Al-Tuḥfah p. 151 refuses outright',
+ /* الحال ships only as the single-word, masculine-singular core. The source also treats a
+    clause as an interpreted single noun (p. 154), and allows exceptional definite haals,
+    indefinite owners, and fronting (pp. 155–156); none is silently claimed here. */
+ 'haal expressed as a sentence or شبه جملة',
+ 'exceptional definite haal, indefinite صاحب الحال, or fronted haal',
+ 'feminine, dual, sound-plural, and broken-plural haal agreement lanes',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
   'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
@@ -6932,6 +7008,11 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     three أنواع out one by one. The «ليس خبرًا» exclusion is not a productive concern here: no lane
     puts a maṣdar in a khabar position. */
  R_MAFUL_MUTLAQ_NASB:sourceRule('A maṣdar that is not a khabar and that confirms its ʿāmil, or makes its kind or its number clear, is a mafʿūl muṭlaq and is accusative.',[146,147],'Productive scope: the registered pairs only, each naming its own visible past-tense ʿāmil, its maṣdar surface, and — for the kind-specifying lane — the noun the maṣdar is annexed to. The purpose is read from the frozen pair, never inferred from the words. Not produced: an omitted or non-verbal ʿāmil, a kind specified by an adjective rather than by iḍāfah, and the numeric ثلاث ضربات frame.'),
+ /* Al-Tuḥfah pp. 153–157, باب الحال. The matn gives the ruling inside the definition itself:
+    «الاسم المنصوب المفسر لما انبهم من الهيئات». The three productive conditions are stated at
+    pp. 154–155: الحال نكرة، بعد تمام الكلام، وصاحبها معرفة. The شرح explicitly permits the
+    condition described to belong to the fāʿil or the mafʿūl bihi; this lane implements both. */
+ R_HAAL_NASB:sourceRule('A haal is the accusative noun that explains the condition of its صاحب at the time of the event; in the productive default it is indefinite, follows a complete clause, and its صاحب is definite.',[153,154,155,156,157],'Only the five frozen masculine-singular pairs. Each pair names the visible past event, the definite صاحب (fāʿil or mafʿūl bihi), and an indefinite adjective surface from the canonical noun registry. Definite haal, indefinite owners, fronting, sentence/phrase haal and broader agreement classes remain deferred.'),
  /* p. 147, أنواع المفعول المطلق. A SECOND and independent division of the same word, so it is a
     rule of its own: the matn splits the maṣdar into لفظي and معنوي, and the شرح fixes the test —
     «ما يوافق الفعل الناصب له في لفظه، بأن يكون مشتملًا على حروفه» against «ما يوافق الفعل الناصب له
@@ -7133,6 +7214,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
  RL_VERB_ZARF:sourceRule('A verb is linked to the ẓarf of time or place that follows it and makes it accusative as a mafʿūl fīh.',[148,149,151,152],'Only a registered ẓarf lexeme whose ʿāmil is a visible verb earlier in the same sentence. A ẓarf whose ʿāmil is an omitted khabar carries no such link, because there is no verb to link it to; that shape keeps the existing attachment analysis instead.'),
  RL_VERB_ABSOLUTE_OBJECT:sourceRule('A verb is linked to the maṣdar of its own action that follows it and makes it accusative as a mafʿūl muṭlaq.',[146,147],'Only an exact registered pair authorized by frozen template metadata: the ʿāmil is the nearest preceding visible past verb, and the maṣdar, its optional direct object and its optional muḍāf ilayh are all the ones that pair names. Adjacency alone never creates the relation.'),
+ RL_HAAL_OWNER:sourceRule('A registered haal is linked to the event that makes it accusative and to the definite صاحب whose condition it describes.',[153,154,155,156,157],'Only an exact frozen pair owned by its template. The صاحب is named structurally as the fāʿil or mafʿūl bihi; proximity and a manṣūb adjective surface never create the relation.'),
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
  RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
  RL_KANA_NOUN_KHABAR:sourceRule('Kāna and its sisters require a linked noun and khabar with their governed states.',[76,105,106,107,108],'Complete ordered single-noun/single-khabar structures, plus the exact negated-kāna lām al-juḥūd frame whose verbal clause is the khabar.',[IA_KANA])
@@ -7568,6 +7650,52 @@ function mafulFihQualifier(spec){
 }
 verifyMafulFihRegistry();
 
+/* Narrow byte/coherence gate for الحال. Every surface is resolved from a pre-existing canonical
+   record and must index back to that exact record. The pair then has to prove its verb, complete
+   host, definite صاحب, indefinite haal, owner role, agreement declaration and natural English. */
+function verifyHaalRegistry(){
+ Object.entries(HAAL_LEXEMES).forEach(([key,entry])=>{
+  const lexeme=entry.lexeme;
+  if(!lexeme?.nom||!lexeme?.acc||nounFormIndex.get(lexeme.acc)?.lexeme!==lexeme){
+   throw new Error(`Haal lexeme ${key} does not round-trip through its canonical noun record.`);
+  }
+  if(/^ال/u.test(lexeme.nom)||lexeme.acc===lexeme.nom){
+   throw new Error(`Haal lexeme ${key} is not the registered indefinite accusative form.`);
+  }
+  if(entry.inflection!=='singular'||entry.gender!=='masculine'||entry.number!=='singular'){
+   throw new Error(`Haal lexeme ${key} falls outside the declared first productive lane.`);
+  }
+ });
+ Object.entries(HAAL_PAIR_REGISTRY).forEach(([key,pair])=>{
+  const verb=haalVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
+  if(registeredVerb?.form!=='past'||registeredVerb.surface!==verb.past){
+   throw new Error(`Haal pair ${key} names an unregistered past event.`);
+  }
+  const subject=haalNoun('singularPeople',pair.subjectEn);
+  const object=pair.objectEn?haalNoun('singularThings',pair.objectEn):null;
+  const entry=HAAL_LEXEMES[pair.haalKey];
+  if(!entry)throw new Error(`Haal pair ${key} names an unknown adjective record.`);
+  if(!/^ال/u.test(subject.nom)||object&&!/^ال/u.test(object.acc)){
+   throw new Error(`Haal pair ${key} does not name a definite صاحب frame.`);
+  }
+  if(pair.ownerRole===HAAL_OWNER_ROLES.subject){
+   if(object)throw new Error(`Subject-owner haal pair ${key} unexpectedly names an object.`);
+  }else if(pair.ownerRole===HAAL_OWNER_ROLES.object){
+   if(!object)throw new Error(`Object-owner haal pair ${key} names no object.`);
+   const licensed=Array.isArray(verb.obj)?verb.obj.includes(object.acc)
+    :Array.isArray(objectGroups[verb.group])&&objectGroups[verb.group].some(item=>item===object);
+   if(!licensed)throw new Error(`Haal pair ${key} names an object its event does not license.`);
+  }else throw new Error(`Haal pair ${key} names an unknown صاحب role.`);
+  if(pair.gender!==entry.gender||pair.number!==entry.number){
+   throw new Error(`Haal pair ${key} disagrees with its canonical agreement declaration.`);
+  }
+  if(typeof pair.sentenceEn!=='string'||!pair.sentenceEn.trim()){
+   throw new Error(`Haal pair ${key} carries no canonical English.`);
+  }
+ });
+}
+verifyHaalRegistry();
+
 const grammarSpec=(type,role,extra={})=>({type,role,...extra});
 const AR={
  mubtada:(w)=>grammarSpec('noun','mubtada'),
@@ -7613,6 +7741,7 @@ const AR={
  atf:w=>grammarSpec('noun','atf'),
  tawkid:w=>grammarSpec('noun','tawkid'),
  badal:w=>grammarSpec('noun','badal'),
+ haal:w=>grammarSpec('noun',HAAL_ROLE),
  atfParticle:record=>grammarSpec('particle','particle',{particleType:record.particleType,particleWord:record.surface})
 };
 const EN={mubtada:'',khabar:'',object:'',prep:'',majrur:'',mudaf:'',mudafIlayh:'',present:'',fiveVerb:'',fiveNoun:''};
@@ -8090,6 +8219,56 @@ function canonicalMafulFihTranslation(data){
  if(!authority.authorized||!authority.pairKey)return null;
  return MAFUL_FIH_PAIR_REGISTRY[authority.pairKey].sentenceEn;
 }
+function haalTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.haalPairKeys?.length?template:null;
+}
+/* Exact template/pair proof. The صاحب position comes from the frozen pair's role, never from a
+   nearest-noun scan, and the event is the pair's first token in its exact registered structure. */
+function haalPairAt(data,index){
+ const template=haalTemplateRecord(data),tokens=data?.tokens,haal=Array.isArray(tokens)?tokens[index]:null;
+ if(!template||!haal||haal.grammar?.type!=='noun'||haal.grammar.role!==HAAL_ROLE)return null;
+ for(const key of template.haalPairKeys){
+  const pair=HAAL_PAIR_REGISTRY[key],entry=pair&&HAAL_LEXEMES[pair.haalKey];
+  if(!pair||!entry)continue;
+  const hasObject=pair.ownerRole===HAAL_OWNER_ROLES.object;
+  if(tokens.length!==(hasObject?4:3)||index!==tokens.length-1)continue;
+  const verb=tokens[0],subject=tokens[1],object=hasObject?tokens[2]:null;
+  const registeredVerb=haalVerb(pair.verb),registeredSubject=haalNoun('singularPeople',pair.subjectEn);
+  const registeredObject=hasObject?haalNoun('singularThings',pair.objectEn):null;
+  if(verb.grammar?.type!=='verb'||verb.tense!=='past'||verb.word!==registeredVerb.past||verb.surfaceHint!==registeredVerb.past)continue;
+  if(subject.grammar?.role!=='faail'||subject.word!==registeredSubject.nom||subject.surfaceHint!==registeredSubject.nom)continue;
+  if(hasObject&&(object.grammar?.role!=='object'||object.word!==registeredObject.acc||object.surfaceHint!==registeredObject.acc))continue;
+  if(haal.word!==entry.lexeme.acc||haal.surfaceHint!==entry.lexeme.acc)continue;
+  const sahib=hasObject?object:subject;
+  return{key,pair,haalEntry:entry,verb,subject,object,sahib,haal};
+ }
+ return null;
+}
+function deriveHaalAuthority(data,index){
+ const token=Array.isArray(data?.tokens)?data.tokens[index]:null;
+ if(!token||token.grammar?.type!=='noun'||token.grammar.role!==HAAL_ROLE){
+  return Object.freeze({authorized:false,reason:'not-a-haal-token'});
+ }
+ const found=haalPairAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
+ if(token.state&&token.state!=='nasb')return Object.freeze({authorized:false,reason:'haal-not-nasb'});
+ if(token.inflection&&token.inflection!==found.haalEntry.inflection){
+  return Object.freeze({authorized:false,reason:'haal-inflection-mismatch'});
+ }
+ if(found.sahib.state&&found.sahib.state!==(found.pair.ownerRole===HAAL_OWNER_ROLES.subject?'raf':'nasb')){
+  return Object.freeze({authorized:false,reason:'sahib-state-mismatch'});
+ }
+ return Object.freeze({authorized:true,reason:'',pairKey:found.key,verbId:found.verb.id,
+  verbWord:found.verb.word,sahibId:found.sahib.id,sahibWord:found.sahib.word,
+  sahibRole:found.pair.ownerRole,haalId:token.id,haalWord:token.word,
+  gender:found.pair.gender,number:found.pair.number,inflection:found.haalEntry.inflection});
+}
+function canonicalHaalTranslation(data){
+ const index=data?.tokens?.findIndex(token=>token.grammar?.role===HAAL_ROLE)??-1;
+ const authority=deriveHaalAuthority(data,index);
+ return authority.authorized?HAAL_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
+}
 function inflectNoun(token,tokens,index,data){
  const registered=nounFormIndex.get(token.surfaceHint);
  token.lexeme=registered?.lexeme||null;
@@ -8109,6 +8288,9 @@ function inflectNoun(token,tokens,index,data){
     below, so the authority checks them only when they are already present. */
  if(token.grammar.role===MAFUL_FIH_ROLE&&!deriveMafulFihAuthority(data,index).authorized){
   throw new Error(`The ẓarf is not a canonically licensed mafʿūl fīh: ${deriveMafulFihAuthority(data,index).reason}.`);
+ }
+ if(token.grammar.role===HAAL_ROLE&&!deriveHaalAuthority(data,index).authorized){
+  throw new Error(`The adjective is not a canonically licensed haal: ${deriveHaalAuthority(data,index).reason}.`);
  }
  if(roleRule.state==='inherited'){
   const followed=tokens[index-(token.grammar.role==='atf'?2:1)];
@@ -8285,6 +8467,7 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({
  verbObject:'RL_TRANSITIVE_VERB_OBJECT',
  absoluteObject:'RL_VERB_ABSOLUTE_OBJECT',
  zarf:'RL_VERB_ZARF',
+ haal:'RL_HAAL_OWNER',
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
  kana:'RL_KANA_NOUN_KHABAR',
@@ -8376,7 +8559,19 @@ function resolveRelationships(data){
   amil.relations.zarfId=item.id;
   amil.relations.zarfRelationshipId=relation.id;
   item.relations.amilId=amil.id;
-  item.relations.zarfRelationshipId=relation.id;
+ item.relations.zarfRelationshipId=relation.id;
+ });
+ tokens.forEach((item,index)=>{
+  if(item.grammar.role!==HAAL_ROLE)return;
+  const authority=deriveHaalAuthority(data,index);
+  if(!authority.authorized)return;
+  const verb=tokens.find(candidate=>candidate.id===authority.verbId);
+  const sahib=tokens.find(candidate=>candidate.id===authority.sahibId);
+  const relation=addRelationship(data,'haal',{verbId:verb.id,sahibId:sahib.id,haalId:item.id,
+   pairKey:authority.pairKey,sahibRole:authority.sahibRole,gender:authority.gender,number:authority.number});
+  verb.relations.haalId=item.id;verb.relations.haalRelationshipId=relation.id;
+  sahib.relations.haalId=item.id;sahib.relations.haalRelationshipId=relation.id;
+  item.relations.amilId=verb.id;item.relations.sahibId=sahib.id;item.relations.haalRelationshipId=relation.id;
  });
  tokens.forEach((item,index)=>{
   if(item.grammar.role!=='mafulMutlaq')return;
@@ -8511,6 +8706,7 @@ function nounRoleArabic(token){
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl fīh: ${authority.reason}`);
   return`مَفْعُولٌ فِيهِ ${MAFUL_FIH_KIND_LABELS[authority.kind].ar} مَنْصُوبٌ`;
  }
+ if(role===HAAL_ROLE)return'حَالٌ مَنْصُوبٌ';
  throw new Error(`Unknown noun role: ${role}`);
 }
 function renderNounAnalysis(token){
@@ -8536,6 +8732,11 @@ function renderNounAnalysis(token){
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl fīh: ${authority.reason}`);
   const kind=MAFUL_FIH_KIND_LABELS[authority.kind];
   english=`A mafʿūl fīh: a ${kind.en} that ${kind.clauseEn}, accusative with the meaning of «fī».`;
+ }
+ if(token.grammar.role===HAAL_ROLE){
+  const data=token._data,authority=deriveHaalAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized haal: ${authority.reason}`);
+  english=`A haal describing the condition of ${authority.sahibWord} at the time of ${authority.verbWord}; accusative.`;
  }
  if(token.grammar.role==='tawkid'){
   const data=token._data,authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
@@ -8711,6 +8912,17 @@ function mafulFihWhyAuthority(token,data){
  const authority=deriveMafulFihAuthority(data,data?.tokens?.indexOf(token));
  if(!authority.authorized)throw new Error(`WHY: the mafʿūl fīh is not authorized (${authority.reason}).`);
  return authority;
+}
+function haalWhyAuthority(token,data){
+ const authority=deriveHaalAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`WHY: the haal is not authorized (${authority.reason}).`);
+ return authority;
+}
+function whyHaalConditions(token,data){
+ const authority=haalWhyAuthority(token,data);
+ return{id:'WHY_HAAL_DEFINITENESS',
+  ar:`وَ${wq(authority.sahibWord)} مَعْرِفَةٌ، وَ${wq(token.word)} نَكِرَةٌ جَاءَتْ بَعْدَ تَمَامِ الْكَلَامِ.` ,
+  en:`Its صاحب ${eq(authority.sahibWord)} is definite, and ${eq(token.word)} is indefinite after a complete clause.`};
 }
 /* One line, and which line it is depends on what the source actually says about this word. For a
    place ẓarf that line is load-bearing — p. 151 lets only the مبهم be manṣūb — so it states the
@@ -8889,6 +9101,11 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_BADAL_INHERITED',
   stateAr:t=>`وَالْبَدَلُ يَتْبَعُ الْمُبْدَلَ مِنْهُ فِي جَمِيعِ إِعْرَابِهِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A badal follows its mubdal minhu in all of its iʿrāb, so this one is ${stateArabic(t.state)} like it.`},
+ haal:{
+  id:()=>'WHY_ROLE_HAAL',
+  ar:(t,data)=>`${wq(t.word)} بَيَّنَ هَيْئَةَ ${wq(haalWhyAuthority(t,data).sahibWord)} وَقْتَ وُقُوعِ ${wq(haalWhyAuthority(t,data).verbWord)}، فَهُوَ حَالٌ.`,
+  en:(t,data)=>`${eq(t.word)} describes the temporary condition of ${eq(haalWhyAuthority(t,data).sahibWord)} when ${eq(haalWhyAuthority(t,data).verbWord)} occurred, so it is a حَالٌ.`,
+  stateId:()=>'WHY_STATE_HAAL',stateAr:()=>'وَالْحَالُ مَنْصُوبٌ.',stateEn:()=>'The حَالٌ is مَنْصُوبٌ.'},
  adverb:{
   id:(t,data)=>`WHY_ROLE_MAFUL_FIH_${mafulFihWhyAuthority(t,data).kind.toUpperCase()}`,
   ar:(t,data)=>{
@@ -9109,6 +9326,9 @@ function buildTokenWhy(token,data){
   if(token.grammar.role===MAFUL_FIH_ROLE){
    push(whyMafulFihSense(token,data));
   }
+  if(token.grammar.role===HAAL_ROLE){
+   push(whyHaalConditions(token,data));
+  }
   // The five nouns carry their muḍāf ilayh as an attached kāf, so the generic “joined to what
   // follows it” wording would be wrong for them; the engine already flags this via attachedKaf.
   if(token.grammar.isMudaf)push(token.grammar.attachedKaf
@@ -9206,6 +9426,16 @@ function buildRelationshipWhy(rel,data){
    en:`${eq(verb.word)} is the ʿāmil and ${eq(masdar.word)} is its own maṣdar, ${purpose.clauseEn}, so the verb makes it accusative as its mafʿūl muṭlaq.`});
   return{ids,ar,en};
  }
+ if(rel.type==='haal'){
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const sahib=data.tokens.find(item=>item.id===rel.sahibId);
+  const haal=data.tokens.find(item=>item.id===rel.haalId);
+  if(!verb||!sahib||!haal)return{ids,ar,en};
+  push({id:'WHY_REL_HAAL_OWNER',
+   ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(sahib.word)} صَاحِبُ الْحَالِ، وَ${wq(haal.word)} بَيَّنَ هَيْئَتَهُ وَقْتَ الْفِعْلِ فَنَصَبَهُ الْعَامِلُ.`,
+   en:`${eq(verb.word)} is the ʿāmil, ${eq(sahib.word)} is the صاحب الحال, and ${eq(haal.word)} describes that owner's condition during the event, so the ʿāmil makes it accusative.`});
+  return{ids,ar,en};
+ }
  if(rel.type==='concealedAn'){
   const construction=CONCEALED_AN_CONSTRUCTIONS[rel.construction];
   const mode=CONCEALED_AN_MODES[rel.mode];
@@ -9298,6 +9528,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='haal'){
+   const recipient=data.tokens.find(item=>item.id===rel.haalId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='follower'){
    const recipient=data.tokens.find(item=>item.id===rel.followedId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -9328,6 +9563,16 @@ function renderRelationshipAnalysis(data){
   zarf.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: عَامِلٌ وَ${kind.ar} مَنْصُوبٌ عَلَى الظَّرْفِيَّةِ بِتَقْدِيرِ «فِي».`;
   zarf.phraseEn=`Together, “${phrase}” is an ʿāmil with a ${kind.en} accusative on ẓarfiyyah, carrying the meaning of «fī».`;
   zarf.phraseLabel='Ẓarf construction';
+ });
+ data.relationships.filter(rel=>rel.type==='haal').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const sahib=data.tokens.find(item=>item.id===rel.sahibId);
+  const haal=data.tokens.find(item=>item.id===rel.haalId);
+  if(!verb||!sahib||!haal)return;
+  const phrase=`${verb.word} ${sahib.word} ${haal.word}`;
+  haal.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: عَامِلٌ وَصَاحِبُ حَالٍ مَعْرِفَةٌ وَحَالٌ نَكِرَةٌ مَنْصُوبَةٌ تُبَيِّنُ هَيْئَتَهُ وَقْتَ الْفِعْلِ.`;
+  haal.phraseEn=`Together, “${phrase}” has an ʿāmil, a definite صاحب الحال, and an indefinite accusative haal describing that owner's condition during the event.`;
+  haal.phraseLabel='Haal construction';
  });
  data.relationships.filter(rel=>rel.type==='absoluteObject').forEach(rel=>{
   const verb=data.tokens.find(item=>item.id===rel.verbId);
@@ -9624,7 +9869,12 @@ function validateExercise(data){
     const authority=deriveMafulFihAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_MAFUL_FIH_AUTHORITY',`Mafʿūl-fīh authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_ZARF_NASB')fail('E_MAFUL_FIH_RULE','The mafʿūl fīh is not bound to its source rule.',token);
-    if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mafulFih requires nasb, not ${token.state}.`,token);
+   if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mafulFih requires nasb, not ${token.state}.`,token);
+   }else if(token.grammar.role===HAAL_ROLE){
+    const authority=deriveHaalAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_HAAL_AUTHORITY',`Haal authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_HAAL_NASB')fail('E_HAAL_RULE','The haal is not bound to its source rule.',token);
+    if(token.state!=='nasb')fail('E_ROLE_CASE',`Role haal requires nasb, not ${token.state}.`,token);
    }else if(token.grammar.role==='mafulMutlaq'){
     /* Unlike the followers, this role's state is fixed by the rule table rather than inherited,
        so the state is checked here too — the authority proving the construction does not by
@@ -9876,6 +10126,11 @@ function validateExercise(data){
   if(token.grammar.role==='faail'&&(!token.relations.verbId||!relationships.some(rel=>rel.type==='verbSubject'&&rel.subjectId===token.id&&rel.verbId===token.relations.verbId)))fail('E_ORPHAN_SUBJECT','Explicit subject is not linked to a verb.',token);
   if(token.grammar.role==='naibFail'&&(!token.relations.passiveVerbId||!relationships.some(rel=>rel.type==='passiveDeputy'&&rel.deputyId===token.id&&rel.verbId===token.relations.passiveVerbId)))fail('E_ORPHAN_NAIB_FAIL','Deputy subject is not linked to its passive verb.',token);
   if(token.grammar.role==='mafulMutlaq'&&(!token.relations.amilId||!relationships.some(rel=>rel.type==='absoluteObject'&&rel.masdarId===token.id&&rel.verbId===token.relations.amilId)))fail('E_ORPHAN_MAFUL_MUTLAQ','Absolute object is not linked to the ʿāmil that makes it accusative.',token);
+  if(token.grammar.role===HAAL_ROLE&&(!token.relations.amilId||!token.relations.sahibId
+    ||!relationships.some(rel=>rel.type==='haal'&&rel.haalId===token.id
+      &&rel.verbId===token.relations.amilId&&rel.sahibId===token.relations.sahibId))){
+   fail('E_ORPHAN_HAAL','Haal is not linked to both its ʿāmil and its صاحب.',token);
+  }
   if(token.grammar.role==='majrur'){
    const preposition=token.relations.governorId&&tokenById.get(token.relations.governorId);
    if(!preposition||!relationships.some(rel=>rel.type==='preposition'&&rel.nounId===token.id&&rel.governorId===preposition.id))fail('E_ORPHAN_MAJRUR','Genitive noun is not linked to a visible preposition.',token);
@@ -9965,6 +10220,15 @@ function validateExercise(data){
     fail('E_MUTLAQ_RELATION','Absolute-object relationship is not the canonical proof.',masdar);
    }
   }
+  if(rel.type==='haal'){
+   const haal=tokenById.get(rel.haalId);
+   const authority=deriveHaalAuthority(data,data.tokens.indexOf(haal));
+   if(!authority.authorized||rel.verbId!==authority.verbId||rel.sahibId!==authority.sahibId
+     ||rel.haalId!==authority.haalId||rel.pairKey!==authority.pairKey
+     ||rel.sahibRole!==authority.sahibRole||rel.gender!==authority.gender||rel.number!==authority.number){
+    fail('E_HAAL_RELATION','Haal relationship is not the canonical event/owner proof.',haal);
+   }
+  }
   if(rel.type==='follower'){
    const follower=tokenById.get(rel.followerId);
    const authority=rel.kind===ATF_KIND?deriveAtfFollowerAuthority(data,data.tokens.indexOf(follower))
@@ -10045,6 +10309,18 @@ function validateExercise(data){
    fail('E_MAFUL_FIH_RELATION','A mafʿūl fīh whose ʿāmil is an omitted khabar may not carry a verb link.',item);
   }
   if(links.length>1)fail('E_MAFUL_FIH_RELATION_COUNT','A mafʿūl fīh may have at most one ʿāmil relationship.',item);
+ });
+ data.tokens.filter(item=>item.grammar.role===HAAL_ROLE).forEach(item=>{
+  const rel=relationships.find(candidate=>candidate.id===item.relations.haalRelationshipId&&candidate.type==='haal');
+  const amil=tokenById.get(item.relations.amilId),sahib=tokenById.get(item.relations.sahibId);
+  if(!rel||rel.haalId!==item.id||rel.verbId!==amil?.id||rel.sahibId!==sahib?.id
+    ||amil?.relations.haalId!==item.id||amil?.relations.haalRelationshipId!==rel.id
+    ||sahib?.relations.haalId!==item.id||sahib?.relations.haalRelationshipId!==rel.id){
+   fail('E_HAAL_RELATION','A haal must have exactly one reciprocal canonical link to its ʿāmil and صاحب.',item);
+  }
+  if(relationships.filter(candidate=>candidate.type==='haal'&&candidate.haalId===item.id).length!==1){
+   fail('E_HAAL_RELATION_COUNT','A haal must have exactly one event/owner relationship.',item);
+  }
  });
  data.tokens.filter(item=>item.grammar.role==='mafulMutlaq').forEach(item=>{
   const rel=relationships.find(candidate=>candidate.id===item.relations.absoluteObjectRelationshipId&&candidate.type==='absoluteObject');
@@ -10263,6 +10539,23 @@ function add(starts,form,state,sign,build,metadata={}){
    throw new Error(`Template ${stableId} produces a mafʿūl fīh without its explicit past ʿāmil.`);
   }
  }
+ /* الحال المفردة. One template owns one صاحب role and one declension lane. Mixing subject-owner
+    and object-owner pairs would make the same template ID authorize two different structures. */
+ const haalPairKeys=Object.freeze([...(metadata.haalPairKeys||[])]);
+ if(haalPairKeys.some((key,position)=>haalPairKeys.indexOf(key)!==position||!HAAL_PAIR_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered haal pair.`);
+ }
+ if(haalPairKeys.length){
+  const shapes=new Set(haalPairKeys.map(key=>{
+   const pair=HAAL_PAIR_REGISTRY[key],entry=HAAL_LEXEMES[pair.haalKey];
+   return `${pair.ownerRole}|${entry.inflection}|${pair.gender}|${pair.number}`;
+  }));
+  if(shapes.size!==1)throw new Error(`Template ${stableId} mixes haal owner roles or agreement lanes.`);
+  if(![...shapes][0].includes(`|${form}|`))throw new Error(`Template ${stableId} declares a haal of the wrong declension.`);
+  if(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
+   throw new Error(`Template ${stableId} produces a haal without its explicit past event.`);
+  }
+ }
  const conditionalGovernor=isConditionalGovernor(GRAMMAR_RULES.governors[presentGovernor]);
  if(conditionalGovernor!==Boolean(responsePairIds.length)){
   throw new Error(`Template ${stableId} must declare response pairs exactly when its governor is conditional.`);
@@ -10315,6 +10608,7 @@ function add(starts,form,state,sign,build,metadata={}){
   followerConjunctionKeys,
   mutlaqPairKeys,
   mafulFihPairKeys,
+  haalPairKeys,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -11249,6 +11543,34 @@ add('verb','singular','nasb','fatha',()=>pickedMafulFih(MAFUL_FIH_TIME_MUDAF_KEY
  mafulFihMetadata(MAFUL_FIH_TIME_MUDAF_KEYS));
 add('verb','singular','nasb','fatha',()=>pickedMafulFih(MAFUL_FIH_PLACE_KEYS,'maful-fih-place'),
  mafulFihMetadata(MAFUL_FIH_PLACE_KEYS));
+
+/* الحال المفردة — the pair chooses every semantic participant. The builder only resolves those
+   declarations back to canonical records; it never chooses an adjective independently. */
+function buildHaalExercise(pairKey){
+ const pair=HAAL_PAIR_REGISTRY[pairKey],entry=pair&&HAAL_LEXEMES[pair.haalKey];
+ if(!pair||!entry)throw new Error(`Unknown productive haal pair: ${pairKey}`);
+ const verb=haalVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
+ const subject=haalNoun('singularPeople',pair.subjectEn);
+ if(registeredVerb?.form!=='past')throw new Error(`Haal pair ${pairKey} names an unregistered event.`);
+ const tokens=[
+  token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),'A past-tense event with an explicit subject.'),
+  token(subject.nom,subject.en,AR.faail(subject.nom),'The explicit subject of the event.')
+ ];
+ if(pair.ownerRole===HAAL_OWNER_ROLES.object){
+  const object=haalNoun('singularThings',pair.objectEn);
+  tokens.push(token(object.acc,object.en,AR.object(object.acc),EN.object));
+ }
+ tokens.push(token(entry.lexeme.acc,entry.lexeme.en,AR.haal(entry.lexeme.acc),
+  'An indefinite adjective describing the صاحب الحال during the event.',true));
+ return{sentence:'',translation:pair.sentenceEn,tokens};
+}
+const haalKeys=ownerRole=>Object.freeze(HAAL_ALL_PAIR_KEYS.filter(key=>HAAL_PAIR_REGISTRY[key].ownerRole===ownerRole));
+const HAAL_SUBJECT_KEYS=haalKeys(HAAL_OWNER_ROLES.subject);
+const HAAL_OBJECT_KEYS=haalKeys(HAAL_OWNER_ROLES.object);
+const haalMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),haalPairKeys:keys});
+const pickedHaal=(keys,label)=>buildHaalExercise(pickVaried(keys,label,String));
+add('verb','singular','nasb','fatha',()=>pickedHaal(HAAL_SUBJECT_KEYS,'haal-subject'),haalMetadata(HAAL_SUBJECT_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedHaal(HAAL_OBJECT_KEYS,'haal-object'),haalMetadata(HAAL_OBJECT_KEYS));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

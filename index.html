@@ -1126,6 +1126,15 @@ function resolveCanonicalTokenGloss(data,token,index){
   const fixed=GLOSS_FIXED_TOKENS[surface];
   if(fixed.type===type)return fixed.en;
  }
+ /* 4b — كَانَ وَأَخَوَاتُهَا, resolved through the family registry exactly as إِنَّ's sisters are
+    through theirs. Deliberately AFTER the fixed table rather than before it: كَانَ is one of that
+    table's eight surfaces and keeps resolving there, so this step changes nothing for the member the
+    app already produced and only answers for the sisters added beside it. The two agree on كَانَ,
+    and a test asserts that they do rather than leaving it to inspection. */
+ if(type==='verb'&&token.tense==='kana'){
+  const sister=kanaSisterRecord(surface);
+  return sister?sister.en:null;
+ }
  /* 5 — an object noun, resolved through its GOVERNING VERB rather than through its surface.
     Two vocabulary records can share one accusative surface with different English, so a bare
     surface lookup would have to choose between them. The verb that governs the object is what
@@ -3195,8 +3204,60 @@ const innaSisters=[
  {ar:'إِنَّ',gloss:'indeed',meaning:'Indeed,',iraab:'حَرْفُ تَوْكِيدٍ وَنَصْبٍ'},
  {ar:'لَكِنَّ',gloss:'but',meaning:'But',iraab:'حَرْفُ اسْتِدْرَاكٍ وَنَصْبٍ'},
  {ar:'لَعَلَّ',gloss:'perhaps',meaning:'Perhaps',iraab:'حَرْفُ تَرَجٍّ وَتَوَقُّعٍ وَنَصْبٍ'},
- {ar:'لَيْتَ',gloss:'if only',meaning:'If only',iraab:'حَرْفُ تَمَنٍّ وَنَصْبٍ'}
+ {ar:'لَيْتَ',gloss:'if only',meaning:'If only',iraab:'حَرْفُ تَمَنٍّ وَنَصْبٍ'},
+ /* Phase QP1 — كَأَنَّ. Al-Tuḥfah pp. 109–110 lists exactly six sisters; this is the fifth the app
+    produces. It heads a sentence perfectly well — «كَأَنَّ زَيْدًا أَسَدٌ» is the source's own shape —
+    so unlike أَنَّ it needs nothing but this record: the gloss authority resolves inna particles
+    through this list, the composer's innaLead slot reads `meaning` from it, and all six noun-class
+    templates draw from it, so one line reaches every class and sign with no new template, key or
+    shape. Its identity clause is تَشْبِيه, not تَوْكِيد.
+
+    أَنَّ is the sixth and is deliberately NOT here. The reason is structural, not grammatical:
+    أَنَّ لَا يُبْتَدَأُ بِهَا, so «أَنَّ الطَّالِبَ مُجْتَهِدٌ» is a fragment in Arabic exactly as
+    "That the student is hardworking." is one in English. Producing it honestly needs a governing
+    frame — a verb whose مفعول به is the أَنَّ clause, in محل نصب — which is a new sentence structure
+    and a maḥall claim needing its own page, not a registration. It waits for that frame rather than
+    shipping a fragment to a learner. */
+ {ar:'كَأَنَّ',gloss:'as if',meaning:'It is as if',iraab:'حَرْفُ تَشْبِيهٍ وَنَصْبٍ'}
 ];
+/* كَانَ وَأَخَوَاتُهَا — Al-Tuḥfah pp. 106–108: أَفْعَالٌ نَاقِصَةٌ تَرْفَعُ الِاسْمَ وَتَنْصِبُ
+   الْخَبَرَ. The page enumerates the full family — كَانَ، أَمْسَى، أَصْبَحَ، أَضْحَى، ظَلَّ، بَاتَ،
+   صَارَ، لَيْسَ، مَا زَالَ، مَا انْفَكَّ، مَا فَتِئَ، مَا بَرِحَ، مَا دَامَ — and pp. 107–108 attach
+   the operating conditions. This registry holds the members the app can produce TRUTHFULLY today;
+   the rest are named here with the reason they wait, so the gap is a fact a reader can check rather
+   than a silence.
+
+   PRODUCED — single-word past operators whose fatḥ is VISIBLE and whose government is
+   unconditional, so the existing «فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ» analysis is exactly
+   true of them and nothing else has to be built.
+
+   NOT PRODUCED, and why:
+     • أَمْسَى، أَضْحَى — both end in ألف مقصورة, so their fatḥ is مُقَدَّر, not ظاهر. Rendering them
+       with the visible-fatḥ clause above would be false, and a correct estimated-fatḥ bināʾ is the
+       category GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated already excludes as
+       "weak-final estimated signs". It needs its own page and its own render branch.
+     • مَا زَالَ، مَا انْفَكَّ، مَا فَتِئَ، مَا بَرِحَ، مَا دَامَ — these operate only with the
+       preceding مَا (نافية for the four, مَصْدَرِيَّة ظَرْفِيَّة for دَامَ), so the bare verb may not be
+       produced as though it governed unconditionally. Producing them properly means TWO tokens —
+       مَا with its own analysis, then the verb — because «مَا زَالَ» carrying one verb's iʿrāb would
+       attribute فِعْلٌ مَاضٍ نَاقِصٌ to مَا as well, which is untrue. This app has no مَا particle
+       type and no registered page analysing مَا النافية or مَا المصدرية الظرفية in its own right, and
+       a four-token structure is a new composer key besides. Both are additions, not registrations. */
+const kanaSisters=[
+ {ar:'كَانَ',en:'was'},
+ {ar:'أَصْبَحَ',en:'became'},
+ {ar:'صَارَ',en:'came to be'},
+ {ar:'ظَلَّ',en:'remained'},
+ {ar:'بَاتَ',en:'spent the night being'},
+ {ar:'لَيْسَ',en:'is not'}
+];
+const KANA_SURFACES=Object.freeze(kanaSisters.map(item=>item.ar));
+/* The bare verbs whose ناقص operation is CONDITIONAL. Named so the tests can assert the app never
+   produces them as unconditional operators, rather than merely failing to mention them. */
+const KANA_CONDITIONAL_BARE=Object.freeze(['زَالَ','انْفَكَّ','فَتِئَ','بَرِحَ','دَامَ']);
+function kanaSisterRecord(surface){
+ return kanaSisters.find(item=>item.ar===surface)||null;
+}
 const singularPredicates=[...adjectives];
 const dualPredicates=[
  {nom:'حَاضِرَانِ',en:'present'},{nom:'مُجْتَهِدَانِ',en:'hardworking'},
@@ -3349,6 +3410,7 @@ function pickGeneralObject(verb,excludeNoun){
 function pickPerson(){return pickVaried(singularPeople,'people',n=>n.nom)}
 function pickPlace(){return pickVaried(places,'places',n=>n.nom)}
 function pickInna(){return pickVaried(innaSisters,'particles',p=>p.ar)}
+function pickKana(){return pickVaried(kanaSisters,'kana-sisters',p=>p.ar)}
 function innaCopula(particle,plural){return particle.ar==='لَيْتَ'?'were':(plural?'are':'is')}
 function pickHumanAction(){return pickVaried(humanActions,'human-actions',a=>a.pres)}
 function pickHumanPrepAction(){return pickVaried(humanPrepActions,'human-prep-actions',a=>`${a.pres}:${a.prep}`)}
@@ -6071,8 +6133,11 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_MUDAF_ILAYH:sourceRule('A muḍāf ilayh is khafḍ by iḍāfah.',[174,175,177,178],'The immediately following second noun, or an attached pronoun, completes the iḍāfah.'),
  R_ISM_INNA_NASB:sourceRule('Inna and its sisters make their noun accusative.',[105,109,110],'Only the four explicitly generated sisters and a visible single noun.'),
  R_KHABAR_INNA_RAF:sourceRule('Inna and its sisters make their khabar nominative.',[105,109,110],'Only a visible single-word khabar in the generated templates.'),
- R_ISM_KANA_RAF:sourceRule('Kāna raises its noun.',[105,106],'Only kāna with a visible single noun.' ,[IA_KANA]),
- R_KHABAR_KANA_NASB:sourceRule('Kāna makes its khabar accusative.',[105,106],'Only kāna with a visible single-word khabar.',[IA_KANA]),
+ /* Phase QP1 — the claim was always about كان وأخواتها as a class; only the app's generated scope was
+    narrower. pp. 106–108 enumerate the family and attach its operating conditions, so the pages
+    widen with the scope and the claim sentence is unchanged. */
+ R_ISM_KANA_RAF:sourceRule('Kāna and its sisters raise their noun.',[105,106,107,108],'Only a visible single noun after one of the registered unconditional operators: كَانَ, أَصْبَحَ, صَارَ, ظَلَّ, بَاتَ, لَيْسَ. The conditional operators (مَا زَالَ, مَا انْفَكَّ, مَا فَتِئَ, مَا بَرِحَ, مَا دَامَ) and the weak-final أَمْسَى / أَضْحَى are not produced.' ,[IA_KANA]),
+ R_KHABAR_KANA_NASB:sourceRule('Kāna and its sisters make their khabar accusative.',[105,106,107,108],'Only a visible single-word khabar after one of the registered unconditional operators: كَانَ, أَصْبَحَ, صَارَ, ظَلَّ, بَاتَ, لَيْسَ.',[IA_KANA]),
  R_ZARF_NASB:sourceRule('A time/place adverb used as mafʿūl fīh is accusative.',[148,149,151,152,153],'Only verified adverb lexemes used with a meaning of fī.'),
 
  R_SINGULAR_RAF_DAMMA:sourceRule('Visible ḍammah raises a regular singular noun.',[26],'Only nouns whose ending accepts a visible ḍammah.'),
@@ -6156,7 +6221,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_PRESENT_NUUN_NISWAH_MAHALL_NASB_KAY:sourceRule('A present verb built on sukūn for nūn al-niswah is in the position of naṣb when immediately governed by كَيْ whose lām al-taʿlīl is explicitly present.',[42,73,76,124],'Composed authority, page by page: p. 42 states the maḥall rule for a present verb preceded by a nāṣib and attached to nūn al-niswah, illustrating it with لَنْ and containing no كَيْ example; p. 76 states that كَيْ makes the present verb manṣūb by itself when لام التعليل precedes it لفظاً, placing it in that same class; pp. 73 and 124 state and apply the bināʾ on sukūn. Production is limited to canonical كَيْ immediately preceded by an explicit لام التعليل token and immediately preceding an explicitly registered 3fp/2fp nūn-al-niswah present form whose formClass is mabniPresent, endingClass nuun-niswah, binaaClass sukun-nuun-niswah, with empty state and null sign. It authorizes the naṣb maḥall alone: not the bināʾ, not the nūn component, not bare كَيْ, not the estimated (تقديراً) lām, not كَيْ as a mere حرف تعليل under a concealed أَنْ, not أَنْ, not لَنْ, not لَمْ, not an ungoverned form, not an ordinary present, not a five verb, and not nūn al-tawkīd. The surface does not change and no iʿrāb sign is introduced.'),
  C_YAA_MUKHATABA:sourceRule('Yāʾ al-mukhāṭabah is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[38],'Only an explicitly registered surface-unambiguous 2fs present five-verb form in rafʿ.'),
  C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from the original wāw; it has no grammatical role and no place in iʿrāb.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[91],'Al Jazeera Learning Arabic («الألف الفارقة») names the rule and gives كَتَبُوا / لم يكتُبُوا / اكْتُبُوا. Workspace scan separately attests the written spelling «ضَرَبُوا» (p.91) as form-only; that attestation does not authorize this rule.'),
- R_KANA_PAST_DEFICIENT:sourceRule('Kāna is a deficient past verb that raises its noun and makes its khabar accusative.',[105,106],'Only the surface كَانَ and the app’s single-noun/single-khabar template.',[IA_KANA]),
+ R_KANA_PAST_DEFICIENT:sourceRule('Kāna and its sisters are deficient past verbs that raise their noun and make their khabar accusative.',[105,106,107,108],'Only the registered unconditional family surfaces — كَانَ, أَصْبَحَ, صَارَ, ظَلَّ, بَاتَ, لَيْسَ — each built on a VISIBLE fatḥah, with the app’s single-noun/single-khabar template. It does not cover the conditional operators, whose مَا is a separate word carrying its own analysis, nor the weak-final أَمْسَى / أَضْحَى, whose fatḥ is estimated.',[IA_KANA]),
 
  G_LAN_NASB:sourceRule('Lan is a particle of negation, naṣb, and future meaning.',[73,74],'It must be immediately followed by the present verb it governs.'),
  /* Phase 3A1 — أَنْ. Al-Tuḥfah p. 75 lists it first among «القسم الأول ـ وهو الذي يَنصُب الفعل
@@ -6210,7 +6275,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  G_IDHAN_NASB:sourceRule('Idhan is a particle of answer, recompense, and naṣb that makes the present verb after it manṣūb by itself.',[75],'Only canonical إِذَنْ standing at the head of the answer sentence and immediately preceding the muʿrab present verb it governs, where that verb denotes the future and nothing whatever separates them. Two muʿrab lanes are produced: an ordinary sound-final present verb (3ms) and a five-verb form (3mp). It authorizes the particle analysis and its direct government alone — that means the naṣb STATE, never the naṣb sign, which is R_MUDARI_NASB_FATHA for the ordinary lane and R_AFAL5_NASB_DELETE_NUN for the five verbs and follows the verb’s own morphology. It may never be relied on without R_IDHAN_CONDITIONS, whose three conditions are proven separately from frozen application-owned discourse authority; adjacency alone never authorizes it. It does not cover a mabnī nūn-al-niswah form, any five-verb person other than 3mp, a concealed أَنْ, or any of the three separators the source permits (القسم، النداء، «لا» النافية), none of which is implemented, and it may never be used as a whole-word maḥall rule.'),
  G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs.'),
  G_SAWFA_FUTURE:sourceRule('Sawfa marks future meaning and enters only on the present verb.',[14,15,16],'It does not change the indicative mood in the generated construction.'),
- R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'Generated set: inna, lakinna, laʿalla, layta.',[IA_INNA]),
+ R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'pp. 109–110 name six: إِنَّ, أَنَّ, كَأَنَّ, لَكِنَّ, لَيْتَ, لَعَلَّ. Generated set: inna, lakinna, laʿalla, layta, kaʾanna — five of the six. أَنَّ is excluded because it heads no sentence: it needs a governing frame this app does not yet build, and producing it bare would ship a fragment.',[IA_INNA]),
  R_PARTICLE:disabledSourceRule('Generic particle fallback','No generic particle is authorized. Every generated particle must have a specific verified rule ID.'),
 
  RL_PREPOSITION_GOVERNS_JARR:sourceRule('A preposition governs khafḍ in the immediately following noun.',[13,174,175,176,177],'The internal legacy ID says JARR; output uses Al-Tuḥfah’s term khafḍ.'),
@@ -6219,7 +6284,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
  RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
- RL_KANA_NOUN_KHABAR:sourceRule('Kāna requires a linked noun and khabar with their governed states.',[105,106],'Only complete, ordered three-token nominal structures.',[IA_KANA])
+ RL_KANA_NOUN_KHABAR:sourceRule('Kāna and its sisters require a linked noun and khabar with their governed states.',[105,106,107,108],'Only complete, ordered three-token nominal structures headed by a registered unconditional family operator.',[IA_KANA])
 });
 /* Canonical evidence is constructed once from the reviewed definitions and bound to the
    owning SOURCE_REGISTRY key. Public bibliography strings are descriptive only: neither a
@@ -6571,8 +6636,13 @@ function inflectVerb(token,tokens,index){
   return;
  }
  if(token.tense==='kana'){
+  /* Phase QP1 — the surface is RESOLVED from the frozen family registry rather than hard-coded, so
+     widening the family is a registry edit and an unregistered surface fails closed here instead of
+     being silently accepted as a deficient verb. */
+  const sister=kanaSisterRecord(token.surfaceHint||token.word);
+  if(!sister)throw new Error(`Not a registered kāna-family operator: ${token.surfaceHint||token.word}`);
   token.ruleId='R_KANA_PAST_DEFICIENT';
-  token.expectedSurface='كَانَ';
+  token.expectedSurface=sister.ar;
   token.word=token.expectedSurface;
   return;
  }
@@ -7157,7 +7227,9 @@ function buildTokenWhy(token,data){
    else throw new Error(`WHY: unknown past bināʾ class “${token.grammar.morphology?.binaaClass}”`);
    push(whyVerbSubject(token));
   }else if(token.tense==='kana'){
-   push({id:'WHY_KANA',ar:'«كَانَ» فِعْلٌ مَاضٍ نَاقِصٌ يَدْخُلُ عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَيَرْفَعُ اسْمَهُ وَيَنْصِبُ خَبَرَهُ.',en:'«كَانَ» is a deficient past verb that enters a nominal sentence: its اسْم is مَرْفُوعٌ and its خَبَر is مَنْصُوبٌ.'});
+   /* Phase QP1 — the same rule, now naming the operator actually present. The CLAIM is unchanged
+      (كان وأخواتها ترفع الاسم وتنصب الخبر), so this stays one Why rule rather than one per sister. */
+   push({id:'WHY_KANA',ar:`${wq(token.word)} فِعْلٌ مَاضٍ نَاقِصٌ يَدْخُلُ عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَيَرْفَعُ اسْمَهُ وَيَنْصِبُ خَبَرَهُ.`,en:`${eq(token.word)} is a deficient past verb that enters a nominal sentence: its اسْم is مَرْفُوعٌ and its خَبَر is مَنْصُوبٌ.`});
    push({id:'WHY_MABNI_KANA',ar:'وَهُوَ مَبْنِيٌّ عَلَى الْفَتْحِ.',en:'It is مَبْنِيٌّ on the فَتْحَة.'});
   }else if(token.inflection===MABNI_NUUN_NISWAH){
    /* Deliberately NOT whyStateVerb/whySignVerb: those claim مرفوع/منصوب/مجزوم and name an
@@ -8070,7 +8142,11 @@ add('verb','smp','raf','waw',()=>{const v=pickGeneralVerb(),p=pickVaried(smp,'ve
 add('verb','smp','nasb','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'verb-smp-objects',x=>x.acc),a=pickHumanAction();return{sentence:`${a.pres} ${s.nom} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(p.acc,p.en,AR.object(p.acc,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.object,true)]}});
 add('verb','sfp','raf','damma',()=>{const a=pickVaried(femininePastActions,'feminine-past-actions',x=>x.past),p=pickVaried(sfp,'verb-sfp-subjects',x=>x.nom);return{sentence:`${a.past} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(a.past,a.pastEn,AR.past(a.past),'A past-tense verb; the final tāʾ marks feminine gender.'),token(p.nom,p.en,AR.faail(p.nom),'The sound feminine plural subject; nominative.',true)]}},pastTemplateMetadata('3fs-explicit','explicit'));
 add('verb','fiveNouns','raf','waw',()=>{const v=pickGeneralVerb(),f=pickVaried(fiveNouns,'verb-five-noun-subjects',x=>x.nom),o=pickGeneralObject(v,f);return{sentence:`${v.past} ${f.nom} ${o.acc}`,translation:`${cap(f.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(f.nom,f.en,AR.faail(f.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}},pastTemplateMetadata('3ms','explicit'));
-add('verb','singular','nasb','fatha',()=>{const s=pickPerson(),a=pickVaried(singularPredicates,'kana-predicates',x=>x.acc);return{sentence:`كَانَ ${s.nom} ${a.acc}`,translation:`${cap(s.en)} was ${a.en}.`,tokens:[token('كَانَ','was',AR.kana('كَانَ'),'A deficient past-tense verb.'),token(s.nom,s.en,AR.ismKana(s.nom),'The noun of kāna; nominative.'),token(a.acc,a.en,AR.khabarKana(a.acc),'The khabar of kāna; accusative.',true)]}});
+/* Phase QP1 — one template, the whole family. The operator is drawn from the frozen registry through
+   the same deterministic rotation every other template uses, so every registered sister is reached
+   without adding a template; the ism's rafʿ sign and the khabar's naṣb sign come from the canonical
+   matrix exactly as they did when كَانَ was the only member. */
+add('verb','singular','nasb','fatha',()=>{const k=pickKana(),s=pickPerson(),a=pickVaried(singularPredicates,'kana-predicates',x=>x.acc);return{sentence:`${k.ar} ${s.nom} ${a.acc}`,translation:`${cap(s.en)} ${k.en} ${a.en}.`,tokens:[token(k.ar,k.en,AR.kana(k.ar),'A deficient past-tense verb.'),token(s.nom,s.en,AR.ismKana(s.nom),'The noun of kāna; nominative.'),token(a.acc,a.en,AR.khabarKana(a.acc),'The khabar of kāna; accusative.',true)]}});
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('1s'),pastTemplateMetadata('1s','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('2ms'),pastTemplateMetadata('2ms','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('2fs'),pastTemplateMetadata('2fs','attached',true));

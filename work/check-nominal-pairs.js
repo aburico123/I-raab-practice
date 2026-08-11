@@ -153,6 +153,13 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   materializeCanonicalGlosses,
   GLOSS_CLOSED_PARTICLES,
   GLOSS_FIXED_TOKENS,
+  /* Quick Pack 1 — the two nominal-operator family registries. */
+  innaSisters,
+  kanaSisters,
+  KANA_SURFACES,
+  KANA_CONDITIONAL_BARE,
+  kanaSisterRecord,
+  pickKana,
   prepActionRecord,
   isExerciseSnapshot,
   exerciseTokenSchemaFailure,
@@ -12058,6 +12065,219 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
     'an architecture-only phase moved the composer authority');
   p7Cases+=8;
 }
+
+/* ==========================================================================
+   MARFŪʿĀT QUICK PACK 1 — كان وأخواتها and إن وأخواتها.
+
+   Both families were already architecturally complete; only their membership was narrow. These
+   checks prove the widening is real — every registered operator is actually reachable and governs
+   correctly — and that it stops exactly where the source stops being producible truthfully.
+   ========================================================================== */
+let q1Cases=0,q1Attacks=0;
+{
+  const template=api.templates.find(t=>t.stableId==='T_VERB_SINGULAR_NASB_FATHA_02');
+  assert(template,'the kāna template is missing');
+
+  const surfaces=api.KANA_SURFACES;
+  assert(surfaces.length===6,'the kāna family holds '+surfaces.length+' operators, not 6');
+  assert(api.kanaSisters.every(s=>typeof s.ar==='string'&&s.ar&&typeof s.en==='string'&&s.en),
+    'a kāna record is missing its surface or its English');
+  assert(new Set(surfaces).size===surfaces.length,'the kāna family repeats a surface');
+  /* Every expectation below is derived from the app or written in ASCII. Arabic is deliberately NOT
+     hand-typed in this file: an invisible vocalisation difference between a literal here and the
+     registry would fail loudly at best and pass vacuously at worst. Records are located by their
+     English, which is ASCII and unique. */
+  const alifMaqsura=String.fromCharCode(0x0649);
+  const byEn=en=>api.kanaSisters.find(s=>s.en===en)||null;
+  const KANA_ENGLISH=['was','became','came to be','remained','spent the night being','is not'];
+  assert(KANA_ENGLISH.every(en=>byEn(en)),'a kāna operator lost its expected English: '
+    +KANA_ENGLISH.filter(en=>!byEn(en)).join(', '));
+  assert(api.kanaSisters.length===KANA_ENGLISH.length,'the kāna family English set drifted');
+  /* The conditional operators may not be produced BARE: their ناقص government depends on a preceding
+     مَا this app cannot yet analyse as its own token, so a bare verb would claim an unconditional
+     government the source does not give it. Nor may the مَا-prefixed string be one token, which would
+     attribute فِعْلٌ مَاضٍ نَاقِصٌ to مَا as well. */
+  for(const bare of api.KANA_CONDITIONAL_BARE){
+    assert(!surfaces.includes(bare),'the conditional operator '+bare+' is produced bare');
+    assert(!api.kanaSisterRecord(bare),'the conditional operator '+bare+' resolves as a family record');
+    q1Attacks++;
+  }
+  /* A مَا-prefixed operator would be a TWO-WORD surface, so no produced operator may contain a
+     space — that rules out مَا زَالَ and its four companions structurally rather than by listing
+     them. And a weak-final operator ends in ألف مقصورة (U+0649), whose fatḥ is estimated, so no
+     produced surface may end in it: that rules out أَمْسَى and أَضْحَى the same structural way. */
+  for(const s of surfaces){
+    assert(!/\s/.test(s),'a multi-word (مَا-prefixed) operator entered production: '+s);
+    assert(!s.endsWith(alifMaqsura),'a weak-final operator entered production: '+s);
+    q1Attacks+=2;
+  }
+  assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.some(x=>/weak-final estimated signs/.test(x)),
+    'the weak-final policy that keeps أَمْسَى / أَضْحَى out was removed');
+  q1Cases+=5;
+
+  const seen=new Map();
+  let kanaTail=null;
+  for(let attempt=0;attempt<80&&seen.size<surfaces.length;attempt++){
+    const data=api.buildTemplate(template.id);
+    const [verb,ism,khabar]=data.tokens;
+    assert(data.tokens.length===3,'a kāna exercise is not three tokens');
+    assert(verb.tense==='kana','the kāna-family head is not a deficient verb');
+    assert(surfaces.includes(verb.word),'an unregistered operator was produced: '+verb.word);
+    assert(verb.ruleId==='R_KANA_PAST_DEFICIENT','the operator does not cite its own rule');
+    // ترفع الاسم وتنصب الخبر — the whole claim of the chapter, asserted on every build.
+    assert(ism.grammar.role==='ismKana'&&ism.state==='raf','the ism of '+verb.word+' is not مرفوع');
+    assert(ism.ruleId==='R_ISM_KANA_RAF','the ism does not cite R_ISM_KANA_RAF');
+    assert(khabar.grammar.role==='khabarKana'&&khabar.state==='nasb','the khabar of '+verb.word+' is not منصوب');
+    assert(khabar.ruleId==='R_KHABAR_KANA_NASB','the khabar does not cite R_KHABAR_KANA_NASB');
+    // Signs come from the canonical matrix, not from anything this pack added.
+    assert(api.safeSignId(ism.sign)===api.GRAMMAR_RULES.nounInflection.singular.raf[0],
+      'the ism sign is not the canonical singular rafʿ sign');
+    assert(api.safeSignId(khabar.sign)===api.GRAMMAR_RULES.nounInflection.singular.nasb[0],
+      'the khabar sign is not the canonical singular naṣb sign');
+    /* The deficient-verb wording is taken from the APP, not hand-typed here: every operator must
+       render its own surface followed by the identical tail, so a sister that drifted into its own
+       phrasing fails even though no Arabic appears in this file. */
+    assert(verb.ar.startsWith(verb.word+':'),'the operator iʿrāb does not open with its own surface: '+verb.ar);
+    const tail=verb.ar.slice(verb.word.length);
+    if(kanaTail===null)kanaTail=tail;
+    else assert(tail===kanaTail,'the operator '+verb.word+' renders a different deficient-verb clause: '+verb.ar);
+    assert(verb.why.ids.includes('WHY_KANA')&&verb.why.ar.some(line=>line.includes(verb.word)),
+      'the Why line does not name the operator actually present');
+    assert(api.composeCanonicalTranslation(data)===data.translation,'kāna builder ≠ composer for '+verb.word);
+    assert(api.validateExercise(clone(data)).length===0,'a kāna exercise does not validate: '+verb.word);
+    if(!seen.has(verb.word))seen.set(verb.word,data);
+    q1Cases+=6;
+  }
+  assert(seen.size===surfaces.length,'only '+seen.size+' of '+surfaces.length+' kāna operators were reached');
+  for(const s of surfaces)assert(seen.has(s),'kāna operator never produced: '+s);
+  assert(api.GLOSS_FIXED_TOKENS['كَانَ'].en===api.kanaSisterRecord('كَانَ').en,
+    'the fixed gloss table and the kāna registry disagree about كَانَ');
+  assert(Object.keys(api.GLOSS_FIXED_TOKENS).length===8,'the fixed gloss table grew');
+  q1Cases+=3;
+
+  /* An unregistered surface fails closed. The registry lookup is the gate configureVerb consults,
+     and the History block below drives the same surface through the public restore path, so the
+     property is checked at both the lookup and the boundary that a learner could actually reach. */
+  assert(api.kanaSisterRecord('نَامَ')===null&&api.kanaSisterRecord('')===null
+    &&api.kanaSisterRecord('toString')===null&&api.kanaSisterRecord(undefined)===null,
+    'the kāna family lookup admitted an unregistered surface');
+  q1Attacks++;
+
+  // History: a representative new member round-trips; semantic forgery still rejects.
+  {
+    const notRecord=byEn('is not');
+    const data=(notRecord&&seen.get(notRecord.ar))||seen.values().next().value;
+    const snapshot=api.createExerciseSnapshot(data);
+    assert(snapshot&&snapshot.schemaVersion===3,'a kāna exercise did not snapshot at schema v3');
+    const restored=api.restoreExerciseSnapshot(clone(snapshot));
+    assert(restored,'a kāna exercise did not restore');
+    assert(restored.sentence===data.sentence&&restored.translation===data.translation,'the kāna round trip drifted');
+    assert(restored.tokens.map(t=>t.ar).join('|')===data.tokens.map(t=>t.ar).join('|'),'the kāna round trip changed the iʿrāb');
+    for(const [name,mutate] of [
+      ['a forged ism state',s=>{s.tokens[1].state='nasb'}],
+      ['a forged khabar state',s=>{s.tokens[2].state='raf'}],
+      ['an unregistered operator',s=>{s.tokens[0].word=api.KANA_CONDITIONAL_BARE[0]}]
+    ]){
+      const forged=clone(snapshot);mutate(forged);
+      let out=null;
+      try{ out=api.restoreExerciseSnapshot(forged); }catch(error){ out='THREW:'+error.message }
+      assert(out===null,'kāna History accepted '+name+' ('+out+')');
+      q1Attacks++;
+    }
+    q1Cases+=4;
+  }
+}
+{
+  const sisters=api.innaSisters;
+  const surfaces=sisters.map(s=>s.ar);
+  assert(surfaces.length===5,'the inna family holds '+surfaces.length+' members, not 5');
+  const INNA_ENGLISH=['indeed','but','perhaps','if only','as if'];
+  const bySisterGloss=g=>sisters.find(x=>x.gloss===g)||null;
+  assert(INNA_ENGLISH.every(g=>bySisterGloss(g)),'an inna sister lost its expected gloss: '
+    +INNA_ENGLISH.filter(g=>!bySisterGloss(g)).join(', '));
+  const kaannaRecord=bySisterGloss('as if');
+  assert(kaannaRecord,'the simile sister was not registered');
+  for(const inherited of ['indeed','but','perhaps','if only'])
+    assert(bySisterGloss(inherited),'an inherited sister was lost: '+inherited);
+  assert(sisters.every(s=>s.ar&&s.gloss&&s.meaning&&s.iraab),'an inna record is incomplete');
+  assert(new Set(surfaces).size===surfaces.length,'the inna family repeats a surface');
+  q1Cases+=4;
+
+  /* أَنَّ is the sixth the source names and is deliberately NOT produced — and it must never be
+     confused with the VERBAL أَنْ, a different particle with a different identity and government.
+     That is the distinction this pack is most at risk of blurring, so it is asserted directly. */
+  assert(sisters.length===INNA_ENGLISH.length&&!sisters.some(x=>x.gloss==='that'),
+    'the sixth sister entered production without a governing frame');
+  const verbalAn=api.GRAMMAR_RULES.governors.an;
+  assert(verbalAn&&verbalAn.mood==='nasb'&&verbalAn.ruleId==='G_AN_NASB','the verbal an governor spec changed');
+  /* The decisive test: the verbal governor's surface must not be any nominal sister's surface, and
+     no sister may wear the verbal surface. Both are compared registry-to-registry, so the two
+     particles cannot be conflated whatever their spelling. */
+  assert(!surfaces.includes(verbalAn.surface),'the verbal an surface entered the nominal family');
+  assert(!sisters.some(x=>x.ar===verbalAn.surface),'a nominal sister wears the verbal an surface');
+  assert(!api.GRAMMAR_RULES.governors[verbalAn.surface],'the governor table is keyed by surface');
+  assert(api.SOURCE_REGISTRY.G_AN_NASB&&api.SOURCE_REGISTRY.R_INNA_GOVERNS_NOMINAL,
+    'the أَنْ and أَنَّ rules are not both registered');
+  assert(api.SOURCE_REGISTRY.G_AN_NASB!==api.SOURCE_REGISTRY.R_INNA_GOVERNS_NOMINAL,
+    'the verbal and nominal rules collapsed into one');
+  q1Cases+=5;q1Attacks+=2;
+
+  const INNA_TEMPLATES=['T_PARTICLE_SINGULAR_NASB_FATHA_01','T_PARTICLE_BROKEN_NASB_FATHA_01',
+    'T_PARTICLE_DUAL_NASB_YA_01','T_PARTICLE_SMP_NASB_YA_01','T_PARTICLE_SFP_NASB_KASRASUB_01',
+    'T_PARTICLE_FIVENOUNS_NASB_ALIF_01'];
+  const seen=new Set();
+  let kaanna=null;
+  for(const stableId of INNA_TEMPLATES){
+    const t=api.templates.find(x=>x.stableId===stableId);
+    assert(t,'an inna template is missing: '+stableId);
+    for(let attempt=0;attempt<40;attempt++){
+      const data=api.buildTemplate(t.id);
+      const [particle,ism,khabar]=data.tokens;
+      assert(particle.grammar.particleType==='inna','the inna head is not an inna particle');
+      assert(surfaces.includes(particle.word),'an unregistered inna particle was produced: '+particle.word);
+      // تنصب الاسم وترفع الخبر — the mirror of the kāna claim, asserted on every build.
+      assert(ism.grammar.role==='ismInna'&&ism.state==='nasb','the ism of '+particle.word+' is not منصوب');
+      assert(khabar.grammar.role==='khabarInna'&&khabar.state==='raf','the khabar of '+particle.word+' is not مرفوع');
+      assert(api.composeCanonicalTranslation(data)===data.translation,'inna builder ≠ composer for '+particle.word);
+      assert(api.validateExercise(clone(data)).length===0,'an inna exercise does not validate: '+particle.word);
+      seen.add(particle.word);
+      if(particle.word===kaannaRecord.ar&&!kaanna)kaanna=data;
+      q1Cases+=3;
+    }
+  }
+  for(const s of surfaces)assert(seen.has(s),'inna sister never produced: '+s);
+  assert(kaanna,'كَأَنَّ was never actually built');
+  /* The identity clause is taken FROM the registry record, so this asserts the renderer used the
+     sister's own ʿiraab rather than borrowing another sister's. */
+  assert(kaanna.tokens[0].ar.includes(kaannaRecord.iraab),
+    'the simile sister does not render its own identity clause: '+kaanna.tokens[0].ar);
+  assert(kaanna.tokens[0].gloss===kaannaRecord.gloss,'the simile sister has the wrong canonical gloss');
+  assert(kaannaRecord.iraab!==sisters[0].iraab,'the simile sister reuses another sister identity clause');
+  q1Cases+=3;
+
+  {
+    const snapshot=api.createExerciseSnapshot(kaanna);
+    const restored=api.restoreExerciseSnapshot(clone(snapshot));
+    assert(restored&&restored.sentence===kaanna.sentence&&restored.translation===kaanna.translation,
+      'the كَأَنَّ round trip drifted');
+    for(const [name,mutate] of [
+      ['a forged ism state',s=>{s.tokens[1].state='raf'}],
+      ['a forged khabar state',s=>{s.tokens[2].state='nasb'}],
+      ['the verbal an substituted',s=>{s.tokens[0].word=verbalAn.surface}]
+    ]){
+      const forged=clone(snapshot);mutate(forged);
+      let out=null;
+      try{ out=api.restoreExerciseSnapshot(forged); }catch(error){ out='THREW:'+error.message }
+      assert(out===null,'inna History accepted '+name+' ('+out+')');
+      q1Attacks++;
+    }
+    q1Cases+=2;
+  }
+}
+console.log('Marfūʿāt Quick Pack 1 audit passed: '+q1Cases+' canonical checks and '+q1Attacks+' adversarial checks.');
+console.log('  kāna family produced: '+api.KANA_SURFACES.join(', ')
+  +' | deferred: أَمْسَى, أَضْحَى (estimated fatḥ) and '+api.KANA_CONDITIONAL_BARE.join(', ')+' (conditional مَا)');
+console.log('  inna family produced: '+api.innaSisters.map(s=>s.ar).join(', ')+' | deferred: أَنَّ (needs a governing frame)');
 
 console.log('Phase-3B3A separator-authority audit passed: '+p7Cases+' canonical checks and '+p7Attacks+' adversarial checks.');
 console.log('  phase-3B3A constructions: '+Object.keys(P7_CONSTRUCTIONS).length+' registered ('

@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -144,6 +144,20 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   deriveHaalAuthority,
   buildHaalExercise,
   canonicalHaalTranslation,
+  /* التمييز — Al-Tuḥfah pp. 157–162. */
+  TAMYIZ_ROLE,
+  TAMYIZ_SUBTYPES,
+  TAMYIZ_SUBTYPE_LABELS,
+  TAMYIZ_MEASURE_KINDS,
+  TAMYIZ_LEXEMES,
+  TAMYIZ_MEASURE_LEXEMES,
+  TAMYIZ_PAIR_REGISTRY,
+  tamyizNoun,
+  tamyizVerb,
+  tamyizPairAt,
+  deriveTamyizAuthority,
+  buildTamyizExercise,
+  canonicalTamyizTranslation,
   canonicalExerciseIdentityV3Phase1,
   isPhase1V3IdentityCandidate,
   REVIEWED_SOURCE_AUTHORITIES,
@@ -1147,6 +1161,173 @@ function runMafulFihFocusedTests(){
 }
 runMafulFihFocusedTests();
 if(process.env.NAHW_FOCUSED_MAFUL_FIH==='1')process.exit(0);
+/* ---- التمييز: Al-Tuḥfah pp. 157–162. Both source divisions, and the boundaries that keep them
+   apart from each other and from every other manṣūb role. The two lanes share one token shape on
+   purpose, so most of what follows is about proving that the SHAPE never decides anything. ---- */
+function runTamyizFocusedTests(){
+  const clone=value=>JSON.parse(JSON.stringify(value));
+  const analyzed=(template,built)=>api.completeNominalAnalysis({...built,templateId:template.stableId,
+    templateStarts:template.starts,templateForm:template.form,templateState:template.state,templateSign:template.sign});
+  const templateFor=pairKey=>api.templates.find(item=>item.tamyizPairKeys.includes(pairKey));
+  const built=new Map();
+  let builds=0,trips=0,negatives=0;
+  assert(Object.isFrozen(api.TAMYIZ_PAIR_REGISTRY)&&Object.isFrozen(api.TAMYIZ_LEXEMES)
+    &&Object.isFrozen(api.TAMYIZ_MEASURE_LEXEMES),'a tamyīz registry is mutable');
+  /* Byte gate. Every registered surface must resolve to its own record in the live noun index; a
+     combining-mark typo would fail here rather than reaching surfaceHint at build time. */
+  for(const [key,lexeme] of Object.entries({...api.TAMYIZ_LEXEMES,...api.TAMYIZ_MEASURE_LEXEMES})){
+    assert(Object.isFrozen(lexeme),key+' is not immutable tamyīz lexical authority');
+    const registered=api.nounFormIndex.get(lexeme.acc);
+    assert(registered&&registered.lexeme===lexeme,
+      key+' does not round-trip byte-for-byte through the canonical noun index');
+    assert(!lexeme.acc.startsWith('ال')&&/(?:ً|ًا)$/u.test(lexeme.acc),
+      key+' is not an indefinite accusative, which p. 159 requires');
+    assert(!lexeme.nom&&!lexeme.gen,key+' registers case forms no productive lane uses');
+    negatives++;
+  }
+  for(const [pairKey,pair] of Object.entries(api.TAMYIZ_PAIR_REGISTRY)){
+    assert(Object.isFrozen(pair),pairKey+' is not immutable tamyīz pair authority');
+    const template=templateFor(pairKey);
+    assert(template,pairKey+' is unreachable: no template names it');
+    const data=analyzed(template,api.buildTamyizExercise(pairKey));
+    const index=data.tokens.findIndex(item=>item.grammar.role===api.TAMYIZ_ROLE);
+    const tamyiz=data.tokens[index],authority=api.deriveTamyizAuthority(data,index);
+    const verb=data.tokens.find(item=>item.id===authority.verbId);
+    const relation=data.relationships.find(item=>item.type==='tamyiz');
+    const lexeme=api.TAMYIZ_LEXEMES[pair.tamyizKey];
+    const isDhat=pair.subtype===api.TAMYIZ_SUBTYPES.dhat;
+    assert(authority.authorized&&authority.pairKey===pairKey&&authority.subtype===pair.subtype,
+      pairKey+' did not earn exact tamyīz authority');
+    assert(tamyiz.target&&tamyiz.state==='nasb'&&tamyiz.ruleId==='R_TAMYIZ_NASB'&&tamyiz.word===lexeme.acc,
+      pairKey+' did not produce its tamyīz as the manṣūb focus');
+    assert(api.safeSignId(tamyiz.sign)===api.GRAMMAR_RULES.nounInflection.singular.nasb[0],
+      pairKey+' bypassed the canonical noun naṣb matrix');
+    assert(index===data.tokens.length-1&&data.tokens[1].grammar.role==='faail'&&data.tokens[1].state==='raf',
+      pairKey+' does not place the tamyīz after a clause that is already complete');
+    // The division decides what is clarified, and each division carries the other's opposite.
+    assert(authority.mubayyanKind===(isDhat?'noun':'nisbah'),pairKey+' resolved the wrong kind of ambiguity');
+    if(isDhat){
+      const measure=api.TAMYIZ_MEASURE_LEXEMES[pair.measureKey];
+      assert(authority.mubayyanId===data.tokens[2].id&&authority.mubayyanWord===measure.acc
+        &&api.TAMYIZ_MEASURE_KINDS[authority.measureKind],pairKey+' lost its مقدار');
+    }else{
+      assert(!authority.mubayyanId&&!authority.measureKind&&data.tokens[2].word.startsWith('ال'),
+        pairKey+' invented a token-level mubayyan for a tamyīz al-nisbah');
+    }
+    assert(relation&&relation.ruleId==='RL_TAMYIZ_MUBAYYAN'&&relation.verbId===verb.id
+      &&relation.tamyizId===tamyiz.id&&relation.subtype===pair.subtype
+      &&relation.mubayyanId===(isDhat?data.tokens[2].id:''),
+      pairKey+' lacks its canonical ʿāmil/mubayyan relationship');
+    assert(api.isSourceAuthorized(tamyiz.ruleId)&&api.isSourceAuthorized(relation.ruleId)
+      &&api.isSourceAuthorized(isDhat?'R_TAMYIZ_DHAT':'R_TAMYIZ_NISBAH')
+      &&api.isSourceAuthorized('R_TAMYIZ_CONDITIONS'),pairKey+' lost source ownership');
+    assert(tamyiz.ar.includes('تَمْيِيزٌ مَنْصُوبٌ')&&!tamyiz.ar.includes('حَالٌ')
+      &&tamyiz.why.ids.includes('WHY_ROLE_TAMYIZ_'+pair.subtype.toUpperCase())
+      &&tamyiz.why.ids.includes('WHY_STATE_TAMYIZ')
+      &&tamyiz.why.ids.includes(isDhat?'WHY_TAMYIZ_DHAT':'WHY_TAMYIZ_NISBAH')
+      &&tamyiz.why.ids.includes('WHY_TAMYIZ_CONDITIONS')
+      &&tamyiz.phraseWhy?.ids.includes(isDhat?'WHY_REL_TAMYIZ_DHAT':'WHY_REL_TAMYIZ_NISBAH'),
+      pairKey+' Why/iʿrāb chain is incomplete');
+    assert(tamyiz.phraseLabel==='Tamyīz construction'&&data.tokens.every(item=>item===tamyiz||!item.phraseAr),
+      pairKey+' put the combined analysis somewhere other than the tamyīz');
+    assert(api.canonicalTamyizTranslation(data)===pair.sentenceEn
+      &&api.composeCanonicalTranslation(data)===pair.sentenceEn&&data.translation===pair.sentenceEn
+      &&!/ as a /.test(data.translation),pairKey+' translation is not canonical natural English');
+    const snapshot=api.createExerciseSnapshot(data),restored=snapshot&&api.restoreExerciseSnapshot(snapshot);
+    assert(restored&&api.validateExercise(clone(restored)).length===0
+      &&api.deriveTamyizAuthority(restored,index).authorized,pairKey+' failed its History v3 round trip');
+    assert(restored.sentence===data.sentence&&restored.translation===data.translation
+      &&restored.tokens[index].ar===tamyiz.ar&&restored.tokens[index].gloss===tamyiz.gloss,
+      pairKey+' changed learner presentation after History');
+    built.set(pairKey,data);builds++;trips++;
+  }
+  // Both source divisions are actually reached, and the declared morphology scope is truthful.
+  assert(new Set([...built.values()].map(data=>data.relationships.find(r=>r.type==='tamyiz').subtype)).size===2,
+    'the two source divisions are not both productive');
+  assert(new Set([...built.values()].map(data=>data.tokens[data.tokens.length-1].inflection)).size===1
+    &&[...built.values()].every(data=>api.safeSignId(data.tokens[data.tokens.length-1].sign)==='fatha'),
+    'the declared singular/fatḥah-only tamyīz scope is not truthful');
+  const dhatBase=built.get('cupOfWater'),nisbahBase=built.get('filledCup');
+  const mustReject=(label,source,mutate,expected='E_TAMYIZ_AUTHORITY')=>{
+    const data=clone(source);mutate(data);const failures=api.validateExercise(data);
+    assert(failures.some(item=>item.code===expected),label+' was accepted: '+failures.map(item=>item.code).join(','));negatives++;
+  };
+  /* التمييز vs الحال — the collision this chapter turns on. Both are indefinite accusatives at the
+     end of a clause, so the ONLY thing that can separate them is which registry owns the token. */
+  mustReject('tamyīz relabelled haal',dhatBase,data=>{
+    const t=data.tokens[3];t.grammar.role=api.HAAL_ROLE;t.ruleId='R_HAAL_NASB';
+  },'E_HAAL_AUTHORITY');
+  const haalTemplate=api.templates.find(item=>item.haalPairKeys.includes('studentSmiling'));
+  const haalBase=analyzed(haalTemplate,api.buildHaalExercise('studentSmiling'));
+  mustReject('haal relabelled tamyīz',haalBase,data=>{
+    const h=data.tokens.find(item=>item.grammar.role===api.HAAL_ROLE);
+    h.grammar.role=api.TAMYIZ_ROLE;h.ruleId='R_TAMYIZ_NASB';
+  });
+  /* التمييز vs the other manṣūbāt. A manṣūb noun does not become a tamyīz by being relabelled,
+     and the tamyīz token does not become one of them either. */
+  mustReject('direct object relabelled tamyīz',dhatBase,data=>{
+    const o=data.tokens[2];o.grammar.role=api.TAMYIZ_ROLE;o.ruleId='R_TAMYIZ_NASB';
+  });
+  mustReject('tamyīz relabelled direct object',dhatBase,data=>{
+    const t=data.tokens[3];t.grammar.role='object';t.ruleId='R_MAFUL_BIHI_NASB';
+  },'E_ORPHAN_OBJECT');
+  const mutlaqTemplate=api.templates.find(item=>item.mutlaqPairKeys&&item.mutlaqPairKeys.length);
+  const mutlaqBase=api.buildTemplate(mutlaqTemplate.id);
+  mustReject('mafʿūl muṭlaq relabelled tamyīz',mutlaqBase,data=>{
+    const m=data.tokens.find(item=>item.grammar.role==='mafulMutlaq');
+    m.grammar.role=api.TAMYIZ_ROLE;m.ruleId='R_TAMYIZ_NASB';
+  });
+  const zarfTemplate=api.templates.find(item=>item.mafulFihPairKeys&&item.mafulFihPairKeys.length);
+  const zarfBase=api.buildTemplate(zarfTemplate.id);
+  mustReject('ẓarf relabelled tamyīz',zarfBase,data=>{
+    const z=data.tokens.find(item=>item.grammar.role===api.MAFUL_FIH_ROLE);
+    z.grammar.role=api.TAMYIZ_ROLE;z.ruleId='R_TAMYIZ_NASB';
+  });
+  // An unregistered indefinite accusative cannot invent the role, even in a licensed template.
+  mustReject('unregistered noun inventing tamyīz',dhatBase,data=>{
+    const t=data.tokens[3],other=api.TAMYIZ_MEASURE_LEXEMES.pound;
+    t.word=other.acc;t.surfaceHint=other.acc;t.expectedSurface=other.acc;
+  });
+  // p. 159's nakirah condition, and the state and division the authority pins.
+  mustReject('definite tamyīz',dhatBase,data=>{
+    const t=data.tokens[3],definite=api.tamyizNoun('singularThings','the water');
+    t.word=definite.acc;t.surfaceHint=definite.acc;t.expectedSurface=definite.acc;
+  });
+  mustReject('tamyīz forced out of naṣb',dhatBase,data=>{data.tokens[3].state='raf'},'E_ROLE_CASE');
+  mustReject('forged subtype on the relationship',dhatBase,data=>{
+    data.relationships.find(item=>item.type==='tamyiz').subtype=api.TAMYIZ_SUBTYPES.nisbah;
+  },'E_TAMYIZ_RELATION');
+  mustReject('tamyīz al-nisbah given a mubayyan link',nisbahBase,data=>{
+    const rel=data.relationships.find(item=>item.type==='tamyiz');
+    rel.mubayyanId=data.tokens[2].id;data.tokens[3].relations.mubayyanId=data.tokens[2].id;
+  },'E_TAMYIZ_RELATION');
+  mustReject('wrong ʿāmil on the relationship',dhatBase,data=>{
+    data.relationships.find(item=>item.type==='tamyiz').verbId=data.tokens[1].id;
+  },'E_TAMYIZ_RELATION');
+  // An unauthorized pairing: a registered tamyīz its template's pairs never license.
+  mustReject('unauthorized ʿāmil/tamyīz pairing',dhatBase,data=>{
+    const oil=api.TAMYIZ_LEXEMES.oil,t=data.tokens[3];
+    t.word=oil.acc;t.surfaceHint=oil.acc;t.expectedSurface=oil.acc;
+  });
+  /* History forgery: a relabelled role must not survive restoration by being rebuilt into
+     something plausible. The canonical rebuild has to restore the registered division. */
+  {
+    const forged=api.createExerciseSnapshot(dhatBase);
+    const forgedRelation=forged.relationships.find(item=>item.type==='tamyiz');
+    assert(forgedRelation,'the snapshot carries no tamyīz relationship to forge');
+    forgedRelation.subtype=api.TAMYIZ_SUBTYPES.nisbah;forgedRelation.mubayyanId='';
+    const rebuilt=api.restoreExerciseSnapshot(forged);
+    const rebuiltRelation=rebuilt&&rebuilt.relationships.find(item=>item.type==='tamyiz');
+    assert(rebuiltRelation&&rebuiltRelation.subtype===api.TAMYIZ_SUBTYPES.dhat
+      &&rebuiltRelation.mubayyanId===rebuilt.tokens[2].id,
+      'History did not discard and canonically rebuild a forged tamyīz relationship');
+    negatives++;
+  }
+  console.log('Tamyiz focused tests: '+builds+' canonical builds, '+trips+' History round trips, '
+    +negatives+' negative/registry boundaries — green');
+}
+runTamyizFocusedTests();
+if(process.env.NAHW_FOCUSED_TAMYIZ==='1')process.exit(0);
 /* ---- الحال المفردة: definite صاحب, indefinite accusative haal, explicit event/owner proof. ---- */
 function runHaalFocusedTests(){
   const clone=value=>JSON.parse(JSON.stringify(value));
@@ -1800,7 +1981,7 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 // Phase 3B1 adds exactly one: G_IDHAN_NASB, the particle's own identity and government, which is
 // a different claim from the conditions R_IDHAN_CONDITIONS already owns.
 // Plus R_BADAL, the fourth follower chapter's own rule (Al-Tuḥfah pp. 135–138).
-assert(Object.keys(api.SOURCE_REGISTRY).length===108,`Expected 108 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===113,`Expected 113 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -2478,7 +2659,11 @@ const expectedPastTemplateCapabilities={
   T_VERB_SINGULAR_NASB_FATHA_25:'3ms/explicit',
   // الحال المفردة — subject-owner and object-owner lanes share the explicit past event frame.
   T_VERB_SINGULAR_NASB_FATHA_26:'3ms/explicit',
-  T_VERB_SINGULAR_NASB_FATHA_27:'3ms/explicit'
+  T_VERB_SINGULAR_NASB_FATHA_27:'3ms/explicit',
+  /* التمييز — both divisions need the same explicit past frame, because p. 160's condition is
+     precisely that the verb has already taken its fāʿil before the tamyīz arrives. */
+  T_VERB_SINGULAR_NASB_FATHA_28:'3ms/explicit',
+  T_VERB_SINGULAR_NASB_FATHA_29:'3ms/explicit'
 };
 const declaredPastTemplates=api.templates.filter(template=>template.pastCapabilities.length);
 assert(declaredPastTemplates.length===Object.keys(expectedPastTemplateCapabilities).length,
@@ -6333,7 +6518,7 @@ for(const t of api.templates){
 {
   const ids=api.templates.map(t=>t.stableId);
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
-  assert(api.templates.length===138,`Expected 138 templates after the haal fast-track, found ${api.templates.length}`);
+  assert(api.templates.length===140,`Expected 140 templates after the tamyīz fast-track, found ${api.templates.length}`);
   assert(Object.values(p4Templates).map(t=>t.stableId).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_04 | T_PARTICLE_SINGULAR_NASB_FATHA_05 | T_PARTICLE_SINGULAR_NASB_FATHA_06 | T_PARTICLE_SINGULAR_NASB_FATHA_07',
     'The Phase 3A2 stable IDs are not the four appended ones');
@@ -8778,7 +8963,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===138,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===140,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
@@ -8792,7 +8977,8 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
   const mutlaqTemplateIds=api.templates.filter(item=>item.mutlaqPairKeys.length).map(item=>item.stableId);
   const mafulFihTemplateIds=api.templates.filter(item=>item.mafulFihPairKeys.length).map(item=>item.stableId);
   const haalTemplateIds=api.templates.filter(item=>item.haalPairKeys.length).map(item=>item.stableId);
-  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  const tamyizTemplateIds=api.templates.filter(item=>item.tamyizPairKeys.length).map(item=>item.stableId);
+  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
@@ -10161,7 +10347,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===138,'the repair block changed the production template count');
+  assert(api.templates.length===140,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -10282,8 +10468,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===145,'the structural map holds '+registeredKeys.length+' keys, not 145');
-    assert(registeredShapes.length===42,'the shape registry holds '+registeredShapes.length+' shapes, not 42');
+    assert(registeredKeys.length===147,'the structural map holds '+registeredKeys.length+' keys, not 147');
+    assert(registeredShapes.length===43,'the shape registry holds '+registeredShapes.length+' shapes, not 43');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
     /* The 87 inherited keys and 22 inherited shapes are untouched: later productive lanes append
@@ -10308,8 +10494,10 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       const mafulFihKeys=registeredKeys.filter(key=>mafulFihTemplateIds.some(id=>key.startsWith(id+'||')));
       const haalTemplateIds=api.templates.filter(item=>item.haalPairKeys.length).map(item=>item.stableId);
       const haalKeys=registeredKeys.filter(key=>haalTemplateIds.some(id=>key.startsWith(id+'||')));
-      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35','TS36','TS37','TS38','TS39','TS40','TS41','TS42'];
-      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k));
+      const tamyizTemplateIds=api.templates.filter(item=>item.tamyizPairKeys.length).map(item=>item.stableId);
+      const tamyizKeys=registeredKeys.filter(key=>tamyizTemplateIds.some(id=>key.startsWith(id+'||')));
+      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35','TS36','TS37','TS38','TS39','TS40','TS41','TS42','TS43'];
+      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===87,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===22,'the inherited shape set changed: '+inheritedShapes.length);
@@ -10344,7 +10532,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===138,'the map covers '+mappedTemplates.size+' templates, not 138');
+    assert(mappedTemplates.size===140,'the map covers '+mappedTemplates.size+' templates, not 140');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -10406,8 +10594,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===145,'only '+keysSeen.size+' of the 145 structural keys were observed');
-    assert(shapesSeen.size===42,'only '+shapesSeen.size+' of the 42 composer shapes were observed');
+    assert(keysSeen.size===147,'only '+keysSeen.size+' of the 147 structural keys were observed');
+    assert(shapesSeen.size===43,'only '+shapesSeen.size+' of the 43 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -10741,7 +10929,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===145,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===147,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -10759,7 +10947,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
             if(typeof part.slot!=='string'||part.slot==='copula'
               ||part.slot==='atfSentence'||part.slot==='tawkidSentence'||part.slot==='badalSentence'
               ||part.slot==='passiveSentence'||part.slot==='mutlaqSentence'||part.slot==='mafulFihSentence'
-              ||part.slot==='haalSentence')continue;
+              ||part.slot==='haalSentence'||part.slot==='tamyizSentence')continue;
             const index=Number(part.slot.split(':')[1]);
             assert(Number.isInteger(index)&&index>=0&&index<segments.length,
               'shape '+m.shape+' addresses token '+index+' but '+key+' declares only '+segments.length);
@@ -11068,7 +11256,9 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
        five more — one three-token rafʿ host and four four-token hosts. المفعول المطلق adds
        eighteen tokens across its five lanes: two three-token lanes and three four-token ones. */
     /* Productive الحال adds one three-token subject-owner lane and one four-token object-owner lane. */
-    assert([461,462].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 461 or 462 across the registered ʿaṭf context rotation)');
+    /* التمييز adds eight more: both divisions are four-token lanes (ʿāmil, fāʿil, the noun the
+       tamyīz clarifies, and the tamyīz itself). */
+    assert([469,470].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 469 or 470 across the registered ʿaṭf context rotation)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -11257,7 +11447,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===138,'the presentation repair changed the template count');
+    assert(api.templates.length===140,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -13149,17 +13339,17 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===108,'the source-rule count does not include the haal rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===113,'the source-rule count does not include the tamyīz rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
   assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.concealedAnMode).length===6,'the shared concealed-an registry is not exactly six governors');
   assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.mood==='jazm').length===1,
     'a second jāzim entered the governor table');
-  assert(api.templates.length===138,'the production template count does not include the haal additions');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===145
-    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===42,
-    'the composer authority does not include the mafʿūl-muṭlaq mappings');
+  assert(api.templates.length===140,'the production template count does not include the tamyīz additions');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===147
+    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===43,
+    'the composer authority does not include the tamyīz mappings');
   p7Cases+=8;
 }
 
@@ -13928,7 +14118,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===138,`Expected 138 production templates, found ${api.templates.length}`);
+assert(api.templates.length===140,`Expected 140 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -14211,7 +14401,7 @@ console.log(`Appearance-mode audit passed: ${appearanceCases} groups; system/lig
 // ===================================================================================
 let whyCases=0;
 const bareAr=s=>s.replace(/[ـً-ْٰ]/g,'').replace(/[أإآٱ]/g,'ا');
-const WHY_ROLE_STATE={mubtada:'raf',khabar:'raf',faail:'raf',naibFail:'raf',object:'nasb',majrur:'jarr',mudafIlayh:'jarr',ismInna:'nasb',khabarInna:'raf',ismKana:'raf',khabarKana:'nasb',mafulMutlaq:'nasb',adverb:'nasb',haal:'nasb'};
+const WHY_ROLE_STATE={mubtada:'raf',khabar:'raf',faail:'raf',naibFail:'raf',object:'nasb',majrur:'jarr',mudafIlayh:'jarr',ismInna:'nasb',khabarInna:'raf',ismKana:'raf',khabarKana:'nasb',mafulMutlaq:'nasb',adverb:'nasb',haal:'nasb',tamyiz:'nasb'};
 const whyRuleIds=new Set();
 let whyTokens=0,whyRels=0,whyFallbacks=0;
 function auditWhy(why,label,{max=4}={}){
@@ -14252,7 +14442,11 @@ function auditTokenWhy(tok,label,owner=null){
      time it states the class or the شرح's own definition of the word. A muḍāf ẓarf adds the iḍāfah
      line as well, and «فَوْقَ» on its own names no place, so that line is load-bearing too. */
   const mafulFih=tok.grammar?.role===api.MAFUL_FIH_ROLE;
-  auditWhy(tok.why,label,governedByIdhan?{max:7}:governedByConcealedAn?{max:5}:badalFollower?{max:5}:absoluteObject?{max:6}:mafulFih?{max:5}:{});
+  /* A tamyīz carries role, state, sign, its division, and its two conditions. The conditions line
+     is not decoration: p. 159 makes «نكرة» and «بعد تمام الكلام» the definition of when any noun
+     may be a tamyīz at all, and the division line is what separates ذات from نسبة. */
+  const tamyiz=tok.grammar?.role===api.TAMYIZ_ROLE;
+  auditWhy(tok.why,label,governedByIdhan?{max:7}:governedByConcealedAn?{max:5}:badalFollower?{max:5}:absoluteObject?{max:6}:mafulFih?{max:5}:tamyiz?{max:5}:{});
   if(governedByIdhan){
     assert(api.WHY_IDHAN_CONDITIONS.every(line=>tok.why.ids.includes(line.id)),
       `${label}: an إِذَنْ-governed verb omits one of the three conditions`);
@@ -14411,7 +14605,13 @@ const goldens=[
    &&t.grammar.morphology?.person==='3ms',['WHY_SUBJECT_HIDDEN_HUWA']],
  ['hidden subject (3fs)',t=>t.tense==='present'&&t.relations&&t.relations.subjectType==='implicit'
    &&t.grammar.morphology?.person==='3fs',['WHY_SUBJECT_HIDDEN_HIYA']],
- ['ẓarf',t=>t.grammar.role===api.MAFUL_FIH_ROLE,['WHY_STATE_MAFUL_FIH']]
+ ['ẓarf',t=>t.grammar.role===api.MAFUL_FIH_ROLE,['WHY_STATE_MAFUL_FIH']],
+ /* Each tamyīz division has to be reached on its own: the two share a token shape, so a single
+    golden would let one division go unproduced without the audit noticing. */
+ ['tamyīz al-dhāt',t=>t.grammar.role===api.TAMYIZ_ROLE&&t.why.ids.includes('WHY_TAMYIZ_DHAT'),
+  ['WHY_ROLE_TAMYIZ_DHAT','WHY_STATE_TAMYIZ','WHY_TAMYIZ_DHAT','WHY_TAMYIZ_CONDITIONS']],
+ ['tamyīz al-nisbah',t=>t.grammar.role===api.TAMYIZ_ROLE&&t.why.ids.includes('WHY_TAMYIZ_NISBAH'),
+  ['WHY_ROLE_TAMYIZ_NISBAH','WHY_STATE_TAMYIZ','WHY_TAMYIZ_NISBAH','WHY_TAMYIZ_CONDITIONS']]
 ];
 for(const [name,pred,expectIds] of goldens){
   const hit=goldenFind(pred);

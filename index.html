@@ -1157,6 +1157,13 @@ function resolveCanonicalTokenGloss(data,token,index){
   const found=tawkidPairAt(data,index);
   return found?.pair?.follower?.en||null;
  }
+ /* 4e — the same for a badal. Its follower is curriculum-owned too: «ثُلُثَهُ» and «عِلْمُهُ» carry
+    their attached pronoun and are not free vocabulary, and even the muṭābiq five-noun is glossed
+    from the pair rather than from its lexicon entry so that all four kinds answer one authority. */
+ if(type==='noun'&&token.grammar.role==='badal'){
+  const found=badalPairAt(data,index);
+  return found?.pair?.follower?.en||null;
+ }
  /* 5 — an object noun, resolved through its GOVERNING VERB rather than through its surface.
     Two vocabulary records can share one accusative surface with different English, so a bare
     surface lookup would have to choose between them. The verb that governs the object is what
@@ -1294,7 +1301,11 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  TS34:Object.freeze({parts:Object.freeze([Object.freeze({slot:'innaLead:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerPhrase:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerCopula:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])}),
  TS35:Object.freeze({parts:Object.freeze([Object.freeze({lit:'There is '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerPhrase:1'}),Object.freeze({lit:'.'})])}),
  TS36:Object.freeze({parts:Object.freeze([Object.freeze({slot:'atfSentence'})])}),
- TS37:Object.freeze({parts:Object.freeze([Object.freeze({slot:'tawkidSentence'})])})
+ TS37:Object.freeze({parts:Object.freeze([Object.freeze({slot:'tawkidSentence'})])}),
+ /* البدل — one shape for all three hosts and all four kinds, exactly as TS37 serves tawkīd: the
+    English is composed by the canonical badal translator from the registered pair, so a new label
+    never earns a new shape. */
+ TS38:Object.freeze({parts:Object.freeze([Object.freeze({slot:'badalSentence'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1421,7 +1432,14 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_PARTICLE_SINGULAR_JARR_KASRA_03||particle:particle,noun:majrur,particle:particle,noun:atf,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_03",structure:"particle:particle,noun:majrur,particle:particle,noun:atf,noun:mubtada",shape:"TS36",copulaPlural:false}),
  "T_VERB_SINGULAR_RAF_DAMMA_03||verb:past,noun:faail,noun:tawkid,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_RAF_DAMMA_03",structure:"verb:past,noun:faail,noun:tawkid,noun:object",shape:"TS37",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_18||verb:past,noun:faail,noun:object,noun:tawkid":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_18",structure:"verb:past,noun:faail,noun:object,noun:tawkid",shape:"TS37",copulaPlural:false}),
- "T_PARTICLE_SINGULAR_JARR_KASRA_04||particle:particle,noun:majrur,noun:tawkid,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_04",structure:"particle:particle,noun:majrur,noun:tawkid,noun:mubtada",shape:"TS37",copulaPlural:false})
+ "T_PARTICLE_SINGULAR_JARR_KASRA_04||particle:particle,noun:majrur,noun:tawkid,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_04",structure:"particle:particle,noun:majrur,noun:tawkid,noun:mubtada",shape:"TS37",copulaPlural:false}),
+ /* البدل — five structures across two declension families and three states, all composed by the one
+    canonical badal translator, so they share TS38 rather than earning a shape each. */
+ "T_VERB_FIVENOUNS_RAF_WAW_02||verb:past,noun:faail,noun:badal":Object.freeze({templateId:"T_VERB_FIVENOUNS_RAF_WAW_02",structure:"verb:past,noun:faail,noun:badal",shape:"TS38",copulaPlural:false}),
+ "T_VERB_FIVENOUNS_NASB_ALIF_01||verb:past,noun:faail,noun:object,noun:badal":Object.freeze({templateId:"T_VERB_FIVENOUNS_NASB_ALIF_01",structure:"verb:past,noun:faail,noun:object,noun:badal",shape:"TS38",copulaPlural:false}),
+ "T_PARTICLE_FIVENOUNS_JARR_YA_02||particle:particle,noun:majrur,noun:badal,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_FIVENOUNS_JARR_YA_02",structure:"particle:particle,noun:majrur,noun:badal,noun:mubtada",shape:"TS38",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_19||verb:past,noun:faail,noun:object,noun:badal":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_19",structure:"verb:past,noun:faail,noun:object,noun:badal",shape:"TS38",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_JARR_KASRA_05||particle:particle,noun:majrur,noun:badal,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_05",structure:"particle:particle,noun:majrur,noun:badal,noun:mubtada",shape:"TS38",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -1469,6 +1487,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  const bits=spec.split(':');
  if(bits[0]==='atfSentence')return canonicalAtfTranslation(exercise);
  if(bits[0]==='tawkidSentence')return canonicalTawkidTranslation(exercise);
+ if(bits[0]==='badalSentence')return canonicalBadalTranslation(exercise);
  if(bits[0]==='copula'){
   const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
   if(!particle)return null;
@@ -3067,6 +3086,14 @@ const ATF_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
    noun matrix can spell without estimation or new declensional machinery. Exact repetition,
    exact semantic word, exact suffix, and exact antecedent are one frozen pair authority; a
    repeated neighbouring surface or a hand-written نَفْس/كُلّ token proves nothing by itself. */
+/* Phase: البدل. The kind name and its four subtypes are declared here beside the other follower
+   kinds because the shared template-metadata gate reads them while every follower template is
+   being registered; the pair registry itself stays down with the badal builder, after the noun
+   lexicons it draws from. */
+const BADAL_KIND='badal';
+const BADAL_SUBTYPES=Object.freeze({mutabiq:'mutabiq',baad:'baad',ishtimal:'ishtimal',ghalat:'ghalat'});
+/* The kinds whose badal MUST carry a pronoun returning to the mubdal minhu, per pp. 136. */
+const BADAL_PRONOUN_REQUIRED=Object.freeze([BADAL_SUBTYPES.baad,BADAL_SUBTYPES.ishtimal]);
 const TAWKID_KIND='tawkid';
 const TAWKID_SUBTYPES=Object.freeze({lafzi:'lafzi',manawi:'manawi'});
 const TAWKID_ATTACHED_PRONOUNS=Object.freeze(Object.assign(Object.create(null),{
@@ -6198,6 +6225,7 @@ const GRAMMAR_RULES=Object.freeze({
   naat:{state:'inherited',ruleId:'R_NAAT_HAQIQI',en:'A true naʿt following its manʿūt.'},
   atf:{state:'inherited',ruleId:'R_ATF_NASAQ',en:'A maʿṭūf following its maʿṭūf ʿalayh.'},
   tawkid:{state:'inherited',ruleId:'R_TAWKID',en:'A tawkīd following its muʾakkad in iʿrāb.'},
+  badal:{state:'inherited',ruleId:'R_BADAL',en:'A badal following its mubdal minhu in iʿrāb.'},
   adverb:{state:'nasb',ruleId:'R_ZARF_NASB',en:'An accusative adverb.'}
  },
  nounInflection:{
@@ -6303,7 +6331,12 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  roles:['mubtada','khabar','faail','object','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf'],
  relationships:['mubtadaKhabar','verbSubject','verbObject','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
- 'imperative','diptote','naat sababi','atf bayan','emphasis and substitute followers',
+ /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
+    productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
+    بدل الغلط. What remains unproduced of البدل is named exactly, because بدل البداء and بدل النسيان
+    turn on a speaker's prior belief or change of mind, which no sentence surface carries. */
+ 'imperative','diptote','naat sababi','atf bayan','badal al-badaa and badal al-nisyan',
+ 'badal of a verb from a verb',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
   'feminine-dual past forms','passive and deputy-subject constructions',
   'five-verb person patterns other than third-person masculine plural in random templates'
@@ -6480,6 +6513,13 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_ATF_LA:sourceRule('Conjunctive lā denies for the follower the judgment established for the word before it.',[124,127],'Only the registered noun-coordination frame; lā al-nāfiyah and lā al-nāhiyah are distinct identities.'),
  R_ATF_LAKIN:sourceRule('Conjunctive lakin follows negation or prohibition, is not preceded by wāw, and coordinates a single word.',[124,127],'Only the exact registered negated single-noun frame; لَكِنَّ الناسخة is a distinct identity.'),
  R_ATF_HATTA:sourceRule('Conjunctive ḥattā indicates gradation to the final included member.',[124,127],'Only the registered endpoint pair; the ḥattā that licenses concealed أَنْ before a present verb is a distinct identity.'),
+ /* Al-Tuḥfah pp. 135–138. The matn states the ruling — a badal follows the mubdal minhu «فِي جَمِيعِ
+    إِعْرَابِهِ» — and the شرح gives the four kinds with their ضوابط, including the obligatory
+    «ضمير عائد إلى المبدل منه» for بدل البعض and بدل الاشتمال. The three ضروب of بدل الغلط are
+    distinguished on p. 136 by the speaker's state of mind (بداء، نسيان، غلط); only the third, where
+    the tongue outruns the intention and the speaker corrects it aloud, is produced here, because it
+    is the one an exercise can state truthfully about its own composed speech. */
+ R_BADAL:sourceRule('A badal follows its mubdal minhu in all of its iʿrāb; it is the follower actually intended by the ruling, with no intermediary.',[135,136,137,138],'Productive scope: the registered muṭābiq, baʿḍ-min-kull, ishtimāl and ghalaṭ pairs only. بدل البعض and بدل الاشتمال are produced only with the source-required attached pronoun returning to the mubdal minhu, and بدل المطابق and بدل الغلط only without one. Part-whole and association senses come from the frozen pair registry, never inferred from the words. بدل البداء and بدل النسيان are not produced: both are defined by a speaker’s prior belief or change of mind, which this exercise model does not represent. Badal of a verb from a verb is not produced.'),
  R_TAWKID:sourceRule('A registered lafẓī or maʿnawī tawkīd follows its muʾakkad in iʿrāb; maʿnawī forms use the source-required word, antecedent meaning, and agreeing attached pronoun.',[131,132,133,134],'Productive scope: exact noun repetition; singular masculine نَفْس/عَيْن; divisible singular كُلّ; masculine-plural جَمِيع. أَجْمَع and its dependent strengthening forms are not independently produced.'),
 
  R_SINGULAR_RAF_DAMMA:sourceRule('Visible ḍammah raises a regular singular noun.',[26],'Only nouns whose ending accepts a visible ḍammah.'),
@@ -6926,6 +6966,7 @@ const AR={
  naat:w=>grammarSpec('noun','naat'),
  atf:w=>grammarSpec('noun','atf'),
  tawkid:w=>grammarSpec('noun','tawkid'),
+ badal:w=>grammarSpec('noun','badal'),
  atfParticle:record=>grammarSpec('particle','particle',{particleType:record.particleType,particleWord:record.surface})
 };
 const EN={mubtada:'',khabar:'',object:'',prep:'',majrur:'',mudaf:'',mudafIlayh:'',present:'',fiveVerb:'',fiveNoun:''};
@@ -7103,6 +7144,57 @@ function deriveTawkidFollowerAuthority(data,index){
   pronounKey:pair.pronounId,antecedentGender:pair.antecedentGender||'',antecedentNumber:pair.antecedentNumber||'',
   conditionAr:pair.conditionAr,conditionEn:pair.conditionEn});
 }
+function badalTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.followerKind===BADAL_KIND?template:null;
+}
+/* The mubdal minhu is the noun immediately before the badal, and it may not itself be a follower —
+   the badal attaches to a head, not to another follower's tail. */
+function badalPairAt(data,index){
+ const template=badalTemplateRecord(data);
+ const follower=data?.tokens?.[index],followed=data?.tokens?.[index-1];
+ if(!template||!follower||!followed||follower.grammar?.role!=='badal'
+   ||followed.grammar?.type!=='noun'||['naat','atf','tawkid','badal'].includes(followed.grammar?.role))return null;
+ const state=followed.state||follower.state;
+ const formKey={raf:'nom',nasb:'acc',jarr:'gen'}[state];
+ if(!formKey)return null;
+ for(const key of template.followerPairKeys){
+  const pair=BADAL_PAIR_REGISTRY[key];
+  if(pair&&pair.followed[formKey]===followed.word&&pair.follower[formKey]===follower.word){
+   return{key,pair,state,followed,follower};
+  }
+ }
+ return null;
+}
+/* Badal authority, on the same cache-independent follower contract as naʿt, ʿaṭf and tawkīd.
+   Beyond the shared state/inflection proof it settles the one thing that separates the four kinds
+   from each other: بدل البعض and بدل الاشتمال must carry the ضمير عائد the source requires, and
+   بدل المطابق and بدل الغلط must NOT — so a pronoun-bearing surface can never be relabelled as
+   muṭābiq, and a bare noun can never be passed off as baʿḍ. The part-whole and association senses
+   are read from the frozen pair, never guessed from the words. */
+function deriveBadalFollowerAuthority(data,index){
+ const found=badalPairAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
+ const {key,pair,state,followed,follower}=found;
+ if(follower.state!==state)return Object.freeze({authorized:false,reason:'state-mismatch'});
+ if(followed.inflection!==pair.followedInflection||follower.inflection!==pair.followerInflection){
+  return Object.freeze({authorized:false,reason:'inflection-mismatch'});
+ }
+ if(!Object.values(BADAL_SUBTYPES).includes(pair.subtype))return Object.freeze({authorized:false,reason:'unknown-subtype'});
+ const needsPronoun=BADAL_PRONOUN_REQUIRED.includes(pair.subtype);
+ if(needsPronoun){
+  const pronoun=TAWKID_ATTACHED_PRONOUNS[pair.pronounId];
+  if(!pronoun||pronoun.gender!==pair.antecedentGender||pronoun.number!==pair.antecedentNumber){
+   return Object.freeze({authorized:false,reason:'pronoun-agreement-mismatch'});
+  }
+  const suffix=pronoun.surfaceByState[state];
+  if(!suffix||!follower.word.endsWith(suffix))return Object.freeze({authorized:false,reason:'attached-pronoun-mismatch'});
+ }else if(pair.pronounId)return Object.freeze({authorized:false,reason:'pronoun-not-permitted-for-subtype'});
+ return Object.freeze({authorized:true,reason:'',kind:BADAL_KIND,pairKey:key,subtype:pair.subtype,
+  semanticKey:pair.semanticKey,state,followedId:followed.id,followerId:follower.id,
+  pronounKey:pair.pronounId,antecedentGender:pair.antecedentGender||'',antecedentNumber:pair.antecedentNumber||'',
+  conditionAr:pair.conditionAr,conditionEn:pair.conditionEn});
+}
 function canonicalNaatPhraseEnglish(data,followedIndex){
  const found=naatPairAt(data,followedIndex+1);
  return found?.pair?.phraseEn||null;
@@ -7121,7 +7213,8 @@ function inflectNoun(token,tokens,index,data){
      AR.naat from promoting an arbitrary matching adjective into grammatical truth. */
   const authorized=token.grammar.role==='naat'?Boolean(naatPairAt(data,index))
    :token.grammar.role==='atf'?deriveAtfFollowerAuthority(data,index).authorized
-   :token.grammar.role==='tawkid'?deriveTawkidFollowerAuthority(data,index).authorized:false;
+   :token.grammar.role==='tawkid'?deriveTawkidFollowerAuthority(data,index).authorized
+   :token.grammar.role==='badal'?deriveBadalFollowerAuthority(data,index).authorized:false;
   if(!authorized)throw new Error('The follower structure is not canonically registered for this template.');
  }else token.state=roleRule.state;
  token.ruleId=roleRule.ruleId;
@@ -7398,9 +7491,10 @@ function resolveRelationships(data){
   kana.relations.ismId=ismKana.id;kana.relations.khabarId=kanaKhabar.id;ismKana.relations.governorId=kana.id;ismKana.relations.khabarId=kanaKhabar.id;kanaKhabar.relations.kanaId=kana.id;kanaKhabar.relations.ismKanaId=ismKana.id;
  }
  tokens.forEach((item,index)=>{
-  if(!['naat','atf','tawkid'].includes(item.grammar?.role))return;
+  if(!['naat','atf','tawkid','badal'].includes(item.grammar?.role))return;
   const authority=item.grammar.role==='naat'?deriveNaatFollowerAuthority(data,index)
    :item.grammar.role==='atf'?deriveAtfFollowerAuthority(data,index)
+   :item.grammar.role==='badal'?deriveBadalFollowerAuthority(data,index)
    :deriveTawkidFollowerAuthority(data,index);
   if(!authority.authorized)return;
   const fields={kind:authority.kind,followedId:authority.followedId,followerId:authority.followerId,state:authority.state};
@@ -7450,6 +7544,11 @@ function nounRoleArabic(token){
   if(!authority.authorized)throw new Error(`Cannot render unauthorized tawkīd: ${authority.reason}`);
   const subtype=authority.subtype===TAWKID_SUBTYPES.lafzi?'لَفْظِيٌّ':'مَعْنَوِيٌّ';
   return`تَوْكِيدٌ ${subtype} ${stateArabic(token.state)} تَابِعٌ لِمُؤَكَّدِهِ`;
+ }
+ if(role==='badal'){
+  const data=token._data,authority=deriveBadalFollowerAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render unauthorized badal: ${authority.reason}`);
+  return`${BADAL_KIND_LABELS[authority.subtype].ar} ${stateArabic(token.state)} تَابِعٌ لِلْمُبْدَلِ مِنْهُ`;
  }
  if(role==='adverb')return'ظَرْفٌ مَنْصُوبٌ';
  throw new Error(`Unknown noun role: ${role}`);
@@ -7639,6 +7738,26 @@ function whyTawkidCondition(token,data){
   ar:`وَصَحَّ هَذَا التَّوْكِيدُ؛ ${authority.conditionAr}.`,
   en:`This tawkīd is valid because ${authority.conditionEn}.`};
 }
+function badalWhyAuthority(token,data){
+ const authority=deriveBadalFollowerAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`WHY: badal is not authorized (${authority.reason}).`);
+ return authority;
+}
+/* The learner is told WHICH kind this is and WHY that kind is the right one — the part-whole
+   relation for baʿḍ, the association for ishtimāl, sameness for muṭābiq, the correction for ghalaṭ
+   — from the pair's own registered reason, never from generic filler. */
+function whyBadalCondition(token,data){
+ const authority=badalWhyAuthority(token,data);
+ return{id:`WHY_BADAL_${authority.semanticKey.toUpperCase()}`,
+  ar:`وَصَحَّ هَذَا الْبَدَلُ؛ ${authority.conditionAr}.`,
+  en:`This badal is valid because ${authority.conditionEn}.`};
+}
+const BADAL_KIND_LABELS=Object.freeze({
+ mutabiq:Object.freeze({ar:'بَدَلُ الْكُلِّ مِنَ الْكُلِّ',en:'badal al-kull min al-kull (the matching badal)'}),
+ baad:Object.freeze({ar:'بَدَلُ الْبَعْضِ مِنَ الْكُلِّ',en:'badal al-baʿḍ min al-kull (part for whole)'}),
+ ishtimal:Object.freeze({ar:'بَدَلُ الِاشْتِمَالِ',en:'badal al-ishtimāl (badal of inclusion)'}),
+ ghalat:Object.freeze({ar:'بَدَلُ الْغَلَطِ',en:'badal al-ghalaṭ (badal of the slip)'})
+});
 /* Role registry: why the word holds this role, and why that role fixes this state. */
 const WHY_ROLE=Object.freeze({
  mubtada:{
@@ -7720,6 +7839,13 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_TAWKID_INHERITED',
   stateAr:t=>`وَالتَّوْكِيدُ يَتْبَعُ مُؤَكَّدَهُ فِي الْإِعْرَابِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A tawkīd follows its muʾakkad in iʿrāb state, so this one is ${stateArabic(t.state)} like it.`},
+ badal:{
+  id:(t,data)=>`WHY_ROLE_BADAL_${badalWhyAuthority(t,data).subtype.toUpperCase()}`,
+  ar:(t,data)=>`${wq(t.word)} هُوَ الْمَقْصُودُ بِالْحُكْمِ بِلَا وَاسِطَةٍ بَعْدَ ${wq(data.tokens[data.tokens.indexOf(t)-1].word)}، فَهُوَ ${BADAL_KIND_LABELS[badalWhyAuthority(t,data).subtype].ar}.`,
+  en:(t,data)=>`${eq(t.word)} is what the ruling actually intends, with no intermediary, after ${eq(data.tokens[data.tokens.indexOf(t)-1].word)}, so it is ${BADAL_KIND_LABELS[badalWhyAuthority(t,data).subtype].en}.`,
+  stateId:()=>'WHY_STATE_BADAL_INHERITED',
+  stateAr:t=>`وَالْبَدَلُ يَتْبَعُ الْمُبْدَلَ مِنْهُ فِي جَمِيعِ إِعْرَابِهِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
+  stateEn:t=>`A badal follows its mubdal minhu in all of its iʿrāb, so this one is ${stateArabic(t.state)} like it.`},
  adverb:{
   id:t=>WHY_ZARF_SENSE[t.word]?'WHY_ROLE_ZARF':'WHY_ROLE_ZARF_GENERIC',
   ar:t=>`${wq(t.word)} ظَرْفٌ ${whyZarfSense(t).ar}.`,
@@ -7916,6 +8042,9 @@ function buildTokenWhy(token,data){
   if(token.grammar.role==='tawkid'){
    push(whyTawkidCondition(token,data));
   }
+  if(token.grammar.role==='badal'){
+   push(whyBadalCondition(token,data));
+  }
   // The five nouns carry their muḍāf ilayh as an attached kāf, so the generic “joined to what
   // follows it” wording would be wrong for them; the engine already flags this via attachedKaf.
   if(token.grammar.isMudaf)push(token.grammar.attachedKaf
@@ -8003,6 +8132,13 @@ function buildRelationshipWhy(rel,data){
     en:`${eq(follower.word)} is ${rel.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd of ${eq(followed.word)}, so it inherits its iʿrāb state and is ${stateArabic(follower.state)} like it.`});
    return{ids,ar,en};
   }
+  if(rel.kind===BADAL_KIND){
+   const label=BADAL_KIND_LABELS[rel.subtype];
+   push({id:'WHY_REL_BADAL_STATE_INHERITANCE',
+    ar:`${wq(follower.word)} ${label.ar} مِنْ ${wq(followed.word)}، فَتَبِعَهُ فِي جَمِيعِ إِعْرَابِهِ وَصَارَ ${stateArabic(follower.state)} مِثْلَهُ.`,
+    en:`${eq(follower.word)} is ${label.en} for ${eq(followed.word)}, so it follows it in all of its iʿrāb and is ${stateArabic(follower.state)} like it.`});
+   return{ids,ar,en};
+  }
   push({id:'WHY_REL_NAAT_AGREEMENT',
    ar:`${wq(follower.word)} نَعْتٌ حَقِيقِيٌّ لِـ${wq(followed.word)}، وَقَدْ وَافَقَهُ فِي الْإِعْرَابِ وَالتَّعْرِيفِ أَوِ التَّنْكِيرِ وَالتَّذْكِيرِ أَوِ التَّأْنِيثِ وَالْإِفْرَادِ أَوِ التَّثْنِيَةِ أَوِ الْجَمْعِ.`,
    en:`${eq(follower.word)} is the true naʿt of ${eq(followed.word)} and agrees with it in iʿrāb state, definiteness, gender, and number.`});
@@ -8082,6 +8218,13 @@ function renderRelationshipAnalysis(data){
    const subtype=rel.subtype===TAWKID_SUBTYPES.lafzi?'لَفْظِيٌّ':'مَعْنَوِيٌّ';
    followed.phraseAr=`وَالتَّرْكِيبُ «${followed.word} ${follower.word}»: مُؤَكَّدٌ وَتَوْكِيدٌ ${subtype} تَابِعٌ لَهُ فِي الْإِعْرَابِ.`;
    followed.phraseEn=`Together, “${followed.word} ${follower.word}” is a muʾakkad with its ${rel.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd inheriting its state.`;
+   followed.phraseLabel='Follower';
+   return;
+  }
+  if(rel.kind===BADAL_KIND){
+   const label=BADAL_KIND_LABELS[rel.subtype];
+   followed.phraseAr=`وَالتَّرْكِيبُ «${followed.word} ${follower.word}»: مُبْدَلٌ مِنْهُ وَ${label.ar} تَابِعٌ لَهُ فِي جَمِيعِ الْإِعْرَابِ.`;
+   followed.phraseEn=`Together, “${followed.word} ${follower.word}” is a mubdal minhu with its ${label.en}, following it in all of its iʿrāb.`;
    followed.phraseLabel='Follower';
    return;
   }
@@ -8313,6 +8456,10 @@ function validateExercise(data){
     const authority=deriveTawkidFollowerAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_TAWKID_AUTHORITY',`Tawkīd authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_TAWKID')fail('E_TAWKID_RULE','The tawkīd is not bound to its source rule.',token);
+   }else if(token.grammar.role==='badal'){
+    const authority=deriveBadalFollowerAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_BADAL_AUTHORITY',`Badal authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_BADAL')fail('E_BADAL_RULE','The badal is not bound to its source rule.',token);
    }else if(token.state!==roleRule?.state)fail('E_ROLE_CASE',`Role ${token.grammar.role} requires ${roleRule?.state}, not ${token.state}.`,token);
    const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
    if(safeSignId(token.sign)!==signRule?.[0])fail('E_NOUN_SIGN','Noun sign disagrees with case and declension.',token);
@@ -8610,12 +8757,13 @@ function validateExercise(data){
    const follower=tokenById.get(rel.followerId);
    const authority=rel.kind===ATF_KIND?deriveAtfFollowerAuthority(data,data.tokens.indexOf(follower))
     :rel.kind===TAWKID_KIND?deriveTawkidFollowerAuthority(data,data.tokens.indexOf(follower))
+    :rel.kind===BADAL_KIND?deriveBadalFollowerAuthority(data,data.tokens.indexOf(follower))
     :deriveNaatFollowerAuthority(data,data.tokens.indexOf(follower));
    if(!authority.authorized||rel.kind!==authority.kind||rel.followedId!==authority.followedId
      ||rel.followerId!==authority.followerId||rel.state!==authority.state
      ||rel.kind===NAAT_KIND&&(rel.definiteness!==authority.definiteness||rel.gender!==authority.gender||rel.number!==authority.number)
      ||rel.kind===ATF_KIND&&(rel.conjunctionId!==authority.conjunctionId||rel.conjunctionKey!==authority.conjunctionKey)
-     ||rel.kind===TAWKID_KIND&&(rel.pairKey!==authority.pairKey||rel.subtype!==authority.subtype
+     ||(rel.kind===TAWKID_KIND||rel.kind===BADAL_KIND)&&(rel.pairKey!==authority.pairKey||rel.subtype!==authority.subtype
        ||rel.semanticKey!==authority.semanticKey||rel.pronounKey!==authority.pronounKey
        ||rel.antecedentGender!==authority.antecedentGender||rel.antecedentNumber!==authority.antecedentNumber)){
     fail('E_FOLLOWER_RELATION','Follower relationship is not the canonical follower proof.',follower);
@@ -8656,6 +8804,17 @@ function validateExercise(data){
   }
   if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
    fail('E_TAWKID_RELATION_COUNT','A tawkīd must have exactly one follower relationship.',item);
+  }
+ });
+ data.tokens.filter(item=>item.grammar.role==='badal').forEach(item=>{
+  const rel=relationships.find(candidate=>candidate.id===item.relations.followerRelationshipId&&candidate.type==='follower');
+  const followed=tokenById.get(item.relations.followedId);
+  if(!rel||rel.kind!==BADAL_KIND||rel.followerId!==item.id||rel.followedId!==followed?.id
+    ||followed?.relations.followerId!==item.id||followed?.relations.followerRelationshipId!==rel.id){
+   fail('E_BADAL_RELATION','A badal must have exactly one reciprocal canonical link to its mubdal minhu.',item);
+  }
+  if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
+   fail('E_BADAL_RELATION_COUNT','A badal must have exactly one follower relationship.',item);
   }
  });
  data.tokens.filter(item=>item.grammar.role==='mubtada').forEach(item=>{
@@ -8800,13 +8959,14 @@ function add(starts,form,state,sign,build,metadata={}){
  const followerPairKeys=Object.freeze([...(metadata.followerPairKeys||[])]);
  const followerConjunctionKeys=Object.freeze([...(metadata.followerConjunctionKeys||[])]);
  if(Boolean(followerKind)!==Boolean(followerPairKeys.length)
-   ||followerKind&&![NAAT_KIND,ATF_KIND,TAWKID_KIND].includes(followerKind)
+   ||followerKind&&![NAAT_KIND,ATF_KIND,TAWKID_KIND,BADAL_KIND].includes(followerKind)
    ||followerKind!==ATF_KIND&&followerConjunctionKeys.length
    ||followerKind===ATF_KIND&&!followerConjunctionKeys.length){
   throw new Error(`Template ${stableId} has an invalid follower declaration.`);
  }
  const followerRegistry=followerKind===ATF_KIND?ATF_PAIR_REGISTRY
-  :followerKind===TAWKID_KIND?TAWKID_PAIR_REGISTRY:NAAT_PAIR_REGISTRY;
+  :followerKind===TAWKID_KIND?TAWKID_PAIR_REGISTRY
+  :followerKind===BADAL_KIND?BADAL_PAIR_REGISTRY:NAAT_PAIR_REGISTRY;
  if(followerPairKeys.some((key,position)=>followerPairKeys.indexOf(key)!==position||!followerRegistry[key])){
   throw new Error(`Template ${stableId} names a duplicate or unregistered follower pair.`);
  }
@@ -9472,6 +9632,166 @@ function canonicalTawkidTranslation(data){
  const host={raf:'raf',nasb:'nasb',jarr:'jarr'}[template.state];
  return host?tawkidTranslationFor(pair,host):null;
 }
+/* ---- البدل ------------------------------------------------------------------------
+   Al-Tuḥfah pp. 135–138. The matn: «إِذَا أُبْدِلَ اسْمٌ مِنَ اسْمٍ أَوْ فِعْلٌ مِنْ فِعْلٍ تَبِعَهُ فِي جَمِيعِ
+   إِعْرَابِهِ» — so the badal takes its STATE from the mubdal minhu, exactly as the other three
+   followers do, and this phase reuses that one foundation rather than building a second.
+
+   The شرح gives four kinds, and the two middle ones carry a condition the other two do not:
+     • بدل الكل من الكل (المطابق) — ضابطه أن يكون البدل عَيْنَ المبدل منه. No pronoun.
+     • بدل البعض من الكل — ضابطه أن يكون البدل جزءًا من المبدل منه، «ويجب في هذا النوع أن يضاف
+       إلى ضميرٍ عائدٍ إلى المبدل منه».
+     • بدل الاشتمال — ضابطه أن يكون بينهما ارتباط بغير الكلية والجزئية، «ويجب فيه إضافة البدل إلى
+       ضمير عائد إلى المبدل منه أيضًا».
+     • بدل الغلط — the speaker corrects what was said.
+   The pronoun is therefore not decoration: it is REQUIRED for baʿḍ and ishtimāl and must be
+   ABSENT for muṭābiq, which is what keeps the four kinds structurally distinct instead of a label.
+
+   Part-whole and association are not inferred. Each pair is a frozen registry entry naming its own
+   kind, its own antecedent, and its own reason — so «الْقُرْآنَ ثُلُثَهُ» can never be read as
+   ishtimāl, nor «الْمُعَلِّمُ عِلْمُهُ» as baʿḍ, however similar their shapes look.
+
+   The attached-pronoun table is TAWKID_ATTACHED_PRONOUNS, reused unchanged: the source requires the
+   same «ضمير عائد إلى المبدل منه», and a second copy would be a second authority. */
+const BADAL_LEXEMES=Object.freeze({
+ thuluthuHu:Object.freeze({nom:'ثُلُثُهُ',acc:'ثُلُثَهُ',gen:'ثُلُثِهِ',en:'a third of it'}),
+ nisfuHu:Object.freeze({nom:'نِصْفُهُ',acc:'نِصْفَهُ',gen:'نِصْفِهِ',en:'half of it'}),
+ ilmuHu:Object.freeze({nom:'عِلْمُهُ',acc:'عِلْمَهُ',gen:'عِلْمِهِ',en:'his knowledge'}),
+ khuluquHu:Object.freeze({nom:'خُلُقُهُ',acc:'خُلُقَهُ',gen:'خُلُقِهِ',en:'his character'})
+});
+const BADAL_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ /* بدل الكل من الكل — «حَضَرَ إِبْرَاهِيمُ أَبُوكَ» (p. 135). Same referent, no pronoun; the follower is
+    one of الأسماء الخمسة, so the inherited five-noun sign lane is exercised in all three states. */
+ mutabiqFather:Object.freeze({subtype:BADAL_SUBTYPES.mutabiq,semanticKey:'sameReferent',
+  followed:Object.freeze({...singularPeople.find(item=>item.en==='the teacher')}),
+  follower:Object.freeze({...fiveNouns.find(item=>item.en==='your father')}),
+  followedInflection:'singular',followerInflection:'fiveNouns',pronounId:'',
+  antecedentGender:'',antecedentNumber:'',hosts:Object.freeze(['raf','nasb','jarr']),verbPast:'زَارَ',
+  conditionAr:'لِأَنَّ الْبَدَلَ هُوَ عَيْنُ الْمُبْدَلِ مِنْهُ، فَهُمَا لِذَاتٍ وَاحِدَةٍ',
+  conditionEn:'the badal is the very same person as the mubdal minhu',phraseEn:'the teacher, your father'}),
+ mutabiqBrother:Object.freeze({subtype:BADAL_SUBTYPES.mutabiq,semanticKey:'sameReferent',
+  followed:Object.freeze({...singularPeople.find(item=>item.en==='the guest')}),
+  follower:Object.freeze({...fiveNouns.find(item=>item.en==='your brother')}),
+  followedInflection:'singular',followerInflection:'fiveNouns',pronounId:'',
+  antecedentGender:'',antecedentNumber:'',hosts:Object.freeze(['raf','nasb','jarr']),verbPast:'زَارَ',
+  conditionAr:'لِأَنَّ الْبَدَلَ هُوَ عَيْنُ الْمُبْدَلِ مِنْهُ، فَهُمَا لِذَاتٍ وَاحِدَةٍ',
+  conditionEn:'the badal is the very same person as the mubdal minhu',phraseEn:'the guest, your brother'}),
+ /* بدل البعض من الكل — «حَفِظْتُ الْقُرْآنَ ثُلُثَهُ» (p. 136), the شرح's own example. A real part,
+    and the pronoun back to the whole is obligatory. */
+ baadQuranThird:Object.freeze({subtype:BADAL_SUBTYPES.baad,semanticKey:'partOfWhole',
+  followed:Object.freeze({...singularThings.find(item=>item.en==='the Qurʾān')}),follower:BADAL_LEXEMES.thuluthuHu,
+  followedInflection:'singular',followerInflection:'singular',pronounId:'hu',
+  antecedentGender:'masculine',antecedentNumber:'singular',hosts:Object.freeze(['nasb','jarr']),verbPast:'حَفِظَ',
+  conditionAr:'لِأَنَّ الثُّلُثَ جُزْءٌ حَقِيقِيٌّ مِنَ الْمُبْدَلِ مِنْهُ، وَقَدْ أُضِيفَ إِلَى ضَمِيرٍ عَائِدٍ إِلَيْهِ',
+  conditionEn:'a third is a real part of the whole, and it carries the pronoun that returns to that whole',
+  phraseEn:'a third of the Qurʾān'}),
+ baadBreadHalf:Object.freeze({subtype:BADAL_SUBTYPES.baad,semanticKey:'partOfWhole',
+  followed:Object.freeze({...singularThings.find(item=>item.en==='the bread')}),follower:BADAL_LEXEMES.nisfuHu,
+  followedInflection:'singular',followerInflection:'singular',pronounId:'hu',
+  antecedentGender:'masculine',antecedentNumber:'singular',hosts:Object.freeze(['nasb','jarr']),verbPast:'حَفِظَ',
+  conditionAr:'لِأَنَّ النِّصْفَ جُزْءٌ حَقِيقِيٌّ مِنَ الْمُبْدَلِ مِنْهُ، وَقَدْ أُضِيفَ إِلَى ضَمِيرٍ عَائِدٍ إِلَيْهِ',
+  conditionEn:'a half is a real part of the whole, and it carries the pronoun that returns to that whole',
+  phraseEn:'half of the bread'}),
+ /* بدل الاشتمال — «نَفَعَنِي زَيْدٌ عِلْمُهُ» (p. 135). Knowledge and character are not PARTS of a
+    person; they are things the person's meaning takes in — «ارتباط بغير الكلية والجزئية». */
+ ishtimalTeacherKnowledge:Object.freeze({subtype:BADAL_SUBTYPES.ishtimal,semanticKey:'association',
+  followed:Object.freeze({...singularPeople.find(item=>item.en==='the teacher')}),follower:BADAL_LEXEMES.ilmuHu,
+  followedInflection:'singular',followerInflection:'singular',pronounId:'hu',
+  antecedentGender:'masculine',antecedentNumber:'singular',hosts:Object.freeze(['nasb','jarr']),verbPast:'دَرَسَ',
+  conditionAr:'لِأَنَّ الْعِلْمَ لَيْسَ جُزْءًا مِنَ الْمُبْدَلِ مِنْهُ، بَلْ هُوَ مِمَّا يَشْتَمِلُ عَلَيْهِ مَعْنَاهُ، وَقَدْ أُضِيفَ إِلَى ضَمِيرٍ عَائِدٍ إِلَيْهِ',
+  conditionEn:'knowledge is not a part of the man but something his meaning takes in, and it carries the pronoun returning to him',
+  phraseEn:'the teacher’s knowledge'}),
+ ishtimalScholarCharacter:Object.freeze({subtype:BADAL_SUBTYPES.ishtimal,semanticKey:'association',
+  followed:Object.freeze({...singularPeople.find(item=>item.en==='the scholar')}),follower:BADAL_LEXEMES.khuluquHu,
+  followedInflection:'singular',followerInflection:'singular',pronounId:'hu',
+  antecedentGender:'masculine',antecedentNumber:'singular',hosts:Object.freeze(['nasb','jarr']),verbPast:'دَرَسَ',
+  conditionAr:'لِأَنَّ الْخُلُقَ لَيْسَ جُزْءًا مِنَ الْمُبْدَلِ مِنْهُ، بَلْ هُوَ مِمَّا يَشْتَمِلُ عَلَيْهِ مَعْنَاهُ، وَقَدْ أُضِيفَ إِلَى ضَمِيرٍ عَائِدٍ إِلَيْهِ',
+  conditionEn:'character is not a part of the man but something his meaning takes in, and it carries the pronoun returning to him',
+  phraseEn:'the scholar’s character'}),
+ /* بدل الغلط — «رَأَيْتُ زَيْدًا الْفَرَسَ»، «أَرَدْتَ أَنْ تَقُولَ الْفَرَسَ فَغَلِطْتَ فَأَبْدَلْتَ زَيْدًا مِنْهُ» (pp. 135–136).
+    The شرح's third ضرب: the tongue runs ahead to the wrong word and the speaker corrects it after
+    uttering it. The exercise is the speaker here, so the slip is declared, not inferred. */
+ ghalatBookNotebook:Object.freeze({subtype:BADAL_SUBTYPES.ghalat,semanticKey:'spokenCorrection',
+  followed:Object.freeze({...singularThings.find(item=>item.en==='the book')}),
+  follower:Object.freeze({...singularThings.find(item=>item.en==='the notebook')}),
+  followedInflection:'singular',followerInflection:'singular',pronounId:'',
+  antecedentGender:'',antecedentNumber:'',hosts:Object.freeze(['nasb','jarr']),verbPast:'قَرَأَ',
+  conditionAr:'لِأَنَّ الْمُتَكَلِّمَ سَبَقَ لِسَانُهُ إِلَى الْأَوَّلِ ثُمَّ عَدَلَ إِلَى مَا أَرَادَهُ',
+  conditionEn:'the speaker’s tongue ran to the first word and he then corrected it to the one he meant',
+  phraseEn:'the notebook'})
+}));
+const BADAL_ALL_PAIR_KEYS=Object.freeze(Object.keys(BADAL_PAIR_REGISTRY));
+/* ---- البدل: one builder, three host states, the same follower foundation. ---------------- */
+const BADAL_HOST_STATE=Object.freeze({raf:'raf',nasb:'nasb',jarr:'jarr'});
+/* Each pair names the hosts it reads naturally in and the verb that governs it, so no host has to
+   fall back to a verb that makes the sentence say something untrue. بدل البعض and بدل الاشتمال are
+   never drawn as a bare fāʿil — «a third of the Qurʾān visited» is not Arabic anyone should be
+   shown — so the rafʿ host takes the muṭābiq pairs, whose badal genuinely can be the subject,
+   exactly as the source's own «حَضَرَ إِبْرَاهِيمُ أَبُوكَ» does. */
+function badalVerbFor(pair){
+ const verb=verbs.find(item=>item.past===pair.verbPast);
+ if(!verb)throw new Error(`The productive badal pair names an unregistered verb: ${pair.verbPast}`);
+ return verb;
+}
+function badalTranslationFor(pair,host){
+ if(host==='jarr')return`There is a question about ${pair.phraseEn}.`;
+ const verb=badalVerbFor(pair);
+ if(host==='raf')return`${cap(pair.phraseEn)} ${verb.pastEn}.`;
+ return`The student ${verb.pastEn} ${pair.phraseEn}.`;
+}
+function buildBadalExercise(pairKey,host){
+ const pair=BADAL_PAIR_REGISTRY[pairKey];
+ if(!pair)throw new Error(`Unknown productive badal pair: ${pairKey}`);
+ if(!pair.hosts.includes(host))throw new Error(`The badal pair ${pairKey} is not registered for the ${host} host.`);
+ const state=BADAL_HOST_STATE[host],formKey={raf:'nom',nasb:'acc',jarr:'gen'}[state];
+ if(!formKey)throw new Error(`Unknown productive badal host: ${host}`);
+ const followedWord=pair.followed[formKey],followerWord=pair.follower[formKey];
+ const follower=token(followerWord,pair.follower.en,AR.badal(followerWord),
+  'A badal inheriting its mubdal minhu’s state.',true);
+ if(host==='jarr')return{sentence:'',translation:badalTranslationFor(pair,host),tokens:[
+  token('عَنْ','about',AR.prep('عَنْ'),EN.prep),
+  token(followedWord,pair.followed.en,AR.majrur(followedWord,'عَنْ'),'The mubdal minhu governed by the preposition.'),
+  follower,token('سُؤَالٌ','a question',AR.delayedMubtada('سُؤَالٌ'),'A delayed mubtadaʾ; nominative.')
+ ]};
+ const verb=badalVerbFor(pair);
+ /* The rafʿ host is verb + fāʿil + badal and stops there: «زَارَ الْمُعَلِّمُ أَبُوكَ» is already a
+    complete sentence, and adding a trailing object would only put a second noun after the badal for
+    no grammatical gain. */
+ if(host==='raf')return{sentence:'',translation:badalTranslationFor(pair,host),tokens:[
+  token(verb.past,verb.pastEn,AR.past(verb.past),'A past-tense verb built on its canonical ending.'),
+  token(followedWord,pair.followed.en,AR.faail(followedWord),'The mubdal minhu and explicit subject.'),
+  follower
+ ]};
+ return{sentence:'',translation:badalTranslationFor(pair,host),tokens:[
+  token(verb.past,verb.pastEn,AR.past(verb.past),'A past-tense verb built on its canonical ending.'),
+  token('الطَّالِبُ','the student',AR.faail('الطَّالِبُ'),'The explicit subject.'),
+  token(followedWord,pair.followed.en,AR.object(followedWord),'The mubdal minhu and direct object.'),follower
+ ]};
+}
+function canonicalBadalTranslation(data){
+ const followerIndex=data?.tokens?.findIndex(token=>token.grammar?.role==='badal')??-1;
+ const authority=deriveBadalFollowerAuthority(data,followerIndex);
+ if(!authority.authorized)return null;
+ const template=badalTemplateRecord(data),pair=BADAL_PAIR_REGISTRY[authority.pairKey];
+ const host=BADAL_HOST_STATE[template.state];
+ return host?badalTranslationFor(pair,host):null;
+}
+const badalMetadata=(keys,extra={})=>({...extra,followerKind:BADAL_KIND,followerPairKeys:keys});
+const pickedBadal=(keys,label,host)=>buildBadalExercise(pickVaried(keys,label,String),host);
+/* Host membership is the pair's own declaration, so a template can never draw a construction the
+   registry did not license for that state. The badal is the FOCUS token, so its own declension also
+   fixes which template family it belongs to: the muṭābiq pairs answer with one of الأسماء الخمسة
+   and therefore live in the fiveNouns family (wāw / alif / yāʾ), while baʿḍ, ishtimāl and ghalaṭ
+   answer with a singular and live in the singular family (ḍammah / fatḥah / kasrah). Splitting them
+   this way is what lets both sign lanes be inherited rather than re-implemented. */
+const badalKeys=(host,inflection)=>Object.freeze(BADAL_ALL_PAIR_KEYS.filter(key=>
+ BADAL_PAIR_REGISTRY[key].hosts.includes(host)&&BADAL_PAIR_REGISTRY[key].followerInflection===inflection));
+const BADAL_FIVE_RAF_KEYS=badalKeys('raf','fiveNouns');
+const BADAL_FIVE_NASB_KEYS=badalKeys('nasb','fiveNouns');
+const BADAL_FIVE_JARR_KEYS=badalKeys('jarr','fiveNouns');
+const BADAL_SINGULAR_NASB_KEYS=badalKeys('nasb','singular');
+const BADAL_SINGULAR_JARR_KEYS=badalKeys('jarr','singular');
+
 const tawkidMetadata=(keys,extra={})=>({...extra,followerKind:TAWKID_KIND,followerPairKeys:keys});
 const pickedTawkid=(keys,label,host)=>buildTawkidExercise(pickVaried(keys,label,String),host);
 add('verb','singular','raf','damma',()=>pickedTawkid(TAWKID_RAF_PAIR_KEYS,'tawkid-raf','raf'),
@@ -9480,6 +9800,16 @@ add('verb','singular','nasb','fatha',()=>pickedTawkid(TAWKID_ALL_PAIR_KEYS,'tawk
  tawkidMetadata(TAWKID_ALL_PAIR_KEYS,pastTemplateMetadata('3ms','explicit')));
 add('particle','singular','jarr','kasra',()=>pickedTawkid(TAWKID_ALL_PAIR_KEYS,'tawkid-jarr','jarr'),
  tawkidMetadata(TAWKID_ALL_PAIR_KEYS));
+add('verb','fiveNouns','raf','waw',()=>pickedBadal(BADAL_FIVE_RAF_KEYS,'badal-five-raf','raf'),
+ badalMetadata(BADAL_FIVE_RAF_KEYS,pastTemplateMetadata('3ms','explicit')));
+add('verb','fiveNouns','nasb','alif',()=>pickedBadal(BADAL_FIVE_NASB_KEYS,'badal-five-nasb','nasb'),
+ badalMetadata(BADAL_FIVE_NASB_KEYS,pastTemplateMetadata('3ms','explicit')));
+add('particle','fiveNouns','jarr','ya',()=>pickedBadal(BADAL_FIVE_JARR_KEYS,'badal-five-jarr','jarr'),
+ badalMetadata(BADAL_FIVE_JARR_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedBadal(BADAL_SINGULAR_NASB_KEYS,'badal-nasb','nasb'),
+ badalMetadata(BADAL_SINGULAR_NASB_KEYS,pastTemplateMetadata('3ms','explicit')));
+add('particle','singular','jarr','kasra',()=>pickedBadal(BADAL_SINGULAR_JARR_KEYS,'badal-jarr','jarr'),
+ badalMetadata(BADAL_SINGULAR_JARR_KEYS));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

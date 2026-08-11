@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,responseContextId,responsePairIds,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,responseContextId,responsePairIds:[...responsePairIds],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -52,6 +52,11 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   MABNI_PRESENT_GOVERNORS,
   MABNI_PRESENT_GOVERNOR_MODES,
   KAY_TALIL_LAM,
+  CONCEALED_AN_MODES,
+  CONCEALED_AN_CONSTRUCTIONS,
+  CONCEALED_AN_BY_PARTICLE,
+  CONCEALED_AN_FRAME_DATA,
+  deriveConcealedAnNasb,
   mabniPresentStoredField,
   deriveMabniPresentMahall,
   templateAuthorizesPresentMorphology,
@@ -334,6 +339,74 @@ vm.runInContext(script,context,{filename:'index.html'});
 
 const api=context.__nahwTest;
 assert(api&&typeof api.completeNominalAnalysis==='function','Nominal validator was not exported to the test harness');
+function runConcealedAnFocusedTests(){
+  const constructions=Object.values(api.CONCEALED_AN_CONSTRUCTIONS);
+  assert(constructions.length===6,'The concealed-an registry does not contain exactly six constructions');
+  const builtByConstruction=new Map();
+  for(const construction of constructions){
+    assert(api.SOURCE_REGISTRY[construction.ruleId]?.productionEnabled===true,
+      construction.id+' is not bound to a production-enabled source rule');
+    const lanes=[
+      ['ordinary',construction.ordinaryTemplateId,'fatha','WHY_SIGN_MUDARI_NASB'],
+      ['afalKhamsa',construction.fiveTemplateId,'nunDropped','WHY_SIGN_AFAL5_NASB']
+    ];
+    for(const [lane,templateId,signId,signWhy] of lanes){
+      const template=api.templates.find(item=>item.stableId===templateId);
+      assert(template,construction.id+'/'+lane+' is unreachable');
+      assert(template.concealedAnConstruction===construction.id,
+        construction.id+'/'+lane+' template has the wrong construction identity');
+      const data=api.buildTemplate(template.id);
+      const verbIndex=data.tokens.findIndex(token=>token.target);
+      const verb=data.tokens[verbIndex];
+      const authorization=api.deriveConcealedAnNasb(data,verbIndex);
+      assert(authorization.authorized&&authorization.construction===construction.id&&authorization.mode===construction.mode,
+        construction.id+'/'+lane+' did not earn its frozen concealed-an mode');
+      assert(verb.state==='nasb'&&api.safeSignId(verb.sign)===signId,
+        construction.id+'/'+lane+' has the wrong state or sign');
+      assert(verb.ar.includes('بِأَنْ مُضْمَرَةٍ')&&verb.ar.includes(api.CONCEALED_AN_MODES[construction.mode].ar),
+        construction.id+'/'+lane+' learner iʿrāb does not name concealed an and its mode');
+      assert(verb.why.ids.includes('WHY_STATE_VERB_CONCEALED_AN')
+        &&verb.why.ids.includes(construction.mode==='jawazan'?'WHY_CONCEALED_AN_JAWAZAN':'WHY_CONCEALED_AN_WUJUBAN')
+        &&verb.why.ids.includes(signWhy),construction.id+'/'+lane+' Why chain is incomplete');
+      const particle=data.tokens[verbIndex-1];
+      assert(particle.ruleId===construction.ruleId,
+        construction.id+'/'+lane+' particle does not own its source rule');
+      const relation=data.relationships.find(item=>item.type==='concealedAn'&&item.verbId===verb.id);
+      assert(relation&&relation.construction===construction.id&&relation.mode===construction.mode,
+        construction.id+'/'+lane+' relationship cannot answer what licensed the naṣb');
+      const snapshot=api.createExerciseSnapshot(data);
+      const restored=snapshot&&api.restoreExerciseSnapshot(snapshot);
+      assert(restored&&restored.sentence===data.sentence&&restored.translation===data.translation,
+        construction.id+'/'+lane+' History round trip failed');
+      const restoredVerb=restored.tokens.find(token=>token.target);
+      assert(restoredVerb.ar===verb.ar&&restoredVerb.why.ids.join('|')===verb.why.ids.join('|'),
+        construction.id+'/'+lane+' History changed learner-facing analysis');
+      if(lane==='ordinary')builtByConstruction.set(construction.id,data);
+    }
+  }
+  const clone=value=>JSON.parse(JSON.stringify(value));
+  const refuses=(label,source,mutate)=>{
+    const data=clone(source);mutate(data);
+    const index=data.tokens.findIndex(token=>token.target);
+    assert(api.deriveConcealedAnNasb(data,index).authorized===false,label+' was accepted');
+  };
+  refuses('bare lām as lām al-juḥūd',builtByConstruction.get('lamJuhud'),data=>{data.tokens.splice(0,3)});
+  refuses('arbitrary ḥattā',builtByConstruction.get('hatta'),data=>{data.tokens[0].word='يَقْرَأُ'});
+  refuses('arbitrary fāʾ',builtByConstruction.get('faSababiyya'),data=>{data.tokens.shift()});
+  refuses('ordinary conjunction wāw',builtByConstruction.get('wawMaiyya'),data=>{data.tokens[3].grammar.particleType='coordination'});
+  refuses('ordinary disjunctive aw',builtByConstruction.get('aw'),data=>{data.tokens[3].grammar.particleType='awDisjunction'});
+  refuses('a manṣūb-looking verb inventing concealed an',builtByConstruction.get('lamTalil'),data=>{data.tokens[2].grammar.particleType='preposition'});
+  for(const id of ['lamTalil','lamJuhud']){
+    const data=clone(builtByConstruction.get(id));
+    const relation=data.relationships.find(item=>item.type==='concealedAn');
+    relation.mode=relation.mode==='jawazan'?'wujuban':'jawazan';
+    assert(api.validateExercise(data).some(failure=>failure.code==='E_CONCEALED_AN_RELATION'),
+      id+' accepted a swapped jawāzan/wujūban relationship');
+  }
+  console.log('Nawasib focused tests: 6 constructions, 12 lanes, 12 History round trips, 8 negative boundaries — green');
+}
+runConcealedAnFocusedTests();
+if(process.env.NAHW_FOCUSED_NAWASIB==='1')process.exit(0);
 assert(elements.sentence.textContent,'The application did not generate its initial sentence');
 assert(elements.historyToggle.textContent==='Sentence history (1)','The initial exercise was not added to clean snapshot history');
 assert(!elements.historyList.innerHTML.includes('جُمْلَةٌ سَابِقَةٌ'),'Legacy text-only history must not be treated as a reviewable exercise');
@@ -636,10 +709,15 @@ function assertNominalPair(data,label){
 
   const mubtadaIndexes=data.tokens.map((token,index)=>token.ar.includes('مُبْتَدَأٌ')?index:-1).filter(index=>index>=0);
   const khabarIndexes=data.tokens.map((token,index)=>PLAIN_KHABAR.test(analysisText(token))?index:-1).filter(index=>index>=0);
-  const ismInna=countTokens(data,/اسْمُ «/u);
-  const khabarInna=countTokens(data,/خَبَرُ «/u);
+  /* Structural roles, not presentation substrings, own sister-pair completeness. This also covers
+     the lām-al-juḥūd lane, whose kāna khabar is a verbal construction rather than a khabar noun. */
+  const ismInna=data.tokens.filter(token=>token.grammar.role==='ismInna').length;
+  const khabarInna=data.tokens.filter(token=>token.grammar.role==='khabarInna').length;
+  const ismKana=data.tokens.filter(token=>token.grammar.role==='ismKana').length;
+  const khabarKana=data.tokens.filter(token=>token.grammar.role==='khabarKana'||token.grammar.kanaKhabar===true).length;
   assert(ismInna===khabarInna,`${label}: ${ismInna} ism inna but ${khabarInna} khabar inna`);
-  if(ismInna)stats.innaPairs++;
+  assert(ismKana===khabarKana,`${label}: ${ismKana} ism kāna but ${khabarKana} khabar kāna`);
+  if(ismInna||ismKana)stats.innaPairs++;
   assert(mubtadaIndexes.length===khabarIndexes.length,
     `${label}: ${mubtadaIndexes.length} mubtada but ${khabarIndexes.length} khabar — ${data.sentence}`);
   assert(mubtadaIndexes.length<=1,`${label}: multiple nominal pairs need explicit metadata — ${data.sentence}`);
@@ -795,7 +873,7 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 // Phase 3A2's two governor-specific mabnī-present maḥall rules.
 // Phase 3B1 adds exactly one: G_IDHAN_NASB, the particle's own identity and government, which is
 // a different claim from the conditions R_IDHAN_CONDITIONS already owns.
-assert(Object.keys(api.SOURCE_REGISTRY).length===72,`Expected 72 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===81,`Expected 81 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -3906,18 +3984,23 @@ for(const [name,template] of Object.entries(p3Templates))assert(template,`Phase 
     'The كَيْ governor record is not canonical');
   // The lām is deliberately NOT a governor: being absent from this map is what stops it governing.
   assert(!governors.lamTalil,'lām al-taʿlīl must not be registered as a verb governor');
-  /* Phase 3B1 registers إِذَنْ as the first CONDITIONAL governor, so it is expected here now — but
-     the two genuinely deferred nawāṣib must still be absent, and إِذَنْ must be conditional, i.e.
-     bound to the condition set it may never govern without. An unconditional إِذَنْ would govern by
-     adjacency like every other entry in this table, which is exactly what p. 75 forbids. */
-  assert(!governors.hatta&&!governors.faSababiyya,
-    'Deferred nawāṣib must not be registered as governors');
+  /* إِذَنْ remains the only CONDITIONAL governor. The six concealed-أَنْ constructions are
+     registered from one closed authority table and must agree with it exactly; none may inherit
+     إِذَنْ's response-condition semantics. */
+  assert(Object.values(api.CONCEALED_AN_CONSTRUCTIONS).every(construction=>{
+    const governor=governors[construction.particleType];
+    return governor&&governor.surface===construction.surface&&governor.mood==='nasb'
+      &&governor.ruleId===construction.ruleId&&governor.concealedAnMode===construction.mode
+      &&governor.constructionId===construction.id;
+  }),'The concealed-أَنْ governor records do not match their closed authority table');
   assert(governors.idhan&&governors.idhan.surface===api.IDHAN_SURFACE&&governors.idhan.mood==='nasb'
     &&governors.idhan.ruleId===api.IDHAN_GOVERNOR_RULE_ID
     &&governors.idhan.conditionSetId===api.IDHAN_CONDITION_RULE_ID,
     'The إِذَنْ governor record is not canonical');
   assert(api.isConditionalGovernor(governors.idhan),'إِذَنْ is not registered as a conditional governor');
-  assert(['an','kay','lan','lam','sawfa'].every(name=>!api.isConditionalGovernor(governors[name])),
+  assert(['an','kay','lan','lam','sawfa'].every(name=>!api.isConditionalGovernor(governors[name]))
+    &&Object.values(api.CONCEALED_AN_CONSTRUCTIONS).every(construction=>
+      !api.isConditionalGovernor(governors[construction.particleType])),
     'An unconditional governor was reclassified as conditional');
   p3Cases+=7;
 }
@@ -4189,7 +4272,8 @@ for(const [name,snapshot] of Object.entries(p3Snapshots)){
 {
   const ids=api.templates.map(t=>t.stableId);
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A1');
-  /* Phase 3B1 appends _04 (the productive إِذَنْ lane) to this tuple. The guarantee that matters —
+  /* Phase 3B1 appended _04 (the productive إِذَنْ lane), and this phase appends the six exact
+     concealed-أَنْ constructions as _05 through _10. The guarantee that matters —
      the first three positions are byte-identical, so every saved snapshot still resolves to the
      template it was built from — is asserted as a prefix, then the full membership is pinned. */
   assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb'&&t.sign==='fatha')
@@ -4198,19 +4282,18 @@ for(const [name,snapshot] of Object.entries(p3Snapshots)){
     'The particle/present/nasb/fatha stable-ID group changed');
   assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='present'&&t.state==='nasb'&&t.sign==='fatha')
     .map(t=>t.stableId).join(' | ')
-    ==='T_PARTICLE_PRESENT_NASB_FATHA_01 | T_PARTICLE_PRESENT_NASB_FATHA_02 | T_PARTICLE_PRESENT_NASB_FATHA_03 | T_PARTICLE_PRESENT_NASB_FATHA_04',
-    'The particle/present/nasb/fatha stable-ID group is not the expected Phase 3B1 membership');
-  /* Phase 3B2 appends _04 (the productive إِذَنْ five-verb lane) to this tuple, exactly as Phase
-     3B1 appended _04 to the ordinary one. The inherited first three positions are asserted as a
-     prefix first, then the full membership is pinned. */
+    ===Array.from({length:10},(_,i)=>`T_PARTICLE_PRESENT_NASB_FATHA_${String(i+1).padStart(2,'0')}`).join(' | '),
+    'The particle/present/nasb/fatha stable-ID group is not the expected fast-track membership');
+  /* The five-verb group follows the same append-only layout. The inherited first three positions
+     are asserted as a prefix first, then the complete _01 through _10 membership is pinned. */
   assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='fiveVerbs'&&t.state==='nasb'&&t.sign==='nunDropped')
     .map(t=>t.stableId).slice(0,3).join(' | ')
     ==='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03',
     'The particle/fiveVerbs/nasb/nunDropped stable-ID group changed');
   assert(api.templates.filter(t=>t.starts==='particle'&&t.form==='fiveVerbs'&&t.state==='nasb'&&t.sign==='nunDropped')
     .map(t=>t.stableId).join(' | ')
-    ==='T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04',
-    'The particle/fiveVerbs/nasb/nunDropped stable-ID group is not the expected Phase 3B2 membership');
+    ===Array.from({length:10},(_,i)=>`T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_${String(i+1).padStart(2,'0')}`).join(' | '),
+    'The particle/fiveVerbs/nasb/nunDropped stable-ID group is not the expected fast-track membership');
   /* Phase 2b-C's group is untouched by the Phase 3A1 registrations: Phase 3A1 added nothing to
      this filter tuple at all. Phase 3A2 later appends four members to it, so the guarantee that
      matters here — the first three positions are unchanged — is asserted as a prefix. */
@@ -4223,18 +4306,24 @@ for(const [name,snapshot] of Object.entries(p3Snapshots)){
     'A Phase 3A1 template entered the Phase 2b-C filter tuple');
   p3Cases+=5;
 }
-/* --- The deferred boundary is unreachable in production. --- */
+/* --- Productive nāṣib boundaries are exact. --- */
 {
   const produced=new Set();
   for(const t of api.templates)for(let i=0;i<12;i++){
     for(const token of api.buildTemplate(t.id).tokens)if(token.grammar.particleType)produced.add(token.grammar.particleType);
   }
-  /* Phase 3B1 makes إِذَنْ productive, so it is expected here now; the rest of the deferred class
-     is still unreachable. And إِذَنْ may reach production through EXACTLY ONE template — the
-     registered productive consumer — so the scan is repeated per template to prove no other
-     template can emit it. */
-  assert(!produced.has('hatta')&&!produced.has('faSababiyya')&&!produced.has('wawMaiyya'),
-    'A deferred nāṣib reached production');
+  /* Every concealed-أَنْ construction must be productive, and each particle type must be emitted
+     by exactly its registered ordinary/five-verb pair. */
+  assert(Object.values(api.CONCEALED_AN_CONSTRUCTIONS).every(construction=>{
+    if(!produced.has(construction.particleType))return false;
+    const consumers=new Set();
+    for(const template of api.templates)for(let i=0;i<12;i++){
+      if(api.buildTemplate(template.id).tokens.some(token=>
+        token.grammar.particleType===construction.particleType))consumers.add(template.stableId);
+    }
+    return [...consumers].sort().join(',')===
+      [construction.ordinaryTemplateId,construction.fiveTemplateId].sort().join(',');
+  }),'A concealed-أَنْ particle escaped its registered production pair');
   {
     const idhanTemplates=new Set();
     for(const t of api.templates)for(let i=0;i<12;i++){
@@ -5282,7 +5371,7 @@ for(const t of api.templates){
 {
   const ids=api.templates.map(t=>t.stableId);
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
-  assert(api.templates.length===84,`Expected 84 templates after Phase 3B2, found ${api.templates.length}`);
+  assert(api.templates.length===96,`Expected 96 templates after the concealed-an fast-track, found ${api.templates.length}`);
   assert(Object.values(p4Templates).map(t=>t.stableId).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_04 | T_PARTICLE_SINGULAR_NASB_FATHA_05 | T_PARTICLE_SINGULAR_NASB_FATHA_06 | T_PARTICLE_SINGULAR_NASB_FATHA_07',
     'The Phase 3A2 stable IDs are not the four appended ones');
@@ -5296,7 +5385,13 @@ for(const t of api.templates){
         /* Phase 3B1 appends the ordinary إِذَنْ lane and Phase 3B2 the five-verb one. These are
            the only two conditional-governor declarations, and both are إِذَنْ. */
         'T_PARTICLE_PRESENT_NASB_FATHA_04:idhan',
-        'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04:idhan'].join(' | '),
+        'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04:idhan',
+        'T_PARTICLE_PRESENT_NASB_FATHA_05:lamTalilConcealedAn','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_05:lamTalilConcealedAn',
+        'T_PARTICLE_PRESENT_NASB_FATHA_06:lamJuhud','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_06:lamJuhud',
+        'T_PARTICLE_PRESENT_NASB_FATHA_07:hattaNasb','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_07:hattaNasb',
+        'T_PARTICLE_PRESENT_NASB_FATHA_08:faSababiyya','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_08:faSababiyya',
+        'T_PARTICLE_PRESENT_NASB_FATHA_09:wawMaiyya','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09:wawMaiyya',
+        'T_PARTICLE_PRESENT_NASB_FATHA_10:awNasb','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10:awNasb'].join(' | '),
     'A presentGovernor declaration changed');
   // Exactly the two registered lanes declare the conditional governor, and nothing else does.
   assert(api.templates.filter(t=>api.isConditionalGovernor(api.GRAMMAR_RULES.governors[t.presentGovernor]))
@@ -5323,9 +5418,9 @@ for(const t of api.templates){
       }
     });
   }
-  assert(!particleTypes.has('hatta')&&!particleTypes.has('faSababiyya')
-    &&!particleTypes.has('wawMaiyya')&&!particleTypes.has('lamJuhud')&&!particleTypes.has('aw'),
-    'A deferred nāṣib reached production');
+  assert(Object.values(api.CONCEALED_AN_CONSTRUCTIONS).every(construction=>
+    particleTypes.has(construction.particleType))&&!particleTypes.has('anMudmara'),
+    'The productive concealed-أَنْ particle set is incomplete or generic');
   /* Phase 3B1 opens إِذَنْ over the MUʿRAB lane only. The maḥall-rule set is what proves the mabnī
      lane is untouched: a nūn-al-niswah form under إِذَنْ would need a maḥall rule of its own, and
      none exists, so the set below must stay exactly the three Phase 2b-C/3A2 rules. */
@@ -6763,9 +6858,9 @@ function runOwnershipDerivativeSuite(label,original){
     assert(/not the identity of the nāṣib|not the identity of the nāṣib/.test(signRule.conditions),
       signRuleId+' does not say the sign follows the verb’s own morphology');
   }
-  assert(JSON.stringify(api.SOURCE_REGISTRY.R_MUDARI_NASB_FATHA.primarySource.pdfPages)===JSON.stringify([47,73,74]),
+  assert(JSON.stringify(api.SOURCE_REGISTRY.R_MUDARI_NASB_FATHA.primarySource.pdfPages)===JSON.stringify([47,73,74,75,76,77,78]),
     'R_MUDARI_NASB_FATHA pages changed');
-  assert(JSON.stringify(api.SOURCE_REGISTRY.R_AFAL5_NASB_DELETE_NUN.primarySource.pdfPages)===JSON.stringify([47,67,74]),
+  assert(JSON.stringify(api.SOURCE_REGISTRY.R_AFAL5_NASB_DELETE_NUN.primarySource.pdfPages)===JSON.stringify([47,67,74,75,76,77,78]),
     'R_AFAL5_NASB_DELETE_NUN pages changed');
   assert(governorRule!==rule&&api.SOURCE_REGISTRY.G_IDHAN_NASB!==api.SOURCE_REGISTRY.R_IDHAN_CONDITIONS,
     'the governor rule and the condition rule are the same record');
@@ -7721,12 +7816,13 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===84,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===96,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact stable IDs. The 82 Phase 3B0A inherited are unchanged — asserted in both
      directions against the original manifest — and the productive LANES append exactly one each. */
-  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  const concealedTemplateIds=Object.values(api.CONCEALED_AN_CONSTRUCTIONS).flatMap(item=>[item.ordinaryTemplateId,item.fiveTemplateId]);
+  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
@@ -9095,7 +9191,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===84,'the repair block changed the production template count');
+  assert(api.templates.length===96,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -9194,7 +9290,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(Object.keys(api.GLOSS_FIXED_TOKENS).length===8,
       'the fixed-token gloss registry is no longer the eight measured surfaces');
     // Phase 3B1 adds exactly one: إِذَنْ.
-    assert(Object.keys(api.GLOSS_CLOSED_PARTICLES).length===11,
+    assert(Object.keys(api.GLOSS_CLOSED_PARTICLES).length===17,
       'the closed particle gloss registry changed size');
     assert(api.GLOSS_CLOSED_PARTICLES[api.IDHAN_SURFACE]==='in that case',
       'the إِذَنْ gloss is not its canonical wording');
@@ -9216,16 +9312,18 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===89,'the structural map holds '+registeredKeys.length+' keys, not 89');
-    assert(registeredShapes.length===24,'the shape registry holds '+registeredShapes.length+' shapes, not 24');
+    assert(registeredKeys.length===101,'the structural map holds '+registeredKeys.length+' keys, not 101');
+    assert(registeredShapes.length===32,'the shape registry holds '+registeredShapes.length+' shapes, not 32');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
     /* The 87 inherited keys and 22 inherited shapes are untouched: Phase 3B1 APPENDS, it does not
        re-map. Anything else would silently re-translate a pre-existing template. */
     {
       const laneKeys=api.IDHAN_PRODUCTION_CONSUMERS.map(id=>id+'||particle:particle,verb:present');
-      const laneShapes=['TS23','TS24'];
-      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k));
+      const concealedTemplateIds=Object.values(api.CONCEALED_AN_CONSTRUCTIONS).flatMap(item=>[item.ordinaryTemplateId,item.fiveTemplateId]);
+      const concealedKeys=registeredKeys.filter(key=>concealedTemplateIds.some(id=>key.startsWith(id+'||')));
+      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32'];
+      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===87,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===22,'the inherited shape set changed: '+inheritedShapes.length);
@@ -9260,7 +9358,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===84,'the map covers '+mappedTemplates.size+' templates, not 84');
+    assert(mappedTemplates.size===96,'the map covers '+mappedTemplates.size+' templates, not 96');
     // The five dual-structure templates carry exactly two lanes each; everything else exactly one.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -9319,8 +9417,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===89,'only '+keysSeen.size+' of the 89 structural keys were observed');
-    assert(shapesSeen.size===24,'only '+shapesSeen.size+' of the 24 composer shapes were observed');
+    assert(keysSeen.size===101,'only '+keysSeen.size+' of the 101 structural keys were observed');
+    assert(shapesSeen.size===32,'only '+shapesSeen.size+' of the 32 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -9654,7 +9752,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===89,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===101,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -9973,8 +10071,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         tokensChecked++;
       }
     }
-    // Phase 3B1 adds one two-token template, so the population rises by exactly two.
-    assert(tokensChecked===241,'the production token population changed: '+tokensChecked+' (was 241)');
+    // The six ordinary/five-verb concealed-أَنْ pairs add 68 tokens to the inherited 241.
+    assert(tokensChecked===309,'the production token population changed: '+tokensChecked+' (expected 309)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -10163,7 +10261,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===84,'the presentation repair changed the template count');
+    assert(api.templates.length===96,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -11070,12 +11168,13 @@ const p5Seen=new Map();
   }
 }
 
-/* --- §18-AD: no separator CONSTRUCTION, and no concealed أَنْ, has shipped. ---------------
+/* --- §18-AD: no generic separator construction or generic concealed-أَنْ lane has shipped. ---
    Phase 3B3A changed what this block can honestly claim. The separator ARCHITECTURE now exists —
    constructions are classified rather than counted — so "no separator phase has begun" is no longer
    true and asserting it would be a lie that happens to pass. What must still hold, and what is
-   asserted instead, is the thing that actually protects the learner: not one of the three
-   constructions the source names is implemented, sourced or production-enabled. */
+   asserted instead, is the thing that actually protects the learner: not one of the three إِذَنْ
+   separator constructions is implemented, sourced or production-enabled, and concealed أَنْ is
+   available only through the six exact construction records introduced by this phase. */
 {
   const source=fs.readFileSync(file,'utf8');
   assert(!/SEPARATOR_MODES=Object\.freeze\(\{[^}]*(oath|qasam|nida|vocative|laNafiya)/i.test(source),
@@ -11088,8 +11187,10 @@ const p5Seen=new Map();
       'the declared separator construction '+id+' gained an implementation or a source');
   }
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS&&!api.SOURCE_REGISTRY.G_AN_MUDMARA
-    &&!api.SOURCE_REGISTRY.R_AN_CONCEALED,'a deferred phase registered a source rule');
-  assert(!api.GRAMMAR_RULES.governors.anMudmara,'a concealed أَنْ governor was registered');
+    &&!api.SOURCE_REGISTRY.R_AN_CONCEALED,'a generic deferred source rule was registered');
+  assert(!api.GRAMMAR_RULES.governors.anMudmara
+    &&Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.concealedAnMode).length===6,
+    'concealed أَنْ escaped the six exact construction governors');
   assert(/It does not cover a concealed أَنْ or إِذَنْ/.test(api.SOURCE_REGISTRY.G_AN_NASB.conditions),
     'G_AN_NASB stopped excluding the concealed أَنْ');
   assert(/not a concealed أَنْ/.test(api.SOURCE_REGISTRY.R_PRESENT_NUUN_NISWAH_MAHALL_NASB_AN.conditions),
@@ -12052,17 +12153,17 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===72,'the source-rule count moved in an architecture-only phase');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===81,'the source-rule count does not include the nine fast-track rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
-  assert(!api.GRAMMAR_RULES.governors.anMudmara,'a concealed أَنْ governor was registered');
+  assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.concealedAnMode).length===6,'the shared concealed-an registry is not exactly six governors');
   assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.mood==='jazm').length===1,
     'a second jāzim entered the governor table');
-  assert(api.templates.length===84,'an architecture-only phase changed the template count');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===89
-    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===24,
-    'an architecture-only phase moved the composer authority');
+  assert(api.templates.length===96,'the concealed-an templates are not exactly twelve additions');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===101
+    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===32,
+    'the composer authority does not include the twelve fast-track mappings');
   p7Cases+=8;
 }
 
@@ -12828,7 +12929,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===84,`Expected 84 production templates, found ${api.templates.length}`);
+assert(api.templates.length===96,`Expected 96 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -13135,7 +13236,9 @@ function auditTokenWhy(tok,label,owner=null){
      other token in the app — including إِذَنْ's own particle card — keeps the budget of 4. */
   const governedByIdhan=Boolean(owner&&tok.governorId
     &&owner.find(item=>item.id===tok.governorId)?.grammar?.particleType===api.IDHAN_PARTICLE_TYPE);
-  auditWhy(tok.why,label,governedByIdhan?{max:7}:{});
+  const governedByConcealedAn=Boolean(owner&&tok.governorId
+    &&api.CONCEALED_AN_BY_PARTICLE[owner.find(item=>item.id===tok.governorId)?.grammar?.particleType]);
+  auditWhy(tok.why,label,governedByIdhan?{max:7}:governedByConcealedAn?{max:5}:{});
   if(governedByIdhan){
     assert(api.WHY_IDHAN_CONDITIONS.every(line=>tok.why.ids.includes(line.id)),
       `${label}: an إِذَنْ-governed verb omits one of the three conditions`);
@@ -13241,7 +13344,8 @@ function goldenFind(predicate){
   }
   return null;
 }
-const coldIsmKanaGolden=goldenFind(token=>token.grammar.role==='ismKana');
+const coldIsmKanaGolden=goldenFind((token,exercise)=>token.grammar.role==='ismKana'
+  &&exercise.templateId==='T_VERB_SINGULAR_NASB_FATHA_02');
 assert(coldIsmKanaGolden?.template.stableId==='T_VERB_SINGULAR_NASB_FATHA_02',
   'Deterministic cold-corpus scan did not find ism kāna in its canonical template');
 const goldens=[

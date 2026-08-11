@@ -717,7 +717,7 @@ const EXERCISE_TOKEN_KEYS=Object.freeze(['ar','components','en','enHint','expect
  'phraseWhy','relations','ruleId','sign','signRuleId','state','subjectRuleId','surfaceHint','target',
  'tense','why','word']);
 const EXERCISE_GRAMMAR_KEYS=Object.freeze(['attachedKaf','conjugation','delayed','exactPresentRaf',
- 'governorWord','inflection','isMudaf','morphology','particleIraab','particleType','particleWord',
+ 'governorWord','inflection','isMudaf','kanaKhabar','morphology','particleIraab','particleType','particleWord',
  'person','role','type']);
 /* One declared LEGACY name, accepted under Policy B rather than Policy A. Pre-Phase-2 snapshots
    stored a `componentKinds` array on a verb's grammar. It is never consulted — internal components
@@ -979,7 +979,8 @@ const GLOSS_CLOSED_PARTICLES=Object.freeze({
  /* Phase 3B1. «in that case» carries إِذَنْ's jawāb/jazāʾ meaning — it answers a statement and
     states its consequence — and it is the whole modality of the answer, so the verb after it is
     glossed bare, exactly as after لَنْ, أَنْ and سَوْفَ. */
- 'إِذَنْ':'in that case'
+ 'إِذَنْ':'in that case','مَا':'not','لَا':'does not','حَتَّى':'until','فَ':'and therefore',
+ 'وَ':'while','أَوْ':'until'
 });
 /* The eight surfaces no vocabulary registry owns. Each is bound to the token TYPE that may carry
    it, so the same surface cannot borrow this gloss in another role. */
@@ -1117,6 +1118,9 @@ function resolveCanonicalTokenGloss(data,token,index){
   return sister?sister.gloss:null;
  }
  /* 3 — the closed particle vocabulary. */
+ if(type==='particle'&&CONCEALED_AN_BY_PARTICLE[token.grammar?.particleType]){
+  return CONCEALED_AN_CONNECTOR_EN[CONCEALED_AN_BY_PARTICLE[token.grammar.particleType].id]||null;
+ }
  if(type==='particle'){
   return Object.prototype.hasOwnProperty.call(GLOSS_CLOSED_PARTICLES,surface)
    ?GLOSS_CLOSED_PARTICLES[surface]:null;
@@ -1259,7 +1263,15 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
     not a concealed singular pronoun. A separate shape rather than a slot: the person is pinned by
     the lane, so "they" is as fixed here as "he" is in TS23, and making it a slot would invite a
     lane to render with the wrong number. */
- TS24:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" they will "}),Object.freeze({slot:"verb:1:en"}),Object.freeze({lit:"."})])})
+ TS24:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" they will "}),Object.freeze({slot:"verb:1:en"}),Object.freeze({lit:"."})])}),
+ TS25:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:1:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'verb:0:third'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' he '}),Object.freeze({slot:'verb:3:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:4'}),Object.freeze({lit:'.'})])}),
+ TS26:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:1:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'verb:0:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' they '}),Object.freeze({slot:'verb:3:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:4'}),Object.freeze({lit:'.'})])}),
+ TS27:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'verb:1:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:' he '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])}),
+ TS28:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'verb:1:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:' they '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])}),
+ TS29:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:1:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'verb:0:third'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' until he '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])}),
+ TS30:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:1:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'verb:0:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' until they '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])}),
+ TS31:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' was not going to '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])}),
+ TS32:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' were not going to '}),Object.freeze({slot:'verb:4:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:5'}),Object.freeze({lit:'.'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1355,7 +1367,19 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
     identical because the token types and roles are, which is exactly why the key is keyed by
     template ID as well: the two lanes are distinguishable only by which template built them, and
     that is what selects the singular or plural shape. */
- "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04||particle:particle,verb:present":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04",structure:"particle:particle,verb:present",shape:"TS24",copulaPlural:false})
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04||particle:particle,verb:present":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_04",structure:"particle:particle,verb:present",shape:"TS24",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_NASB_FATHA_05||verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_05",structure:"verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS25",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_05||verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_05",structure:"verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS26",copulaPlural:true}),
+ "T_PARTICLE_PRESENT_NASB_FATHA_06||particle:particle,verb:kana,noun:ismKana,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_06",structure:"particle:particle,verb:kana,noun:ismKana,particle:particle,verb:present,noun:object",shape:"TS31",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_06||particle:particle,verb:kana,noun:ismKana,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_06",structure:"particle:particle,verb:kana,noun:ismKana,particle:particle,verb:present,noun:object",shape:"TS32",copulaPlural:true}),
+ "T_PARTICLE_PRESENT_NASB_FATHA_07||verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_07",structure:"verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS25",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_07||verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_07",structure:"verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS26",copulaPlural:true}),
+ "T_PARTICLE_PRESENT_NASB_FATHA_08||particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_08",structure:"particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS27",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_08||particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_08",structure:"particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS28",copulaPlural:true}),
+ "T_PARTICLE_PRESENT_NASB_FATHA_09||particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_09",structure:"particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS27",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09||particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09",structure:"particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS28",copulaPlural:true}),
+ "T_PARTICLE_PRESENT_NASB_FATHA_10||verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_10",structure:"verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object",shape:"TS29",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10||verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10",structure:"verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object",shape:"TS30",copulaPlural:true})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -5591,6 +5615,74 @@ function observeIdhanResponseHead(tokens,verbIndex){
 function isConditionalGovernor(spec){
  return Boolean(spec&&typeof spec.conditionSetId==='string'&&spec.conditionSetId);
 }
+function concealedAnRefusal(reason){return Object.freeze({authorized:false,reason,construction:'',mode:''})}
+function concealedAnVerbSurface(frame,lane){
+ const lexeme=verbs.find(item=>item.past===frame.targetPast);
+ return lane==='afalKhamsa'?lexeme?.fiveSub:lexeme?.acc;
+}
+function concealedAnPrefixSurface(frame){return verbs.find(item=>item.past===frame.prefixPast)?.pres}
+/* The shared structural authority. A manṣūb surface is never evidence: the resolver starts from
+   the frozen template and the exact visible construction, then separately checks that the target
+   carries the state/sign which that licensed concealed أَنْ requires. */
+function deriveConcealedAnNasb(data,verbIndex){
+ try{return deriveConcealedAnNasbCore(data,verbIndex)}catch{return concealedAnRefusal('unreadable-construction')}
+}
+function deriveConcealedAnNasbCore(data,verbIndex){
+ if(!data||typeof data!=='object'||!Array.isArray(data.tokens))return concealedAnRefusal('unreadable-construction');
+ const tokens=data.tokens,verb=tokens[verbIndex],particle=tokens[verbIndex-1];
+ if(!verb||verb.grammar?.type!=='verb'||verb.tense!=='present')return concealedAnRefusal('not-a-present-verb');
+ const construction=CONCEALED_AN_BY_PARTICLE[particle?.grammar?.particleType];
+ if(!construction)return concealedAnRefusal('no-concealed-an-licensor');
+ const template=templates.find(item=>item.stableId===data.templateId);
+ if(!template||template.concealedAnConstruction!==construction.id||template.presentGovernor!==construction.particleType){
+  return concealedAnRefusal('template-construction-mismatch');
+ }
+ const lane=template.form==='fiveVerbs'?'afalKhamsa':template.form==='present'?'ordinary':'';
+ const expectedTemplate=lane==='afalKhamsa'?construction.fiveTemplateId:construction.ordinaryTemplateId;
+ if(!lane||template.stableId!==expectedTemplate)return concealedAnRefusal('template-lane-mismatch');
+ const governorSpec=GRAMMAR_RULES.governors[construction.particleType];
+ if(!governorSpec||governorSpec.concealedAnMode!==construction.mode||governorSpec.constructionId!==construction.id
+   ||governorSpec.ruleId!==construction.ruleId||governorSpec.mood!=='nasb')return concealedAnRefusal('registry-mismatch');
+ if(particle.word!==construction.surface||particle.ruleId!==construction.ruleId
+   ||verb.governorId!==particle.id||particle.relations?.governsId!==verb.id)return concealedAnRefusal('licensor-link-not-canonical');
+ const morphology=authoritativeVerbMorphology(verb,data);
+ const expectedPerson=lane==='afalKhamsa'?'3mp':'3ms';
+ const expectedInflection=lane==='afalKhamsa'?'afalKhamsa':'regular';
+ if(!morphology.registered||morphology.person!==expectedPerson||verb.inflection!==expectedInflection
+   ||presentCapabilityFailure(template,morphology))return concealedAnRefusal('target-lane-mismatch');
+ const moodRule=GRAMMAR_RULES.presentVerb[expectedInflection].nasb;
+ if(verb.state!=='nasb'||safeSignId(verb.sign)!==moodRule[0]||verb.ruleId!==moodRule[1])return concealedAnRefusal('target-state-sign-mismatch');
+ const frame=CONCEALED_AN_FRAME_DATA[construction.id];
+ const expectedTarget=concealedAnVerbSurface(frame,lane);
+ const expectedSubject=CONCEALED_AN_SUBJECTS[lane];
+ if(verb.word!==expectedTarget)return concealedAnRefusal('target-lexeme-mismatch');
+ const is=(token,type,role,word)=>Boolean(token&&token.grammar?.type===type
+   &&(role===undefined||token.grammar.role===role)&&(word===undefined||token.word===word));
+ let structural=false;
+ if(construction.frame==='negatedKana'){
+  structural=tokens.length===6&&verbIndex===4
+   &&is(tokens[0],'particle','particle','مَا')&&tokens[0].grammar.particleType==='maNafiyaKana'
+   &&is(tokens[1],'verb','kana','كَانَ')&&is(tokens[2],'noun','ismKana',expectedSubject)
+   &&verb.grammar.kanaKhabar===true&&is(tokens[5],'noun','object',frame.targetObject);
+ }else if(construction.frame==='negativeResult'||construction.frame==='negativeAccompaniment'){
+  structural=tokens.length===6&&verbIndex===4
+   &&is(tokens[0],'particle','particle','لَا')&&tokens[0].grammar.particleType==='laNafiyaContext'
+   &&is(tokens[1],'verb','present',concealedAnPrefixSurface(frame))&&tokens[1].state==='raf'
+   &&is(tokens[2],'noun','faail',expectedSubject)&&is(tokens[5],'noun','object',frame.targetObject);
+ }else if(construction.frame==='untilMeaning'){
+  structural=tokens.length===6&&verbIndex===4
+   &&is(tokens[0],'verb','present',concealedAnPrefixSurface(frame))&&tokens[0].state==='raf'
+   &&is(tokens[1],'noun','faail',expectedSubject)&&is(tokens[2],'noun','object',frame.prefixObject)
+   &&is(tokens[5],'noun','object',frame.targetObject);
+ }else{
+  structural=tokens.length===5&&verbIndex===3
+   &&is(tokens[0],'verb','present',concealedAnPrefixSurface(frame))&&tokens[0].state==='raf'
+   &&is(tokens[1],'noun','faail',expectedSubject)&&is(tokens[4],'noun','object',frame.targetObject);
+ }
+ if(!structural)return concealedAnRefusal('licensing-frame-mismatch');
+ return Object.freeze({authorized:true,reason:'authorized',construction:construction.id,mode:construction.mode,
+  particleId:particle.id,verbId:verb.id,ruleId:construction.ruleId});
+}
 function idhanProductionRefusal(reason){
  return Object.freeze({authorized:false,reason,templateId:'',contextId:'',pairId:''});
 }
@@ -5870,6 +5962,40 @@ function materializeComponents(data){
   token.components=kinds.map((kind,i)=>makeComponent(kind,token.id,i+1));
  });
 }
+/* Nawasib fast-track — one authority for every construction in which أَنْ is concealed.
+   The visible particle never becomes a direct nāṣib: it licenses a canonical construction, and
+   that construction supplies أَنْ مُضْمَرَة.  The mode is frozen here (never stored as a Boolean
+   on an exercise), while the resolver below proves the exact visible frame every time. */
+const CONCEALED_AN_MODES=Object.freeze({
+ jawazan:Object.freeze({id:'jawazan',ar:'جَوَازًا',en:'permissibly'}),
+ wujuban:Object.freeze({id:'wujuban',ar:'وُجُوبًا',en:'obligatorily'})
+});
+const CONCEALED_AN_CONSTRUCTIONS=Object.freeze({
+ lamTalil:Object.freeze({id:'lamTalil',particleType:'lamTalilConcealedAn',surface:'لِ',mode:'jawazan',ruleId:'G_LAM_TALIL_CONCEALED_AN',
+  nameAr:'لَامِ التَّعْلِيلِ',nameEn:'lām al-taʿlīl',frame:'purpose',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_05',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_05'}),
+ lamJuhud:Object.freeze({id:'lamJuhud',particleType:'lamJuhud',surface:'لِ',mode:'wujuban',ruleId:'G_LAM_JUHUD_CONCEALED_AN',
+  nameAr:'لَامِ الْجُحُودِ',nameEn:'lām al-juḥūd',frame:'negatedKana',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_06',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_06'}),
+ hatta:Object.freeze({id:'hatta',particleType:'hattaNasb',surface:'حَتَّى',mode:'wujuban',ruleId:'G_HATTA_CONCEALED_AN',
+  nameAr:'حَتَّى',nameEn:'ḥattā',frame:'purposeEndpoint',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_07',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_07'}),
+ faSababiyya:Object.freeze({id:'faSababiyya',particleType:'faSababiyya',surface:'فَ',mode:'wujuban',ruleId:'G_FA_SABABIYYA_CONCEALED_AN',
+  nameAr:'فَاءِ السَّبَبِيَّةِ',nameEn:'fāʾ al-sababiyyah',frame:'negativeResult',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_08',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_08'}),
+ wawMaiyya:Object.freeze({id:'wawMaiyya',particleType:'wawMaiyya',surface:'وَ',mode:'wujuban',ruleId:'G_WAW_MAIYYA_CONCEALED_AN',
+  nameAr:'وَاوِ الْمَعِيَّةِ',nameEn:'wāw al-maʿiyyah',frame:'negativeAccompaniment',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_09',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09'}),
+ aw:Object.freeze({id:'aw',particleType:'awNasb',surface:'أَوْ',mode:'wujuban',ruleId:'G_AW_CONCEALED_AN',
+  nameAr:'«أَوْ» الَّتِي بِمَعْنَى «إِلَى أَنْ»',nameEn:'aw meaning “until”',frame:'untilMeaning',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_10',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10'})
+});
+const CONCEALED_AN_BY_PARTICLE=Object.freeze(Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,item])));
+const CONCEALED_AN_FRAME_DATA=Object.freeze({
+ lamTalil:Object.freeze({prefixPast:'دَرَسَ',targetPast:'حَفِظَ',targetObject:'الدَّرْسَ'}),
+ lamJuhud:Object.freeze({targetPast:'كَتَبَ',targetObject:'الدَّرْسَ'}),
+ hatta:Object.freeze({prefixPast:'دَرَسَ',targetPast:'حَفِظَ',targetObject:'الدَّرْسَ'}),
+ faSababiyya:Object.freeze({prefixPast:'قَرَأَ',targetPast:'كَتَبَ',targetObject:'الدَّرْسَ'}),
+ wawMaiyya:Object.freeze({prefixPast:'أَكَلَ',targetPast:'شَرِبَ',targetObject:'الْمَاءَ'}),
+ aw:Object.freeze({prefixPast:'اِسْتَعْمَلَ',prefixObject:'الْمِفْتَاحَ',targetPast:'فَتَحَ',targetObject:'الْبَابَ'})
+});
+const CONCEALED_AN_SUBJECTS=Object.freeze({ordinary:'الطَّالِبُ',afalKhamsa:'الطُّلَّابُ'});
+const CONCEALED_AN_CONNECTOR_EN=Object.freeze({lamTalil:'so that',lamJuhud:'to',hatta:'until',
+ faSababiyya:'and therefore',wawMaiyya:'while',aw:'until'});
 const GRAMMAR_RULES=Object.freeze({
  roles:{
   mubtada:{state:'raf',ruleId:'R_MUBTADA_RAF',en:'The mubtadaʾ; nominative.'},
@@ -5905,6 +6031,9 @@ const GRAMMAR_RULES=Object.freeze({
      themselves, with no concealed أَنْ in between. */
   an:{surface:'أَنْ',mood:'nasb',ruleId:'G_AN_NASB'},
   kay:{surface:'كَيْ',mood:'nasb',ruleId:'G_KAY_NASB'},
+  ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,Object.freeze({
+   surface:item.surface,mood:'nasb',ruleId:item.ruleId,concealedAnMode:item.mode,constructionId:item.id
+  })])),
   /* Phase 3B1 — إِذَنْ, the first CONDITIONAL governor in this table. p. 75 states its identity
      and its direct government («وأما «إِذَنْ» فَحَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ», inside القسم
      الأول), and then makes the naṣb depend on three conditions. `conditionSetId` is what carries
@@ -5943,7 +6072,9 @@ const PHASE3A2_VERB_HINT='An exact registered person-bound present form built on
    particle, and كَيْ's licensing condition is precisely that this word is present. So the
    displayed sentence joins it to what follows while the token list keeps them distinct. This is
    the ONLY place surface composition may differ from a plain space-join. */
-const PROCLITIC_PARTICLE_TYPES=Object.freeze([KAY_TALIL_LAM.particleType]);
+const PROCLITIC_PARTICLE_TYPES=Object.freeze([KAY_TALIL_LAM.particleType,
+ CONCEALED_AN_CONSTRUCTIONS.lamTalil.particleType,CONCEALED_AN_CONSTRUCTIONS.lamJuhud.particleType,
+ CONCEALED_AN_CONSTRUCTIONS.faSababiyya.particleType,CONCEALED_AN_CONSTRUCTIONS.wawMaiyya.particleType]);
 /* Global ownership for particle source rules. Each particle type owns exactly one rule, and the
    governor rules are owned so tightly that no other token may carry them at all — a forged
    G_AN_NASB on a noun would otherwise be source-authorized and counted in validByRule as a
@@ -5952,9 +6083,12 @@ const PROCLITIC_PARTICLE_TYPES=Object.freeze([KAY_TALIL_LAM.particleType]);
 const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',
  lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',an:'G_AN_NASB',kay:'G_KAY_NASB',
  [IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
- [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId});
+ [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,
+ maNafiyaKana:'R_MA_NAFIYA_KANA',laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
+ ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,item.ruleId]))});
 const PARTICLE_EXCLUSIVE_RULE_IDS=Object.freeze(['G_LAN_NASB','G_LAM_JAZM','G_SAWFA_FUTURE',
- 'G_AN_NASB','G_KAY_NASB',IDHAN_GOVERNOR_RULE_ID,KAY_TALIL_LAM.ruleId]);
+ 'G_AN_NASB','G_KAY_NASB',IDHAN_GOVERNOR_RULE_ID,KAY_TALIL_LAM.ruleId,
+ 'R_MA_NAFIYA_KANA','R_LA_NAFIYA_CONTEXT',...Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>item.ruleId)]);
 function particleRuleOwnerFailure(token){
  const owned=PARTICLE_RULE_OWNERS[token?.grammar?.particleType];
  if(token?.grammar?.type==='particle'&&owned)return token.ruleId!==owned;
@@ -5972,10 +6106,10 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
  roles:['mubtada','khabar','faail','object','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana'],
- relationships:['mubtadaKhabar','verbSubject','verbObject','preposition','idafa','inna','kana'],
+ relationships:['mubtadaKhabar','verbSubject','verbObject','preposition','idafa','inna','kana','concealedAn'],
  deliberatelyNotGenerated:[
  'imperative','diptote','naat','coordination','substitute and coordinated followers',
-  'weak-final estimated signs','an and kay subjunctive clauses','la nahiya and lam al-amr jussive clauses',
+ 'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
   'feminine-dual past forms','passive and deputy-subject constructions',
   'five-verb person patterns other than third-person masculine plural in random templates'
  ]
@@ -6136,7 +6270,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  /* Phase QP1 — the claim was always about كان وأخواتها as a class; only the app's generated scope was
     narrower. pp. 106–108 enumerate the family and attach its operating conditions, so the pages
     widen with the scope and the claim sentence is unchanged. */
- R_ISM_KANA_RAF:sourceRule('Kāna and its sisters raise their noun.',[105,106,107,108],'Only a visible single noun after one of the registered unconditional operators: كَانَ, أَصْبَحَ, صَارَ, ظَلَّ, بَاتَ, لَيْسَ. The conditional operators (مَا زَالَ, مَا انْفَكَّ, مَا فَتِئَ, مَا بَرِحَ, مَا دَامَ) and the weak-final أَمْسَى / أَضْحَى are not produced.' ,[IA_KANA]),
+ R_ISM_KANA_RAF:sourceRule('Kāna and its sisters raise their noun.',[76,105,106,107,108],'A visible single noun after one of the registered unconditional operators, plus the exact negated كَانَ frame used for lām al-juḥūd. The other conditional operators and the weak-final أَمْسَى / أَضْحَى are not produced.' ,[IA_KANA]),
  R_KHABAR_KANA_NASB:sourceRule('Kāna and its sisters make their khabar accusative.',[105,106,107,108],'Only a visible single-word khabar after one of the registered unconditional operators: كَانَ, أَصْبَحَ, صَارَ, ظَلَّ, بَاتَ, لَيْسَ.',[IA_KANA]),
  R_ZARF_NASB:sourceRule('A time/place adverb used as mafʿūl fīh is accusative.',[148,149,151,152,153],'Only verified adverb lexemes used with a meaning of fī.'),
 
@@ -6166,13 +6300,13 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     TRUTHFULNESS repair only: the pages, the evidence and the grammatical claim are untouched —
     the sign has always depended on the verb's own morphology and never on which nāṣib precedes
     it, which is precisely why one rule serves them all. */
- R_MUDARI_NASB_FATHA:sourceRule('A regular sound-final present verb after lan is accusative with visible fatḥah.',[47,73,74],'Only an explicitly stored ordinary muʿrab present form standing in naṣb under a nāṣib this app produces: لَنْ, أَنْ, explicit لِكَيْ, or إِذَنْ once its three conditions are proven. The sign follows the verb’s own morphology, not the identity of the nāṣib; the particle’s own government is a separate rule in every case.'),
+ R_MUDARI_NASB_FATHA:sourceRule('A regular sound-final present verb after a nāṣib is accusative with visible fatḥah.',[47,73,74,75,76,77,78],'Only an explicitly stored ordinary muʿrab present form standing in naṣb under a nāṣib this app produces: لَنْ, أَنْ, explicit لِكَيْ, إِذَنْ once its three conditions are proven, or one of the six frozen constructions licensing concealed أَنْ. The sign follows the verb’s own morphology, not the identity of the nāṣib.'),
  R_MUDARI_JAZM_SUKUN:sourceRule('A regular sound-final present verb after lam is jussive with visible sukūn.',[58,79,80],'Only the explicitly stored lam forms.'),
  R_AFAL5_RAF_NUN:sourceRule('Retention of nūn is the nominative sign of the five verbs.',[38,39,67,72],'Rafʿ production includes only the explicitly registered, surface-unambiguous 3md, 3mp, 2mp, and 2fs patterns.'),
- /* Same truthfulness repair as R_MUDARI_NASB_FATHA above, and for the same reason: أَنْ and
-    explicit لِكَيْ have taken this sign since Phase 3A1, and Phase 3B2 adds إِذَنْ. Pages and
-    evidence unchanged; the claim is unchanged; only the stale enumeration of nāṣibs is corrected. */
- R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74],'Only an explicitly stored five-verb form standing in naṣb under a visible nāṣib this app produces: لَنْ, أَنْ, explicit لِكَيْ, or إِذَنْ once its three conditions are proven. The sign follows the verb’s own five-verb morphology, not the identity of the nāṣib.'),
+ /* Same truthfulness repair as R_MUDARI_NASB_FATHA above, and for the same reason: the sign rule
+    names every productive direct and concealed-أَنْ path while leaving construction identity to
+    the separately sourced governor records. */
+ R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74,75,76,77,78],'Only an explicitly stored five-verb form standing in naṣb under a nāṣib this app produces: لَنْ, أَنْ, explicit لِكَيْ, إِذَنْ once its three conditions are proven, or one of the six frozen constructions licensing concealed أَنْ. The sign follows the verb’s own five-verb morphology, not the identity of the nāṣib.'),
  R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80],'Only after the visible jāzim lam.'),
  R_PAST_FATH_VISIBLE:sourceRule('A sound-final past verb has visible fatḥ unless wāw al-jamāʿah or a moving rafʿ pronoun is attached.',[71],'Generated scope: bare third-person masculine, the existing sākinah feminine tāʾ forms, and the explicitly stored dual-alif forms.'),
  R_PAST_FATH_EST_MUNASABAH:sourceRule('A past verb attached to wāw al-jamāʿah has estimated fatḥ because the position is occupied by the vowel of munāsabah.',[71,72],'Generated scope: explicitly stored third-person masculine-plural past forms only.'),
@@ -6221,7 +6355,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_PRESENT_NUUN_NISWAH_MAHALL_NASB_KAY:sourceRule('A present verb built on sukūn for nūn al-niswah is in the position of naṣb when immediately governed by كَيْ whose lām al-taʿlīl is explicitly present.',[42,73,76,124],'Composed authority, page by page: p. 42 states the maḥall rule for a present verb preceded by a nāṣib and attached to nūn al-niswah, illustrating it with لَنْ and containing no كَيْ example; p. 76 states that كَيْ makes the present verb manṣūb by itself when لام التعليل precedes it لفظاً, placing it in that same class; pp. 73 and 124 state and apply the bināʾ on sukūn. Production is limited to canonical كَيْ immediately preceded by an explicit لام التعليل token and immediately preceding an explicitly registered 3fp/2fp nūn-al-niswah present form whose formClass is mabniPresent, endingClass nuun-niswah, binaaClass sukun-nuun-niswah, with empty state and null sign. It authorizes the naṣb maḥall alone: not the bināʾ, not the nūn component, not bare كَيْ, not the estimated (تقديراً) lām, not كَيْ as a mere حرف تعليل under a concealed أَنْ, not أَنْ, not لَنْ, not لَمْ, not an ungoverned form, not an ordinary present, not a five verb, and not nūn al-tawkīd. The surface does not change and no iʿrāb sign is introduced.'),
  C_YAA_MUKHATABA:sourceRule('Yāʾ al-mukhāṭabah is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[38],'Only an explicitly registered surface-unambiguous 2fs present five-verb form in rafʿ.'),
  C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from the original wāw; it has no grammatical role and no place in iʿrāb.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[91],'Al Jazeera Learning Arabic («الألف الفارقة») names the rule and gives كَتَبُوا / لم يكتُبُوا / اكْتُبُوا. Workspace scan separately attests the written spelling «ضَرَبُوا» (p.91) as form-only; that attestation does not authorize this rule.'),
- R_KANA_PAST_DEFICIENT:sourceRule('Kāna and its sisters are deficient past verbs that raise their noun and make their khabar accusative.',[105,106,107,108],'Only the registered unconditional family surfaces — كَانَ, أَصْبَحَ, صَارَ, ظَلَّ, بَاتَ, لَيْسَ — each built on a VISIBLE fatḥah, with the app’s single-noun/single-khabar template. It does not cover the conditional operators, whose مَا is a separate word carrying its own analysis, nor the weak-final أَمْسَى / أَضْحَى, whose fatḥ is estimated.',[IA_KANA]),
+ R_KANA_PAST_DEFICIENT:sourceRule('Kāna and its sisters are deficient past verbs that raise their noun and make their khabar accusative.',[76,105,106,107,108],'The registered unconditional family surfaces use the app’s single-noun/single-khabar template; canonical كَانَ also appears in the exact مَا كَانَ + lām al-juḥūd frame, whose following verbal clause is its khabar. Other conditional operators and weak-final أَمْسَى / أَضْحَى remain excluded.',[IA_KANA]),
 
  G_LAN_NASB:sourceRule('Lan is a particle of negation, naṣb, and future meaning.',[73,74],'It must be immediately followed by the present verb it governs.'),
  /* Phase 3A1 — أَنْ. Al-Tuḥfah p. 75 lists it first among «القسم الأول ـ وهو الذي يَنصُب الفعل
@@ -6273,6 +6407,15 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     because the sign depends on the verb's own morphology and not on which nāṣib precedes it — the
     same division of labour Phase 3A1 established for أَنْ and كَيْ. */
  G_IDHAN_NASB:sourceRule('Idhan is a particle of answer, recompense, and naṣb that makes the present verb after it manṣūb by itself.',[75],'Only canonical إِذَنْ standing at the head of the answer sentence and immediately preceding the muʿrab present verb it governs, where that verb denotes the future and nothing whatever separates them. Two muʿrab lanes are produced: an ordinary sound-final present verb (3ms) and a five-verb form (3mp). It authorizes the particle analysis and its direct government alone — that means the naṣb STATE, never the naṣb sign, which is R_MUDARI_NASB_FATHA for the ordinary lane and R_AFAL5_NASB_DELETE_NUN for the five verbs and follows the verb’s own morphology. It may never be relied on without R_IDHAN_CONDITIONS, whose three conditions are proven separately from frozen application-owned discourse authority; adjacency alone never authorizes it. It does not cover a mabnī nūn-al-niswah form, any five-verb person other than 3mp, a concealed أَنْ, or any of the three separators the source permits (القسم، النداء، «لا» النافية), none of which is implemented, and it may never be used as a whole-word maḥall rule.'),
+ /* Al-Tuḥfah pp. 76–78: the visible word licenses the construction; concealed أَنْ supplies naṣb. */
+ G_LAM_TALIL_CONCEALED_AN:sourceRule('Lām al-taʿlīl licenses a present verb through أَنْ concealed permissibly.',[76],'Only the registered purpose frame; the lām is not described as a direct nāṣib. أَنْ is مُضْمَرَة جَوَازًا.'),
+ G_LAM_JUHUD_CONCEALED_AN:sourceRule('Lām al-juḥūd licenses a present verb through أَنْ concealed obligatorily after negated kāna.',[76],'Only the exact مَا كَانَ + visible ism + lām + present-verbal khabar frame. Bare lām and unnegated kāna are excluded.'),
+ G_HATTA_CONCEALED_AN:sourceRule('Ḥattā licenses a following present verb through أَنْ concealed obligatorily when the preceding action is directed to the following endpoint or purpose.',[76],'Only the registered study-to-memorization endpoint/purpose frame; arbitrary ḥattā is excluded.'),
+ G_FA_SABABIYYA_CONCEALED_AN:sourceRule('Fāʾ al-sababiyyah licenses a present verb through أَنْ concealed obligatorily in the answer to negation or request.',[76,77],'Production uses only one exact negation frame; arbitrary fāʾ and every unproved request subtype are excluded.'),
+ G_WAW_MAIYYA_CONCEALED_AN:sourceRule('Wāw al-maʿiyyah licenses a present verb through أَنْ concealed obligatorily after negation or request.',[76,77],'Production uses only one exact negation-and-accompaniment frame; ordinary conjunction is excluded.'),
+ G_AW_CONCEALED_AN:sourceRule('Aw licenses a present verb through أَنْ concealed obligatorily when it means illā or ilā.',[78],'Production uses only the exact registered “until” (إِلَى أَنْ) frame; ordinary disjunction is excluded.'),
+ R_MA_NAFIYA_KANA:sourceRule('Mā negates kāna in the canonical lām al-juḥūd frame.',[76],'Only مَا immediately before canonical كَانَ in the registered lām al-juḥūd templates.'),
+ R_LA_NAFIYA_CONTEXT:sourceRule('Lā supplies the negation required before fāʾ al-sababiyyah or wāw al-maʿiyyah.',[76,77],'Only the exact registered negative-result and negative-accompaniment templates; it is not lā al-nāhiyah and does not govern jazm.'),
  G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs.'),
  G_SAWFA_FUTURE:sourceRule('Sawfa marks future meaning and enters only on the present verb.',[14,15,16],'It does not change the indicative mood in the generated construction.'),
  R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'pp. 109–110 name six: إِنَّ, أَنَّ, كَأَنَّ, لَكِنَّ, لَيْتَ, لَعَلَّ. Generated set: inna, lakinna, laʿalla, layta, kaʾanna — five of the six. أَنَّ is excluded because it heads no sentence: it needs a governing frame this app does not yet build, and producing it bare would ship a fragment.',[IA_INNA]),
@@ -6284,7 +6427,8 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
  RL_INNA_NOUN_KHABAR:sourceRule('Inna and its sisters require a linked noun and khabar with their governed states.',[105,109,110],'Only complete, ordered three-token nominal structures.',[IA_INNA]),
- RL_KANA_NOUN_KHABAR:sourceRule('Kāna and its sisters require a linked noun and khabar with their governed states.',[105,106,107,108],'Only complete, ordered three-token nominal structures headed by a registered unconditional family operator.',[IA_KANA])
+ RL_KANA_NOUN_KHABAR:sourceRule('Kāna and its sisters require a linked noun and khabar with their governed states.',[76,105,106,107,108],'Complete ordered single-noun/single-khabar structures, plus the exact negated-kāna lām al-juḥūd frame whose verbal clause is the khabar.',[IA_KANA])
+ ,RL_CONCEALED_AN_LICENSE:sourceRule('A licensed visible construction connects its present verb to concealed أَنْ and records whether concealment is permissible or obligatory.',[76,77,78],'Only the six frozen productive construction frames; the relationship is derived from their visible token structure and never restored as authority.')
 });
 /* Canonical evidence is constructed once from the reviewed definitions and bound to the
    owning SOURCE_REGISTRY key. Public bibliography strings are descriptive only: neither a
@@ -6543,6 +6687,9 @@ const AR={
  kay:w=>grammarSpec('particle','particle',{particleType:'kay',particleWord:w}),
  idhan:w=>grammarSpec('particle','particle',{particleType:IDHAN_PARTICLE_TYPE,particleWord:w}),
  lamTalil:w=>grammarSpec('particle','particle',{particleType:KAY_TALIL_LAM.particleType,particleWord:w}),
+ concealedAnParticle:(w,particleType)=>grammarSpec('particle','particle',{particleType,particleWord:w}),
+ maNafiyaKana:w=>grammarSpec('particle','particle',{particleType:'maNafiyaKana',particleWord:w}),
+ laNafiyaContext:w=>grammarSpec('particle','particle',{particleType:'laNafiyaContext',particleWord:w}),
  future:w=>grammarSpec('particle','particle',{particleType:'sawfa',particleWord:w}),
  presentFive:(w)=>grammarSpec('verb','present',{conjugation:'afalKhamsa',person:'3mp'}),
  fiveNounNom:w=>grammarSpec('noun','mubtada',{inflection:'fiveNouns',isMudaf:true,attachedKaf:true}),
@@ -6718,11 +6865,14 @@ function configureParticle(token){
  const type=token.grammar.particleType;
  token.ruleId={preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',
   an:'G_AN_NASB',kay:'G_KAY_NASB',[IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
-  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId}[type]||'R_PARTICLE';
+  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',
+  laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
+  ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,item.ruleId]))}[type]||'R_PARTICLE';
  // The lām of لِكَيْ is not a governor, so it carries its canonical surface here rather than in
  // GRAMMAR_RULES.governors — being absent from that map is exactly what stops it governing.
  token.expectedSurface=GRAMMAR_RULES.governors[type]?.surface
   ||(type===KAY_TALIL_LAM.particleType?KAY_TALIL_LAM.surface:null)
+  ||CONCEALED_AN_BY_PARTICLE[type]?.surface
   ||token.grammar.particleWord||token.surfaceHint;
  token.word=token.expectedSurface;
 }
@@ -6733,7 +6883,8 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({
  verbObject:'RL_TRANSITIVE_VERB_OBJECT',
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
- kana:'RL_KANA_NOUN_KHABAR'
+ kana:'RL_KANA_NOUN_KHABAR',
+ concealedAn:'RL_CONCEALED_AN_LICENSE'
 });
 function addRelationship(data,type,fields){
  const relationship={id:`${data.templateId}:R${data.relationships.length+1}`,type,ruleId:RELATIONSHIP_RULE_IDS[type],...fields};
@@ -6842,10 +6993,19 @@ function resolveRelationships(data){
  const kana=tokens.find(item=>item.tense==='kana');
  const ismKana=tokens.find(item=>item.grammar.role==='ismKana');
  const khabarKana=tokens.find(item=>item.grammar.role==='khabarKana');
- if(kana&&ismKana&&khabarKana){
-  addRelationship(data,'kana',{governorId:kana.id,ismId:ismKana.id,khabarId:khabarKana.id});
-  kana.relations.ismId=ismKana.id;kana.relations.khabarId=khabarKana.id;ismKana.relations.governorId=kana.id;ismKana.relations.khabarId=khabarKana.id;khabarKana.relations.governorId=kana.id;khabarKana.relations.ismId=ismKana.id;
+ const verbalKhabarKana=tokens.find(item=>item.grammar?.type==='verb'&&item.grammar.kanaKhabar===true);
+ const kanaKhabar=khabarKana||verbalKhabarKana;
+ if(kana&&ismKana&&kanaKhabar){
+  addRelationship(data,'kana',{governorId:kana.id,ismId:ismKana.id,khabarId:kanaKhabar.id,khabarKind:khabarKana?'single':'verbalSentence'});
+  kana.relations.ismId=ismKana.id;kana.relations.khabarId=kanaKhabar.id;ismKana.relations.governorId=kana.id;ismKana.relations.khabarId=kanaKhabar.id;kanaKhabar.relations.kanaId=kana.id;kanaKhabar.relations.ismKanaId=ismKana.id;
  }
+ tokens.forEach((item,index)=>{
+  const authorization=deriveConcealedAnNasb(data,index);
+  if(!authorization.authorized)return;
+  const relation=addRelationship(data,'concealedAn',{licensorId:authorization.particleId,verbId:item.id,
+   construction:authorization.construction,mode:authorization.mode});
+  item.relations.concealedAnRelationshipId=relation.id;
+ });
 }
 function nounRoleArabic(token){
  const role=token.grammar.role;
@@ -6919,7 +7079,12 @@ function renderVerbAnalysis(token){
  const unconditionalCause={lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»'}[governor?.grammar.particleType]||'';
  const idhanAuthorized=governor?.grammar.particleType===IDHAN_PARTICLE_TYPE
   &&idhanAuthorizationFor(token).authorized;
- const cause=idhanAuthorized?' بِـ«إِذَنْ»':unconditionalCause;
+ const concealedAuthorization=CONCEALED_AN_BY_PARTICLE[governor?.grammar.particleType]
+  ?deriveConcealedAnNasb(token._data||{tokens:token._tokens},(token._tokens||[]).indexOf(token)):concealedAnRefusal('not-concealed');
+ const concealedConstruction=concealedAuthorization.authorized?CONCEALED_AN_CONSTRUCTIONS[concealedAuthorization.construction]:null;
+ const concealedMode=concealedConstruction?CONCEALED_AN_MODES[concealedConstruction.mode]:null;
+ const concealedCause=concealedConstruction?` بِأَنْ مُضْمَرَةٍ ${concealedMode.ar} بَعْدَ ${concealedConstruction.nameAr}`:'';
+ const cause=idhanAuthorized?' بِـ«إِذَنْ»':concealedCause||unconditionalCause;
  const canonicalVerbSign=canonicalSign(safeSignId(token.sign));
  if(!canonicalVerbSign)throw new Error(`No canonical sign for present sign id “${safeSignId(token.sign)}”`);
  let arabic=`${token.word}: فِعْلٌ مُضَارِعٌ ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${canonicalVerbSign.ar}`;
@@ -6934,6 +7099,7 @@ function renderVerbAnalysis(token){
  }
  token.ar=`${arabic}.`;
  const causeEn=idhanAuthorized?' because idhan governs it'
+  :concealedConstruction?` because an is concealed ${concealedMode.en} after ${concealedConstruction.nameEn}`
   :{lan:' because lan governs it',lam:' because lam governs it',
     an:' because an governs it',kay:' because kay governs it'}[governor?.grammar.particleType]||'';
  const hiddenSubjectEn={'أَنَا':'I','نَحْنُ':'we','هُوَ':'he','هِيَ':'she','أَنْتَ':'you'}[token.relations.subjectPronoun];
@@ -6963,6 +7129,13 @@ function renderParticleAnalysis(token){
     كَيْ's own government; it says nothing about the lām governing anything here, so neither does
     this line. Its licensing role is explained in the Why layer, never asserted as iʿrāb. */
  if(type===KAY_TALIL_LAM.particleType){token.ar=`${token.word}: لَامُ التَّعْلِيلِ، حَرْفٌ مَبْنِيٌّ عَلَى الْكَسْرِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='The lām of purpose (lām al-taʿlīl).';return}
+ const concealed=CONCEALED_AN_BY_PARTICLE[type];
+ if(concealed){
+  token.ar=`${token.word}: ${concealed.nameAr.replace(/ِ$/u,'ُ')}، حَرْفٌ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
+  token.en=`${concealed.nameEn}; it licenses the canonical concealed-an construction.`;return;
+ }
+ if(type==='maNafiyaKana'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle in the canonical negated-kāna frame.';return}
+ if(type==='laNafiyaContext'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle; it does not govern this indicative verb.';return}
  throw new Error(`Unknown particle type: ${type}`);
 }
 /* ===== “Why this iʿrāb?” explanation engine (presentation only) =====================
@@ -7074,6 +7247,21 @@ function whySignNoun(t){
   ar:`وَ${wq(t.word)} ${form.ar}، فَعَلَامَةُ ${st.sign} ${sign.ar}.`,
   en:`${eq(t.word)} is ${form.en}, so its sign of ${st.signEn} is ${sign.en}.`};
 }
+const WHY_CONCEALED_AN_MODE=Object.freeze({
+ jawazan:Object.freeze({id:'WHY_CONCEALED_AN_JAWAZAN',ar:'وَالنَّاصِبُ «أَنْ» مُضْمَرَةٌ جَوَازًا؛ فَيَجُوزُ إِظْهَارُهَا.',en:'The nāṣib is a concealed أَنْ, concealed permissibly; it may be made explicit.'}),
+ wujuban:Object.freeze({id:'WHY_CONCEALED_AN_WUJUBAN',ar:'وَالنَّاصِبُ «أَنْ» مُضْمَرَةٌ وُجُوبًا؛ فَلَا تُظْهَرُ فِي هَذَا الْمَوْضِعِ.',en:'The nāṣib is a concealed أَنْ, concealed obligatorily; it is not made explicit in this position.'})
+});
+function whyConcealedAnConstruction(construction){
+ const details={
+  lamTalil:['WHY_LICENSE_LAM_TALIL','لَامُ التَّعْلِيلِ دَلَّتْ عَلَى غَرَضِ الْفِعْلِ السَّابِقِ.','Lām al-taʿlīl marks the purpose of the preceding action.'],
+  lamJuhud:['WHY_LICENSE_LAM_JUHUD','تَقَدَّمَتْ لَامَ الْجُحُودِ «كَانَ» الْمَنْفِيَّةُ، فَتَمَّ شَرْطُهَا.','Negated kāna precedes lām al-juḥūd, so its condition is met.'],
+  hatta:['WHY_LICENSE_HATTA','دَلَّتْ «حَتَّى» عَلَى غَايَةِ الْفِعْلِ السَّابِقِ أَوْ تَعْلِيلِهِ.','Ḥattā marks the endpoint or purpose of the preceding action.'],
+  faSababiyya:['WHY_LICENSE_FA_SABABIYYA','وَقَعَتْ فَاءُ السَّبَبِيَّةِ فِي جَوَابِ نَفْيٍ صَرِيحٍ.','Fāʾ al-sababiyyah occurs as the result of an explicit negation.'],
+  wawMaiyya:['WHY_LICENSE_WAW_MAIYYA','وَقَعَتْ وَاوُ الْمَعِيَّةِ بَعْدَ نَفْيٍ صَرِيحٍ وَدَلَّتْ عَلَى الْمُصَاحَبَةِ.','Wāw al-maʿiyyah follows explicit negation and expresses accompaniment.'],
+  aw:['WHY_LICENSE_AW_ILA','جَاءَتْ «أَوْ» بِمَعْنَى «إِلَى أَنْ» فِي هَذَا السِّيَاقِ الْمُسَجَّلِ.','Aw has the registered meaning “until” (ilā an) in this context.']
+ }[construction.id];
+ return{id:details[0],ar:details[1],en:details[2]};
+}
 function whyStateVerb(t,data){
  const gov=t.governorId?data.tokens.find(x=>x.id===t.governorId):null;
  const type=gov&&gov.grammar.particleType;
@@ -7084,6 +7272,13 @@ function whyStateVerb(t,data){
     whySignVerb, which names no governor and so stays true here. */
  if(type==='an')return{id:'WHY_STATE_VERB_AN',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ يَنْصِبُ بِنَفْسِهِ، فَهُوَ مَنْصُوبٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of maṣdar, naṣb, and future meaning that governs by itself, so it is مَنْصُوبٌ.`};
  if(type==='kay')return{id:'WHY_STATE_VERB_KAY',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ يَنْصِبُ بِنَفْسِهِ؛ لِتَقَدُّمِ لَامِ التَّعْلِيلِ عَلَيْهِ لَفْظًا، فَهُوَ مَنْصُوبٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of maṣdar and naṣb that governs by itself because لَامُ التَّعْلِيلِ explicitly precedes it, so it is مَنْصُوبٌ.`};
+ const concealed=CONCEALED_AN_BY_PARTICLE[type];
+ if(concealed){
+  const authorization=deriveConcealedAnNasb(data,data.tokens.indexOf(t));
+  if(!authorization.authorized)throw new Error(`WHY: concealed an is not licensed (${authorization.reason}).`);
+  const mode=CONCEALED_AN_MODES[concealed.mode];
+  return{id:'WHY_STATE_VERB_CONCEALED_AN',ar:`${wq(t.word)} فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِأَنْ مُضْمَرَةٍ ${mode.ar} بَعْدَ ${concealed.nameAr}.`,en:`${eq(t.word)} is مَنْصُوبٌ by a concealed أَنْ (${mode.en}) after ${concealed.nameEn}.`};
+ }
  /* Phase 3B1 — إِذَنْ. This is the ONE state Why that may not say merely "a nāṣib precedes it, so
     it is منصوب": p. 75 makes the naṣb conditional, so the explanation has to say WHY THIS
     OCCURRENCE is الناصبة. Each of the three conditions gets its own line, keyed to the authorized
@@ -7168,7 +7363,13 @@ const WHY_PARTICLE=Object.freeze({
     which is the fact that distinguishes it from every other nāṣib in this app. The conditions
     themselves are stated once, on the verb they actually govern, so a learner meets them where the
     naṣb happens rather than twice in two places. */
- [IDHAN_PARTICLE_TYPE]:t=>({id:'WHY_PARTICLE_IDHAN',ar:`${wq(t.word)} حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ، تَنْصِبُ الْفِعْلَ الْمُضَارِعَ بِنَفْسِهَا بِشُرُوطٍ ثَلَاثَةٍ.`,en:`${eq(t.word)} is a particle of answer, recompense, and naṣb; it makes the present verb مَنْصُوبٌ by itself, on three conditions.`})
+ [IDHAN_PARTICLE_TYPE]:t=>({id:'WHY_PARTICLE_IDHAN',ar:`${wq(t.word)} حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ، تَنْصِبُ الْفِعْلَ الْمُضَارِعَ بِنَفْسِهَا بِشُرُوطٍ ثَلَاثَةٍ.`,en:`${eq(t.word)} is a particle of answer, recompense, and naṣb; it makes the present verb مَنْصُوبٌ by itself, on three conditions.`}),
+ maNafiyaKana:t=>({id:'WHY_PARTICLE_MA_NAFIYA_KANA',ar:`${wq(t.word)} حَرْفُ نَفْيٍ نَفَى «كَانَ» فِي هَذَا التَّرْكِيبِ.`,en:`${eq(t.word)} negates kāna in this construction.`}),
+ laNafiyaContext:t=>({id:'WHY_PARTICLE_LA_NAFIYA_CONTEXT',ar:`${wq(t.word)} حَرْفُ نَفْيٍ لَا يَعْمَلُ الْجَزْمَ هُنَا.`,en:`${eq(t.word)} is a negating particle and does not govern jazm here.`}),
+ ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(construction=>[construction.particleType,t=>({
+  id:`WHY_PARTICLE_${construction.id.toUpperCase()}`,ar:`${wq(t.word)} هُوَ ${construction.nameAr} فِي التَّرْكِيبِ الْمُسَجَّلِ، وَلَيْسَ نَاصِبًا بِنَفْسِهِ.`,
+  en:`${eq(t.word)} is ${construction.nameEn} in the registered construction; it is not itself a direct nāṣib.`
+ })]))
 });
 /* Phase 3B1 — the three conditions of Al-Tuḥfah p. 75, one line each, stated as SATISFIED because
    they are emitted only after the resolver has proven all three. They are deliberately three lines
@@ -7257,6 +7458,8 @@ function buildTokenWhy(token,data){
       unauthorized إِذَنْ, so these lines can never appear beside an unproven claim. */
    const idhanGovernor=token.governorId?(data?.tokens||token._tokens||[]).find(item=>item.id===token.governorId):null;
    if(idhanGovernor?.grammar?.particleType===IDHAN_PARTICLE_TYPE)WHY_IDHAN_CONDITIONS.forEach(push);
+   const concealed=CONCEALED_AN_BY_PARTICLE[idhanGovernor?.grammar?.particleType];
+   if(concealed){push(whyConcealedAnConstruction(concealed));push(WHY_CONCEALED_AN_MODE[concealed.mode]);}
    push(whyStateVerb(token,data));
    push(whySignVerb(token));
    push(whyVerbSubject(token));
@@ -7272,6 +7475,13 @@ function buildTokenWhy(token,data){
 function buildRelationshipWhy(rel,data){
  const ids=[],ar=[],en=[];
  const push=s=>{ids.push(s.id);ar.push(s.ar);en.push(s.en)};
+ if(rel.type==='concealedAn'){
+  const construction=CONCEALED_AN_CONSTRUCTIONS[rel.construction];
+  const mode=CONCEALED_AN_MODES[rel.mode];
+  if(!construction||!mode)return{ids,ar,en};
+  push({id:'WHY_REL_CONCEALED_AN_LICENSE',ar:`رَبَطَ هَذَا التَّرْكِيبُ ${construction.nameAr} بِالْفِعْلِ، فَكَانَ نَاصِبُهُ «أَنْ» الْمُضْمَرَةَ ${mode.ar}.`,en:`This construction links ${construction.nameEn} to the verb, whose nāṣib is a concealed أَنْ (${mode.en}).`});
+  return{ids,ar,en};
+ }
  const mubtada=data.tokens.find(item=>item.id===rel.mubtadaId);
  const anchor=data.tokens.find(item=>item.id===(rel.khabarId||rel.anchorId));
  const phrase=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)?.word).filter(Boolean).join(' ');
@@ -7304,12 +7514,27 @@ function buildRelationshipWhy(rel,data){
 function attachWhyExplanations(data){
  data.tokens.forEach(token=>{token.why=buildTokenWhy(token,data)});
  data.relationships.forEach(rel=>{
+  if(rel.type==='concealedAn'){
+   const recipient=data.tokens.find(item=>item.id===rel.verbId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type!=='mubtadaKhabar'||rel.khabarKind==='single')return;
   const recipient=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)).filter(Boolean).at(-1);
   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
  });
 }
 function renderRelationshipAnalysis(data){
+ data.relationships.filter(rel=>rel.type==='concealedAn').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const licensor=data.tokens.find(item=>item.id===rel.licensorId);
+  const construction=CONCEALED_AN_CONSTRUCTIONS[rel.construction];
+  const mode=CONCEALED_AN_MODES[rel.mode];
+  if(!verb||!licensor||!construction||!mode)return;
+  verb.phraseAr=`وَالتَّرْكِيبُ «${licensor.word}${verb.word}» رَبَطَ ${construction.nameAr} بِالْمُضَارِعِ، وَنَاصِبُهُ «أَنْ» مُضْمَرَةٌ ${mode.ar}.`;
+  verb.phraseEn=`Together, the licensed ${construction.nameEn} construction supplies a concealed أَنْ (${mode.en}) as the verb's nāṣib.`;
+  verb.phraseLabel='Construction';
+ });
  data.relationships.filter(rel=>rel.type==='mubtadaKhabar').forEach(rel=>{
   const mubtada=data.tokens.find(item=>item.id===rel.mubtadaId);
   const anchor=data.tokens.find(item=>item.id===(rel.khabarId||rel.anchorId));
@@ -7636,8 +7861,19 @@ function validateExercise(data){
       canonical particleType rather than read from the stored link. Person and morphology are
       identical for أَنْ and لَنْ, so this is the only thing that stops a governed exercise from
       being filed under a different governor's template. */
-   if(productionTemplate&&(governor?.grammar?.particleType||'')!==productionTemplate.presentGovernor){
+   if(productionTemplate&&(!productionTemplate.concealedAnConstruction||token.target)
+     &&(governor?.grammar?.particleType||'')!==productionTemplate.presentGovernor){
     fail('E_PRESENT_GOVERNOR_TEMPLATE','The governing particle disagrees with the one its production template declares.',token);
+   }
+   const concealedSpec=CONCEALED_AN_BY_PARTICLE[governor?.grammar?.particleType];
+   if(concealedSpec){
+    const authorization=deriveConcealedAnNasb(data,data.tokens.indexOf(token));
+    if(!authorization.authorized)fail('E_CONCEALED_AN_LICENSE',`Concealed an is not licensed here: ${authorization.reason}.`,token);
+    const concealedRelations=relationships.filter(rel=>rel.type==='concealedAn'&&rel.verbId===token.id);
+    if(concealedRelations.length!==1||concealedRelations[0].licensorId!==governor.id
+      ||concealedRelations[0].construction!==concealedSpec.id||concealedRelations[0].mode!==concealedSpec.mode){
+     fail('E_CONCEALED_AN_RELATION','The concealed-an licensing relationship is missing or non-canonical.',token);
+    }
    }
    /* Phase 3B1 — a CONDITIONAL governor's naṣb is not settled by adjacency. Every check above
       asks whether the verb agrees with the governor beside it; this asks the prior question of
@@ -7670,7 +7906,8 @@ function validateExercise(data){
     const subjectComponent=(token.components||[]).find(component=>component.syntacticRole==='fail');
     if(morphology.subjectMode==='attached'){
      if(subjectRel?.subjectType!=='attached'||subjectRel.pronoun!==subjectComponent?.nameAr)fail('E_ATTACHED_SUBJECT','Present attached-subject relationship disagrees with its ending component.',token);
-     if(data.tokens.some(candidate=>candidate.grammar?.role==='faail'))fail('E_PRESENT_COMPETING_SUBJECT','An attached-subject present exercise may not contain an explicit noun fāʿil.',token);
+     const presentIndex=data.tokens.indexOf(token);
+     if(data.tokens.slice(presentIndex+1).some(candidate=>candidate.grammar?.role==='faail'))fail('E_PRESENT_COMPETING_SUBJECT','An attached-subject present verb may not also take a following explicit noun fāʿil.',token);
     }else if(morphology.subjectMode==='explicit'&&subjectRel?.subjectType!=='explicit')fail('E_PRESENT_EXPLICIT_SUBJECT','This present form requires its following explicit noun fāʿil.',token);
     else if(morphology.subjectMode==='implicit'&&(subjectRel?.subjectType!=='implicit'||subjectRel.pronoun!==PRESENT_HIDDEN_SUBJECTS[morphology.person]))fail('E_PRESENT_IMPLICIT_SUBJECT','Present hidden subject disagrees with the registered person.',token);
    }
@@ -7768,6 +8005,19 @@ function validateExercise(data){
    if(token.relations?.governsId)fail('E_LAM_TALIL_GOVERNS','Lām al-taʿlīl may not be recorded as the governor of the verb; kay governs it directly.',token);
    if(data.tokens.some(item=>item.governorId===token.id))fail('E_LAM_TALIL_GOVERNS','No token may name lām al-taʿlīl as its governor.',token);
   }
+  if(CONCEALED_AN_BY_PARTICLE[token.grammar.particleType]){
+   const nextIndex=data.tokens.indexOf(token)+1;
+   const authorization=deriveConcealedAnNasb(data,nextIndex);
+   if(!authorization.authorized)fail('E_CONCEALED_AN_CONSTRUCTION',`This particle does not stand in its canonical concealed-an construction: ${authorization.reason}.`,token);
+  }
+  if(token.grammar.particleType==='maNafiyaKana'||token.grammar.particleType==='laNafiyaContext'){
+   const licensed=data.tokens.some((candidate,index)=>deriveConcealedAnNasb(data,index).authorized);
+   if(!licensed)fail('E_CONCEALED_AN_CONTEXT','A negation-context particle may occur only inside its canonical concealed-an construction.',token);
+  }
+  if(token.grammar?.kanaKhabar===true){
+   const authorization=deriveConcealedAnNasb(data,data.tokens.indexOf(token));
+   if(!authorization.authorized||authorization.construction!=='lamJuhud')fail('E_KANA_VERBAL_KHABAR','A verbal kāna-khabar marker belongs only to the canonical lām al-juḥūd frame.',token);
+  }
   if(token.ar.includes('بِـ«لَنْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='لَنْ')fail('E_FAKE_LAN','Explanation mentions lan without a linked lan.',token);
   if(token.ar.includes('بِـ«أَنْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='أَنْ')fail('E_FAKE_AN','Explanation mentions an without a linked an.',token);
   if(token.ar.includes('بِـ«كَيْ»')&&data.tokens.find(item=>item.id===token.governorId)?.word!=='كَيْ')fail('E_FAKE_KAY','Explanation mentions kay without a linked kay.',token);
@@ -7817,9 +8067,12 @@ function validateExercise(data){
  const kana=data.tokens.filter(item=>item.tense==='kana');
  const ismKana=data.tokens.filter(item=>item.grammar.role==='ismKana');
  const khabarKana=data.tokens.filter(item=>item.grammar.role==='khabarKana');
- if(kana.length||ismKana.length||khabarKana.length){
-  const ordered=kana.length===1&&ismKana.length===1&&khabarKana.length===1&&data.tokens.indexOf(kana[0])<data.tokens.indexOf(ismKana[0])&&data.tokens.indexOf(ismKana[0])<data.tokens.indexOf(khabarKana[0]);
-  if(!(ordered&&relationships.some(rel=>rel.type==='kana'&&rel.governorId===kana[0].id&&rel.ismId===ismKana[0].id&&rel.khabarId===khabarKana[0].id)))fail('E_KANA_PAIR','Kāna structure is incomplete, out of order, or unlinked.');
+ const verbalKhabarKana=data.tokens.filter(item=>item.grammar?.type==='verb'&&item.grammar.kanaKhabar===true);
+ if(kana.length||ismKana.length||khabarKana.length||verbalKhabarKana.length){
+  const khabar=khabarKana[0]||verbalKhabarKana[0];
+  const exactOne=khabarKana.length+verbalKhabarKana.length===1;
+  const ordered=kana.length===1&&ismKana.length===1&&exactOne&&data.tokens.indexOf(kana[0])<data.tokens.indexOf(ismKana[0])&&data.tokens.indexOf(ismKana[0])<data.tokens.indexOf(khabar);
+  if(!(ordered&&relationships.some(rel=>rel.type==='kana'&&rel.governorId===kana[0].id&&rel.ismId===ismKana[0].id&&rel.khabarId===khabar.id)))fail('E_KANA_PAIR','Kāna structure is incomplete, out of order, or unlinked.');
  }
  if(data.tokens.some(item=>item.grammar.particleType==='lan')&&!/will not/i.test(data.translation))fail('E_LAN_TRANSLATION','Lan sentence lacks “will not” in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='lam')&&!/did not/i.test(data.translation))fail('E_LAM_TRANSLATION','Lam sentence lacks “did not” in its translation.');
@@ -7906,6 +8159,15 @@ function add(starts,form,state,sign,build,metadata={}){
  if(presentGovernor&&!Object.hasOwn(GRAMMAR_RULES.governors,presentGovernor)){
   throw new Error(`Unknown present template governor: ${presentGovernor}`);
  }
+ const concealedAnConstruction=metadata.concealedAnConstruction||'';
+ if(concealedAnConstruction){
+  const construction=CONCEALED_AN_CONSTRUCTIONS[concealedAnConstruction];
+  if(!construction||construction.particleType!==presentGovernor){
+   throw new Error(`Template ${stableId} has an invalid concealed-an construction declaration.`);
+  }
+  const expected=form==='fiveVerbs'?construction.fiveTemplateId:construction.ordinaryTemplateId;
+  if(stableId!==expected)throw new Error(`Concealed-an construction ${concealedAnConstruction} is not bound to ${stableId}.`);
+ }
  /* Phase 3B1 — the discourse metadata, frozen here and nowhere else, and the ONLY road into the
     response layer. A template whose governor is CONDITIONAL must name the exact registered
     exchanges it may produce, because its government cannot be settled without them; every other
@@ -7957,6 +8219,7 @@ function add(starts,form,state,sign,build,metadata={}){
      governor from adjacency and compares; the declaration is frozen here and never read off a
      token. The mabnī lane is excluded: its governor is settled by capability `governorMode`. */
   presentGovernor,
+  concealedAnConstruction,
   /* Phase 3B1 — the ONLY road into the discourse layer. templateResponseContext and the productive
      resolver read these two and nothing else; no exercise may carry either name. */
   responseContextId,
@@ -8317,6 +8580,64 @@ add('particle','fiveVerbs','nasb','nunDropped',()=>buildIdhanProductiveExercise(
  presentGovernor:IDHAN_PARTICLE_TYPE,
  responsePairIds:IDHAN_PRODUCTIVE_LANES.afalKhamsa.pairIds
 });
+
+/* Remaining six nawāṣib — one builder over the six frozen concealed-an frames.  Each visible
+   sentence proves its license: purpose, negated kāna, endpoint/purpose, an explicit negative
+   result, explicit negative accompaniment, or the registered “until” sense of أَوْ. */
+function concealedAnVerbToken(lexeme,lane,kanaKhabar=false){
+ const grammar=lane==='afalKhamsa'?AR.presentFive(lexeme.fiveSub):AR.presentPred(lexeme.acc);
+ if(kanaKhabar)grammar.kanaKhabar=true;
+ return token(lane==='afalKhamsa'?lexeme.fiveSub:lexeme.acc,
+  lane==='afalKhamsa'?`they ${lexeme.en}`:lexeme.en,grammar,
+  lane==='afalKhamsa'?EN.fiveVerb:EN.present,true);
+}
+function buildConcealedAnExercise(constructionId,lane){
+ const construction=CONCEALED_AN_CONSTRUCTIONS[constructionId];
+ const frame=CONCEALED_AN_FRAME_DATA[constructionId];
+ if(!construction||!frame)throw new Error(`Unknown concealed-an construction: ${constructionId}`);
+ const target=verbs.find(item=>item.past===frame.targetPast);
+ const prefix=frame.prefixPast?verbs.find(item=>item.past===frame.prefixPast):null;
+ if(!target||(frame.prefixPast&&!prefix))throw new Error(`Unregistered concealed-an frame: ${constructionId}`);
+ const subjectAr=CONCEALED_AN_SUBJECTS[lane],subjectEn=nounEnglish(subjectAr,'nom');
+ const plural=lane==='afalKhamsa',pronoun=plural?'they':'he';
+ const connector=token(construction.surface,CONCEALED_AN_CONNECTOR_EN[constructionId],AR.concealedAnParticle(construction.surface,construction.particleType),'A visible licensor of concealed an.');
+ const targetToken=concealedAnVerbToken(target,lane,constructionId==='lamJuhud');
+ const objectEn=objectEnglish(frame.targetObject);
+ if(constructionId==='lamJuhud')return{
+  sentence:'',translation:`${cap(subjectEn)} ${plural?'were':'was'} not going to ${target.en} ${objectEn}.`,
+  tokens:[token('مَا','not',AR.maNafiyaKana('مَا'),'A negating particle.'),token('كَانَ','was',AR.kana('كَانَ'),'A deficient past-tense verb.'),
+   token(subjectAr,subjectEn,AR.ismKana(subjectAr),'The noun of kāna; nominative.'),connector,targetToken,
+   token(frame.targetObject,objectEn,AR.object(frame.targetObject),EN.object)]
+ };
+ const prefixVerb=token(prefix.pres,prefix.en,AR.presentPred(prefix.pres),EN.present);
+ const subject=token(subjectAr,subjectEn,AR.faail(subjectAr),'The explicit subject; nominative.');
+ const object=token(frame.targetObject,objectEn,AR.object(frame.targetObject),EN.object);
+ if(constructionId==='faSababiyya'||constructionId==='wawMaiyya')return{
+  sentence:'',translation:`${cap(subjectEn)} does not ${prefix.en} ${constructionId==='faSababiyya'?'and therefore':'while'} ${pronoun} ${target.en} ${objectEn}.`,
+  tokens:[token('لَا','does not',AR.laNafiyaContext('لَا'),'A negating particle.'),prefixVerb,subject,connector,targetToken,object]
+ };
+ if(constructionId==='aw'){
+  const prefixObjectEn=objectEnglish(frame.prefixObject);
+  return{sentence:'',translation:`${cap(subjectEn)} ${plural?prefix.en:prefix.third} ${prefixObjectEn} until ${pronoun} ${target.en} ${objectEn}.`,
+   tokens:[prefixVerb,subject,token(frame.prefixObject,prefixObjectEn,AR.object(frame.prefixObject),EN.object),connector,targetToken,object]};
+ }
+ return{sentence:'',translation:`${cap(subjectEn)} ${plural?prefix.en:prefix.third} ${constructionId==='hatta'?'until':'so that'} ${pronoun} ${target.en} ${objectEn}.`,
+  tokens:[prefixVerb,subject,connector,targetToken,object]};
+}
+function concealedAnTemplateMetadata(constructionId,lane){
+ const construction=CONCEALED_AN_CONSTRUCTIONS[constructionId];
+ const targetPerson=lane==='afalKhamsa'?'3mp':'3ms';
+ const targetSubject=lane==='afalKhamsa'?'attached':'implicit';
+ const capabilities=[{person:targetPerson,subjectMode:targetSubject,formClass:PRESENT_MORPHOLOGY[targetPerson].formClass,
+  endingClass:PRESENT_MORPHOLOGY[targetPerson].endingClass,binaaClass:PRESENT_MORPHOLOGY[targetPerson].binaaClass}];
+ if(constructionId!=='lamJuhud')capabilities.unshift({person:'3ms',subjectMode:'explicit',formClass:PRESENT_MORPHOLOGY['3ms'].formClass,
+  endingClass:PRESENT_MORPHOLOGY['3ms'].endingClass,binaaClass:PRESENT_MORPHOLOGY['3ms'].binaaClass});
+ return{presentGovernor:construction.particleType,concealedAnConstruction:constructionId,presentCapabilities:capabilities};
+}
+for(const constructionId of Object.keys(CONCEALED_AN_CONSTRUCTIONS)){
+ add('particle','present','nasb','fatha',()=>buildConcealedAnExercise(constructionId,'ordinary'),concealedAnTemplateMetadata(constructionId,'ordinary'));
+ add('particle','fiveVerbs','nasb','nunDropped',()=>buildConcealedAnExercise(constructionId,'afalKhamsa'),concealedAnTemplateMetadata(constructionId,'afalKhamsa'));
+}
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

@@ -1143,6 +1143,11 @@ function resolveCanonicalTokenGloss(data,token,index){
  if(type==='particle'&&token.grammar?.particleType===LA_JINS_PARTICLE_TYPE){
   return LA_JINS_PARTICLE.gloss;
  }
+ /* Same problem, same solution: «وَ» is the ʿaṭf conjunction on one reading and the wāw of
+    accompaniment on another, and only the particle's identity separates the two glosses. */
+ if(type==='particle'&&token.grammar?.particleType===WAW_MAIYYA_TYPE){
+  return WAW_MAIYYA.gloss;
+ }
  if(type==='particle'){
   return Object.prototype.hasOwnProperty.call(GLOSS_CLOSED_PARTICLES,surface)
    ?GLOSS_CLOSED_PARTICLES[surface]:null;
@@ -1367,6 +1372,7 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  ,TS44:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mustathnaSentence'})])})
  ,TS45:Object.freeze({parts:Object.freeze([Object.freeze({slot:'laJinsSentence'})])})
  ,TS46:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulAjlSentence'})])})
+ ,TS47:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulMaahSentence'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1528,6 +1534,7 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  /* الاستثناء: the particle lane and the غَيْر iḍāfah lane are genuinely different structures. */
  ,"T_VERB_SINGULAR_NASB_FATHA_30||verb:past,noun:faail,particle:particle,noun:mustathna":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_30",structure:"verb:past,noun:faail,particle:particle,noun:mustathna",shape:"TS44",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_31||verb:past,noun:faail,noun:mustathna,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_31",structure:"verb:past,noun:faail,noun:mustathna,noun:mudafIlayh",shape:"TS44",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_34||verb:past,noun:faail,particle:particle,noun:mafulMaah":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_34",structure:"verb:past,noun:faail,particle:particle,noun:mafulMaah",shape:"TS47",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_32||verb:past,noun:faail,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_32",structure:"verb:past,noun:faail,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_33||verb:past,noun:faail,noun:object,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_33",structure:"verb:past,noun:faail,noun:object,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_PARTICLE_SINGULAR_NASB_FATHA_09||particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_09",structure:"particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa",shape:"TS45",copulaPlural:false})
@@ -1587,6 +1594,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='mustathnaSentence')return canonicalMustathnaTranslation(exercise);
  if(bits[0]==='laJinsSentence')return canonicalLaJinsTranslation(exercise);
  if(bits[0]==='mafulAjlSentence')return canonicalMafulAjlTranslation(exercise);
+ if(bits[0]==='mafulMaahSentence')return canonicalMafulMaahTranslation(exercise);
  if(bits[0]==='copula'){
   const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
   if(!particle)return null;
@@ -4433,6 +4441,68 @@ const MAFUL_AJL_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
   sentenceEn:'The student memorized the Qurʾān out of eagerness.'})
 }));
 const MAFUL_AJL_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_AJL_PAIR_REGISTRY));
+/* Productive المفعول معه — Al-Tuḥfah pp. 172–173 (باب المفعول معه).
+
+   Matn p. 172: «هُوَ الاسْمُ، الْمَنْصُوبُ، الَّذِي يُذْكَرُ لِبَيَانِ مَنْ فُعِلَ مَعَهُ الْفِعْلُ». The شرح
+   sharpens it to «الاسم، الفضلة، المنصوب بالفعل أو ما فيه معنى الفعل وحروفه، الدالُّ على الذات
+   التي وقع الفعل بمصاحبتها، **المسبوق بواو تفيد المعية نصًّا**» — and that last clause is the whole
+   difficulty of this chapter, because وَ is also the commonest حرف عطف in the language.
+
+   The source does not leave the two to be told apart by feel. p. 173 divides the noun after the
+   wāw into two kinds:
+
+     1. «ما يتعين نصبُه على أنه مفعول معه» — where تشريك is impossible, so no ʿaṭf reading exists at
+        all: «أَنَا سَائِرٌ وَالْجَبَلَ» (a mountain cannot share in walking) and «ذَاكَرْتُ
+        وَالْمِصْبَاحَ» (a lamp cannot share in studying).
+     2. «ما يجوز نصبُه على ذلك وإتباعُه لما قبله في إعرابه معطوفًا عليه» — where both readings work.
+
+   ONLY the first kind is produced, and that is what makes مفعول معه provably not عطف here: every
+   registered pair names a companion that CANNOT perform the ʿāmil's action, so the accompaniment
+   reading is the only one available. The second kind is a جواز and is deferred by name, exactly as
+   the ambiguous أحوال of الاستثناء and المفعول له were. */
+const MAFUL_MAAH_ROLE='mafulMaah';
+const WAW_MAIYYA_TYPE='wawMafulMaah';
+const WAW_MAIYYA=Object.freeze({surface:'وَ',particleType:WAW_MAIYYA_TYPE,ruleId:'R_WAW_MAIYYA',
+ gloss:'along with',nameAr:'وَاوُ الْمَعِيَّةِ',nameEn:'the wāw of accompaniment'});
+/* Companions that cannot possibly share the act. Each entry records WHY تشريك fails, because that
+   is the source's own criterion for the first kind, and it is what the learner needs to see. */
+/* Every companion this chapter needs is already canonical vocabulary, so MAFUL_MAAH_LEXEMES stays
+   empty on purpose: nothing here is retyped, and the registry resolves each companion from the
+   lexicon by English. The load-time collision gate is what proved «الْمِصْبَاحَ» was already owned. */
+const MAFUL_MAAH_LEXEMES=Object.freeze(Object.assign(Object.create(null),{}));
+function mafulMaahCompanion(spec){
+ if(spec.lexemeKey){
+  const lexeme=MAFUL_MAAH_LEXEMES[spec.lexemeKey];
+  if(!lexeme)throw new Error(`The mafʿūl-maʿah registry names an unregistered companion: ${spec.lexemeKey}`);
+  return lexeme;
+ }
+ const matches=singularThings.filter(item=>item.en===spec.en);
+ if(matches.length!==1)throw new Error(`The mafʿūl-maʿah registry matched ${matches.length} records for “${spec.en}”.`);
+ return matches[0];
+}
+function mafulMaahVerb(spec){
+ const capability=MUTLAQ_VERB_CAPABILITIES[spec.capabilityKey];
+ if(capability)return Object.freeze({past:capability.past,pastEn:capability.pastEn});
+ const matches=generalVerbActions.filter(item=>item.en===spec.verbEn);
+ if(matches.length!==1)throw new Error(`The mafʿūl-maʿah registry matched ${matches.length} verb records for “${spec.verbEn}”.`);
+ return Object.freeze({past:matches[0].past,pastEn:matches[0].pastEn});
+}
+const MAFUL_MAAH_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ /* The شرح's own «ذَاكَرْتُ وَالْمِصْبَاحَ», on this app's 3ms explicit-fāʿil past frame. */
+ studiedWithLamp:Object.freeze({verb:Object.freeze({verbEn:'study'}),subjectEn:'the student',
+  companion:Object.freeze({en:'the lamp'}),
+  reasonAr:'وَالْمِصْبَاحُ لَا يُشَارِكُ فِي الدَّرْسِ',reasonEn:'a lamp cannot share in studying',
+  sentenceEn:'The student studied by the lamp.'}),
+ satWithWall:Object.freeze({verb:Object.freeze({capabilityKey:'jalasa'}),subjectEn:'the student',
+  companion:Object.freeze({en:'the wall'}),
+  reasonAr:'وَالْجِدَارُ لَا يُشَارِكُ فِي الْجُلُوسِ',reasonEn:'a wall cannot share in sitting down',
+  sentenceEn:'The student sat down alongside the wall.'}),
+ stoodWithTree:Object.freeze({verb:Object.freeze({capabilityKey:'waqafa'}),subjectEn:'the guest',
+  companion:Object.freeze({en:'the tree'}),
+  reasonAr:'وَالشَّجَرَةُ لَا تُشَارِكُ فِي الْوُقُوفِ',reasonEn:'a tree cannot share in standing up',
+  sentenceEn:'The guest stood alongside the tree.'})
+}));
+const MAFUL_MAAH_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_MAAH_PAIR_REGISTRY));
 const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...feminineHumanSingulars,...feminineHumanDuals,...fiveNouns];
 function nounEnglish(word,caseName='acc'){
  return allCaseNouns.find(item=>item[caseName]===word)?.en||'the noun';
@@ -7053,6 +7123,7 @@ const GRAMMAR_RULES=Object.freeze({
   haal:{state:'nasb',ruleId:'R_HAAL_NASB',en:'A haal describing its صاحب at the time of the event; accusative.'},
   tamyiz:{state:'nasb',ruleId:'R_TAMYIZ_NASB',en:'A tamyīz: an indefinite noun that lifts the vagueness off an expression or a relation; accusative.'},
   mustathna:{state:'nasb',ruleId:'R_MUSTATHNA_NASB',en:'A mustathnā excluded from a complete affirmative statement; accusative.'},
+  mafulMaah:{state:'nasb',ruleId:'R_MAFUL_MAAH_NASB',en:'A mafʿūl maʿah: the thing the action happened alongside, after a wāw that expressly means accompaniment; accusative.'},
   mafulAjl:{state:'nasb',ruleId:'R_MAFUL_AJL_NASB',en:'A mafʿūl lah: an inward maṣdar giving the reason the action happened; accusative.'},
   ismLa:{state:'nasb',ruleId:'R_ISM_LA_NASB',en:'The noun of «لا» that negates its whole class; accusative because «لا» works like «إنّ».'},
   khabarLa:{state:'raf',ruleId:'R_KHABAR_LA_RAF',en:'The khabar of «لا» that negates its whole class; nominative.'}
@@ -7119,7 +7190,7 @@ const PHASE3A2_VERB_HINT='An exact registered person-bound present form built on
    particle, and كَيْ's licensing condition is precisely that this word is present. So the
    displayed sentence joins it to what follows while the token list keeps them distinct. This is
    the ONLY place surface composition may differ from a plain space-join. */
-const PROCLITIC_PARTICLE_TYPES=Object.freeze([KAY_TALIL_LAM.particleType,'atfAmQuestion',
+const PROCLITIC_PARTICLE_TYPES=Object.freeze([WAW_MAIYYA_TYPE,KAY_TALIL_LAM.particleType,'atfAmQuestion',
  ATF_CONJUNCTION_REGISTRY.waw.particleType,ATF_CONJUNCTION_REGISTRY.fa.particleType,
  CONCEALED_AN_CONSTRUCTIONS.lamTalil.particleType,CONCEALED_AN_CONSTRUCTIONS.lamJuhud.particleType,
  CONCEALED_AN_CONSTRUCTIONS.faSababiyya.particleType,CONCEALED_AN_CONSTRUCTIONS.wawMaiyya.particleType]);
@@ -7157,8 +7228,8 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
- roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','mafulAjl','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
- relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','laJins','mafulAjl','preposition','idafa','inna','kana','concealedAn','follower'],
+ roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','mafulAjl','mafulMaah','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
+ relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','laJins','mafulAjl','mafulMaah','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
@@ -7213,6 +7284,11 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  'the mafʿūl lah carrying أل, where p. 172 makes khafḍ by a particle of causation the more frequent reading',
  'the mafʿūl lah as a muḍāf, where p. 172 makes naṣb and khafḍ equally permissible',
  'the khafḍ reading of the stripped mafʿūl lah, which p. 172 keeps permissible but calls less frequent',
+ /* المفعول معه ships only the kind where the source says naṣb «يتعين» — where تشريك is impossible.
+    The kind that merely permits it is a جواز and would print one of two valid readings as the
+    answer, so it is named here instead. */
+ 'the mafʿūl maʿah where p. 173 permits BOTH naṣb on accompaniment and ʿaṭf on what precedes it',
+ 'the mafʿūl maʿah whose ʿāmil is an ism fāʿil rather than a verb (الأمير حاضر والجيشَ)',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
   'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
@@ -7391,6 +7467,9 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  /* Al-Tuḥfah pp. 170–172, باب المفعول من أجله. The definition, the five conditions and the state
     are three separate claims, and the state one is the careful one: the source permits naṣb AND
     جر بحرف التعليل for every qualifying noun, and only weights them differently by ḥāl. */
+ /* Al-Tuḥfah pp. 172–173, باب المفعول معه. */
+ R_MAFUL_MAAH_NASB:sourceRule('The mafʿūl maʿah is the accusative surplus noun naming the thing the action happened alongside, preceded by a wāw that expressly means accompaniment.',[172,173],'Only the kind p. 173 says «يتعين نصبه»: the companion cannot perform the ʿāmil’s action, so no ʿaṭf reading competes. The clause already has its own fāʿil, keeping the companion a فضلة rather than a second subject.'),
+ R_WAW_MAIYYA:sourceRule('The wāw preceding a mafʿūl maʿah is express in indicating accompaniment; a wāw that merely could join two nouns is a conjunction instead.',[172,173],'It carries its own particle identity, so the ʿaṭf wāw this app already produces on the same surface can never authorize the frame, and its English gloss resolves by identity rather than by spelling.'),
  R_MAFUL_AJL_NASB:sourceRule('The mafʿūl lah is the accusative noun mentioned to explain the reason the action occurred.',[170,171],'Only registered inward-motive maṣdars in the third ḥāl — stripped of أل and of iḍāfah — where p. 172 makes naṣb the more frequent reading. The construction, not the word, is what licenses the role.'),
  R_MAFUL_AJL_CONDITIONS:sourceRule('A noun is a mafʿūl lah only when it is a maṣdar, an inward (qalbī) one rather than an act of the limbs, a cause for what precedes it, and united with its ʿāmil in both time and doer.',[171],'The two lexical conditions are checked on the registry — every motive is an inward maṣdar and none is one of the act-maṣdars the mafʿūl-muṭlaq chapter registered — and the three construction conditions on the built graph: one past clause, one explicit marfūʿ fāʿil, and a frozen pair naming the motive for that exact act.'),
  R_MAFUL_AJL_STATE:sourceRule('Any noun meeting the conditions may be accusative, or khafḍ by a particle of causation such as the lām; when it is stripped of أل and of iḍāfah the accusative is the more frequent of the two.',[171,172],'Only the stripped ḥāl is produced. The Why states «الأكثر», never «يجب», because the source itself keeps the khafḍ reading permissible here; the أل and muḍāf ḥāls, where khafḍ is preferred or equal, are not produced at all.'),
@@ -7609,6 +7688,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
  RL_VERB_ZARF:sourceRule('A verb is linked to the ẓarf of time or place that follows it and makes it accusative as a mafʿūl fīh.',[148,149,151,152],'Only a registered ẓarf lexeme whose ʿāmil is a visible verb earlier in the same sentence. A ẓarf whose ʿāmil is an omitted khabar carries no such link, because there is no verb to link it to; that shape keeps the existing attachment analysis instead.'),
  RL_VERB_ABSOLUTE_OBJECT:sourceRule('A verb is linked to the maṣdar of its own action that follows it and makes it accusative as a mafʿūl muṭlaq.',[146,147],'Only an exact registered pair authorized by frozen template metadata: the ʿāmil is the nearest preceding visible past verb, and the maṣdar, its optional direct object and its optional muḍāf ilayh are all the ones that pair names. Adjacency alone never creates the relation.'),
+ RL_VERB_MAFUL_MAAH:sourceRule('A verb is linked to the companion the action happened alongside, and to the doer that performed it.',[172,173],'Only an exact frozen pair owned by its template, whose companion is registered as unable to share the act.'),
  RL_VERB_MAFUL_AJL:sourceRule('A verb is linked to the inward maṣdar that gives the reason it happened, and to the doer whose motive it is.',[170,171],'Only an exact frozen pair owned by its template; the motive must share the ʿāmil’s time and its doer.'),
  RL_LA_JINS_NOUN_KHABAR:sourceRule('«لا» that negates a whole class is linked to the noun it makes accusative and to the khabar it makes nominative.',[166,167],'Only an exact frozen pair owned by its template; adjacency alone never creates the relation.'),
  RL_ISTITHNA_EXCLUSION:sourceRule('A registered mustathnā is linked to the ʿāmil that makes it accusative, to the mustathnā minhu it is excluded from, and to the أداة that excludes it.',[162,163,164],'Only an exact frozen pair owned by its template. The mustathnā minhu is named structurally as the pair’s fāʿil, never as the nearest preceding noun.'),
@@ -8343,6 +8423,66 @@ function verifyMafulAjlRegistry(){
  });
 }
 verifyMafulAjlRegistry();
+/* المفعول معه. */
+function registerMafulMaahNounForms(){
+ Object.values(MAFUL_MAAH_LEXEMES).forEach(lexeme=>{
+  const existing=nounFormIndex.get(lexeme.acc);
+  if(existing&&existing.lexeme!==lexeme){
+   throw new Error(`Mafʿūl-maʿah lexeme collides with an existing noun surface: ${lexeme.acc}`);
+  }
+  nounFormIndex.set(lexeme.acc,{lexeme,inflection:lexeme.inflection});
+ });
+}
+registerMafulMaahNounForms();
+/* Narrow byte/coherence gate. The load-bearing check is the last one: every pair has to state why
+   تشريك fails, because that impossibility is the source's own criterion for the kind of مفعول معه
+   this app produces — the kind where no ʿaṭf reading exists to compete with it. */
+function verifyMafulMaahRegistry(){
+ /* Three distinct wāws share one surface in this app, and none may borrow another's identity:
+    the ʿaṭf conjunction, the concealed-أن wāw al-maʿiyyah that makes a PRESENT VERB manṣūb, and
+    this one, which makes a NOUN manṣūb on accompaniment. The middle one already existed, and this
+    check is what caught the attempted reuse of its name. */
+ if(WAW_MAIYYA.particleType===ATF_CONJUNCTION_REGISTRY.waw.particleType){
+  throw new Error('The wāw of the mafʿūl maʿah reused the ʿaṭf conjunction identity.');
+ }
+ if(WAW_MAIYYA.particleType===CONCEALED_AN_CONSTRUCTIONS.wawMaiyya.particleType){
+  throw new Error('The wāw of the mafʿūl maʿah reused the concealed-أن wāw al-maʿiyyah identity.');
+ }
+ if(GRAMMAR_RULES.governors[WAW_MAIYYA_TYPE]){
+  throw new Error('The wāw of the mafʿūl maʿah entered the verb governor table; it governs a noun, not a verb.');
+ }
+ Object.entries(MAFUL_MAAH_LEXEMES).forEach(([key,lexeme])=>{
+  if(nounFormIndex.get(lexeme.acc)?.lexeme!==lexeme){
+   throw new Error(`Mafʿūl-maʿah lexeme ${key} did not round-trip through the noun index.`);
+  }
+ });
+ Object.entries(MAFUL_MAAH_PAIR_REGISTRY).forEach(([key,pair])=>{
+  const verb=mafulMaahVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
+  if(registeredVerb?.form!=='past'||registeredVerb.surface!==verb.past){
+   throw new Error(`Mafʿūl-maʿah pair ${key} names an unregistered past ʿāmil.`);
+  }
+  const subject=mafulAjlNoun('singularPeople',pair.subjectEn);
+  if(nounFormIndex.get(subject.nom)?.lexeme!==subject){
+   throw new Error(`Mafʿūl-maʿah pair ${key} names a subject outside the noun index.`);
+  }
+  const companion=mafulMaahCompanion(pair.companion);
+  if(nounFormIndex.get(companion.acc)?.lexeme!==companion){
+   throw new Error(`Mafʿūl-maʿah pair ${key} names a companion outside the noun index.`);
+  }
+  /* The companion must be a thing, never a person: a person COULD share the act, and then the
+     wāw would no longer be «نصًّا في المعية» — the exercise would have two valid readings. */
+  if(singularPeople.some(item=>item===companion)){
+   throw new Error(`Mafʿūl-maʿah pair ${key} names a companion that could share the act.`);
+  }
+  if(!pair.reasonAr||!pair.reasonEn){
+   throw new Error(`Mafʿūl-maʿah pair ${key} does not state why تشريك is impossible.`);
+  }
+  if(typeof pair.sentenceEn!=='string'||!pair.sentenceEn.trim()){
+   throw new Error(`Mafʿūl-maʿah pair ${key} carries no canonical English.`);
+  }
+ });
+}
+verifyMafulMaahRegistry();
 
 const grammarSpec=(type,role,extra={})=>({type,role,...extra});
 const AR={
@@ -8395,6 +8535,8 @@ const AR={
  khabarLa:w=>grammarSpec('noun',KHABAR_LA_ROLE),
  laJinsParticle:()=>grammarSpec('particle','particle',{particleType:LA_JINS_PARTICLE_TYPE,particleWord:LA_JINS_PARTICLE.surface}),
  mafulAjl:w=>grammarSpec('noun',MAFUL_AJL_ROLE),
+ mafulMaah:w=>grammarSpec('noun',MAFUL_MAAH_ROLE),
+ wawMaiyya:()=>grammarSpec('particle','particle',{particleType:WAW_MAIYYA_TYPE,particleWord:WAW_MAIYYA.surface}),
  mustathna:w=>grammarSpec('noun',MUSTATHNA_ROLE),
  mustathnaMudaf:w=>grammarSpec('noun',MUSTATHNA_ROLE,{isMudaf:true}),
  istithnaParticle:t=>grammarSpec('particle','particle',{particleType:t.particleType,particleWord:t.surface}),
@@ -9212,6 +9354,65 @@ function canonicalMafulAjlTranslation(data){
  const authority=deriveMafulAjlAuthority(data,index);
  return authority.authorized?MAFUL_AJL_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
 }
+/* ---- المفعول معه: the accompaniment wāw, and why it is not ʿaṭf --------------------------- */
+function mafulMaahTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.mafulMaahPairKeys?.length?template:null;
+}
+function mafulMaahPairAt(data,index){
+ const template=mafulMaahTemplateRecord(data),tokens=data?.tokens;
+ const companionToken=Array.isArray(tokens)?tokens[index]:null;
+ if(!template||!companionToken||companionToken.grammar?.type!=='noun'
+   ||companionToken.grammar.role!==MAFUL_MAAH_ROLE)return null;
+ for(const key of template.mafulMaahPairKeys){
+  const pair=MAFUL_MAAH_PAIR_REGISTRY[key];
+  if(!pair)continue;
+  if(tokens.length!==4||index!==3)continue;
+  const verb=tokens[0],subject=tokens[1],waw=tokens[2];
+  const registeredVerb=mafulMaahVerb(pair.verb);
+  const registeredSubject=mafulAjlNoun('singularPeople',pair.subjectEn);
+  const companion=mafulMaahCompanion(pair.companion);
+  if(verb.grammar?.type!=='verb'||verb.tense!=='past')continue;
+  if(verb.word!==registeredVerb.past||verb.surfaceHint!==registeredVerb.past)continue;
+  if(subject.grammar?.role!=='faail')continue;
+  if(subject.word!==registeredSubject.nom||subject.surfaceHint!==registeredSubject.nom)continue;
+  /* The wāw must carry the accompaniment identity. An ʿaṭf wāw has the same surface and would
+     make the following noun a معطوف inheriting rafʿ — a different analysis entirely. */
+  if(waw?.grammar?.type!=='particle'||waw.grammar.particleType!==WAW_MAIYYA_TYPE)continue;
+  if(waw.word!==WAW_MAIYYA.surface)continue;
+  if(companionToken.word!==companion.acc||companionToken.surfaceHint!==companion.acc)continue;
+  return{key,pair,companion,verb,subject,waw,companionToken};
+ }
+ return null;
+}
+function deriveMafulMaahAuthority(data,index){
+ const tokens=data?.tokens;
+ const token=Array.isArray(tokens)?tokens[index]:null;
+ if(!token||token.grammar?.type!=='noun'||token.grammar.role!==MAFUL_MAAH_ROLE){
+  return Object.freeze({authorized:false,reason:'not-a-maful-maah-token'});
+ }
+ const found=mafulMaahPairAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
+ if(token.state&&token.state!=='nasb')return Object.freeze({authorized:false,reason:'maful-maah-not-nasb'});
+ if(found.subject.state&&found.subject.state!=='raf'){
+  return Object.freeze({authorized:false,reason:'amil-has-no-marfu-fail'});
+ }
+ /* «الفضلة» — it is not a pillar of the sentence. The clause already has its fāʿil, so the
+    companion cannot be mistaken for a second subject sharing the act. */
+ if(tokens.filter(item=>item?.grammar?.role==='faail').length!==1){
+  return Object.freeze({authorized:false,reason:'companion-is-not-a-fadlah'});
+ }
+ return Object.freeze({authorized:true,reason:'',pairKey:found.key,
+  verbId:found.verb.id,verbWord:found.verb.word,
+  subjectId:found.subject.id,subjectWord:found.subject.word,
+  wawId:found.waw.id,companionId:token.id,companionWord:token.word,
+  reasonAr:found.pair.reasonAr,reasonEn:found.pair.reasonEn,inflection:'singular'});
+}
+function canonicalMafulMaahTranslation(data){
+ const index=data?.tokens?.findIndex(token=>token.grammar?.role===MAFUL_MAAH_ROLE)??-1;
+ const authority=deriveMafulMaahAuthority(data,index);
+ return authority.authorized?MAFUL_MAAH_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
+}
 function inflectNoun(token,tokens,index,data){
  const registered=nounFormIndex.get(token.surfaceHint);
  token.lexeme=registered?.lexeme||null;
@@ -9244,6 +9445,9 @@ function inflectNoun(token,tokens,index,data){
   if(!authority.authorized){
    throw new Error(`The noun is not a canonically licensed «لا» al-jins participant: ${authority.reason}.`);
   }
+ }
+ if(token.grammar.role===MAFUL_MAAH_ROLE&&!deriveMafulMaahAuthority(data,index).authorized){
+  throw new Error(`The noun is not a canonically licensed mafʿūl maʿah: ${deriveMafulMaahAuthority(data,index).reason}.`);
  }
  if(token.grammar.role===MAFUL_AJL_ROLE&&!deriveMafulAjlAuthority(data,index).authorized){
   throw new Error(`The noun is not a canonically licensed mafʿūl lah: ${deriveMafulAjlAuthority(data,index).reason}.`);
@@ -9404,7 +9608,7 @@ function configureParticle(token){
  token.ruleId={preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',
   an:'G_AN_NASB',kay:'G_KAY_NASB',[IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',
-  laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,
+  laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,
   ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
   ...Object.fromEntries(Object.values(ATF_CONTEXT_PARTICLES).map(item=>[item.particleType,item.ruleId])),
   ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,item.ruleId]))}[type]||'R_PARTICLE';
@@ -9417,6 +9621,7 @@ function configureParticle(token){
   ||ATF_CONTEXT_PARTICLES[type]?.surface
   ||(type===ISTITHNA_ILLA_TYPE?ISTITHNA_TOOLS.illa.surface:null)
   ||(type===LA_JINS_PARTICLE_TYPE?LA_JINS_PARTICLE.surface:null)
+  ||(type===WAW_MAIYYA_TYPE?WAW_MAIYYA.surface:null)
   ||token.grammar.particleWord||token.surfaceHint;
  token.word=token.expectedSurface;
 }
@@ -9433,6 +9638,7 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({
  istithna:'RL_ISTITHNA_EXCLUSION',
  laJins:'RL_LA_JINS_NOUN_KHABAR',
  mafulAjl:'RL_VERB_MAFUL_AJL',
+ mafulMaah:'RL_VERB_MAFUL_MAAH',
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
  kana:'RL_KANA_NOUN_KHABAR',
@@ -9525,6 +9731,18 @@ function resolveRelationships(data){
   amil.relations.zarfRelationshipId=relation.id;
   item.relations.amilId=amil.id;
  item.relations.zarfRelationshipId=relation.id;
+ });
+ tokens.forEach((item,index)=>{
+  if(item.grammar.role!==MAFUL_MAAH_ROLE)return;
+  const authority=deriveMafulMaahAuthority(data,index);
+  if(!authority.authorized)return;
+  const verb=tokens.find(candidate=>candidate.id===authority.verbId);
+  const subject=tokens.find(candidate=>candidate.id===authority.subjectId);
+  const relation=addRelationship(data,'mafulMaah',{verbId:verb.id,subjectId:subject.id,
+   companionId:item.id,wawId:authority.wawId,pairKey:authority.pairKey});
+  verb.relations.mafulMaahId=item.id;verb.relations.mafulMaahRelationshipId=relation.id;
+  item.relations.amilId=verb.id;item.relations.companionOfId=subject.id;
+  item.relations.mafulMaahRelationshipId=relation.id;
  });
  tokens.forEach((item,index)=>{
   if(item.grammar.role!==MAFUL_AJL_ROLE)return;
@@ -9734,6 +9952,7 @@ function nounRoleArabic(token){
     analysis, not to the core case label, so it is carried by the Why and the combined block. */
  if(role===TAMYIZ_ROLE)return'تَمْيِيزٌ مَنْصُوبٌ';
  if(role===MAFUL_AJL_ROLE)return'مَفْعُولٌ لِأَجْلِهِ مَنْصُوبٌ';
+ if(role===MAFUL_MAAH_ROLE)return'مَفْعُولٌ مَعَهُ مَنْصُوبٌ';
  if(role===MUSTATHNA_ROLE)return'مُسْتَثْنًى مَنْصُوبٌ';
  /* «اسْمُ لَا» rather than a bare «منصوب»: the naṣb here comes from لا working like إنّ, and the
     learner needs to see whose noun it is. The muḍāف clause is appended by the shared iḍāfah line. */
@@ -9778,6 +9997,11 @@ function renderNounAnalysis(token){
   english=token.grammar.role===ISM_LA_ROLE
    ?'The noun of the لا that negates a whole class; accusative, because that لا works like «إنّ».'
    :'The khabar of the لا that negates a whole class; nominative, and indefinite as its condition requires.';
+ }
+ if(token.grammar.role===MAFUL_MAAH_ROLE){
+  const data=token._data,authority=deriveMafulMaahAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl maʿah: ${authority.reason}`);
+  english=`A mafʿūl maʿah: the thing ${authority.verbWord} happened alongside; accusative, not a follower.`;
  }
  if(token.grammar.role===MAFUL_AJL_ROLE){
   const data=token._data,authority=deriveMafulAjlAuthority(data,data?.tokens?.indexOf(token));
@@ -9934,6 +10158,7 @@ function renderParticleAnalysis(token){
   token.en=`${concealed.nameEn}; it licenses the canonical concealed-an construction.`;return;
  }
  if(type==='maNafiyaKana'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle in the canonical negated-kāna frame.';return}
+ if(type===WAW_MAIYYA_TYPE){token.ar=`${token.word}: ${WAW_MAIYYA.nameAr}، حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='The wāw of accompaniment; it is not a conjunction here.';return}
  if(type===LA_JINS_PARTICLE_TYPE){token.ar=`${token.word}: ${LA_JINS_PARTICLE.nameAr}، تَعْمَلُ عَمَلَ «إِنَّ»، مَبْنِيَّةٌ عَلَى السُّكُونِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.`;token.en='The لا that negates a whole class; it works like «إنّ».';return}
  if(type===ISTITHNA_ILLA_TYPE){token.ar=`${token.word}: ${ISTITHNA_TOOLS.illa.nameAr} مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of exception; it excludes what follows it from what precedes it.';return}
  if(type==='laNafiyaContext'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle; it does not govern this indicative verb.';return}
@@ -9993,6 +10218,19 @@ function whyLaJinsConditions(token,data){
  return{id:'WHY_LA_JINS_CONDITIONS',
   ar:`وَشَرْطُ عَمَلِهَا أَنْ يَكُونَ اسْمُهَا وَخَبَرُهَا نَكِرَتَيْنِ، وَقَدْ تَحَقَّقَ ذَلِكَ فِي ${wq(token.word)} وَ${wq(authority.khabarWord)}.`,
   en:`Its government requires that both its noun and its khabar be indefinite, and ${eq(token.word)} and ${eq(authority.khabarWord)} both are.`};
+}
+function mafulMaahWhyAuthority(token,data){
+ const authority=deriveMafulMaahAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`WHY: the mafʿūl maʿah is not authorized (${authority.reason}).`);
+ return authority;
+}
+/* The one line that matters: WHY this cannot be read as ʿaṭf. p. 173's criterion for the kind of
+   مفعول معه produced here is that تشريك is impossible, so the line states that impossibility. */
+function whyMafulMaahExclusivity(token,data){
+ const authority=mafulMaahWhyAuthority(token,data);
+ return{id:'WHY_MAFUL_MAAH_EXCLUSIVE',
+  ar:`وَلَا يَصِحُّ عَطْفُهُ عَلَى ${wq(authority.subjectWord)}؛ ${authority.reasonAr}، فَتَعَيَّنَ نَصْبُهُ عَلَى الْمَعِيَّةِ.`,
+  en:`It cannot be read as joined to ${eq(authority.subjectWord)}, because ${authority.reasonEn}; so the accusative on accompaniment is the only reading.`};
 }
 function mafulAjlWhyAuthority(token,data){
  const authority=deriveMafulAjlAuthority(data,data?.tokens?.indexOf(token));
@@ -10255,6 +10493,13 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_KHABAR_LA',
   stateAr:()=>'وَخَبَرُ «لَا» مَرْفُوعٌ بِهَا.',
   stateEn:()=>'The خَبَر of «لا» is مَرْفُوعٌ by it.'},
+ mafulMaah:{
+  id:()=>'WHY_ROLE_MAFUL_MAAH',
+  ar:(t,data)=>`${wq(t.word)} وَقَعَ ${wq(mafulMaahWhyAuthority(t,data).verbWord)} بِمُصَاحَبَتِهِ، فَهُوَ مَفْعُولٌ مَعَهُ.`,
+  en:(t,data)=>`${eq(mafulMaahWhyAuthority(t,data).verbWord)} happened alongside ${eq(t.word)}, so it is a مَفْعُولٌ مَعَهُ.`,
+  stateId:()=>'WHY_STATE_MAFUL_MAAH',
+  stateAr:()=>'وَالْمَفْعُولُ مَعَهُ مَنْصُوبٌ.',
+  stateEn:()=>'The مَفْعُولٌ مَعَهُ is مَنْصُوبٌ.'},
  mafulAjl:{
   id:()=>'WHY_ROLE_MAFUL_AJL',
   ar:(t,data)=>`${wq(t.word)} ذُكِرَ بَيَانًا لِسَبَبِ وُقُوعِ ${wq(mafulAjlWhyAuthority(t,data).verbWord)}، فَهُوَ مَفْعُولٌ لِأَجْلِهِ.`,
@@ -10447,6 +10692,9 @@ const WHY_PARTICLE=Object.freeze({
     from reading the naṣb that follows as government by إِلَّا rather than naṣb على الاستثناء. */
  /* Naming the CLASS negation is the point: an ordinary لا denies one instance, this one denies
     the whole kind, and that is why it governs at all. */
+ /* The wāw's own line has to do the separating work: it states that this wāw is «نص في المعية»,
+    which is precisely what an ʿaṭf wāw is not. */
+ [WAW_MAIYYA_TYPE]:t=>({id:'WHY_PARTICLE_WAW_MAIYYA',ar:`${wq(t.word)} وَاوُ الْمَعِيَّةِ، نَصٌّ فِي الدَّلَالَةِ عَلَى الْمُصَاحَبَةِ، وَلَيْسَتْ عَاطِفَةً؛ فَمَا بَعْدَهَا مَنْصُوبٌ لَا تَابِعٌ.`,en:`${eq(t.word)} is the wāw of accompaniment — express, not merely possible — and it is not a conjunction, so what follows it is accusative rather than a follower.`}),
  [LA_JINS_PARTICLE_TYPE]:t=>({id:'WHY_PARTICLE_LA_NAFIYA_JINS',ar:`${wq(t.word)} نَافِيَةٌ لِلْجِنْسِ، تَنْفِي الْحُكْمَ عَنِ الْجِنْسِ كُلِّهِ، وَتَعْمَلُ عَمَلَ «إِنَّ» فَتَنْصِبُ الِاسْمَ وَتَرْفَعُ الْخَبَرَ.`,en:`${eq(t.word)} negates the whole class, not one instance, and it works like «إنّ»: accusative for its noun, nominative for its khabar.`}),
  [ISTITHNA_ILLA_TYPE]:t=>({id:'WHY_PARTICLE_ISTITHNA_ILLA',ar:`${wq(t.word)} حَرْفُ اسْتِثْنَاءٍ، يُخْرِجُ مَا بَعْدَهُ مِنْ حُكْمِ مَا قَبْلَهُ.`,en:`${eq(t.word)} is a particle of exception: it takes what follows it out of the ruling given to what precedes it.`}),
  ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(record=>[record.particleType,t=>({
@@ -10524,6 +10772,9 @@ function buildTokenWhy(token,data){
   }
   if(token.grammar.role===MUSTATHNA_ROLE){
    push(whyMustathnaConditions(token,data));
+  }
+  if(token.grammar.role===MAFUL_MAAH_ROLE){
+   push(whyMafulMaahExclusivity(token,data));
   }
   if(token.grammar.role===MAFUL_AJL_ROLE){
    push(whyMafulAjlConditions(token,data));
@@ -10631,6 +10882,17 @@ function buildRelationshipWhy(rel,data){
   push({id:'WHY_REL_ABSOLUTE_OBJECT',
    ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(masdar.word)} مَصْدَرُهُ ${purpose.clauseAr}، فَنَصَبَهُ عَلَى الْمَفْعُولِيَّةِ الْمُطْلَقَةِ.`,
    en:`${eq(verb.word)} is the ʿāmil and ${eq(masdar.word)} is its own maṣdar, ${purpose.clauseEn}, so the verb makes it accusative as its mafʿūl muṭlaq.`});
+  return{ids,ar,en};
+ }
+ if(rel.type==='mafulMaah'){
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const subject=data.tokens.find(item=>item.id===rel.subjectId);
+  const companion=data.tokens.find(item=>item.id===rel.companionId);
+  const pair=MAFUL_MAAH_PAIR_REGISTRY[rel.pairKey];
+  if(!verb||!subject||!companion||!pair)return{ids,ar,en};
+  push({id:'WHY_REL_MAFUL_MAAH',
+   ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(subject.word)} فَاعِلُهُ، وَ${wq(companion.word)} وَقَعَ الْفِعْلُ بِمُصَاحَبَتِهِ، ${pair.reasonAr}، فَنَصَبَهُ الْعَامِلُ عَلَى الْمَعِيَّةِ.`,
+   en:`${eq(verb.word)} is the ʿāmil and ${eq(subject.word)} its doer; the act happened alongside ${eq(companion.word)}, and ${pair.reasonEn}, so the ʿāmil makes it accusative on accompaniment.`});
   return{ids,ar,en};
  }
  if(rel.type==='mafulAjl'){
@@ -10787,6 +11049,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='mafulMaah'){
+   const recipient=data.tokens.find(item=>item.id===rel.companionId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='mafulAjl'){
    const recipient=data.tokens.find(item=>item.id===rel.motiveId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -10847,6 +11114,16 @@ function renderRelationshipAnalysis(data){
   haal.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: عَامِلٌ وَصَاحِبُ حَالٍ مَعْرِفَةٌ وَحَالٌ نَكِرَةٌ مَنْصُوبَةٌ تُبَيِّنُ هَيْئَتَهُ وَقْتَ الْفِعْلِ.`;
   haal.phraseEn=`Together, “${phrase}” has an ʿāmil, a definite صاحب الحال, and an indefinite accusative haal describing that owner's condition during the event.`;
   haal.phraseLabel='Haal construction';
+ });
+ data.relationships.filter(rel=>rel.type==='mafulMaah').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const companion=data.tokens.find(item=>item.id===rel.companionId);
+  const pair=MAFUL_MAAH_PAIR_REGISTRY[rel.pairKey];
+  if(!verb||!companion||!pair)return;
+  const phrase=data.tokens.map(item=>item.word).join(' ');
+  companion.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: الْوَاوُ لِلْمَعِيَّةِ لَا لِلْعَطْفِ، ${pair.reasonAr}، فَتَعَيَّنَ نَصْبُ ${wq(companion.word)} عَلَى الْمَعِيَّةِ.`;
+  companion.phraseEn=`Together, “${phrase}”: the wāw is for accompaniment, not conjunction — ${pair.reasonEn} — so “${companion.word}” can only be accusative as a mafʿūl maʿah.`;
+  companion.phraseLabel='Mafʿūl maʿah construction';
  });
  data.relationships.filter(rel=>rel.type==='mafulAjl').forEach(rel=>{
   const verb=data.tokens.find(item=>item.id===rel.verbId);
@@ -11211,6 +11488,11 @@ function validateExercise(data){
     }
     // The matn's own words: «تَنْصِبُ النَّكِرَاتِ». A definite participant is a different chapter.
     if(/^ال/u.test(token.word))fail('E_LA_JINS_DEFINITE','A «لا» al-jins participant may not be definite.',token);
+   }else if(token.grammar.role===MAFUL_MAAH_ROLE){
+    const authority=deriveMafulMaahAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_MAFUL_MAAH_AUTHORITY',`Mafʿūl-maʿah authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_MAFUL_MAAH_NASB')fail('E_MAFUL_MAAH_RULE','The mafʿūl maʿah is not bound to its source rule.',token);
+    if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mafulMaah requires nasb, not ${token.state}.`,token);
    }else if(token.grammar.role===MAFUL_AJL_ROLE){
     const authority=deriveMafulAjlAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_MAFUL_AJL_AUTHORITY',`Mafʿūl-lah authority failed: ${authority.reason}.`,token);
@@ -11491,6 +11773,11 @@ function validateExercise(data){
       &&(token.grammar.role===ISM_LA_ROLE?rel.ismId:rel.khabarId)===token.id))){
    fail('E_ORPHAN_LA_JINS','A «لا» al-jins participant is not linked to its governing لا.',token);
   }
+  if(token.grammar.role===MAFUL_MAAH_ROLE&&(!token.relations.amilId
+    ||!relationships.some(rel=>rel.type==='mafulMaah'&&rel.companionId===token.id
+      &&rel.verbId===token.relations.amilId))){
+   fail('E_ORPHAN_MAFUL_MAAH','Mafʿūl maʿah is not linked to the ʿāmil that makes it accusative.',token);
+  }
   if(token.grammar.role===MAFUL_AJL_ROLE&&(!token.relations.amilId||!token.relations.motiveHolderId
     ||!relationships.some(rel=>rel.type==='mafulAjl'&&rel.motiveId===token.id
       &&rel.verbId===token.relations.amilId&&rel.subjectId===token.relations.motiveHolderId))){
@@ -11598,6 +11885,15 @@ function validateExercise(data){
      ||rel.qualifierId!==authority.qualifierId||rel.pairKey!==authority.pairKey
      ||rel.purpose!==authority.purpose||rel.agreement!==authority.agreement){
     fail('E_MUTLAQ_RELATION','Absolute-object relationship is not the canonical proof.',masdar);
+   }
+  }
+  if(rel.type==='mafulMaah'){
+   const companion=tokenById.get(rel.companionId);
+   const authority=deriveMafulMaahAuthority(data,data.tokens.indexOf(companion));
+   if(!authority.authorized||rel.verbId!==authority.verbId||rel.subjectId!==authority.subjectId
+     ||rel.companionId!==authority.companionId||rel.wawId!==authority.wawId
+     ||rel.pairKey!==authority.pairKey){
+    fail('E_MAFUL_MAAH_RELATION','Mafʿūl-maʿah relationship is not the canonical accompaniment proof.',companion);
    }
   }
   if(rel.type==='mafulAjl'){
@@ -11730,6 +12026,19 @@ function validateExercise(data){
   }
   if(relationships.filter(candidate=>candidate.type==='laJins').length!==1){
    fail('E_LA_JINS_RELATION_COUNT','A «لا» al-jins frame must have exactly one relationship.',item);
+  }
+ });
+ data.tokens.filter(item=>item.grammar.role===MAFUL_MAAH_ROLE).forEach(item=>{
+  const rel=relationships.find(candidate=>candidate.id===item.relations.mafulMaahRelationshipId&&candidate.type==='mafulMaah');
+  const amil=tokenById.get(item.relations.amilId);
+  const waw=rel&&tokenById.get(rel.wawId);
+  if(!rel||rel.companionId!==item.id||rel.verbId!==amil?.id
+    ||!waw||waw.grammar.particleType!==WAW_MAIYYA_TYPE
+    ||amil?.relations.mafulMaahId!==item.id||amil?.relations.mafulMaahRelationshipId!==rel.id){
+   fail('E_MAFUL_MAAH_RELATION','A mafʿūl maʿah must have exactly one reciprocal canonical link to its ʿāmil, through the wāw of accompaniment.',item);
+  }
+  if(relationships.filter(candidate=>candidate.type==='mafulMaah'&&candidate.companionId===item.id).length!==1){
+   fail('E_MAFUL_MAAH_RELATION_COUNT','A mafʿūl maʿah must have exactly one accompaniment relationship.',item);
   }
  });
  data.tokens.filter(item=>item.grammar.role===MAFUL_AJL_ROLE).forEach(item=>{
@@ -12026,6 +12335,14 @@ function add(starts,form,state,sign,build,metadata={}){
    throw new Error(`Template ${stableId} produces a haal without its explicit past event.`);
   }
  }
+ /* المفعول معه. */
+ const mafulMaahPairKeys=Object.freeze([...(metadata.mafulMaahPairKeys||[])]);
+ if(mafulMaahPairKeys.some((key,position)=>mafulMaahPairKeys.indexOf(key)!==position||!MAFUL_MAAH_PAIR_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered mafʿūl-maʿah pair.`);
+ }
+ if(mafulMaahPairKeys.length&&!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
+  throw new Error(`Template ${stableId} produces a mafʿūl maʿah without an explicit past ʿāmil and fāʿil.`);
+ }
  /* المفعول له. One template owns one shape: a motive after a bare clause and a motive after a
     transitive one are different structures. */
  const mafulAjlPairKeys=Object.freeze([...(metadata.mafulAjlPairKeys||[])]);
@@ -12135,6 +12452,7 @@ function add(starts,form,state,sign,build,metadata={}){
   mustathnaPairKeys,
   laJinsPairKeys,
   mafulAjlPairKeys,
+  mafulMaahPairKeys,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -13202,6 +13520,25 @@ const mafulAjlMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),mafulAj
 const pickedMafulAjl=(keys,label)=>buildMafulAjlExercise(pickVaried(keys,label,String));
 add('verb','singular','nasb','fatha',()=>pickedMafulAjl(MAFUL_AJL_BARE_KEYS,'maful-ajl-bare'),mafulAjlMetadata(MAFUL_AJL_BARE_KEYS));
 add('verb','singular','nasb','fatha',()=>pickedMafulAjl(MAFUL_AJL_OBJECT_KEYS,'maful-ajl-object'),mafulAjlMetadata(MAFUL_AJL_OBJECT_KEYS));
+/* المفعول معه — the pair names the act, the doer and the companion that cannot share it. */
+function buildMafulMaahExercise(pairKey){
+ const pair=MAFUL_MAAH_PAIR_REGISTRY[pairKey];
+ if(!pair)throw new Error(`Unknown productive mafʿūl-maʿah pair: ${pairKey}`);
+ const verb=mafulMaahVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
+ if(registeredVerb?.form!=='past')throw new Error(`Mafʿūl-maʿah pair ${pairKey} names an unregistered ʿāmil.`);
+ const subject=mafulAjlNoun('singularPeople',pair.subjectEn);
+ const companion=mafulMaahCompanion(pair.companion);
+ return{sentence:'',translation:pair.sentenceEn,tokens:[
+  token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),'A past-tense event with an explicit subject.'),
+  token(subject.nom,subject.en,AR.faail(subject.nom),'The doer of the action.'),
+  token(WAW_MAIYYA.surface,WAW_MAIYYA.gloss,AR.wawMaiyya(),''),
+  token(companion.acc,companion.en,AR.mafulMaah(companion.acc),
+   'The thing the action happened alongside; it cannot share in the act.',true)
+ ]};
+}
+const mafulMaahMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),mafulMaahPairKeys:keys});
+const pickedMafulMaah=()=>buildMafulMaahExercise(pickVaried(MAFUL_MAAH_ALL_PAIR_KEYS,'maful-maah',String));
+add('verb','singular','nasb','fatha',()=>pickedMafulMaah(),mafulMaahMetadata(MAFUL_MAAH_ALL_PAIR_KEYS));
 const laJinsMetadata=keys=>({laJinsPairKeys:keys});
 const pickedLaJins=()=>buildLaJinsExercise(pickVaried(LA_JINS_ALL_PAIR_KEYS,'la-jins',String));
 add('particle','singular','nasb','fatha',()=>pickedLaJins(),laJinsMetadata(LA_JINS_ALL_PAIR_KEYS));

@@ -1016,6 +1016,8 @@ const J1A_PARTICLE_IRAAB=Object.freeze(Object.assign(Object.create(null),{
  lamma:Object.freeze({ar:'حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'A particle of negation and jazm that gives past meaning, with the negation continuing up to the moment of speaking.'}),
  lamAmr:Object.freeze({ar:'لَامُ الْأَمْرِ، حَرْفُ جَزْمٍ مَبْنِيٌّ عَلَى الْكَسْرِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lām al-amr: a particle of jazm asking for the act to be brought about.'}),
  laNahiya:Object.freeze({ar:'لَا النَّاهِيَةُ، حَرْفُ نَهْيٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lā al-nāhiyah: a particle of prohibition and jazm asking for the act to be refrained from.'}),
+ lamDuaa:Object.freeze({ar:'لَامُ الدُّعَاءِ، حَرْفُ جَزْمٍ مَبْنِيٌّ عَلَى الْكَسْرِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lām al-duʿāʾ: a particle of jazm asking, from the lower to the higher, for the act to be brought about.'}),
+ laDuaaiyya:Object.freeze({ar:'لَا الدُّعَائِيَّةُ، حَرْفُ دُعَاءٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lā al-duʿāʾiyyah: a particle of supplication and jazm asking, from the lower to the higher, for the act to be withheld.'}),
  hamzatTaqrir:Object.freeze({ar:'هَمْزَةُ التَّقْرِيرِ، حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَ هُوَ الْجَازِمَ.',en:'Hamzat al-taqrīr, seeking acknowledgement of what follows. It is built and has no syntactic position, and it is not the jāzim.'})
 }));
 (()=>{
@@ -1034,7 +1036,9 @@ const J1A_PARTICLE_IRAAB=Object.freeze(Object.assign(Object.create(null),{
  }
 })();
 const J1A_PARTICLE_GLOSSES=Object.freeze(Object.assign(Object.create(null),{
- lamma:'did not yet',hamzatTaqrir:'did',lamAmr:'let',laNahiya:'not'
+ lamma:'did not yet',hamzatTaqrir:'did',lamAmr:'let',laNahiya:'not',
+ // J1b. «may» carries the supplicatory modality that «let» carries for the command pair.
+ lamDuaa:'may',laDuaaiyya:'may not'
 }));
 /* The eight surfaces no vocabulary registry owns. Each is bound to the token TYPE that may carry
    it, so the same surface cannot borrow this gloss in another role. */
@@ -1198,6 +1202,18 @@ function resolveCanonicalTokenGloss(data,token,index){
     the reason the surface table cannot be extended instead. «لِ» is لَامُ التَّعْلِيلِ ("so") in the
     closed table and لَامُ الْأَمْرِ ("let") here; «لَا» is the plain negating particle ("does not")
     there and the prohibitive one ("not") here. Only the particle's own identity separates them. */
+ /* J1b — the dedicated duʿāʾ vocabulary. These surfaces belong to no general pool on purpose, so
+    without this branch History would rebuild them as «the noun» and refuse the snapshot. Bound to
+    the token TYPE, so the same Arabic cannot borrow a duʿāʾ gloss in another role. */
+ if(type==='noun'&&surface===DUAA_ADDRESSEE.surface&&token.grammar?.role==='faail')return DUAA_ADDRESSEE.en;
+ if(type==='noun'&&token.grammar?.role==='object'){
+  const duaaObject=Object.values(DUAA_OBJECTS).find(item=>item.acc===surface);
+  if(duaaObject)return duaaObject.en;
+ }
+ if(type==='verb'){
+  const duaaVerb=Object.values(DUAA_LEXEMES).find(item=>item.juss===surface);
+  if(duaaVerb)return duaaVerb.en;
+ }
  if(type==='particle'&&Object.hasOwn(J1A_PARTICLE_GLOSSES,token.grammar?.particleType||'')){
   return J1A_PARTICLE_GLOSSES[token.grammar.particleType];
  }
@@ -1444,6 +1460,11 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  ,TS49:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Did he not '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'?'})])})
  ,TS50:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Did they not '}),Object.freeze({slot:'verb:2:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'?'})])})
  ,TS55:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Did he not yet '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'?'})])})
+ /* J1b — «May Allah forgive the sin.» / «May Allah not forsake the patient one.» The subject slot
+    reads the fāʿil's canonical gloss, so the divine addressee's English comes from its own frozen
+    record and never from a general noun pool. */
+ ,TS57:Object.freeze({parts:Object.freeze([Object.freeze({lit:'May '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])})
+ ,TS58:Object.freeze({parts:Object.freeze([Object.freeze({lit:'May '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' not '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])})
  ,TS56:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Did they not yet '}),Object.freeze({slot:'verb:2:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'?'})])})
  ,TS51:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let him '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
  ,TS52:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let them '}),Object.freeze({slot:'verb:1:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
@@ -1536,6 +1557,10 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS50",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS56",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05",structure:"particle:particle,verb:present,noun:object",shape:"TS52",copulaPlural:false}),
+ /* J1b — the duʿāʾ pair. Four tokens, because the fāʿil is explicit: the supplication names who is
+    being asked, which is what makes the direction «من الأدنى للأعلى» visible in the sentence. */
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_07||particle:particle,verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_07",structure:"particle:particle,verb:present,noun:faail,noun:object",shape:"TS57",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_08||particle:particle,verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_08",structure:"particle:particle,verb:present,noun:faail,noun:object",shape:"TS58",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06",structure:"particle:particle,verb:present,noun:object",shape:"TS54",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01",structure:"particle:particle,verb:present,noun:object",shape:"TS19",copulaPlural:false}),
  "T_PARTICLE_SINGULAR_NASB_FATHA_02||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_02",structure:"particle:particle,verb:present,noun:object",shape:"TS20",copulaPlural:false}),
@@ -7187,6 +7212,53 @@ function exerciseIdhanProductiveAuthorization(data){
 }
 /* The one place a person is turned into an inflection lane. A مبني present form must never
    fall through to 'regular', which would hand it an iʿrāb ḍammah. */
+/* J1b — THE duʿāʾ authority. Nothing here reads a flag: the claim "this is a supplication" is
+   earned from the frozen frame every time it is made. The template must declare the construction,
+   the particle must be that construction's governor, the verb must be the frame's own registered
+   jussive surface governed by that particle, the fāʿil must be the canonical divine addressee
+   byte-for-byte, and the object must be the one the frame names. A command frame relabelled duʿāʾ
+   fails at the fāʿil; a duʿāʾ frame relabelled a command fails at the template declaration. */
+function duaaRefusal(reason){return Object.freeze({authorized:false,reason,frameKey:'',construction:''})}
+function deriveDuaaAuthority(data,index){
+ const tokens=Array.isArray(data&&data.tokens)?data.tokens:[];
+ const verb=tokens[index];
+ if(!verb||verb.grammar?.type!=='verb'||verb.tense!=='present')return duaaRefusal('not-a-present-verb');
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ if(!template||!template.duaaConstruction)return duaaRefusal('template-declares-no-duaa-construction');
+ const construction=DUAA_CONSTRUCTIONS[template.duaaConstruction];
+ if(!construction)return duaaRefusal('unregistered-construction');
+ // The governor is re-derived from adjacency, never read off the verb's stored governorId alone.
+ const governor=tokens[index-1];
+ if(!governor||governor.grammar?.type!=='particle'
+   ||governor.grammar.particleType!==construction.governorType)return duaaRefusal('governor-is-not-this-construction');
+ if(governor.word!==construction.surface)return duaaRefusal('governor-is-not-its-canonical-bytes');
+ if(governor.ruleId!==construction.ruleId)return duaaRefusal('governor-does-not-carry-its-own-rule');
+ if(verb.governorId!==governor.id||governor.relations?.governsId!==verb.id)return duaaRefusal('government-link-not-canonical');
+ // The jazm itself: taken from the canonical matrix for this verb's inflection, never from the sign.
+ const moodRule=GRAMMAR_RULES.presentVerb[verb.inflection]?.jazm;
+ if(!moodRule||verb.state!=='jazm'||safeSignId(verb.sign)!==moodRule[0]
+   ||verb.ruleId!==moodRule[1])return duaaRefusal('target-state-or-sign-not-canonical');
+ // The frame: identified by the verb+object pair, then required to be one this template may build.
+ const subject=tokens[index+1],object=tokens[index+2];
+ if(!subject||subject.grammar?.role!=='faail')return duaaRefusal('no-explicit-faail');
+ if(subject.word!==DUAA_ADDRESSEE.surface)return duaaRefusal('faail-is-not-the-canonical-addressee');
+ if(!object||object.grammar?.role!=='object')return duaaRefusal('no-object');
+ const frameKey=DUAA_FRAME_BY_VERB[verb.word+'|'+object.word];
+ if(!frameKey)return duaaRefusal('verb-and-object-are-not-a-registered-frame');
+ const frame=DUAA_FRAMES[frameKey];
+ if(frame.construction!==construction.id)return duaaRefusal('frame-belongs-to-the-other-construction');
+ if(!template.duaaFrameKeys.includes(frameKey))return duaaRefusal('frame-not-authorized-by-this-template');
+ return Object.freeze({authorized:true,reason:'',frameKey,construction:construction.id});
+}
+/* The whole-exercise view, used by the renderer and by History exactly as the إِذَنْ lane's is. */
+function exerciseDuaaAuthority(data){
+ const tokens=Array.isArray(data&&data.tokens)?data.tokens:[];
+ for(let index=0;index<tokens.length;index++){
+  const result=deriveDuaaAuthority(data,index);
+  if(result.authorized)return result;
+ }
+ return null;
+}
 function presentConjugationFor(person){
  const formClass=PRESENT_MORPHOLOGY[person]?.formClass;
  if(formClass==='mabniPresent')return MABNI_NUUN_NISWAH;
@@ -7355,7 +7427,13 @@ const ONE_VERB_JAWAZIM=Object.freeze(Object.assign(Object.create(null),{
  lamAmr:Object.freeze({id:'lamAmr',governorType:'lamAmr',hamzah:false,surface:'لِ',ruleId:'G_LAM_AMR_JAZM',
   nameAr:'لَامُ الْأَمْرِ',nameEn:'lām al-amr'}),
  laNahiya:Object.freeze({id:'laNahiya',governorType:'laNahiya',hamzah:false,surface:'لَا',ruleId:'G_LA_NAHIYA_JAZM',
-  nameAr:'لَا النَّاهِيَةُ',nameEn:'lā al-nāhiyah'})
+  nameAr:'لَا النَّاهِيَةُ',nameEn:'lā al-nāhiyah'}),
+ /* J1b. Same bytes as لَامُ الْأَمْرِ and لَا النَّاهِيَةُ above, different identity — which is the
+    whole point: the surface never decides, the frozen duʿāʾ construction does. */
+ lamDuaa:Object.freeze({id:'lamDuaa',governorType:'lamDuaa',hamzah:false,surface:'لِ',ruleId:'G_LAM_DUAA_JAZM',
+  nameAr:'لَامُ الدُّعَاءِ',nameEn:'lām al-duʿāʾ'}),
+ laDuaaiyya:Object.freeze({id:'laDuaaiyya',governorType:'laDuaaiyya',hamzah:false,surface:'لَا',ruleId:'G_LA_DUAA_JAZM',
+  nameAr:'لَا الدُّعَائِيَّةُ',nameEn:'lā al-duʿāʾiyyah'})
 }));
 /* Startup invariant. The registry is byte-checked against the governor table it claims to use, so a
    typo in an Arabic surface is a build error rather than a sentence a learner would have to catch.
@@ -7374,6 +7452,118 @@ const ONE_VERB_JAWAZIM=Object.freeze(Object.assign(Object.create(null),{
   }
   if(typeof entry.hamzah!=='boolean')throw new Error(`One-verb jāzim ${id}.hamzah is not a boolean.`);
   if(entry.governorType===HAMZAT_TAQRIR.particleType)throw new Error(`One-verb jāzim ${id} makes the hamzah its governor.`);
+ }
+})();
+/* ===== J1b — the two duʿāʾ jawāzim (Al-Tuḥfah pp. 80–81) =========================================
+   The source splits لَامُ الْأَمْرِ from لَامُ الدُّعَاءِ, and لَا النَّاهِيَةُ from لَا الدُّعَائِيَّةُ, by a
+   criterion it states in words rather than in syntax: «الأمر يكون من الأعلى للأدنى … وأما الدعاءُ
+   فيكون من الأدنى للأعلى» (p. 80), and the same for النهي/الدعاء (pp. 80–81). Both pairs share their
+   bytes and both cause jazm, so nothing in the morphology can tell them apart — which is precisely
+   why J1a deferred these two and why they need a semantic frame rather than a flag.
+
+   The authority here is the FRAME, not a Boolean. A construction is a duʿāʾ because the sentence
+   actually asks the higher on behalf of the lower: its fāʿil is the divine addressee, its verb is
+   one of the registered supplication verbs, and its object is the one that frame names. Strip any
+   of those and deriveDuaaAuthority withholds, so no ordinary command can be relabelled duʿāʾ.
+
+   Shape: لِ/لَا + a 3ms jussive verb + the explicit divine fāʿil + its object. That is the source's
+   OWN لَامُ الدُّعَاءِ example, ﴿لِيَقْضِ عَلَيْنَا رَبُّكَ﴾ — a third-person verb whose fāʿil is named
+   and divine. The لَا الدُّعَائِيَّةُ examples the source cites (﴿رَبَّنَا لَا تُؤَاخِذْنَا﴾، ﴿وَلَا تَحْمِلْ
+   عَلَيْنَا إِصْرًا﴾) are second-person instead; this engine cannot produce those, because 2ms is
+   deliberately non-productive (تـ surfaces are ambiguous with 3fs — see PRESENT_NON_PRODUCTION_PERSONS),
+   so the 3ms member of the same category is produced and the difference is recorded here rather than
+   glossed over. Both are «طَلَبُ الْكَفِّ عَنِ الْفِعْلِ» addressed from the lower to the higher.
+
+   There is no five-verb lane, and its absence is grammatical rather than an omission: ḥadhf al-nūn
+   needs a plural subject, and this frame's fāʿil is the divine addressee, which is singular. */
+const DUAA_ADDRESSEE=Object.freeze({surface:'اللَّهُ',en:'Allah'});
+const DUAA_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ ghafara:Object.freeze({key:'ghafara',past:'غَفَرَ',pres:'يَغْفِرُ',acc:'يَغْفِرَ',juss:'يَغْفِرْ',
+  en:'forgive',third:'forgives',pastEn:'forgave'}),
+ rahima:Object.freeze({key:'rahima',past:'رَحِمَ',pres:'يَرْحَمُ',acc:'يَرْحَمَ',juss:'يَرْحَمْ',
+  en:'have mercy on',third:'has mercy on',pastEn:'had mercy on'}),
+ nasara:Object.freeze({key:'nasara',past:'نَصَرَ',pres:'يَنْصُرُ',acc:'يَنْصُرَ',juss:'يَنْصُرْ',
+  en:'help',third:'helps',pastEn:'helped'}),
+ khadhala:Object.freeze({key:'khadhala',past:'خَذَلَ',pres:'يَخْذُلُ',acc:'يَخْذُلَ',juss:'يَخْذُلْ',
+  en:'forsake',third:'forsakes',pastEn:'forsook'}),
+ harama:Object.freeze({key:'harama',past:'حَرَمَ',pres:'يَحْرِمُ',acc:'يَحْرِمَ',juss:'يَحْرِمْ',
+  en:'deprive',third:'deprives',pastEn:'deprived'})
+}));
+const DUAA_OBJECTS=Object.freeze(Object.assign(Object.create(null),{
+ thanb:Object.freeze({key:'thanb',acc:'الذَّنْبَ',en:'the sin'}),
+ abd:Object.freeze({key:'abd',acc:'الْعَبْدَ',en:'the servant'}),
+ mazlum:Object.freeze({key:'mazlum',acc:'الْمَظْلُومَ',en:'the wronged one'}),
+ sabir:Object.freeze({key:'sabir',acc:'الصَّابِرَ',en:'the patient one'}),
+ muhsin:Object.freeze({key:'muhsin',acc:'الْمُحْسِنَ',en:'the doer of good'})
+}));
+/* The frames. Each is a whole reviewed supplication — verb AND object together — because the two
+   cannot be combined at random without producing sentences that are grammatical and senseless.
+   `polarity` is what the two constructions actually differ in: the لَام asks for the act, the لَا
+   asks for it to be withheld, and both are addressed upward. */
+const DUAA_FRAMES=Object.freeze(Object.assign(Object.create(null),{
+ forgiveSin:Object.freeze({key:'forgiveSin',construction:'lamDuaa',verbKey:'ghafara',objectKey:'thanb'}),
+ mercyServant:Object.freeze({key:'mercyServant',construction:'lamDuaa',verbKey:'rahima',objectKey:'abd'}),
+ helpWronged:Object.freeze({key:'helpWronged',construction:'lamDuaa',verbKey:'nasara',objectKey:'mazlum'}),
+ forsakePatient:Object.freeze({key:'forsakePatient',construction:'laDuaaiyya',verbKey:'khadhala',objectKey:'sabir'}),
+ forsakeWronged:Object.freeze({key:'forsakeWronged',construction:'laDuaaiyya',verbKey:'khadhala',objectKey:'mazlum'}),
+ depriveDoer:Object.freeze({key:'depriveDoer',construction:'laDuaaiyya',verbKey:'harama',objectKey:'muhsin'})
+}));
+const DUAA_CONSTRUCTIONS=Object.freeze(Object.assign(Object.create(null),{
+ lamDuaa:Object.freeze({id:'lamDuaa',governorType:'lamDuaa',surface:'لِ',ruleId:'G_LAM_DUAA_JAZM',
+  polarity:'positive',
+  frameKeys:Object.freeze(['forgiveSin','mercyServant','helpWronged'])}),
+ laDuaaiyya:Object.freeze({id:'laDuaaiyya',governorType:'laDuaaiyya',surface:'لَا',ruleId:'G_LA_DUAA_JAZM',
+  polarity:'negative',
+  frameKeys:Object.freeze(['forsakePatient','forsakeWronged','depriveDoer'])})
+}));
+const DUAA_FRAME_KEYS=Object.freeze(Object.keys(DUAA_FRAMES));
+const DUAA_FRAME_BY_VERB=Object.freeze(Object.assign(Object.create(null),
+ Object.fromEntries(DUAA_FRAME_KEYS.map(key=>[DUAA_LEXEMES[DUAA_FRAMES[key].verbKey].juss+'|'+DUAA_OBJECTS[DUAA_FRAMES[key].objectKey].acc,key]))));
+/* Startup invariant. Byte ownership is checked rather than trusted: a divine name is the last
+   surface in this project that should be able to drift, every frame must name records that exist,
+   and no two records may claim the same Arabic. A typo is a build error, never a sentence a
+   learner has to catch. */
+(()=>{
+ if(DUAA_ADDRESSEE.surface!=='اللَّهُ')throw new Error('The duʿāʾ addressee is not its canonical bytes.');
+ const surfaces=new Set([DUAA_ADDRESSEE.surface]);
+ for(const key of Object.keys(DUAA_LEXEMES)){
+  const lexeme=DUAA_LEXEMES[key];
+  if(!Object.isFrozen(lexeme)||lexeme.key!==key)throw new Error('Duʿāʾ lexeme '+key+' is not frozen or not bound to its key.');
+  for(const name of ['past','pres','acc','juss','en','third','pastEn']){
+   if(typeof lexeme[name]!=='string'||!lexeme[name])throw new Error('Duʿāʾ lexeme '+key+'.'+name+' is not a non-empty string.');
+  }
+  for(const form of ['past','pres','acc','juss']){
+   if(surfaces.has(lexeme[form]))throw new Error('Duʿāʾ surface '+lexeme[form]+' is claimed twice.');
+   surfaces.add(lexeme[form]);
+  }
+ }
+ for(const key of Object.keys(DUAA_OBJECTS)){
+  const noun=DUAA_OBJECTS[key];
+  if(!Object.isFrozen(noun)||noun.key!==key)throw new Error('Duʿāʾ object '+key+' is not frozen or not bound to its key.');
+  if(typeof noun.acc!=='string'||!noun.acc||typeof noun.en!=='string'||!noun.en)throw new Error('Duʿāʾ object '+key+' is incomplete.');
+  if(surfaces.has(noun.acc))throw new Error('Duʿāʾ surface '+noun.acc+' is claimed twice.');
+  surfaces.add(noun.acc);
+ }
+ for(const key of DUAA_FRAME_KEYS){
+  const frame=DUAA_FRAMES[key];
+  if(!Object.isFrozen(frame)||frame.key!==key)throw new Error('Duʿāʾ frame '+key+' is not frozen or not bound to its key.');
+  if(!DUAA_LEXEMES[frame.verbKey])throw new Error('Duʿāʾ frame '+key+' names an unregistered verb.');
+  if(!DUAA_OBJECTS[frame.objectKey])throw new Error('Duʿāʾ frame '+key+' names an unregistered object.');
+  const construction=DUAA_CONSTRUCTIONS[frame.construction];
+  if(!construction)throw new Error('Duʿāʾ frame '+key+' names an unregistered construction.');
+  if(!construction.frameKeys.includes(key))throw new Error('Duʿāʾ frame '+key+' is not claimed by the construction it names.');
+ }
+ for(const id of Object.keys(DUAA_CONSTRUCTIONS)){
+  const construction=DUAA_CONSTRUCTIONS[id];
+  if(construction.id!==id||construction.governorType!==id)throw new Error('Duʿāʾ construction '+id+' is not bound to its own key.');
+  if(!construction.frameKeys.length)throw new Error('Duʿāʾ construction '+id+' registers no frame.');
+  for(const key of construction.frameKeys){
+   if(DUAA_FRAMES[key]&&DUAA_FRAMES[key].construction!==id)throw new Error('Duʿāʾ construction '+id+' claims a frame that names another.');
+  }
+ }
+ // A verb+object pair must identify exactly ONE frame, or the resolver could not name it back.
+ if(Object.keys(DUAA_FRAME_BY_VERB).length!==DUAA_FRAME_KEYS.length){
+  throw new Error('Two duʿāʾ frames share one verb-and-object pair.');
  }
 })();
 const GRAMMAR_RULES=Object.freeze({
@@ -7449,7 +7639,11 @@ const GRAMMAR_RULES=Object.freeze({
      what makes that structural rather than a convention. */
   lamma:{surface:'لَمَّا',mood:'jazm',ruleId:'G_LAMMA_JAZM'},
   lamAmr:{surface:'لِ',mood:'jazm',ruleId:'G_LAM_AMR_JAZM'},
-  laNahiya:{surface:'لَا',mood:'jazm',ruleId:'G_LA_NAHIYA_JAZM'}
+  laNahiya:{surface:'لَا',mood:'jazm',ruleId:'G_LA_NAHIYA_JAZM'},
+  /* J1b — the duʿāʾ pair. They govern by adjacency exactly as their command/prohibition twins do;
+     what separates them is the frozen duʿāʾ frame, proven separately by deriveDuaaAuthority. */
+  lamDuaa:{surface:'لِ',mood:'jazm',ruleId:'G_LAM_DUAA_JAZM'},
+  laDuaaiyya:{surface:'لَا',mood:'jazm',ruleId:'G_LA_DUAA_JAZM'}
  }
 });
 /* J1a byte cross-check. Every construction's surface and rule must be the SAME bytes and the same
@@ -7499,7 +7693,7 @@ const PHASE3A2_VERB_HINT='An exact registered person-bound present form built on
 const PROCLITIC_PARTICLE_TYPES=Object.freeze([WAW_MAIYYA_TYPE,KAY_TALIL_LAM.particleType,'atfAmQuestion',
  /* J1a. «أَلَمْ» and «لِيَكْتُبْ» are written joined, exactly as «لِكَيْ» is, while each half stays its
     own token with its own iʿrāb. لَا is NOT here: «لَا يَكْتُبْ» is written as two words. */
- HAMZAT_TAQRIR.particleType,'lamAmr',
+ HAMZAT_TAQRIR.particleType,'lamAmr','lamDuaa',
  ATF_CONJUNCTION_REGISTRY.waw.particleType,ATF_CONJUNCTION_REGISTRY.fa.particleType,
  CONCEALED_AN_CONSTRUCTIONS.lamTalil.particleType,CONCEALED_AN_CONSTRUCTIONS.lamJuhud.particleType,
  CONCEALED_AN_CONSTRUCTIONS.faSababiyya.particleType,CONCEALED_AN_CONSTRUCTIONS.wawMaiyya.particleType]);
@@ -7513,6 +7707,7 @@ const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA
  [IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
  // J1a — each new one-verb jāzim owns exactly one rule, and هَمْزَةُ التَّقْرِيرِ owns its own.
  lamma:'G_LAMMA_JAZM',lamAmr:'G_LAM_AMR_JAZM',laNahiya:'G_LA_NAHIYA_JAZM',
+ lamDuaa:'G_LAM_DUAA_JAZM',laDuaaiyya:'G_LA_DUAA_JAZM',
  [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,
  maNafiyaKana:'R_MA_NAFIYA_KANA',laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
@@ -7523,7 +7718,7 @@ const PARTICLE_EXCLUSIVE_RULE_IDS=Object.freeze(['G_LAN_NASB','G_LAM_JAZM','G_SA
  'G_AN_NASB','G_KAY_NASB',IDHAN_GOVERNOR_RULE_ID,KAY_TALIL_LAM.ruleId,
  // J1a. Owned this tightly so a forged G_LA_NAHIYA_JAZM on any other token is refused outright —
  // which is the mechanism that keeps لَا النَّاهِيَةُ apart from the three other لَا identities.
- 'G_LAMMA_JAZM','G_LAM_AMR_JAZM','G_LA_NAHIYA_JAZM',HAMZAT_TAQRIR.ruleId,
+ 'G_LAMMA_JAZM','G_LAM_AMR_JAZM','G_LA_NAHIYA_JAZM','G_LAM_DUAA_JAZM','G_LA_DUAA_JAZM',HAMZAT_TAQRIR.ruleId,
  'R_MA_NAFIYA_KANA','R_LA_NAFIYA_CONTEXT',
  ...new Set(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>item.ruleId)),
  ...Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>item.ruleId)]);
@@ -7609,11 +7804,13 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  'the built munada of the dual and the sound masculine plural, which p. 169 builds on alif and on waw',
  'the sisters of «يا» — الهمزة، أَيْ، أَيَا، هَيَا — which p. 168 names but this app does not produce',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions',
- /* J1a shipped لَا النَّاهِيَةُ and لَامُ الْأَمْرِ, so the old blanket entry naming both came off this
-    list. What remains unproduced of pp. 79–81's first قسم is named exactly instead: the two duʿāʾ
-    identities the source splits off by an explicit criterion it states pragmatically
-    («الأمر من الأعلى للأدنى … والدعاء من الأدنى للأعلى»), which no sentence surface carries. */
- 'لام الدعاء and لا الدعائية, whose direction «من الأدنى للأعلى» is pragmatic and needs a reviewed duʿāʾ frame layer',
+ /* J1a shipped لَا النَّاهِيَةُ and لَامُ الْأَمْرِ; J1b shipped لَامُ الدُّعَاءِ and لَا الدُّعَائِيَّةُ on a
+    reviewed duʿāʾ frame layer. All six one-verb jawāzim of pp. 79–81 are now produced, so nothing
+    from that قسم is deferred. What is named here instead is the ONE thing the duʿāʾ lane genuinely
+    does not reach: the source's own لَا الدُّعَائِيَّةُ examples are second-person (﴿رَبَّنَا لَا
+    تُؤَاخِذْنَا﴾), and 2ms is deliberately non-productive in this engine because its تـ surfaces are
+    ambiguous with 3fs. The third-person member of the same category is produced instead. */
+ 'second-person duʿāʾ (﴿رَبَّنَا لَا تُؤَاخِذْنَا﴾), whose 2ms surface is ambiguous with 3fs and non-productive here',
   'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
  ]
@@ -8029,6 +8226,8 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  G_LAMMA_JAZM:sourceRule('Lammā is a particle like lam in jazm, negation, and conversion to past meaning, adding that the negation runs up to the moment of speaking.',[79,80],'It must be immediately followed by the present verb it governs. It governs alone and also under هَمْزَة التَّقْرِير in أَلَمَّا.'),
  G_HAMZAT_TAQRIR:sourceRule('Hamzat al-taqrīr is added onto lam and lammā to seek acknowledgement of what they negate; it is a particle only, and governs nothing.',[79,80],'Only the exact registered أَلَمْ and أَلَمَّا constructions, in which it stands immediately before لَمْ or لَمَّا and the jazm belongs entirely to that particle. It is absent from the governor table and may never be a verb’s governor.'),
  G_LAM_AMR_JAZM:sourceRule('Lām al-amr makes the present verb jussive and asks for the act to be brought about, as a command from the higher to the lower.',[79,80],'Only the registered command frame over a third-person verb, matching the source’s own «فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ». The supplicating lām shares these bytes but is a separate identity and is NOT produced here: its direction is «من الأدنى للأعلى» and no sentence surface carries it.'),
+ G_LAM_DUAA_JAZM:sourceRule('Lām al-duʿāʾ makes the present verb jussive and asks for the act to be brought about, as a supplication from the lower to the higher.',[79,80],'Only a registered duʿāʾ frame whose fāʿil is the canonical divine addressee, matching the source’s own ﴿لِيَقْضِ عَلَيْنَا رَبُّكَ﴾. It shares its bytes with لَامُ الْأَمْرِ but not its identity: the command lām is a separate rule, and neither may be produced in the other’s frame.'),
+ G_LA_DUAA_JAZM:sourceRule('The supplicating lā makes the present verb jussive and asks for the act to be withheld, as a supplication from the lower to the higher.',[79,80,81],'Only a registered duʿāʾ frame whose fāʿil is the canonical divine addressee. The source’s own examples of this لَا are second-person (﴿رَبَّنَا لَا تُؤَاخِذْنَا﴾); this app produces the third-person member of the same category, because 2ms is deliberately non-productive here. It is none of the four other لَا identities, and none of them governs jazm in a present verb.'),
  G_LA_NAHIYA_JAZM:sourceRule('Lā al-nāhiyah makes the present verb jussive and asks for the act to be refrained from, as a prohibition from the higher to the lower.',[79,80,81],'Only the registered prohibition frame. This لَا carries its own particle identity and its own rule: the conjunctive لَا, the plain negating لَا, and لَا النَّافِيَةُ لِلْجِنْسِ are three separate identities on the same bytes, and none of them governs jazm in a present verb. The supplicating لَا is a fourth and is not produced here.'),
  G_SAWFA_FUTURE:sourceRule('Sawfa marks future meaning and enters only on the present verb.',[14,15,16],'It does not change the indicative mood in the generated construction.'),
  R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'pp. 109–110 name six: إِنَّ, أَنَّ, كَأَنَّ, لَكِنَّ, لَيْتَ, لَعَلَّ. Generated set: inna, lakinna, laʿalla, layta, kaʾanna — five of the six. أَنَّ is excluded because it heads no sentence: it needs a governing frame this app does not yet build, and producing it bare would ship a fragment.',[IA_INNA]),
@@ -8229,6 +8428,20 @@ registerMissingFollowerForms([NAAT_LEXEMES.hardworkingDual],'dual');
 registerMissingFollowerForms([NAAT_LEXEMES.hardworkingSmp],'smp');
 registerMissingFollowerForms([NAAT_LEXEMES.hardworkingSfp],'sfp');
 registerMissingFollowerForms(Object.values(TAWKID_LEXEMES),'singular');
+/* J1b — the duʿāʾ verbs enter the surface index like any other, so authoritativeVerbMorphology
+   resolves them as registered 3ms forms. They are deliberately NOT added to the general `verbs`
+   pool: nothing outside a registered duʿāʾ frame may reach them. */
+function registerDuaaVerbs(){
+ for(const key of Object.keys(DUAA_LEXEMES)){
+  const lexeme=DUAA_LEXEMES[key];
+  for(const form of ['past','pres','acc','juss']){
+   if(verbFormIndex.has(lexeme[form])){
+    throw new Error(`Duʿāʾ surface ${lexeme[form]} is already owned by another verb record.`);
+   }
+   verbFormIndex.set(lexeme[form],{lexeme,form,surface:lexeme[form],morphology:Object.freeze({})});
+  }
+ }
+}
 function registerVerbSet(items,morphology={}){
  items.forEach(lexeme=>{
   ['past','pres','acc','juss','five','fiveSub'].forEach(form=>{
@@ -8334,6 +8547,7 @@ function resolvePresentReading(registered,data){
  return matches.length===1?matches[0]:null;
 }
 registerVerbSet(verbs);
+registerDuaaVerbs();
 registerVerbSet(additionalVerbActions);
 registerVerbSet(humanActions);
 registerVerbSet(humanPrepActions);
@@ -8958,6 +9172,8 @@ const AR={
  lamma:w=>grammarSpec('particle','particle',{particleType:'lamma',particleWord:w}),
  lamAmr:w=>grammarSpec('particle','particle',{particleType:'lamAmr',particleWord:w}),
  laNahiya:w=>grammarSpec('particle','particle',{particleType:'laNahiya',particleWord:w}),
+ lamDuaa:w=>grammarSpec('particle','particle',{particleType:'lamDuaa',particleWord:w}),
+ laDuaaiyya:w=>grammarSpec('particle','particle',{particleType:'laDuaaiyya',particleWord:w}),
  hamzatTaqrir:w=>grammarSpec('particle','particle',{particleType:HAMZAT_TAQRIR.particleType,particleWord:w}),
  an:w=>grammarSpec('particle','particle',{particleType:'an',particleWord:w}),
  kay:w=>grammarSpec('particle','particle',{particleType:'kay',particleWord:w}),
@@ -10166,6 +10382,7 @@ function configureParticle(token){
  token.ruleId={preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',
   an:'G_AN_NASB',kay:'G_KAY_NASB',[IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
   lamma:'G_LAMMA_JAZM',lamAmr:'G_LAM_AMR_JAZM',laNahiya:'G_LA_NAHIYA_JAZM',
+  lamDuaa:'G_LAM_DUAA_JAZM',laDuaaiyya:'G_LA_DUAA_JAZM',
   [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',
   laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,[NIDA_PARTICLE_TYPE]:NIDA_PARTICLE.ruleId,
@@ -10645,7 +10862,8 @@ function renderNounAnalysis(token){
    الْأَمْرِ», not «بِـ«لِ»»), because a bare proclitic lām would tell the learner nothing about which
    lām governs — which is the whole point of separating it from لَامُ التَّعْلِيلِ. */
 const PRESENT_GOVERNOR_CAUSE_AR=Object.freeze(Object.assign(Object.create(null),{lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»',
-  lamma:' بِـ«لَمَّا»',lamAmr:' بِلَامِ الْأَمْرِ',laNahiya:' بِـ«لَا» النَّاهِيَةِ'}));
+  lamma:' بِـ«لَمَّا»',lamAmr:' بِلَامِ الْأَمْرِ',laNahiya:' بِـ«لَا» النَّاهِيَةِ',
+  lamDuaa:' بِلَامِ الدُّعَاءِ',laDuaaiyya:' بِـ«لَا» الدُّعَائِيَّةِ'}));
 const PRESENT_VERB_LABEL_AR='فِعْلٌ مُضَارِعٌ';
 const AFAL_KHAMSA_REASON_AR='؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ';
 function renderVerbAnalysis(token){
@@ -10732,7 +10950,8 @@ function renderVerbAnalysis(token){
   :{lan:' because lan governs it',lam:' because lam governs it',
     an:' because an governs it',kay:' because kay governs it',
     lamma:' because lammā governs it',lamAmr:' because lām al-amr governs it',
-    laNahiya:' because the prohibitive lā governs it'}[governor?.grammar.particleType]||'';
+    laNahiya:' because the prohibitive lā governs it',
+    lamDuaa:' because lām al-duʿāʾ governs it',laDuaaiyya:' because the supplicating lā governs it'}[governor?.grammar.particleType]||'';
  const hiddenSubjectEn={'أَنَا':'I','نَحْنُ':'we','هُوَ':'he','هِيَ':'she','أَنْتَ':'you'}[token.relations.subjectPronoun];
  const subjectEn=token.relations.subjectType==='implicit'
   ?` Its subject is a hidden pronoun, concealed ${PRESENT_CONCEALMENT[token.grammar.morphology?.person].en}, understood as “${hiddenSubjectEn}”.`
@@ -10754,6 +10973,8 @@ function renderParticleAnalysis(token){
  if(type===HAMZAT_TAQRIR.particleType){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.hamzatTaqrir.ar}`;token.en=J1A_PARTICLE_IRAAB.hamzatTaqrir.en;return}
  if(type==='lamAmr'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.lamAmr.ar}`;token.en=J1A_PARTICLE_IRAAB.lamAmr.en;return}
  if(type==='laNahiya'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.laNahiya.ar}`;token.en=J1A_PARTICLE_IRAAB.laNahiya.en;return}
+ if(type==='lamDuaa'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.lamDuaa.ar}`;token.en=J1A_PARTICLE_IRAAB.lamDuaa.en;return}
+ if(type==='laDuaaiyya'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.laDuaaiyya.ar}`;token.en=J1A_PARTICLE_IRAAB.laDuaaiyya.en;return}
  if(type==='sawfa'){token.ar=`${token.word}: حَرْفُ اسْتِقْبَالٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle marking the future.';return}
  /* Phase 3A1. The identity clauses are Al-Tuḥfah's own words (p. 75 for أَنْ, p. 76 for كَيْ);
     the bināʾ tail follows this project's established particle pattern, matching لَنْ exactly. */
@@ -11257,6 +11478,8 @@ function whyStateVerb(t,data){
     whySignVerb, which names no governor and so stays true for all of them. */
  if(type==='lamma')return{id:'WHY_STATE_VERB_LAMMA',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ، فَهُوَ مَجْزُومٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of negation, jazm, and past meaning, so it is مَجْزُومٌ.`};
  if(type==='lamAmr')return{id:'WHY_STATE_VERB_LAM_AMR',ar:`${wq(t.word)} سَبَقَتْهُ لَامُ الْأَمْرِ وَهِيَ حَرْفُ جَزْمٍ، فَهُوَ مَجْزُومٌ.`,en:`${eq(t.word)} is preceded by lām al-amr, a particle of jazm, so it is مَجْزُومٌ.`};
+ if(type==='lamDuaa')return{id:'WHY_STATE_VERB_LAM_DUAA',ar:`${wq(t.word)} سَبَقَتْهُ لَامُ الدُّعَاءِ وَهِيَ حَرْفُ جَزْمٍ، فَهُوَ مَجْزُومٌ؛ وَإِنَّمَا كَانَتْ لِلدُّعَاءِ لَا لِلْأَمْرِ؛ لِأَنَّ الطَّلَبَ فِيهَا مِنَ الْأَدْنَى لِلْأَعْلَى، وَفَاعِلُ الْفِعْلِ هُوَ ${wq(DUAA_ADDRESSEE.surface)}.`,en:`${eq(t.word)} is preceded by lām al-duʿāʾ, a particle of jazm, so it is مَجْزُومٌ. It is the supplicating lām and not the commanding one because the request runs from the lower to the higher: the verb's own fāʿil is ${eq(DUAA_ADDRESSEE.surface)}.`};
+ if(type==='laDuaaiyya')return{id:'WHY_STATE_VERB_LA_DUAA',ar:`${wq(t.word)} سَبَقَتْهُ «لَا» الدُّعَائِيَّةُ وَهِيَ حَرْفُ دُعَاءٍ وَجَزْمٍ، فَهُوَ مَجْزُومٌ؛ وَإِنَّمَا كَانَتْ لِلدُّعَاءِ لَا لِلنَّهْيِ؛ لِأَنَّ طَلَبَ الْكَفِّ فِيهَا مِنَ الْأَدْنَى لِلْأَعْلَى، وَفَاعِلُ الْفِعْلِ هُوَ ${wq(DUAA_ADDRESSEE.surface)}.`,en:`${eq(t.word)} is preceded by the supplicating lā, a particle of supplication and jazm, so it is مَجْزُومٌ. It is supplicating and not prohibitive because the request to withhold runs from the lower to the higher: the verb's own fāʿil is ${eq(DUAA_ADDRESSEE.surface)}.`};
  if(type==='laNahiya')return{id:'WHY_STATE_VERB_LA_NAHIYA',ar:`${wq(t.word)} سَبَقَتْهُ «لَا» النَّاهِيَةُ وَهِيَ حَرْفُ نَهْيٍ وَجَزْمٍ، فَهُوَ مَجْزُومٌ؛ وَلَوْ كَانَتْ نَافِيَةً لَبَقِيَ مَرْفُوعًا.`,en:`${eq(t.word)} is preceded by the prohibitive lā, a particle of prohibition and jazm, so it is مَجْزُومٌ — had the lā been the merely negating one, the verb would have stayed مَرْفُوعٌ.`};
  /* Phase 3A1. Each direct nāṣib gets its OWN state Why so the learner is never told that لَنْ
     governs a verb that أَنْ or كَيْ actually governs. The naṣb SIGN keeps the existing generic
@@ -11350,6 +11573,8 @@ const WHY_PARTICLE=Object.freeze({
  lamma:t=>({id:'WHY_PARTICLE_LAMMA',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مِثْلُ «لَمْ»، وَيَمْتَدُّ نَفْيُهَا إِلَى زَمَنِ التَّكَلُّمِ.`,en:`${eq(t.word)} is a particle of negation, jazm, and past meaning like «لَمْ»; its negation runs up to the moment of speaking.`}),
  [HAMZAT_TAQRIR.particleType]:t=>({id:'WHY_PARTICLE_HAMZAT_TAQRIR',ar:`${wq(t.word)} هَمْزَةُ التَّقْرِيرِ، زِيدَتْ عَلَى الْجَازِمِ لِطَلَبِ الْإِقْرَارِ بِمَا بَعْدَهَا، وَلَيْسَتْ هِيَ الَّتِي جَزَمَتِ الْفِعْلَ.`,en:`${eq(t.word)} is hamzat al-taqrīr, added onto the jāzim to seek acknowledgement of what follows; it is not what made the verb مَجْزُومٌ.`}),
  lamAmr:t=>({id:'WHY_PARTICLE_LAM_AMR',ar:`${wq(t.word)} لَامُ الْأَمْرِ، تَطْلُبُ حُصُولَ الْفِعْلِ طَلَبًا جَازِمًا، وَتَجْزِمُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is lām al-amr: it asks for the act to be brought about, and it makes the present verb مَجْزُومٌ.`}),
+ lamDuaa:t=>({id:'WHY_PARTICLE_LAM_DUAA',ar:`${wq(t.word)} لَامُ الدُّعَاءِ، تَطْلُبُ حُصُولَ الْفِعْلِ مِنَ الْأَدْنَى لِلْأَعْلَى، وَتَجْزِمُ الْفِعْلَ الْمُضَارِعَ؛ وَهِيَ غَيْرُ لَامِ الْأَمْرِ وَإِنِ اتَّفَقَتَا فِي اللَّفْظِ وَالْجَزْمِ.`,en:`${eq(t.word)} is lām al-duʿāʾ: it asks for the act to be brought about, from the lower to the higher, and it makes the present verb مَجْزُومٌ. It is not lām al-amr, though the two share both their spelling and their jazm.`}),
+ laDuaaiyya:t=>({id:'WHY_PARTICLE_LA_DUAA',ar:`${wq(t.word)} «لَا» الدُّعَائِيَّةُ، تَطْلُبُ الْكَفَّ عَنِ الْفِعْلِ مِنَ الْأَدْنَى لِلْأَعْلَى، وَتَجْزِمُ الْفِعْلَ الْمُضَارِعَ؛ وَهِيَ غَيْرُ النَّاهِيَةِ وَغَيْرِ النَّافِيَةِ وَغَيْرِ النَّافِيَةِ لِلْجِنْسِ وَغَيْرِ الْعَاطِفَةِ.`,en:`${eq(t.word)} is the supplicating lā: it asks for the act to be withheld, from the lower to the higher, and it makes the present verb مَجْزُومٌ. It is not the prohibitive lā, nor the negating lā, nor the lā that negates a whole class, nor the conjunctive lā.`}),
  laNahiya:t=>({id:'WHY_PARTICLE_LA_NAHIYA',ar:`${wq(t.word)} «لَا» النَّاهِيَةُ، تَطْلُبُ الْكَفَّ عَنِ الْفِعْلِ وَتَرْكَهُ، وَتَجْزِمُ الْفِعْلَ الْمُضَارِعَ؛ وَهِيَ غَيْرُ النَّافِيَةِ وَغَيْرُ النَّافِيَةِ لِلْجِنْسِ وَغَيْرِ الْعَاطِفَةِ.`,en:`${eq(t.word)} is lā al-nāhiyah: it asks for the act to be refrained from, and it makes the present verb مَجْزُومٌ. It is not the negating lā, not lā that negates a whole class, and not the conjunctive lā.`}),
  an:t=>({id:'WHY_PARTICLE_AN',ar:`${wq(t.word)} حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ، يَنْصِبُ الْفِعْلَ الْمُضَارِعَ بِنَفْسِهِ.`,en:`${eq(t.word)} is a particle of maṣdar, naṣb, and future meaning; it makes the present verb مَنْصُوبٌ by itself.`}),
  kay:t=>({id:'WHY_PARTICLE_KAY',ar:`${wq(t.word)} حَرْفُ مَصْدَرٍ وَنَصْبٍ، وَإِنَّمَا نَصَبَتْ بِنَفْسِهَا لِأَنَّ لَامَ التَّعْلِيلِ تَقَدَّمَتْهَا لَفْظًا.`,en:`${eq(t.word)} is a particle of maṣdar and naṣb; it makes the present verb مَنْصُوبٌ by itself precisely because لَامُ التَّعْلِيلِ explicitly precedes it.`}),
@@ -12925,6 +13150,8 @@ function validateExercise(data){
     while لَا النَّاهِيَةُ asks for it to be refrained from and must. */
  if(data.tokens.some(item=>item.grammar.particleType==='lamma')&&!/not yet/i.test(data.translation))fail('E_LAMMA_TRANSLATION','Lammā sentence lacks “not yet” in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='lamAmr')&&(!/\blet\b/i.test(data.translation)||/\bnot\b/i.test(data.translation)))fail('E_LAM_AMR_TRANSLATION','Lām al-amr sentence does not read as an unnegated command in its translation.');
+ if(data.tokens.some(item=>item.grammar.particleType==='lamDuaa')&&(!/\bmay\b/i.test(data.translation)||/\bnot\b/i.test(data.translation)))fail('E_LAM_DUAA_TRANSLATION','Lām al-duʿāʾ sentence does not read as an unnegated supplication in its translation.');
+ if(data.tokens.some(item=>item.grammar.particleType==='laDuaaiyya')&&!/\bmay\b(?:\s+\w+)?\s+not\b/i.test(data.translation))fail('E_LA_DUAA_TRANSLATION','Lā al-duʿāʾiyyah sentence does not read as a negative supplication in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='laNahiya')&&!/\blet\b(?:\s+\w+)?\s+not\b/i.test(data.translation))fail('E_LA_NAHIYA_TRANSLATION','Lā al-nāhiyah sentence does not read as a prohibition in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='sawfa')&&!/\bwill\b/i.test(data.translation))fail('E_SAWFA_TRANSLATION','Sawfa sentence lacks future meaning in its translation.');
  /* Phase 3A1. كَيْ is tested first and more specifically: every لِكَيْ translation also contains
@@ -13008,6 +13235,20 @@ function add(starts,form,state,sign,build,metadata={}){
  const presentGovernor=metadata.presentGovernor||'';
  if(presentGovernor&&!Object.hasOwn(GRAMMAR_RULES.governors,presentGovernor)){
   throw new Error(`Unknown present template governor: ${presentGovernor}`);
+ }
+ const duaaConstruction=metadata.duaaConstruction||'';
+ const duaaFrameKeys=Object.freeze([...(metadata.duaaFrameKeys||[])]);
+ if(duaaConstruction){
+  const construction=DUAA_CONSTRUCTIONS[duaaConstruction];
+  if(!construction||construction.governorType!==presentGovernor){
+   throw new Error(`Template ${stableId} declares a duʿāʾ construction that is not its own governor.`);
+  }
+  if(!duaaFrameKeys.length||duaaFrameKeys.some((key,position)=>duaaFrameKeys.indexOf(key)!==position
+    ||!construction.frameKeys.includes(key))){
+   throw new Error(`Template ${stableId} names a duplicate or unregistered duʿāʾ frame.`);
+  }
+ }else if(duaaFrameKeys.length){
+  throw new Error(`Template ${stableId} names duʿāʾ frames without declaring a construction.`);
  }
  const concealedAnConstruction=metadata.concealedAnConstruction||'';
  if(concealedAnConstruction){
@@ -13225,6 +13466,10 @@ function add(starts,form,state,sign,build,metadata={}){
      governor from adjacency and compares; the declaration is frozen here and never read off a
      token. The mabnī lane is excluded: its governor is settled by capability `governorMode`. */
   presentGovernor,
+  /* J1b — the ONLY road into the duʿāʾ layer. deriveDuaaAuthority reads these two and nothing
+     else, and no exercise may carry either name. */
+  duaaConstruction,
+  duaaFrameKeys,
   concealedAnConstruction,
   /* Phase 3B1 — the ONLY road into the discourse layer. templateResponseContext and the productive
      resolver read these two and nothing else; no exercise may carry either name. */
@@ -14462,6 +14707,43 @@ J1A_CONSTRUCTION_ORDER.forEach(construction=>{
  add('particle','fiveVerbs','jazm','nunDropped',()=>buildJawazimFiveVerbExercise(construction),
   {...presentTemplateMetadata('3mp','attached'),presentGovernor:ONE_VERB_JAWAZIM[construction].governorType});
 });
+
+/* ===== J1b — the two duʿāʾ lanes ================================================================
+   One builder for both, because the grammar is identical and only the frozen construction differs:
+   لِ asks for the act, لَا asks for it to be withheld, and both name the divine addressee as the
+   verb's own fāʿil, which is what makes the direction «من الأدنى للأعلى» visible in the sentence
+   rather than asserted about it. Frames rotate deterministically inside each construction, so each
+   identity varies across three reviewed supplications instead of shipping one fixed sentence.
+   Registered LAST, for the stable-ID reason documented at the Phase 2b-C block. */
+function buildDuaaExercise(constructionId){
+ const construction=DUAA_CONSTRUCTIONS[constructionId];
+ const frameKey=pickVaried([...construction.frameKeys],`duaa-frame:${constructionId}`,String);
+ const frame=DUAA_FRAMES[frameKey];
+ const verb=DUAA_LEXEMES[frame.verbKey],object=DUAA_OBJECTS[frame.objectKey];
+ // لِ is proclitic and joins its verb; لَا is written as its own word.
+ const head=constructionId==='lamDuaa'?`${construction.surface}${verb.juss}`:`${construction.surface} ${verb.juss}`;
+ const negation=construction.polarity==='negative'?' not':'';
+ return{
+  sentence:`${head} ${DUAA_ADDRESSEE.surface} ${object.acc}`,
+  translation:`May ${DUAA_ADDRESSEE.en}${negation} ${verb.en} ${object.en}.`,
+  tokens:[
+   token(construction.surface,J1A_PARTICLE_GLOSSES[constructionId],
+    constructionId==='lamDuaa'?AR.lamDuaa(construction.surface):AR.laDuaaiyya(construction.surface),
+    J1A_PARTICLE_IRAAB[constructionId].en),
+   token(verb.juss,verb.en,AR.presentPred(verb.juss),EN.present,true),
+   token(DUAA_ADDRESSEE.surface,DUAA_ADDRESSEE.en,AR.faail(DUAA_ADDRESSEE.surface),GRAMMAR_RULES.roles.faail.en),
+   token(object.acc,object.en,AR.object(object.acc),EN.object)
+  ]
+ };
+}
+const duaaTemplateMetadata=constructionId=>({
+ ...presentTemplateMetadata('3ms','explicit'),
+ presentGovernor:constructionId,
+ duaaConstruction:constructionId,
+ duaaFrameKeys:[...DUAA_CONSTRUCTIONS[constructionId].frameKeys]
+});
+add('particle','present','jazm','sukun',()=>buildDuaaExercise('lamDuaa'),duaaTemplateMetadata('lamDuaa'));
+add('particle','present','jazm','sukun',()=>buildDuaaExercise('laDuaaiyya'),duaaTemplateMetadata('laDuaaiyya'));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

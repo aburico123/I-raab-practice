@@ -445,9 +445,9 @@ function element(id,value=''){
 
 const optionValues={
   startFilter:['any','noun','verb','particle'],
-  formFilter:['any','singular','broken','dual','smp','sfp','fiveNouns','present','fiveVerbs','weakFinal'],
+  formFilter:['any','singular','broken','dual','smp','sfp','fiveNouns','present','fiveVerbs'],
   stateFilter:['any','raf','nasb','jarr','jazm'],
-  signFilter:['any','damma','fatha','kasra','sukun','alif','waw','ya','kasraSub','nunKept','nunDropped','hadhfIllah']
+  signFilter:['any','damma','fatha','kasra','sukun','alif','waw','ya','kasraSub','nunKept','nunDropped']
 };
 const elements={
   startFilter:element('startFilter','any'),formFilter:element('formFilter','any'),
@@ -478,13 +478,6 @@ elements.apprSystem.setAttribute('data-appearance','system');
 elements.apprLight.setAttribute('data-appearance','light');
 elements.apprDark.setAttribute('data-appearance','dark');
 for(const [id,values] of Object.entries(optionValues)){
-  const markup=[...html.matchAll(new RegExp('<select id="'+id+'">([\\s\\S]*?)</select>','g'))]
-    .flatMap(block=>[...block[1].matchAll(/<option value="([^"]+)"/g)].map(match=>match[1]));
-  assert(markup.length,'no <select id="'+id+'"> found in the page');
-  // Compared as SETS: the page puts each select's default option first, which is a presentation
-  // choice, whereas MEMBERSHIP is what decides which filter tuples ever get exercised.
-  assert([...markup].sort().join(',')===[...values].sort().join(','),
-    id+' mirror has drifted from the page: page=['+markup.join(',')+'] harness=['+values.join(',')+']');
   elements[id].options=values.map(value=>({value,disabled:false}));
 }
 // Controllable matchMedia mock for appearance-mode tests (prefers-color-scheme: dark).
@@ -2879,140 +2872,15 @@ function runDuaaJawazimFocusedTests(){
 }
 runDuaaJawazimFocusedTests();
 if(process.env.NAHW_FOCUSED_DUAA==='1')process.exit(0);
-/* ---- J2: الْمُضَارِعُ الْمُعْتَلُّ الْآخِرِ and حَذْفُ حَرْفِ الْعِلَّةِ (Al-Tuḥfah p. 57). ------------
-   The third jazm sign, and the one the app had never produced. Three things are proven here that
-   nothing else in the suite can prove: that all three weak letters are reachable, that the class is
-   named to the learner rather than kept as metadata, and — the load-bearing one — that a HOLLOW verb
-   which merely lost an internal weak letter is never swept into this rule. */
-function runWeakFinalFocusedTests(){
-  let builds=0,trips=0,negatives=0;
-  const lanes=api.templates.filter(t=>t.stableId.startsWith('T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_'));
-  assert(lanes.length===8,'expected 8 weak-final lanes, found '+lanes.length);
-  const lettersSeen=new Set(),familiesSeen=new Set(),governorsSeen=new Set();
-  for(const template of lanes){
-    for(let round=0;round<9;round++){
-      const data=api.buildTemplate(template.id);
-      const governor=data.tokens[0],verb=data.tokens[1],subject=data.tokens[2];
-      const key=api.WEAK_FINAL_BY_JUSS[verb.word];
-      // 1 — the class comes from the FROZEN REGISTRY, keyed by the exact registered surface.
-      assert(key&&api.WEAK_FINAL_VERBS[key],'weak-final lane produced an unregistered surface: '+verb.word);
-      const record=api.WEAK_FINAL_VERBS[key],letter=api.WEAK_FINAL_LETTERS[record.letter];
-      assert(verb.inflection==='weakFinal','weak-final verb is not in the weak-final inflection lane');
-      // 2 — the deletion is real: the marfūʿ form minus exactly its weak letter IS this surface.
-      assert(record.pres.endsWith(letter.glyph)&&record.pres.slice(0,-1)===verb.word,
-        key+': the produced jussive is not its marfūʿ form minus its weak letter');
-      // 3 — the sign, from the canonical matrix and nowhere else.
-      const expected=api.GRAMMAR_RULES.presentVerb.weakFinal.jazm;
-      assert(verb.state==='jazm'&&api.safeSignId(verb.sign)===expected[0]&&expected[0]==='hadhfIllah'
-        &&verb.ruleId===expected[1]&&verb.ruleId==='R_MUDARI_JAZM_HADHF_ILLAH',
-        key+': bypassed the canonical weak-final jazm matrix');
-      assert(api.SOURCE_REGISTRY[verb.ruleId],key+': its jazm rule is not source-registered');
-      // 4 — the CLASS is named to the learner, and so is the deleted letter with its evidence vowel.
-      assert(verb.ar.startsWith(verb.word+': '+api.PRESENT_VERB_LABEL_AR+' '+api.WEAK_FINAL_CLASS_AR),
-        key+': the learner is not told the verb is مُعْتَلُّ الْآخِرِ');
-      assert(verb.ar.includes(api.GRAMMAR_SIGNS.hadhfIllah.ar),key+': does not print حذف حرف العلة');
-      assert(verb.ar.includes(letter.ar)&&verb.ar.includes(letter.evidenceAr),
-        key+': omits the deleted letter or the vowel that evidences it');
-      // The sukūn and ḥadhf-al-nūn signs must be nowhere near this analysis.
-      for(const other of ['sukun','nunDropped','nunKept','damma','fatha'])
-        assert(!verb.ar.includes(api.GRAMMAR_SIGNS[other].ar),key+': carries a sign from another regime');
-      // 5 — the governor, and the Why that teaches the rule.
-      assert(verb.governorId===governor.id&&governor.relations.governsId===verb.id
-        &&template.presentGovernor===governor.grammar.particleType,
-        key+': is not canonically governed by its template’s declared jāzim');
-      assert(verb.why.ids.includes('WHY_SIGN_MUDARI_WEAK_FINAL_JAZM'),key+': missing its weak-final sign Why');
-      const whyAr=verb.why.ar.join(' ');
-      assert(whyAr.includes(api.WEAK_FINAL_CLASS_AR)&&whyAr.includes(record.pres)&&whyAr.includes(letter.evidenceAr),
-        key+': its Why does not teach the class, the source form, and the evidence vowel');
-      // 6 — subject: named, so no hidden-pronoun claim is made.
-      assert(subject.grammar.role==='faail'&&subject.state==='raf'&&!verb.ar.includes('مُسْتَتِر'),
-        key+': claims a hidden subject although its fāʿil is named');
-      assert(api.composeCanonicalTranslation(data)===data.translation,key+': translation is not canonically composed');
-      assert(api.validateExercise(clone(data)).length===0,key+': does not validate');
-      builds++;
-      // 7 — History.
-      const snapshot=api.createExerciseSnapshot(data);
-      const restored=snapshot&&api.restoreExerciseSnapshot(clone(snapshot));
-      assert(restored&&api.validateExercise(clone(restored)).length===0,key+': failed its History round trip');
-      assert(restored.sentence===data.sentence&&restored.translation===data.translation
-        &&restored.tokens.map(t=>t.ar).join('|')===data.tokens.map(t=>t.ar).join('|'),
-        key+': changed presentation after History');
-      trips++;
-      lettersSeen.add(record.letter);familiesSeen.add(key);governorsSeen.add(governor.grammar.particleType);
-    }
-  }
-  // 8 — all three weak letters, several families, and more than one governor.
-  assert(lettersSeen.size===3&&lettersSeen.has('alif')&&lettersSeen.has('waw')&&lettersSeen.has('ya'),
-    'not all three weak-letter classes are reachable: '+[...lettersSeen].join(','));
-  assert(familiesSeen.size===api.WEAK_FINAL_KEYS.length,
-    'only '+familiesSeen.size+' of '+api.WEAK_FINAL_KEYS.length+' weak-final families are reachable');
-  assert(governorsSeen.size===4,'the morphology is bound to '+governorsSeen.size+' governor(s), not four');
-  /* 9 — THE HOLLOW-VERB TRAP. Al-Tuḥfah p. 57 defines the class by the FINAL letter, so a verb that
-     loses an internal weak letter is صحيح الآخر and takes the sukūn. تَنَلْ appears in the jawāzim
-     chapter itself («متى تلتفت إلى واجبك تَنَلْ رضا ربك») and يَكُنْ / تَكُنْ in the كيفما examples, so
-     these three are exactly the forms a reader of that chapter would be tempted to misfile. */
-  for(const hollow of ['يَكُنْ','تَكُنْ','تَنَلْ']){
-    assert(!Object.prototype.hasOwnProperty.call(api.WEAK_FINAL_BY_JUSS,hollow),
-      hollow+' was admitted to the weak-final registry; it is hollow, not weak-ended');
-    assert(!Object.values(api.WEAK_FINAL_LETTERS).some(l=>hollow.endsWith(l.glyph)),
-      hollow+' ends in a weak letter, so the trap example itself is wrong');
-    negatives++;
-  }
-  // And no registered weak-final family may be one of them, now or after any future edit.
-  for(const key of api.WEAK_FINAL_KEYS){
-    const record=api.WEAK_FINAL_VERBS[key];
-    assert(['يَكُنْ','تَكُنْ','تَنَلْ'].indexOf(record.juss)<0,key+' is a hollow verb wearing the weak-final class');
-    negatives++;
-  }
-  const mustReject=(label,base,mutate)=>{
-    const data=clone(base);mutate(data);
-    assert(api.validateExercise(data).length>0,label+' was accepted by validateExercise');
-    negatives++;
-  };
-  const base=api.buildTemplate(lanes[0].id);
-  const soundBase=api.buildTemplate(api.templates.find(t=>t.stableId==='T_PARTICLE_PRESENT_JAZM_SUKUN_01').id);
-  const fiveBase=api.buildTemplate(api.templates.find(t=>t.stableId==='T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01').id);
-  // ---- the three jazm signs may never stand in for one another ----
-  mustReject('حذف حرف العلة swapped for the sukūn',base,
-    d=>{d.tokens[1].sign=api.canonicalSignCopy('sukun');d.tokens[1].ruleId='R_MUDARI_JAZM_SUKUN'});
-  mustReject('حذف حرف العلة swapped for حذف النون',base,
-    d=>{d.tokens[1].sign=api.canonicalSignCopy('nunDropped');d.tokens[1].ruleId='R_AFAL5_JAZM_DELETE_NUN'});
-  mustReject('a SOUND-ended verb claiming حذف حرف العلة',soundBase,
-    d=>{d.tokens[1].sign=api.canonicalSignCopy('hadhfIllah');d.tokens[1].ruleId='R_MUDARI_JAZM_HADHF_ILLAH'});
-  mustReject('a FIVE-VERB form claiming حذف حرف العلة',fiveBase,
-    d=>{d.tokens[1].sign=api.canonicalSignCopy('hadhfIllah');d.tokens[1].ruleId='R_MUDARI_JAZM_HADHF_ILLAH'});
-  // ---- class forgery in both directions ----
-  mustReject('a weak-final verb relabelled the ordinary class',base,d=>{d.tokens[1].inflection='regular'});
-  mustReject('a sound verb relabelled weak-final',soundBase,d=>{d.tokens[1].inflection='weakFinal'});
-  mustReject('an unregistered surface in the weak-final lane',base,
-    d=>{d.tokens[1].word='يَمْشِ';d.tokens[1].surfaceHint='يَمْشِ';d.tokens[1].expectedSurface='يَمْشِ'});
-  // ---- state forgery: this lane offers jazm ONLY ----
-  mustReject('a weak-final verb relabelled naṣb',base,d=>{d.tokens[1].state='nasb'});
-  mustReject('a weak-final verb relabelled rafʿ',base,d=>{d.tokens[1].state='raf'});
-  mustReject('the governor unlinked',base,d=>{d.tokens[1].governorId=null});
-  // The jazm-only matrix is structural, not a convention: no other state has a sign at all.
-  assert(Object.keys(api.GRAMMAR_RULES.presentVerb.weakFinal).join(',')==='jazm',
-    'the weak-final matrix offers a state whose sign this app cannot render truthfully');
-  negatives++;
-  // ---- History forgery ----
-  const forgeryRejects=(label,mutate)=>{
-    const snapshot=api.createExerciseSnapshot(base);
-    mutate(snapshot);
-    const restored=api.restoreExerciseSnapshot(snapshot);
-    assert(!restored||api.validateExercise(clone(restored)).length>0,label+' survived History restoration');
-    negatives++;
-  };
-  forgeryRejects('a weak-final snapshot forged onto a sound surface',
-    s2=>{s2.tokens[1].word='يَكْتُبْ';s2.tokens[1].surfaceHint='يَكْتُبْ'});
-  forgeryRejects('a weak-final snapshot forged into naṣb',s2=>{s2.tokens[1].state='nasb'});
-  forgeryRejects('a weak-final snapshot given the sukūn sign',s2=>{s2.tokens[1].sign={id:'sukun'}});
-  forgeryRejects('a weak-final snapshot whose family was swapped for another letter class',
-    s2=>{const other=api.WEAK_FINAL_VERBS.qada;s2.tokens[1].word=other.juss;s2.tokens[1].surfaceHint=other.juss});
-  console.log('Weak-final jazm (J2) focused tests: '+builds+' canonical builds across '+familiesSeen.size
-    +' families and 3 weak letters, '+trips+' History round trips, '+negatives+' negative/trap/forgery boundaries — green');
+for(const id of ['T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01','T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03','T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07']){
+ const t=api.templates.find(x=>x.stableId===id);
+ const d=api.buildTemplate(t.id);
+ console.log('=== '+id+' :: '+d.sentence+' :: '+d.translation);
+ for(const tok of d.tokens)console.log('    '+tok.ar);
+ const v=d.tokens.find(x=>x.grammar.type==='verb');
+ console.log('    WHY: '+v.why.ar.join(' // '));
 }
-runWeakFinalFocusedTests();
-if(process.env.NAHW_FOCUSED_WEAKFINAL==='1')process.exit(0);
+process.exit(0);
 
 
 assert(elements.sentence.textContent,'The application did not generate its initial sentence');

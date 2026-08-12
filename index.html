@@ -332,6 +332,7 @@ body.lang-arabic .icon-popover{direction:rtl}
         <option value="sfp">جَمْعُ الْمُؤَنَّثِ السَّالِمُ</option>
         <option value="fiveNouns">الْأَسْمَاءُ الْخَمْسَةُ</option>
         <option value="present">الْمُضَارِعُ الَّذِي لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ</option>
+        <option value="weakFinal">الْمُضَارِعُ الْمُعْتَلُّ الْآخِرِ</option>
         <option value="fiveVerbs">الْأَفْعَالُ الْخَمْسَةُ</option>
       </select>
     </div>
@@ -359,6 +360,7 @@ body.lang-arabic .icon-popover{direction:rtl}
         <option value="kasraSub">الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ</option>
         <option value="nunKept">ثُبُوتُ النُّونِ</option>
         <option value="nunDropped">حَذْفُ النُّونِ</option>
+        <option value="hadhfIllah">حَذْفُ حَرْفِ الْعِلَّةِ</option>
       </select>
     </div>
     <button id="newBtn" type="button">Reset filters</button>
@@ -1463,6 +1465,14 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  /* J1b — «May Allah forgive the sin.» / «May Allah not forsake the patient one.» The subject slot
     reads the fāʿil's canonical gloss, so the divine addressee's English comes from its own frozen
     record and never from a general noun pool. */
+ /* J2 — the weak-final lanes. The fāʿil is explicit in every one of them, exactly as in the
+    source's own «لم يَسْعَ عليٌّ» / «لَمْ يدْعُ محمَّدٌ» / «لم يُعْطِ محمَّدٌ». */
+ ,TS59:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
+ ,TS60:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
+ ,TS61:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' not '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
+ ,TS62:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])})
+ ,TS63:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])})
+ ,TS64:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' not '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])})
  ,TS57:Object.freeze({parts:Object.freeze([Object.freeze({lit:'May '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])})
  ,TS58:Object.freeze({parts:Object.freeze([Object.freeze({lit:'May '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' not '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'.'})])})
  ,TS56:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Did they not yet '}),Object.freeze({slot:'verb:2:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'?'})])})
@@ -1559,6 +1569,15 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05",structure:"particle:particle,verb:present,noun:object",shape:"TS52",copulaPlural:false}),
  /* J1b — the duʿāʾ pair. Four tokens, because the fāʿil is explicit: the supplication names who is
     being asked, which is what makes the direction «من الأدنى للأعلى» visible in the sentence. */
+ /* J2 — the weak-final jazm family: four governors over an intransitive and a transitive frame. */
+ "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01",structure:"particle:particle,verb:present,noun:faail",shape:"TS59",copulaPlural:false}),
+ "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02",structure:"particle:particle,verb:present,noun:faail",shape:"TS59",copulaPlural:false}),
+ "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03",structure:"particle:particle,verb:present,noun:faail",shape:"TS60",copulaPlural:false}),
+ "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04",structure:"particle:particle,verb:present,noun:faail",shape:"TS61",copulaPlural:false}),
+ "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05||particle:particle,verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05",structure:"particle:particle,verb:present,noun:faail,noun:object",shape:"TS62",copulaPlural:false}),
+ "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06||particle:particle,verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06",structure:"particle:particle,verb:present,noun:faail,noun:object",shape:"TS62",copulaPlural:false}),
+ "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07||particle:particle,verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07",structure:"particle:particle,verb:present,noun:faail,noun:object",shape:"TS63",copulaPlural:false}),
+ "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08||particle:particle,verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08",structure:"particle:particle,verb:present,noun:faail,noun:object",shape:"TS64",copulaPlural:false}),
  "T_PARTICLE_PRESENT_JAZM_SUKUN_07||particle:particle,verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_07",structure:"particle:particle,verb:present,noun:faail,noun:object",shape:"TS57",copulaPlural:false}),
  "T_PARTICLE_PRESENT_JAZM_SUKUN_08||particle:particle,verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_08",structure:"particle:particle,verb:present,noun:faail,noun:object",shape:"TS58",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06",structure:"particle:particle,verb:present,noun:object",shape:"TS54",copulaPlural:false}),
@@ -4795,7 +4814,11 @@ const GRAMMAR_SIGN_SOURCE=Object.freeze({
  ya:{id:'ya',ar:'الْيَاءُ',en:'yāʾ'},
  kasraSub:{id:'kasraSub',ar:'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ',en:'kasrah in place of fatḥah'},
  nunKept:{id:'nunKept',ar:'ثُبُوتُ النُّونِ',en:'retention of the nūn'},
- nunDropped:{id:'nunDropped',ar:'حَذْفُ النُّونِ',en:'deletion of the nūn'}
+ nunDropped:{id:'nunDropped',ar:'حَذْفُ النُّونِ',en:'deletion of the nūn'},
+ /* J2 — the third jazm sign. Al-Tuḥfah p. 57's matn: «وَأَمَّا الْحَذْفُ فَيَكُونُ عَلَامَةً لِلْجَزْمِ
+    فِي الْفِعْلِ الْمُضَارِعِ الْمُعْتَلِّ الْآخِرِ، وَفِي الْأَفْعَالِ الْخَمْسَةِ». Two places, one matn
+    sign — so ḥadhf al-nūn above and this one are siblings, and neither may stand for the other. */
+ hadhfIllah:{id:'hadhfIllah',ar:'حَذْفُ حَرْفِ الْعِلَّةِ',en:'deletion of the weak letter'}
 });
 /* Phase 3B0-pre hardening — the registry is rebuilt as a NULL-PROTOTYPE store of DEEPLY FROZEN
    records. Two separate defects made the previous shape unsafe:
@@ -7566,6 +7589,103 @@ const DUAA_FRAME_BY_VERB=Object.freeze(Object.assign(Object.create(null),
   throw new Error('Two duʿāʾ frames share one verb-and-object pair.');
  }
 })();
+/* ===== J2 — الْمُضَارِعُ الْمُعْتَلُّ الْآخِرِ and حَذْفُ حَرْفِ الْعِلَّةِ (Al-Tuḥfah p. 57) ============
+   «الْمَوْضِعُ الْأَوَّلُ: الْفِعْلُ الْمُضَارِعُ الْمُعْتَلُّ الْآخِرِ، وَمَعْنَى كَوْنِهِ مُعْتَلَّ الْآخِرِ أَنَّ آخِرَهُ
+    حَرْفٌ مِنْ حُرُوفِ الْعِلَّةِ الثَّلَاثَةِ الَّتِي هِيَ الْأَلِفُ وَالْوَاوُ وَالْيَاءُ» — so the class is defined by
+   the FINAL letter, and by nothing else. That single sentence is what rules out the hollow verbs:
+   يَكُنْ, تَكُنْ and تَنَلْ lose an internal weak letter and end in ن or ل, so they are صحيح الآخر and
+   their jazm sign is the sukūn. The trap is load-bearing enough to have its own permanent test.
+
+   p. 57 also supplies the exact per-letter iʿrāb this app renders, and its own lexical lists, from
+   which every family below is drawn — none is invented:
+     ألف : «يَسْعَى، وَيَرْضَى، وَيَهْوَى، وَيَنْأَى، وَيَشْقَى، وَيَبْقَى»   → «لم يَسْعَ عليٌّ إلى المَجْدِ»
+     واو : «يَدْعُو، وَيَرْجُو، وَيَبْلُو، وَيَقْسُو، وَيَسْمُو، وَيَنْبُو»   → «لَمْ يدْعُ محمَّدٌ إلا إلى الحق»
+     ياء : «يُعْطِي، وَيَقْضِي، وَيَسْتَغْشِي، وَيُحْيِي، وَيَلْوِي، وَيَهْدِي» → «لم يُعْطِ محمَّدٌ إلا خالداً»
+   and for each: «وعلامة جزمه حذفُ الألف/الواو/الياء، والفتحةُ/الضمةُ/الكسرةُ قبلها دليلٌ عليها».
+
+   ONLY jazm is produced. In rafʿ and naṣb these verbs carry ESTIMATED marks (ضمة مقدرة للثقل or
+   للتعذر, and فتحة مقدرة للتعذر on the ألف family), which is a separate render branch the coverage
+   matrix still defers. Registering a marfūʿ weak-final surface and printing the ordinary visible-
+   ḍammah clause over it would be false, so GRAMMAR_RULES.presentVerb.weakFinal offers jazm alone
+   and configureVerb throws on any other state — the guard is structural, not a convention. */
+const WEAK_FINAL_LETTERS=Object.freeze(Object.assign(Object.create(null),{
+ alif:Object.freeze({id:'alif',glyph:'ى',ar:'الْأَلِفُ',en:'alif',evidenceAr:'الْفَتْحَةُ',evidenceEn:'the fatḥah'}),
+ waw:Object.freeze({id:'waw',glyph:'و',ar:'الْوَاوُ',en:'wāw',evidenceAr:'الضَّمَّةُ',evidenceEn:'the ḍammah'}),
+ ya:Object.freeze({id:'ya',glyph:'ي',ar:'الْيَاءُ',en:'yāʾ',evidenceAr:'الْكَسْرَةُ',evidenceEn:'the kasrah'})
+}));
+const WEAK_FINAL_VERBS=Object.freeze(Object.assign(Object.create(null),{
+ saa:Object.freeze({key:'saa',letter:'alif',past:'سَعَى',pres:'يَسْعَى',juss:'يَسْعَ',
+  en:'strive',third:'strives',pastEn:'strove',objectKeys:Object.freeze([])}),
+ baqiya:Object.freeze({key:'baqiya',letter:'alif',past:'بَقِيَ',pres:'يَبْقَى',juss:'يَبْقَ',
+  en:'remain',third:'remains',pastEn:'remained',objectKeys:Object.freeze([])}),
+ radiya:Object.freeze({key:'radiya',letter:'alif',past:'رَضِيَ',pres:'يَرْضَى',juss:'يَرْضَ',
+  en:'be content',third:'is content',pastEn:'was content',objectKeys:Object.freeze([])}),
+ sama:Object.freeze({key:'sama',letter:'waw',past:'سَمَا',pres:'يَسْمُو',juss:'يَسْمُ',
+  en:'rise',third:'rises',pastEn:'rose',objectKeys:Object.freeze([])}),
+ daa:Object.freeze({key:'daa',letter:'waw',past:'دَعَا',pres:'يَدْعُو',juss:'يَدْعُ',
+  en:'call',third:'calls',pastEn:'called',objectKeys:Object.freeze(['الْعَالِمَ','الْمُسَافِرَ'])}),
+ raja:Object.freeze({key:'raja',letter:'waw',past:'رَجَا',pres:'يَرْجُو',juss:'يَرْجُ',
+  en:'hope for',third:'hopes for',pastEn:'hoped for',objectKeys:Object.freeze(['الْجَوَابَ','الْخَبَرَ'])}),
+ qada:Object.freeze({key:'qada',letter:'ya',past:'قَضَى',pres:'يَقْضِي',juss:'يَقْضِ',
+  en:'complete',third:'completes',pastEn:'completed',objectKeys:Object.freeze(['الْوَاجِبَ'])}),
+ hada:Object.freeze({key:'hada',letter:'ya',past:'هَدَى',pres:'يَهْدِي',juss:'يَهْدِ',
+  en:'guide',third:'guides',pastEn:'guided',objectKeys:Object.freeze(['الْمُسَافِرَ'])}),
+ ata:Object.freeze({key:'ata',letter:'ya',past:'أَعْطَى',pres:'يُعْطِي',juss:'يُعْطِ',
+  en:'give',third:'gives',pastEn:'gave',objectKeys:Object.freeze(['الْكِتَابَ','الْقَلَمَ'])})
+}));
+const WEAK_FINAL_KEYS=Object.freeze(Object.keys(WEAK_FINAL_VERBS));
+const WEAK_FINAL_BY_JUSS=Object.freeze(Object.assign(Object.create(null),
+ Object.fromEntries(WEAK_FINAL_KEYS.map(key=>[WEAK_FINAL_VERBS[key].juss,key]))));
+/* Startup invariant. The deletion is PROVEN here, not asserted: for every family the marfūʿ surface
+   must end in exactly the weak letter its record names, and removing that one glyph must yield the
+   registered jussive surface byte-for-byte. That is the whole grammatical claim of p. 57 — «حذف
+   الواو، والضمة قبلها دليل عليها» — checked as a round trip, so a mistyped jussive form or a verb
+   that is not really weak-final is a build error rather than a false sign shown to a learner. */
+(()=>{
+ const seen=new Set();
+ for(const key of WEAK_FINAL_KEYS){
+  const verb=WEAK_FINAL_VERBS[key];
+  if(!Object.isFrozen(verb)||verb.key!==key)throw new Error('Weak-final verb '+key+' is not frozen or not bound to its key.');
+  const letter=WEAK_FINAL_LETTERS[verb.letter];
+  if(!letter)throw new Error('Weak-final verb '+key+' names an unregistered weak letter.');
+  for(const name of ['past','pres','juss','en','third','pastEn']){
+   if(typeof verb[name]!=='string'||!verb[name])throw new Error('Weak-final verb '+key+'.'+name+' is not a non-empty string.');
+  }
+  if(!verb.pres.endsWith(letter.glyph)){
+   throw new Error('Weak-final verb '+key+' does not actually end in the weak letter it claims: '+verb.pres);
+  }
+  if(verb.pres.slice(0,-1)!==verb.juss){
+   throw new Error('Weak-final verb '+key+' does not round-trip: dropping its weak letter does not give '+verb.juss);
+  }
+  if(Object.values(WEAK_FINAL_LETTERS).some(item=>verb.juss.endsWith(item.glyph))){
+   throw new Error('Weak-final jussive '+verb.juss+' still ends in a weak letter.');
+  }
+  for(const surface of [verb.past,verb.pres,verb.juss]){
+   if(seen.has(surface))throw new Error('Weak-final surface '+surface+' is claimed twice.');
+   seen.add(surface);
+  }
+ }
+ if(Object.keys(WEAK_FINAL_BY_JUSS).length!==WEAK_FINAL_KEYS.length){
+  throw new Error('Two weak-final families share one jussive surface.');
+ }
+ /* Every complement must be a noun the canonical registry can actually gloss. nounEnglish answers
+    'the noun' for anything outside its pools, and an exercise that reads «Let the blacksmith not
+    call the noun» is broken rather than merely untidy — so it is a build error here. */
+ for(const key of WEAK_FINAL_KEYS){
+  for(const object of WEAK_FINAL_VERBS[key].objectKeys){
+   if(nounEnglish(object,'acc')==='the noun'){
+    throw new Error('Weak-final verb '+key+' names a complement with no canonical English: '+object);
+   }
+  }
+ }
+ for(const id of Object.keys(WEAK_FINAL_LETTERS)){
+  const letter=WEAK_FINAL_LETTERS[id];
+  if(letter.id!==id||[...letter.glyph].length!==1)throw new Error('Weak letter '+id+' is not a single bound glyph.');
+  if(!WEAK_FINAL_KEYS.some(key=>WEAK_FINAL_VERBS[key].letter===id)){
+   throw new Error('Weak letter '+id+' has no registered family, so its sign could never be practised.');
+  }
+ }
+})();
 const GRAMMAR_RULES=Object.freeze({
  roles:{
   mubtada:{state:'raf',ruleId:'R_MUBTADA_RAF',en:'The mubtadaʾ; nominative.'},
@@ -7610,7 +7730,11 @@ const GRAMMAR_RULES=Object.freeze({
  },
  presentVerb:{
   regular:{raf:['damma','R_MUDARI_RAF_DAMMA'],nasb:['fatha','R_MUDARI_NASB_FATHA'],jazm:['sukun','R_MUDARI_JAZM_SUKUN']},
-  afalKhamsa:{raf:['nunKept','R_AFAL5_RAF_NUN'],nasb:['nunDropped','R_AFAL5_NASB_DELETE_NUN'],jazm:['nunDropped','R_AFAL5_JAZM_DELETE_NUN']}
+  afalKhamsa:{raf:['nunKept','R_AFAL5_RAF_NUN'],nasb:['nunDropped','R_AFAL5_NASB_DELETE_NUN'],jazm:['nunDropped','R_AFAL5_JAZM_DELETE_NUN']},
+  /* J2 — jazm and nothing else. Offering rafʿ or naṣb here would let configureVerb write a visible
+     ḍammah or fatḥah onto a verb whose mark is estimated; its absence is what makes that impossible
+     rather than merely discouraged. */
+  weakFinal:{jazm:['hadhfIllah','R_MUDARI_JAZM_HADHF_ILLAH']}
  },
  governors:{
   lan:{surface:'لَنْ',mood:'nasb',ruleId:'G_LAN_NASB'},
@@ -7737,7 +7861,7 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr']},
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
- verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
+ verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],weakFinal:['jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
  roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','mafulAjl','mafulMaah','munada','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
  relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','laJins','mafulAjl','mafulMaah','nida','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
@@ -8107,6 +8231,11 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     lam» stopped being true the moment a second jāzim shipped. The sign is emphatically NOT proof of
     the state — ḥadhf al-nūn is equally the naṣb sign of the five verbs (R_AFAL5_NASB_DELETE_NUN) —
     so jazm is proven from the canonical governor and never inferred from the missing nūn. */
+ /* J2 — Al-Tuḥfah p. 57's first موضع of الحذف. The condition is the class, not the ending: a verb
+    qualifies because its registered record says its final letter is ألف, واو or ياء and the load-
+    time round trip proves that dropping exactly that letter yields the jussive surface. A verb that
+    merely lost an internal weak letter — يَكُنْ, تَكُنْ, تَنَلْ — is صحيح الآخر and takes the sukūn. */
+ R_MUDARI_JAZM_HADHF_ILLAH:sourceRule('Deletion of the weak final letter is the jussive sign of a present verb whose last letter is alif, wāw, or yāʾ.',[57,58,79,80,81],'Only an explicitly registered weak-final family standing in jazm under a jāzim this app produces. The class comes from the frozen record and its proven pres→juss round trip, never from inspecting the ending: a hollow verb that drops an internal weak letter is sound-ended and takes the sukūn. Rafʿ and naṣb are excluded, because both carry estimated marks this app does not yet render.'),
  R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80,81],'Only an explicitly stored five-verb form standing in jazm under a jāzim this app produces: لَمْ, لَمَّا, أَلَمْ, أَلَمَّا, لَامُ الْأَمْرِ, or لَا النَّاهِيَةُ. The state comes from the canonical governor, never from the sign: the same ḥadhf al-nūn is the naṣb sign of these very verbs, so the ending alone proves nothing.'),
  R_PAST_FATH_VISIBLE:sourceRule('A sound-final past verb has visible fatḥ unless wāw al-jamāʿah or a moving rafʿ pronoun is attached.',[71],'Generated scope: bare third-person masculine, the existing sākinah feminine tāʾ forms, and the explicitly stored dual-alif forms.'),
  R_PASSIVE_PAST_FORM:sourceRule('A past verb is changed to the passive by ḍamm on its first letter and kasr on the letter before its last.',[96,97,98],'Only the explicit passive-past surfaces in PASSIVE_VERB_CAPABILITIES; no string transformation is performed.'),
@@ -8431,6 +8560,18 @@ registerMissingFollowerForms(Object.values(TAWKID_LEXEMES),'singular');
 /* J1b — the duʿāʾ verbs enter the surface index like any other, so authoritativeVerbMorphology
    resolves them as registered 3ms forms. They are deliberately NOT added to the general `verbs`
    pool: nothing outside a registered duʿāʾ frame may reach them. */
+/* J2 — only the JUSSIVE surface enters the index. The marfūʿ form stays in the frozen record as
+   the evidence the round-trip invariant checks and as what the Why names; registering it as a
+   producible surface would invite a raf exercise whose sign this app cannot yet render truthfully. */
+function registerWeakFinalVerbs(){
+ for(const key of WEAK_FINAL_KEYS){
+  const lexeme=WEAK_FINAL_VERBS[key];
+  if(verbFormIndex.has(lexeme.juss)){
+   throw new Error(`Weak-final surface ${lexeme.juss} is already owned by another verb record.`);
+  }
+  verbFormIndex.set(lexeme.juss,{lexeme,form:'juss',surface:lexeme.juss,morphology:Object.freeze({})});
+ }
+}
 function registerDuaaVerbs(){
  for(const key of Object.keys(DUAA_LEXEMES)){
   const lexeme=DUAA_LEXEMES[key];
@@ -8548,6 +8689,7 @@ function resolvePresentReading(registered,data){
 }
 registerVerbSet(verbs);
 registerDuaaVerbs();
+registerWeakFinalVerbs();
 registerVerbSet(additionalVerbActions);
 registerVerbSet(humanActions);
 registerVerbSet(humanPrepActions);
@@ -9157,6 +9299,8 @@ const AR={
  mudaf:w=>grammarSpec('noun','mubtada',{isMudaf:true}),
  mudafIlayh:(w)=>grammarSpec('noun','mudafIlayh'),
  presentPred:(w)=>grammarSpec('verb','present',{conjugation:'regular',person:'3ms'}),
+ // J2 — the weak-final lane. Its own conjugation key is what routes it to the jazm-only matrix.
+ presentWeakFinal:(w)=>grammarSpec('verb','present',{conjugation:'weakFinal',person:'3ms'}),
  presentAdvanced:(w,person)=>grammarSpec('verb','present',{conjugation:presentConjugationFor(person),person,exactPresentRaf:true}),
  past:(w,opts={})=>grammarSpec('verb','past',{person:opts.person||'3ms'}),
  passivePast:w=>grammarSpec('verb','past',{person:'3ms',voice:PASSIVE_VOICE}),
@@ -10864,6 +11008,9 @@ function renderNounAnalysis(token){
 const PRESENT_GOVERNOR_CAUSE_AR=Object.freeze(Object.assign(Object.create(null),{lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»',
   lamma:' بِـ«لَمَّا»',lamAmr:' بِلَامِ الْأَمْرِ',laNahiya:' بِـ«لَا» النَّاهِيَةِ',
   lamDuaa:' بِلَامِ الدُّعَاءِ',laDuaaiyya:' بِـ«لَا» الدُّعَائِيَّةِ'}));
+/* J2 — the class term itself, so the learner practises «مُعْتَلُّ الْآخِرِ» rather than only its
+   consequence. Named once, and asserted by the focused tests from this same constant. */
+const WEAK_FINAL_CLASS_AR='مُعْتَلُّ الْآخِرِ';
 const PRESENT_VERB_LABEL_AR='فِعْلٌ مُضَارِعٌ';
 const AFAL_KHAMSA_REASON_AR='؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ';
 function renderVerbAnalysis(token){
@@ -10934,7 +11081,18 @@ function renderVerbAnalysis(token){
  const cause=idhanAuthorized?' بِـ«إِذَنْ»':concealedCause||unconditionalCause;
  const canonicalVerbSign=canonicalSign(safeSignId(token.sign));
  if(!canonicalVerbSign)throw new Error(`No canonical sign for present sign id “${safeSignId(token.sign)}”`);
- let arabic=`${token.word}: ${PRESENT_VERB_LABEL_AR} ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${canonicalVerbSign.ar}`;
+ /* J2 — «وهو فعل مضارع معتل الآخر» (p. 57). The class is stated in the word's own iʿrāb rather
+     than left as metadata, because it is the reason the sign is what it is. */
+ const weakFinal=token.inflection==='weakFinal'?WEAK_FINAL_VERBS[WEAK_FINAL_BY_JUSS[token.word]]:null;
+ if(token.inflection==='weakFinal'&&!weakFinal)throw new Error(`Unregistered weak-final surface: ${token.word}`);
+ const classAr=weakFinal?` ${WEAK_FINAL_CLASS_AR}`:'';
+ let arabic=`${token.word}: ${PRESENT_VERB_LABEL_AR}${classAr} ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${canonicalVerbSign.ar}`;
+ /* p. 57 names the deleted letter and the vowel it left behind — «حذف الواو، والضمة قبلها دليل
+    عليها» — so the generic sign above is followed by exactly that evidence. */
+ if(weakFinal){
+  const letter=WEAK_FINAL_LETTERS[weakFinal.letter];
+  arabic+=`، وَهُوَ ${letter.ar}، وَ${letter.evidenceAr} قَبْلَهَا دَلِيلٌ عَلَيْهَا`;
+ }
  if(token.inflection==='afalKhamsa'){
   arabic+=AFAL_KHAMSA_REASON_AR;
  }else if(token.relations.subjectType==='implicit'){
@@ -10956,7 +11114,10 @@ function renderVerbAnalysis(token){
  const subjectEn=token.relations.subjectType==='implicit'
   ?` Its subject is a hidden pronoun, concealed ${PRESENT_CONCEALMENT[token.grammar.morphology?.person].en}, understood as “${hiddenSubjectEn}”.`
   :'';
- token.en=`A present-tense verb. It is ${token.state==='raf'?'indicative':token.state==='nasb'?'subjunctive':'jussive'}${causeEn}; its sign is ${canonicalVerbSign.en}.${subjectEn}`;
+ const weakFinalEn=weakFinal
+  ?` It is a weak-ended present verb: its final ${WEAK_FINAL_LETTERS[weakFinal.letter].en} is deleted, and ${WEAK_FINAL_LETTERS[weakFinal.letter].evidenceEn} before it is the evidence for it.`
+  :'';
+ token.en=`A present-tense verb. It is ${token.state==='raf'?'indicative':token.state==='nasb'?'subjunctive':'jussive'}${causeEn}; its sign is ${canonicalVerbSign.en}.${weakFinalEn}${subjectEn}`;
 }
 function renderParticleAnalysis(token){
  const type=token.grammar.particleType;
@@ -11516,6 +11677,17 @@ function whySignVerb(t){
    :t.state==='nasb'?{ar:'وَالْأَفْعَالُ الْخَمْسَةُ تُنْصَبُ بِحَذْفِ النُّونِ',en:'its sign of naṣb is حَذْفُ النُّونِ'}
    :{ar:'وَالْأَفْعَالُ الْخَمْسَةُ تُجْزَمُ بِحَذْفِ النُّونِ',en:'its sign of jazm is حَذْفُ النُّونِ'};
   return{id:`WHY_SIGN_AFAL5_${t.state.toUpperCase()}`,ar:`وَهُوَ مِنَ الْأَفْعَالِ الْخَمْسَةِ، ${tail.ar}.`,en:`It is one of الْأَفْعَالُ الْخَمْسَةُ, and ${tail.en}.`};
+ }
+ /* J2 — the existing branch below says «صَحِيحُ الْآخِرِ», which is exactly what a weak-final verb
+    is not. This is the Why that has to teach the rule: the class, the deleted letter, and the
+    vowel left behind as its evidence (Al-Tuḥfah p. 57). */
+ if(t.inflection==='weakFinal'){
+  const record=WEAK_FINAL_VERBS[WEAK_FINAL_BY_JUSS[t.word]];
+  if(!record)throw new Error(`WHY: unregistered weak-final surface ${t.word}.`);
+  const letter=WEAK_FINAL_LETTERS[record.letter];
+  return{id:'WHY_SIGN_MUDARI_WEAK_FINAL_JAZM',
+   ar:`وَهُوَ مُضَارِعٌ ${WEAK_FINAL_CLASS_AR}؛ لِأَنَّ آخِرَهُ ${letter.ar}، وَالْمُعْتَلُّ الْآخِرِ يُجْزَمُ بِحَذْفِ حَرْفِ الْعِلَّةِ، فَحُذِفَتْ ${letter.ar} مِنْ «${record.pres}»، وَ${letter.evidenceAr} قَبْلَهَا دَلِيلٌ عَلَيْهَا.`,
+   en:`It is a weak-ended present verb: its last letter is ${letter.en}, and a weak-ended verb is made jussive by deleting that weak letter. The ${letter.en} of «${record.pres}» is dropped, and ${letter.evidenceEn} before it is the evidence that it was there.`};
  }
  return{id:`WHY_SIGN_MUDARI_${t.state.toUpperCase()}`,
   ar:`وَهُوَ مُضَارِعٌ صَحِيحُ الْآخِرِ لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ، فَعَلَامَةُ ${st.sign} ${sign.ar}.`,
@@ -12334,7 +12506,9 @@ function validateExercise(data){
  const focusTokens=data.tokens.filter(item=>item.target);
  if(focusTokens.length===1&&(data.templateForm||data.templateState||data.templateSign)){
   const focus=focusTokens[0];
-  const focusForm=focus.grammar?.type==='verb'?(focus.inflection==='afalKhamsa'?'fiveVerbs':'present'):focus.inflection;
+  const focusForm=focus.grammar?.type==='verb'
+   ?(focus.inflection==='afalKhamsa'?'fiveVerbs':focus.inflection==='weakFinal'?'weakFinal':'present')
+   :focus.inflection;
   if(data.templateForm&&focusForm!==data.templateForm)fail('E_TARGET_FORM',`Focus form ${focusForm} disagrees with the template's declared form ${data.templateForm}.`,focus);
   /* A built focus has no iʿrāb state or sign of its own, so the template's declared tuple names
      its MAHALL instead — the convention the mabnī present verb already follows. The comparison
@@ -12581,12 +12755,20 @@ function validateExercise(data){
    if(token.inflection==='regular'&&safeSignId(token.sign)==='nunKept')fail('E_PRESENT_ORDINARY_NUN','An ordinary present verb may not use retention of nūn.',token);
    if(token.inflection==='afalKhamsa'&&token.state==='raf'&&safeSignId(token.sign)!=='nunKept')fail('E_AFAL5_RAF_SIGN','A five-verb form in rafʿ must use retention of nūn.',token);
    if(token.inflection==='afalKhamsa'&&token.state==='raf'&&!/ن[َِ]$/u.test(token.word))fail('E_AFAL5_RAF_NUN','A five-verb form in rafʿ must retain its nūn.',token);
-   const authoritativeInflection=authoritative.formClass==='afalKhamsa'?'afalKhamsa':'regular';
+   const authoritativeInflection=authoritative.formClass==='afalKhamsa'?'afalKhamsa'
+    :Object.prototype.hasOwnProperty.call(WEAK_FINAL_BY_JUSS,token.word)?'weakFinal':'regular';
    if(token.inflection!==authoritativeInflection)fail('E_PRESENT_FORM_CLASS','Present inflection disagrees with the authoritative person/form class.',token);
    const passiveAuthority=derivePassiveConstructionAuthority(data);
-   const authorizedForms=token.inflection==='regular'
+   const authorizedForms=token.inflection==='weakFinal'
+    ?{jazm:['juss']}[token.state]
+    :token.inflection==='regular'
     ?{raf:['pres','presentRaf',...(passiveAuthority.authorized&&passiveAuthority.verbId===token.id?['passivePresent']:[])],nasb:['acc'],jazm:['juss']}[token.state]
     :{raf:['five','presentRaf'],nasb:['fiveSub'],jazm:['fiveSub']}[token.state];
+   /* The two ḥadhf signs are siblings and must never be interchangeable: ḥadhf al-nūn belongs to the
+      five verbs and ḥadhf ḥarf al-ʿillah to the weak-ended ones, and each is also the OTHER state's
+      sign somewhere in the language, so neither may be read as proof of a class. */
+   if(token.inflection==='weakFinal'&&safeSignId(token.sign)!=='hadhfIllah')fail('E_WEAK_FINAL_SIGN','A weak-ended present verb in jazm must use deletion of its weak letter.',token);
+   if(token.inflection!=='weakFinal'&&safeSignId(token.sign)==='hadhfIllah')fail('E_WEAK_FINAL_CLASS','Deletion of the weak letter was claimed by a verb that is not weak-ended.',token);
    if(!authorizedForms?.includes(registered?.form))fail('E_PRESENT_FORM_STATE','Registered present surface does not belong to its claimed form class and state.',token);
    /* Only re-derive the five-verb surface when the AUTHORITATIVE morphology really is a five
       verb: inflectFiveVerb throws for a person that has no five-verb form (3ms), so a token
@@ -13152,7 +13334,10 @@ function validateExercise(data){
  if(data.tokens.some(item=>item.grammar.particleType==='lamAmr')&&(!/\blet\b/i.test(data.translation)||/\bnot\b/i.test(data.translation)))fail('E_LAM_AMR_TRANSLATION','Lām al-amr sentence does not read as an unnegated command in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='lamDuaa')&&(!/\bmay\b/i.test(data.translation)||/\bnot\b/i.test(data.translation)))fail('E_LAM_DUAA_TRANSLATION','Lām al-duʿāʾ sentence does not read as an unnegated supplication in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='laDuaaiyya')&&!/\bmay\b(?:\s+\w+)?\s+not\b/i.test(data.translation))fail('E_LA_DUAA_TRANSLATION','Lā al-duʿāʾiyyah sentence does not read as a negative supplication in its translation.');
- if(data.tokens.some(item=>item.grammar.particleType==='laNahiya')&&!/\blet\b(?:\s+\w+)?\s+not\b/i.test(data.translation))fail('E_LA_NAHIYA_TRANSLATION','Lā al-nāhiyah sentence does not read as a prohibition in its translation.');
+ /* The gap widened from one word to three when J2 gave these lanes a NAMED subject: «Let the
+    teacher not remain» puts two words between «let» and «not». Still one clause, so the guard
+    keeps its point — a translation that lost its prohibition entirely still fails. */
+ if(data.tokens.some(item=>item.grammar.particleType==='laNahiya')&&!/\blet\b(?:\s+\w+){0,3}\s+not\b/i.test(data.translation))fail('E_LA_NAHIYA_TRANSLATION','Lā al-nāhiyah sentence does not read as a prohibition in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='sawfa')&&!/\bwill\b/i.test(data.translation))fail('E_SAWFA_TRANSLATION','Sawfa sentence lacks future meaning in its translation.');
  /* Phase 3A1. كَيْ is tested first and more specifically: every لِكَيْ translation also contains
     "that", so testing أَنْ's looser pattern alone would let a كَيْ↔أَنْ swap slip through. */
@@ -14744,6 +14929,59 @@ const duaaTemplateMetadata=constructionId=>({
 });
 add('particle','present','jazm','sukun',()=>buildDuaaExercise('lamDuaa'),duaaTemplateMetadata('lamDuaa'));
 add('particle','present','jazm','sukun',()=>buildDuaaExercise('laDuaaiyya'),duaaTemplateMetadata('laDuaaiyya'));
+
+/* ===== J2 — the weak-final jazm lanes ==========================================================
+   Al-Tuḥfah p. 57's own sentences are «لم يَسْعَ عليٌّ إلى المَجْدِ», «لَمْ يدْعُ محمَّدٌ إلا إلى الحق»
+   and «لم يُعْطِ محمَّدٌ إلا خالداً» — a jāzim, the weak-final verb, and a NAMED fāʿil. These lanes keep
+   that shape: the fāʿil is explicit, so the verb makes no hidden-pronoun claim and the whole of the
+   learner's attention is on the ending.
+
+   Four governors, chosen for semantic truth rather than symmetry: لَمْ and لَمَّا negate, لَامُ الْأَمْرِ
+   commands and لَا النَّاهِيَةُ prohibits, and all four read naturally with a third-person subject.
+   The duʿāʾ pair is deliberately left alone — J1b's frames are whole reviewed supplications bound to
+   their own vocabulary, and splicing a weak-final verb into them would break that pairing.
+
+   Intransitive families take no object; transitive ones draw theirs from the objects their own
+   frozen record names, so no verb is ever handed a complement it does not take. */
+const WEAK_FINAL_INTRANSITIVE=Object.freeze(WEAK_FINAL_KEYS.filter(key=>!WEAK_FINAL_VERBS[key].objectKeys.length));
+const WEAK_FINAL_TRANSITIVE=Object.freeze(WEAK_FINAL_KEYS.filter(key=>WEAK_FINAL_VERBS[key].objectKeys.length));
+const WEAK_FINAL_GOVERNORS=Object.freeze(['lam','lamma','lamAmr','laNahiya']);
+const WEAK_FINAL_LEAD_EN=Object.freeze(Object.assign(Object.create(null),{
+ lam:(subject,verb,object)=>`${cap(subject)} did not ${verb}${object}.`,
+ lamma:(subject,verb,object)=>`${cap(subject)} did not yet ${verb}${object}.`,
+ lamAmr:(subject,verb,object)=>`Let ${subject} ${verb}${object}.`,
+ laNahiya:(subject,verb,object)=>`Let ${subject} not ${verb}${object}.`
+}));
+function buildWeakFinalExercise(governorType,transitive){
+ const pool=transitive?WEAK_FINAL_TRANSITIVE:WEAK_FINAL_INTRANSITIVE;
+ const key=pickVaried([...pool],`weak-final-verb:${governorType}:${transitive?'t':'i'}`,String);
+ const verb=WEAK_FINAL_VERBS[key];
+ const subject=pickVaried(singularPeople,`weak-final-subject:${governorType}:${key}`,item=>item.nom);
+ const object=transitive?pickVaried([...verb.objectKeys],`weak-final-object:${governorType}:${key}`,String):'';
+ const record=ONE_VERB_JAWAZIM[governorType];
+ const spec={lam:AR.lam,lamma:AR.lamma,lamAmr:AR.lamAmr,laNahiya:AR.laNahiya}[governorType];
+ // لِ is proclitic and joins its verb; لَمْ, لَمَّا and لَا are written as their own words.
+ const head=governorType==='lamAmr'?`${record.surface}${verb.juss}`:`${record.surface} ${verb.juss}`;
+ return{
+  sentence:`${head} ${subject.nom}${object?` ${object}`:''}`,
+  translation:WEAK_FINAL_LEAD_EN[governorType](subject.en,verb.en,object?` ${objectEnglish(object)}`:''),
+  tokens:[
+   token(record.surface,jawazimGloss(governorType),spec(record.surface),J1A_PARTICLE_EN[governorType]),
+   token(verb.juss,verb.en,AR.presentWeakFinal(verb.juss),EN.present,true),
+   token(subject.nom,subject.en,AR.faail(subject.nom),GRAMMAR_RULES.roles.faail.en),
+   ...(object?[token(object,objectEnglish(object),AR.object(object),EN.object)]:[])
+  ]
+ };
+}
+const weakFinalTemplateMetadata=governorType=>({
+ ...presentTemplateMetadata('3ms','explicit'),presentGovernor:governorType
+});
+for(const transitive of [false,true]){
+ for(const governorType of WEAK_FINAL_GOVERNORS){
+  add('particle','weakFinal','jazm','hadhfIllah',()=>buildWeakFinalExercise(governorType,transitive),
+   weakFinalTemplateMetadata(governorType));
+ }
+}
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

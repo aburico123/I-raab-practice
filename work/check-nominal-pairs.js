@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,laJinsPairKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],laJinsPairKeys:[...laJinsPairKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,laJinsPairKeys,mafulAjlPairKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],laJinsPairKeys:[...laJinsPairKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -183,6 +183,14 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   deriveLaJinsAuthority,
   buildLaJinsExercise,
   canonicalLaJinsTranslation,
+  /* المفعول له — Al-Tuḥfah pp. 170–172. */
+  MAFUL_AJL_ROLE,
+  MAFUL_AJL_LEXEMES,
+  MAFUL_AJL_PAIR_REGISTRY,
+  mafulAjlPairAt,
+  deriveMafulAjlAuthority,
+  buildMafulAjlExercise,
+  canonicalMafulAjlTranslation,
   ISTITHNA_NEGATION_PARTICLE_TYPES,
   NAAT_LEXEMES,
   canonicalExerciseIdentityV3Phase1,
@@ -1188,6 +1196,135 @@ function runMafulFihFocusedTests(){
 }
 runMafulFihFocusedTests();
 if(process.env.NAHW_FOCUSED_MAFUL_FIH==='1')process.exit(0);
+/* ---- المفعول له: Al-Tuḥfah pp. 170–172. The five conditions, the honest state, and the one
+   collision that matters — a mafʿūl muṭlaq answers WHAT the action was, a mafʿūl lah answers
+   WHY it happened, and both are accusative maṣdars after a verb. ---- */
+function runMafulAjlFocusedTests(){
+  const clone=value=>JSON.parse(JSON.stringify(value));
+  const analyzed=(template,built)=>api.completeNominalAnalysis({...built,templateId:template.stableId,
+    templateStarts:template.starts,templateForm:template.form,templateState:template.state,templateSign:template.sign});
+  const templateFor=pairKey=>api.templates.find(item=>item.mafulAjlPairKeys.includes(pairKey));
+  const built=new Map();
+  let builds=0,trips=0,negatives=0;
+  assert(Object.isFrozen(api.MAFUL_AJL_PAIR_REGISTRY)&&Object.isFrozen(api.MAFUL_AJL_LEXEMES),
+    'a mafʿūl-lah registry is mutable');
+  /* Byte gate, plus the two lexical conditions: every motive is an indefinite accusative maṣdar
+     stripped of أل, and none of them is one of the act-maṣdars the mafʿūl-muṭlaq chapter owns —
+     which is the source's own «قلبي» condition made checkable. */
+  for(const [key,lexeme] of Object.entries(api.MAFUL_AJL_LEXEMES)){
+    assert(api.nounFormIndex.get(lexeme.acc)?.lexeme===lexeme,
+      key+' does not round-trip byte-for-byte through the noun index');
+    assert(!lexeme.acc.startsWith('ال')&&/(?:ً|ًا)$/u.test(lexeme.acc),
+      key+' is not a stripped indefinite accusative maṣdar');
+    assert(!Object.values(api.MUTLAQ_LEXEMES).some(record=>record.acc===lexeme.acc),
+      key+' is an act-maṣdar, which the قلبي condition excludes');
+    negatives++;
+  }
+  for(const [pairKey,pair] of Object.entries(api.MAFUL_AJL_PAIR_REGISTRY)){
+    assert(Object.isFrozen(pair),pairKey+' is not immutable mafʿūl-lah pair authority');
+    const template=templateFor(pairKey);
+    assert(template,pairKey+' is unreachable: no template names it');
+    const data=analyzed(template,api.buildMafulAjlExercise(pairKey));
+    const index=data.tokens.findIndex(item=>item.grammar.role===api.MAFUL_AJL_ROLE);
+    const motive=data.tokens[index],authority=api.deriveMafulAjlAuthority(data,index);
+    const relation=data.relationships.find(item=>item.type==='mafulAjl');
+    const lexeme=api.MAFUL_AJL_LEXEMES[pair.lexemeKey];
+    assert(authority.authorized&&authority.pairKey===pairKey,pairKey+' did not earn exact mafʿūl-lah authority');
+    assert(motive.target&&motive.state==='nasb'&&motive.ruleId==='R_MAFUL_AJL_NASB'&&motive.word===lexeme.acc
+      &&api.safeSignId(motive.sign)===api.GRAMMAR_RULES.nounInflection.singular.nasb[0],
+      pairKey+' did not produce its motive as the manṣūb focus');
+    // Conditions 4 and 5: the motive shares its ʿāmil's time and its doer.
+    assert(index===data.tokens.length-1&&data.tokens[0].tense==='past'
+      &&data.tokens[1].grammar.role==='faail'&&data.tokens[1].state==='raf'
+      &&authority.verbId===data.tokens[0].id&&authority.subjectId===data.tokens[1].id,
+      pairKey+' lost the shared-time / shared-doer frame');
+    assert(relation&&relation.ruleId==='RL_VERB_MAFUL_AJL'&&relation.motiveId===motive.id
+      &&relation.verbId===data.tokens[0].id&&relation.subjectId===data.tokens[1].id,
+      pairKey+' lacks its canonical causal relationship');
+    assert(api.isSourceAuthorized(motive.ruleId)&&api.isSourceAuthorized(relation.ruleId)
+      &&api.isSourceAuthorized('R_MAFUL_AJL_CONDITIONS')&&api.isSourceAuthorized('R_MAFUL_AJL_STATE'),
+      pairKey+' lost source ownership');
+    assert(motive.ar.includes('مَفْعُولٌ لِأَجْلِهِ مَنْصُوبٌ')&&!motive.ar.includes('مُطْلَقٌ')
+      &&motive.why.ids.includes('WHY_ROLE_MAFUL_AJL')&&motive.why.ids.includes('WHY_STATE_MAFUL_AJL')
+      &&motive.why.ids.includes('WHY_MAFUL_AJL_CONDITIONS')
+      &&motive.why.ids.includes('WHY_MAFUL_AJL_STATE')
+      &&motive.phraseWhy?.ids.includes('WHY_REL_MAFUL_AJL'),pairKey+' Why/iʿrāb chain is incomplete');
+    /* The state line must stay honest: the source permits khafḍ here too and only calls naṣb
+       «الأكثر», so the Why may never say «يجب». */
+    const stateLine=motive.why.ar[motive.why.ids.indexOf('WHY_MAFUL_AJL_STATE')];
+    assert(stateLine.includes('الْأَكْثَرُ')&&!stateLine.includes('يَجِبُ'),
+      pairKey+' presented the preferred reading as an obligatory one');
+    assert(motive.phraseLabel==='Mafʿūl lah construction'&&data.tokens.every(item=>item===motive||!item.phraseAr),
+      pairKey+' put the combined analysis somewhere other than the motive');
+    assert(api.canonicalMafulAjlTranslation(data)===pair.sentenceEn
+      &&api.composeCanonicalTranslation(data)===pair.sentenceEn&&data.translation===pair.sentenceEn
+      &&/out of /.test(data.translation),pairKey+' translation is not canonical natural English');
+    const snapshot=api.createExerciseSnapshot(data),restored=snapshot&&api.restoreExerciseSnapshot(snapshot);
+    assert(restored&&api.validateExercise(clone(restored)).length===0
+      &&api.deriveMafulAjlAuthority(restored,index).authorized,pairKey+' failed its History v3 round trip');
+    assert(restored.sentence===data.sentence&&restored.translation===data.translation
+      &&restored.tokens[index].ar===motive.ar&&restored.tokens[index].gloss===motive.gloss,
+      pairKey+' changed learner presentation after History');
+    built.set(pairKey,data);builds++;trips++;
+  }
+  assert(new Set([...built.values()].map(d=>d.tokens.length)).size===2,
+    'both mafʿūl-lah structures are not productive');
+  const base=built.get('stoodInRespect');
+  const mustReject=(label,source,mutate,expected='E_MAFUL_AJL_AUTHORITY')=>{
+    const data=clone(source);mutate(data);const failures=api.validateExercise(data);
+    assert(failures.some(item=>item.code===expected),label+' was accepted: '+failures.map(item=>item.code).join(','));negatives++;
+  };
+  /* مفعول لأجله vs مفعول مطلق — the collision this chapter turns on. Both are accusative maṣdars
+     standing after a verb; only the registry says which question the maṣdar answers. */
+  mustReject('mafʿūl lah relabelled mafʿūl muṭlaq',base,data=>{
+    const m=data.tokens[data.tokens.length-1];m.grammar.role='mafulMutlaq';m.ruleId='R_MAFUL_MUTLAQ_NASB';
+  },'E_MUTLAQ_AUTHORITY');
+  const mutlaqTemplate=api.templates.find(item=>item.mutlaqPairKeys.length);
+  const mutlaqBase=api.buildTemplate(mutlaqTemplate.id);
+  mustReject('mafʿūl muṭlaq relabelled mafʿūl lah',mutlaqBase,data=>{
+    const m=data.tokens.find(item=>item.grammar.role==='mafulMutlaq');
+    m.grammar.role=api.MAFUL_AJL_ROLE;m.ruleId='R_MAFUL_AJL_NASB';
+  });
+  // …and against the other manṣūbāt that share the shape.
+  mustReject('direct object relabelled mafʿūl lah',built.get('visitedInLove'),data=>{
+    const o=data.tokens[2];o.grammar.role=api.MAFUL_AJL_ROLE;o.ruleId='R_MAFUL_AJL_NASB';
+  });
+  mustReject('haal relabelled mafʿūl lah',api.buildTemplate(api.templates.find(t=>t.haalPairKeys.length).id),data=>{
+    const h=data.tokens.find(item=>item.grammar.role===api.HAAL_ROLE);
+    h.grammar.role=api.MAFUL_AJL_ROLE;h.ruleId='R_MAFUL_AJL_NASB';
+  });
+  mustReject('tamyīz relabelled mafʿūl lah',api.buildTemplate(api.templates.find(t=>t.tamyizPairKeys.length).id),data=>{
+    const t=data.tokens.find(item=>item.grammar.role===api.TAMYIZ_ROLE);
+    t.grammar.role=api.MAFUL_AJL_ROLE;t.ruleId='R_MAFUL_AJL_NASB';
+  });
+  // An act-maṣdar cannot become a motive, and an unpaired motive cannot invent the role.
+  mustReject('an act-maṣdar inventing a motive',base,data=>{
+    const act=Object.values(api.MUTLAQ_LEXEMES)[0],m=data.tokens[data.tokens.length-1];
+    m.word=act.acc;m.surfaceHint=act.acc;m.expectedSurface=act.acc;
+  });
+  mustReject('unauthorized motive for this ʿāmil',base,data=>{
+    const other=api.MAFUL_AJL_LEXEMES.desire,m=data.tokens[data.tokens.length-1];
+    m.word=other.acc;m.surfaceHint=other.acc;m.expectedSurface=other.acc;
+  });
+  mustReject('motive forced out of naṣb',base,data=>{data.tokens[data.tokens.length-1].state='raf'},'E_ROLE_CASE');
+  mustReject('doer stripped of rafʿ',base,data=>{data.tokens[1].state='nasb'},'E_ROLE_CASE');
+  mustReject('wrong doer on the relationship',built.get('visitedInLove'),data=>{
+    data.relationships.find(item=>item.type==='mafulAjl').subjectId=data.tokens[2].id;
+  },'E_MAFUL_AJL_RELATION');
+  /* History forgery: relabelling the motive must not survive restoration. */
+  {
+    const forged=api.createExerciseSnapshot(base);
+    forged.tokens[forged.tokens.length-1].grammar.role='mafulMutlaq';
+    const rebuilt=api.restoreExerciseSnapshot(forged);
+    assert(!rebuilt||rebuilt.tokens[rebuilt.tokens.length-1].grammar.role===api.MAFUL_AJL_ROLE,
+      'History restored a mafʿūl lah as a mafʿūl muṭlaq');
+    negatives++;
+  }
+  console.log('Maful Li-Ajlih focused tests: '+builds+' canonical builds, '+trips+' History round trips, '
+    +negatives+' negative/collision boundaries — green');
+}
+runMafulAjlFocusedTests();
+if(process.env.NAHW_FOCUSED_MAFUL_AJL==='1')process.exit(0);
 /* ---- «لا» النافية للجنس: Al-Tuḥfah pp. 166–168. Only the muʿrab type is productive, so these
    tests prove the four conditions structurally AND that this لا cannot be confused with the
    ordinary negating لا the app already produces on the same surface. ---- */
@@ -2327,7 +2464,7 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 // Phase 3B1 adds exactly one: G_IDHAN_NASB, the particle's own identity and government, which is
 // a different claim from the conditions R_IDHAN_CONDITIONS already owns.
 // Plus R_BADAL, the fourth follower chapter's own rule (Al-Tuḥfah pp. 135–138).
-assert(Object.keys(api.SOURCE_REGISTRY).length===122,`Expected 122 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===126,`Expected 126 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -3013,7 +3150,11 @@ const expectedPastTemplateCapabilities={
   /* الاستثناء — both أدوات need the explicit past frame, because تام means the مستثنى منه is
      actually present as the ʿāmil's own fāʿil. */
   T_VERB_SINGULAR_NASB_FATHA_30:'3ms/explicit',
-  T_VERB_SINGULAR_NASB_FATHA_31:'3ms/explicit'
+  T_VERB_SINGULAR_NASB_FATHA_31:'3ms/explicit',
+  /* المفعول له — the motive must share its ʿāmil's time and doer, so both lanes need the
+     explicit past frame. */
+  T_VERB_SINGULAR_NASB_FATHA_32:'3ms/explicit',
+  T_VERB_SINGULAR_NASB_FATHA_33:'3ms/explicit'
 };
 const declaredPastTemplates=api.templates.filter(template=>template.pastCapabilities.length);
 assert(declaredPastTemplates.length===Object.keys(expectedPastTemplateCapabilities).length,
@@ -6868,7 +7009,7 @@ for(const t of api.templates){
 {
   const ids=api.templates.map(t=>t.stableId);
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
-  assert(api.templates.length===143,`Expected 143 templates after the «لا» al-jins fast-track, found ${api.templates.length}`);
+  assert(api.templates.length===145,`Expected 145 templates after the mafʿūl-lah fast-track, found ${api.templates.length}`);
   assert(Object.values(p4Templates).map(t=>t.stableId).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_04 | T_PARTICLE_SINGULAR_NASB_FATHA_05 | T_PARTICLE_SINGULAR_NASB_FATHA_06 | T_PARTICLE_SINGULAR_NASB_FATHA_07',
     'The Phase 3A2 stable IDs are not the four appended ones');
@@ -9313,7 +9454,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===143,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===145,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
@@ -9330,7 +9471,8 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
   const tamyizTemplateIds=api.templates.filter(item=>item.tamyizPairKeys.length).map(item=>item.stableId);
   const mustathnaTemplateIds=api.templates.filter(item=>item.mustathnaPairKeys.length).map(item=>item.stableId);
   const laJinsTemplateIds=api.templates.filter(item=>item.laJinsPairKeys.length).map(item=>item.stableId);
-  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  const mafulAjlTemplateIds=api.templates.filter(item=>item.mafulAjlPairKeys.length).map(item=>item.stableId);
+  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
@@ -10699,7 +10841,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===143,'the repair block changed the production template count');
+  assert(api.templates.length===145,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -10820,8 +10962,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===150,'the structural map holds '+registeredKeys.length+' keys, not 150');
-    assert(registeredShapes.length===45,'the shape registry holds '+registeredShapes.length+' shapes, not 45');
+    assert(registeredKeys.length===152,'the structural map holds '+registeredKeys.length+' keys, not 152');
+    assert(registeredShapes.length===46,'the shape registry holds '+registeredShapes.length+' shapes, not 46');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
     /* The 87 inherited keys and 22 inherited shapes are untouched: later productive lanes append
@@ -10852,8 +10994,10 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       const mustathnaKeys=registeredKeys.filter(key=>mustathnaTemplateIds.some(id=>key.startsWith(id+'||')));
       const laJinsTemplateIds=api.templates.filter(item=>item.laJinsPairKeys.length).map(item=>item.stableId);
       const laJinsKeys=registeredKeys.filter(key=>laJinsTemplateIds.some(id=>key.startsWith(id+'||')));
-      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35','TS36','TS37','TS38','TS39','TS40','TS41','TS42','TS43','TS44','TS45'];
-      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!laJinsKeys.includes(k));
+      const mafulAjlTemplateIds=api.templates.filter(item=>item.mafulAjlPairKeys.length).map(item=>item.stableId);
+      const mafulAjlKeys=registeredKeys.filter(key=>mafulAjlTemplateIds.some(id=>key.startsWith(id+'||')));
+      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35','TS36','TS37','TS38','TS39','TS40','TS41','TS42','TS43','TS44','TS45','TS46'];
+      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===87,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===22,'the inherited shape set changed: '+inheritedShapes.length);
@@ -10888,7 +11032,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===143,'the map covers '+mappedTemplates.size+' templates, not 143');
+    assert(mappedTemplates.size===145,'the map covers '+mappedTemplates.size+' templates, not 145');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -10950,8 +11094,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===150,'only '+keysSeen.size+' of the 150 structural keys were observed');
-    assert(shapesSeen.size===45,'only '+shapesSeen.size+' of the 45 composer shapes were observed');
+    assert(keysSeen.size===152,'only '+keysSeen.size+' of the 152 structural keys were observed');
+    assert(shapesSeen.size===46,'only '+shapesSeen.size+' of the 46 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -11285,7 +11429,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===150,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===152,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -11303,7 +11447,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
             if(typeof part.slot!=='string'||part.slot==='copula'
               ||part.slot==='atfSentence'||part.slot==='tawkidSentence'||part.slot==='badalSentence'
               ||part.slot==='passiveSentence'||part.slot==='mutlaqSentence'||part.slot==='mafulFihSentence'
-              ||part.slot==='haalSentence'||part.slot==='tamyizSentence'||part.slot==='mustathnaSentence'||part.slot==='laJinsSentence')continue;
+              ||part.slot==='haalSentence'||part.slot==='tamyizSentence'||part.slot==='mustathnaSentence'||part.slot==='laJinsSentence'||part.slot==='mafulAjlSentence')continue;
             const index=Number(part.slot.split(':')[1]);
             assert(Number.isInteger(index)&&index>=0&&index<segments.length,
               'shape '+m.shape+' addresses token '+index+' but '+key+' declares only '+segments.length);
@@ -11614,7 +11758,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Productive الحال adds one three-token subject-owner lane and one four-token object-owner lane. */
     /* التمييز adds eight more: both divisions are four-token lanes (ʿāmil, fāʿil, the noun the
        tamyīz clarifies, and the tamyīz itself). */
-    assert([481,482].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 481 or 482 across the registered ʿaṭf context rotation)');
+    assert([488,489].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 488 or 489 across the registered ʿaṭf context rotation)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -11803,7 +11947,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===143,'the presentation repair changed the template count');
+    assert(api.templates.length===145,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -13695,16 +13839,16 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===122,'the source-rule count does not include the tamyīz rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===126,'the source-rule count does not include the tamyīz rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
   assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.concealedAnMode).length===6,'the shared concealed-an registry is not exactly six governors');
   assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.mood==='jazm').length===1,
     'a second jāzim entered the governor table');
-  assert(api.templates.length===143,'the production template count does not include the tamyīz additions');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===150
-    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===45,
+  assert(api.templates.length===145,'the production template count does not include the tamyīz additions');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===152
+    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===46,
     'the composer authority does not include the tamyīz mappings');
   p7Cases+=8;
 }
@@ -14474,7 +14618,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===143,`Expected 143 production templates, found ${api.templates.length}`);
+assert(api.templates.length===145,`Expected 145 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -14757,7 +14901,7 @@ console.log(`Appearance-mode audit passed: ${appearanceCases} groups; system/lig
 // ===================================================================================
 let whyCases=0;
 const bareAr=s=>s.replace(/[ـً-ْٰ]/g,'').replace(/[أإآٱ]/g,'ا');
-const WHY_ROLE_STATE={ismLa:'nasb',khabarLa:'raf',mustathna:'nasb',mubtada:'raf',khabar:'raf',faail:'raf',naibFail:'raf',object:'nasb',majrur:'jarr',mudafIlayh:'jarr',ismInna:'nasb',khabarInna:'raf',ismKana:'raf',khabarKana:'nasb',mafulMutlaq:'nasb',adverb:'nasb',haal:'nasb',tamyiz:'nasb'};
+const WHY_ROLE_STATE={mafulAjl:'nasb',ismLa:'nasb',khabarLa:'raf',mustathna:'nasb',mubtada:'raf',khabar:'raf',faail:'raf',naibFail:'raf',object:'nasb',majrur:'jarr',mudafIlayh:'jarr',ismInna:'nasb',khabarInna:'raf',ismKana:'raf',khabarKana:'nasb',mafulMutlaq:'nasb',adverb:'nasb',haal:'nasb',tamyiz:'nasb'};
 const whyRuleIds=new Set();
 let whyTokens=0,whyRels=0,whyFallbacks=0;
 function auditWhy(why,label,{max=4}={}){
@@ -14808,7 +14952,10 @@ function auditTokenWhy(tok,label,owner=null){
   /* اسم لا carries role, state, sign, the indefiniteness condition and the iḍāfah line — and the
      iḍāfah line is load-bearing, because المضاف is the one type of اسم لا that is muʿrab. */
   const ismLa=tok.grammar?.role===api.ISM_LA_ROLE;
-  auditWhy(tok.why,label,governedByIdhan?{max:7}:governedByConcealedAn?{max:5}:badalFollower?{max:5}:absoluteObject?{max:6}:mafulFih?{max:5}:tamyiz?{max:5}:mustathna?{max:5}:ismLa?{max:5}:{});
+  /* A mafʿūl lah carries role, state, sign, its قلبي/unity conditions, and the honest state line
+     that keeps «الأكثر» from being read as «يجب». */
+  const mafulAjl=tok.grammar?.role===api.MAFUL_AJL_ROLE;
+  auditWhy(tok.why,label,governedByIdhan?{max:7}:governedByConcealedAn?{max:5}:badalFollower?{max:5}:absoluteObject?{max:6}:mafulFih?{max:5}:tamyiz?{max:5}:mustathna?{max:5}:ismLa?{max:5}:mafulAjl?{max:5}:{});
   if(governedByIdhan){
     assert(api.WHY_IDHAN_CONDITIONS.every(line=>tok.why.ids.includes(line.id)),
       `${label}: an إِذَنْ-governed verb omits one of the three conditions`);

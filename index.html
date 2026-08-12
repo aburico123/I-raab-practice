@@ -1366,6 +1366,7 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  ,TS43:Object.freeze({parts:Object.freeze([Object.freeze({slot:'tamyizSentence'})])})
  ,TS44:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mustathnaSentence'})])})
  ,TS45:Object.freeze({parts:Object.freeze([Object.freeze({slot:'laJinsSentence'})])})
+ ,TS46:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulAjlSentence'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1527,6 +1528,8 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  /* الاستثناء: the particle lane and the غَيْر iḍāfah lane are genuinely different structures. */
  ,"T_VERB_SINGULAR_NASB_FATHA_30||verb:past,noun:faail,particle:particle,noun:mustathna":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_30",structure:"verb:past,noun:faail,particle:particle,noun:mustathna",shape:"TS44",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_31||verb:past,noun:faail,noun:mustathna,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_31",structure:"verb:past,noun:faail,noun:mustathna,noun:mudafIlayh",shape:"TS44",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_32||verb:past,noun:faail,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_32",structure:"verb:past,noun:faail,noun:mafulAjl",shape:"TS46",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_33||verb:past,noun:faail,noun:object,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_33",structure:"verb:past,noun:faail,noun:object,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_PARTICLE_SINGULAR_NASB_FATHA_09||particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_09",structure:"particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa",shape:"TS45",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
@@ -1583,6 +1586,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='tamyizSentence')return canonicalTamyizTranslation(exercise);
  if(bits[0]==='mustathnaSentence')return canonicalMustathnaTranslation(exercise);
  if(bits[0]==='laJinsSentence')return canonicalLaJinsTranslation(exercise);
+ if(bits[0]==='mafulAjlSentence')return canonicalMafulAjlTranslation(exercise);
  if(bits[0]==='copula'){
   const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
   if(!particle)return null;
@@ -4362,6 +4366,73 @@ const LA_JINS_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
   sentenceEn:'No person of good is blameworthy.'})
 }));
 const LA_JINS_ALL_PAIR_KEYS=Object.freeze(Object.keys(LA_JINS_PAIR_REGISTRY));
+/* Productive المفعول له — Al-Tuḥfah pp. 170–172 (باب المفعول من أجله; المفعول معه begins p. 172).
+
+   Matn p. 170: «هُوَ الاسْمُ، الْمَنْصُوبُ، الَّذِي يُذْكَرُ بَيَانًا لِسَبَبِ وُقُوعِ الْفِعْلِ، نَحْوُ:
+   قَامَ زَيْدٌ إِجْلَالًا لِعَمْرٍو». The شرح notes it is also called المفعول لأجله and المفعول له, and
+   lists FIVE conditions a noun must meet to be one (p. 171):
+
+     1. أن يكون مصدرًا
+     2. أن يكون قلبيًّا — «ألا يكون دالًّا على عمل من أعمال الجوارح كاليد واللسان، مثل قراءة وضرب»
+     3. أن يكون عِلَّةً لما قبله
+     4. أن يكون متحدًا مع عامله في الوقت
+     5. أن يتحد مع عامله في الفاعل
+
+   All five are structural facts about a construction, not about a word, which is why they live in
+   the frozen pairs below rather than in a test on the Arabic.
+
+   The state is the delicate part, and it is stated exactly as the source states it. «وكل اسم
+   استوفى هذه الشروط يجوز فيه أمران: النصب، والجر بحرف من حروف الجر الدالة على التعليل كاللام»
+   (p. 171) — so naṣb is never the only reading. p. 172 then weights the three حالات: with أل the
+   جر is الأكثر and the naṣb يقلّ; as a مضاف the two are equal; and مجردًا من أل ومن الإضافة «فالأكثر
+   فيه أن ينصب» and the جر يقلّ. Only that third حال is produced, because it is the one where naṣb
+   is the preferred reading — and even there the Why says «الأكثر», not «يجب». */
+const MAFUL_AJL_ROLE='mafulAjl';
+/* Every lexeme is a قلبي maṣdar — a motive of the heart, not an act of the limbs — and every one is
+   مجرد: no أل, no iḍāfah. Both facts are re-checked at load time, because they are two of the
+   source's own five conditions and the third حال's definition. */
+const MAFUL_AJL_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ respect:Object.freeze({acc:'إِجْلَالًا',en:'out of respect',inflection:'singular',
+  senseAr:'تَعْظِيمٌ فِي الْقَلْبِ',senseEn:'an inward honouring'}),
+ love:Object.freeze({acc:'مَحَبَّةً',en:'out of love',inflection:'singular',
+  senseAr:'مَيْلُ الْقَلْبِ',senseEn:'an inclination of the heart'}),
+ desire:Object.freeze({acc:'رَغْبَةً',en:'out of eagerness',inflection:'singular',
+  senseAr:'رَغْبَةُ الْقَلْبِ',senseEn:'an eagerness of the heart'})
+}));
+function mafulAjlNoun(poolName,en){
+ const pool={singularPeople,singularThings}[poolName];
+ if(!pool)throw new Error(`The mafʿūl-lah registry names an unknown noun pool: ${poolName}`);
+ const matches=pool.filter(item=>item.en===en);
+ if(matches.length!==1)throw new Error(`The mafʿūl-lah registry matched ${matches.length} ${poolName} records for “${en}”.`);
+ return matches[0];
+}
+function mafulAjlVerb(spec){
+ if(spec.capabilityKey){
+  const capability=MUTLAQ_VERB_CAPABILITIES[spec.capabilityKey];
+  if(!capability)throw new Error(`The mafʿūl-lah registry names an unknown intransitive capability: ${spec.capabilityKey}`);
+  return Object.freeze({past:capability.past,pastEn:capability.pastEn,obj:null});
+ }
+ const matches=generalVerbActions.filter(item=>item.en===spec.verbEn);
+ if(matches.length!==1)throw new Error(`The mafʿūl-lah registry matched ${matches.length} verb records for “${spec.verbEn}”.`);
+ return Object.freeze({past:matches[0].past,pastEn:matches[0].pastEn,obj:matches[0].obj||null});
+}
+/* Each pair states the motive relation in full: who acted, what they did, and the inward reason.
+   Conditions 4 and 5 are guaranteed by the shape itself — one past clause, one fāʿil — and the
+   pair is what makes condition 3, «علة لما قبله», a checked claim rather than an assumption. */
+const MAFUL_AJL_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ /* The matn's own «قَامَ زَيْدٌ إِجْلَالًا» frame. */
+ stoodInRespect:Object.freeze({lexemeKey:'respect',verb:Object.freeze({capabilityKey:'qaama'}),
+  subjectEn:'the student',objectEn:'',
+  sentenceEn:'The student stood up out of respect.'}),
+ /* «زُرْتُكَ مَحَبَّةَ أَدَبِكَ» (p. 172), on the مجرد form this lane produces. */
+ visitedInLove:Object.freeze({lexemeKey:'love',verb:Object.freeze({verbEn:'visit'}),
+  subjectEn:'the student',objectEn:'the teacher',
+  sentenceEn:'The student visited the teacher out of love.'}),
+ memorizedInDesire:Object.freeze({lexemeKey:'desire',verb:Object.freeze({verbEn:'memorize'}),
+  subjectEn:'the student',objectEn:'the Qurʾān',
+  sentenceEn:'The student memorized the Qurʾān out of eagerness.'})
+}));
+const MAFUL_AJL_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_AJL_PAIR_REGISTRY));
 const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...feminineHumanSingulars,...feminineHumanDuals,...fiveNouns];
 function nounEnglish(word,caseName='acc'){
  return allCaseNouns.find(item=>item[caseName]===word)?.en||'the noun';
@@ -6982,6 +7053,7 @@ const GRAMMAR_RULES=Object.freeze({
   haal:{state:'nasb',ruleId:'R_HAAL_NASB',en:'A haal describing its صاحب at the time of the event; accusative.'},
   tamyiz:{state:'nasb',ruleId:'R_TAMYIZ_NASB',en:'A tamyīz: an indefinite noun that lifts the vagueness off an expression or a relation; accusative.'},
   mustathna:{state:'nasb',ruleId:'R_MUSTATHNA_NASB',en:'A mustathnā excluded from a complete affirmative statement; accusative.'},
+  mafulAjl:{state:'nasb',ruleId:'R_MAFUL_AJL_NASB',en:'A mafʿūl lah: an inward maṣdar giving the reason the action happened; accusative.'},
   ismLa:{state:'nasb',ruleId:'R_ISM_LA_NASB',en:'The noun of «لا» that negates its whole class; accusative because «لا» works like «إنّ».'},
   khabarLa:{state:'raf',ruleId:'R_KHABAR_LA_RAF',en:'The khabar of «لا» that negates its whole class; nominative.'}
  },
@@ -7085,8 +7157,8 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
- roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
- relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','laJins','preposition','idafa','inna','kana','concealedAn','follower'],
+ roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','mafulAjl','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
+ relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','laJins','mafulAjl','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
@@ -7136,6 +7208,11 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  'اسم لا الشبيه بالمضاف, whose example needs a noun carrying its own attached-pronoun subject',
  'the repeated «لا», where p. 167 permits both إعمال and إلغاء',
  'the إلغاء cases: a definite noun after «لا», or a separator between «لا» and its noun',
+ /* المفعول له ships only the ḥāl where the source makes naṣb the more frequent reading. The other
+    two are named, and so is the khafḍ reading the source keeps permissible even here. */
+ 'the mafʿūl lah carrying أل, where p. 172 makes khafḍ by a particle of causation the more frequent reading',
+ 'the mafʿūl lah as a muḍāf, where p. 172 makes naṣb and khafḍ equally permissible',
+ 'the khafḍ reading of the stripped mafʿūl lah, which p. 172 keeps permissible but calls less frequent',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
   'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
@@ -7311,6 +7388,12 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  /* Al-Tuḥfah pp. 166–168, باب لا. The government, its four conditions and the three types of
     اسم لا are separate entries because the source states them separately — and because only one of
     the three types is مُعْرَب, which is what this app can produce. */
+ /* Al-Tuḥfah pp. 170–172, باب المفعول من أجله. The definition, the five conditions and the state
+    are three separate claims, and the state one is the careful one: the source permits naṣb AND
+    جر بحرف التعليل for every qualifying noun, and only weights them differently by ḥāl. */
+ R_MAFUL_AJL_NASB:sourceRule('The mafʿūl lah is the accusative noun mentioned to explain the reason the action occurred.',[170,171],'Only registered inward-motive maṣdars in the third ḥāl — stripped of أل and of iḍāfah — where p. 172 makes naṣb the more frequent reading. The construction, not the word, is what licenses the role.'),
+ R_MAFUL_AJL_CONDITIONS:sourceRule('A noun is a mafʿūl lah only when it is a maṣdar, an inward (qalbī) one rather than an act of the limbs, a cause for what precedes it, and united with its ʿāmil in both time and doer.',[171],'The two lexical conditions are checked on the registry — every motive is an inward maṣdar and none is one of the act-maṣdars the mafʿūl-muṭlaq chapter registered — and the three construction conditions on the built graph: one past clause, one explicit marfūʿ fāʿil, and a frozen pair naming the motive for that exact act.'),
+ R_MAFUL_AJL_STATE:sourceRule('Any noun meeting the conditions may be accusative, or khafḍ by a particle of causation such as the lām; when it is stripped of أل and of iḍāfah the accusative is the more frequent of the two.',[171,172],'Only the stripped ḥāl is produced. The Why states «الأكثر», never «يجب», because the source itself keeps the khafḍ reading permissible here; the أل and muḍāf ḥāls, where khafḍ is preferred or equal, are not produced at all.'),
  R_LA_NAFIYA_JINS:sourceRule('«لا» that negates a whole class works like «إنّ»: it makes its noun accusative and its khabar nominative.',[166],'Only the registered muḍāf frame. This لا carries its own particle identity, so the non-governing negating لا this app already produces can never authorize the frame.'),
  R_ISM_LA_NASB:sourceRule('When the noun of «لا» is a muḍāf it is accusative by the visible fatḥah or by what stands in for it.',[166,167],'Only المضاف, which the source states is muʿrab and manṣūb. المفرد is deliberately not produced: the source makes it مبني على ما ينصب به, and this engine models no bināʾ for nouns, so producing it would print «منصوب» where the source says «مبني في محل نصب».'),
  R_KHABAR_LA_RAF:sourceRule('The khabar of «لا» that negates a whole class is nominative, and it must itself be indefinite.',[166],'Only the registered indefinite khabars of the productive frame.'),
@@ -7526,6 +7609,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
  RL_VERB_ZARF:sourceRule('A verb is linked to the ẓarf of time or place that follows it and makes it accusative as a mafʿūl fīh.',[148,149,151,152],'Only a registered ẓarf lexeme whose ʿāmil is a visible verb earlier in the same sentence. A ẓarf whose ʿāmil is an omitted khabar carries no such link, because there is no verb to link it to; that shape keeps the existing attachment analysis instead.'),
  RL_VERB_ABSOLUTE_OBJECT:sourceRule('A verb is linked to the maṣdar of its own action that follows it and makes it accusative as a mafʿūl muṭlaq.',[146,147],'Only an exact registered pair authorized by frozen template metadata: the ʿāmil is the nearest preceding visible past verb, and the maṣdar, its optional direct object and its optional muḍāf ilayh are all the ones that pair names. Adjacency alone never creates the relation.'),
+ RL_VERB_MAFUL_AJL:sourceRule('A verb is linked to the inward maṣdar that gives the reason it happened, and to the doer whose motive it is.',[170,171],'Only an exact frozen pair owned by its template; the motive must share the ʿāmil’s time and its doer.'),
  RL_LA_JINS_NOUN_KHABAR:sourceRule('«لا» that negates a whole class is linked to the noun it makes accusative and to the khabar it makes nominative.',[166,167],'Only an exact frozen pair owned by its template; adjacency alone never creates the relation.'),
  RL_ISTITHNA_EXCLUSION:sourceRule('A registered mustathnā is linked to the ʿāmil that makes it accusative, to the mustathnā minhu it is excluded from, and to the أداة that excludes it.',[162,163,164],'Only an exact frozen pair owned by its template. The mustathnā minhu is named structurally as the pair’s fāʿil, never as the nearest preceding noun.'),
  RL_TAMYIZ_MUBAYYAN:sourceRule('A registered tamyīz is linked to the ʿāmil that makes it accusative and, when it is a tamyīz al-dhāt, to the vague noun it interprets.',[157,158,159],'Only an exact frozen pair owned by its template. A tamyīz al-nisbah is linked to its ʿāmil alone, because the vagueness it lifts belongs to the relation rather than to any one token; adjacency never creates either link.'),
@@ -8203,6 +8287,62 @@ function verifyLaJinsRegistry(){
  });
 }
 verifyLaJinsRegistry();
+/* المفعول له. */
+function registerMafulAjlNounForms(){
+ Object.values(MAFUL_AJL_LEXEMES).forEach(lexeme=>{
+  const existing=nounFormIndex.get(lexeme.acc);
+  if(existing&&existing.lexeme!==lexeme){
+   throw new Error(`Mafʿūl-lah lexeme collides with an existing noun surface: ${lexeme.acc}`);
+  }
+  nounFormIndex.set(lexeme.acc,{lexeme,inflection:lexeme.inflection});
+ });
+}
+registerMafulAjlNounForms();
+/* Narrow byte/coherence gate. The two conditions that are facts about the WORD — it is a قلبي
+   maṣdar, and in this ḥāl it is مجرد من «أل» ومن الإضافة — are checked here; the three that are
+   facts about the CONSTRUCTION are checked by the authority on the built graph. */
+function verifyMafulAjlRegistry(){
+ Object.entries(MAFUL_AJL_LEXEMES).forEach(([key,lexeme])=>{
+  if(nounFormIndex.get(lexeme.acc)?.lexeme!==lexeme){
+   throw new Error(`Mafʿūl-lah lexeme ${key} did not round-trip through the noun index.`);
+  }
+  // الحالة الثالثة: مجردًا من «أل» ومن الإضافة — the one where p. 172 makes naṣb الأكثر.
+  if(/^ال/u.test(lexeme.acc))throw new Error(`Mafʿūl-lah lexeme ${key} carries أل, which is a different ḥāl.`);
+  if(!/(?:ً|ًا)$/u.test(lexeme.acc)){
+   throw new Error(`Mafʿūl-lah lexeme ${key} is not an indefinite accusative maṣdar: ${lexeme.acc}`);
+  }
+  if(!lexeme.senseAr||!lexeme.senseEn)throw new Error(`Mafʿūl-lah lexeme ${key} carries no inward-motive sense.`);
+  /* Condition 2, «أن يكون قلبيًّا», made checkable: the source excludes maṣdars of the limbs, and
+     names قراءة and ضرب as its examples. A motive registered here must not be one of the maṣdars
+     the mafʿūl-muṭlaq chapter registered, because those are precisely acts, not motives. */
+  if(Object.values(MUTLAQ_LEXEMES).some(record=>record&&record.acc===lexeme.acc)){
+   throw new Error(`Mafʿūl-lah lexeme ${key} is a maṣdar of an act, not a قلبي motive.`);
+  }
+ });
+ Object.entries(MAFUL_AJL_PAIR_REGISTRY).forEach(([key,pair])=>{
+  const lexeme=MAFUL_AJL_LEXEMES[pair.lexemeKey];
+  if(!lexeme)throw new Error(`Mafʿūl-lah pair ${key} names an unregistered motive.`);
+  const verb=mafulAjlVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
+  if(registeredVerb?.form!=='past'||registeredVerb.surface!==verb.past){
+   throw new Error(`Mafʿūl-lah pair ${key} names an unregistered past ʿāmil.`);
+  }
+  const subject=mafulAjlNoun('singularPeople',pair.subjectEn);
+  if(nounFormIndex.get(subject.nom)?.lexeme!==subject){
+   throw new Error(`Mafʿūl-lah pair ${key} names a subject outside the noun index.`);
+  }
+  if(pair.objectEn){
+   if(!Array.isArray(verb.obj))throw new Error(`Mafʿūl-lah pair ${key} gives an object to an ʿāmil that licenses none.`);
+   const object=[...singularThings,...singularPeople].filter(item=>item.en===pair.objectEn);
+   if(object.length!==1||!verb.obj.includes(object[0].acc)){
+    throw new Error(`Mafʿūl-lah pair ${key} names an object its ʿāmil does not license.`);
+   }
+  }
+  if(typeof pair.sentenceEn!=='string'||!pair.sentenceEn.trim()){
+   throw new Error(`Mafʿūl-lah pair ${key} carries no canonical English.`);
+  }
+ });
+}
+verifyMafulAjlRegistry();
 
 const grammarSpec=(type,role,extra={})=>({type,role,...extra});
 const AR={
@@ -8254,6 +8394,7 @@ const AR={
  ismLaMudaf:w=>grammarSpec('noun',ISM_LA_ROLE,{isMudaf:true}),
  khabarLa:w=>grammarSpec('noun',KHABAR_LA_ROLE),
  laJinsParticle:()=>grammarSpec('particle','particle',{particleType:LA_JINS_PARTICLE_TYPE,particleWord:LA_JINS_PARTICLE.surface}),
+ mafulAjl:w=>grammarSpec('noun',MAFUL_AJL_ROLE),
  mustathna:w=>grammarSpec('noun',MUSTATHNA_ROLE),
  mustathnaMudaf:w=>grammarSpec('noun',MUSTATHNA_ROLE,{isMudaf:true}),
  istithnaParticle:t=>grammarSpec('particle','particle',{particleType:t.particleType,particleWord:t.surface}),
@@ -9012,6 +9153,65 @@ function canonicalLaJinsTranslation(data){
  const authority=deriveLaJinsAuthority(data,index);
  return authority.authorized?LA_JINS_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
 }
+/* ---- المفعول له: the five conditions, split between registry and structure ------------------- */
+function mafulAjlTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.mafulAjlPairKeys?.length?template:null;
+}
+function mafulAjlPairAt(data,index){
+ const template=mafulAjlTemplateRecord(data),tokens=data?.tokens;
+ const motive=Array.isArray(tokens)?tokens[index]:null;
+ if(!template||!motive||motive.grammar?.type!=='noun'||motive.grammar.role!==MAFUL_AJL_ROLE)return null;
+ for(const key of template.mafulAjlPairKeys){
+  const pair=MAFUL_AJL_PAIR_REGISTRY[key],lexeme=pair&&MAFUL_AJL_LEXEMES[pair.lexemeKey];
+  if(!pair||!lexeme)continue;
+  const hasObject=Boolean(pair.objectEn);
+  if(tokens.length!==(hasObject?4:3)||index!==tokens.length-1)continue;
+  const verb=tokens[0],subject=tokens[1];
+  const registeredVerb=mafulAjlVerb(pair.verb),registeredSubject=mafulAjlNoun('singularPeople',pair.subjectEn);
+  if(verb.grammar?.type!=='verb'||verb.tense!=='past')continue;
+  if(verb.word!==registeredVerb.past||verb.surfaceHint!==registeredVerb.past)continue;
+  if(subject.grammar?.role!=='faail')continue;
+  if(subject.word!==registeredSubject.nom||subject.surfaceHint!==registeredSubject.nom)continue;
+  if(hasObject){
+   const object=[...singularThings,...singularPeople].find(item=>item.en===pair.objectEn);
+   if(!object||tokens[2]?.grammar?.role!=='object'||tokens[2].word!==object.acc)continue;
+  }
+  if(motive.word!==lexeme.acc||motive.surfaceHint!==lexeme.acc)continue;
+  return{key,pair,lexeme,verb,subject,motive};
+ }
+ return null;
+}
+function deriveMafulAjlAuthority(data,index){
+ const tokens=data?.tokens;
+ const token=Array.isArray(tokens)?tokens[index]:null;
+ if(!token||token.grammar?.type!=='noun'||token.grammar.role!==MAFUL_AJL_ROLE){
+  return Object.freeze({authorized:false,reason:'not-a-maful-lah-token'});
+ }
+ const found=mafulAjlPairAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
+ if(token.state&&token.state!=='nasb')return Object.freeze({authorized:false,reason:'maful-lah-not-nasb'});
+ if(token.inflection&&token.inflection!==found.lexeme.inflection){
+  return Object.freeze({authorized:false,reason:'maful-lah-inflection-mismatch'});
+ }
+ /* Condition 4, «متحدًا مع عامله في الوقت», and condition 5, «يتحد مع عامله في الفاعل»: one past
+    clause with one explicit fāʿil is exactly what makes both true, so both are checked as the
+    shape they are — the motive belongs to the same actor, at the same time, as the act. */
+ if(found.subject.state&&found.subject.state!=='raf'){
+  return Object.freeze({authorized:false,reason:'amil-has-no-marfu-fail'});
+ }
+ // الحالة الثالثة again, on the built token: أل here would make الجر the more frequent reading.
+ if(/^ال/u.test(token.word))return Object.freeze({authorized:false,reason:'motive-carries-al'});
+ if(token.grammar.isMudaf)return Object.freeze({authorized:false,reason:'motive-is-mudaf'});
+ return Object.freeze({authorized:true,reason:'',pairKey:found.key,lexemeKey:found.pair.lexemeKey,
+  verbId:found.verb.id,verbWord:found.verb.word,subjectId:found.subject.id,subjectWord:found.subject.word,
+  motiveId:token.id,motiveWord:token.word,inflection:found.lexeme.inflection});
+}
+function canonicalMafulAjlTranslation(data){
+ const index=data?.tokens?.findIndex(token=>token.grammar?.role===MAFUL_AJL_ROLE)??-1;
+ const authority=deriveMafulAjlAuthority(data,index);
+ return authority.authorized?MAFUL_AJL_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
+}
 function inflectNoun(token,tokens,index,data){
  const registered=nounFormIndex.get(token.surfaceHint);
  token.lexeme=registered?.lexeme||null;
@@ -9044,6 +9244,9 @@ function inflectNoun(token,tokens,index,data){
   if(!authority.authorized){
    throw new Error(`The noun is not a canonically licensed «لا» al-jins participant: ${authority.reason}.`);
   }
+ }
+ if(token.grammar.role===MAFUL_AJL_ROLE&&!deriveMafulAjlAuthority(data,index).authorized){
+  throw new Error(`The noun is not a canonically licensed mafʿūl lah: ${deriveMafulAjlAuthority(data,index).reason}.`);
  }
  if(token.grammar.role===MUSTATHNA_ROLE&&!deriveMustathnaAuthority(data,index).authorized){
   throw new Error(`The noun is not a canonically licensed mustathnā: ${deriveMustathnaAuthority(data,index).reason}.`);
@@ -9229,6 +9432,7 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({
  tamyiz:'RL_TAMYIZ_MUBAYYAN',
  istithna:'RL_ISTITHNA_EXCLUSION',
  laJins:'RL_LA_JINS_NOUN_KHABAR',
+ mafulAjl:'RL_VERB_MAFUL_AJL',
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
  kana:'RL_KANA_NOUN_KHABAR',
@@ -9321,6 +9525,18 @@ function resolveRelationships(data){
   amil.relations.zarfRelationshipId=relation.id;
   item.relations.amilId=amil.id;
  item.relations.zarfRelationshipId=relation.id;
+ });
+ tokens.forEach((item,index)=>{
+  if(item.grammar.role!==MAFUL_AJL_ROLE)return;
+  const authority=deriveMafulAjlAuthority(data,index);
+  if(!authority.authorized)return;
+  const verb=tokens.find(candidate=>candidate.id===authority.verbId);
+  const subject=tokens.find(candidate=>candidate.id===authority.subjectId);
+  const relation=addRelationship(data,'mafulAjl',{verbId:verb.id,subjectId:subject.id,
+   motiveId:item.id,pairKey:authority.pairKey,lexemeKey:authority.lexemeKey});
+  verb.relations.mafulAjlId=item.id;verb.relations.mafulAjlRelationshipId=relation.id;
+  item.relations.amilId=verb.id;item.relations.motiveHolderId=subject.id;
+  item.relations.mafulAjlRelationshipId=relation.id;
  });
  tokens.forEach((item,index)=>{
   if(item.grammar.role!==ISM_LA_ROLE)return;
@@ -9517,6 +9733,7 @@ function nounRoleArabic(token){
     say «تمييز لعشرين، منصوب» and «تمييز نسبة محوَّل عن المبتدأ منصوب» — the division belongs to the
     analysis, not to the core case label, so it is carried by the Why and the combined block. */
  if(role===TAMYIZ_ROLE)return'تَمْيِيزٌ مَنْصُوبٌ';
+ if(role===MAFUL_AJL_ROLE)return'مَفْعُولٌ لِأَجْلِهِ مَنْصُوبٌ';
  if(role===MUSTATHNA_ROLE)return'مُسْتَثْنًى مَنْصُوبٌ';
  /* «اسْمُ لَا» rather than a bare «منصوب»: the naṣb here comes from لا working like إنّ, and the
     learner needs to see whose noun it is. The muḍāف clause is appended by the shared iḍāfah line. */
@@ -9561,6 +9778,11 @@ function renderNounAnalysis(token){
   english=token.grammar.role===ISM_LA_ROLE
    ?'The noun of the لا that negates a whole class; accusative, because that لا works like «إنّ».'
    :'The khabar of the لا that negates a whole class; nominative, and indefinite as its condition requires.';
+ }
+ if(token.grammar.role===MAFUL_AJL_ROLE){
+  const data=token._data,authority=deriveMafulAjlAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl lah: ${authority.reason}`);
+  english=`A mafʿūl lah: an inward maṣdar giving the reason ${authority.verbWord} happened; accusative.`;
  }
  if(token.grammar.role===MUSTATHNA_ROLE){
   const data=token._data,authority=deriveMustathnaAuthority(data,data?.tokens?.indexOf(token));
@@ -9771,6 +9993,28 @@ function whyLaJinsConditions(token,data){
  return{id:'WHY_LA_JINS_CONDITIONS',
   ar:`وَشَرْطُ عَمَلِهَا أَنْ يَكُونَ اسْمُهَا وَخَبَرُهَا نَكِرَتَيْنِ، وَقَدْ تَحَقَّقَ ذَلِكَ فِي ${wq(token.word)} وَ${wq(authority.khabarWord)}.`,
   en:`Its government requires that both its noun and its khabar be indefinite, and ${eq(token.word)} and ${eq(authority.khabarWord)} both are.`};
+}
+function mafulAjlWhyAuthority(token,data){
+ const authority=deriveMafulAjlAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`WHY: the mafʿūl lah is not authorized (${authority.reason}).`);
+ return authority;
+}
+/* The conditions a learner can actually check on this sentence: it is an inward maṣdar rather than
+   an act of the limbs, and it shares its ʿāmil's time and doer. */
+function whyMafulAjlConditions(token,data){
+ const authority=mafulAjlWhyAuthority(token,data);
+ const lexeme=MAFUL_AJL_LEXEMES[authority.lexemeKey];
+ return{id:'WHY_MAFUL_AJL_CONDITIONS',
+  ar:`وَهُوَ مَصْدَرٌ قَلْبِيٌّ — ${lexeme.senseAr} — لَا مِنْ أَعْمَالِ الْجَوَارِحِ، وَقَدِ اتَّحَدَ مَعَ ${wq(authority.verbWord)} فِي الْوَقْتِ وَفِي الْفَاعِلِ ${wq(authority.subjectWord)}.`,
+  en:`It is an inward maṣdar — ${lexeme.senseEn} — not an act of the limbs, and it shares both the time of ${eq(authority.verbWord)} and its doer ${eq(authority.subjectWord)}.`};
+}
+/* The honest state line. The source permits khafḍ by a particle of causation for ANY qualifying
+   noun, and only calls naṣb «الأكثر» in this stripped ḥāl — so the Why says الأكثر, not يجب. */
+function whyMafulAjlState(token,data){
+ mafulAjlWhyAuthority(token,data);
+ return{id:'WHY_MAFUL_AJL_STATE',
+  ar:'وَهُوَ مُجَرَّدٌ مِنْ «أل» وَمِنَ الْإِضَافَةِ، وَالْأَكْثَرُ فِي هَذَا أَنْ يُنْصَبَ، وَيَقِلُّ جَرُّهُ بِحَرْفِ التَّعْلِيلِ.',
+  en:'It is stripped of أل and of iḍāfah, and in that case the accusative is the more frequent reading; khafḍ by a particle of causation stays permissible but is less common.'};
 }
 function mustathnaWhyAuthority(token,data){
  const authority=deriveMustathnaAuthority(data,data?.tokens?.indexOf(token));
@@ -10011,6 +10255,13 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_KHABAR_LA',
   stateAr:()=>'وَخَبَرُ «لَا» مَرْفُوعٌ بِهَا.',
   stateEn:()=>'The خَبَر of «لا» is مَرْفُوعٌ by it.'},
+ mafulAjl:{
+  id:()=>'WHY_ROLE_MAFUL_AJL',
+  ar:(t,data)=>`${wq(t.word)} ذُكِرَ بَيَانًا لِسَبَبِ وُقُوعِ ${wq(mafulAjlWhyAuthority(t,data).verbWord)}، فَهُوَ مَفْعُولٌ لِأَجْلِهِ.`,
+  en:(t,data)=>`${eq(t.word)} is mentioned to explain WHY ${eq(mafulAjlWhyAuthority(t,data).verbWord)} happened, so it is a مَفْعُولٌ لِأَجْلِهِ.`,
+  stateId:()=>'WHY_STATE_MAFUL_AJL',
+  stateAr:()=>'وَالْمَفْعُولُ لِأَجْلِهِ مَنْصُوبٌ.',
+  stateEn:()=>'The مَفْعُولٌ لِأَجْلِهِ is مَنْصُوبٌ.'},
  mustathna:{
   id:()=>'WHY_ROLE_MUSTATHNA',
   ar:(t,data)=>{
@@ -10274,6 +10525,10 @@ function buildTokenWhy(token,data){
   if(token.grammar.role===MUSTATHNA_ROLE){
    push(whyMustathnaConditions(token,data));
   }
+  if(token.grammar.role===MAFUL_AJL_ROLE){
+   push(whyMafulAjlConditions(token,data));
+   push(whyMafulAjlState(token,data));
+  }
   if(token.grammar.role===ISM_LA_ROLE){
    push(whyLaJinsConditions(token,data));
   }
@@ -10376,6 +10631,16 @@ function buildRelationshipWhy(rel,data){
   push({id:'WHY_REL_ABSOLUTE_OBJECT',
    ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(masdar.word)} مَصْدَرُهُ ${purpose.clauseAr}، فَنَصَبَهُ عَلَى الْمَفْعُولِيَّةِ الْمُطْلَقَةِ.`,
    en:`${eq(verb.word)} is the ʿāmil and ${eq(masdar.word)} is its own maṣdar, ${purpose.clauseEn}, so the verb makes it accusative as its mafʿūl muṭlaq.`});
+  return{ids,ar,en};
+ }
+ if(rel.type==='mafulAjl'){
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const motive=data.tokens.find(item=>item.id===rel.motiveId);
+  const lexeme=MAFUL_AJL_LEXEMES[rel.lexemeKey];
+  if(!verb||!motive||!lexeme)return{ids,ar,en};
+  push({id:'WHY_REL_MAFUL_AJL',
+   ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(motive.word)} عِلَّتُهُ، ${lexeme.senseAr}، فَنَصَبَهُ عَلَى الْمَفْعُولِ لِأَجْلِهِ.`,
+   en:`${eq(verb.word)} is the ʿāmil and ${eq(motive.word)} is its reason — ${lexeme.senseEn} — so the verb makes it accusative as its mafʿūl lah.`});
   return{ids,ar,en};
  }
  if(rel.type==='laJins'){
@@ -10522,6 +10787,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='mafulAjl'){
+   const recipient=data.tokens.find(item=>item.id===rel.motiveId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='laJins'){
    const recipient=data.tokens.find(item=>item.id===rel.khabarId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -10577,6 +10847,16 @@ function renderRelationshipAnalysis(data){
   haal.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: عَامِلٌ وَصَاحِبُ حَالٍ مَعْرِفَةٌ وَحَالٌ نَكِرَةٌ مَنْصُوبَةٌ تُبَيِّنُ هَيْئَتَهُ وَقْتَ الْفِعْلِ.`;
   haal.phraseEn=`Together, “${phrase}” has an ʿāmil, a definite صاحب الحال, and an indefinite accusative haal describing that owner's condition during the event.`;
   haal.phraseLabel='Haal construction';
+ });
+ data.relationships.filter(rel=>rel.type==='mafulAjl').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const subject=data.tokens.find(item=>item.id===rel.subjectId);
+  const motive=data.tokens.find(item=>item.id===rel.motiveId);
+  if(!verb||!subject||!motive)return;
+  const phrase=data.tokens.map(item=>item.word).join(' ');
+  motive.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: ${wq(motive.word)} مَصْدَرٌ قَلْبِيٌّ بَيَّنَ سَبَبَ ${wq(verb.word)}، وَاتَّحَدَ مَعَهُ فِي الْوَقْتِ وَفِي الْفَاعِلِ ${wq(subject.word)}، فَنُصِبَ مَفْعُولًا لِأَجْلِهِ.`;
+  motive.phraseEn=`Together, “${phrase}”: “${motive.word}” is an inward maṣdar giving the reason for “${verb.word}”, sharing its time and its doer “${subject.word}”, so it is accusative as a mafʿūl lah.`;
+  motive.phraseLabel='Mafʿūl lah construction';
  });
  data.relationships.filter(rel=>rel.type==='laJins').forEach(rel=>{
   const particle=data.tokens.find(item=>item.id===rel.particleId);
@@ -10931,6 +11211,11 @@ function validateExercise(data){
     }
     // The matn's own words: «تَنْصِبُ النَّكِرَاتِ». A definite participant is a different chapter.
     if(/^ال/u.test(token.word))fail('E_LA_JINS_DEFINITE','A «لا» al-jins participant may not be definite.',token);
+   }else if(token.grammar.role===MAFUL_AJL_ROLE){
+    const authority=deriveMafulAjlAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_MAFUL_AJL_AUTHORITY',`Mafʿūl-lah authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_MAFUL_AJL_NASB')fail('E_MAFUL_AJL_RULE','The mafʿūl lah is not bound to its source rule.',token);
+    if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mafulAjl requires nasb, not ${token.state}.`,token);
    }else if(token.grammar.role===MUSTATHNA_ROLE){
     const authority=deriveMustathnaAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_MUSTATHNA_AUTHORITY',`Mustathnā authority failed: ${authority.reason}.`,token);
@@ -11206,6 +11491,11 @@ function validateExercise(data){
       &&(token.grammar.role===ISM_LA_ROLE?rel.ismId:rel.khabarId)===token.id))){
    fail('E_ORPHAN_LA_JINS','A «لا» al-jins participant is not linked to its governing لا.',token);
   }
+  if(token.grammar.role===MAFUL_AJL_ROLE&&(!token.relations.amilId||!token.relations.motiveHolderId
+    ||!relationships.some(rel=>rel.type==='mafulAjl'&&rel.motiveId===token.id
+      &&rel.verbId===token.relations.amilId&&rel.subjectId===token.relations.motiveHolderId))){
+   fail('E_ORPHAN_MAFUL_AJL','Mafʿūl lah is not linked to its ʿāmil and the doer whose motive it is.',token);
+  }
   if(token.grammar.role===MUSTATHNA_ROLE&&(!token.relations.amilId||!token.relations.wholeId
     ||!relationships.some(rel=>rel.type==='istithna'&&rel.mustathnaId===token.id
       &&rel.verbId===token.relations.amilId&&rel.wholeId===token.relations.wholeId))){
@@ -11308,6 +11598,15 @@ function validateExercise(data){
      ||rel.qualifierId!==authority.qualifierId||rel.pairKey!==authority.pairKey
      ||rel.purpose!==authority.purpose||rel.agreement!==authority.agreement){
     fail('E_MUTLAQ_RELATION','Absolute-object relationship is not the canonical proof.',masdar);
+   }
+  }
+  if(rel.type==='mafulAjl'){
+   const motive=tokenById.get(rel.motiveId);
+   const authority=deriveMafulAjlAuthority(data,data.tokens.indexOf(motive));
+   if(!authority.authorized||rel.verbId!==authority.verbId||rel.subjectId!==authority.subjectId
+     ||rel.motiveId!==authority.motiveId||rel.pairKey!==authority.pairKey
+     ||rel.lexemeKey!==authority.lexemeKey){
+    fail('E_MAFUL_AJL_RELATION','Mafʿūl-lah relationship is not the canonical causal proof.',motive);
    }
   }
   if(rel.type==='laJins'){
@@ -11431,6 +11730,17 @@ function validateExercise(data){
   }
   if(relationships.filter(candidate=>candidate.type==='laJins').length!==1){
    fail('E_LA_JINS_RELATION_COUNT','A «لا» al-jins frame must have exactly one relationship.',item);
+  }
+ });
+ data.tokens.filter(item=>item.grammar.role===MAFUL_AJL_ROLE).forEach(item=>{
+  const rel=relationships.find(candidate=>candidate.id===item.relations.mafulAjlRelationshipId&&candidate.type==='mafulAjl');
+  const amil=tokenById.get(item.relations.amilId),holder=tokenById.get(item.relations.motiveHolderId);
+  if(!rel||rel.motiveId!==item.id||rel.verbId!==amil?.id||rel.subjectId!==holder?.id
+    ||amil?.relations.mafulAjlId!==item.id||amil?.relations.mafulAjlRelationshipId!==rel.id){
+   fail('E_MAFUL_AJL_RELATION','A mafʿūl lah must have exactly one reciprocal canonical link to its ʿāmil and doer.',item);
+  }
+  if(relationships.filter(candidate=>candidate.type==='mafulAjl'&&candidate.motiveId===item.id).length!==1){
+   fail('E_MAFUL_AJL_RELATION_COUNT','A mafʿūl lah must have exactly one causal relationship.',item);
   }
  });
  data.tokens.filter(item=>item.grammar.role===MUSTATHNA_ROLE).forEach(item=>{
@@ -11716,6 +12026,19 @@ function add(starts,form,state,sign,build,metadata={}){
    throw new Error(`Template ${stableId} produces a haal without its explicit past event.`);
   }
  }
+ /* المفعول له. One template owns one shape: a motive after a bare clause and a motive after a
+    transitive one are different structures. */
+ const mafulAjlPairKeys=Object.freeze([...(metadata.mafulAjlPairKeys||[])]);
+ if(mafulAjlPairKeys.some((key,position)=>mafulAjlPairKeys.indexOf(key)!==position||!MAFUL_AJL_PAIR_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered mafʿūl-lah pair.`);
+ }
+ if(mafulAjlPairKeys.length){
+  const shapes=new Set(mafulAjlPairKeys.map(key=>MAFUL_AJL_PAIR_REGISTRY[key].objectEn?'object':'bare'));
+  if(shapes.size!==1)throw new Error(`Template ${stableId} mixes mafʿūl-lah structures.`);
+  if(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
+   throw new Error(`Template ${stableId} produces a mafʿūl lah without the explicit past ʿāmil its conditions require.`);
+  }
+ }
  /* «لا» النافية للجنس. */
  const laJinsPairKeys=Object.freeze([...(metadata.laJinsPairKeys||[])]);
  if(laJinsPairKeys.some((key,position)=>laJinsPairKeys.indexOf(key)!==position||!LA_JINS_PAIR_REGISTRY[key])){
@@ -11811,6 +12134,7 @@ function add(starts,form,state,sign,build,metadata={}){
   tamyizPairKeys,
   mustathnaPairKeys,
   laJinsPairKeys,
+  mafulAjlPairKeys,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -12852,6 +13176,32 @@ function buildLaJinsExercise(pairKey){
  ];
  return{sentence:'',translation:pair.sentenceEn,tokens};
 }
+/* المفعول له — the pair names the act, the doer and the motive; the builder resolves them. */
+function buildMafulAjlExercise(pairKey){
+ const pair=MAFUL_AJL_PAIR_REGISTRY[pairKey],lexeme=pair&&MAFUL_AJL_LEXEMES[pair.lexemeKey];
+ if(!pair||!lexeme)throw new Error(`Unknown productive mafʿūl-lah pair: ${pairKey}`);
+ const verb=mafulAjlVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
+ if(registeredVerb?.form!=='past')throw new Error(`Mafʿūl-lah pair ${pairKey} names an unregistered ʿāmil.`);
+ const subject=mafulAjlNoun('singularPeople',pair.subjectEn);
+ const tokens=[
+  token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),'A past-tense event with an explicit subject.'),
+  token(subject.nom,subject.en,AR.faail(subject.nom),'The doer, whose inward motive the maṣdar states.')
+ ];
+ if(pair.objectEn){
+  const object=[...singularThings,...singularPeople].find(item=>item.en===pair.objectEn);
+  tokens.push(token(object.acc,object.en,AR.object(object.acc),EN.object));
+ }
+ tokens.push(token(lexeme.acc,lexeme.en,AR.mafulAjl(lexeme.acc),
+  'An inward maṣdar giving the reason the action happened.',true));
+ return{sentence:'',translation:pair.sentenceEn,tokens};
+}
+const mafulAjlKeys=hasObject=>Object.freeze(MAFUL_AJL_ALL_PAIR_KEYS.filter(key=>Boolean(MAFUL_AJL_PAIR_REGISTRY[key].objectEn)===hasObject));
+const MAFUL_AJL_BARE_KEYS=mafulAjlKeys(false);
+const MAFUL_AJL_OBJECT_KEYS=mafulAjlKeys(true);
+const mafulAjlMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),mafulAjlPairKeys:keys});
+const pickedMafulAjl=(keys,label)=>buildMafulAjlExercise(pickVaried(keys,label,String));
+add('verb','singular','nasb','fatha',()=>pickedMafulAjl(MAFUL_AJL_BARE_KEYS,'maful-ajl-bare'),mafulAjlMetadata(MAFUL_AJL_BARE_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedMafulAjl(MAFUL_AJL_OBJECT_KEYS,'maful-ajl-object'),mafulAjlMetadata(MAFUL_AJL_OBJECT_KEYS));
 const laJinsMetadata=keys=>({laJinsPairKeys:keys});
 const pickedLaJins=()=>buildLaJinsExercise(pickVaried(LA_JINS_ALL_PAIR_KEYS,'la-jins',String));
 add('particle','singular','nasb','fatha',()=>pickedLaJins(),laJinsMetadata(LA_JINS_ALL_PAIR_KEYS));

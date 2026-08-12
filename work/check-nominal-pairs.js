@@ -52,6 +52,14 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   MABNI_PRESENT_GOVERNORS,
   MABNI_PRESENT_GOVERNOR_MODES,
   KAY_TALIL_LAM,
+  ONE_VERB_JAWAZIM,
+  HAMZAT_TAQRIR,
+  J1A_PARTICLE_GLOSSES,
+  J1A_PARTICLE_IRAAB,
+  PRESENT_VERB_LABEL_AR,
+  AFAL_KHAMSA_REASON_AR,
+  PRESENT_GOVERNOR_CAUSE_AR,
+  stateArabic,
   CONCEALED_AN_MODES,
   CONCEALED_AN_CONSTRUCTIONS,
   CONCEALED_AN_BY_PARTICLE,
@@ -2457,6 +2465,213 @@ function runConcealedAnFocusedTests(){
 }
 runConcealedAnFocusedTests();
 if(process.env.NAHW_FOCUSED_NAWASIB==='1')process.exit(0);
+/* ---- J1a: the one-verb jawāzim of Al-Tuḥfah pp. 79–81, over both proven jazm regimes. ----------
+   Every identity is proven the same way and independently of every other: the particle carries its
+   own source rule and its own learner-facing iʿrāb, the verb is مجزوم by the CANONICAL governor
+   rather than by its ending, the sign comes from the frozen present-verb matrix for that verb's own
+   inflection, and the whole exercise survives History unchanged. The negatives then attack exactly
+   the confusions this chapter invites: one jāzim swapped for another, the hamzah added or removed,
+   لَا relabelled as one of its three homographs, jazm relabelled naṣb, and the two signs swapped. */
+function runJawazimOneVerbFocusedTests(){
+  let builds=0,trips=0,negatives=0;
+  const LANES=Object.freeze({
+    lam:{ordinary:'T_PARTICLE_PRESENT_JAZM_SUKUN_01',five:'T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01'},
+    lamma:{ordinary:'T_PARTICLE_PRESENT_JAZM_SUKUN_02',five:'T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02'},
+    alam:{ordinary:'T_PARTICLE_PRESENT_JAZM_SUKUN_03',five:'T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03'},
+    alamma:{ordinary:'T_PARTICLE_PRESENT_JAZM_SUKUN_04',five:'T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04'},
+    lamAmr:{ordinary:'T_PARTICLE_PRESENT_JAZM_SUKUN_05',five:'T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05'},
+    laNahiya:{ordinary:'T_PARTICLE_PRESENT_JAZM_SUKUN_06',five:'T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06'}
+  });
+  // The exact learner-facing identity clause each particle must print. Checked as a whole phrase,
+  // not by keyword, so a generic «حَرْفُ جَزْمٍ» could never satisfy any of them.
+  const templateByStableId=id=>{
+    const found=api.templates.find(item=>item.stableId===id);
+    assert(found,'J1a lane '+id+' is not registered');
+    return found;
+  };
+  const built=new Map();
+  for(const [construction,lanes] of Object.entries(LANES)){
+    const record=api.ONE_VERB_JAWAZIM[construction];
+    assert(record,'J1a construction '+construction+' is not in the frozen registry');
+    for(const regime of ['ordinary','five']){
+      const template=templateByStableId(lanes[regime]);
+      const data=api.buildTemplate(template.id);
+      // 1 — the template's frozen declaration names the particle that ACTUALLY governs. For أَلَمْ
+      //     and أَلَمَّا that is لَمْ / لَمَّا, never the hamzah.
+      assert(template.presentGovernor===record.governorType,
+        construction+'/'+regime+' declares the wrong governor: '+template.presentGovernor);
+      const hamzah=data.tokens.find(t=>t.grammar.particleType===api.HAMZAT_TAQRIR.particleType);
+      const governor=data.tokens.find(t=>t.grammar.particleType===record.governorType);
+      const verb=data.tokens.find(t=>t.grammar.type==='verb');
+      const object=data.tokens.find(t=>t.grammar.role==='object');
+      assert(governor&&verb&&object,construction+'/'+regime+' is missing one of its canonical tokens');
+      // 2 — the hamzah is present exactly when the construction says so, and never governs.
+      assert(Boolean(hamzah)===record.hamzah,construction+'/'+regime+' disagrees with its hamzah declaration');
+      if(hamzah){
+        assert(hamzah.ruleId===api.HAMZAT_TAQRIR.ruleId&&hamzah.word===api.HAMZAT_TAQRIR.surface,
+          construction+' hamzah lost its canonical rule or bytes');
+        assert(!hamzah.relations.governsId&&verb.governorId===governor.id,
+          construction+' let the hamzah govern the verb');
+        assert(hamzah.ar===hamzah.word+': '+api.J1A_PARTICLE_IRAAB.hamzatTaqrir.ar,construction+' hamzah iʿrāb is not its frozen canonical clause');
+        assert(data.tokens.indexOf(hamzah)===data.tokens.indexOf(governor)-1,
+          construction+' hamzah is not immediately before its jāzim');
+      }
+      // 3 — byte safety: the particle is the exact surface the frozen governor table holds.
+      assert(governor.word===record.surface&&governor.word===api.GRAMMAR_RULES.governors[record.governorType].surface,
+        construction+'/'+regime+' particle is not its canonical bytes');
+      // 4 — source ownership.
+      assert(governor.ruleId===record.ruleId&&api.SOURCE_REGISTRY[record.ruleId],
+        construction+'/'+regime+' particle does not carry its own source rule');
+      /* 5 — the exact learner-facing particle identity, asserted against the app's OWN frozen
+         clause rather than a copy of it here. A second copy of these strings in this file is
+         precisely what must not exist: مَبْنِيٌّ with the shadda before or after the vowel renders
+         identically and compares unequal, so a duplicated literal would fail for a reason that has
+         nothing to do with grammar. Distinctness of the five clauses is enforced at load time. */
+      assert(governor.ar===governor.word+': '+api.J1A_PARTICLE_IRAAB[record.governorType].ar,
+        construction+'/'+regime+' particle iʿrāb is not its frozen canonical clause');
+      // 6 — the verb is مجزوم by the CANONICAL governor, and the state is not read off the ending.
+      assert(verb.state==='jazm'&&verb.governorId===governor.id&&governor.relations.governsId===verb.id,
+        construction+'/'+regime+' verb is not canonically governed in jazm');
+      // 7 — the sign comes from the frozen matrix for this verb's own inflection.
+      const expected=api.GRAMMAR_RULES.presentVerb[verb.inflection].jazm;
+      assert(api.safeSignId(verb.sign)===expected[0]&&verb.ruleId===expected[1],
+        construction+'/'+regime+' bypassed the canonical present-verb jazm matrix');
+      assert(verb.inflection===(regime==='five'?'afalKhamsa':'regular'),
+        construction+'/'+regime+' is not the inflection its lane claims');
+      /* 8 — the exact governed-verb terminology, assembled from the app's OWN canonical strings for
+         the same combining-mark reason as the particle clause above. «مَجْزُومٌ» comes from
+         stateArabic, the sign label from the frozen GRAMMAR_SIGNS entry the matrix named, and the
+         cause clause must carry the jāzim's canonical bytes — so a verb printing the right sign
+         under the wrong governor would still fail. */
+      assert(verb.ar.startsWith(verb.word+': '+api.PRESENT_VERB_LABEL_AR+' '+api.stateArabic('jazm')),
+        construction+'/'+regime+' verb iʿrāb is not the canonical jussive wording');
+      assert(verb.ar.includes(api.GRAMMAR_SIGNS[expected[0]].ar),
+        construction+'/'+regime+' verb does not print its canonical jazm sign label');
+      // The signs of the other two states must be nowhere in the analysis.
+      for(const other of ['damma','fatha','nunKept'])assert(!verb.ar.includes(api.GRAMMAR_SIGNS[other].ar),
+        construction+'/'+regime+' verb analysis carries a sign from another state');
+      assert(verb.ar.includes(api.PRESENT_GOVERNOR_CAUSE_AR[record.governorType]),
+        construction+'/'+regime+' verb does not carry its own jāzim2019s canonical cause clause');
+      if(regime==='five'){
+        assert(verb.ar.includes(api.AFAL_KHAMSA_REASON_AR),
+          construction+' five-verb lane does not print the five-verbs reason for ḥadhf al-nūn');
+        // 14 — internal component analysis is preserved, not simplified away.
+        assert(verb.components.some(c=>c.kind==='waw-jamaaah'),
+          construction+' five-verb lane lost its wāw al-jamāʿah component');
+      }else{
+        assert(!verb.ar.includes(api.AFAL_KHAMSA_REASON_AR),
+          construction+' ordinary lane claims to be one of the five verbs');
+        // 13 — the existing hidden-subject authority is reused, not replaced.
+        assert(verb.relations.subjectType==='implicit'
+          &&verb.ar.includes(api.PRESENT_CONCEALMENT['3ms'].ar),
+          construction+' ordinary lane lost the canonical hidden-subject analysis');
+      }
+      // 9 — specific Why for the particle AND for the state.
+      assert(verb.why.ids.includes('WHY_STATE_VERB_'+({lam:'LAM',lamma:'LAMMA',lamAmr:'LAM_AMR',laNahiya:'LA_NAHIYA'})[record.governorType]),
+        construction+'/'+regime+' verb Why does not name its own jāzim');
+      assert(governor.why.ids.some(id=>id.startsWith('WHY_PARTICLE_')),
+        construction+'/'+regime+' particle has no Why');
+      if(hamzah)assert(hamzah.why.ids.includes('WHY_PARTICLE_HAMZAT_TAQRIR'),construction+' hamzah has no Why of its own');
+      // 10 — structure registration and canonical translation.
+      assert(api.composeCanonicalTranslation(data)===data.translation,
+        construction+'/'+regime+' translation is not canonically composed from its registered structure');
+      assert(api.validateExercise(clone(data)).length===0,construction+'/'+regime+' does not validate');
+      builds++;
+      // 11 — History v3 round trip: build → snapshot → restore → validate → render identically.
+      const snapshot=api.createExerciseSnapshot(data);
+      const restored=snapshot&&api.restoreExerciseSnapshot(clone(snapshot));
+      assert(restored&&api.validateExercise(clone(restored)).length===0,construction+'/'+regime+' failed its History round trip');
+      assert(restored.sentence===data.sentence&&restored.translation===data.translation
+        &&restored.tokens.map(t=>t.ar).join('|')===data.tokens.map(t=>t.ar).join('|'),
+        construction+'/'+regime+' changed presentation after History');
+      trips++;
+      built.set(construction+':'+regime,data);
+    }
+  }
+  // 12 — RANDOMIZATION: each lane must actually vary its verb, not ship one frozen sentence.
+  for(const [construction,lanes] of Object.entries(LANES)){
+    const template=templateByStableId(lanes.ordinary);
+    const seen=new Set();
+    for(let i=0;i<12;i++)seen.add(api.buildTemplate(template.id).tokens.find(t=>t.grammar.type==='verb').word);
+    assert(seen.size>=4,construction+' ordinary lane produced only '+seen.size+' distinct verbs');
+    negatives++;
+  }
+  /* Rejection is the claim, and the codes are recorded rather than pinned one at a time: several of
+     these forgeries are caught by more than one authority at once — a swapped particle fails its
+     template's governor declaration AND its Why AND its translation guard — so pinning whichever
+     fires first would make the test brittle about ordering rather than strict about grammar. What
+     is pinned is that NOTHING gets through, and the distribution is printed so a change in which
+     authority does the catching is visible in the log. */
+  const rejectionCodes={};
+  const mustReject=(label,base,mutate)=>{
+    const data=clone(base);mutate(data);
+    const failures=api.validateExercise(data);
+    assert(failures.length>0,label+' was accepted by validateExercise');
+    for(const f of failures)rejectionCodes[f.code]=(rejectionCodes[f.code]||0)+1;
+    negatives++;
+  };
+  const lamOrdinary=built.get('lam:ordinary'),lammaOrdinary=built.get('lamma:ordinary');
+  const alamOrdinary=built.get('alam:ordinary'),laNahiyaOrdinary=built.get('laNahiya:ordinary');
+  const lamAmrOrdinary=built.get('lamAmr:ordinary'),lamFive=built.get('lam:five');
+  // ---- one jāzim swapped for another, without canonical reconstruction ----
+  mustReject('لَمْ relabelled لَمَّا',lamOrdinary,d=>{d.tokens[0].grammar.particleType='lamma';d.tokens[0].ruleId='G_LAMMA_JAZM'});
+  mustReject('لَمَّا relabelled لَمْ',lammaOrdinary,d=>{d.tokens[0].grammar.particleType='lam';d.tokens[0].ruleId='G_LAM_JAZM'});
+  mustReject('لَمْ keeping its surface but wearing لَمَّا’s rule',lamOrdinary,d=>{d.tokens[0].ruleId='G_LAMMA_JAZM'});
+  mustReject('لَامُ الْأَمْرِ wearing لَامُ التَّعْلِيلِ’s rule',lamAmrOrdinary,d=>{d.tokens[0].ruleId=api.KAY_TALIL_LAM.ruleId});
+  // ---- the hamzah added to, or removed from, a construction that does not declare it ----
+  mustReject('أَلَمْ stripped of its hamzah',alamOrdinary,d=>{d.tokens.splice(0,1)});
+  mustReject('أَلَمَّا rebuilt as أَلَمْ',built.get('alamma:ordinary'),
+    d=>{d.tokens[1].grammar.particleType='lam';d.tokens[1].ruleId='G_LAM_JAZM'});
+  // ---- the hamzah promoted to governor: the verb must never hang off it ----
+  mustReject('the hamzah made the verb’s governor',alamOrdinary,
+    d=>{d.tokens[2].governorId=d.tokens[0].id;d.tokens[0].relations.governsId=d.tokens[2].id;
+        d.tokens[1].relations.governsId=null});
+  // ---- SAME-SURFACE لَا COLLISIONS: all three other identities must be refused here ----
+  for(const [label,type,ruleId] of [['لَا الْعَاطِفَةُ','atfLa','R_ATF_LA'],
+      ['لَا النَّافِيَةُ','laNafiyaContext','R_LA_NAFIYA_CONTEXT'],
+      ['لَا النَّافِيَةُ لِلْجِنْسِ','laNafiyaJins','R_LA_NAFIYA_JINS']]){
+    mustReject('لَا النَّاهِيَةُ relabelled '+label,laNahiyaOrdinary,
+      d=>{d.tokens[0].grammar.particleType=type;d.tokens[0].ruleId=ruleId});
+  }
+  // The reverse direction: none of the three may borrow the prohibitive rule.
+  mustReject('لَا النَّافِيَةُ borrowing the prohibitive rule',laNahiyaOrdinary,
+    d=>{d.tokens[0].grammar.particleType='laNafiyaContext'});
+  // ---- jazm ↔ nasb, and the two signs swapped ----
+  mustReject('jazm relabelled naṣb',lamOrdinary,d=>{d.tokens[1].state='nasb'});
+  mustReject('sukūn swapped for ḥadhf al-nūn',lamOrdinary,
+    d=>{d.tokens[1].sign=api.canonicalSignCopy('nunDropped');d.tokens[1].ruleId='R_AFAL5_JAZM_DELETE_NUN'});
+  mustReject('ḥadhf al-nūn swapped for sukūn',lamFive,
+    d=>{d.tokens[1].sign=api.canonicalSignCopy('sukun');d.tokens[1].ruleId='R_MUDARI_JAZM_SUKUN'});
+  // ---- an unauthorized verb surface ----
+  mustReject('an unregistered verb surface',lamOrdinary,
+    d=>{d.tokens[1].word='يَتَكَلَّمْ';d.tokens[1].surfaceHint='يَتَكَلَّمْ';d.tokens[1].expectedSurface='يَتَكَلَّمْ'});
+  // ---- History FORGERY: a swapped identity must not survive restoration ----
+  const forgeryRejects=(label,construction,mutate)=>{
+    const snapshot=api.createExerciseSnapshot(built.get(construction));
+    mutate(snapshot);
+    const restored=api.restoreExerciseSnapshot(snapshot);
+    assert(!restored||api.validateExercise(clone(restored)).length>0,label+' survived History restoration');
+    negatives++;
+  };
+  forgeryRejects('a لَمْ snapshot forged into لَمَّا','lam:ordinary',
+    s=>{s.tokens[0].word='لَمَّا';s.tokens[0].surfaceHint='لَمَّا';s.tokens[0].grammar.particleType='lamma'});
+  forgeryRejects('a لَمَّا snapshot forged into لَمْ','lamma:ordinary',
+    s=>{s.tokens[0].word='لَمْ';s.tokens[0].surfaceHint='لَمْ';s.tokens[0].grammar.particleType='lam'});
+  forgeryRejects('a plain لَمْ snapshot given a hamzah','lam:ordinary',
+    s=>{s.tokens.unshift({...s.tokens[0],id:'forged-hamzah',word:api.HAMZAT_TAQRIR.surface,
+      surfaceHint:api.HAMZAT_TAQRIR.surface,grammar:{...s.tokens[0].grammar,particleType:api.HAMZAT_TAQRIR.particleType}})});
+  forgeryRejects('an أَلَمْ snapshot stripped of its hamzah','alam:ordinary',s=>{s.tokens.splice(0,1)});
+  forgeryRejects('a لَا النَّاهِيَةُ snapshot forged into لَا الْعَاطِفَةُ','laNahiya:ordinary',
+    s=>{s.tokens[0].grammar.particleType='atfLa'});
+  forgeryRejects('a لَامُ الْأَمْرِ snapshot forged into لَامُ التَّعْلِيلِ','lamAmr:ordinary',
+    s=>{s.tokens[0].grammar.particleType=api.KAY_TALIL_LAM.particleType});
+  forgeryRejects('a jazm snapshot forged into naṣb','lam:ordinary',s=>{s.tokens[1].state='nasb'});
+  console.log('Jawazim one-verb (J1a) focused tests: '+builds+' canonical builds across 6 identities and 2 jazm regimes, '
+    +trips+' History round trips, '+negatives+' negative/collision/forgery boundaries — green');
+  console.log('  J1a rejection code distribution: '+JSON.stringify(rejectionCodes));
+}
+runJawazimOneVerbFocusedTests();
+if(process.env.NAHW_FOCUSED_JAWAZIM==='1')process.exit(0);
 assert(elements.sentence.textContent,'The application did not generate its initial sentence');
 assert(elements.historyToggle.textContent==='Sentence history (1)','The initial exercise was not added to clean snapshot history');
 assert(!elements.historyList.innerHTML.includes('جُمْلَةٌ سَابِقَةٌ'),'Legacy text-only history must not be treated as a reviewable exercise');
@@ -2924,7 +3139,11 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 // Phase 3B1 adds exactly one: G_IDHAN_NASB, the particle's own identity and government, which is
 // a different claim from the conditions R_IDHAN_CONDITIONS already owns.
 // Plus R_BADAL, the fourth follower chapter's own rule (Al-Tuḥfah pp. 135–138).
-assert(Object.keys(api.SOURCE_REGISTRY).length===135,`Expected 135 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+// J1a adds exactly four (Al-Tuḥfah pp. 79–81, القسم الأول of باب جوازم الفعل المضارع):
+// G_LAMMA_JAZM, G_LAM_AMR_JAZM and G_LA_NAHIYA_JAZM are three new governors, and G_HAMZAT_TAQRIR
+// owns هَمْزَةُ التَّقْرِيرِ's identity WITHOUT any government — أَلَمْ and أَلَمَّا are governed by the
+// existing G_LAM_JAZM and by G_LAMMA_JAZM, so neither needs a governor rule of its own.
+assert(Object.keys(api.SOURCE_REGISTRY).length===139,`Expected 139 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -7471,7 +7690,12 @@ for(const t of api.templates){
 {
   const ids=api.templates.map(t=>t.stableId);
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
-  assert(api.templates.length===151,`Expected 151 templates after the munādā final gap, found ${api.templates.length}`);
+  // J1a appends exactly ten: five one-verb jawāzim × the two proven jazm regimes. All are appended,
+  // so every pre-existing stableId is unchanged — pinned directly below by keeping لَمْ at _01.
+  assert(api.templates.length===161,`Expected 161 templates after J1a, found ${api.templates.length}`);
+  assert(api.templates.filter(t=>t.state==='jazm').map(t=>t.stableId).join(' | ')
+    ==='T_NOUN_PRESENT_JAZM_SUKUN_01 | T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_01 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_02 | T_PARTICLE_PRESENT_JAZM_SUKUN_03 | T_PARTICLE_PRESENT_JAZM_SUKUN_04 | T_PARTICLE_PRESENT_JAZM_SUKUN_05 | T_PARTICLE_PRESENT_JAZM_SUKUN_06 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06',
+    'the jazm template ordinals shifted: لَمْ must keep _01 in both families and J1a must append only');
   assert(Object.values(p4Templates).map(t=>t.stableId).join(' | ')
     ==='T_PARTICLE_SINGULAR_NASB_FATHA_04 | T_PARTICLE_SINGULAR_NASB_FATHA_05 | T_PARTICLE_SINGULAR_NASB_FATHA_06 | T_PARTICLE_SINGULAR_NASB_FATHA_07',
     'The Phase 3A2 stable IDs are not the four appended ones');
@@ -7491,7 +7715,16 @@ for(const t of api.templates){
         'T_PARTICLE_PRESENT_NASB_FATHA_07:hattaNasb','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_07:hattaNasb',
         'T_PARTICLE_PRESENT_NASB_FATHA_08:faSababiyya','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_08:faSababiyya',
         'T_PARTICLE_PRESENT_NASB_FATHA_09:wawMaiyya','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09:wawMaiyya',
-        'T_PARTICLE_PRESENT_NASB_FATHA_10:awNasb','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10:awNasb'].join(' | '),
+        'T_PARTICLE_PRESENT_NASB_FATHA_10:awNasb','T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10:awNasb',
+        /* J1a appends the five remaining one-verb jawāzim over both jazm regimes. أَلَمْ and أَلَمَّا
+           declare `lam` and `lamma`, NOT the hamzah: the added hamzah is not the jāzim, so the
+           template's frozen governor declaration names the particle that actually governs. */
+        'T_PARTICLE_PRESENT_JAZM_SUKUN_02:lamma','T_PARTICLE_PRESENT_JAZM_SUKUN_03:lam',
+        'T_PARTICLE_PRESENT_JAZM_SUKUN_04:lamma','T_PARTICLE_PRESENT_JAZM_SUKUN_05:lamAmr',
+        'T_PARTICLE_PRESENT_JAZM_SUKUN_06:laNahiya',
+        'T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02:lamma','T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03:lam',
+        'T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04:lamma','T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05:lamAmr',
+        'T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06:laNahiya'].join(' | '),
     'A presentGovernor declaration changed');
   // Exactly the two registered lanes declare the conditional governor, and nothing else does.
   assert(api.templates.filter(t=>api.isConditionalGovernor(api.GRAMMAR_RULES.governors[t.presentGovernor]))
@@ -8700,7 +8933,7 @@ for(const [id,fixture] of Object.entries(s0Fixtures)){
    ========================================================================== */
 /* The exact 82 stable template IDs this phase inherited. Phase 3B0A adds no template and
    renames none, so this manifest must match byte for byte. */
-const PHASE3B0A_STABLE_TEMPLATE_IDS='T_NOUN_BROKEN_JARR_KASRA_01,T_NOUN_BROKEN_NASB_FATHA_01,T_NOUN_BROKEN_RAF_DAMMA_01,T_NOUN_DUAL_JARR_YA_01,T_NOUN_DUAL_NASB_YA_01,T_NOUN_DUAL_RAF_ALIF_01,T_NOUN_FIVENOUNS_JARR_YA_01,T_NOUN_FIVENOUNS_NASB_ALIF_01,T_NOUN_FIVENOUNS_RAF_WAW_01,T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01,T_NOUN_FIVEVERBS_NASB_NUNDROPPED_01,T_NOUN_FIVEVERBS_RAF_NUNKEPT_01,T_NOUN_PRESENT_JAZM_SUKUN_01,T_NOUN_PRESENT_NASB_FATHA_01,T_NOUN_PRESENT_RAF_DAMMA_01,T_NOUN_SFP_JARR_KASRA_01,T_NOUN_SFP_NASB_KASRASUB_01,T_NOUN_SFP_RAF_DAMMA_01,T_NOUN_SINGULAR_JARR_KASRA_01,T_NOUN_SINGULAR_NASB_FATHA_01,T_NOUN_SINGULAR_NASB_FATHA_02,T_NOUN_SINGULAR_NASB_FATHA_03,T_NOUN_SINGULAR_RAF_DAMMA_01,T_NOUN_SINGULAR_RAF_DAMMA_02,T_NOUN_SMP_JARR_YA_01,T_NOUN_SMP_NASB_YA_01,T_NOUN_SMP_RAF_WAW_01,T_PARTICLE_BROKEN_JARR_KASRA_01,T_PARTICLE_BROKEN_NASB_FATHA_01,T_PARTICLE_DUAL_JARR_YA_01,T_PARTICLE_DUAL_NASB_YA_01,T_PARTICLE_FIVENOUNS_JARR_YA_01,T_PARTICLE_FIVENOUNS_NASB_ALIF_01,T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01,T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01,T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02,T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03,T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01,T_PARTICLE_PRESENT_JAZM_SUKUN_01,T_PARTICLE_PRESENT_NASB_FATHA_01,T_PARTICLE_PRESENT_NASB_FATHA_02,T_PARTICLE_PRESENT_NASB_FATHA_03,T_PARTICLE_PRESENT_RAF_DAMMA_01,T_PARTICLE_SFP_JARR_KASRA_01,T_PARTICLE_SFP_NASB_KASRASUB_01,T_PARTICLE_SINGULAR_JARR_KASRA_01,T_PARTICLE_SINGULAR_NASB_FATHA_01,T_PARTICLE_SINGULAR_NASB_FATHA_02,T_PARTICLE_SINGULAR_NASB_FATHA_03,T_PARTICLE_SINGULAR_NASB_FATHA_04,T_PARTICLE_SINGULAR_NASB_FATHA_05,T_PARTICLE_SINGULAR_NASB_FATHA_06,T_PARTICLE_SINGULAR_NASB_FATHA_07,T_PARTICLE_SMP_JARR_YA_01,T_PARTICLE_SMP_NASB_YA_01,T_VERB_BROKEN_NASB_FATHA_01,T_VERB_BROKEN_RAF_DAMMA_01,T_VERB_DUAL_NASB_YA_01,T_VERB_DUAL_RAF_ALIF_01,T_VERB_FIVENOUNS_RAF_WAW_01,T_VERB_FIVEVERBS_RAF_NUNKEPT_01,T_VERB_PRESENT_RAF_DAMMA_01,T_VERB_SFP_RAF_DAMMA_01,T_VERB_SINGULAR_NASB_FATHA_01,T_VERB_SINGULAR_NASB_FATHA_02,T_VERB_SINGULAR_NASB_FATHA_03,T_VERB_SINGULAR_NASB_FATHA_04,T_VERB_SINGULAR_NASB_FATHA_05,T_VERB_SINGULAR_NASB_FATHA_06,T_VERB_SINGULAR_NASB_FATHA_07,T_VERB_SINGULAR_NASB_FATHA_08,T_VERB_SINGULAR_NASB_FATHA_09,T_VERB_SINGULAR_NASB_FATHA_10,T_VERB_SINGULAR_NASB_FATHA_11,T_VERB_SINGULAR_NASB_FATHA_12,T_VERB_SINGULAR_NASB_FATHA_13,T_VERB_SINGULAR_NASB_FATHA_14,T_VERB_SINGULAR_NASB_FATHA_15,T_VERB_SINGULAR_NASB_FATHA_16,T_VERB_SINGULAR_RAF_DAMMA_01,T_VERB_SMP_NASB_YA_01,T_VERB_SMP_RAF_WAW_01';
+const PHASE3B0A_STABLE_TEMPLATE_IDS='T_NOUN_BROKEN_JARR_KASRA_01,T_NOUN_BROKEN_NASB_FATHA_01,T_NOUN_BROKEN_RAF_DAMMA_01,T_NOUN_DUAL_JARR_YA_01,T_NOUN_DUAL_NASB_YA_01,T_NOUN_DUAL_RAF_ALIF_01,T_NOUN_FIVENOUNS_JARR_YA_01,T_NOUN_FIVENOUNS_NASB_ALIF_01,T_NOUN_FIVENOUNS_RAF_WAW_01,T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01,T_NOUN_FIVEVERBS_NASB_NUNDROPPED_01,T_NOUN_FIVEVERBS_RAF_NUNKEPT_01,T_NOUN_PRESENT_JAZM_SUKUN_01,T_NOUN_PRESENT_NASB_FATHA_01,T_NOUN_PRESENT_RAF_DAMMA_01,T_NOUN_SFP_JARR_KASRA_01,T_NOUN_SFP_NASB_KASRASUB_01,T_NOUN_SFP_RAF_DAMMA_01,T_NOUN_SINGULAR_JARR_KASRA_01,T_NOUN_SINGULAR_NASB_FATHA_01,T_NOUN_SINGULAR_NASB_FATHA_02,T_NOUN_SINGULAR_NASB_FATHA_03,T_NOUN_SINGULAR_RAF_DAMMA_01,T_NOUN_SINGULAR_RAF_DAMMA_02,T_NOUN_SMP_JARR_YA_01,T_NOUN_SMP_NASB_YA_01,T_NOUN_SMP_RAF_WAW_01,T_PARTICLE_BROKEN_JARR_KASRA_01,T_PARTICLE_BROKEN_NASB_FATHA_01,T_PARTICLE_DUAL_JARR_YA_01,T_PARTICLE_DUAL_NASB_YA_01,T_PARTICLE_FIVENOUNS_JARR_YA_01,T_PARTICLE_FIVENOUNS_NASB_ALIF_01,T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01,T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02,T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03,T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04,T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05,T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06,T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01,T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_02,T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_03,T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01,T_PARTICLE_PRESENT_JAZM_SUKUN_01,T_PARTICLE_PRESENT_JAZM_SUKUN_02,T_PARTICLE_PRESENT_JAZM_SUKUN_03,T_PARTICLE_PRESENT_JAZM_SUKUN_04,T_PARTICLE_PRESENT_JAZM_SUKUN_05,T_PARTICLE_PRESENT_JAZM_SUKUN_06,T_PARTICLE_PRESENT_NASB_FATHA_01,T_PARTICLE_PRESENT_NASB_FATHA_02,T_PARTICLE_PRESENT_NASB_FATHA_03,T_PARTICLE_PRESENT_RAF_DAMMA_01,T_PARTICLE_SFP_JARR_KASRA_01,T_PARTICLE_SFP_NASB_KASRASUB_01,T_PARTICLE_SINGULAR_JARR_KASRA_01,T_PARTICLE_SINGULAR_NASB_FATHA_01,T_PARTICLE_SINGULAR_NASB_FATHA_02,T_PARTICLE_SINGULAR_NASB_FATHA_03,T_PARTICLE_SINGULAR_NASB_FATHA_04,T_PARTICLE_SINGULAR_NASB_FATHA_05,T_PARTICLE_SINGULAR_NASB_FATHA_06,T_PARTICLE_SINGULAR_NASB_FATHA_07,T_PARTICLE_SMP_JARR_YA_01,T_PARTICLE_SMP_NASB_YA_01,T_VERB_BROKEN_NASB_FATHA_01,T_VERB_BROKEN_RAF_DAMMA_01,T_VERB_DUAL_NASB_YA_01,T_VERB_DUAL_RAF_ALIF_01,T_VERB_FIVENOUNS_RAF_WAW_01,T_VERB_FIVEVERBS_RAF_NUNKEPT_01,T_VERB_PRESENT_RAF_DAMMA_01,T_VERB_SFP_RAF_DAMMA_01,T_VERB_SINGULAR_NASB_FATHA_01,T_VERB_SINGULAR_NASB_FATHA_02,T_VERB_SINGULAR_NASB_FATHA_03,T_VERB_SINGULAR_NASB_FATHA_04,T_VERB_SINGULAR_NASB_FATHA_05,T_VERB_SINGULAR_NASB_FATHA_06,T_VERB_SINGULAR_NASB_FATHA_07,T_VERB_SINGULAR_NASB_FATHA_08,T_VERB_SINGULAR_NASB_FATHA_09,T_VERB_SINGULAR_NASB_FATHA_10,T_VERB_SINGULAR_NASB_FATHA_11,T_VERB_SINGULAR_NASB_FATHA_12,T_VERB_SINGULAR_NASB_FATHA_13,T_VERB_SINGULAR_NASB_FATHA_14,T_VERB_SINGULAR_NASB_FATHA_15,T_VERB_SINGULAR_NASB_FATHA_16,T_VERB_SINGULAR_RAF_DAMMA_01,T_VERB_SMP_NASB_YA_01,T_VERB_SMP_RAF_WAW_01';
 let ctxCases=0,ctxAttackCases=0,ctxOwnershipCopyAttacks=0,ctxUnreachableReasons=null;
 const ctxCodeHist={};
 const ctxProofReasonsSeen=new Set();
@@ -9920,7 +10153,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===151,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===161,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
@@ -11309,7 +11542,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===151,'the repair block changed the production template count');
+  assert(api.templates.length===161,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -11430,8 +11663,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===158,'the structural map holds '+registeredKeys.length+' keys, not 158');
-    assert(registeredShapes.length===48,'the shape registry holds '+registeredShapes.length+' shapes, not 48');
+    assert(registeredKeys.length===168,'the structural map holds '+registeredKeys.length+' keys, not 168');
+    assert(registeredShapes.length===56,'the shape registry holds '+registeredShapes.length+' shapes, not 56');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
     /* The 87 inherited keys and 22 inherited shapes are untouched: later productive lanes append
@@ -11471,8 +11704,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35','TS36','TS37','TS38','TS39','TS40','TS41','TS42','TS43','TS44','TS45','TS46','TS47','TS48'];
       const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
-      assert(inheritedKeys.length===87,'the inherited structural-key set changed: '+inheritedKeys.length);
-      assert(inheritedShapes.length===22,'the inherited shape set changed: '+inheritedShapes.length);
+      assert(inheritedKeys.length===97,'the inherited structural-key set changed: '+inheritedKeys.length);
+      assert(inheritedShapes.length===30,'the inherited shape set changed: '+inheritedShapes.length);
       assert(inheritedKeys.every(k=>!laneShapes.includes(MAP[k].shape)),'an inherited template was re-mapped onto a productive shape');
       assert(inheritedShapes.every(id=>SHAPES[id].parts.every(p=>typeof p.lit!=='string'||!/ (he|they) will /.test(p.lit))),
         'an inherited shape acquired a productive lane’s wording');
@@ -11504,7 +11737,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===151,'the map covers '+mappedTemplates.size+' templates, not 151');
+    assert(mappedTemplates.size===161,'the map covers '+mappedTemplates.size+' templates, not 161');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -11566,8 +11799,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===158,'only '+keysSeen.size+' of the 158 structural keys were observed');
-    assert(shapesSeen.size===48,'only '+shapesSeen.size+' of the 48 composer shapes were observed');
+    assert(keysSeen.size===168,'only '+keysSeen.size+' of the 168 structural keys were observed');
+    assert(shapesSeen.size===56,'only '+shapesSeen.size+' of the 56 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -11901,7 +12134,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===158,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===168,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -12230,7 +12463,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Productive الحال adds one three-token subject-owner lane and one four-token object-owner lane. */
     /* التمييز adds eight more: both divisions are four-token lanes (ʿāmil, fāʿil, the noun the
        tamyīz clarifies, and the tamyīz itself). */
-    assert([505,506].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 505 or 506 across the registered ʿaṭf context rotation)');
+    assert([539,540].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 539 or 540 across the registered ʿaṭf context rotation)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -12419,7 +12652,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===151,'the presentation repair changed the template count');
+    assert(api.templates.length===161,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -13353,9 +13586,15 @@ const p5Seen=new Map();
     'G_AN_NASB stopped excluding the concealed أَنْ');
   assert(/not a concealed أَنْ/.test(api.SOURCE_REGISTRY.R_PRESENT_NUUN_NISWAH_MAHALL_NASB_AN.conditions),
     'the mabnī أَنْ maḥall rule stopped excluding the concealed أَنْ');
-  // Phase 4 (the jawāzim) is untouched: لَمْ remains the only jāzim in the governor table.
-  assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.mood==='jazm').length===1,
-    'a second jāzim entered the governor table');
+  /* J1a shipped the jawāzim, so «لَمْ is the only jāzim» is no longer the claim. What the guard
+     protects is unchanged in substance: nothing may leak a jāzim into the governor table, so the
+     jussive set is pinned to exactly the four one-verb jawāzim J1a registered — no more, no fewer.
+     أَلَمْ and أَلَمَّا add no entry: they are those same particles under هَمْزَةُ التَّقْرِيرِ, which
+     governs nothing and must stay out of the table entirely. */
+  assert(Object.entries(api.GRAMMAR_RULES.governors).filter(([,g])=>g.mood==='jazm').map(([id])=>id).sort().join(',')
+    ==='laNahiya,lam,lamAmr,lamma','the set of jawāzim in the governor table changed');
+  assert(!Object.prototype.hasOwnProperty.call(api.GRAMMAR_RULES.governors,'hamzatTaqrir'),
+    'هَمْزَةُ التَّقْرِيرِ entered the governor table and could now govern');
   p5Cases+=7;
 }
 
@@ -14311,17 +14550,24 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===135,'the source-rule count does not include the tamyīz rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===139,'the source-rule count does not include the J1a jawāzim rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
   assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.concealedAnMode).length===6,'the shared concealed-an registry is not exactly six governors');
-  assert(Object.values(api.GRAMMAR_RULES.governors).filter(g=>g.mood==='jazm').length===1,
-    'a second jāzim entered the governor table');
-  assert(api.templates.length===151,'the production template count does not include the tamyīz additions');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===158
-    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===48,
-    'the composer authority does not include the tamyīz mappings');
+  /* J1a shipped the jawāzim, so «لَمْ is the only jāzim» is no longer the claim. What the guard
+     protects is unchanged in substance: nothing may leak a jāzim into the governor table, so the
+     jussive set is pinned to exactly the four one-verb jawāzim J1a registered — no more, no fewer.
+     أَلَمْ and أَلَمَّا add no entry: they are those same particles under هَمْزَةُ التَّقْرِيرِ, which
+     governs nothing and must stay out of the table entirely. */
+  assert(Object.entries(api.GRAMMAR_RULES.governors).filter(([,g])=>g.mood==='jazm').map(([id])=>id).sort().join(',')
+    ==='laNahiya,lam,lamAmr,lamma','the set of jawāzim in the governor table changed');
+  assert(!Object.prototype.hasOwnProperty.call(api.GRAMMAR_RULES.governors,'hamzatTaqrir'),
+    'هَمْزَةُ التَّقْرِيرِ entered the governor table and could now govern');
+  assert(api.templates.length===161,'the production template count does not include the J1a additions');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===168
+    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===56,
+    'the composer authority does not include the J1a mappings');
   p7Cases+=8;
 }
 
@@ -15094,7 +15340,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===151,`Expected 151 production templates, found ${api.templates.length}`);
+assert(api.templates.length===161,`Expected 161 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);

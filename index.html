@@ -998,6 +998,44 @@ const GLOSS_CLOSED_PARTICLES=Object.freeze({
  // الاستثناء: «إِلَّا» is a closed particle with one English reading in every construction here.
  'إِلَّا':'except'
 });
+/* J1a — the four one-verb jawāzim whose gloss cannot be keyed by surface. Two of them share bytes
+   with an identity already in the table above («لِ» = لَامُ التَّعْلِيلِ, «لَا» = the plain negating
+   particle), and the other two are new surfaces. Resolved by particle TYPE, ahead of the surface
+   table, exactly as لَا النَّافِيَةُ لِلْجِنْسِ and وَاوُ الْمَعِيَّةِ already are.
+   لَمْ is deliberately absent: it keeps its existing «did not» in every construction, including
+   under هَمْزَةُ التَّقْرِيرِ, where the English question is built from literals rather than by
+   reading the two particle glosses. */
+/* J1a — the ONE canonical copy of each one-verb jāzim's learner-facing iʿrāb. The renderer reads
+   this and nothing else, so the clause a learner sees, the clause the focused tests assert, and the
+   clause a byte check verifies are all literally the same string. Keeping a second copy anywhere is
+   what lets Arabic combining marks drift apart unnoticed — shadda before or after the vowel renders
+   identically and compares unequal. لَمْ is included even though it shipped before J1a: its clause
+   is unchanged, it simply now lives beside the four it is compared against. */
+const J1A_PARTICLE_IRAAB=Object.freeze(Object.assign(Object.create(null),{
+ lam:Object.freeze({ar:'حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'A particle of negation and jazm that gives past meaning.'}),
+ lamma:Object.freeze({ar:'حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'A particle of negation and jazm that gives past meaning, with the negation continuing up to the moment of speaking.'}),
+ lamAmr:Object.freeze({ar:'لَامُ الْأَمْرِ، حَرْفُ جَزْمٍ مَبْنِيٌّ عَلَى الْكَسْرِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lām al-amr: a particle of jazm asking for the act to be brought about.'}),
+ laNahiya:Object.freeze({ar:'لَا النَّاهِيَةُ، حَرْفُ نَهْيٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lā al-nāhiyah: a particle of prohibition and jazm asking for the act to be refrained from.'}),
+ hamzatTaqrir:Object.freeze({ar:'هَمْزَةُ التَّقْرِيرِ، حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَ هُوَ الْجَازِمَ.',en:'Hamzat al-taqrīr, seeking acknowledgement of what follows. It is built and has no syntactic position, and it is not the jāzim.'})
+}));
+(()=>{
+ for(const id of Object.keys(J1A_PARTICLE_IRAAB)){
+  const entry=J1A_PARTICLE_IRAAB[id];
+  if(!Object.isFrozen(entry))throw new Error(`J1a iʿrāb entry ${id} is not frozen.`);
+  for(const name of ['ar','en']){
+   if(typeof entry[name]!=='string'||!entry[name])throw new Error(`J1a iʿrāb entry ${id}.${name} is not a non-empty string.`);
+  }
+  // Every clause must end the project's standard particle way; a truncated paste would not.
+  if(!entry.ar.endsWith('.'))throw new Error(`J1a iʿrāb entry ${id} is not a complete sentence.`);
+ }
+ const clauses=Object.values(J1A_PARTICLE_IRAAB).map(entry=>entry.ar);
+ if(new Set(clauses).size!==clauses.length){
+  throw new Error('Two one-verb jawāzim share one iʿrāb clause; each identity must be its own.');
+ }
+})();
+const J1A_PARTICLE_GLOSSES=Object.freeze(Object.assign(Object.create(null),{
+ lamma:'did not yet',hamzatTaqrir:'did',lamAmr:'let',laNahiya:'not'
+}));
 /* The eight surfaces no vocabulary registry owns. Each is bound to the token TYPE that may carry
    it, so the same surface cannot borrow this gloss in another role. */
 const GLOSS_FIXED_TOKENS=Object.freeze({
@@ -1155,6 +1193,13 @@ function resolveCanonicalTokenGloss(data,token,index){
     accompaniment on another, and only the particle's identity separates the two glosses. */
  if(type==='particle'&&token.grammar?.particleType===WAW_MAIYYA_TYPE){
   return WAW_MAIYYA.gloss;
+ }
+ /* J1a — exactly the same problem as «لَا» and «وَ» above, now for four more identities, and it is
+    the reason the surface table cannot be extended instead. «لِ» is لَامُ التَّعْلِيلِ ("so") in the
+    closed table and لَامُ الْأَمْرِ ("let") here; «لَا» is the plain negating particle ("does not")
+    there and the prohibitive one ("not") here. Only the particle's own identity separates them. */
+ if(type==='particle'&&Object.hasOwn(J1A_PARTICLE_GLOSSES,token.grammar?.particleType||'')){
+  return J1A_PARTICLE_GLOSSES[token.grammar.particleType];
  }
  if(type==='particle'){
   return Object.prototype.hasOwnProperty.call(GLOSS_CLOSED_PARTICLES,surface)
@@ -1388,6 +1433,22 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  ,TS46:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulAjlSentence'})])})
  ,TS47:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulMaahSentence'})])})
  ,TS48:Object.freeze({parts:Object.freeze([Object.freeze({slot:'munadaSentence'})])})
+ /* J1a — the one-verb jawāzim of Al-Tuḥfah pp. 79–81 that need an English pattern لَمْ's TS18/TS19
+    do not already provide. لَمَّا reuses TS18/TS19 unchanged (its particle gloss carries the
+    «not yet»), so only the interrogative-hamzah, command-lām and prohibitive-lā patterns are new.
+    The hamzah lanes read BOTH particle glosses, which is what keeps أَلَمْ and أَلَمَّا distinct in
+    English without the shape knowing which jāzim it is standing over. */
+ /* The hamzah lanes spell their question out in literals instead of reading the two particle
+    glosses. That is what lets لَمْ and لَمَّا keep the SAME canonical gloss they carry standing
+    alone («did not» / «did not yet») while the English still distinguishes أَلَمْ from أَلَمَّا. */
+ ,TS49:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Did he not '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'?'})])})
+ ,TS50:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Did they not '}),Object.freeze({slot:'verb:2:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'?'})])})
+ ,TS55:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Did he not yet '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'?'})])})
+ ,TS56:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Did they not yet '}),Object.freeze({slot:'verb:2:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:'?'})])})
+ ,TS51:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let him '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
+ ,TS52:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let them '}),Object.freeze({slot:'verb:1:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
+ ,TS53:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let him not '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
+ ,TS54:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let them not '}),Object.freeze({slot:'verb:1:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1461,6 +1522,21 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_PARTICLE_PRESENT_RAF_DAMMA_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_RAF_DAMMA_01",structure:"particle:particle,verb:present,noun:object",shape:"TS18",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_01",structure:"particle:particle,verb:present,noun:object",shape:"TS19",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01",structure:"particle:particle,verb:present,noun:object",shape:"TS19",copulaPlural:false}),
+ /* J1a — the five remaining one-verb jawāzim over both proven jazm regimes. لَمَّا shares لَمْ's
+    exact token shape and English pattern; أَلَمْ and أَلَمَّا carry a second particle, because the
+    hamzah is its own word with its own iʿrāb and is NOT the jāzim (the shape reads both glosses,
+    the government stays with لَمْ/لَمَّا). لَامُ الْأَمْرِ and لَا النَّاهِيَةُ keep لَمْ's three-token
+    shape and differ only in their English pattern. */
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_02||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_02",structure:"particle:particle,verb:present,noun:object",shape:"TS18",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_03||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_03",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS49",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_04||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_04",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS55",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_05||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_05",structure:"particle:particle,verb:present,noun:object",shape:"TS51",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_06||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_06",structure:"particle:particle,verb:present,noun:object",shape:"TS53",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02",structure:"particle:particle,verb:present,noun:object",shape:"TS19",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS50",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04||particle:particle,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04",structure:"particle:particle,particle:particle,verb:present,noun:object",shape:"TS56",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05",structure:"particle:particle,verb:present,noun:object",shape:"TS52",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06",structure:"particle:particle,verb:present,noun:object",shape:"TS54",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_RAF_NUNKEPT_01",structure:"particle:particle,verb:present,noun:object",shape:"TS19",copulaPlural:false}),
  "T_PARTICLE_SINGULAR_NASB_FATHA_02||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_02",structure:"particle:particle,verb:present,noun:object",shape:"TS20",copulaPlural:false}),
  "T_PARTICLE_SINGULAR_NASB_FATHA_03||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_03",structure:"particle:particle,verb:present,noun:object",shape:"TS20",copulaPlural:false}),
@@ -7250,6 +7326,56 @@ const CONCEALED_AN_FRAME_DATA=Object.freeze({
 const CONCEALED_AN_SUBJECTS=Object.freeze({ordinary:'الطَّالِبُ',afalKhamsa:'الطُّلَّابُ'});
 const CONCEALED_AN_CONNECTOR_EN=Object.freeze({lamTalil:'so that',lamJuhud:'to',hatta:'until',
  faSababiyya:'and therefore',wawMaiyya:'while',aw:'until'});
+/* ===== J1a — the one-verb jawāzim (Al-Tuḥfah pp. 79–81) ==========================================
+   القسم الأول of باب جوازم الفعل المضارع: «أما القسم الأول فستة أحرُف، وهي: لم، ولما، وألمْ، وألمَّا،
+   ولام الأمر والدعاء، و«لا» في النهي والدعاء، وكلها حروف بإجماع النحاة» (p. 80).
+
+   SIX source entries. This phase ships FIVE of the identities they yield — لَمَّا, أَلَمْ, أَلَمَّا,
+   لَامُ الْأَمْرِ and لَا النَّاهِيَةُ — beside the already-shipped لَمْ. The two duʿāʾ identities the
+   source separates off by an explicit criterion («الأمر يكون من الأعلى للأدنى … وأما الدعاء فيكون
+   من الأدنى للأعلى», p. 80) are deferred: that distinction is pragmatic, not syntactic, so it needs
+   a reviewed duʿāʾ frame layer rather than a flag, and shipping it as a label on an ordinary
+   sentence would assert a direction the sentence does not carry.
+
+   `governorType` is what actually governs. أَلَمْ and أَلَمَّا name لَمْ and لَمَّا, because the added
+   hamzah is not a jāzim: the source calls أَلَمْ «"لم" زيدت عليه همزةُ التقرير» and أَلَمَّا «"لمَّا"
+   زيدت عليه الهمزة» — an addition ONTO a jāzim, never a second one. The hamzah is therefore its own
+   token with its own iʿrāb and is deliberately absent from GRAMMAR_RULES.governors, exactly as
+   KAY_TALIL_LAM is: being absent from that map is what makes it structurally unable to govern. */
+const HAMZAT_TAQRIR=Object.freeze({surface:'أَ',particleType:'hamzatTaqrir',ruleId:'G_HAMZAT_TAQRIR'});
+const ONE_VERB_JAWAZIM=Object.freeze(Object.assign(Object.create(null),{
+ lam:Object.freeze({id:'lam',governorType:'lam',hamzah:false,surface:'لَمْ',ruleId:'G_LAM_JAZM',
+  nameAr:'لَمْ',nameEn:'lam'}),
+ lamma:Object.freeze({id:'lamma',governorType:'lamma',hamzah:false,surface:'لَمَّا',ruleId:'G_LAMMA_JAZM',
+  nameAr:'لَمَّا',nameEn:'lammā'}),
+ alam:Object.freeze({id:'alam',governorType:'lam',hamzah:true,surface:'لَمْ',ruleId:'G_LAM_JAZM',
+  nameAr:'أَلَمْ',nameEn:'alam'}),
+ alamma:Object.freeze({id:'alamma',governorType:'lamma',hamzah:true,surface:'لَمَّا',ruleId:'G_LAMMA_JAZM',
+  nameAr:'أَلَمَّا',nameEn:'alammā'}),
+ lamAmr:Object.freeze({id:'lamAmr',governorType:'lamAmr',hamzah:false,surface:'لِ',ruleId:'G_LAM_AMR_JAZM',
+  nameAr:'لَامُ الْأَمْرِ',nameEn:'lām al-amr'}),
+ laNahiya:Object.freeze({id:'laNahiya',governorType:'laNahiya',hamzah:false,surface:'لَا',ruleId:'G_LA_NAHIYA_JAZM',
+  nameAr:'لَا النَّاهِيَةُ',nameEn:'lā al-nāhiyah'})
+}));
+/* Startup invariant. The registry is byte-checked against the governor table it claims to use, so a
+   typo in an Arabic surface is a build error rather than a sentence a learner would have to catch.
+   A construction may never name a governorType that is not a registered jāzim, and its surface must
+   be the SAME bytes that table holds — surfaceHint can rescue nothing here. */
+(()=>{
+ if(!Object.isFrozen(ONE_VERB_JAWAZIM))throw new Error('The one-verb jawāzim registry is not frozen.');
+ if(Object.getPrototypeOf(ONE_VERB_JAWAZIM)!==null)throw new Error('The one-verb jawāzim registry has a prototype.');
+ if(HAMZAT_TAQRIR.surface!=='أَ')throw new Error('هَمْزَةُ التَّقْرِيرِ is not its canonical bytes.');
+ for(const id of Object.keys(ONE_VERB_JAWAZIM)){
+  const entry=ONE_VERB_JAWAZIM[id];
+  if(!Object.isFrozen(entry))throw new Error(`One-verb jāzim ${id} is not frozen.`);
+  if(entry.id!==id)throw new Error(`One-verb jāzim ${id} is not bound to its own key.`);
+  for(const name of ['governorType','surface','ruleId','nameAr','nameEn']){
+   if(typeof entry[name]!=='string'||!entry[name])throw new Error(`One-verb jāzim ${id}.${name} is not a non-empty string.`);
+  }
+  if(typeof entry.hamzah!=='boolean')throw new Error(`One-verb jāzim ${id}.hamzah is not a boolean.`);
+  if(entry.governorType===HAMZAT_TAQRIR.particleType)throw new Error(`One-verb jāzim ${id} makes the hamzah its governor.`);
+ }
+})();
 const GRAMMAR_RULES=Object.freeze({
  roles:{
   mubtada:{state:'raf',ruleId:'R_MUBTADA_RAF',en:'The mubtadaʾ; nominative.'},
@@ -7316,9 +7442,33 @@ const GRAMMAR_RULES=Object.freeze({
      proven condition set before the government may be written. G_IDHAN_NASB owns the particle's
      identity and its government only; the conditions are R_IDHAN_CONDITIONS, and the naṣb SIGN is
      R_MUDARI_NASB_FATHA, exactly as for أَنْ. */
-  idhan:{surface:'إِذَنْ',mood:'nasb',ruleId:'G_IDHAN_NASB',conditionSetId:'R_IDHAN_CONDITIONS'}
+  idhan:{surface:'إِذَنْ',mood:'nasb',ruleId:'G_IDHAN_NASB',conditionSetId:'R_IDHAN_CONDITIONS'},
+  /* J1a — the one-verb jawāzim beside the already-present لَمْ. Each governs by adjacency alone,
+     exactly as لَمْ does, so none carries a conditionSetId. هَمْزَةُ التَّقْرِيرِ is deliberately NOT
+     here: أَلَمْ / أَلَمَّا are governed by لَمْ / لَمَّا, and the hamzah's absence from this table is
+     what makes that structural rather than a convention. */
+  lamma:{surface:'لَمَّا',mood:'jazm',ruleId:'G_LAMMA_JAZM'},
+  lamAmr:{surface:'لِ',mood:'jazm',ruleId:'G_LAM_AMR_JAZM'},
+  laNahiya:{surface:'لَا',mood:'jazm',ruleId:'G_LA_NAHIYA_JAZM'}
  }
 });
+/* J1a byte cross-check. Every construction's surface and rule must be the SAME bytes and the same
+   rule id the governor table holds for the governor it names, so a construction can never quietly
+   describe one particle while producing another. Placed here because it reads GRAMMAR_RULES. */
+(()=>{
+ for(const id of Object.keys(ONE_VERB_JAWAZIM)){
+  const entry=ONE_VERB_JAWAZIM[id];
+  const governor=GRAMMAR_RULES.governors[entry.governorType];
+  if(!governor)throw new Error(`One-verb jāzim ${id} names an unregistered governor: ${entry.governorType}`);
+  if(governor.mood!=='jazm')throw new Error(`One-verb jāzim ${id} names a governor that does not govern jazm.`);
+  if(governor.surface!==entry.surface)throw new Error(`One-verb jāzim ${id} disagrees with the governor table on its Arabic surface.`);
+  if(governor.ruleId!==entry.ruleId)throw new Error(`One-verb jāzim ${id} disagrees with the governor table on its source rule.`);
+  if(governor.conditionSetId)throw new Error(`One-verb jāzim ${id} names a conditional governor.`);
+ }
+ if(Object.hasOwn(GRAMMAR_RULES.governors,HAMZAT_TAQRIR.particleType)){
+  throw new Error('هَمْزَةُ التَّقْرِيرِ is registered as a governor; it must not be able to govern.');
+ }
+})();
 /* Phase 3A1 — لِكَيْ. Al-Tuḥfah p. 76 makes كَيْ a direct nāṣib ONLY on a condition:
    «ويشترط في النصب بها أن تتقدَّمَها لام التعليل لفظاً ... أو تتقدَّمَها هذه اللام تقديراً، فإذا لم
    تتقدَّمها اللام لفظاً ولا تقديراً كان النصب بأنْ مُضْمَرَة، وكانت «كَيْ» نفسُها حرفَ تعليل».
@@ -7347,6 +7497,9 @@ const PHASE3A2_VERB_HINT='An exact registered person-bound present form built on
    displayed sentence joins it to what follows while the token list keeps them distinct. This is
    the ONLY place surface composition may differ from a plain space-join. */
 const PROCLITIC_PARTICLE_TYPES=Object.freeze([WAW_MAIYYA_TYPE,KAY_TALIL_LAM.particleType,'atfAmQuestion',
+ /* J1a. «أَلَمْ» and «لِيَكْتُبْ» are written joined, exactly as «لِكَيْ» is, while each half stays its
+    own token with its own iʿrāb. لَا is NOT here: «لَا يَكْتُبْ» is written as two words. */
+ HAMZAT_TAQRIR.particleType,'lamAmr',
  ATF_CONJUNCTION_REGISTRY.waw.particleType,ATF_CONJUNCTION_REGISTRY.fa.particleType,
  CONCEALED_AN_CONSTRUCTIONS.lamTalil.particleType,CONCEALED_AN_CONSTRUCTIONS.lamJuhud.particleType,
  CONCEALED_AN_CONSTRUCTIONS.faSababiyya.particleType,CONCEALED_AN_CONSTRUCTIONS.wawMaiyya.particleType]);
@@ -7358,6 +7511,9 @@ const PROCLITIC_PARTICLE_TYPES=Object.freeze([WAW_MAIYYA_TYPE,KAY_TALIL_LAM.part
 const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',
  lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',an:'G_AN_NASB',kay:'G_KAY_NASB',
  [IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
+ // J1a — each new one-verb jāzim owns exactly one rule, and هَمْزَةُ التَّقْرِيرِ owns its own.
+ lamma:'G_LAMMA_JAZM',lamAmr:'G_LAM_AMR_JAZM',laNahiya:'G_LA_NAHIYA_JAZM',
+ [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,
  maNafiyaKana:'R_MA_NAFIYA_KANA',laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
  ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
@@ -7365,6 +7521,9 @@ const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA
  ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,item.ruleId]))});
 const PARTICLE_EXCLUSIVE_RULE_IDS=Object.freeze(['G_LAN_NASB','G_LAM_JAZM','G_SAWFA_FUTURE',
  'G_AN_NASB','G_KAY_NASB',IDHAN_GOVERNOR_RULE_ID,KAY_TALIL_LAM.ruleId,
+ // J1a. Owned this tightly so a forged G_LA_NAHIYA_JAZM on any other token is refused outright —
+ // which is the mechanism that keeps لَا النَّاهِيَةُ apart from the three other لَا identities.
+ 'G_LAMMA_JAZM','G_LAM_AMR_JAZM','G_LA_NAHIYA_JAZM',HAMZAT_TAQRIR.ruleId,
  'R_MA_NAFIYA_KANA','R_LA_NAFIYA_CONTEXT',
  ...new Set(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>item.ruleId)),
  ...Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>item.ruleId)]);
@@ -7449,7 +7608,12 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
     the source names for the built kind, and the sisters of «يا». */
  'the built munada of the dual and the sound masculine plural, which p. 169 builds on alif and on waw',
  'the sisters of «يا» — الهمزة، أَيْ، أَيَا، هَيَا — which p. 168 names but this app does not produce',
- 'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
+ 'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions',
+ /* J1a shipped لَا النَّاهِيَةُ and لَامُ الْأَمْرِ, so the old blanket entry naming both came off this
+    list. What remains unproduced of pp. 79–81's first قسم is named exactly instead: the two duʿāʾ
+    identities the source splits off by an explicit criterion it states pragmatically
+    («الأمر من الأعلى للأدنى … والدعاء من الأدنى للأعلى»), which no sentence surface carries. */
+ 'لام الدعاء and لا الدعائية, whose direction «من الأدنى للأعلى» is pragmatic and needs a reviewed duʿāʾ frame layer',
   'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
  ]
@@ -7728,13 +7892,25 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     the sign has always depended on the verb's own morphology and never on which nāṣib precedes
     it, which is precisely why one rule serves them all. */
  R_MUDARI_NASB_FATHA:sourceRule('A regular sound-final present verb after a nāṣib is accusative with visible fatḥah.',[47,73,74,75,76,77,78],'Only an explicitly stored ordinary muʿrab present form standing in naṣb under a nāṣib this app produces: لَنْ, أَنْ, explicit لِكَيْ, إِذَنْ once its three conditions are proven, or one of the six frozen constructions licensing concealed أَنْ. The sign follows the verb’s own morphology, not the identity of the nāṣib.'),
- R_MUDARI_JAZM_SUKUN:sourceRule('A regular sound-final present verb after lam is jussive with visible sukūn.',[58,79,80],'Only the explicitly stored lam forms.'),
+ /* J1a TRUTHFULNESS REPAIR. This condition read «Only the explicitly stored lam forms» while لَمْ
+    was the only jāzim this app produced. J1a ships لَمَّا, أَلَمْ, أَلَمَّا, لَامُ الْأَمْرِ and
+    لَا النَّاهِيَةُ, all of which take this same sign, so the old wording had become false — the
+    identical repair R_MUDARI_NASB_FATHA received when the nawāṣib phases landed, and for the
+    identical reason: the sign has always followed the verb's OWN morphology and never the identity
+    of the governor, which is exactly why one rule serves them all. The authority is not loosened:
+    it still requires an explicitly stored ordinary present form, standing in jazm, under one of the
+    named canonical jawāzim. A token merely labelled jussive authorizes nothing. */
+ R_MUDARI_JAZM_SUKUN:sourceRule('A regular sound-final present verb after a jāzim is jussive with visible sukūn.',[58,79,80,81],'Only an explicitly stored ordinary muʿrab present form standing in jazm under a jāzim this app produces: لَمْ, لَمَّا, the same two under هَمْزَة التَّقْرِير (أَلَمْ, أَلَمَّا), لَامُ الْأَمْرِ, or لَا النَّاهِيَةُ. The sign follows the verb’s own morphology, not the identity of the jāzim, and the state is taken from the canonical governor rather than read off the ending. Weak-final verbs are excluded: they drop the weak letter instead and are not produced here.'),
  R_AFAL5_RAF_NUN:sourceRule('Retention of nūn is the nominative sign of the five verbs.',[38,39,67,72],'Rafʿ production includes only the explicitly registered, surface-unambiguous 3md, 3mp, 2mp, and 2fs patterns.'),
  /* Same truthfulness repair as R_MUDARI_NASB_FATHA above, and for the same reason: the sign rule
     names every productive direct and concealed-أَنْ path while leaving construction identity to
     the separately sourced governor records. */
  R_AFAL5_NASB_DELETE_NUN:sourceRule('Deletion of nūn is the accusative sign of the five verbs.',[47,67,74,75,76,77,78],'Only an explicitly stored five-verb form standing in naṣb under a nāṣib this app produces: لَنْ, أَنْ, explicit لِكَيْ, إِذَنْ once its three conditions are proven, or one of the six frozen constructions licensing concealed أَنْ. The sign follows the verb’s own five-verb morphology, not the identity of the nāṣib.'),
- R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80],'Only after the visible jāzim lam.'),
+ /* J1a TRUTHFULNESS REPAIR, same cause as R_MUDARI_JAZM_SUKUN above: «Only after the visible jāzim
+    lam» stopped being true the moment a second jāzim shipped. The sign is emphatically NOT proof of
+    the state — ḥadhf al-nūn is equally the naṣb sign of the five verbs (R_AFAL5_NASB_DELETE_NUN) —
+    so jazm is proven from the canonical governor and never inferred from the missing nūn. */
+ R_AFAL5_JAZM_DELETE_NUN:sourceRule('Deletion of nūn is the jussive sign of the five verbs.',[58,67,79,80,81],'Only an explicitly stored five-verb form standing in jazm under a jāzim this app produces: لَمْ, لَمَّا, أَلَمْ, أَلَمَّا, لَامُ الْأَمْرِ, or لَا النَّاهِيَةُ. The state comes from the canonical governor, never from the sign: the same ḥadhf al-nūn is the naṣb sign of these very verbs, so the ending alone proves nothing.'),
  R_PAST_FATH_VISIBLE:sourceRule('A sound-final past verb has visible fatḥ unless wāw al-jamāʿah or a moving rafʿ pronoun is attached.',[71],'Generated scope: bare third-person masculine, the existing sākinah feminine tāʾ forms, and the explicitly stored dual-alif forms.'),
  R_PASSIVE_PAST_FORM:sourceRule('A past verb is changed to the passive by ḍamm on its first letter and kasr on the letter before its last.',[96,97,98],'Only the explicit passive-past surfaces in PASSIVE_VERB_CAPABILITIES; no string transformation is performed.'),
  R_PAST_FATH_EST_MUNASABAH:sourceRule('A past verb attached to wāw al-jamāʿah has estimated fatḥ because the position is occupied by the vowel of munāsabah.',[71,72],'Generated scope: explicitly stored third-person masculine-plural past forms only.'),
@@ -7844,7 +8020,16 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  G_AW_CONCEALED_AN:sourceRule('Aw licenses a present verb through أَنْ concealed obligatorily when it means illā or ilā.',[78],'Production uses only the exact registered “until” (إِلَى أَنْ) frame; ordinary disjunction is excluded.'),
  R_MA_NAFIYA_KANA:sourceRule('Mā negates kāna in the canonical lām al-juḥūd frame.',[76],'Only مَا immediately before canonical كَانَ in the registered lām al-juḥūd templates.'),
  R_LA_NAFIYA_CONTEXT:sourceRule('Lā supplies the negation required before fāʾ al-sababiyyah or wāw al-maʿiyyah.',[76,77],'Only the exact registered negative-result and negative-accompaniment templates; it is not lā al-nāhiyah and does not govern jazm.'),
- G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs.'),
+ G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs. It governs alone and also under هَمْزَة التَّقْرِير in أَلَمْ, where the hamzah is an addition onto it and never a second governor.'),
+ /* J1a — the four remaining rules of القسم الأول. Al-Tuḥfah p. 80 states each identity in its own
+    words: لَمَّا is «حرفٌ مثل «لم» في الجزم والنفي والقلب»; أَلَمْ is «"لم" زيدت عليه همزةُ التقرير»
+    and أَلَمَّا «"لمَّا" زيدت عليه الهمزة» — which is why the hamzah gets a rule of its own that
+    authorizes an identity and no government at all. The lām and لَا rules are scoped to the ONE
+    direction this phase can produce truthfully; the duʿāʾ direction is refused by both. */
+ G_LAMMA_JAZM:sourceRule('Lammā is a particle like lam in jazm, negation, and conversion to past meaning, adding that the negation runs up to the moment of speaking.',[79,80],'It must be immediately followed by the present verb it governs. It governs alone and also under هَمْزَة التَّقْرِير in أَلَمَّا.'),
+ G_HAMZAT_TAQRIR:sourceRule('Hamzat al-taqrīr is added onto lam and lammā to seek acknowledgement of what they negate; it is a particle only, and governs nothing.',[79,80],'Only the exact registered أَلَمْ and أَلَمَّا constructions, in which it stands immediately before لَمْ or لَمَّا and the jazm belongs entirely to that particle. It is absent from the governor table and may never be a verb’s governor.'),
+ G_LAM_AMR_JAZM:sourceRule('Lām al-amr makes the present verb jussive and asks for the act to be brought about, as a command from the higher to the lower.',[79,80],'Only the registered command frame over a third-person verb, matching the source’s own «فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ». The supplicating lām shares these bytes but is a separate identity and is NOT produced here: its direction is «من الأدنى للأعلى» and no sentence surface carries it.'),
+ G_LA_NAHIYA_JAZM:sourceRule('Lā al-nāhiyah makes the present verb jussive and asks for the act to be refrained from, as a prohibition from the higher to the lower.',[79,80,81],'Only the registered prohibition frame. This لَا carries its own particle identity and its own rule: the conjunctive لَا, the plain negating لَا, and لَا النَّافِيَةُ لِلْجِنْسِ are three separate identities on the same bytes, and none of them governs jazm in a present verb. The supplicating لَا is a fourth and is not produced here.'),
  G_SAWFA_FUTURE:sourceRule('Sawfa marks future meaning and enters only on the present verb.',[14,15,16],'It does not change the indicative mood in the generated construction.'),
  R_INNA_GOVERNS_NOMINAL:sourceRule('Inna and its sisters make the noun accusative and the khabar nominative.',[105,109,110],'pp. 109–110 name six: إِنَّ, أَنَّ, كَأَنَّ, لَكِنَّ, لَيْتَ, لَعَلَّ. Generated set: inna, lakinna, laʿalla, layta, kaʾanna — five of the six. أَنَّ is excluded because it heads no sentence: it needs a governing frame this app does not yet build, and producing it bare would ship a fragment.',[IA_INNA]),
  R_PARTICLE:disabledSourceRule('Generic particle fallback','No generic particle is authorized. Every generated particle must have a specific verified rule ID.'),
@@ -8769,6 +8954,11 @@ const AR={
  khabarInna:(w,p)=>grammarSpec('noun','khabarInna',{governorWord:p}),
  lan:w=>grammarSpec('particle','particle',{particleType:'lan',particleWord:w}),
  lam:w=>grammarSpec('particle','particle',{particleType:'lam',particleWord:w}),
+ // J1a — one helper per new one-verb jāzim, plus the non-governing hamzah.
+ lamma:w=>grammarSpec('particle','particle',{particleType:'lamma',particleWord:w}),
+ lamAmr:w=>grammarSpec('particle','particle',{particleType:'lamAmr',particleWord:w}),
+ laNahiya:w=>grammarSpec('particle','particle',{particleType:'laNahiya',particleWord:w}),
+ hamzatTaqrir:w=>grammarSpec('particle','particle',{particleType:HAMZAT_TAQRIR.particleType,particleWord:w}),
  an:w=>grammarSpec('particle','particle',{particleType:'an',particleWord:w}),
  kay:w=>grammarSpec('particle','particle',{particleType:'kay',particleWord:w}),
  idhan:w=>grammarSpec('particle','particle',{particleType:IDHAN_PARTICLE_TYPE,particleWord:w}),
@@ -9975,6 +10165,8 @@ function configureParticle(token){
  const type=token.grammar.particleType;
  token.ruleId={preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',
   an:'G_AN_NASB',kay:'G_KAY_NASB',[IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
+  lamma:'G_LAMMA_JAZM',lamAmr:'G_LAM_AMR_JAZM',laNahiya:'G_LA_NAHIYA_JAZM',
+  [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',
   laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,[NIDA_PARTICLE_TYPE]:NIDA_PARTICLE.ruleId,
   ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
@@ -9984,6 +10176,9 @@ function configureParticle(token){
  // GRAMMAR_RULES.governors — being absent from that map is exactly what stops it governing.
  token.expectedSurface=GRAMMAR_RULES.governors[type]?.surface
   ||(type===KAY_TALIL_LAM.particleType?KAY_TALIL_LAM.surface:null)
+  // J1a. Same reason as the لِكَيْ lām directly above: هَمْزَةُ التَّقْرِيرِ carries its canonical
+  // bytes here precisely because it is absent from the governor table and cannot govern.
+  ||(type===HAMZAT_TAQRIR.particleType?HAMZAT_TAQRIR.surface:null)
   ||CONCEALED_AN_BY_PARTICLE[type]?.surface
   ||ATF_CONJUNCTION_BY_TYPE[type]?.surface
   ||ATF_CONTEXT_PARTICLES[type]?.surface
@@ -10442,6 +10637,17 @@ function renderNounAnalysis(token){
     building statement its role clause already made rather than a sign it does not have. */
  token.en=canonical?`${english} Its sign is ${canonical.en}.`:`${english}`;
 }
+/* J1a — the present verb's own label and the five-verbs reason, named once. Both are asserted by
+   the jawāzim focused tests, and a test that carried its own copy of either would compare Arabic
+   against Arabic across two files, where combining-mark order can differ invisibly. */
+/* J1a — the cause clause each governor contributes to its verb's iʿrāb, named once so the renderer
+   and the focused tests share the exact bytes. لَامُ الْأَمْرِ is named rather than quoted («بِلَامِ
+   الْأَمْرِ», not «بِـ«لِ»»), because a bare proclitic lām would tell the learner nothing about which
+   lām governs — which is the whole point of separating it from لَامُ التَّعْلِيلِ. */
+const PRESENT_GOVERNOR_CAUSE_AR=Object.freeze(Object.assign(Object.create(null),{lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»',
+  lamma:' بِـ«لَمَّا»',lamAmr:' بِلَامِ الْأَمْرِ',laNahiya:' بِـ«لَا» النَّاهِيَةِ'}));
+const PRESENT_VERB_LABEL_AR='فِعْلٌ مُضَارِعٌ';
+const AFAL_KHAMSA_REASON_AR='؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ';
 function renderVerbAnalysis(token){
  if(token.tense==='past'){
   if(token.grammar.voice===PASSIVE_VOICE){
@@ -10496,7 +10702,10 @@ function renderVerbAnalysis(token){
     adjacency: the resolver must authorize the productive occurrence before the verb may be called
     «مَنْصُوبٌ بِـ«إِذَنْ»». An unauthorized occurrence gets no cause clause at all and is refused
     by validateExercise, so it never reaches a learner in either form. */
- const unconditionalCause={lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»'}[governor?.grammar.particleType]||'';
+ /* J1a adds four jawāzim. The clause names the DIRECT governor, which for أَلَمْ and أَلَمَّا is
+    لَمْ / لَمَّا and never the hamzah: the hamzah is an addition onto the jāzim, not a second one,
+    and it is not in GRAMMAR_RULES.governors, so it can never be resolved as `governor` here. */
+ const unconditionalCause=PRESENT_GOVERNOR_CAUSE_AR[governor?.grammar.particleType]||'';
  const idhanAuthorized=governor?.grammar.particleType===IDHAN_PARTICLE_TYPE
   &&idhanAuthorizationFor(token).authorized;
  const concealedAuthorization=CONCEALED_AN_BY_PARTICLE[governor?.grammar.particleType]
@@ -10507,9 +10716,9 @@ function renderVerbAnalysis(token){
  const cause=idhanAuthorized?' بِـ«إِذَنْ»':concealedCause||unconditionalCause;
  const canonicalVerbSign=canonicalSign(safeSignId(token.sign));
  if(!canonicalVerbSign)throw new Error(`No canonical sign for present sign id “${safeSignId(token.sign)}”`);
- let arabic=`${token.word}: فِعْلٌ مُضَارِعٌ ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${canonicalVerbSign.ar}`;
+ let arabic=`${token.word}: ${PRESENT_VERB_LABEL_AR} ${stateArabic(token.state)}${cause}، وَعَلَامَةُ ${signActionArabic(token.state)} ${canonicalVerbSign.ar}`;
  if(token.inflection==='afalKhamsa'){
-  arabic+=`؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ`;
+  arabic+=AFAL_KHAMSA_REASON_AR;
  }else if(token.relations.subjectType==='implicit'){
   // The concealment class is a sourced grammatical claim, not a formatting choice: the
   // speaker and addressee conceal obligatorily, the singular absent person permissibly.
@@ -10521,7 +10730,9 @@ function renderVerbAnalysis(token){
  const causeEn=idhanAuthorized?' because idhan governs it'
   :concealedConstruction?` because an is concealed ${concealedMode.en} after ${concealedConstruction.nameEn}`
   :{lan:' because lan governs it',lam:' because lam governs it',
-    an:' because an governs it',kay:' because kay governs it'}[governor?.grammar.particleType]||'';
+    an:' because an governs it',kay:' because kay governs it',
+    lamma:' because lammā governs it',lamAmr:' because lām al-amr governs it',
+    laNahiya:' because the prohibitive lā governs it'}[governor?.grammar.particleType]||'';
  const hiddenSubjectEn={'أَنَا':'I','نَحْنُ':'we','هُوَ':'he','هِيَ':'she','أَنْتَ':'you'}[token.relations.subjectPronoun];
  const subjectEn=token.relations.subjectType==='implicit'
   ?` Its subject is a hidden pronoun, concealed ${PRESENT_CONCEALMENT[token.grammar.morphology?.person].en}, understood as “${hiddenSubjectEn}”.`
@@ -10533,7 +10744,16 @@ function renderParticleAnalysis(token){
  if(type==='preposition'){token.ar=`${token.word}: حَرْفُ خَفْضٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A preposition, built and with no syntactic position.';return}
  if(type==='inna'){token.ar=`${token.word}: ${token.grammar.particleIraab} مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle that governs its noun and khabar.';return}
  if(type==='lan'){token.ar=`${token.word}: حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of negation, future meaning, and naṣb.';return}
- if(type==='lam'){token.ar=`${token.word}: حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of negation and jazm that gives past meaning.';return}
+ if(type==='lam'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.lam.ar}`;token.en=J1A_PARTICLE_IRAAB.lam.en;return}
+ /* J1a. Each identity clause is Al-Tuḥfah p. 80's own wording — لَمَّا is «مثل «لم» في الجزم
+    والنفي والقلب», the hamzah is «همزة التقرير», the lām is «للأمر» and لَا is «للنهي» — and the
+    bināʾ tail follows this project's established particle pattern, matching لَمْ exactly. The
+    hamzah's clause says outright that it does not govern, because that is the whole point of
+    analysing أَلَمْ as two words rather than one. */
+ if(type==='lamma'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.lamma.ar}`;token.en=J1A_PARTICLE_IRAAB.lamma.en;return}
+ if(type===HAMZAT_TAQRIR.particleType){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.hamzatTaqrir.ar}`;token.en=J1A_PARTICLE_IRAAB.hamzatTaqrir.en;return}
+ if(type==='lamAmr'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.lamAmr.ar}`;token.en=J1A_PARTICLE_IRAAB.lamAmr.en;return}
+ if(type==='laNahiya'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.laNahiya.ar}`;token.en=J1A_PARTICLE_IRAAB.laNahiya.en;return}
  if(type==='sawfa'){token.ar=`${token.word}: حَرْفُ اسْتِقْبَالٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle marking the future.';return}
  /* Phase 3A1. The identity clauses are Al-Tuḥfah's own words (p. 75 for أَنْ, p. 76 for كَيْ);
     the bināʾ tail follows this project's established particle pattern, matching لَنْ exactly. */
@@ -11030,6 +11250,14 @@ function whyStateVerb(t,data){
  const type=gov&&gov.grammar.particleType;
  if(type==='lan')return{id:'WHY_STATE_VERB_LAN',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ نَصْبٍ، فَهُوَ مَنْصُوبٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of naṣb, so it is مَنْصُوبٌ.`};
  if(type==='lam')return{id:'WHY_STATE_VERB_LAM',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ جَزْمٍ، فَهُوَ مَجْزُومٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of jazm, so it is مَجْزُومٌ.`};
+ /* J1a. Each jāzim gets its OWN state Why, so the learner is never told that لَمْ governs a verb
+    that لَمَّا or لَامُ الْأَمْرِ actually governs. For أَلَمْ and أَلَمَّا the explanation names the
+    jāzim and says explicitly that the hamzah is not it — that is the one thing about those two
+    constructions a learner is most likely to get wrong. The SIGN keeps the existing generic
+    whySignVerb, which names no governor and so stays true for all of them. */
+ if(type==='lamma')return{id:'WHY_STATE_VERB_LAMMA',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ، فَهُوَ مَجْزُومٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of negation, jazm, and past meaning, so it is مَجْزُومٌ.`};
+ if(type==='lamAmr')return{id:'WHY_STATE_VERB_LAM_AMR',ar:`${wq(t.word)} سَبَقَتْهُ لَامُ الْأَمْرِ وَهِيَ حَرْفُ جَزْمٍ، فَهُوَ مَجْزُومٌ.`,en:`${eq(t.word)} is preceded by lām al-amr, a particle of jazm, so it is مَجْزُومٌ.`};
+ if(type==='laNahiya')return{id:'WHY_STATE_VERB_LA_NAHIYA',ar:`${wq(t.word)} سَبَقَتْهُ «لَا» النَّاهِيَةُ وَهِيَ حَرْفُ نَهْيٍ وَجَزْمٍ، فَهُوَ مَجْزُومٌ؛ وَلَوْ كَانَتْ نَافِيَةً لَبَقِيَ مَرْفُوعًا.`,en:`${eq(t.word)} is preceded by the prohibitive lā, a particle of prohibition and jazm, so it is مَجْزُومٌ — had the lā been the merely negating one, the verb would have stayed مَرْفُوعٌ.`};
  /* Phase 3A1. Each direct nāṣib gets its OWN state Why so the learner is never told that لَنْ
     governs a verb that أَنْ or كَيْ actually governs. The naṣb SIGN keeps the existing generic
     whySignVerb, which names no governor and so stays true here. */
@@ -11118,6 +11346,11 @@ const WHY_PARTICLE=Object.freeze({
  inna:t=>({id:'WHY_PARTICLE_INNA',ar:`${wq(t.word)} مِنْ «إِنَّ» وَأَخَوَاتِهَا، تَنْصِبُ الِاسْمَ وَتَرْفَعُ الْخَبَرَ.`,en:`${eq(t.word)} is one of «إِنَّ» and its sisters: it makes the اسْم مَنْصُوبٌ and the خَبَر مَرْفُوعٌ.`}),
  lan:t=>({id:'WHY_PARTICLE_LAN',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ، يَنْصِبُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is a particle of negation, naṣb, and future meaning; it makes the present verb مَنْصُوبٌ.`}),
  lam:t=>({id:'WHY_PARTICLE_LAM',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ، يَجْزِمُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is a particle of negation, jazm, and past meaning; it makes the present verb مَجْزُومٌ.`}),
+ // J1a. The hamzah's own Why is the place the learner is told which word is doing the governing.
+ lamma:t=>({id:'WHY_PARTICLE_LAMMA',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مِثْلُ «لَمْ»، وَيَمْتَدُّ نَفْيُهَا إِلَى زَمَنِ التَّكَلُّمِ.`,en:`${eq(t.word)} is a particle of negation, jazm, and past meaning like «لَمْ»; its negation runs up to the moment of speaking.`}),
+ [HAMZAT_TAQRIR.particleType]:t=>({id:'WHY_PARTICLE_HAMZAT_TAQRIR',ar:`${wq(t.word)} هَمْزَةُ التَّقْرِيرِ، زِيدَتْ عَلَى الْجَازِمِ لِطَلَبِ الْإِقْرَارِ بِمَا بَعْدَهَا، وَلَيْسَتْ هِيَ الَّتِي جَزَمَتِ الْفِعْلَ.`,en:`${eq(t.word)} is hamzat al-taqrīr, added onto the jāzim to seek acknowledgement of what follows; it is not what made the verb مَجْزُومٌ.`}),
+ lamAmr:t=>({id:'WHY_PARTICLE_LAM_AMR',ar:`${wq(t.word)} لَامُ الْأَمْرِ، تَطْلُبُ حُصُولَ الْفِعْلِ طَلَبًا جَازِمًا، وَتَجْزِمُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is lām al-amr: it asks for the act to be brought about, and it makes the present verb مَجْزُومٌ.`}),
+ laNahiya:t=>({id:'WHY_PARTICLE_LA_NAHIYA',ar:`${wq(t.word)} «لَا» النَّاهِيَةُ، تَطْلُبُ الْكَفَّ عَنِ الْفِعْلِ وَتَرْكَهُ، وَتَجْزِمُ الْفِعْلَ الْمُضَارِعَ؛ وَهِيَ غَيْرُ النَّافِيَةِ وَغَيْرُ النَّافِيَةِ لِلْجِنْسِ وَغَيْرِ الْعَاطِفَةِ.`,en:`${eq(t.word)} is lā al-nāhiyah: it asks for the act to be refrained from, and it makes the present verb مَجْزُومٌ. It is not the negating lā, not lā that negates a whole class, and not the conjunctive lā.`}),
  an:t=>({id:'WHY_PARTICLE_AN',ar:`${wq(t.word)} حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ، يَنْصِبُ الْفِعْلَ الْمُضَارِعَ بِنَفْسِهِ.`,en:`${eq(t.word)} is a particle of maṣdar, naṣb, and future meaning; it makes the present verb مَنْصُوبٌ by itself.`}),
  kay:t=>({id:'WHY_PARTICLE_KAY',ar:`${wq(t.word)} حَرْفُ مَصْدَرٍ وَنَصْبٍ، وَإِنَّمَا نَصَبَتْ بِنَفْسِهَا لِأَنَّ لَامَ التَّعْلِيلِ تَقَدَّمَتْهَا لَفْظًا.`,en:`${eq(t.word)} is a particle of maṣdar and naṣb; it makes the present verb مَنْصُوبٌ by itself precisely because لَامُ التَّعْلِيلِ explicitly precedes it.`}),
  [KAY_TALIL_LAM.particleType]:t=>({id:'WHY_PARTICLE_LAM_TALIL',ar:`${wq(t.word)} لَامُ التَّعْلِيلِ، تَدُلُّ عَلَى الْغَرَضِ، وَبِظُهُورِهَا قَبْلَ «كَيْ» نَصَبَتْ «كَيْ» بِنَفْسِهَا.`,en:`${eq(t.word)} is لَامُ التَّعْلِيلِ, which indicates purpose; its explicit appearance before «كَيْ» is what lets «كَيْ» govern by itself.`}),
@@ -12681,7 +12914,18 @@ function validateExercise(data){
   if(!(ordered&&relationships.some(rel=>rel.type==='kana'&&rel.governorId===kana[0].id&&rel.ismId===ismKana[0].id&&rel.khabarId===khabar.id)))fail('E_KANA_PAIR','Kāna structure is incomplete, out of order, or unlinked.');
  }
  if(data.tokens.some(item=>item.grammar.particleType==='lan')&&!/will not/i.test(data.translation))fail('E_LAN_TRANSLATION','Lan sentence lacks “will not” in its translation.');
- if(data.tokens.some(item=>item.grammar.particleType==='lam')&&!/did not/i.test(data.translation))fail('E_LAM_TRANSLATION','Lam sentence lacks “did not” in its translation.');
+ /* J1a widens this by exactly one shape. It was written when لَمْ only ever headed a plain negative
+    statement («He did not …»); under هَمْزَةُ التَّقْرِيرِ the same لَمْ heads a question («Did he not
+    …?»), which still carries both the negation and the past meaning this guard exists to protect.
+    At most one word may stand between, so «did» and «not» must still belong to one clause. */
+ if(data.tokens.some(item=>item.grammar.particleType==='lam')&&!/\bdid\b(?:\s+\w+)?\s+not\b/i.test(data.translation))fail('E_LAM_TRANSLATION','Lam sentence lacks “did not” in its translation.');
+ /* J1a — the same guard for each new jāzim, so an English translation can never quietly drift onto
+    a neighbouring identity. لَمَّا must keep its «not yet», and the command/prohibition pair is held
+    apart in BOTH directions: لَامُ الْأَمْرِ asks for the act, so its English may not carry a «not»,
+    while لَا النَّاهِيَةُ asks for it to be refrained from and must. */
+ if(data.tokens.some(item=>item.grammar.particleType==='lamma')&&!/not yet/i.test(data.translation))fail('E_LAMMA_TRANSLATION','Lammā sentence lacks “not yet” in its translation.');
+ if(data.tokens.some(item=>item.grammar.particleType==='lamAmr')&&(!/\blet\b/i.test(data.translation)||/\bnot\b/i.test(data.translation)))fail('E_LAM_AMR_TRANSLATION','Lām al-amr sentence does not read as an unnegated command in its translation.');
+ if(data.tokens.some(item=>item.grammar.particleType==='laNahiya')&&!/\blet\b(?:\s+\w+)?\s+not\b/i.test(data.translation))fail('E_LA_NAHIYA_TRANSLATION','Lā al-nāhiyah sentence does not read as a prohibition in its translation.');
  if(data.tokens.some(item=>item.grammar.particleType==='sawfa')&&!/\bwill\b/i.test(data.translation))fail('E_SAWFA_TRANSLATION','Sawfa sentence lacks future meaning in its translation.');
  /* Phase 3A1. كَيْ is tested first and more specifically: every لِكَيْ translation also contains
     "that", so testing أَنْ's looser pattern alone would let a كَيْ↔أَنْ swap slip through. */
@@ -14124,6 +14368,100 @@ const pickedMunada=keys=>buildMunadaExercise(pickVaried(keys,'munada-'+keys[0],S
 const laJinsMetadata=keys=>({laJinsPairKeys:keys});
 const pickedLaJins=()=>buildLaJinsExercise(pickVaried(LA_JINS_ALL_PAIR_KEYS,'la-jins',String));
 add('particle','singular','nasb','fatha',()=>pickedLaJins(),laJinsMetadata(LA_JINS_ALL_PAIR_KEYS));
+
+/* ===== J1a — the five remaining one-verb jawāzim, over both proven jazm regimes ==================
+   One builder serves every construction, because the grammar genuinely is the same: a jāzim stands
+   immediately before the present verb and makes it مجزوم, and the SIGN follows the verb's own
+   morphology — السكون for the ordinary sound-final form, حذف النون for the five verbs — never the
+   identity of the jāzim. What differs per construction is its particle identity and its English,
+   both of which come from the frozen ONE_VERB_JAWAZIM registry rather than from the builder.
+
+   The verb and its object are drawn from the SAME pools the لَمْ lane already uses, through the same
+   deterministic rotation, so every construction varies across the 24 registered verb families and
+   their objects, and no vocabulary is added for randomization's sake.
+
+   Registered LAST for the stable-ID reason documented at the Phase 2b-C block: ordinals are handed
+   out by registration order within each (starts, form, state, sign) family and stored History is
+   bound to them, so appending is the only safe placement. لَمْ keeps _01 in both families. */
+/* Every particle gloss and enHint here is the SAME value the canonical authority rebuilds on
+   restore, so a build and its History restoration cannot disagree. لَمْ keeps «did not» even under
+   the hamzah, which is exactly why the hamzah lanes spell their English out in literals. */
+const J1A_PARTICLE_EN=Object.freeze(Object.assign(Object.create(null),{
+ lam:'A particle of negation and jazm that gives past meaning.',
+ lamma:'A particle of negation and jazm that gives past meaning, with the negation continuing up to the moment of speaking.',
+ lamAmr:'Lām al-amr: a particle of jazm asking for the act to be brought about.',
+ laNahiya:'Lā al-nāhiyah: a particle of prohibition and jazm asking for the act to be refrained from.',
+ hamzatTaqrir:'Hamzat al-taqrīr, seeking acknowledgement of what follows. It is built and has no syntactic position, and it is not the jāzim.'
+}));
+const jawazimGloss=particleType=>Object.hasOwn(J1A_PARTICLE_GLOSSES,particleType)
+ ?J1A_PARTICLE_GLOSSES[particleType]
+ :GLOSS_CLOSED_PARTICLES[GRAMMAR_RULES.governors[particleType].surface];
+const jawazimParticleTokens=construction=>{
+ const record=ONE_VERB_JAWAZIM[construction];
+ const spec={lamma:AR.lamma,lamAmr:AR.lamAmr,laNahiya:AR.laNahiya,lam:AR.lam}[record.governorType];
+ const governorToken=token(record.surface,jawazimGloss(record.governorType),
+  spec(record.surface),J1A_PARTICLE_EN[record.governorType]);
+ // The hamzah precedes the jāzim; it never replaces it, so the governor token is always emitted.
+ return record.hamzah
+  ?[token(HAMZAT_TAQRIR.surface,J1A_PARTICLE_GLOSSES.hamzatTaqrir,
+     AR.hamzatTaqrir(HAMZAT_TAQRIR.surface),J1A_PARTICLE_EN.hamzatTaqrir),governorToken]
+  :[governorToken];
+};
+const jawazimSentence=(construction,verbSurface,object)=>{
+ const record=ONE_VERB_JAWAZIM[construction];
+ const head=record.hamzah?`${HAMZAT_TAQRIR.surface}${record.surface}`:record.surface;
+ // لِ is proclitic and joins what follows; لَمْ, لَمَّا and لَا are written as separate words.
+ const separator=record.governorType==='lamAmr'?'':' ';
+ return `${head}${separator}${verbSurface} ${object}`;
+};
+const JAWAZIM_ORDINARY_EN=Object.freeze(Object.assign(Object.create(null),{
+ lamma:(v,o)=>`He did not yet ${v.en} ${objectEnglish(o)}.`,
+ alam:(v,o)=>`Did he not ${v.en} ${objectEnglish(o)}?`,
+ alamma:(v,o)=>`Did he not yet ${v.en} ${objectEnglish(o)}?`,
+ lamAmr:(v,o)=>`Let him ${v.en} ${objectEnglish(o)}.`,
+ laNahiya:(v,o)=>`Let him not ${v.en} ${objectEnglish(o)}.`
+}));
+const JAWAZIM_FIVE_EN=Object.freeze(Object.assign(Object.create(null),{
+ lamma:(v,o)=>`They did not yet ${v.en} ${objectEnglish(o)}.`,
+ alam:(v,o)=>`Did they not ${v.en} ${objectEnglish(o)}?`,
+ alamma:(v,o)=>`Did they not yet ${v.en} ${objectEnglish(o)}?`,
+ lamAmr:(v,o)=>`Let them ${v.en} ${objectEnglish(o)}.`,
+ laNahiya:(v,o)=>`Let them not ${v.en} ${objectEnglish(o)}.`
+}));
+function buildJawazimOrdinaryExercise(construction){
+ const v=pickVaried(verbs,`jawazim-ordinary-verb:${construction}`,item=>item.pres);
+ const o=pickVaried(v.obj,`jawazim-ordinary-object:${construction}:${v.pres}`,String);
+ return{
+  sentence:jawazimSentence(construction,v.juss,o),
+  translation:JAWAZIM_ORDINARY_EN[construction](v,o),
+  tokens:[...jawazimParticleTokens(construction),
+   token(v.juss,v.en,AR.presentPred(v.juss),EN.present,true),
+   token(o,objectEnglish(o),AR.object(o),EN.object)]
+ };
+}
+function buildJawazimFiveVerbExercise(construction){
+ const v=pickVaried(verbs,`jawazim-five-verb:${construction}`,item=>item.pres);
+ const o=pickVaried(v.obj,`jawazim-five-object:${construction}:${v.pres}`,String);
+ const particles=jawazimParticleTokens(construction);
+ return{
+  sentence:jawazimSentence(construction,v.fiveSub,o),
+  translation:JAWAZIM_FIVE_EN[construction](v,o),
+  tokens:[...particles,
+   token(v.fiveSub,`they ${v.en}`,AR.presentFive(v.fiveSub),EN.fiveVerb,true),
+   token(o,objectEnglish(o),AR.object(o),EN.object)]
+ };
+}
+/* The order here IS the stable-ID order: _02 لَمَّا, _03 أَلَمْ, _04 أَلَمَّا, _05 لَامُ الْأَمْرِ,
+   _06 لَا النَّاهِيَةُ in both families, matching the TRANSLATION_STRUCTURE_MAP entries exactly. */
+const J1A_CONSTRUCTION_ORDER=Object.freeze(['lamma','alam','alamma','lamAmr','laNahiya']);
+J1A_CONSTRUCTION_ORDER.forEach(construction=>{
+ add('particle','present','jazm','sukun',()=>buildJawazimOrdinaryExercise(construction),
+  {...presentTemplateMetadata('3ms','implicit'),presentGovernor:ONE_VERB_JAWAZIM[construction].governorType});
+});
+J1A_CONSTRUCTION_ORDER.forEach(construction=>{
+ add('particle','fiveVerbs','jazm','nunDropped',()=>buildJawazimFiveVerbExercise(construction),
+  {...presentTemplateMetadata('3mp','attached'),presentGovernor:ONE_VERB_JAWAZIM[construction].governorType});
+});
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

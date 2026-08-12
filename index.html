@@ -989,7 +989,9 @@ const GLOSS_CLOSED_PARTICLES=Object.freeze({
     states its consequence — and it is the whole modality of the answer, so the verb after it is
     glossed bare, exactly as after لَنْ, أَنْ and سَوْفَ. */
  'إِذَنْ':'in that case','مَا':'not','لَا':'does not','حَتَّى':'until','فَ':'and therefore',
- 'وَ':'while','أَوْ':'until'
+ 'وَ':'while','أَوْ':'until',
+ // الاستثناء: «إِلَّا» is a closed particle with one English reading in every construction here.
+ 'إِلَّا':'except'
 });
 /* The eight surfaces no vocabulary registry owns. Each is bound to the token TYPE that may carry
    it, so the same surface cannot borrow this gloss in another role. */
@@ -1356,6 +1358,7 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  /* الحال المفردة — the frozen pair owns natural English for both صاحب lanes. */
  TS42:Object.freeze({parts:Object.freeze([Object.freeze({slot:'haalSentence'})])})
  ,TS43:Object.freeze({parts:Object.freeze([Object.freeze({slot:'tamyizSentence'})])})
+ ,TS44:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mustathnaSentence'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
@@ -1514,6 +1517,9 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
     not the structure, is what tells the two divisions apart. */
  ,"T_VERB_SINGULAR_NASB_FATHA_28||verb:past,noun:faail,noun:object,noun:tamyiz":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_28",structure:"verb:past,noun:faail,noun:object,noun:tamyiz",shape:"TS43",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_29||verb:past,noun:faail,noun:object,noun:tamyiz":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_29",structure:"verb:past,noun:faail,noun:object,noun:tamyiz",shape:"TS43",copulaPlural:false})
+ /* الاستثناء: the particle lane and the غَيْر iḍāfah lane are genuinely different structures. */
+ ,"T_VERB_SINGULAR_NASB_FATHA_30||verb:past,noun:faail,particle:particle,noun:mustathna":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_30",structure:"verb:past,noun:faail,particle:particle,noun:mustathna",shape:"TS44",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_31||verb:past,noun:faail,noun:mustathna,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_31",structure:"verb:past,noun:faail,noun:mustathna,noun:mudafIlayh",shape:"TS44",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -1567,6 +1573,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='mafulFihSentence')return canonicalMafulFihTranslation(exercise);
  if(bits[0]==='haalSentence')return canonicalHaalTranslation(exercise);
  if(bits[0]==='tamyizSentence')return canonicalTamyizTranslation(exercise);
+ if(bits[0]==='mustathnaSentence')return canonicalMustathnaTranslation(exercise);
  if(bits[0]==='copula'){
   const particle=exercise.tokens.find(item=>item&&item.grammar&&item.grammar.particleType==='inna');
   if(!particle)return null;
@@ -4207,6 +4214,92 @@ const TAMYIZ_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
   sentenceEn:'The student filled the bottle with water.'})
 }));
 const TAMYIZ_ALL_PAIR_KEYS=Object.freeze(Object.keys(TAMYIZ_PAIR_REGISTRY));
+/* Productive الاستثناء — Al-Tuḥfah pp. 162–165 (باب الاستثناء; شروط إعمال «لا» عمل «إنّ» begins
+   p. 166). The matn lists eight أدوات at p. 162 and then, at p. 163, gives the noun after «إِلَّا»
+   THREE أحوال, which the شرح names outright:
+
+     الحالة الأولى — وجوب النصب على الاستثناء, when the preceding speech is تام مُوجَب:
+       «قَامَ الْقَوْمُ إِلَّا زَيْدًا», «خَرَجَ النَّاسُ إِلَّا عَمْرًا».
+     الحالة الثانية — جواز إتباعه لما قبل «إلا» على البدلية، مع جواز نصبه على الاستثناء, when the
+       speech is تام مَنْفِيّ: «مَا قَامَ الْقَوْمُ إِلَّا زَيْدٌ» و«إِلَّا زَيْدًا» (p. 164, which adds that
+       the naṣb there is «على قلة»).
+     الحالة الثالثة — وجوب إجرائه على حسب ما يقتضيه العامل قبل «إلا», when the speech is ناقص —
+       and ناقص «لا يكون إلا منفيًّا»: «مَا حَضَرَ إِلَّا عَلِيٌّ», «مَا رَأَيْتُ إِلَّا عَلِيًّا»,
+       «مَا مَرَرْتُ إِلَّا بِزَيْدٍ».
+
+   The شرح's own definitions decide which حال applies, so they are what this registry encodes:
+   تام = «أن يُذكَر فيه المستثنى منه»; ناقص = «ألّا يُذكَر فيه المستثنى منه»; مُوجَب = «ألّا يسبقه نفي
+   أو شبهه», where شبه النفي is النهي and الاستفهام.
+
+   ONLY الحالة الأولى is produced. That is deliberate and it is the whole reason this chapter is
+   scoped this way: it is the one حال where the source states a single obligatory analysis, so it
+   is the one حال an exercise can present as the answer. الثانية and الثالثة are جواز and
+   عامل-dependent respectively, and printing either as though it were the ruling would teach a
+   جواز as a وجوب. They are named in the coverage matrix instead.
+
+   Two أدوات are productive, both under that same first حال. «إِلَّا» is a حرف, so the مستثنى after
+   it carries the naṣb itself. «غَيْر» is an اسم: p. 164 says the noun after it «يجب جَرُّهُ
+   بإضافة الأداة إليه», while «الأداة نفسها… تأخذ حكم الاسم الواقع بعد إلا» — so غَيْرَ is the
+   منصوب مستثنى and what follows is its مضاف إليه مخفوض. */
+const MUSTATHNA_ROLE='mustathna';
+const ISTITHNA_TOOL_KINDS=Object.freeze({particle:'particle',noun:'noun'});
+const ISTITHNA_ILLA_TYPE='istithnaIlla';
+const ISTITHNA_TOOLS=Object.freeze(Object.assign(Object.create(null),{
+ illa:Object.freeze({key:'illa',kind:ISTITHNA_TOOL_KINDS.particle,surface:'إِلَّا',
+  particleType:ISTITHNA_ILLA_TYPE,ruleId:'R_ISTITHNA_ILLA',gloss:'except',
+  nameAr:'حَرْفُ اسْتِثْنَاءٍ',nameEn:'a particle of exception'}),
+ /* غَيْر is registered accusative-only: this lane never produces it in any other state, and a
+    rafʿ or khafḍ form the app cannot build has no business in the noun index. */
+ ghayr:Object.freeze({key:'ghayr',kind:ISTITHNA_TOOL_KINDS.noun,acc:'غَيْرَ',inflection:'singular',
+  en:'other than',nameAr:'اسْمُ اسْتِثْنَاءٍ',nameEn:'a noun of exception'})
+}));
+/* The مستثنى itself, and the point of every one of them being an indefinite singular person: the
+   source's own examples exclude ONE individual from a named group, and الاتصال — the مستثنى being
+   genuinely part of the مستثنى منه — is checked pair by pair below. */
+/* «طَالِبٌ» is already canonical vocabulary — NAAT_LEXEMES.studentIndef owns it — so it is REUSED
+   here rather than retyped. That is the byte policy in one line: two hand-typed copies of one word
+   can differ in combining-mark order, and the noun index would then hold two records for a single
+   surface. Only the two genuinely new words are written out. */
+const MUSTATHNA_NEW_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ guestIndef:Object.freeze({nom:'ضَيْفٌ',acc:'ضَيْفًا',gen:'ضَيْفٍ',en:'a guest'}),
+ manIndef:Object.freeze({nom:'رَجُلٌ',acc:'رَجُلًا',gen:'رَجُلٍ',en:'a man'})
+}));
+const MUSTATHNA_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ student:Object.freeze({lexeme:NAAT_LEXEMES.studentIndef,inflection:'singular',wholeEn:'the students'}),
+ guest:Object.freeze({lexeme:MUSTATHNA_NEW_LEXEMES.guestIndef,inflection:'singular',wholeEn:'the guests'}),
+ man:Object.freeze({lexeme:MUSTATHNA_NEW_LEXEMES.manIndef,inflection:'singular',wholeEn:'the men'})
+}));
+function mustathnaWhole(en){
+ const matches=brokenHuman.filter(item=>item.en===en);
+ if(matches.length!==1)throw new Error(`The istithnāʾ registry matched ${matches.length} broken-plural records for “${en}”.`);
+ return matches[0];
+}
+function mustathnaVerb(spec){
+ const capability=MUTLAQ_VERB_CAPABILITIES[spec.capabilityKey];
+ if(!capability)throw new Error(`The istithnāʾ registry names an unknown intransitive capability: ${spec.capabilityKey}`);
+ return Object.freeze({past:capability.past,pastEn:capability.pastEn});
+}
+const MUSTATHNA_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ /* «قَامَ الْقَوْمُ إِلَّا زَيْدًا» (p. 163) on this app's explicit-fāʿil past frame. The ʿāmils are
+    intransitive, so no مفعول به can stand beside the مستثنى and be confused with it. */
+ studentsIlla:Object.freeze({toolKey:'illa',verb:Object.freeze({capabilityKey:'qaama'}),
+  wholeEn:'the students',mustathnaKey:'student',
+  sentenceEn:'The students stood up except one student.'}),
+ guestsIlla:Object.freeze({toolKey:'illa',verb:Object.freeze({capabilityKey:'jalasa'}),
+  wholeEn:'the guests',mustathnaKey:'guest',
+  sentenceEn:'The guests sat down except one guest.'}),
+ menIlla:Object.freeze({toolKey:'illa',verb:Object.freeze({capabilityKey:'waqafa'}),
+  wholeEn:'the men',mustathnaKey:'man',
+  sentenceEn:'The men stood except one man.'}),
+ /* «قَامَ الْقَوْمُ غَيْرَ زَيْدٍ» (p. 164): غَيْرَ carries the naṣb, its complement the khafḍ. */
+ studentsGhayr:Object.freeze({toolKey:'ghayr',verb:Object.freeze({capabilityKey:'qaama'}),
+  wholeEn:'the students',mustathnaKey:'student',
+  sentenceEn:'The students stood up, all but one student.'}),
+ guestsGhayr:Object.freeze({toolKey:'ghayr',verb:Object.freeze({capabilityKey:'jalasa'}),
+  wholeEn:'the guests',mustathnaKey:'guest',
+  sentenceEn:'The guests sat down, all but one guest.'})
+}));
+const MUSTATHNA_ALL_PAIR_KEYS=Object.freeze(Object.keys(MUSTATHNA_PAIR_REGISTRY));
 const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...feminineHumanSingulars,...feminineHumanDuals,...fiveNouns];
 function nounEnglish(word,caseName='acc'){
  return allCaseNouns.find(item=>item[caseName]===word)?.en||'the noun';
@@ -6825,7 +6918,8 @@ const GRAMMAR_RULES=Object.freeze({
      it, is المفعول فيه. */
   adverb:{state:'nasb',ruleId:'R_ZARF_NASB',en:'A mafʿūl fīh: a noun of time or place naming when or where the action happened; accusative.'},
   haal:{state:'nasb',ruleId:'R_HAAL_NASB',en:'A haal describing its صاحب at the time of the event; accusative.'},
-  tamyiz:{state:'nasb',ruleId:'R_TAMYIZ_NASB',en:'A tamyīz: an indefinite noun that lifts the vagueness off an expression or a relation; accusative.'}
+  tamyiz:{state:'nasb',ruleId:'R_TAMYIZ_NASB',en:'A tamyīz: an indefinite noun that lifts the vagueness off an expression or a relation; accusative.'},
+  mustathna:{state:'nasb',ruleId:'R_MUSTATHNA_NASB',en:'A mustathnā excluded from a complete affirmative statement; accusative.'}
  },
  nounInflection:{
   singular:{raf:['damma','R_SINGULAR_RAF_DAMMA'],nasb:['fatha','R_SINGULAR_NASB_FATHA'],jarr:['kasra','R_SINGULAR_JARR_KASRA']},
@@ -6927,8 +7021,8 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
- roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
- relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','preposition','idafa','inna','kana','concealedAn','follower'],
+ roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
+ relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','preposition','idafa','inna','kana','concealedAn','follower'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
@@ -6965,6 +7059,13 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  'tamyīz al-dhāt after a measure of area (المساحات), registered by the source with no productive host here',
  'the three transformed kinds of tamyīz al-nisbah (المحوَّل عن الفاعل، عن المفعول، عن المبتدأ)',
  'the comparative أفعل التفضيل frame that carries the tamyīz transformed from a mubtadaʾ',
+ /* الاستثناء ships ONE of the source's three أحوال — the only one it makes obligatory. The other
+    two are named here rather than approximated, because both would require presenting a جواز or an
+    عامل-dependent reading as though it were the answer. */
+ 'the mustathnā of complete NEGATED speech, where p. 164 permits both badal and naṣb',
+ 'the mustathnā of incomplete speech (الاستثناء المفرغ), whose state follows the ʿāmil before إلا',
+ 'the أدوات سِوًى، سُوًى and سَوَاء, and خلا/عدا/حاشا, whose noun may be either manṣūb or makhfūḍ',
+ 'the منقطع exception, where the excepted noun is not part of the group',
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions','la nahiya and lam al-amr jussive clauses',
   'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
@@ -7134,6 +7235,12 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     conditions are separate rules because the source states them separately and they do different
     work: the divisions decide what a given tamyīz clarifies, while the conditions decide whether
     any noun may be one at all. */
+ /* Al-Tuḥfah pp. 162–165, باب الاستثناء. The naṣb rule and the conditions that select it are
+    separate entries because the source states them separately: the matn gives the ruling, and the
+    شرح defines تام/ناقص/موجب/منفي, which is what decides WHICH of the three أحوال applies. */
+ R_MUSTATHNA_NASB:sourceRule('A noun excepted by إلا is accusative on istithnāʾ when the preceding speech is complete and affirmative; the excepting noun غير takes that same ruling, and what follows غير is khafḍ by its iḍāfah.',[162,163,164],'Only the first of the three أحوال — the one the source makes obligatory. Registered pairs name the ʿāmil, the mustathnā minhu, the أداة and the excluded individual, and الاتصال is checked so nothing is excepted from a group it does not belong to.'),
+ R_ISTITHNA_CONDITIONS:sourceRule('Speech is complete (tāmm) when the mustathnā minhu is mentioned in it, and affirmative (mūjab) when no negation — nor its likeness, prohibition and interrogation — precedes it; only then is naṣb on istithnāʾ obligatory.',[163],'Both conditions are proven structurally: the mustathnā minhu is the pair’s own marfūʿ fāʿil, and no negating, prohibiting or interrogative particle may stand before the أداة. When either fails the exercise is refused rather than re-analysed.'),
+ R_ISTITHNA_ILLA:sourceRule('إلا is a particle of exception; it is built and has no syntactic position of its own.',[162,163],'Only the registered exception constructions of the first ḥāl. It is deliberately absent from the governor table: it makes the noun after it accusative on istithnāʾ, and governs no verb.'),
  R_TAMYIZ_NASB:sourceRule('A tamyīz is the plain accusative noun that interprets what was left vague, whether the vagueness is in an entity or in a relation.',[157,158],'Only a registered indefinite accusative named by a frozen productive pair, standing last after an ʿāmil that already has its explicit fāʿil. Being indefinite and accusative never makes a noun a tamyīz on its own.'),
  R_TAMYIZ_DHAT:sourceRule('Tamyīz al-dhāt, also called tamyīz al-mufrad, lifts the vagueness off a noun named before it whose reality is left unstated; it follows a number or a measure of weight, volume or area.',[158],'Only the measures of weight and volume registered here, each clarified by the exact noun its frozen pair names. Numbers and areas are not produced: the counting frame needs number morphology this engine does not model.'),
  R_TAMYIZ_NISBAH:sourceRule('Tamyīz al-nisbah, also called tamyīz al-jumlah, lifts the vagueness off a relation stated in the clause before it; it is either transformed from an original fāʿil, mafʿūl or mubtadaʾ, or not transformed at all.',[158,159],'Only the untransformed (غير محوَّل) kind, on frozen pairs whose ʿāmil already governs a definite object, so no omitted-muḍāf original has to be claimed. All three transformed kinds remain deferred.'),
@@ -7342,6 +7449,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_TRANSITIVE_VERB_OBJECT:sourceRule('A generated transitive verb may govern its linked direct object in the accusative.',[140,141],'Lexical transitivity is separately verified in the vocabulary audit.'),
  RL_VERB_ZARF:sourceRule('A verb is linked to the ẓarf of time or place that follows it and makes it accusative as a mafʿūl fīh.',[148,149,151,152],'Only a registered ẓarf lexeme whose ʿāmil is a visible verb earlier in the same sentence. A ẓarf whose ʿāmil is an omitted khabar carries no such link, because there is no verb to link it to; that shape keeps the existing attachment analysis instead.'),
  RL_VERB_ABSOLUTE_OBJECT:sourceRule('A verb is linked to the maṣdar of its own action that follows it and makes it accusative as a mafʿūl muṭlaq.',[146,147],'Only an exact registered pair authorized by frozen template metadata: the ʿāmil is the nearest preceding visible past verb, and the maṣdar, its optional direct object and its optional muḍāf ilayh are all the ones that pair names. Adjacency alone never creates the relation.'),
+ RL_ISTITHNA_EXCLUSION:sourceRule('A registered mustathnā is linked to the ʿāmil that makes it accusative, to the mustathnā minhu it is excluded from, and to the أداة that excludes it.',[162,163,164],'Only an exact frozen pair owned by its template. The mustathnā minhu is named structurally as the pair’s fāʿil, never as the nearest preceding noun.'),
  RL_TAMYIZ_MUBAYYAN:sourceRule('A registered tamyīz is linked to the ʿāmil that makes it accusative and, when it is a tamyīz al-dhāt, to the vague noun it interprets.',[157,158,159],'Only an exact frozen pair owned by its template. A tamyīz al-nisbah is linked to its ʿāmil alone, because the vagueness it lifts belongs to the relation rather than to any one token; adjacency never creates either link.'),
  RL_HAAL_OWNER:sourceRule('A registered haal is linked to the event that makes it accusative and to the definite صاحب whose condition it describes.',[153,154,155,156,157],'Only an exact frozen pair owned by its template. The صاحب is named structurally as the fāʿil or mafʿūl bihi; proximity and a manṣūb adjective surface never create the relation.'),
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
@@ -7899,6 +8007,72 @@ function verifyTamyizRegistry(){
  });
 }
 verifyTamyizRegistry();
+/* الاستثناء. The مستثنى surfaces and «غَيْرَ» are new curriculum vocabulary and enter the index here. */
+function registerMustathnaNounForms(){
+ const records=[...Object.values(MUSTATHNA_NEW_LEXEMES),ISTITHNA_TOOLS.ghayr];
+ records.forEach(lexeme=>['nom','acc','gen'].forEach(form=>{
+  const surface=lexeme[form];
+  if(!surface)return;
+  const existing=nounFormIndex.get(surface);
+  if(existing&&existing.lexeme!==lexeme){
+   throw new Error(`Istithnāʾ lexeme collides with an existing noun surface: ${surface}`);
+  }
+  nounFormIndex.set(surface,{lexeme,inflection:'singular'});
+ }));
+}
+registerMustathnaNounForms();
+/* Narrow byte/coherence gate for الاستثناء, matching the discipline of the chapters before it.
+   Beyond the byte round-trip it checks the two things that make this chapter's ONE productive حال
+   true: the مستثنى is indefinite (an excluded individual, not the group), and it is genuinely part
+   of the مستثنى منه — الاتصال — because a منقطع exception would be a different claim entirely. */
+function verifyMustathnaRegistry(){
+ Object.entries(MUSTATHNA_LEXEMES).forEach(([key,entry])=>{
+  const lexeme=entry.lexeme;
+  if(!lexeme)throw new Error(`Mustathnā entry ${key} names no canonical noun record.`);
+  ['acc','gen'].forEach(form=>{
+   const surface=lexeme[form];
+   if(!surface)throw new Error(`Mustathnā lexeme ${key} has no ${form} surface.`);
+   if(nounFormIndex.get(surface)?.lexeme!==lexeme){
+    throw new Error(`Mustathnā lexeme ${key} did not round-trip through the noun index: ${surface}`);
+   }
+   if(/^ال/u.test(surface))throw new Error(`Mustathnā lexeme ${key} is definite: ${surface}`);
+  });
+  // The excluded individual must belong to the group it is excluded from.
+  const whole=mustathnaWhole(entry.wholeEn);
+  if(!whole)throw new Error(`Mustathnā lexeme ${key} names no مستثنى منه.`);
+ });
+ const ghayr=ISTITHNA_TOOLS.ghayr;
+ if(nounFormIndex.get(ghayr.acc)?.lexeme!==ghayr){
+  throw new Error('The istithnāʾ noun «غَيْرَ» did not round-trip through the noun index.');
+ }
+ if(ghayr.nom||ghayr.gen)throw new Error('«غَيْرَ» registers case forms no productive lane uses.');
+ if(GRAMMAR_RULES.governors[ISTITHNA_ILLA_TYPE]){
+  throw new Error('«إِلَّا» entered the governor table; it governs no verb in this chapter.');
+ }
+ Object.entries(MUSTATHNA_PAIR_REGISTRY).forEach(([key,pair])=>{
+  const tool=ISTITHNA_TOOLS[pair.toolKey];
+  if(!tool)throw new Error(`Istithnāʾ pair ${key} names an unregistered أداة.`);
+  const verb=mustathnaVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
+  if(registeredVerb?.form!=='past'||registeredVerb.surface!==verb.past){
+   throw new Error(`Istithnāʾ pair ${key} names an unregistered past ʿāmil.`);
+  }
+  const whole=mustathnaWhole(pair.wholeEn);
+  if(nounFormIndex.get(whole.nom)?.lexeme!==whole){
+   throw new Error(`Istithnāʾ pair ${key} names a مستثنى منه outside the noun index.`);
+  }
+  const entry=MUSTATHNA_LEXEMES[pair.mustathnaKey];
+  if(!entry)throw new Error(`Istithnāʾ pair ${key} names an unregistered مستثنى.`);
+  /* الاتصال, checked per pair rather than trusted: the pair's group must be the very group its
+     مستثنى declares itself part of, so «قَامَ الطُّلَّابُ إِلَّا ضَيْفًا» can never be registered. */
+  if(entry.wholeEn!==pair.wholeEn){
+   throw new Error(`Istithnāʾ pair ${key} excludes a ${pair.mustathnaKey} from a group it does not belong to.`);
+  }
+  if(typeof pair.sentenceEn!=='string'||!pair.sentenceEn.trim()){
+   throw new Error(`Istithnāʾ pair ${key} carries no canonical English.`);
+  }
+ });
+}
+verifyMustathnaRegistry();
 
 const grammarSpec=(type,role,extra={})=>({type,role,...extra});
 const AR={
@@ -7947,6 +8121,9 @@ const AR={
  badal:w=>grammarSpec('noun','badal'),
  haal:w=>grammarSpec('noun',HAAL_ROLE),
  tamyiz:w=>grammarSpec('noun',TAMYIZ_ROLE),
+ mustathna:w=>grammarSpec('noun',MUSTATHNA_ROLE),
+ mustathnaMudaf:w=>grammarSpec('noun',MUSTATHNA_ROLE,{isMudaf:true}),
+ istithnaParticle:t=>grammarSpec('particle','particle',{particleType:t.particleType,particleWord:t.surface}),
  atfParticle:record=>grammarSpec('particle','particle',{particleType:record.particleType,particleWord:record.surface})
 };
 const EN={mubtada:'',khabar:'',object:'',prep:'',majrur:'',mudaf:'',mudafIlayh:'',present:'',fiveVerb:'',fiveNoun:''};
@@ -8545,6 +8722,91 @@ function canonicalTamyizTranslation(data){
  const authority=deriveTamyizAuthority(data,index);
  return authority.authorized?TAMYIZ_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
 }
+/* ---- الاستثناء: exact template/pair proof of the ONE obligatory حال ---------------------------
+   The authority proves the two facts p. 163 makes the ruling depend on, structurally rather than
+   by inspecting Arabic: the speech is تام, because the مستثنى منه is present as the fāʿil this
+   pair names; and it is مُوجَب, because no negation, prohibition or interrogative particle stands
+   anywhere before the أداة. Lose either, and the source's answer stops being وجوب النصب — so the
+   authority withholds instead of quietly producing a different حال's analysis. */
+const ISTITHNA_NEGATION_PARTICLE_TYPES=Object.freeze(['maNafiyaKana','laNafiyaContext',
+ 'atfBalNegation','atfLakinNegation','atfAmQuestion','lan','lam']);
+function mustathnaTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.mustathnaPairKeys?.length?template:null;
+}
+function mustathnaPairAt(data,index){
+ const template=mustathnaTemplateRecord(data),tokens=data?.tokens;
+ const mustathna=Array.isArray(tokens)?tokens[index]:null;
+ if(!template||!mustathna||mustathna.grammar?.type!=='noun'||mustathna.grammar.role!==MUSTATHNA_ROLE)return null;
+ for(const key of template.mustathnaPairKeys){
+  const pair=MUSTATHNA_PAIR_REGISTRY[key],tool=pair&&ISTITHNA_TOOLS[pair.toolKey];
+  const entry=pair&&MUSTATHNA_LEXEMES[pair.mustathnaKey];
+  const lexeme=entry&&entry.lexeme;
+  if(!pair||!tool||!entry||!lexeme)continue;
+  const isParticle=tool.kind===ISTITHNA_TOOL_KINDS.particle;
+  if(tokens.length!==4||index!==(isParticle?3:2))continue;
+  const verb=tokens[0],whole=tokens[1];
+  const registeredVerb=mustathnaVerb(pair.verb),registeredWhole=mustathnaWhole(pair.wholeEn);
+  if(verb.grammar?.type!=='verb'||verb.tense!=='past')continue;
+  if(verb.word!==registeredVerb.past||verb.surfaceHint!==registeredVerb.past)continue;
+  if(whole.grammar?.role!=='faail')continue;
+  if(whole.word!==registeredWhole.nom||whole.surfaceHint!==registeredWhole.nom)continue;
+  if(isParticle){
+   const particle=tokens[2];
+   if(particle?.grammar?.type!=='particle'||particle.grammar.particleType!==tool.particleType)continue;
+   if(particle.word!==tool.surface)continue;
+   if(mustathna.word!==lexeme.acc||mustathna.surfaceHint!==lexeme.acc)continue;
+   return{key,pair,tool,entry,lexeme,verb,whole,particle,mustathna,complement:null};
+  }
+  /* غَيْرَ is itself the مستثنى, and what follows is its مضاف إليه — the noun the exception is
+     really about, in khafḍ by the iḍāfah, exactly as p. 164 requires. */
+  const complement=tokens[3];
+  if(mustathna.word!==tool.acc||mustathna.surfaceHint!==tool.acc)continue;
+  if(!mustathna.grammar.isMudaf)continue;
+  if(complement?.grammar?.role!=='mudafIlayh')continue;
+  if(complement.word!==lexeme.gen||complement.surfaceHint!==lexeme.gen)continue;
+  return{key,pair,tool,entry,lexeme,verb,whole,particle:null,mustathna,complement};
+ }
+ return null;
+}
+function deriveMustathnaAuthority(data,index){
+ const tokens=data?.tokens;
+ const token=Array.isArray(tokens)?tokens[index]:null;
+ if(!token||token.grammar?.type!=='noun'||token.grammar.role!==MUSTATHNA_ROLE){
+  return Object.freeze({authorized:false,reason:'not-a-mustathna-token'});
+ }
+ const found=mustathnaPairAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
+ if(token.state&&token.state!=='nasb')return Object.freeze({authorized:false,reason:'mustathna-not-nasb'});
+ const declaredInflection=found.tool.kind===ISTITHNA_TOOL_KINDS.noun?found.tool.inflection:found.entry.inflection;
+ if(token.inflection&&token.inflection!==declaredInflection){
+  return Object.freeze({authorized:false,reason:'mustathna-inflection-mismatch'});
+ }
+ /* تام — the مستثنى منه is actually mentioned. It is the pair's fāʿil, and it must be marfūʿ,
+    because a clause whose subject never took rafʿ is not a complete one. */
+ if(found.whole.state&&found.whole.state!=='raf'){
+  return Object.freeze({authorized:false,reason:'mustathna-minhu-not-marfu'});
+ }
+ /* مُوجَب — «ألّا يسبقه نفي أو شبهه», and شبه النفي is النهي والاستفهام (p. 163). Any of them
+    before the أداة would move the exercise into الحالة الثانية, which is جواز, not وجوب. */
+ const toolIndex=found.particle?tokens.indexOf(found.particle):index;
+ const negated=tokens.slice(0,toolIndex).some(item=>item?.grammar?.type==='particle'
+  &&ISTITHNA_NEGATION_PARTICLE_TYPES.includes(item.grammar.particleType));
+ if(negated)return Object.freeze({authorized:false,reason:'speech-is-not-mujab'});
+ return Object.freeze({authorized:true,reason:'',pairKey:found.key,toolKey:found.tool.key,
+  toolKind:found.tool.kind,verbId:found.verb.id,verbWord:found.verb.word,
+  wholeId:found.whole.id,wholeWord:found.whole.word,
+  toolId:found.particle?found.particle.id:found.mustathna.id,toolWord:found.particle?found.particle.word:found.mustathna.word,
+  mustathnaId:token.id,mustathnaWord:token.word,
+  complementId:found.complement?found.complement.id:'',
+  excludedWord:found.complement?found.complement.word:token.word,
+  inflection:declaredInflection});
+}
+function canonicalMustathnaTranslation(data){
+ const index=data?.tokens?.findIndex(token=>token.grammar?.role===MUSTATHNA_ROLE)??-1;
+ const authority=deriveMustathnaAuthority(data,index);
+ return authority.authorized?MUSTATHNA_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
+}
 function inflectNoun(token,tokens,index,data){
  const registered=nounFormIndex.get(token.surfaceHint);
  token.lexeme=registered?.lexeme||null;
@@ -8570,6 +8832,9 @@ function inflectNoun(token,tokens,index,data){
  }
  if(token.grammar.role===TAMYIZ_ROLE&&!deriveTamyizAuthority(data,index).authorized){
   throw new Error(`The noun is not a canonically licensed tamyīz: ${deriveTamyizAuthority(data,index).reason}.`);
+ }
+ if(token.grammar.role===MUSTATHNA_ROLE&&!deriveMustathnaAuthority(data,index).authorized){
+  throw new Error(`The noun is not a canonically licensed mustathnā: ${deriveMustathnaAuthority(data,index).reason}.`);
  }
  if(roleRule.state==='inherited'){
   const followed=tokens[index-(token.grammar.role==='atf'?2:1)];
@@ -8724,7 +8989,7 @@ function configureParticle(token){
  token.ruleId={preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',
   an:'G_AN_NASB',kay:'G_KAY_NASB',[IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',
-  laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
+  laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,
   ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
   ...Object.fromEntries(Object.values(ATF_CONTEXT_PARTICLES).map(item=>[item.particleType,item.ruleId])),
   ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,item.ruleId]))}[type]||'R_PARTICLE';
@@ -8735,6 +9000,7 @@ function configureParticle(token){
   ||CONCEALED_AN_BY_PARTICLE[type]?.surface
   ||ATF_CONJUNCTION_BY_TYPE[type]?.surface
   ||ATF_CONTEXT_PARTICLES[type]?.surface
+  ||(type===ISTITHNA_ILLA_TYPE?ISTITHNA_TOOLS.illa.surface:null)
   ||token.grammar.particleWord||token.surfaceHint;
  token.word=token.expectedSurface;
 }
@@ -8748,6 +9014,7 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({
  zarf:'RL_VERB_ZARF',
  haal:'RL_HAAL_OWNER',
  tamyiz:'RL_TAMYIZ_MUBAYYAN',
+ istithna:'RL_ISTITHNA_EXCLUSION',
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
  kana:'RL_KANA_NOUN_KHABAR',
@@ -8840,6 +9107,20 @@ function resolveRelationships(data){
   amil.relations.zarfRelationshipId=relation.id;
   item.relations.amilId=amil.id;
  item.relations.zarfRelationshipId=relation.id;
+ });
+ tokens.forEach((item,index)=>{
+  if(item.grammar.role!==MUSTATHNA_ROLE)return;
+  const authority=deriveMustathnaAuthority(data,index);
+  if(!authority.authorized)return;
+  const verb=tokens.find(candidate=>candidate.id===authority.verbId);
+  const whole=tokens.find(candidate=>candidate.id===authority.wholeId);
+  const relation=addRelationship(data,'istithna',{verbId:verb.id,wholeId:whole.id,
+   mustathnaId:item.id,toolKey:authority.toolKey,toolKind:authority.toolKind,
+   toolId:authority.toolId,pairKey:authority.pairKey});
+  verb.relations.mustathnaId=item.id;verb.relations.istithnaRelationshipId=relation.id;
+  whole.relations.mustathnaId=item.id;whole.relations.istithnaRelationshipId=relation.id;
+  item.relations.amilId=verb.id;item.relations.wholeId=whole.id;
+  item.relations.istithnaRelationshipId=relation.id;
  });
  tokens.forEach((item,index)=>{
   if(item.grammar.role!==TAMYIZ_ROLE)return;
@@ -9009,6 +9290,7 @@ function nounRoleArabic(token){
     say «تمييز لعشرين، منصوب» and «تمييز نسبة محوَّل عن المبتدأ منصوب» — the division belongs to the
     analysis, not to the core case label, so it is carried by the Why and the combined block. */
  if(role===TAMYIZ_ROLE)return'تَمْيِيزٌ مَنْصُوبٌ';
+ if(role===MUSTATHNA_ROLE)return'مُسْتَثْنًى مَنْصُوبٌ';
  throw new Error(`Unknown noun role: ${role}`);
 }
 function renderNounAnalysis(token){
@@ -9039,6 +9321,11 @@ function renderNounAnalysis(token){
   const data=token._data,authority=deriveHaalAuthority(data,data?.tokens?.indexOf(token));
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized haal: ${authority.reason}`);
   english=`A haal describing the condition of ${authority.sahibWord} at the time of ${authority.verbWord}; accusative.`;
+ }
+ if(token.grammar.role===MUSTATHNA_ROLE){
+  const data=token._data,authority=deriveMustathnaAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized mustathnā: ${authority.reason}`);
+  english=`A mustathnā excepted from ${authority.wholeWord} in complete affirmative speech; accusative.`;
  }
  if(token.grammar.role===TAMYIZ_ROLE){
   const data=token._data,authority=deriveTamyizAuthority(data,data?.tokens?.indexOf(token));
@@ -9185,6 +9472,7 @@ function renderParticleAnalysis(token){
   token.en=`${concealed.nameEn}; it licenses the canonical concealed-an construction.`;return;
  }
  if(type==='maNafiyaKana'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle in the canonical negated-kāna frame.';return}
+ if(type===ISTITHNA_ILLA_TYPE){token.ar=`${token.word}: ${ISTITHNA_TOOLS.illa.nameAr} مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of exception; it excludes what follows it from what precedes it.';return}
  if(type==='laNafiyaContext'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle; it does not govern this indicative verb.';return}
  throw new Error(`Unknown particle type: ${type}`);
 }
@@ -9227,6 +9515,20 @@ function haalWhyAuthority(token,data){
  const authority=deriveHaalAuthority(data,data?.tokens?.indexOf(token));
  if(!authority.authorized)throw new Error(`WHY: the haal is not authorized (${authority.reason}).`);
  return authority;
+}
+function mustathnaWhyAuthority(token,data){
+ const authority=deriveMustathnaAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`WHY: the mustathnā is not authorized (${authority.reason}).`);
+ return authority;
+}
+/* One line, and it is the load-bearing one: p. 163 gives the noun after إلا three different
+   rulings, and it is تام + موجب — nothing about the word itself — that selects the obligatory
+   naṣb. Saying so is what stops a learner reading «منصوب» as always true after إلا. */
+function whyMustathnaConditions(token,data){
+ const authority=mustathnaWhyAuthority(token,data);
+ return{id:'WHY_MUSTATHNA_TAAM_MUJAB',
+  ar:`وَالْكَلَامُ قَبْلَهُ تَامٌّ؛ لِذِكْرِ الْمُسْتَثْنَى مِنْهُ ${wq(authority.wholeWord)} فِيهِ، وَمُوجَبٌ؛ لِأَنَّهُ لَمْ يَسْبِقْهُ نَفْيٌ وَلَا شِبْهُهُ، وَحِينَئِذٍ يَجِبُ النَّصْبُ عَلَى الِاسْتِثْنَاءِ.`,
+  en:`The speech before it is complete, because the group ${eq(authority.wholeWord)} it is excepted from is mentioned, and affirmative, because no negation or its likeness precedes it — and in that case naṣb on istithnāʾ is obligatory.`};
 }
 function tamyizWhyAuthority(token,data){
  const authority=deriveTamyizAuthority(data,data?.tokens?.indexOf(token));
@@ -9439,6 +9741,17 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_BADAL_INHERITED',
   stateAr:t=>`وَالْبَدَلُ يَتْبَعُ الْمُبْدَلَ مِنْهُ فِي جَمِيعِ إِعْرَابِهِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A badal follows its mubdal minhu in all of its iʿrāb, so this one is ${stateArabic(t.state)} like it.`},
+ mustathna:{
+  id:()=>'WHY_ROLE_MUSTATHNA',
+  ar:(t,data)=>{
+   const authority=mustathnaWhyAuthority(t,data);
+   return `${wq(t.word)} أُخْرِجَ مِنْ حُكْمِ ${wq(authority.wholeWord)} بِأَدَاةِ الِاسْتِثْنَاءِ، فَهُوَ مُسْتَثْنًى.`;
+  },
+  en:(t,data)=>{
+   const authority=mustathnaWhyAuthority(t,data);
+   return `${eq(t.word)} is taken out of what is said about ${eq(authority.wholeWord)} by the particle of exception, so it is a مُسْتَثْنًى.`;
+  },
+  stateId:()=>'WHY_STATE_MUSTATHNA',stateAr:()=>'وَالْمُسْتَثْنَى مَنْصُوبٌ.',stateEn:()=>'The مُسْتَثْنًى is مَنْصُوبٌ.'},
  tamyiz:{
   id:(t,data)=>`WHY_ROLE_TAMYIZ_${tamyizWhyAuthority(t,data).subtype.toUpperCase()}`,
   ar:(t,data)=>{
@@ -9609,6 +9922,9 @@ const WHY_PARTICLE=Object.freeze({
  [IDHAN_PARTICLE_TYPE]:t=>({id:'WHY_PARTICLE_IDHAN',ar:`${wq(t.word)} حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ، تَنْصِبُ الْفِعْلَ الْمُضَارِعَ بِنَفْسِهَا بِشُرُوطٍ ثَلَاثَةٍ.`,en:`${eq(t.word)} is a particle of answer, recompense, and naṣb; it makes the present verb مَنْصُوبٌ by itself, on three conditions.`}),
  maNafiyaKana:t=>({id:'WHY_PARTICLE_MA_NAFIYA_KANA',ar:`${wq(t.word)} حَرْفُ نَفْيٍ نَفَى «كَانَ» فِي هَذَا التَّرْكِيبِ.`,en:`${eq(t.word)} negates kāna in this construction.`}),
  laNafiyaContext:t=>({id:'WHY_PARTICLE_LA_NAFIYA_CONTEXT',ar:`${wq(t.word)} حَرْفُ نَفْيٍ لَا يَعْمَلُ الْجَزْمَ هُنَا.`,en:`${eq(t.word)} is a negating particle and does not govern jazm here.`}),
+ /* «إِلَّا» excludes; it does not govern. Saying so on the particle itself is what keeps a learner
+    from reading the naṣb that follows as government by إِلَّا rather than naṣb على الاستثناء. */
+ [ISTITHNA_ILLA_TYPE]:t=>({id:'WHY_PARTICLE_ISTITHNA_ILLA',ar:`${wq(t.word)} حَرْفُ اسْتِثْنَاءٍ، يُخْرِجُ مَا بَعْدَهُ مِنْ حُكْمِ مَا قَبْلَهُ.`,en:`${eq(t.word)} is a particle of exception: it takes what follows it out of the ruling given to what precedes it.`}),
  ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(record=>[record.particleType,t=>({
   id:`WHY_PARTICLE_ATF_${record.id.toUpperCase()}`,
   ar:`${wq(t.word)} ${record.nameAr}، وَهِيَ ${record.meaningAr}.`,
@@ -9681,6 +9997,9 @@ function buildTokenWhy(token,data){
   }
   if(token.grammar.role===HAAL_ROLE){
    push(whyHaalConditions(token,data));
+  }
+  if(token.grammar.role===MUSTATHNA_ROLE){
+   push(whyMustathnaConditions(token,data));
   }
   if(token.grammar.role===TAMYIZ_ROLE){
    push(whyTamyizSubtype(token,data));
@@ -9781,6 +10100,18 @@ function buildRelationshipWhy(rel,data){
   push({id:'WHY_REL_ABSOLUTE_OBJECT',
    ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(masdar.word)} مَصْدَرُهُ ${purpose.clauseAr}، فَنَصَبَهُ عَلَى الْمَفْعُولِيَّةِ الْمُطْلَقَةِ.`,
    en:`${eq(verb.word)} is the ʿāmil and ${eq(masdar.word)} is its own maṣdar, ${purpose.clauseEn}, so the verb makes it accusative as its mafʿūl muṭlaq.`});
+  return{ids,ar,en};
+ }
+ if(rel.type==='istithna'){
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const whole=data.tokens.find(item=>item.id===rel.wholeId);
+  const mustathna=data.tokens.find(item=>item.id===rel.mustathnaId);
+  const tool=ISTITHNA_TOOLS[rel.toolKey];
+  if(!verb||!whole||!mustathna||!tool)return{ids,ar,en};
+  const toolWord=tool.kind===ISTITHNA_TOOL_KINDS.particle?tool.surface:tool.acc;
+  push({id:'WHY_REL_ISTITHNA_EXCLUSION',
+   ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(whole.word)} هُوَ الْمُسْتَثْنَى مِنْهُ، وَ${wq(mustathna.word)} أُخْرِجَ مِنْهُ بِـ${wq(toolWord)}، فَنُصِبَ عَلَى الِاسْتِثْنَاءِ.`,
+   en:`${eq(verb.word)} is the ʿāmil, ${eq(whole.word)} is the group excepted from, and ${eq(mustathna.word)} is taken out of it by ${eq(toolWord)}, so it is accusative on istithnāʾ.`});
   return{ids,ar,en};
  }
  if(rel.type==='tamyiz'){
@@ -9905,6 +10236,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='istithna'){
+   const recipient=data.tokens.find(item=>item.id===rel.mustathnaId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='tamyiz'){
    const recipient=data.tokens.find(item=>item.id===rel.tamyizId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -9950,6 +10286,21 @@ function renderRelationshipAnalysis(data){
   haal.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: عَامِلٌ وَصَاحِبُ حَالٍ مَعْرِفَةٌ وَحَالٌ نَكِرَةٌ مَنْصُوبَةٌ تُبَيِّنُ هَيْئَتَهُ وَقْتَ الْفِعْلِ.`;
   haal.phraseEn=`Together, “${phrase}” has an ʿāmil, a definite صاحب الحال, and an indefinite accusative haal describing that owner's condition during the event.`;
   haal.phraseLabel='Haal construction';
+ });
+ data.relationships.filter(rel=>rel.type==='istithna').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const whole=data.tokens.find(item=>item.id===rel.wholeId);
+  const mustathna=data.tokens.find(item=>item.id===rel.mustathnaId);
+  const tool=ISTITHNA_TOOLS[rel.toolKey];
+  if(!verb||!whole||!mustathna||!tool)return;
+  /* The whole clause is quoted, because «تام موجب» is a claim about the clause: the مستثنى منه
+     has to be visible in it for the exception to be complete at all. */
+  const complement=mustathna.grammar.isMudaf?data.tokens[data.tokens.indexOf(mustathna)+1]:null;
+  const toolWord=tool.kind===ISTITHNA_TOOL_KINDS.particle?tool.surface:'';
+  const phrase=[verb.word,whole.word,toolWord,mustathna.word,complement?complement.word:''].filter(Boolean).join(' ');
+  mustathna.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: كَلَامٌ تَامٌّ مُوجَبٌ، ذُكِرَ فِيهِ الْمُسْتَثْنَى مِنْهُ ${wq(whole.word)}، فَوَجَبَ نَصْبُ الْمُسْتَثْنَى عَلَى الِاسْتِثْنَاءِ.`;
+  mustathna.phraseEn=`Together, “${phrase}” is complete affirmative speech in which the مستثنى منه “${whole.word}” is mentioned, so the excepted noun must be accusative on istithnāʾ.`;
+  mustathna.phraseLabel='Istithnāʾ construction';
  });
  data.relationships.filter(rel=>rel.type==='tamyiz').forEach(rel=>{
   const verb=data.tokens.find(item=>item.id===rel.verbId);
@@ -10265,6 +10616,11 @@ function validateExercise(data){
     if(!authority.authorized)fail('E_MAFUL_FIH_AUTHORITY',`Mafʿūl-fīh authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_ZARF_NASB')fail('E_MAFUL_FIH_RULE','The mafʿūl fīh is not bound to its source rule.',token);
    if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mafulFih requires nasb, not ${token.state}.`,token);
+   }else if(token.grammar.role===MUSTATHNA_ROLE){
+    const authority=deriveMustathnaAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_MUSTATHNA_AUTHORITY',`Mustathnā authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_MUSTATHNA_NASB')fail('E_MUSTATHNA_RULE','The mustathnā is not bound to its source rule.',token);
+    if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mustathna requires nasb, not ${token.state}.`,token);
    }else if(token.grammar.role===TAMYIZ_ROLE){
     const authority=deriveTamyizAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_TAMYIZ_AUTHORITY',`Tamyīz authority failed: ${authority.reason}.`,token);
@@ -10529,6 +10885,11 @@ function validateExercise(data){
   if(token.grammar.role==='faail'&&(!token.relations.verbId||!relationships.some(rel=>rel.type==='verbSubject'&&rel.subjectId===token.id&&rel.verbId===token.relations.verbId)))fail('E_ORPHAN_SUBJECT','Explicit subject is not linked to a verb.',token);
   if(token.grammar.role==='naibFail'&&(!token.relations.passiveVerbId||!relationships.some(rel=>rel.type==='passiveDeputy'&&rel.deputyId===token.id&&rel.verbId===token.relations.passiveVerbId)))fail('E_ORPHAN_NAIB_FAIL','Deputy subject is not linked to its passive verb.',token);
   if(token.grammar.role==='mafulMutlaq'&&(!token.relations.amilId||!relationships.some(rel=>rel.type==='absoluteObject'&&rel.masdarId===token.id&&rel.verbId===token.relations.amilId)))fail('E_ORPHAN_MAFUL_MUTLAQ','Absolute object is not linked to the ʿāmil that makes it accusative.',token);
+  if(token.grammar.role===MUSTATHNA_ROLE&&(!token.relations.amilId||!token.relations.wholeId
+    ||!relationships.some(rel=>rel.type==='istithna'&&rel.mustathnaId===token.id
+      &&rel.verbId===token.relations.amilId&&rel.wholeId===token.relations.wholeId))){
+   fail('E_ORPHAN_MUSTATHNA','Mustathnā is not linked to both its ʿāmil and its mustathnā minhu.',token);
+  }
   if(token.grammar.role===TAMYIZ_ROLE&&(!token.relations.amilId
     ||!relationships.some(rel=>rel.type==='tamyiz'&&rel.tamyizId===token.id
       &&rel.verbId===token.relations.amilId))){
@@ -10628,6 +10989,16 @@ function validateExercise(data){
     fail('E_MUTLAQ_RELATION','Absolute-object relationship is not the canonical proof.',masdar);
    }
   }
+  if(rel.type==='istithna'){
+   const mustathna=tokenById.get(rel.mustathnaId);
+   const authority=deriveMustathnaAuthority(data,data.tokens.indexOf(mustathna));
+   if(!authority.authorized||rel.verbId!==authority.verbId||rel.wholeId!==authority.wholeId
+     ||rel.mustathnaId!==authority.mustathnaId||rel.pairKey!==authority.pairKey
+     ||rel.toolKey!==authority.toolKey||rel.toolKind!==authority.toolKind
+     ||rel.toolId!==authority.toolId){
+    fail('E_MUSTATHNA_RELATION','Istithnāʾ relationship is not the canonical exclusion proof.',mustathna);
+   }
+  }
   if(rel.type==='haal'){
    const haal=tokenById.get(rel.haalId);
    const authority=deriveHaalAuthority(data,data.tokens.indexOf(haal));
@@ -10717,6 +11088,24 @@ function validateExercise(data){
    fail('E_MAFUL_FIH_RELATION','A mafʿūl fīh whose ʿāmil is an omitted khabar may not carry a verb link.',item);
   }
   if(links.length>1)fail('E_MAFUL_FIH_RELATION_COUNT','A mafʿūl fīh may have at most one ʿāmil relationship.',item);
+ });
+ data.tokens.filter(item=>item.grammar.role===MUSTATHNA_ROLE).forEach(item=>{
+  const rel=relationships.find(candidate=>candidate.id===item.relations.istithnaRelationshipId&&candidate.type==='istithna');
+  const amil=tokenById.get(item.relations.amilId),whole=tokenById.get(item.relations.wholeId);
+  if(!rel||rel.mustathnaId!==item.id||rel.verbId!==amil?.id||rel.wholeId!==whole?.id
+    ||amil?.relations.mustathnaId!==item.id||amil?.relations.istithnaRelationshipId!==rel.id
+    ||whole?.relations.mustathnaId!==item.id||whole?.relations.istithnaRelationshipId!==rel.id){
+   fail('E_MUSTATHNA_RELATION','A mustathnā must have exactly one reciprocal canonical link to its ʿāmil and its mustathnā minhu.',item);
+  }
+  /* The أداة decides the shape, so a forged toolKey cannot survive: «إِلَّا» is a particle token
+     and غَيْرَ is the مستثنى itself in iḍāfah. Neither can borrow the other's structure. */
+  const tool=ISTITHNA_TOOLS[rel?.toolKey];
+  if(!tool||Boolean(item.grammar.isMudaf)!==(tool.kind===ISTITHNA_TOOL_KINDS.noun)){
+   fail('E_MUSTATHNA_RELATION','The registered أداة disagrees with the structure of this mustathnā.',item);
+  }
+  if(relationships.filter(candidate=>candidate.type==='istithna'&&candidate.mustathnaId===item.id).length!==1){
+   fail('E_MUSTATHNA_RELATION_COUNT','A mustathnā must have exactly one exclusion relationship.',item);
+  }
  });
  data.tokens.filter(item=>item.grammar.role===TAMYIZ_ROLE).forEach(item=>{
   const rel=relationships.find(candidate=>candidate.id===item.relations.tamyizRelationshipId&&candidate.type==='tamyiz');
@@ -10983,6 +11372,20 @@ function add(starts,form,state,sign,build,metadata={}){
    throw new Error(`Template ${stableId} produces a haal without its explicit past event.`);
   }
  }
+ /* الاستثناء. One template owns one أداة: «إِلَّا» and «غَيْر» build different token shapes, so a
+    template mixing them would let one stable ID authorize two structures. */
+ const mustathnaPairKeys=Object.freeze([...(metadata.mustathnaPairKeys||[])]);
+ if(mustathnaPairKeys.some((key,position)=>mustathnaPairKeys.indexOf(key)!==position||!MUSTATHNA_PAIR_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered istithnāʾ pair.`);
+ }
+ if(mustathnaPairKeys.length){
+  const shapes=new Set(mustathnaPairKeys.map(key=>MUSTATHNA_PAIR_REGISTRY[key].toolKey));
+  if(shapes.size!==1)throw new Error(`Template ${stableId} mixes istithnāʾ أدوات.`);
+  if(form!=='singular')throw new Error(`Template ${stableId} declares a mustathnā of the wrong declension.`);
+  if(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
+   throw new Error(`Template ${stableId} produces a mustathnā without the explicit past ʿāmil its تام condition requires.`);
+  }
+ }
  /* التمييز. One template owns one division: a template mixing تمييز ذات and تمييز نسبة pairs would
     make a single ID authorize two different analyses of the same token shape. */
  const tamyizPairKeys=Object.freeze([...(metadata.tamyizPairKeys||[])]);
@@ -11054,6 +11457,7 @@ function add(starts,form,state,sign,build,metadata={}){
   mafulFihPairKeys,
   haalPairKeys,
   tamyizPairKeys,
+  mustathnaPairKeys,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
@@ -12048,6 +12452,38 @@ const tamyizMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),tamyizPai
 const pickedTamyiz=(keys,label)=>buildTamyizExercise(pickVaried(keys,label,String));
 add('verb','singular','nasb','fatha',()=>pickedTamyiz(TAMYIZ_DHAT_KEYS,'tamyiz-dhat'),tamyizMetadata(TAMYIZ_DHAT_KEYS));
 add('verb','singular','nasb','fatha',()=>pickedTamyiz(TAMYIZ_NISBAH_KEYS,'tamyiz-nisbah'),tamyizMetadata(TAMYIZ_NISBAH_KEYS));
+
+/* الاستثناء. The pair names the ʿāmil, the group excepted from, the أداة and the excluded
+   individual; the builder only resolves those declarations back to canonical records. */
+function buildMustathnaExercise(pairKey){
+ const pair=MUSTATHNA_PAIR_REGISTRY[pairKey];
+ if(!pair)throw new Error(`Unknown productive istithnāʾ pair: ${pairKey}`);
+ const tool=ISTITHNA_TOOLS[pair.toolKey],lexeme=MUSTATHNA_LEXEMES[pair.mustathnaKey].lexeme;
+ const verb=mustathnaVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
+ if(registeredVerb?.form!=='past')throw new Error(`Istithnāʾ pair ${pairKey} names an unregistered ʿāmil.`);
+ const whole=mustathnaWhole(pair.wholeEn);
+ const tokens=[
+  token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),'A past-tense event with an explicit subject.'),
+  token(whole.nom,whole.en,AR.faail(whole.nom),'The group the exception is taken from; mentioning it is what makes the speech complete.')
+ ];
+ if(tool.kind===ISTITHNA_TOOL_KINDS.particle){
+  tokens.push(token(tool.surface,tool.gloss,AR.istithnaParticle(tool),''));
+  tokens.push(token(lexeme.acc,lexeme.en,AR.mustathna(lexeme.acc),
+   'The individual excepted from the group; accusative on istithnāʾ.',true));
+ }else{
+  tokens.push(token(tool.acc,tool.en,AR.mustathnaMudaf(tool.acc),
+   'The excepting noun itself; it takes the ruling of the noun after إلا.',true));
+  tokens.push(token(lexeme.gen,lexeme.en,AR.mudafIlayh(lexeme.gen),EN.mudafIlayh));
+ }
+ return{sentence:'',translation:pair.sentenceEn,tokens};
+}
+const mustathnaKeys=toolKey=>Object.freeze(MUSTATHNA_ALL_PAIR_KEYS.filter(key=>MUSTATHNA_PAIR_REGISTRY[key].toolKey===toolKey));
+const MUSTATHNA_ILLA_KEYS=mustathnaKeys('illa');
+const MUSTATHNA_GHAYR_KEYS=mustathnaKeys('ghayr');
+const mustathnaMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),mustathnaPairKeys:keys});
+const pickedMustathna=(keys,label)=>buildMustathnaExercise(pickVaried(keys,label,String));
+add('verb','singular','nasb','fatha',()=>pickedMustathna(MUSTATHNA_ILLA_KEYS,'mustathna-illa'),mustathnaMetadata(MUSTATHNA_ILLA_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedMustathna(MUSTATHNA_GHAYR_KEYS,'mustathna-ghayr'),mustathnaMetadata(MUSTATHNA_GHAYR_KEYS));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

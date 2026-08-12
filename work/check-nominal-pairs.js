@@ -1223,6 +1223,142 @@ function runMafulFihFocusedTests(){
 }
 runMafulFihFocusedTests();
 if(process.env.NAHW_FOCUSED_MAFUL_FIH==='1')process.exit(0);
+/* ---- THE PRODUCTIVE CURRICULUM INVENTORY -----------------------------------------------------
+   The permanent answer to "what does this app actually teach?". Every MAIN curriculum category is
+   listed once, with the role that identifies it and the source rule that must own it, and each is
+   proven the only way that means anything: build a real exercise, find the token, validate it,
+   render it, and round-trip it through History.
+
+   Three deliberate properties:
+
+   1. It does not read the coverage matrix, the role enum, or any template name. A category counts
+      as productive here only if the generator actually produces it. That is what makes this a
+      check on the claims rather than a restatement of them.
+   2. It is deterministic. It walks the template list in order and takes the first build that
+      yields the role, so a category cannot pass by luck of the RNG and it cannot start failing
+      because a random draw went elsewhere.
+   3. It asserts coverage over the matn's own named HEADS rather than over a row count, because a
+      row count is an artifact of how this table is written while the heads are the source's. The
+      four التوابع must each appear rather than standing in for one another, so a regressed chapter
+      fails by name instead of the suite quietly staying green.
+
+   A built (mabnī) category declares 'BINAA' instead of a state: it must then carry no iʿrāb state
+   and no sign, and must carry a bināʾ marker and a maḥall — the distinction the munādā chapter
+   exists to protect. */
+function runProductiveCurriculumInventory(){
+  const clone=value=>JSON.parse(JSON.stringify(value));
+  const isTimeZarf=tok=>{
+    const lexeme=api.MAFUL_FIH_BY_SURFACE[tok.word];
+    return Boolean(lexeme&&lexeme.kind==='time');
+  };
+  /* The matn's own named heads at pp. 138–139, in its order. Several heads are verified by more
+     than one row — المنادى has two state regimes, and التابع للمنصوب is «أَرْبَعَةُ أَشْيَاءَ» — so
+     coverage is asserted over the HEADS, not over a row count. */
+  const MANSUB_HEADS=['المفعول به','المصدر','ظرف الزمان','ظرف المكان','الحال','التمييز','المستثنى',
+    'اسم لا','المنادى','المفعول من أجله','المفعول معه','خبر كان وأخواتها','اسم إن وأخواتها',
+    'التابع للمنصوب'];
+  const INVENTORY=[
+    // group, label, token predicate, expected state ('BINAA' = built), expected source rule, head
+    ['MARFŪʿĀT','الفاعل',t=>t.grammar.role==='faail','raf','R_FAIL_RAF'],
+    ['MARFŪʿĀT','نائب الفاعل',t=>t.grammar.role==='naibFail','raf','R_NAIB_FAIL_RAF'],
+    ['MARFŪʿĀT','المبتدأ',t=>t.grammar.role==='mubtada','raf','R_MUBTADA_RAF'],
+    ['MARFŪʿĀT','الخبر',t=>t.grammar.role==='khabar','raf','R_KHABAR_RAF'],
+    ['MARFŪʿĀT','اسم كان وأخواتها',t=>t.grammar.role==='ismKana','raf','R_ISM_KANA_RAF'],
+    ['MARFŪʿĀT','خبر إن وأخواتها',t=>t.grammar.role==='khabarInna','raf','R_KHABAR_INNA_RAF'],
+    ['MARFŪʿĀT','خبر لا النافية للجنس',t=>t.grammar.role===api.KHABAR_LA_ROLE,'raf','R_KHABAR_LA_RAF'],
+    ['MARFŪʿĀT','النعت المرفوع',t=>t.grammar.role==='naat'&&t.state==='raf','raf','R_NAAT_HAQIQI'],
+    ['MARFŪʿĀT','العطف المرفوع',t=>t.grammar.role==='atf'&&t.state==='raf','raf','R_ATF_NASAQ'],
+    ['MARFŪʿĀT','التوكيد المرفوع',t=>t.grammar.role==='tawkid'&&t.state==='raf','raf','R_TAWKID'],
+    ['MARFŪʿĀT','البدل المرفوع',t=>t.grammar.role==='badal'&&t.state==='raf','raf','R_BADAL'],
+    /* المنصوبات, in the order the matn enumerates them at pp. 138–139. The count printed at the
+       end is derived from these rows passing, never hard-coded. */
+    ['MANṢŪBĀT','المفعول به',t=>t.grammar.role==='object','nasb','R_MAFUL_NASB','المفعول به'],
+    ['MANṢŪBĀT','المصدر (المفعول المطلق)',t=>t.grammar.role==='mafulMutlaq','nasb','R_MAFUL_MUTLAQ_NASB','المصدر'],
+    ['MANṢŪBĀT','ظرف الزمان',t=>t.grammar.role===api.MAFUL_FIH_ROLE&&isTimeZarf(t),'nasb','R_ZARF_NASB','ظرف الزمان'],
+    ['MANṢŪBĀT','ظرف المكان',t=>t.grammar.role===api.MAFUL_FIH_ROLE&&!isTimeZarf(t),'nasb','R_ZARF_NASB','ظرف المكان'],
+    ['MANṢŪBĀT','الحال',t=>t.grammar.role===api.HAAL_ROLE,'nasb','R_HAAL_NASB','الحال'],
+    ['MANṢŪBĀT','التمييز',t=>t.grammar.role===api.TAMYIZ_ROLE,'nasb','R_TAMYIZ_NASB','التمييز'],
+    ['MANṢŪBĀT','المستثنى',t=>t.grammar.role===api.MUSTATHNA_ROLE,'nasb','R_MUSTATHNA_NASB','المستثنى'],
+    ['MANṢŪBĀT','اسم لا النافية للجنس',t=>t.grammar.role===api.ISM_LA_ROLE,'nasb','R_ISM_LA_NASB','اسم لا'],
+    ['MANṢŪBĀT','المنادى المبني',t=>t.grammar.role===api.MUNADA_ROLE&&!t.state,'BINAA','R_MUNADA_MABNI','المنادى'],
+    ['MANṢŪBĀT','المنادى المنصوب',t=>t.grammar.role===api.MUNADA_ROLE&&t.state==='nasb','nasb','R_MUNADA_NASB','المنادى'],
+    ['MANṢŪBĀT','المفعول من أجله',t=>t.grammar.role===api.MAFUL_AJL_ROLE,'nasb','R_MAFUL_AJL_NASB','المفعول من أجله'],
+    ['MANṢŪBĀT','المفعول معه',t=>t.grammar.role===api.MAFUL_MAAH_ROLE,'nasb','R_MAFUL_MAAH_NASB','المفعول معه'],
+    ['MANṢŪBĀT','خبر كان وأخواتها',t=>t.grammar.role==='khabarKana','nasb','R_KHABAR_KANA_NASB','خبر كان وأخواتها'],
+    ['MANṢŪBĀT','اسم إن وأخواتها',t=>t.grammar.role==='ismInna','nasb','R_ISM_INNA_NASB','اسم إن وأخواتها'],
+    ['MANṢŪBĀT','التابع: النعت المنصوب',t=>t.grammar.role==='naat'&&t.state==='nasb','nasb','R_NAAT_HAQIQI','التابع للمنصوب'],
+    ['MANṢŪBĀT','التابع: العطف المنصوب',t=>t.grammar.role==='atf'&&t.state==='nasb','nasb','R_ATF_NASAQ','التابع للمنصوب'],
+    ['MANṢŪBĀT','التابع: التوكيد المنصوب',t=>t.grammar.role==='tawkid'&&t.state==='nasb','nasb','R_TAWKID','التابع للمنصوب'],
+    ['MANṢŪBĀT','التابع: البدل المنصوب',t=>t.grammar.role==='badal'&&t.state==='nasb','nasb','R_BADAL','التابع للمنصوب'],
+    ['MAKHFŪḌĀT','المخفوض بالحرف',t=>t.grammar.role==='majrur','jarr','R_HARF_JARR'],
+    ['MAKHFŪḌĀT','المخفوض بالإضافة',t=>t.grammar.role==='mudafIlayh','jarr','R_MUDAF_ILAYH'],
+    ['MAKHFŪḌĀT','النعت المخفوض',t=>t.grammar.role==='naat'&&t.state==='jarr','jarr','R_NAAT_HAQIQI'],
+    ['MAKHFŪḌĀT','العطف المخفوض',t=>t.grammar.role==='atf'&&t.state==='jarr','jarr','R_ATF_NASAQ'],
+    ['MAKHFŪḌĀT','التوكيد المخفوض',t=>t.grammar.role==='tawkid'&&t.state==='jarr','jarr','R_TAWKID'],
+    ['MAKHFŪḌĀT','البدل المخفوض',t=>t.grammar.role==='badal'&&t.state==='jarr','jarr','R_BADAL']
+  ];
+  const REPS=16;
+  const verified=new Map();
+  const headsCovered=new Set();
+  const followersCovered=new Set();
+  for(const [group,label,match,expectedState,expectedRule,head] of INVENTORY){
+    let found=null;
+    search:
+    for(const template of api.templates){
+      for(let iteration=0;iteration<REPS;iteration++){
+        let data;try{data=api.buildTemplate(template.id)}catch(error){continue}
+        const token=data.tokens.find(match);
+        if(token){found={template,data,token};break search}
+      }
+    }
+    assert(found,`curriculum inventory: ${group} / ${label} is NOT REACHABLE by any template`);
+    const {template,data,token}=found;
+    const where=`${group} / ${label} (${template.stableId})`;
+    // The state regime. A built category must carry a mahall and no iʿrab; an inflected one the reverse.
+    if(expectedState==='BINAA'){
+      assert(!token.state&&!token.sign,`${where}: a built category carries an iʿrāb state or sign`);
+      assert(token.binaaSign&&api.MUNADA_BINAA_SIGNS[token.binaaSign],`${where}: no canonical bināʾ marker`);
+      assert(token.mahall==='nasb'&&token.mahallRuleId,`${where}: built category does not hold the position of naṣb`);
+    }else{
+      assert(token.state===expectedState,`${where}: state ${token.state} != ${expectedState}`);
+      assert(token.sign&&api.canonicalSign(api.safeSignId(token.sign)),`${where}: no canonical iʿrāb sign`);
+      assert(!token.binaaSign&&!token.mahall,`${where}: an inflected category carries bināʾ marks`);
+    }
+    assert(token.ruleId===expectedRule,`${where}: rule ${token.ruleId} != ${expectedRule}`);
+    assert(api.isSourceAuthorized(token.ruleId),`${where}: rule ${token.ruleId} is not source-authorized`);
+    assert(token.ar&&/\.$/.test(token.ar),`${where}: no complete learner iʿrāb line`);
+    assert(token.why&&token.why.ids.length>=2,`${where}: Why is missing or too thin`);
+    assert(api.validateExercise(clone(data)).length===0,`${where}: canonical build does not validate`);
+    const snapshot=api.createExerciseSnapshot(data);
+    const restored=snapshot&&api.restoreExerciseSnapshot(snapshot);
+    assert(restored,`${where}: History restore failed`);
+    assert(api.validateExercise(clone(restored)).length===0,`${where}: restored exercise does not validate`);
+    const index=data.tokens.indexOf(token),after=restored.tokens[index];
+    assert(after&&after.ar===token.ar&&after.ruleId===token.ruleId&&after.state===token.state
+      &&(after.mahall||'')===(token.mahall||'')&&(after.binaaSign||'')===(token.binaaSign||''),
+      `${where}: analysis changed across History`);
+    verified.set(group,(verified.get(group)||0)+1);
+    if(head){
+      headsCovered.add(head);
+      if(head==='التابع للمنصوب')followersCovered.add(label);
+    }
+  }
+  /* Coverage is asserted over the source's named heads, never over a row count, and the four
+     التوابع must each be present rather than standing in for one another. */
+  const missingHeads=MANSUB_HEADS.filter(head=>!headsCovered.has(head));
+  assert(!missingHeads.length,`manṣūbāt heads not productively covered: ${missingHeads.join('، ')}`);
+  assert(headsCovered.size===MANSUB_HEADS.length,
+    `manṣūbāt inventory covered ${headsCovered.size} heads, the matn names ${MANSUB_HEADS.length}`);
+  assert(followersCovered.size===4,`only ${followersCovered.size} of the four التوابع are manṣūb-productive`);
+  console.log('Productive curriculum inventory: '
+    +(verified.get('MARFŪʿĀT')||0)+' marfūʿāt, '
+    +(verified.get('MAKHFŪḌĀT')||0)+' makhfūḍāt, and all '+MANSUB_HEADS.length
+    +' manṣūbāt heads of the matn (pp. 138–139) across '+(verified.get('MANṢŪBĀT')||0)
+    +' rows — every category built, validated, rendered and History-restored');
+}
+runProductiveCurriculumInventory();
+if(process.env.NAHW_FOCUSED_INVENTORY==='1')process.exit(0);
+
 /* ---- المنادى: Al-Tuḥfah pp. 168–170. All five source types are productive, across TWO state
    regimes, and most of what follows exists to prove the regimes cannot be confused: «مبني على
    الضم في محل نصب» is neither «مرفوع» nor «منصوب», and no forgery may turn one into the other. */

@@ -1217,6 +1217,17 @@ function resolveCanonicalTokenGloss(data,token,index){
   const duaaVerb=Object.values(DUAA_LEXEMES).find(item=>item.juss===surface);
   if(duaaVerb)return duaaVerb.en;
  }
+ /* Phase 2 — every conditional أداة glosses from its own frozen record. Resolved here rather than
+    spread into the closed table above, which is declared long before the registry exists. */
+ /* أَيّ's complement belongs to no general pool, so without this History would rebuild it as
+    «the noun» and refuse the snapshot. Bound to the muḍāf-ilayh role it actually holds. */
+ if(type==='noun'&&token.grammar?.role==='mudafIlayh'){
+  const complement=Object.values(CONDITION_COMPLEMENTS).find(item=>item.gen===surface);
+  if(complement)return complement.en;
+ }
+ if(type==='particle'&&CONDITION_GOVERNORS[token.grammar?.particleType||'']){
+  return CONDITION_GOVERNORS[token.grammar.particleType].gloss;
+ }
  if(type==='particle'&&Object.hasOwn(J1A_PARTICLE_GLOSSES,token.grammar?.particleType||'')){
   return J1A_PARTICLE_GLOSSES[token.grammar.particleType];
  }
@@ -1582,6 +1593,19 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_PARTICLE_SINGULAR_NASB_FATHA_15||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_15",structure:"particle:particle,verb:present,noun:object",shape:"TS66",copulaPlural:false}),
  "T_PARTICLE_SINGULAR_NASB_FATHA_16||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_16",structure:"particle:particle,verb:present,noun:object",shape:"TS66",copulaPlural:false}),
  "T_PARTICLE_PRESENT_JAZM_SUKUN_09||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_09",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ /* Phase 2 — one lane per أداة. أَيّ carries its complement, so its structure has four segments. */
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_10||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_10",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_11||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_11",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_12||particle:particle,noun:mudafIlayh,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_12",structure:"particle:particle,noun:mudafIlayh,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_13||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_13",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_14||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_14",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_15||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_15",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_16||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_16",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_17||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_17",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_18||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_18",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_19||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_19",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_20||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_20",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_PRESENT_JAZM_SUKUN_21||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_21",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
  "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
  "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01",structure:"particle:particle,verb:present,noun:faail",shape:"TS59",copulaPlural:false}),
@@ -7362,7 +7386,17 @@ function deriveConditionAuthority(data,index){
  if(!governor)return conditionRefusal('head-is-not-a-conditional-governor');
  if(head.word!==governor.surface)return conditionRefusal('head-is-not-its-canonical-bytes');
  if(head.ruleId!==governor.ruleId)return conditionRefusal('head-does-not-carry-its-own-rule');
- const shart=tokens[1],jawab=tokens[2];
+ /* أَيّ is the one أداة that cannot stand alone: p. 81 exemplifies it as «أَيَّ كِتَابٍ تَقْرَأْ …»,
+    an iḍāfah. So its complement occupies index 1 and its two verbs shift right by one, and a frame
+    that declares the complement must actually have it. */
+ const offset=governor.requiresComplement?1:0;
+ if(governor.requiresComplement){
+  const complement=tokens[1];
+  if(!complement||complement.grammar?.type!=='noun'||complement.grammar.role!=='mudafIlayh'){
+   return conditionRefusal('the-adah-requires-a-complement-and-has-none');
+  }
+ }
+ const shart=tokens[1+offset],jawab=tokens[2+offset];
  if(!shart||!jawab||shart.grammar?.type!=='verb'||jawab.grammar?.type!=='verb'){
   return conditionRefusal('the-two-verbs-are-not-in-their-canonical-positions');
  }
@@ -7370,7 +7404,7 @@ function deriveConditionAuthority(data,index){
   return conditionRefusal('the-two-conditional-roles-are-not-in-their-canonical-order');
  }
  // The frame is identified by the ORDERED pair, so swapping the verbs identifies no frame at all.
- const frameKey=CONDITION_FRAME_BY_PAIR[shart.word+'|'+jawab.word];
+ const frameKey=CONDITION_FRAME_BY_PAIR[conditionFramePairKey(governor.id,shart.word,jawab.word)];
  if(!frameKey)return conditionRefusal('the-two-verbs-are-not-a-registered-conditional-frame');
  const frame=CONDITION_FRAMES[frameKey];
  if(frame.governor!==governor.id)return conditionRefusal('frame-belongs-to-another-governor');
@@ -7843,7 +7877,40 @@ const CONDITION_GOVERNORS=Object.freeze(Object.assign(Object.create(null),{
  /* النوع الأول: «حَرْفٌ بِاتِّفَاقٍ» — إِنْ alone. Its kind is recorded because p. 81 divides the
     two-verb jawāzim into ḥarf and ism, and the learner must be told which this is. */
  inShart:Object.freeze({id:'inShart',particleType:'inShart',surface:'إِنْ',ruleId:'G_IN_SHART_JAZM',
-  kind:'harf',nameAr:'حَرْفُ شَرْطٍ جَازِمٌ',nameEn:'a conditional particle governing jazm',gloss:'if'})
+  kind:'harf',nameAr:'حَرْفُ شَرْطٍ جَازِمٌ',nameEn:'a conditional particle governing jazm',gloss:'if'}),
+ /* النوع الثاني: «وَهُوَ الْمُتَّفَقُ عَلَى أَنَّهُ اسْمٌ — فَتِسْعَةُ أَسْمَاءٍ، وَهِيَ: مَنْ، وَمَا، وَأَيّ، وَمَتَى،
+    وَأَيَّانَ، وَأَيْنَ، وَأَنَّى، وَحَيْثُمَا، وَكَيْفَمَا» (p. 81). These are NOUNS, so their iʿrāb says
+    «اسْمُ شَرْطٍ جَازِمٌ» and never «حرف». The source gives them no syntactic maḥall anywhere in this
+    chapter, so none is asserted here — the identity and the government are all it authorizes.
+    أَيْنَ is registered in the form the commentary actually exemplifies, أَيْنَمَا. */
+ manShart:Object.freeze({id:'manShart',particleType:'manShart',surface:'مَنْ',ruleId:'G_MAN_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ',nameEn:'a conditional noun governing jazm',gloss:'whoever',semantic:'person'}),
+ maShart:Object.freeze({id:'maShart',particleType:'maShart',surface:'مَا',ruleId:'G_MA_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ',nameEn:'a conditional noun governing jazm',gloss:'whatever',semantic:'general'}),
+ ayyShart:Object.freeze({id:'ayyShart',particleType:'ayyShart',surface:'أَيَّ',ruleId:'G_AYY_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ',nameEn:'a conditional noun governing jazm',gloss:'whichever',semantic:'selection',requiresComplement:true}),
+ mataShart:Object.freeze({id:'mataShart',particleType:'mataShart',surface:'مَتَى',ruleId:'G_MATA_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ',nameEn:'a conditional noun governing jazm',gloss:'whenever',semantic:'time'}),
+ ayyanaShart:Object.freeze({id:'ayyanaShart',particleType:'ayyanaShart',surface:'أَيَّانَ',ruleId:'G_AYYANA_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ',nameEn:'a conditional noun governing jazm',gloss:'whenever',semantic:'time'}),
+ aynamaShart:Object.freeze({id:'aynamaShart',particleType:'aynamaShart',surface:'أَيْنَمَا',ruleId:'G_AYNA_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ',nameEn:'a conditional noun governing jazm',gloss:'wherever',semantic:'place'}),
+ annaShart:Object.freeze({id:'annaShart',particleType:'annaShart',surface:'أَنَّى',ruleId:'G_ANNA_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ',nameEn:'a conditional noun governing jazm',gloss:'wherever',semantic:'place'}),
+ haythumaShart:Object.freeze({id:'haythumaShart',particleType:'haythumaShart',surface:'حَيْثُمَا',ruleId:'G_HAYTHUMA_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ',nameEn:'a conditional noun governing jazm',gloss:'wherever',semantic:'place'}),
+ kayfamaShart:Object.freeze({id:'kayfamaShart',particleType:'kayfamaShart',surface:'كَيْفَمَا',ruleId:'G_KAYFAMA_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ',nameEn:'a conditional noun governing jazm',gloss:'however',semantic:'manner'}),
+ /* النوع الثالث «حَرْفٌ عَلَى الْأَصَحِّ» and النوع الرابع «اسْمٌ عَلَى الْأَصَحِّ» (pp. 81–83). The
+    source's own hedge is carried into the learner-facing identity rather than silently resolved. */
+ idhMaShart:Object.freeze({id:'idhMaShart',particleType:'idhMaShart',surface:'إِذْ مَا',ruleId:'G_IDH_MA_SHART_JAZM',
+  kind:'harf',nameAr:'حَرْفُ شَرْطٍ جَازِمٌ عَلَى الْأَصَحِّ',nameEn:'a conditional particle governing jazm, on the sounder view',gloss:'whenever',semantic:'general'}),
+ mahmaShart:Object.freeze({id:'mahmaShart',particleType:'mahmaShart',surface:'مَهْمَا',ruleId:'G_MAHMA_SHART_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٍ عَلَى الْأَصَحِّ',nameEn:'a conditional noun governing jazm, on the sounder view',gloss:'whatever',semantic:'general'}),
+ /* «وَيُزَادُ عَلَى هَذِهِ الْأَسْمَاءِ التِّسْعَةِ «إِذَا» فِي الشِّعْرِ … وَذَلِكَ ضَرُورَةٌ» (p. 82). Poetry
+    only, and marked so: the poeticOnly flag keeps it out of every ordinary prose lane. */
+ idhaShiri:Object.freeze({id:'idhaShiri',particleType:'idhaShiri',surface:'إِذَا',ruleId:'G_IDHA_SHIR_JAZM',
+  kind:'ism',nameAr:'اسْمُ شَرْطٍ جَازِمٌ فِي الشِّعْرِ خَاصَّةً',nameEn:'a conditional noun governing jazm, in poetry only',gloss:'if',semantic:'general',poeticOnly:true})
 }));
 /* The frames. A conditional is only meaningful if the condition and its answer belong together, so
    each frame owns BOTH verbs and their English, and nothing is combined at random. */
@@ -7859,6 +7926,24 @@ const CONDITION_VERBS=Object.freeze(Object.assign(Object.create(null),{
  afham:Object.freeze({key:'afham',juss:'تَفْهَمْ',en:'understand',person:'2ms',inflection:'regular',owned:true}),
  sabir:Object.freeze({key:'sabir',juss:'تَصْبِرْ',en:'be patient',person:'2ms',inflection:'regular',owned:true}),
  zfar:Object.freeze({key:'zfar',juss:'تَظْفَرْ',en:'attain',person:'2ms',inflection:'regular',owned:true}),
+ // Phase 2 — verbs the remaining governors' own meanings need. مَنْ is «whoever», so its verbs are
+ // third-person; the rest address «you» and are 2ms.
+ dhakaraHu:Object.freeze({key:'dhakaraHu',juss:'يُذَاكِرْ',en:'study',person:'3ms',inflection:'regular',owned:true}),
+ najahaHu:Object.freeze({key:'najahaHu',juss:'يَنْجَحْ',en:'succeed',person:'3ms',inflection:'regular',owned:true}),
+ sadaqaHu:Object.freeze({key:'sadaqaHu',juss:'يَصْدُقْ',en:'be truthful',person:'3ms',inflection:'regular',owned:true}),
+ yusadHu:Object.freeze({key:'yusadHu',juss:'يَسُدْ',en:'prevail',person:'3ms',inflection:'regular',owned:true}),
+ zaraa:Object.freeze({key:'zaraa',juss:'تَزْرَعْ',en:'sow',person:'2ms',inflection:'regular',owned:true}),
+ hasada:Object.freeze({key:'hasada',juss:'تَحْصُدْ',en:'reap',person:'2ms',inflection:'regular',owned:true}),
+ qaraa:Object.freeze({key:'qaraa',juss:'تَقْرَأْ',en:'read',person:'2ms',inflection:'regular',owned:true}),
+ istafid:Object.freeze({key:'istafid',juss:'تَسْتَفِدْ',en:'benefit',person:'2ms',inflection:'regular',owned:true}),
+ ijtahid:Object.freeze({key:'ijtahid',juss:'تَجْتَهِدْ',en:'work hard',person:'2ms',inflection:'regular',owned:true}),
+ istaqim:Object.freeze({key:'istaqim',juss:'تَسْتَقِمْ',en:'stay upright',person:'2ms',inflection:'regular',owned:true}),
+ tadhhab:Object.freeze({key:'tadhhab',juss:'تَذْهَبْ',en:'go',person:'2ms',inflection:'regular',owned:true}),
+ tajid:Object.freeze({key:'tajid',juss:'تَجِدْ',en:'find',person:'2ms',inflection:'regular',owned:true}),
+ tanzil:Object.freeze({key:'tanzil',juss:'تَنْزِلْ',en:'settle',person:'2ms',inflection:'regular',owned:true}),
+ turzaq:Object.freeze({key:'turzaq',juss:'تَرْبَحْ',en:'gain',person:'2ms',inflection:'regular',owned:true}),
+ tuhsin:Object.freeze({key:'tuhsin',juss:'تُحْسِنْ',en:'do good',person:'2ms',inflection:'regular',owned:true}),
+ tuhmad:Object.freeze({key:'tuhmad',juss:'تُشْكَرْ',en:'be thanked',person:'2ms',inflection:'regular',owned:true}),
  // Weak-final, owned by WEAK_FINAL_VERBS and proven there by its pres→juss round trip.
  saaTaa:Object.freeze({key:'saaTaa',juss:'تَسْعَ',en:'strive',person:'2ms',inflection:'weakFinal',owned:false}),
  samaTaa:Object.freeze({key:'samaTaa',juss:'تَسْمُ',en:'rise',person:'2ms',inflection:'weakFinal',owned:false}),
@@ -7890,12 +7975,46 @@ const CONDITION_FRAMES=Object.freeze(Object.assign(Object.create(null),{
   en:'If you guide, you will attain.'}),
  riseUnderstand:Object.freeze({key:'riseUnderstand',governor:'inShart',shartKey:'samaTaa',jawabKey:'afham',
   en:'If you rise, you will understand.'}),
+ /* Phase 2 — one frame per governor, and each frame's content follows the أداة's own meaning:
+    a person for مَنْ, a thing for مَا and مَهْمَا, a time for مَتَى and أَيَّانَ, a place for أَيْنَمَا,
+    أَنَّى and حَيْثُمَا, a manner for كَيْفَمَا, and a chosen item for أَيّ. */
+ manStudySucceed:Object.freeze({key:'manStudySucceed',governor:'manShart',shartKey:'dhakaraHu',jawabKey:'najahaHu',
+  en:'Whoever studies succeeds.'}),
+ manTruthPrevail:Object.freeze({key:'manTruthPrevail',governor:'manShart',shartKey:'sadaqaHu',jawabKey:'yusadHu',
+  en:'Whoever is truthful prevails.'}),
+ maSowReap:Object.freeze({key:'maSowReap',governor:'maShart',shartKey:'zaraa',jawabKey:'hasada',
+  en:'Whatever you sow, you reap.'}),
+ mahmaReadBenefit:Object.freeze({key:'mahmaReadBenefit',governor:'mahmaShart',shartKey:'qaraa',jawabKey:'istafid',
+  en:'Whatever you read, you benefit.'}),
+ mataWorkSucceed:Object.freeze({key:'mataWorkSucceed',governor:'mataShart',shartKey:'ijtahid',jawabKey:'najaha',
+  en:'Whenever you work hard, you succeed.'}),
+ ayyanaPatienceAttain:Object.freeze({key:'ayyanaPatienceAttain',governor:'ayyanaShart',shartKey:'sabir',jawabKey:'zfar',
+  en:'Whenever you are patient, you attain.'}),
+ aynamaGoFind:Object.freeze({key:'aynamaGoFind',governor:'aynamaShart',shartKey:'tadhhab',jawabKey:'tajid',
+  en:'Wherever you go, you find.'}),
+ annaSettleGain:Object.freeze({key:'annaSettleGain',governor:'annaShart',shartKey:'tanzil',jawabKey:'turzaq',
+  en:'Wherever you settle, you gain.'}),
+ haythumaUprightSucceed:Object.freeze({key:'haythumaUprightSucceed',governor:'haythumaShart',shartKey:'istaqim',jawabKey:'najaha',
+  en:'Wherever you stay upright, you succeed.'}),
+ kayfamaGoodThanked:Object.freeze({key:'kayfamaGoodThanked',governor:'kayfamaShart',shartKey:'tuhsin',jawabKey:'tuhmad',
+  en:'However you do good, you are thanked.'}),
+ idhMaStudySucceed:Object.freeze({key:'idhMaStudySucceed',governor:'idhMaShart',shartKey:'dhakara',jawabKey:'najaha',
+  en:'Whenever you study, you succeed.'}),
+ ayyBookReadBenefit:Object.freeze({key:'ayyBookReadBenefit',governor:'ayyShart',shartKey:'qaraa',jawabKey:'istafid',
+  complementKey:'kitab',en:'Whichever book you read, you benefit.'}),
+ idhaPatienceAttain:Object.freeze({key:'idhaPatienceAttain',governor:'idhaShiri',shartKey:'sabir',jawabKey:'zfar',
+  en:'If you are patient, you attain.'}),
  studyMemorizeFive:Object.freeze({key:'studyMemorizeFive',governor:'inShart',shartKey:'darasuu',jawabKey:'hafizuu',
   en:'If they study, they will memorize.'}),
  listenMemorizeFive:Object.freeze({key:'listenMemorizeFive',governor:'inShart',shartKey:'samiuu',jawabKey:'hafizuu',
   en:'If they hear, they will memorize.'}),
  readMemorizeFive:Object.freeze({key:'readMemorizeFive',governor:'inShart',shartKey:'qarauu',jawabKey:'hafizuu',
   en:'If they read, they will memorize.'})
+}));
+/* The complements أَيّ may annex. Its own analysis is a مضاف إليه مخفوض, so the noun carries its
+   own khafḍ sign exactly as any second term of an iḍāfah does. */
+const CONDITION_COMPLEMENTS=Object.freeze(Object.assign(Object.create(null),{
+ kitab:Object.freeze({key:'kitab',gen:'كِتَابٍ',en:'book'})
 }));
 const CONDITION_FRAME_KEYS=Object.freeze(Object.keys(CONDITION_FRAMES));
 /* One group per shart inflection: the template that owns a group declares exactly its keys, so a
@@ -7907,9 +8026,15 @@ const CONDITION_FRAMES_BY_SHART_INFLECTION=Object.freeze(Object.assign(Object.cr
   return all;
  },{})));
 /* Keyed by the ORDERED pair, which is what makes a فعل الشرط ↔ جواب الشرط swap identify no frame. */
+/* Keyed by GOVERNOR plus the ORDERED verb pair. The order is what makes a فعل الشرط ↔ جواب الشرط
+   swap identify no frame; the governor is what lets two different أدوات share a verb pair without
+   either being able to answer for the other. */
+const conditionFramePairKey=(governor,shartJuss,jawabJuss)=>governor+'|'+shartJuss+'|'+jawabJuss;
 const CONDITION_FRAME_BY_PAIR=Object.freeze(Object.assign(Object.create(null),
  Object.fromEntries(CONDITION_FRAME_KEYS.map(key=>[
-  CONDITION_VERBS[CONDITION_FRAMES[key].shartKey].juss+'|'+CONDITION_VERBS[CONDITION_FRAMES[key].jawabKey].juss,key]))));
+  conditionFramePairKey(CONDITION_FRAMES[key].governor,
+   CONDITION_VERBS[CONDITION_FRAMES[key].shartKey].juss,
+   CONDITION_VERBS[CONDITION_FRAMES[key].jawabKey].juss),key]))));
 /* Startup invariant. Every frame must name registered parts, the two verbs may never be the same
    word (a conditional whose answer repeats its condition is not a conditional), and every verb must
    be a person this app can truthfully analyse. */
@@ -7940,6 +8065,13 @@ const CONDITION_FRAME_BY_PAIR=Object.freeze(Object.assign(Object.create(null),
   if(!shart||!jawab)throw new Error('Condition frame '+key+' names an unregistered verb.');
   if(shart.juss===jawab.juss)throw new Error('Condition frame '+key+' repeats one verb as both condition and answer.');
   if(shart.person!==jawab.person)throw new Error('Condition frame '+key+' mixes persons across its two verbs.');
+  const adah=CONDITION_GOVERNORS[frame.governor];
+  if(Boolean(adah.requiresComplement)!==Boolean(frame.complementKey)){
+   throw new Error('Condition frame '+key+' disagrees with its أداة about needing a complement.');
+  }
+  if(frame.complementKey&&!CONDITION_COMPLEMENTS[frame.complementKey]){
+   throw new Error('Condition frame '+key+' names an unregistered complement.');
+  }
   if(!CONDITION_FRAMES_BY_SHART_INFLECTION[shart.inflection]?.includes(key)){
    throw new Error('Condition frame '+key+' is not grouped under its own shart inflection.');
   }
@@ -8037,7 +8169,8 @@ const GRAMMAR_RULES=Object.freeze({
   lamDuaa:{surface:'لِ',mood:'jazm',ruleId:'G_LAM_DUAA_JAZM'},
   /* Phase 1 — the first governor in this table that governs TWO verbs. Adjacency proposes the
      first; the frozen conditional frame is what reaches the second. */
-  inShart:{surface:'إِنْ',mood:'jazm',ruleId:'G_IN_SHART_JAZM'},
+  ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).map(item=>[item.particleType,
+   Object.freeze({surface:item.surface,mood:'jazm',ruleId:item.ruleId})])),
   laDuaaiyya:{surface:'لَا',mood:'jazm',ruleId:'G_LA_DUAA_JAZM'}
  }
 });
@@ -8119,7 +8252,9 @@ const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA
  [IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
  // J1a — each new one-verb jāzim owns exactly one rule, and هَمْزَةُ التَّقْرِيرِ owns its own.
  lamma:'G_LAMMA_JAZM',lamAmr:'G_LAM_AMR_JAZM',laNahiya:'G_LA_NAHIYA_JAZM',
- lamDuaa:'G_LAM_DUAA_JAZM',laDuaaiyya:'G_LA_DUAA_JAZM',inShart:'G_IN_SHART_JAZM',
+ lamDuaa:'G_LAM_DUAA_JAZM',laDuaaiyya:'G_LA_DUAA_JAZM',
+ // Every conditional أداة owns its own rule, read straight from the frozen registry.
+ ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).map(item=>[item.particleType,item.ruleId])),
  [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,
  maNafiyaKana:'R_MA_NAFIYA_KANA',laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
@@ -8130,7 +8265,8 @@ const PARTICLE_EXCLUSIVE_RULE_IDS=Object.freeze(['G_LAN_NASB','G_LAM_JAZM','G_SA
  'G_AN_NASB','G_KAY_NASB',IDHAN_GOVERNOR_RULE_ID,KAY_TALIL_LAM.ruleId,
  // J1a. Owned this tightly so a forged G_LA_NAHIYA_JAZM on any other token is refused outright —
  // which is the mechanism that keeps لَا النَّاهِيَةُ apart from the three other لَا identities.
- 'G_LAMMA_JAZM','G_LAM_AMR_JAZM','G_LA_NAHIYA_JAZM','G_LAM_DUAA_JAZM','G_LA_DUAA_JAZM','G_IN_SHART_JAZM',HAMZAT_TAQRIR.ruleId,
+ 'G_LAMMA_JAZM','G_LAM_AMR_JAZM','G_LA_NAHIYA_JAZM','G_LAM_DUAA_JAZM','G_LA_DUAA_JAZM',
+ ...Object.values(CONDITION_GOVERNORS).map(item=>item.ruleId),HAMZAT_TAQRIR.ruleId,
  'R_MA_NAFIYA_KANA','R_LA_NAFIYA_CONTEXT',
  ...new Set(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>item.ruleId)),
  ...Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>item.ruleId)]);
@@ -8646,6 +8782,18 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  G_LAMMA_JAZM:sourceRule('Lammā is a particle like lam in jazm, negation, and conversion to past meaning, adding that the negation runs up to the moment of speaking.',[79,80],'It must be immediately followed by the present verb it governs. It governs alone and also under هَمْزَة التَّقْرِير in أَلَمَّا.'),
  G_HAMZAT_TAQRIR:sourceRule('Hamzat al-taqrīr is added onto lam and lammā to seek acknowledgement of what they negate; it is a particle only, and governs nothing.',[79,80],'Only the exact registered أَلَمْ and أَلَمَّا constructions, in which it stands immediately before لَمْ or لَمَّا and the jazm belongs entirely to that particle. It is absent from the governor table and may never be a verb’s governor.'),
  G_LAM_AMR_JAZM:sourceRule('Lām al-amr makes the present verb jussive and asks for the act to be brought about, as a command from the higher to the lower.',[79,80],'Only the registered command frame over a third-person verb, matching the source’s own «فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ». The supplicating lām shares these bytes but is a separate identity and is NOT produced here: its direction is «من الأدنى للأعلى» and no sentence surface carries it.'),
+ G_MAN_SHART_JAZM:sourceRule('Man is a conditional noun governing jazm; it makes two verbs jussive and refers to a person.',[79,81,82,83],'Only a registered conditional frame: the أداة at the head, then the verb of the condition, then its answer, both jussive by it. The source gives these nouns no syntactic maḥall anywhere in this chapter, so none is claimed.'),
+ G_MA_SHART_JAZM:sourceRule('Ma is a conditional noun governing jazm; it makes two verbs jussive and refers to what is not a person.',[79,81,82,83],'Only a registered conditional frame: the أداة at the head, then the verb of the condition, then its answer, both jussive by it. The source gives these nouns no syntactic maḥall anywhere in this chapter, so none is claimed.'),
+ G_AYY_SHART_JAZM:sourceRule('Ayy is a conditional noun governing jazm; it makes two verbs jussive and is annexed to the thing chosen from.',[79,81,82,83],'Only a registered conditional frame in which it is annexed to its complement, as in the source’s own «أَيَّ كِتَابٍ تَقْرَأْ تَسْتَفِدْ». It never stands alone.'),
+ G_MATA_SHART_JAZM:sourceRule('Mata is a conditional noun governing jazm; it makes two verbs jussive and refers to a time.',[79,81,82,83],'Only a registered conditional frame: the أداة at the head, then the verb of the condition, then its answer, both jussive by it. The source gives these nouns no syntactic maḥall anywhere in this chapter, so none is claimed.'),
+ G_AYYANA_SHART_JAZM:sourceRule('Ayyan is a conditional noun governing jazm; it makes two verbs jussive and refers to a time.',[79,81,82,83],'Only a registered conditional frame: the أداة at the head, then the verb of the condition, then its answer, both jussive by it. The source gives these nouns no syntactic maḥall anywhere in this chapter, so none is claimed.'),
+ G_AYNA_SHART_JAZM:sourceRule('Ayna is a conditional noun governing jazm; it makes two verbs jussive and refers to a place.',[79,81,82,83],'Only a registered conditional frame: the أداة at the head, then the verb of the condition, then its answer, both jussive by it. The source gives these nouns no syntactic maḥall anywhere in this chapter, so none is claimed.'),
+ G_ANNA_SHART_JAZM:sourceRule('Anna is a conditional noun governing jazm; it makes two verbs jussive and refers to a place.',[79,81,82,83],'Only a registered conditional frame: the أداة at the head, then the verb of the condition, then its answer, both jussive by it. The source gives these nouns no syntactic maḥall anywhere in this chapter, so none is claimed.'),
+ G_HAYTHUMA_SHART_JAZM:sourceRule('Haythuma is a conditional noun governing jazm; it makes two verbs jussive and refers to a place.',[79,81,82,83],'Only a registered conditional frame: the أداة at the head, then the verb of the condition, then its answer, both jussive by it. The source gives these nouns no syntactic maḥall anywhere in this chapter, so none is claimed.'),
+ G_KAYFAMA_SHART_JAZM:sourceRule('Kayfama is a conditional noun governing jazm; it makes two verbs jussive and refers to a manner.',[79,81,82,83],'Only a registered conditional frame: the أداة at the head, then the verb of the condition, then its answer, both jussive by it. The source gives these nouns no syntactic maḥall anywhere in this chapter, so none is claimed.'),
+ G_IDH_MA_SHART_JAZM:sourceRule('Idh ma makes two verbs jussive; it is a particle on the sounder of the two views the source reports.',[79,81,82,83],'Only a registered conditional frame. The source reports two views on whether it is a particle or a noun and prefers the particle; that hedge is kept in the learner-facing identity rather than resolved away.'),
+ G_MAHMA_SHART_JAZM:sourceRule('Mahma makes two verbs jussive; it is a noun on the sounder of the two views the source reports.',[79,81,82,83],'Only a registered conditional frame. The source reports two views and prefers the noun; that hedge is kept in the learner-facing identity.'),
+ G_IDHA_SHIR_JAZM:sourceRule('Idha makes two verbs jussive in poetry only, by poetic necessity.',[79,81,82,83],'Only the registered POETRY frame. The source admits this use «في الشعر خاصة» and calls it ضرورة, so it is excluded from every ordinary prose lane by its own poeticOnly flag.'),
  G_IN_SHART_JAZM:sourceRule('In is a conditional particle governing jazm by the agreement of the grammarians; it makes two verbs jussive, the first the verb of the condition and the second its answer and recompense.',[79,81],'Only a registered conditional frame: the particle, the verb of the condition, and the answer, in that order, with both verbs jussive by this same particle. It is the ONE governor here that reaches a verb it does not stand beside, and it may do so only inside such a frame.'),
  G_LAM_DUAA_JAZM:sourceRule('Lām al-duʿāʾ makes the present verb jussive and asks for the act to be brought about, as a supplication from the lower to the higher.',[79,80],'Only a registered duʿāʾ frame whose fāʿil is the canonical divine addressee, matching the source’s own ﴿لِيَقْضِ عَلَيْنَا رَبُّكَ﴾. It shares its bytes with لَامُ الْأَمْرِ but not its identity: the command lām is a separate rule, and neither may be produced in the other’s frame.'),
  G_LA_DUAA_JAZM:sourceRule('The supplicating lā makes the present verb jussive and asks for the act to be withheld, as a supplication from the lower to the higher.',[79,80,81],'Only a registered duʿāʾ frame whose fāʿil is the canonical divine addressee. The source’s own examples of this لَا are second-person (﴿رَبَّنَا لَا تُؤَاخِذْنَا﴾); this app produces the third-person member of the same category, because 2ms is deliberately non-productive here. It is none of the four other لَا identities, and none of them governs jazm in a present verb.'),
@@ -9639,7 +9787,11 @@ const AR={
  laNahiya:w=>grammarSpec('particle','particle',{particleType:'laNahiya',particleWord:w}),
  lamDuaa:w=>grammarSpec('particle','particle',{particleType:'lamDuaa',particleWord:w}),
  laDuaaiyya:w=>grammarSpec('particle','particle',{particleType:'laDuaaiyya',particleWord:w}),
- inShart:w=>grammarSpec('particle','particle',{particleType:'inShart',particleWord:w}),
+ /* أَيّ is annexed to its complement, so its own token declares the iḍāfah; every other أداة stands
+    alone and declares none. */
+ conditionAdah:(w,particleType)=>grammarSpec('particle','particle',
+  {particleType,particleWord:w,...(CONDITION_GOVERNORS[particleType]?.requiresComplement?{isMudaf:true}:{})}),
+ conditionComplement:w=>grammarSpec('noun','mudafIlayh'),
  // Phase 1 — the two conditional verb roles. shartRole is a DECLARATION the builder makes;
  // deriveConditionAuthority proves it, and validateExercise refuses the exercise when it cannot.
  // exactPresentRaf marks a person-bound registered surface (a legacy field name); 2ms is outside
@@ -10838,15 +10990,18 @@ function inflectVerb(token,tokens,index){
     come from the preceding token. It is proposed here structurally (the head IS a registered conditional
     particle and this verb declares the jawāb role) and DECIDED later by deriveConditionAuthority
     under full authority, exactly as إِذَنْ's is. The شرط needs nothing special: it is adjacent. */
- const conditionalHead=token.grammar.shartRole==='jawab'&&tokens[0]?.grammar?.type==='particle'
+ /* BOTH conditional roles may be non-adjacent to their أداة: the jawāb never stands beside it, and
+    أَيّ's own complement pushes even the شرط away from it. So the head is looked up structurally for
+    either role; when it happens to be adjacent this is the same token `previous` would have given. */
+ const conditionalHead=token.grammar.shartRole&&tokens[0]?.grammar?.type==='particle'
   &&CONDITION_GOVERNORS[tokens[0].grammar.particleType]?tokens[0]:null;
  const effectiveGovernor=conditionalHead?GRAMMAR_RULES.governors[conditionalHead.grammar.particleType]:governor;
  token.state=effectiveGovernor?.mood||'raf';
  token.governorId=conditionalHead?conditionalHead.id:(governor?previous.id:null);
  if(conditionalHead){
-  // The أداة points at BOTH: governsId keeps its ordinary meaning (the verb it stands before) and
-  // governsJawabId records the second, so neither link can be forged from the other.
-  conditionalHead.relations.governsJawabId=token.id;
+  // The أداة points at BOTH, on two separate fields, so neither link can be forged from the other.
+  if(token.grammar.shartRole==='jawab')conditionalHead.relations.governsJawabId=token.id;
+  else conditionalHead.relations.governsId=token.id;
   conditionalHead.ruleId=effectiveGovernor.ruleId;
  }else if(governor){previous.relations.governsId=token.id;previous.ruleId=governor.ruleId}
  token.inflection=token.grammar.conjugation;
@@ -10871,7 +11026,8 @@ function configureParticle(token){
  token.ruleId={preposition:'R_HARF_JARR',inna:'R_INNA_GOVERNS_NOMINAL',lan:'G_LAN_NASB',lam:'G_LAM_JAZM',sawfa:'G_SAWFA_FUTURE',
   an:'G_AN_NASB',kay:'G_KAY_NASB',[IDHAN_PARTICLE_TYPE]:IDHAN_GOVERNOR_RULE_ID,
   lamma:'G_LAMMA_JAZM',lamAmr:'G_LAM_AMR_JAZM',laNahiya:'G_LA_NAHIYA_JAZM',
-  lamDuaa:'G_LAM_DUAA_JAZM',laDuaaiyya:'G_LA_DUAA_JAZM',inShart:'G_IN_SHART_JAZM',
+  lamDuaa:'G_LAM_DUAA_JAZM',laDuaaiyya:'G_LA_DUAA_JAZM',
+  ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).map(item=>[item.particleType,item.ruleId])),
   [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',
   laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,[NIDA_PARTICLE_TYPE]:NIDA_PARTICLE.ruleId,
@@ -10933,13 +11089,17 @@ function resolveRelationships(data){
  (()=>{
   const template=data.templateId?templates.find(entry=>entry.stableId===data.templateId):null;
   if(!template||!template.conditionFrameKeys?.length)return;
-  const head=tokens[0],shart=tokens[1],jawab=tokens[2];
+  const head=tokens[0];
   if(!head||head.grammar?.type!=='particle')return;
   const governor=CONDITION_GOVERNORS[head.grammar.particleType];
   if(!governor||head.word!==governor.surface)return;
+  // أَيّ annexes a complement, which shifts its two verbs right by one.
+  const offset=governor.requiresComplement?1:0;
+  if(governor.requiresComplement&&tokens[1]?.grammar?.role!=='mudafIlayh')return;
+  const shart=tokens[1+offset],jawab=tokens[2+offset];
   if(!shart||!jawab||shart.grammar?.type!=='verb'||jawab.grammar?.type!=='verb')return;
   if(shart.grammar.shartRole!=='shart'||jawab.grammar.shartRole!=='jawab')return;
-  const frameKey=CONDITION_FRAME_BY_PAIR[shart.word+'|'+jawab.word];
+  const frameKey=CONDITION_FRAME_BY_PAIR[conditionFramePairKey(governor.id,shart.word,jawab.word)];
   if(!frameKey||CONDITION_FRAMES[frameKey].governor!==governor.id)return;
   if(!template.conditionFrameKeys.includes(frameKey))return;
   if(shart.governorId!==head.id||jawab.governorId!==head.id)return;
@@ -11377,7 +11537,9 @@ function renderNounAnalysis(token){
    lām governs — which is the whole point of separating it from لَامُ التَّعْلِيلِ. */
 const PRESENT_GOVERNOR_CAUSE_AR=Object.freeze(Object.assign(Object.create(null),{lan:' بِـ«لَنْ»',lam:' بِـ«لَمْ»',an:' بِـ«أَنْ»',kay:' بِـ«كَيْ»',
   lamma:' بِـ«لَمَّا»',lamAmr:' بِلَامِ الْأَمْرِ',laNahiya:' بِـ«لَا» النَّاهِيَةِ',
-  lamDuaa:' بِلَامِ الدُّعَاءِ',laDuaaiyya:' بِـ«لَا» الدُّعَائِيَّةِ',inShart:' بِإِنْ'}));
+  lamDuaa:' بِلَامِ الدُّعَاءِ',laDuaaiyya:' بِـ«لَا» الدُّعَائِيَّةِ',inShart:' بِإِنْ',
+  ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).filter(item=>item.id!=='inShart')
+   .map(item=>[item.particleType,` بِـ«${item.surface}»`]))}));
 /* J2 — the class term itself, so the learner practises «مُعْتَلُّ الْآخِرِ» rather than only its
    consequence. Named once, and asserted by the focused tests from this same constant. */
 const WEAK_FINAL_CLASS_AR='مُعْتَلُّ الْآخِرِ';
@@ -11500,7 +11662,9 @@ function renderVerbAnalysis(token){
     lamma:' because lammā governs it',lamAmr:' because lām al-amr governs it',
     laNahiya:' because the prohibitive lā governs it',
     lamDuaa:' because lām al-duʿāʾ governs it',laDuaaiyya:' because the supplicating lā governs it',
-    inShart:' because in governs it'}[governor?.grammar.particleType]||'';
+    inShart:' because in governs it',
+    ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).filter(item=>item.id!=='inShart')
+     .map(item=>[item.particleType,' because its conditional أداة governs it']))}[governor?.grammar.particleType]||'';
  const hiddenSubjectEn={'أَنَا':'I','نَحْنُ':'we','هُوَ':'he','هِيَ':'she','أَنْتَ':'you'}[token.relations.subjectPronoun];
  const subjectEn=token.relations.subjectType==='implicit'
   ?` Its subject is a hidden pronoun, concealed ${PRESENT_CONCEALMENT[token.grammar.morphology?.person].en}, understood as “${hiddenSubjectEn}”.`
@@ -11528,7 +11692,16 @@ function renderParticleAnalysis(token){
  if(type==='laNahiya'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.laNahiya.ar}`;token.en=J1A_PARTICLE_IRAAB.laNahiya.en;return}
  if(type==='lamDuaa'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.lamDuaa.ar}`;token.en=J1A_PARTICLE_IRAAB.lamDuaa.en;return}
  if(type==='laDuaaiyya'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.laDuaaiyya.ar}`;token.en=J1A_PARTICLE_IRAAB.laDuaaiyya.en;return}
- if(type==='inShart'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.inShart.ar}`;token.en=J1A_PARTICLE_IRAAB.inShart.en;return}
+ /* Phase 2 — every conditional أداة renders from the frozen registry: its own kind term
+     (حرف شرط جازم or اسم شرط جازم, with the source's «على الأصح» hedge where it gives one) and the
+     government clause the source states once for إِنْ and applies to the whole قسم. No maḥall is
+     claimed for the nouns, because this chapter gives them none. */
+ if(CONDITION_GOVERNORS[type]){
+  const adah=CONDITION_GOVERNORS[type];
+  token.ar=`${token.word}: ${adah.nameAr}، يَجْزِمُ فِعْلَيْنِ: الْأَوَّلُ فِعْلُ الشَّرْطِ، وَالثَّانِي جَوَابُهُ وَجَزَاؤُهُ.`;
+  token.en=`${adah.nameEn}. It makes two verbs jussive: the first is the verb of the condition, the second its answer and recompense.`;
+  return;
+ }
  if(type==='sawfa'){token.ar=`${token.word}: حَرْفُ اسْتِقْبَالٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle marking the future.';return}
  /* Phase 3A1. The identity clauses are Al-Tuḥfah's own words (p. 75 for أَنْ, p. 76 for كَيْ);
     the bināʾ tail follows this project's established particle pattern, matching لَنْ exactly. */
@@ -12032,6 +12205,9 @@ function whyStateVerb(t,data){
     whySignVerb, which names no governor and so stays true for all of them. */
  if(type==='lamma')return{id:'WHY_STATE_VERB_LAMMA',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ، فَهُوَ مَجْزُومٌ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a particle of negation, jazm, and past meaning, so it is مَجْزُومٌ.`};
  if(type==='lamAmr')return{id:'WHY_STATE_VERB_LAM_AMR',ar:`${wq(t.word)} سَبَقَتْهُ لَامُ الْأَمْرِ وَهِيَ حَرْفُ جَزْمٍ، فَهُوَ مَجْزُومٌ.`,en:`${eq(t.word)} is preceded by lām al-amr, a particle of jazm, so it is مَجْزُومٌ.`};
+ if(CONDITION_GOVERNORS[type]&&type!=='inShart')return{id:'WHY_STATE_VERB_CONDITION',
+   ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ ${CONDITION_GOVERNORS[type].nameAr}، يَجْزِمُ فِعْلَيْنِ، فَهُوَ مَجْزُومٌ بِهِ.`,
+   en:`${eq(t.word)} is preceded by ${eq(gov.word)}, ${CONDITION_GOVERNORS[type].nameEn}, which makes TWO verbs jussive, so it is مَجْزُومٌ by it.`};
  if(type==='inShart')return{id:'WHY_STATE_VERB_IN_SHART',ar:`${wq(t.word)} سَبَقَهُ ${wq(gov.word)} وَهُوَ حَرْفُ شَرْطٍ جَازِمٌ يَجْزِمُ فِعْلَيْنِ، فَهُوَ مَجْزُومٌ بِهِ.`,en:`${eq(t.word)} is preceded by ${eq(gov.word)}, a conditional particle that makes TWO verbs jussive, so it is مَجْزُومٌ by it.`};
  if(type==='lamDuaa')return{id:'WHY_STATE_VERB_LAM_DUAA',ar:`${wq(t.word)} سَبَقَتْهُ لَامُ الدُّعَاءِ وَهِيَ حَرْفُ جَزْمٍ، فَهُوَ مَجْزُومٌ؛ وَإِنَّمَا كَانَتْ لِلدُّعَاءِ لَا لِلْأَمْرِ؛ لِأَنَّ الطَّلَبَ فِيهَا مِنَ الْأَدْنَى لِلْأَعْلَى، وَفَاعِلُ الْفِعْلِ هُوَ ${wq(DUAA_ADDRESSEE.surface)}.`,en:`${eq(t.word)} is preceded by lām al-duʿāʾ, a particle of jazm, so it is مَجْزُومٌ. It is the supplicating lām and not the commanding one because the request runs from the lower to the higher: the verb's own fāʿil is ${eq(DUAA_ADDRESSEE.surface)}.`};
  if(type==='laDuaaiyya')return{id:'WHY_STATE_VERB_LA_DUAA',ar:`${wq(t.word)} سَبَقَتْهُ «لَا» الدُّعَائِيَّةُ وَهِيَ حَرْفُ دُعَاءٍ وَجَزْمٍ، فَهُوَ مَجْزُومٌ؛ وَإِنَّمَا كَانَتْ لِلدُّعَاءِ لَا لِلنَّهْيِ؛ لِأَنَّ طَلَبَ الْكَفِّ فِيهَا مِنَ الْأَدْنَى لِلْأَعْلَى، وَفَاعِلُ الْفِعْلِ هُوَ ${wq(DUAA_ADDRESSEE.surface)}.`,en:`${eq(t.word)} is preceded by the supplicating lā, a particle of supplication and jazm, so it is مَجْزُومٌ. It is supplicating and not prohibitive because the request to withhold runs from the lower to the higher: the verb's own fāʿil is ${eq(DUAA_ADDRESSEE.surface)}.`};
@@ -12140,6 +12316,10 @@ const WHY_PARTICLE=Object.freeze({
  lamma:t=>({id:'WHY_PARTICLE_LAMMA',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مِثْلُ «لَمْ»، وَيَمْتَدُّ نَفْيُهَا إِلَى زَمَنِ التَّكَلُّمِ.`,en:`${eq(t.word)} is a particle of negation, jazm, and past meaning like «لَمْ»; its negation runs up to the moment of speaking.`}),
  [HAMZAT_TAQRIR.particleType]:t=>({id:'WHY_PARTICLE_HAMZAT_TAQRIR',ar:`${wq(t.word)} هَمْزَةُ التَّقْرِيرِ، زِيدَتْ عَلَى الْجَازِمِ لِطَلَبِ الْإِقْرَارِ بِمَا بَعْدَهَا، وَلَيْسَتْ هِيَ الَّتِي جَزَمَتِ الْفِعْلَ.`,en:`${eq(t.word)} is hamzat al-taqrīr, added onto the jāzim to seek acknowledgement of what follows; it is not what made the verb مَجْزُومٌ.`}),
  lamAmr:t=>({id:'WHY_PARTICLE_LAM_AMR',ar:`${wq(t.word)} لَامُ الْأَمْرِ، تَطْلُبُ حُصُولَ الْفِعْلِ طَلَبًا جَازِمًا، وَتَجْزِمُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is lām al-amr: it asks for the act to be brought about, and it makes the present verb مَجْزُومٌ.`}),
+ ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).filter(item=>item.id!=='inShart').map(item=>[item.particleType,
+   t=>({id:'WHY_PARTICLE_CONDITION_'+item.id.toUpperCase(),
+    ar:`${wq(t.word)} ${item.nameAr}، يَجْزِمُ فِعْلَيْنِ: أَوَّلُهُمَا فِعْلُ الشَّرْطِ، وَثَانِيهِمَا جَوَابُهُ وَجَزَاؤُهُ.`,
+    en:`${eq(t.word)} is ${item.nameEn}: it makes two verbs jussive — the first the verb of the condition, the second its answer and recompense.`})])),
  inShart:t=>({id:'WHY_PARTICLE_IN_SHART',ar:`${wq(t.word)} حَرْفُ شَرْطٍ جَازِمٌ، يَجْزِمُ فِعْلَيْنِ: أَوَّلُهُمَا فِعْلُ الشَّرْطِ، وَثَانِيهِمَا جَوَابُهُ وَجَزَاؤُهُ.`,en:`${eq(t.word)} is a conditional particle governing jazm: it makes two verbs jussive — the first the verb of the condition, the second its answer and recompense.`}),
  lamDuaa:t=>({id:'WHY_PARTICLE_LAM_DUAA',ar:`${wq(t.word)} لَامُ الدُّعَاءِ، تَطْلُبُ حُصُولَ الْفِعْلِ مِنَ الْأَدْنَى لِلْأَعْلَى، وَتَجْزِمُ الْفِعْلَ الْمُضَارِعَ؛ وَهِيَ غَيْرُ لَامِ الْأَمْرِ وَإِنِ اتَّفَقَتَا فِي اللَّفْظِ وَالْجَزْمِ.`,en:`${eq(t.word)} is lām al-duʿāʾ: it asks for the act to be brought about, from the lower to the higher, and it makes the present verb مَجْزُومٌ. It is not lām al-amr, though the two share both their spelling and their jazm.`}),
  laDuaaiyya:t=>({id:'WHY_PARTICLE_LA_DUAA',ar:`${wq(t.word)} «لَا» الدُّعَائِيَّةُ، تَطْلُبُ الْكَفَّ عَنِ الْفِعْلِ مِنَ الْأَدْنَى لِلْأَعْلَى، وَتَجْزِمُ الْفِعْلَ الْمُضَارِعَ؛ وَهِيَ غَيْرُ النَّاهِيَةِ وَغَيْرِ النَّافِيَةِ وَغَيْرِ النَّافِيَةِ لِلْجِنْسِ وَغَيْرِ الْعَاطِفَةِ.`,en:`${eq(t.word)} is the supplicating lā: it asks for the act to be withheld, from the lower to the higher, and it makes the present verb مَجْزُومٌ. It is not the prohibitive lā, nor the negating lā, nor the lā that negates a whole class, nor the conjunctive lā.`}),
@@ -13150,10 +13330,13 @@ function validateExercise(data){
       adjacent to it. The exemption is granted by the authority, never by the token's own claim: an
       unproven conditional falls through to the ordinary checks and is refused by them. */
    const conditionAuthority=deriveConditionAuthority(data,data.tokens.indexOf(token));
-   const conditionalJawab=conditionAuthority.authorized&&conditionAuthority.role==='jawab';
+   const conditionalJawab=conditionAuthority.authorized;
    if(governor&&!conditionalJawab&&data.tokens[data.tokens.indexOf(token)-1]!==governor)fail('E_GOVERNOR_ADJACENCY','Present-verb governor is not immediately before the verb.',token);
    if(governor&&!conditionalJawab&&governor.relations.governsId!==token.id)fail('E_GOVERNOR_RECIPROCAL','Governor and present verb do not point to each other.',token);
-   if(conditionalJawab&&governor.relations.governsJawabId!==token.id)fail('E_GOVERNOR_RECIPROCAL','The أداة and its jawāb do not point to each other.',token);
+   if(conditionalJawab){
+  const link=conditionAuthority.role==='jawab'?governor.relations.governsJawabId:governor.relations.governsId;
+  if(link!==token.id)fail('E_GOVERNOR_RECIPROCAL','The أداة and this conditional verb do not point to each other.',token);
+ }
    /* A verb that CLAIMS a conditional role must have earned it. This is what stops a فعل الشرط ↔
       جواب الشرط swap, a deleted أداة, and a frame the template does not own. */
    if(token.grammar.shartRole&&!conditionAuthority.authorized)fail('E_CONDITION_AUTHORITY',`A conditional role is claimed without canonical authority (${conditionAuthority.reason}).`,token);
@@ -15423,18 +15606,27 @@ for(const transitive of [false,true]){
    nothing else, which is the source's «إِنْ تُذَاكِرْ تَنْجَحْ» exactly. Both verbs are 2ms, so both
    carry «مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ», the analysis the source gives them. Frames rotate
    deterministically, so the rule is practised over changing vocabulary rather than one sentence. */
-function buildConditionExercise(shartInflection){
- const keys=CONDITION_FRAMES_BY_SHART_INFLECTION[shartInflection];
- const frameKey=pickVaried([...keys],`condition-frame:${shartInflection}`,String);
+function buildConditionExercise(shartInflection,onlyGovernor){
+ const all=CONDITION_FRAMES_BY_SHART_INFLECTION[shartInflection];
+ /* A lane either belongs to ONE أداة (the per-governor lanes) or to إِنْ's own morphology lanes.
+    Either way the poetry-only إِذَا is reachable from its own lane and nowhere else. */
+ const keys=all.filter(key=>onlyGovernor
+  ?CONDITION_FRAMES[key].governor===onlyGovernor
+  :CONDITION_FRAMES[key].governor==='inShart');
+ if(!keys.length)throw new Error(`No conditional frame for ${shartInflection}/${onlyGovernor||'inShart'}`);
+ const frameKey=pickVaried([...keys],`condition-frame:${shartInflection}:${onlyGovernor||'in'}`,String);
  const frame=CONDITION_FRAMES[frameKey];
  const governor=CONDITION_GOVERNORS[frame.governor];
  const shart=CONDITION_VERBS[frame.shartKey],jawab=CONDITION_VERBS[frame.jawabKey];
  const verbHint=inflection=>inflection==='afalKhamsa'?EN.fiveVerb:EN.present;
+ const complement=frame.complementKey?CONDITION_COMPLEMENTS[frame.complementKey]:null;
+ const adahEn=`${governor.nameEn.charAt(0).toUpperCase()}${governor.nameEn.slice(1)}.`;
  return{
-  sentence:`${governor.surface} ${shart.juss} ${jawab.juss}`,
+  sentence:[governor.surface,complement?complement.gen:null,shart.juss,jawab.juss].filter(Boolean).join(' '),
   translation:frame.en,
   tokens:[
-   token(governor.surface,governor.gloss,AR.inShart(governor.surface),J1A_PARTICLE_IRAAB[governor.particleType].en),
+   token(governor.surface,governor.gloss,AR.conditionAdah(governor.surface,governor.particleType),adahEn),
+   ...(complement?[token(complement.gen,complement.en,AR.conditionComplement(complement.gen),EN.mudafIlayh)]:[]),
    token(shart.juss,shart.en,AR.shartVerb(shart.juss,shart.person,shart.inflection),verbHint(shart.inflection),true),
    token(jawab.juss,jawab.en,AR.jawabVerb(jawab.juss,jawab.person,jawab.inflection),verbHint(jawab.inflection))
   ]
@@ -15454,6 +15646,19 @@ add('particle','weakFinal','jazm','hadhfIllah',()=>buildConditionExercise('weakF
  conditionTemplateMetadata('weakFinal','2ms'));
 add('particle','fiveVerbs','jazm','nunDropped',()=>buildConditionExercise('afalKhamsa'),
  conditionTemplateMetadata('afalKhamsa','3mp'));
+/* Phase 2 — one lane per remaining أداة. Each declares ONLY its own frames, so no lane can build a
+   governor it does not own, and the poetry-only إِذَا is confined to the last of them. */
+const conditionGovernorLaneMetadata=governorId=>({
+ ...presentTemplateMetadata(CONDITION_VERBS[CONDITION_FRAMES[
+  CONDITION_FRAME_KEYS.find(k=>CONDITION_FRAMES[k].governor===governorId)].shartKey].person,'implicit'),
+ presentGovernor:governorId,
+ conditionFrameKeys:CONDITION_FRAME_KEYS.filter(k=>CONDITION_FRAMES[k].governor===governorId)
+});
+for(const governorId of Object.keys(CONDITION_GOVERNORS)){
+ if(governorId==='inShart')continue;
+ add('particle','present','jazm','sukun',()=>buildConditionExercise('regular',governorId),
+  conditionGovernorLaneMetadata(governorId));
+}
 
 /* ===== 1G — لَمْ over the mabnī nūn-al-niswah lane ==============================================
    The same two persons the لَنْ lane already produces, under a jāzim instead of a nāṣib. The verb

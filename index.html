@@ -718,7 +718,7 @@ const EXERCISE_TOKEN_KEYS=Object.freeze(['ar','components','en','enHint','expect
  'governorId','grammar','id','inflection','lexeme','mahallRuleId','phraseAr','phraseEn','phraseLabel',
  'phraseWhy','relations','ruleId','sign','signRuleId','state','subjectRuleId','surfaceHint','target',
  'tense','voiceRuleId','why','word','binaaSign','mahall']);
-const EXERCISE_GRAMMAR_KEYS=Object.freeze(['attachedKaf','attachedHaa','conjugation','delayed','exactPresentRaf',
+const EXERCISE_GRAMMAR_KEYS=Object.freeze(['attachedKaf','attachedHaa','builtHaal','conjugation','delayed','exactPresentRaf',
  'governorWord','inflection','isMudaf','kanaKhabar','morphology','particleIraab','particleType','particleWord',
  'person','role','shartRole','type','voice']);
 /* One declared LEGACY name, accepted under Policy B rather than Policy A. Pre-Phase-2 snapshots
@@ -953,12 +953,35 @@ function presentCapabilityFailure(template,morphology,governorMode='none'){
    string is the canonical "no claim" value that lane initialises, so an empty value is never a
    violation — only a non-empty claim on a lane that can never own one. The nūn component's own
    `mahall` and `ruleId` live on the component object and are untouched. */
+/* A noun with a maḥall and no state is a BUILT noun: its word does not inflect, so its syntactic
+   position is recorded separately. Two constructions are in that class — the built munādā
+   (p. 169) and the interrogative ḥāl (p. 155) — and every place that has to treat such a noun
+   specially asks this, never a role name. */
+/* The bināʾ markers a BUILT noun may carry, per construction. The munādā's three come from
+   p. 169; the interrogative ḥāl's fatḥah from p. 155. A built noun whose marker belongs to
+   neither table has no canonical marker at all, which is what the harness asserts. */
+function builtNounBinaaMarker(token){
+ if(!isBuiltNoun(token))return null;
+ if(token.grammar.role===MUNADA_ROLE)return MUNADA_BINAA_SIGNS[token.binaaSign]||null;
+ if(token.grammar.role===HAAL_ROLE&&token.grammar.builtHaal){
+  return token.binaaSign==='fatha'
+   ?Object.freeze({ar:HAAL_ISTIFHAM.binaaAr,en:HAAL_ISTIFHAM.binaaEn,ruleId:HAAL_ISTIFHAM.ruleId})
+   :null;
+ }
+ return null;
+}
+function isBuiltNoun(token){
+ return token?.grammar?.type==='noun'&&!token.state&&Boolean(token.mahall);
+}
 function mahallRuleOwnerFailure(token,data){
  if(!token?.mahallRuleId)return false;
  /* A built munādā is the only NOUN that owns a maḥall rule: it has no iʿrāb state of its own, so
     its syntactic position has to be recorded separately, exactly as the mabnī present verb's is. */
  if(token.grammar?.type==='noun'&&token.grammar.role===MUNADA_ROLE){
   return !deriveMunadaAuthority(data,data?.tokens?.indexOf(token)).binaa;
+ }
+ if(token.grammar?.type==='noun'&&token.grammar.role===HAAL_ROLE){
+  return !deriveHaalMahallAuthority(data).authorized||token.mahallRuleId!==HAAL_ISTIFHAM.mahallRuleId;
  }
  if(token.grammar?.type!=='verb'||token.tense!=='present')return true;
  return authoritativeVerbMorphology(token,data).formClass!=='mabniPresent';
@@ -1287,6 +1310,7 @@ function resolveCanonicalTokenGloss(data,token,index){
  }
  /* 4h — a haal adjective is authorized only by its exact template-owned event/owner pair. */
  if(type==='noun'&&token.grammar.role===HAAL_ROLE){
+  if(token.grammar.builtHaal)return deriveHaalMahallAuthority(data).authorized?HAAL_ISTIFHAM.en:null;
   const found=haalPairAt(data,index);
   return found?.haalEntry?.lexeme?.en||null;
  }
@@ -1488,6 +1512,8 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  ,TS67:Object.freeze({parts:Object.freeze([Object.freeze({slot:'zannaSentence'})])})
  /* خبر جملة اسمية — the authorized frame owns the whole English sentence. */
  ,TS68:Object.freeze({parts:Object.freeze([Object.freeze({slot:'khabarClauseSentence'})])})
+ /* الحال في محل نصب — the authorized frame owns the whole English question. */
+ ,TS69:Object.freeze({parts:Object.freeze([Object.freeze({slot:'haalMahallSentence'})])})
  ,TS65:Object.freeze({parts:Object.freeze([Object.freeze({slot:'conditionSentence'})])})
  ,TS59:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
  ,TS60:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
@@ -1721,6 +1747,8 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  ,"T_VERB_SINGULAR_NASB_FATHA_32||verb:past,noun:faail,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_32",structure:"verb:past,noun:faail,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_33||verb:past,noun:faail,noun:object,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_33",structure:"verb:past,noun:faail,noun:object,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_PARTICLE_SINGULAR_NASB_FATHA_14||particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_14",structure:"particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa",shape:"TS45",copulaPlural:false})
+ /* الحال في محل نصب — the interrogative heads the sentence, so the shape is its own. */
+ ,"T_NOUN_SINGULAR_NASB_FATHA_04||noun:haal,verb:past,noun:faail":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_04",structure:"noun:haal,verb:past,noun:faail",shape:"TS69",copulaPlural:false})
  /* خبر جملة اسمية — one structure, three lanes: which of the three words is asked about. */
  ,"T_NOUN_SINGULAR_RAF_DAMMA_04||noun:mubtada,noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_04",structure:"noun:mubtada,noun:mubtada,noun:khabar",shape:"TS68",copulaPlural:false})
  ,"T_NOUN_SINGULAR_RAF_DAMMA_05||noun:mubtada,noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_05",structure:"noun:mubtada,noun:mubtada,noun:khabar",shape:"TS68",copulaPlural:false})
@@ -1801,6 +1829,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='mafulMaahSentence')return canonicalMafulMaahTranslation(exercise);
  if(bits[0]==='zannaSentence')return canonicalZannaTranslation(exercise);
  if(bits[0]==='khabarClauseSentence')return canonicalKhabarClauseTranslation(exercise);
+ if(bits[0]==='haalMahallSentence')return canonicalHaalMahallTranslation(exercise);
  if(bits[0]==='munadaSentence')return canonicalMunadaTranslation(exercise);
  if(bits[0]==='conditionSentence')return canonicalConditionTranslation(exercise);
  if(bits[0]==='copula'){
@@ -4747,6 +4776,41 @@ const MAFUL_MAAH_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
    Every Arabic string below that the app already owned is READ from it — the rābiṭ's name and the
    attached pronoun come from the definitions panel's own example, and the verbal clause's name from
    the block that has printed it since the verbal-khabar lane shipped. */
+/* الحال في محل نصب — Al-Tuḥfah p. 155, the chapter's own worked parse:
+
+   «وَرُبَّمَا وَجَبَ تَقْدِيمُ الْحَالِ عَلَى جَمِيعِ أَجْزَاءِ الْكَلَامِ، كَمَا إِذَا كَانَ الْحَالُ اسْمَ
+    اسْتِفْهَامٍ، نَحْوُ: «كَيْفَ قَدِمَ عَلِيٌّ» فَكَيْفَ: اسْمُ اسْتِفْهَامٍ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ
+    نَصْبِ حَالٍ مِنْ عَلِيٍّ، وَلَا يَجُوزُ تَأْخِيرُ اسْمِ الِاسْتِفْهَامِ.»
+
+   Two things this construction is for. It is the one place this chapter says «فِي مَحَلِّ نَصْبٍ»
+   outright — the ḥāl that has no iʿrāb of its own and takes a POSITION instead — and it is the one
+   ḥāl that must come first, which is why its own frozen shape puts it at the head. */
+const HAAL_MAHALL=Object.freeze({state:'nasb',ar:'نَصْبٍ',en:'naṣb'});
+const HAAL_ISTIFHAM=Object.freeze({surface:'كَيْفَ',en:'how',
+ nameAr:'اسْمُ اسْتِفْهَامٍ',nameEn:'an interrogative noun',
+ binaaAr:'الْفَتْحِ',binaaEn:'fatḥ',
+ ruleId:'R_HAAL_ISTIFHAM_MABNI',mahallRuleId:'R_HAAL_MAHALL_NASB'});
+/* One frame = one event and one ṣāḥib. The ṣāḥib must be معرفة, which p. 155 states as a condition
+   of the chapter, so every frame names a definite person from the app's own lexicon. */
+const HAAL_MAHALL_FRAMES=Object.freeze(Object.assign(Object.create(null),{
+ studentRose:Object.freeze({key:'studentRose',capabilityKey:'qaama',sahibEn:'the student',
+  sentenceEn:'How did the student rise?'}),
+ guestSat:Object.freeze({key:'guestSat',capabilityKey:'jalasa',sahibEn:'the guest',
+  sentenceEn:'How did the guest sit down?'}),
+ teacherStood:Object.freeze({key:'teacherStood',capabilityKey:'waqafa',sahibEn:'the teacher',
+  sentenceEn:'How did the teacher stand up?'}),
+ imamProstrated:Object.freeze({key:'imamProstrated',capabilityKey:'sajada',sahibEn:'the imam',
+  sentenceEn:'How did the imam prostrate?'}),
+ doctorSat:Object.freeze({key:'doctorSat',capabilityKey:'qaada',sahibEn:'the doctor',
+  sentenceEn:'How did the doctor sit?'}),
+ scholarRose:Object.freeze({key:'scholarRose',capabilityKey:'qaama',sahibEn:'the scholar',
+  sentenceEn:'How did the scholar rise?'}),
+ merchantStood:Object.freeze({key:'merchantStood',capabilityKey:'waqafa',sahibEn:'the merchant',
+  sentenceEn:'How did the merchant stand up?'}),
+ travelerSatDown:Object.freeze({key:'travelerSatDown',capabilityKey:'jalasa',sahibEn:'the traveler',
+  sentenceEn:'How did the traveler sit down?'})
+}));
+const HAAL_MAHALL_FRAME_KEYS=Object.freeze(Object.keys(HAAL_MAHALL_FRAMES));
 const KHABAR_CLAUSE_KINDS=Object.freeze(Object.assign(Object.create(null),{
  verbal:Object.freeze({id:'verbal',ar:'الْجُمْلَةُ الْفِعْلِيَّةُ',labelAr:'خَبَرٌ جُمْلَةٌ فِعْلِيَّةٌ',
   en:'a verbal sentence',labelEn:'a verbal-sentence khabar',ruleId:'R_KHABAR_JUMLA_FILIYYA'}),
@@ -8596,6 +8660,17 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
     بدل الغلط. What remains unproduced of البدل is named exactly, because بدل البداء and بدل النسيان
     turn on a speaker's prior belief or change of mind, which no sentence surface carries. */
+ /* الحال. This chapter (pp. 153–156) divides the ḥāl by what it is DERIVED from and by its
+    conditions, not into مفرد / جملة / شبه جملة the way it divides the khabar at p. 102. It never
+    says «حال جملة», never «جملة في محل نصب حال», and never «حال شبه جملة»; the sentence-shaped
+    ḥāl it does teach — «جَاءَ مُحَمَّدٌ يَضْحَكُ» at p. 154 — it analyses instead as الاسم المؤوَّل
+    بالصريح, «فِي تَأْوِيلِ ضَاحِكاً». Those three terms are therefore not produced here, because this
+    source does not teach them, and the linking machinery (واو الحال، الرابط) belongs with them.
+    What p. 155 DOES state outright — «فِي مَحَلِّ نَصْبِ حَالٍ» for a built interrogative — is
+    produced. */
+ 'the terms حال جملة, جملة في محل نصب حال and حال شبه جملة, which this source does not use',
+ 'the sentence-shaped hal of p. 154, which this source analyses as al-ism al-muʾawwal bi-l-sarih',
+ 'the wāw and pronoun that link a hal clause, which belong to those unbuilt terms',
  'imperative','diptote','naat sababi','atf bayan','badal al-badaa and badal al-nisyan',
  'badal of a verb from a verb',
  /* المفعول المطلق ships with its three meanings (تأكيد، نوع، عدد) and both divisions
@@ -8848,6 +8923,8 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_MUNADA_MABNI_DAMM:sourceRule('When the munada would be raised by a damma, it is built on the damma.',[169],'Only the registered single proper name and intended indefinite. The damma here is a binaʾ marker, never the iʿrab sign of rafʿ.'),
  R_MUNADA_MAHALL_NASB:sourceRule('The built munada occupies the position of nasb even though its word carries no iʿrab.',[169],'Recorded as a mahall and never as a state, so nothing downstream can read it as an ordinary accusative.'),
  R_MUNADA_NASB:sourceRule('The remaining three kinds of munada — the unintended indefinite, the mudaf, and the one resembling a mudaf — are accusative and nothing else.',[168,169,170],'Each goes through the ordinary noun nasb matrix, because each is genuinely muʿrab.'),
+ R_HAAL_ISTIFHAM_MABNI:sourceRule('An interrogative noun standing as a haal is built, not inflected, and must be put before every other part of the sentence.',[155],'Only inside a frozen frame whose head is that exact interrogative and whose sahib al-hal is definite.'),
+ R_HAAL_MAHALL_NASB:sourceRule('A built haal has no iʿrab on its word; it occupies the position of nasb as the haal of a named owner.',[155],'Recorded as a mahall and never as a state, so nothing downstream can read it as an ordinary accusative.'),
  R_KHABAR_JUMLA_ISMIYYA:sourceRule('The khabar may be a nominal sentence — a mubtadaʾ with its own khabar — which then holds the position of rafʿ as the khabar of the first mubtadaʾ.',[101,102],'Only a frozen frame owned by its template, whose inner mubtadaʾ carries the attached pronoun that links the clause back to the outer mubtadaʾ.'),
  R_KHABAR_JUMLA_FILIYYA:sourceRule('The khabar may be a verbal sentence — a verb with its subject or its deputy — which then holds the position of rafʿ as the khabar.',[101,102],'Only where a mubtadaʾ is followed by a present verb whose subject returns to it.'),
  R_KHABAR_JUMLA_RABIT:sourceRule('A khabar that is a sentence must carry a link binding it to the mubtadaʾ: either a pronoun returning to the mubtadaʾ, or a demonstrative noun.',[102],'The link is resolved from the clause structure — an attached pronoun on its muḍāf, or the pronoun concealed in its verb. The demonstrative option is registered and not produced.'),
@@ -10018,6 +10095,85 @@ function zannaPairRecord(pairKey){
   proposition:zannaProposition(pair.propKey),sentenceEn:pair.sentenceEn});
 }
 /* The nominal-sentence khabar: resolution, registration and proof. */
+/* الحال في محل نصب: resolution and proof. */
+function haalMahallRefusal(reason){return Object.freeze({authorized:false,reason,frameKey:''})}
+function deriveHaalMahallAuthority(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ if(!template?.haalMahallFrameKeys?.length)return haalMahallRefusal('template-declares-no-haal-mahall-frame');
+ const tokens=data?.tokens;
+ if(!Array.isArray(tokens)||tokens.length!==3)return haalMahallRefusal('not-the-three-word-shape');
+ const [head,verb,sahib]=tokens;
+ /* p. 155: «وَلَا يَجُوزُ تَأْخِيرُ اسْمِ الِاسْتِفْهَامِ» — the position is part of the proof. */
+ if(!head||head.grammar?.type!=='noun'||head.grammar.role!==HAAL_ROLE||!head.grammar.builtHaal){
+  return haalMahallRefusal('the-head-is-not-a-built-haal-noun');
+ }
+ if(head.word!==HAAL_ISTIFHAM.surface)return haalMahallRefusal('the-head-is-not-its-canonical-bytes');
+ /* At build time the tense is not materialized yet, so the structural role is what is read —
+    the same thing inflectVerb will copy into it a moment later. */
+ if(!verb||verb.grammar?.type!=='verb'||(verb.tense||verb.grammar?.role)!=='past'){
+  return haalMahallRefusal('no-past-event');
+ }
+ if(!sahib||sahib.grammar?.role!=='faail')return haalMahallRefusal('no-explicit-sahib');
+ for(const frameKey of template.haalMahallFrameKeys){
+  const record=haalMahallFrameRecord(frameKey);
+  if(verb.word!==record.verb.past)continue;
+  if(sahib.word!==record.sahib.nom)continue;
+  return Object.freeze({authorized:true,reason:'',frameKey,
+   headId:head.id,verbId:verb.id,verbWord:verb.word,sahibId:sahib.id,sahibWord:sahib.word});
+ }
+ return haalMahallRefusal('the-event-and-its-owner-are-not-a-registered-frame');
+}
+function canonicalHaalMahallTranslation(data){
+ const authority=deriveHaalMahallAuthority(data);
+ return authority.authorized?haalMahallFrameRecord(authority.frameKey).sentenceEn:null;
+}
+function haalMahallRelationshipParts(rel,data){
+ const authority=deriveHaalMahallAuthority(data);
+ if(!authority.authorized)return null;
+ const [head,verb,sahib]=data.tokens;
+ if(rel.haalId!==head.id||rel.verbId!==verb.id||rel.sahibId!==sahib.id)return null;
+ if(rel.frameKey!==authority.frameKey||rel.mahall!==HAAL_MAHALL.state)return null;
+ return{head,verb,sahib,record:haalMahallFrameRecord(authority.frameKey)};
+}
+function isBuiltHaal(token){return token?.grammar?.role===HAAL_ROLE&&Boolean(token.grammar.builtHaal)}
+function haalMahallFrameRecord(frameKey){
+ const frame=HAAL_MAHALL_FRAMES[frameKey];
+ if(!frame)throw new Error(`Unknown haal-mahall frame: ${frameKey}`);
+ const verb=haalVerb(frame);
+ const sahib=haalNoun('singularPeople',frame.sahibEn);
+ return Object.freeze({key:frameKey,verb,sahib,sentenceEn:frame.sentenceEn});
+}
+function verifyHaalMahallRegistry(){
+ /* «كَيْفَ» must not be owned by anything else in the app: it is a NOUN here, and a surface shared
+    with a particle table would let one word carry two identities. */
+ if(GLOSS_CLOSED_PARTICLES[HAAL_ISTIFHAM.surface]||GLOSS_FIXED_TOKENS[HAAL_ISTIFHAM.surface]){
+  throw new Error('«كَيْفَ» already has a fixed gloss owner.');
+ }
+ if(GRAMMAR_RULES.governors[HAAL_ISTIFHAM.surface]){
+  throw new Error('The interrogative haal entered the verb governor table.');
+ }
+ /* It is BUILT, so it may carry no accusative form anywhere in the noun index — the whole point of
+    this construction is that its word does not change. */
+ if(nounFormIndex.has(HAAL_ISTIFHAM.surface)){
+  throw new Error('«كَيْفَ» was registered as an inflecting noun; it is mabnī.');
+ }
+ HAAL_MAHALL_FRAME_KEYS.forEach(key=>{
+  const record=haalMahallFrameRecord(key);
+  if(verbFormIndex.get(record.verb.past)?.form!=='past'){
+   throw new Error(`Haal-mahall frame ${key} names an unregistered past ʿāmil.`);
+  }
+  if(nounFormIndex.get(record.sahib.nom)?.lexeme!==record.sahib){
+   throw new Error(`Haal-mahall frame ${key} names a ṣāḥib outside the noun index.`);
+  }
+  // p. 155: «وَيُشْتَرَطُ فِي صَاحِبِ الْحَالِ أَنْ يَكُونَ مَعْرِفَةً».
+  if(!/^ال/u.test(record.sahib.nom)){
+   throw new Error(`Haal-mahall frame ${key} names an indefinite ṣāḥib al-ḥāl.`);
+  }
+  if(typeof record.sentenceEn!=='string'||!record.sentenceEn.trim()){
+   throw new Error(`Haal-mahall frame ${key} carries no canonical English.`);
+  }
+ });
+}
 function khabarClauseOwned(key){
  const record=OWNED_HAA_LEXEMES[key];
  if(!record)throw new Error(`Unknown owned-noun record: ${key}`);
@@ -10190,6 +10346,7 @@ function registerMunadaNounForms(){
 registerMunadaNounForms();
 verifyZannaRegistry();
 verifyKhabarClauseRegistry();
+verifyHaalMahallRegistry();
 /* Narrow byte/coherence gate. The load-bearing checks here are the two the chapter turns on: a
    built subtype must carry a bināʾ marker and NO accusative form, and an inflected one must carry
    an accusative and NO bināʾ marker. Neither can borrow the other's regime. */
@@ -10349,6 +10506,7 @@ const AR={
  mafulThani:w=>grammarSpec('noun',ZANNA_SECOND_ROLE),
  /* The inner mubtadaʾ of a nominal-sentence khabar: a muḍāf whose muḍāf ilayh is the link. */
  mubtadaHaa:w=>grammarSpec('noun','mubtada',{isMudaf:true,attachedHaa:true}),
+ haalIstifham:()=>grammarSpec('noun',HAAL_ROLE,{inflection:'singular',builtHaal:true}),
  munada:w=>grammarSpec('noun',MUNADA_ROLE),
  munadaMudaf:w=>grammarSpec('noun',MUNADA_ROLE,{isMudaf:true}),
  nidaParticle:()=>grammarSpec('particle','particle',{particleType:NIDA_PARTICLE_TYPE,particleWord:NIDA_PARTICLE.surface}),
@@ -11461,6 +11619,23 @@ function inflectNoun(token,tokens,index,data){
  if(token.grammar.role===MAFUL_FIH_ROLE&&!deriveMafulFihAuthority(data,index).authorized){
   throw new Error(`The ẓarf is not a canonically licensed mafʿūl fīh: ${deriveMafulFihAuthority(data,index).reason}.`);
  }
+ /* The built ḥāl never reaches the state/sign matrix — the same architecture the built munādā
+    uses, and for the same reason: p. 155 gives it a POSITION, not an iʿrāb. */
+ if(isBuiltHaal(token)){
+  const builtAuthority=deriveHaalMahallAuthority(data);
+  if(!builtAuthority.authorized){
+   throw new Error(`The noun is not a canonically licensed built haal: ${builtAuthority.reason}.`);
+  }
+  token.state='';
+  token.sign=null;
+  token.ruleId=HAAL_ISTIFHAM.ruleId;
+  token.binaaSign='fatha';
+  token.mahall=HAAL_MAHALL.state;
+  token.mahallRuleId=HAAL_ISTIFHAM.mahallRuleId;
+  token.expectedSurface=HAAL_ISTIFHAM.surface;
+  token.word=token.expectedSurface;
+  return;
+ }
  if(token.grammar.role===HAAL_ROLE&&!deriveHaalAuthority(data,index).authorized){
   throw new Error(`The adjective is not a canonically licensed haal: ${deriveHaalAuthority(data,index).reason}.`);
  }
@@ -11857,6 +12032,20 @@ function resolveRelationships(data){
  /* ظنّ. One relationship for the whole structure, keyed off the SECOND object so it is created
     once; both objects and the sister carry back-links, so History restores a structure rather
     than three tokens that merely sit in the right order. */
+ /* الحال في محل نصب (p. 155). The ḥāl heads the sentence here, so adjacency cannot find it; the
+    frozen frame does, and the link it writes is the ordinary one — same type, same reciprocal
+    fields — because صاحب الحال is the same relationship whatever the ḥāl's own regime. */
+ (()=>{
+  const authority=deriveHaalMahallAuthority(data);
+  if(!authority.authorized)return;
+  const [head,verb,sahib]=tokens;
+  const relation=addRelationship(data,'haal',{haalId:head.id,verbId:verb.id,sahibId:sahib.id,
+   frameKey:authority.frameKey,mahall:HAAL_MAHALL.state});
+  head.relations.amilId=verb.id;head.relations.sahibId=sahib.id;
+  head.relations.haalRelationshipId=relation.id;
+  verb.relations.haalId=head.id;verb.relations.haalRelationshipId=relation.id;
+  sahib.relations.haalId=head.id;sahib.relations.haalRelationshipId=relation.id;
+ })();
  tokens.forEach((item,index)=>{
   if(item.grammar.role!==ZANNA_SECOND_ROLE)return;
   const authority=deriveZannaAuthority(data,index);
@@ -12104,6 +12293,10 @@ function nounRoleArabic(token){
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl fīh: ${authority.reason}`);
   return`مَفْعُولٌ فِيهِ ${MAFUL_FIH_KIND_LABELS[authority.kind].ar} مَنْصُوبٌ`;
  }
+ /* p. 155 spells the built one out: «اسْمُ اسْتِفْهَامٍ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ نَصْبِ حَالٍ». */
+ if(isBuiltHaal(token)){
+  return HAAL_ISTIFHAM.nameAr+' مَبْنِيٌّ عَلَى '+HAAL_ISTIFHAM.binaaAr+' فِي مَحَلِّ '+HAAL_MAHALL.ar+' حَالٌ';
+ }
  if(role===HAAL_ROLE)return'حَالٌ مَنْصُوبٌ';
  /* The subtype is deliberately NOT folded into this label. Al-Tuḥfah's own iʿrāb drills at p. 161
     say «تمييز لعشرين، منصوب» and «تمييز نسبة محوَّل عن المبتدأ منصوب» — the division belongs to the
@@ -12136,7 +12329,7 @@ function renderNounAnalysis(token){
  /* A built munada has NO iʿrab sign, so it is the one noun that legitimately reaches here without
     one. Its line ends at the role clause — which already carries «مبني على … في محل نصب» — rather
     than appending a «وَعَلَامَةُ نَصْبِهِ …» it does not have. */
- const builtMunada=token.grammar.role===MUNADA_ROLE&&!token.state;
+ const builtMunada=isBuiltNoun(token);
  // Labels come from the frozen table via the semantic id, never from the token’s stored copy.
  const canonical=builtMunada?null:canonicalSign(safeSignId(token.sign));
  if(!builtMunada&&!canonical)throw new Error(`No canonical sign for noun sign id “${safeSignId(token.sign)}”`);
@@ -12163,7 +12356,11 @@ function renderNounAnalysis(token){
   const kind=MAFUL_FIH_KIND_LABELS[authority.kind];
   english=`A mafʿūl fīh: a ${kind.en} that ${kind.clauseEn}, accusative with the meaning of «fī».`;
  }
- if(token.grammar.role===HAAL_ROLE){
+ if(isBuiltHaal(token)){
+  const data=token._data,builtAuthority=deriveHaalMahallAuthority(data);
+  if(!builtAuthority.authorized)throw new Error(`Cannot render an unauthorized built haal: ${builtAuthority.reason}`);
+  english=`${HAAL_ISTIFHAM.nameEn} asking after the condition of ${builtAuthority.sahibWord} at the time of ${builtAuthority.verbWord}. It is built, and holds the position of ${HAAL_MAHALL.en} as the haal.`;
+ }else if(token.grammar.role===HAAL_ROLE){
   const data=token._data,authority=deriveHaalAuthority(data,data?.tokens?.indexOf(token));
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized haal: ${authority.reason}`);
   english=`A haal describing the condition of ${authority.sahibWord} at the time of ${authority.verbWord}; accusative.`;
@@ -12472,6 +12669,13 @@ function mafulFihWhyAuthority(token,data){
  return authority;
 }
 function haalWhyAuthority(token,data){
+ /* Both regimes answer here, so the Why table never has to know which one it is looking at.
+    The built ḥāl (p. 155) has no state, so its own state line is the maḥall instead. */
+ if(isBuiltHaal(token)){
+  const built=deriveHaalMahallAuthority(data);
+  if(!built.authorized)throw new Error(`WHY: the built haal is not authorized (${built.reason}).`);
+  return{sahibWord:built.sahibWord,verbWord:built.verbWord,built:true};
+ }
  const authority=deriveHaalAuthority(data,data?.tokens?.indexOf(token));
  if(!authority.authorized)throw new Error(`WHY: the haal is not authorized (${authority.reason}).`);
  return authority;
@@ -12856,7 +13060,13 @@ const WHY_ROLE=Object.freeze({
   id:()=>'WHY_ROLE_HAAL',
   ar:(t,data)=>`${wq(t.word)} بَيَّنَ هَيْئَةَ ${wq(haalWhyAuthority(t,data).sahibWord)} وَقْتَ وُقُوعِ ${wq(haalWhyAuthority(t,data).verbWord)}، فَهُوَ حَالٌ.`,
   en:(t,data)=>`${eq(t.word)} describes the temporary condition of ${eq(haalWhyAuthority(t,data).sahibWord)} when ${eq(haalWhyAuthority(t,data).verbWord)} occurred, so it is a حَالٌ.`,
-  stateId:()=>'WHY_STATE_HAAL',stateAr:()=>'وَالْحَالُ مَنْصُوبٌ.',stateEn:()=>'The حَالٌ is مَنْصُوبٌ.'},
+  stateId:t=>isBuiltHaal(t)?'WHY_STATE_HAAL_MAHALL':'WHY_STATE_HAAL',
+  stateAr:t=>isBuiltHaal(t)
+   ?'وَالْحَالُ الْمَبْنِيُّ لَا إِعْرَابَ لِلَفْظِهِ، وَإِنَّمَا هُوَ فِي مَحَلِّ '+HAAL_MAHALL.ar+'.'
+   :'وَالْحَالُ مَنْصُوبٌ.',
+  stateEn:t=>isBuiltHaal(t)
+   ?'A built حَالٌ has no iʿrāb on its word; it holds the position of '+HAAL_MAHALL.en+'.'
+   :'The حَالٌ is مَنْصُوبٌ.'},
  adverb:{
   id:(t,data)=>`WHY_ROLE_MAFUL_FIH_${mafulFihWhyAuthority(t,data).kind.toUpperCase()}`,
   ar:(t,data)=>{
@@ -13114,7 +13324,7 @@ function buildTokenWhy(token,data){
   /* A built munada has no iʿrab sign, so there is no sign line to explain. Its bināʾ marker is
      explained by whyMunadaRuling instead, which is where it belongs — the marker is a fact about
      building, not about iʿrāb. */
-  if(!(token.grammar.role===MUNADA_ROLE&&!token.state))push(whySignNoun(token));
+  if(!isBuiltNoun(token))push(whySignNoun(token));
   if(token.grammar.role==='tawkid'){
    push(whyTawkidCondition(token,data));
   }
@@ -13129,7 +13339,9 @@ function buildTokenWhy(token,data){
    push(whyMafulFihSense(token,data));
   }
   if(token.grammar.role===HAAL_ROLE){
-   push(whyHaalConditions(token,data));
+   /* The built ḥāl's position is already its state line, so it adds no further line; the
+      inflected one adds the chapter's definiteness condition. */
+   if(!isBuiltHaal(token))push(whyHaalConditions(token,data));
   }
   if(token.grammar.role===MUSTATHNA_ROLE){
    push(whyMustathnaConditions(token,data));
@@ -13275,6 +13487,18 @@ function buildRelationshipWhy(rel,data){
   push({id:'WHY_REL_NOMINAL_KHABAR_RABIT',
    ar:`وَلَا بُدَّ لِخَبَرِ الْجُمْلَةِ مِنْ رَابِطٍ، وَهُوَ هُنَا ${rabit.ar}، وَهُوَ الْهَاءُ فِي ${wq(inner.word)}.`,
    en:`A sentence khabar must carry a link, and here it is ${rabit.en}: the ${shape.en} pronoun in ${eq(inner.word)}.`});
+  return{ids,ar,en};
+ }
+ if(rel.type==='haal'&&rel.mahall){
+  const parts=haalMahallRelationshipParts(rel,data);
+  if(!parts)return{ids,ar,en};
+  const {head,verb,sahib}=parts;
+  push({id:'WHY_REL_HAAL_MAHALL_OWNER',
+   ar:`${wq(head.word)} سَأَلَ عَنْ هَيْئَةِ ${wq(sahib.word)} وَقْتَ وُقُوعِ ${wq(verb.word)}، فَهُوَ حَالٌ مِنْهُ.`,
+   en:`${eq(head.word)} asks after the condition of ${eq(sahib.word)} when ${eq(verb.word)} happened, so it is its haal.`});
+  push({id:'WHY_REL_HAAL_MAHALL_POSITION',
+   ar:`وَلَمَّا كَانَ ${HAAL_ISTIFHAM.nameAr} وَجَبَ تَقْدِيمُهُ عَلَى جَمِيعِ أَجْزَاءِ الْكَلَامِ.`,
+   en:`Because it is ${HAAL_ISTIFHAM.nameEn}, it must be put before every other part of the sentence.`});
   return{ids,ar,en};
  }
  if(rel.type==='zanna'){
@@ -13467,7 +13691,7 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
-  if(rel.type==='haal'){
+  if(rel.type==='haal'&&!rel.mahall){
    const recipient=data.tokens.find(item=>item.id===rel.haalId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
@@ -13479,6 +13703,11 @@ function attachWhyExplanations(data){
   }
   if(rel.type==='nida'){
    const recipient=data.tokens[data.tokens.length-1];
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
+  if(rel.type==='haal'&&rel.mahall){
+   const recipient=data.tokens.find(item=>item.id===rel.sahibId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
@@ -13543,7 +13772,7 @@ function renderRelationshipAnalysis(data){
   zarf.phraseEn=`Together, “${phrase}” is an ʿāmil with a ${kind.en} accusative on ẓarfiyyah, carrying the meaning of «fī».`;
   zarf.phraseLabel='Ẓarf construction';
  });
- data.relationships.filter(rel=>rel.type==='haal').forEach(rel=>{
+ data.relationships.filter(rel=>rel.type==='haal'&&!rel.mahall).forEach(rel=>{
   const verb=data.tokens.find(item=>item.id===rel.verbId);
   const sahib=data.tokens.find(item=>item.id===rel.sahibId);
   const haal=data.tokens.find(item=>item.id===rel.haalId);
@@ -13568,6 +13797,15 @@ function renderRelationshipAnalysis(data){
  /* ظنّ. The combined block is where the chapter actually lives: it shows the nominative sentence
     FIRST and then what the sister did to it. The proof is re-derived; the relationship record is
     only allowed to agree with it. */
+ data.relationships.filter(rel=>rel.type==='haal'&&rel.mahall).forEach(rel=>{
+  const parts=haalMahallRelationshipParts(rel,data);
+  if(!parts)return;
+  const {head,verb,sahib}=parts;
+  const phrase=data.tokens.map(item=>item.word).join(' ');
+  sahib.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: ${wq(head.word)} ${HAAL_ISTIFHAM.nameAr} فِي مَحَلِّ ${HAAL_MAHALL.ar} حَالٌ مِنْ ${wq(sahib.word)}، وَعَامِلُهُ ${wq(verb.word)}، وَقُدِّمَ عَلَى الْكَلَامِ كُلِّهِ لِأَنَّهُ اسْمُ اسْتِفْهَامٍ.`;
+  sahib.phraseEn=`Together, “${phrase}”: “${head.word}” is ${HAAL_ISTIFHAM.nameEn} holding the position of ${HAAL_MAHALL.en} as the haal of “${sahib.word}”, governed by “${verb.word}”, and it is put before the whole sentence because it is an interrogative.`;
+  sahib.phraseLabel='Haal construction';
+ });
  data.relationships.filter(rel=>rel.type==='zanna').forEach(rel=>{
   const parts=zannaRelationshipParts(rel,data);
   if(!parts)return;
@@ -13894,7 +14132,7 @@ function validateExercise(data){
      its MAHALL instead — the convention the mabnī present verb already follows. The comparison
      therefore moves to the maḥall rather than being skipped: a built munādā still has to sit in
      the position its template declares, and a forged maḥall still fails here. */
-  const builtFocus=focus.grammar?.type==='noun'&&focus.grammar.role===MUNADA_ROLE&&!focus.state;
+  const builtFocus=isBuiltNoun(focus);
   if(data.templateState&&!builtFocus&&focus.state!==data.templateState)fail('E_TARGET_STATE',`Focus state ${focus.state} disagrees with the template's declared state ${data.templateState}.`,focus);
   if(data.templateState&&builtFocus&&focus.mahall!==data.templateState)fail('E_TARGET_STATE',`Focus maḥall ${focus.mahall} disagrees with the template's declared state ${data.templateState}.`,focus);
   if(data.templateSign&&!builtFocus&&safeSignId(focus.sign)!==data.templateSign)fail('E_TARGET_SIGN',`Focus sign ${safeSignId(focus.sign)} disagrees with the template's declared sign ${data.templateSign}.`,focus);
@@ -14036,11 +14274,23 @@ function validateExercise(data){
     /* p. 159's first condition, re-checked on the built token: a definite surface here would mean
        the registry was bypassed, since no registered tamyīz lexeme carries the article. */
     if(/^ال/u.test(token.word))fail('E_TAMYIZ_DEFINITE','A tamyīz may not be definite.',token);
+   }else if(isBuiltHaal(token)){
+    /* The two regimes, each refusing the other's marks — the collision this construction exists
+       to prevent: a built haal must never look accusative, and an inflected one must never
+       borrow a maḥall. */
+    const builtAuthority=deriveHaalMahallAuthority(data);
+    if(!builtAuthority.authorized)fail('E_HAAL_AUTHORITY',`Built-haal authority failed: ${builtAuthority.reason}.`,token);
+    else if(token.ruleId!==HAAL_ISTIFHAM.ruleId)fail('E_HAAL_RULE','The built haal is not bound to its own source rule.',token);
+    if(token.state)fail('E_HAAL_BINAA','A built haal has no iʿrāb state.',token);
+    if(token.sign)fail('E_HAAL_BINAA','A built haal has no iʿrāb sign.',token);
+    if(token.mahall!==HAAL_MAHALL.state)fail('E_HAAL_BINAA','A built haal must hold the position of naṣb.',token);
+    if(token.mahallRuleId!==HAAL_ISTIFHAM.mahallRuleId)fail('E_HAAL_BINAA','The built haal is not bound to its maḥall rule.',token);
    }else if(token.grammar.role===HAAL_ROLE){
     const authority=deriveHaalAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_HAAL_AUTHORITY',`Haal authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_HAAL_NASB')fail('E_HAAL_RULE','The haal is not bound to its source rule.',token);
     if(token.state!=='nasb')fail('E_ROLE_CASE',`Role haal requires nasb, not ${token.state}.`,token);
+    if(token.mahall)fail('E_HAAL_BINAA','An inflected haal may not also hold a maḥall.',token);
    }else if(token.grammar.role==='mafulMutlaq'){
     /* Unlike the followers, this role's state is fixed by the rule table rather than inherited,
        so the state is checked here too — the authority proving the construction does not by
@@ -14440,6 +14690,9 @@ function validateExercise(data){
   if(rel.type==='mubtadaKhabar'&&rel.khabarKind==='nominalSentence'&&!khabarClauseRelationshipParts(rel,data)){
    fail('E_KHABAR_CLAUSE_RELATION','Nominal-sentence khabar relationship is not the canonical proof.',tokenById.get(rel.mubtadaId));
   }
+  if(rel.type==='haal'&&rel.mahall&&!haalMahallRelationshipParts(rel,data)){
+   fail('E_HAAL_MAHALL_RELATION','Built-haal relationship is not the canonical proof.',tokenById.get(rel.haalId));
+  }
   if(rel.type==='zanna'&&!zannaRelationshipParts(rel,data)){
    fail('E_ZANNA_RELATION','Ẓanna relationship is not the canonical proof.',tokenById.get(rel.secondId));
   }
@@ -14507,7 +14760,9 @@ function validateExercise(data){
     fail('E_MUSTATHNA_RELATION','Istithnāʾ relationship is not the canonical exclusion proof.',mustathna);
    }
   }
-  if(rel.type==='haal'){
+  if(rel.type==='haal'&&rel.mahall){
+   /* The built regime proves itself; see haalMahallRelationshipParts. */
+  }else if(rel.type==='haal'){
    const haal=tokenById.get(rel.haalId);
    const authority=deriveHaalAuthority(data,data.tokens.indexOf(haal));
    if(!authority.authorized||rel.verbId!==authority.verbId||rel.sahibId!==authority.sahibId
@@ -14991,6 +15246,21 @@ function add(starts,form,state,sign,build,metadata={}){
  if(mafulMaahPairKeys.length&&!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
   throw new Error(`Template ${stableId} produces a mafʿūl maʿah without an explicit past ʿāmil and fāʿil.`);
  }
+ /* الحال في محل نصب. One shape, one target — the built ḥāl itself, because the term this
+    construction exists to teach is its own. */
+ const haalMahallFrameKeys=Object.freeze([...(metadata.haalMahallFrameKeys||[])]);
+ if(haalMahallFrameKeys.some((key,position)=>haalMahallFrameKeys.indexOf(key)!==position
+   ||!HAAL_MAHALL_FRAMES[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered haal-mahall frame.`);
+ }
+ if(haalMahallFrameKeys.length){
+  if(form!=='singular'||state!==HAAL_MAHALL.state){
+   throw new Error(`Template ${stableId} declares a built haal with the wrong declension or position.`);
+  }
+  if(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
+   throw new Error(`Template ${stableId} produces a built haal without its explicit past event.`);
+  }
+ }
  /* خبر جملة اسمية. One template owns one target position; all six frames share one token shape,
     so the lanes differ only in which of the three words the learner is asked about. */
  const khabarClauseFrameKeys=Object.freeze([...(metadata.khabarClauseFrameKeys||[])]);
@@ -15158,6 +15428,7 @@ function add(starts,form,state,sign,build,metadata={}){
   zannaTarget,
   khabarClauseFrameKeys,
   khabarClauseTarget,
+  haalMahallFrameKeys,
   munadaPairKeys,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
@@ -16634,6 +16905,20 @@ const khabarClauseLane=target=>()=>buildKhabarClauseExercise(
 add('noun','singular','raf','damma',khabarClauseLane('owner'),khabarClauseMetadata('owner'));
 add('noun','singular','raf','damma',khabarClauseLane('inner'),khabarClauseMetadata('inner'));
 add('noun','singular','raf','damma',khabarClauseLane('predicate'),khabarClauseMetadata('predicate'));
+/* الحال في محل نصب — Al-Tuḥfah p. 155's own «كَيْفَ قَدِمَ عَلِيٌّ», on this app's vocabulary. The
+   ḥāl heads the sentence because the source says it must. */
+function buildHaalMahallExercise(frameKey){
+ const record=haalMahallFrameRecord(frameKey);
+ return{sentence:'',translation:record.sentenceEn,tokens:[
+  token(HAAL_ISTIFHAM.surface,HAAL_ISTIFHAM.en,AR.haalIstifham(),
+   'An interrogative asking after a condition; built, and holding the position of naṣb.',true),
+  token(record.verb.past,record.verb.pastEn,AR.past(record.verb.past),'A past-tense event.'),
+  token(record.sahib.nom,record.sahib.en,AR.faail(record.sahib.nom),'The doer, and the owner of the condition.')
+ ]};
+}
+add('noun','singular','nasb','fatha',
+ ()=>buildHaalMahallExercise(pickVaried([...HAAL_MAHALL_FRAME_KEYS],'haal-mahall',String)),
+ {...pastTemplateMetadata('3ms','explicit'),haalMahallFrameKeys:HAAL_MAHALL_FRAME_KEYS});
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

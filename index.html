@@ -719,8 +719,13 @@ const EXERCISE_TOKEN_KEYS=Object.freeze(['ar','components','en','enHint','expect
  'phraseWhy','relations','ruleId','sign','signRuleId','state','subjectRuleId','surfaceHint','target',
  'tense','voiceRuleId','why','word','binaaSign','mahall']);
 const EXERCISE_GRAMMAR_KEYS=Object.freeze(['attachedKaf','attachedHaa','builtHaal','conjugation','delayed','exactPresentRaf',
- 'governorWord','inflection','isMudaf','kanaKhabar','morphology','particleIraab','particleType','particleWord',
+ 'governorWord','idafaFrameKey','inflection','isMudaf','kanaKhabar','morphology','particleIraab','particleType','particleWord',
  'person','role','shartRole','type','voice']);
+/* Wave 1 — `idafaFrameKey` is a builder's DECLARATION that a muḍāf ilayh belongs to one of the
+   frozen iḍāfah-meaning frames, and it is admitted to the schema for exactly that reason. It is
+   never authority: deriveIdafaMeaningAuthority looks the frame up by the two words actually
+   standing in the sentence and refuses the exercise when a declared key disagrees with what the
+   pair yields, so a snapshot that rewrites it to another meaning is rejected rather than believed. */
 /* One declared LEGACY name, accepted under Policy B rather than Policy A. Pre-Phase-2 snapshots
    stored a `componentKinds` array on a verb's grammar. It is never consulted — internal components
    are derived from structural morphology alone — and materializeAuthoritativeMorphology DELETES it
@@ -1253,6 +1258,13 @@ function resolveCanonicalTokenGloss(data,token,index){
  if(type==='particle'&&Object.hasOwn(J1A_PARTICLE_GLOSSES,token.grammar?.particleType||'')){
   return J1A_PARTICLE_GLOSSES[token.grammar.particleType];
  }
+ /* Wave 1 — a khafḍ particle glosses from its own record, by TYPE, and this must run before the
+    surface table below: «وَ» is «and» as وَاوُ الْعَطْفِ but «by» as وَاوُ الْقَسَمِ, «لِ» is «so»
+    as لَامُ التَّعْلِيلِ but «to» as اللَّامُ الْجَارَّةُ, and «حَتَّى» is «until» in three
+    different chapters. A surface lookup cannot tell those apart; the identity can. */
+ if(type==='particle'&&KHAFD_PARTICLE_BY_TYPE[token.grammar?.particleType||'']){
+  return KHAFD_PARTICLE_BY_TYPE[token.grammar.particleType].gloss;
+ }
  if(type==='particle'){
   return Object.prototype.hasOwnProperty.call(GLOSS_CLOSED_PARTICLES,surface)
    ?GLOSS_CLOSED_PARTICLES[surface]:null;
@@ -1274,7 +1286,7 @@ function resolveCanonicalTokenGloss(data,token,index){
  /* 4c — a productive true naʿt gets its adjective gloss from the exact authorized pair. Shared
     surfaces keep their older noun-entry glosses, so this role-and-template proof is necessary and
     prevents the follower vocabulary from repainting pre-existing exercises. */
- if(type==='noun'&&token.grammar.role==='naat'){
+  if(type==='noun'&&token.grammar.role==='naat'){
   const found=naatPairAt(data,index);
   return found?.pair?.follower?.en||null;
  }
@@ -1342,7 +1354,17 @@ function resolveCanonicalTokenGloss(data,token,index){
   const registered=nounFormIndex.get(surface);
   if(registered&&registered.lexeme&&typeof registered.lexeme.en==='string')return registered.lexeme.en;
   const byCase=nounEnglish(surface,'acc');
-  return byCase==='the noun'?null:byCase;
+  if(byCase!=='the noun')return byCase;
+  /* 6-bis — Wave 1's curriculum-owned vocabulary, resolved by SURFACE AND ROLE together: the words
+     the khafd chapter and the idafah-meaning frames need and that no registry above owns
+     (Muhammad, mishkah, lafz al-jalalah, the times mudh and mundhu govern, rubba's own host nouns,
+     and the frozen idafah pairs). It is deliberately the LAST word rather than the first: every
+     pool, pair registry and form index above keeps ownership of any surface it already has, so a
+     Wave-1 frame can never repaint an existing exercise's English. Binding to the ROLE as well as
+     the surface is what stops these words lending their reading to a token standing elsewhere. */
+  const wave1=WAVE1_GLOSS_BY_ROLE[token.grammar.role||''];
+  if(wave1&&wave1[surface])return wave1[surface];
+  return null;
  }
  /* 7 — a passive verb is glossed from the exact capability authorized by the construction. */
  if(type==='verb'&&token.grammar.voice===PASSIVE_VOICE){
@@ -1434,6 +1456,11 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  TS13:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:0:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
  TS14:Object.freeze({parts:Object.freeze([Object.freeze({slot:"gloss:1:cap"}),Object.freeze({lit:" "}),Object.freeze({slot:"verb:0:third"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
  TS15:Object.freeze({parts:Object.freeze([Object.freeze({slot:"innaLead:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"copula"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
+ TS70:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" belongs "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:2"}),Object.freeze({"lit":"."})])}),
+ TS71:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" lasts "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:2"}),Object.freeze({"lit":"."})])}),
+ TS72:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" has lasted "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:2"}),Object.freeze({"lit":"."})])}),
+ TS73:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" is "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:2"}),Object.freeze({"lit":"."})])}),
+ TS74:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":", "}),Object.freeze({"slot":"gloss:3"}),Object.freeze({"lit":" is "}),Object.freeze({"slot":"gloss:4"}),Object.freeze({"lit":"."})])}),
  TS16:Object.freeze({parts:Object.freeze([Object.freeze({lit:"There is "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
  TS17:Object.freeze({parts:Object.freeze([Object.freeze({lit:"There is "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:" for "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
  TS18:Object.freeze({parts:Object.freeze([Object.freeze({lit:"He "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
@@ -1530,6 +1557,28 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  ,TS54:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let them not '}),Object.freeze({slot:'verb:1:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
+ /* Wave 1 — حروف الخفض and معاني الإضافة. The six مِنْ lanes and the kāf compose with the
+    existing TS02, and the three iḍāfah-meaning lanes with the existing TS04; the lām, ḥattā,
+    مُذْ/مُنْذُ, رُبَّ and the three oaths each needed a shape of their own. */
+ "T_NOUN_SINGULAR_JARR_KASRA_02||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_02",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS02",copulaPlural:false}),
+ "T_NOUN_BROKEN_JARR_KASRA_02||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_BROKEN_JARR_KASRA_02",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS02",copulaPlural:false}),
+ "T_NOUN_DUAL_JARR_YA_02||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_DUAL_JARR_YA_02",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS02",copulaPlural:false}),
+ "T_NOUN_SMP_JARR_YA_02||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SMP_JARR_YA_02",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS02",copulaPlural:false}),
+ "T_NOUN_SFP_JARR_KASRA_02||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SFP_JARR_KASRA_02",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS02",copulaPlural:false}),
+ "T_NOUN_FIVENOUNS_JARR_YA_02||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_FIVENOUNS_JARR_YA_02",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS02",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_03||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_03",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS02",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_04||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_04",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS70",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_05||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_05",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS71",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_06||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_06",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS72",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_07||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_07",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS72",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_JARR_KASRA_06||particle:particle,noun:majrur,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_06",structure:"particle:particle,noun:majrur,noun:mubtada",shape:"TS73",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_JARR_KASRA_07||particle:particle,noun:majrur,particle:particle,noun:ismInna,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_07",structure:"particle:particle,noun:majrur,particle:particle,noun:ismInna,noun:khabarInna",shape:"TS74",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_JARR_KASRA_08||particle:particle,noun:majrur,particle:particle,noun:ismInna,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_08",structure:"particle:particle,noun:majrur,particle:particle,noun:ismInna,noun:khabarInna",shape:"TS74",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_JARR_KASRA_09||particle:particle,noun:majrur,particle:particle,noun:ismInna,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_09",structure:"particle:particle,noun:majrur,particle:particle,noun:ismInna,noun:khabarInna",shape:"TS74",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_11||noun:mubtada,verb:present,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_11",structure:"noun:mubtada,verb:present,particle:particle,noun:majrur",shape:"TS06",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_08||noun:mubtada,noun:mudafIlayh,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_08",structure:"noun:mubtada,noun:mudafIlayh,noun:khabar",shape:"TS04",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_09||noun:mubtada,noun:mudafIlayh,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_09",structure:"noun:mubtada,noun:mudafIlayh,noun:khabar",shape:"TS04",copulaPlural:false}),
+ "T_NOUN_SINGULAR_JARR_KASRA_10||noun:mubtada,noun:mudafIlayh,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_10",structure:"noun:mubtada,noun:mudafIlayh,noun:khabar",shape:"TS04",copulaPlural:false}),
  "T_NOUN_SINGULAR_RAF_DAMMA_01||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_01",structure:"noun:mubtada,noun:khabar",shape:"TS01",copulaPlural:false}),
  "T_NOUN_SINGULAR_RAF_DAMMA_02||noun:mubtada,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_02",structure:"noun:mubtada,particle:particle,noun:majrur",shape:"TS02",copulaPlural:false}),
  "T_NOUN_SINGULAR_NASB_FATHA_01||noun:mubtada,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_01",structure:"noun:mubtada,verb:present,noun:object",shape:"TS03",copulaPlural:false}),
@@ -3419,6 +3468,213 @@ const ATF_CONTEXT_PARTICLES=Object.freeze(Object.assign(Object.create(null),{
 }));
 const ATF_CONJUNCTION_BY_TYPE=Object.freeze(Object.assign(Object.create(null),
  Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(record=>[record.particleType,record]))));
+/* ── Wave 1 — حُرُوفُ الْخَفْضِ ────────────────────────────────────────────────────────────
+   Al-Tuḥfah gives this list twice. The matn at p. 12 («وَحُرُوفِ الْخَفْضِ، وَهِيَ: مِنْ، وَإِلَى،
+   وَعَنْ، وَعَلَى، وَفِي، وَرُبَّ، وَالْبَاءُ، وَالْكَافُ، وَاللَّامُ، وَحُرُوفُ القَسَمِ، وَهِيَ:
+   الوَاوُ، وَالبَاءُ، وَالتَّاءُ») is expanded by the شرح at p. 13, which names each particle's
+   MEANING and states exactly what it may govern; the matn at p. 175 repeats the list inside باب
+   المخفوضات and its شرح at pp. 175–177 adds مُذْ and مُنْذُ.
+
+   حَتَّى الْجَارَّةُ is in NEITHER list. The source authorizes it at p. 127 instead — «وَتَأْتِي
+   جَارَّةً نَحْوُ قَوْلِهِ تَعَالَى ﴿حَتَّى مَطْلَعِ الْفَجْرِ﴾ وَلِهَذَا قَالَ الْمُؤَلِّفُ: وَحَتَّى
+   فِي بَعْضِ الْمَوَاضِعِ» — so this record cites p. 127 and no other page. The permanent inventory
+   previously cited pp. 176–177 for it; those pages were read and do not mention it.
+
+   Every record owns its OWN particleType and its OWN source rule. That is what stops one identity
+   borrowing another's authority when the two share bytes, which happens four times over in this
+   chapter: بِ is both التَّعْدِيَة and بَاءُ الْقَسَمِ; وَ is both وَاوُ الْعَطْفِ and وَاوُ
+   الْقَسَمِ; لِ is both اللَّامُ الْجَارَّةُ and لَامُ التَّعْلِيلِ (and لَامُ الْأَمْرِ, and لَامُ
+   الدُّعَاءِ); حَتَّى is the jārrah here, the nāṣibah at p. 76 and the ʿāṭifah at p. 127. A shared
+   surface is never a shared identity.
+
+   `governs` keeps the source's own restriction on the governed noun as a CLOSED vocabulary rather
+   than a boolean, so a builder must satisfy the restriction the source actually states:
+     zahirWaMudmar — «وتجر الاسم الظاهر والمضمر» / «والضمير» (p. 13, p. 176)
+     zahirOnly     — «ولا تجر إلا الاسم الظاهر» (رُبَّ and الكاف, p. 176; واو القسم, p. 13)
+     azman         — «وَيَجُرَّانِ الأَزْمَانَ» (مُذْ / مُنْذُ, p. 177)
+     lafzAlJalala  — «ولا تدخل إلا على لفظ الجلالة» (تاء القسم, p. 13)
+
+   `connectiveSurface` is a SECOND canonical byte record owned by the same identity, and only مِنْ
+   has one: its sukūn becomes a fatḥah before a word carrying the definite article («سَافَرْتُ مِنَ
+   الْقَاهِرَةِ», p. 13). It is not a normalization and nothing derives it at run time — it is
+   registered, verified at load, and a builder may use it only in that exact position. */
+const KHAFD_KIND='harfKhafd';
+const KHAFD_PARTICLE_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ min:Object.freeze({id:'min',surface:'مِنْ',connectiveSurface:'مِنَ',particleType:'khafdMin',ruleId:'R_KHAFD_MIN',
+  nameAr:'مِنْ',meaningAr:'الِابْتِدَاءُ',meaningEn:'starting-point',gloss:'from',governs:'zahirWaMudmar',pages:[13,175],
+  proclitic:false,qasam:false}),
+ rubba:Object.freeze({id:'rubba',surface:'رُبَّ',particleType:'khafdRubba',ruleId:'R_KHAFD_RUBBA',
+  nameAr:'رُبَّ',meaningAr:'التَّقْلِيلُ',meaningEn:'fewness',gloss:'seldom',governs:'zahirOnly',pages:[13,176],
+  proclitic:false,qasam:false}),
+ ba:Object.freeze({id:'ba',surface:'بِ',particleType:'khafdBa',ruleId:'R_KHAFD_BA',
+  nameAr:'الْبَاءُ',meaningAr:'التَّعْدِيَةُ',meaningEn:'carrying the verb over to its object',gloss:'by',governs:'zahirWaMudmar',pages:[13,176],
+  proclitic:true,qasam:false}),
+ kaf:Object.freeze({id:'kaf',surface:'كَ',particleType:'khafdKaf',ruleId:'R_KHAFD_KAF',
+  nameAr:'الْكَافُ',meaningAr:'التَّشْبِيهُ',meaningEn:'comparison',gloss:'like',governs:'zahirOnly',pages:[13,176],
+  proclitic:true,qasam:false}),
+ lam:Object.freeze({id:'lam',surface:'لِ',particleType:'khafdLam',ruleId:'R_KHAFD_LAM',
+  nameAr:'اللَّامُ',meaningAr:'الْمِلْكُ',meaningEn:'ownership',gloss:'to',governs:'zahirWaMudmar',pages:[13,176],
+  proclitic:true,qasam:false}),
+ hatta:Object.freeze({id:'hatta',surface:ATF_CONJUNCTION_REGISTRY.hatta.surface,particleType:'khafdHatta',ruleId:'R_KHAFD_HATTA',
+  nameAr:'حَتَّى الْجَارَّةُ',meaningAr:'الْغَايَةُ',meaningEn:'the end-limit reached',gloss:'until',governs:'zahirOnly',pages:[127],
+  proclitic:false,qasam:false}),
+ mudh:Object.freeze({id:'mudh',surface:'مُذْ',particleType:'khafdMudh',ruleId:'R_KHAFD_MUDH',
+  nameAr:'مُذْ',meaningAr:'مَعْنَى مِنْ؛ لِأَنَّ مَا بَعْدَهَا مَاضٍ',meaningEn:'the sense of min, because what follows it is past time',
+  gloss:'since',governs:'azman',pages:[177],proclitic:false,qasam:false}),
+ mundhu:Object.freeze({id:'mundhu',surface:'مُنْذُ',particleType:'khafdMundhu',ruleId:'R_KHAFD_MUNDHU',
+  nameAr:'مُنْذُ',meaningAr:'مَعْنَى مِنْ؛ لِأَنَّ مَا بَعْدَهَا مَاضٍ',meaningEn:'the sense of min, because what follows it is past time',
+  gloss:'since',governs:'azman',pages:[177],proclitic:false,qasam:false}),
+ /* حُرُوفُ الْقَسَمِ. The source counts these among حروف الخفض themselves (p. 12 lists them inside
+    the same sentence), and p. 13 gives each one its own restriction. They are kept apart from the
+    ordinary prepositions by `qasam`, so an oath identity can never be produced in an ordinary
+    preposition's frame and no ordinary preposition can be relabelled an oath particle. */
+ qasamWaw:Object.freeze({id:'qasamWaw',surface:ATF_CONJUNCTION_REGISTRY.waw.surface,particleType:'qasamWaw',ruleId:'R_KHAFD_QASAM_WAW',
+  nameAr:'وَاوُ الْقَسَمِ',meaningAr:'الْقَسَمُ',meaningEn:'oath',gloss:'by',governs:'zahirOnly',pages:[13,177],
+  proclitic:true,qasam:true}),
+ qasamBa:Object.freeze({id:'qasamBa',surface:'بِ',particleType:'qasamBa',ruleId:'R_KHAFD_QASAM_BA',
+  nameAr:'بَاءُ الْقَسَمِ',meaningAr:'الْقَسَمُ',meaningEn:'oath',gloss:'by',governs:'zahirWaMudmar',pages:[13,177],
+  proclitic:true,qasam:true}),
+ qasamTa:Object.freeze({id:'qasamTa',surface:'تَ',particleType:'qasamTa',ruleId:'R_KHAFD_QASAM_TA',
+  nameAr:'تَاءُ الْقَسَمِ',meaningAr:'الْقَسَمُ',meaningEn:'oath',gloss:'by',governs:'lafzAlJalala',pages:[13,177],
+  proclitic:true,qasam:true})
+}));
+const KHAFD_PARTICLE_BY_TYPE=Object.freeze(Object.assign(Object.create(null),
+ Object.fromEntries(Object.values(KHAFD_PARTICLE_REGISTRY).map(record=>[record.particleType,record]))));
+const KHAFD_GOVERNS_MODES=Object.freeze(['zahirWaMudmar','zahirOnly','azman','lafzAlJalala']);
+/* The ONE canonical copy of every fragment the khafḍ identity clause is built from. The learner's
+   line, the focused tests and the byte checks all read these same strings, which is what keeps a
+   second hand-typed copy from drifting apart on an invisible combining-mark order. The wording is
+   the source's own: «وتجر الاسم الظاهر والمضمر»، «ولا تجر إلا الاسم الظاهر»، «ويجران الأزمان»،
+   «ولا تدخل إلا على لفظ الجلالة». */
+const KHAFD_GOVERNS_CLAUSES=Object.freeze(Object.assign(Object.create(null),{
+ zahirWaMudmar:Object.freeze({ar:'يَجُرُّ الِاسْمَ الظَّاهِرَ وَالْمُضْمَرَ',en:'it governs both the explicit noun and the pronoun'}),
+ zahirOnly:Object.freeze({ar:'لَا يَجُرُّ إِلَّا الِاسْمَ الظَّاهِرَ',en:'it governs nothing but the explicit noun'}),
+ azman:Object.freeze({ar:'يَجُرُّ الْأَزْمَانَ',en:'it governs times'}),
+ lafzAlJalala:Object.freeze({ar:'لَا يَدْخُلُ إِلَّا عَلَى لَفْظِ الْجَلَالَةِ',en:'it enters upon nothing but the name of Allah'})
+}));
+const KHAFD_KIND_LABELS=Object.freeze(Object.assign(Object.create(null),{
+ plain:Object.freeze({ar:'حَرْفُ خَفْضٍ',en:'a particle of khafḍ'}),
+ qasam:Object.freeze({ar:'حَرْفُ خَفْضٍ وَقَسَمٍ',en:'a particle of khafḍ and of oath'})
+}));
+const KHAFD_IRAAB_JOIN=Object.freeze({ar:'، '});
+const KHAFD_IRAAB_BINAA=Object.freeze({ar:' مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَمَعْنَاهُ '});
+const KHAFD_IRAAB_GOVERNS=Object.freeze({ar:'، وَ'});
+/* لَفْظُ الْجَلَالَةِ, the one noun تاء القسم may enter upon. Registered once, as bytes, because
+   three separate oath identities govern it and a second copy is how combining marks drift. */
+const LAFZ_AL_JALALA=Object.freeze({gen:'اللَّهِ',en:'Allah'});
+(()=>{
+ const surfaces=new Map(),types=new Set(),rules=new Set(),names=new Set();
+ for(const id of Object.keys(KHAFD_PARTICLE_REGISTRY)){
+  const record=KHAFD_PARTICLE_REGISTRY[id];
+  if(!Object.isFrozen(record))throw new Error(`Khafḍ particle ${id} is not frozen.`);
+  if(record.id!==id)throw new Error(`Khafḍ particle ${id} disagrees with its own key.`);
+  for(const field of ['surface','particleType','ruleId','nameAr','meaningAr','meaningEn','gloss','governs']){
+   if(typeof record[field]!=='string'||!record[field])throw new Error(`Khafḍ particle ${id}.${field} is not a non-empty string.`);
+  }
+  if(!KHAFD_GOVERNS_MODES.includes(record.governs))throw new Error(`Khafḍ particle ${id} names an unknown governs mode.`);
+  if(!Array.isArray(record.pages)||!record.pages.length)throw new Error(`Khafḍ particle ${id} cites no source page.`);
+  // Two identities MAY share a surface; they may never share a type, a rule, or a learner-facing name.
+  if(types.has(record.particleType))throw new Error(`Khafḍ particle type ${record.particleType} is claimed twice.`);
+  if(rules.has(record.ruleId))throw new Error(`Khafḍ source rule ${record.ruleId} is claimed twice.`);
+  if(names.has(record.nameAr))throw new Error(`Khafḍ identity name ${record.nameAr} is claimed twice.`);
+  types.add(record.particleType);rules.add(record.ruleId);names.add(record.nameAr);
+  if(!surfaces.has(record.surface))surfaces.set(record.surface,[]);
+  surfaces.get(record.surface).push(record.id);
+  if(record.connectiveSurface){
+   if(record.connectiveSurface===record.surface)throw new Error(`Khafḍ particle ${id} registers a connective form identical to its base form.`);
+   if(record.proclitic)throw new Error(`A proclitic khafḍ particle (${id}) may not also carry a connective form.`);
+  }
+ }
+ // The one surface the source itself gives to two identities in this chapter is بِ; وَ is shared
+ // with عطف, which lives in its own registry. Both are asserted so a silent third claim is caught.
+ if((surfaces.get('بِ')||[]).join(',')!=='ba,qasamBa')throw new Error('The بِ surface is not owned by exactly التعدية and القسم.');
+ if(!KHAFD_PARTICLE_REGISTRY.qasamTa.governs.includes('lafzAlJalala'))throw new Error('تاء القسم lost its لفظ الجلالة restriction.');
+ if(LAFZ_AL_JALALA.gen!=='اللَّهِ')throw new Error('لفظ الجلالة is not its canonical spelling.');
+})();
+/* ── Wave 1 — مَعَانِي الْإِضَافَةِ ────────────────────────────────────────────────────────
+   The matn at p. 177 gives the iḍāfah two divisions («وَهُوَ عَلَى قِسْمَيْنِ: مَا يُقَدَّرُ
+   بِاللَّامِ، وَمَا يُقَدَّرُ بِمِنْ»); the شرح at p. 178 says the author named two of THREE and
+   supplies the third, together with the ضابط of each:
+
+     بمعنى مِنْ  — «أن يكون المضاف جُزْءًا وَبَعْضًا من المضاف إليه»، نحو «جُبَّةُ صُوفٍ»
+     بمعنى فِي   — «أن يكون المضاف إليه ظَرْفاً للمضاف»، نحو ﴿بَلْ مَكْرُ اللَّيْلِ﴾
+     بمعنى اللام — «فكُلُّ ما لا يصلح فيه أَحَدُ النوعين المذكورين»، نحو «غُلَامُ زَيْدٍ» و«حَصِيرُ الْمَسْجِدِ»
+
+   The ضابط is the authority, not the label. A frame is therefore FROZEN as a canonical
+   muḍāf + muḍāf ilayh PAIR and carries its meaning with it, so no arbitrary iḍāfah can be
+   relabelled «بمعنى مِنْ»: the pair must be one this registry owns, and the pair is what
+   decides the meaning. اللام is deliberately the residual category the source makes it — it is
+   asserted only for pairs that satisfy NEITHER other ḍābiṭ, and the load check below proves that
+   no لام pair is a part-of pair and no لام pair has a time-word second term. */
+const IDAFA_MEANING_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ lam:Object.freeze({id:'lam',ruleId:'R_IDAFA_MAANA_LAM',clauseAr:'عَلَى مَعْنَى اللَّامِ',
+  dabitAr:'لِأَنَّهُ لَا يَصْلُحُ فِيهِ أَنْ يَكُونَ الْأَوَّلُ بَعْضًا مِنَ الثَّانِي وَلَا أَنْ يَكُونَ الثَّانِي ظَرْفًا لِلْأَوَّلِ',
+  dabitEn:'because the first is not a part of the second and the second is not a time or place for the first',
+  meaningEn:'the sense of the lām — belonging',pages:[177,178]}),
+ min:Object.freeze({id:'min',ruleId:'R_IDAFA_MAANA_MIN',clauseAr:'عَلَى مَعْنَى مِنْ',
+  dabitAr:'لِأَنَّ الْمُضَافَ جُزْءٌ وَبَعْضٌ مِنَ الْمُضَافِ إِلَيْهِ',
+  dabitEn:'because the muḍāf is a part and a portion of the muḍāf ilayh',
+  meaningEn:'the sense of min — made of',pages:[177,178]}),
+ fi:Object.freeze({id:'fi',ruleId:'R_IDAFA_MAANA_FI',clauseAr:'عَلَى مَعْنَى فِي',
+  dabitAr:'لِأَنَّ الْمُضَافَ إِلَيْهِ ظَرْفٌ لِلْمُضَافِ',
+  dabitEn:'because the muḍāf ilayh is the time or place within which the muḍāf falls',
+  meaningEn:'the sense of fī — within',pages:[177,178]})
+}));
+/* The frozen pairs. `part` marks a second term that is a MATERIAL the first is made of, `zarf`
+   marks one that is a time the first falls within; both are properties of the pair itself, and the
+   meaning is derived from them rather than declared beside them. */
+const IDAFA_MEANING_FRAMES=Object.freeze([
+ // بمعنى مِنْ — the source's own «جُبَّةُ صُوفٍ», plus the three the matn lists at p. 177.
+ Object.freeze({key:'jubbaSuf',meaning:'min',part:true,zarf:false,mudaf:'جُبَّةُ',mudafEn:'cloak',mudafIlayh:'صُوفٍ',mudafIlayhEn:'wool',khabar:'دَافِئَةٌ',khabarEn:'warm',phraseEn:'a wool cloak'}),
+ Object.freeze({key:'thawbKhazz',meaning:'min',part:true,zarf:false,mudaf:'ثَوْبُ',mudafEn:'garment',mudafIlayh:'خَزٍّ',mudafIlayhEn:'silk',khabar:'جَمِيلٌ',khabarEn:'beautiful',phraseEn:'a silk garment'}),
+ Object.freeze({key:'babSaj',meaning:'min',part:true,zarf:false,mudaf:'بَابُ',mudafEn:'door',mudafIlayh:'سَاجٍ',mudafIlayhEn:'teak',khabar:'قَوِيٌّ',khabarEn:'strong',phraseEn:'a teak door'}),
+ Object.freeze({key:'khatamHadid',meaning:'min',part:true,zarf:false,mudaf:'خَاتَمُ',mudafEn:'ring',mudafIlayh:'حَدِيدٍ',mudafIlayhEn:'iron',khabar:'ثَقِيلٌ',khabarEn:'heavy',phraseEn:'an iron ring'}),
+ // بمعنى فِي — the source's own «مَكْرُ اللَّيْلِ», plus three more whose second term is a time.
+ Object.freeze({key:'makrLayl',meaning:'fi',part:false,zarf:true,mudaf:'مَكْرُ',mudafEn:'scheming',mudafIlayh:'اللَّيْلِ',mudafIlayhEn:'the night',khabar:'خَدِيعَةٌ',khabarEn:'a deception',phraseEn:'the scheming of the night'}),
+ Object.freeze({key:'salatLayl',meaning:'fi',part:false,zarf:true,mudaf:'صَلَاةُ',mudafEn:'prayer',mudafIlayh:'اللَّيْلِ',mudafIlayhEn:'the night',khabar:'نُورٌ',khabarEn:'a light',phraseEn:'the night prayer'}),
+ Object.freeze({key:'qiyamLayl',meaning:'fi',part:false,zarf:true,mudaf:'قِيَامُ',mudafEn:'standing',mudafIlayh:'اللَّيْلِ',mudafIlayhEn:'the night',khabar:'عِبَادَةٌ',khabarEn:'an act of worship',phraseEn:'the night vigil'}),
+ Object.freeze({key:'darsSabah',meaning:'fi',part:false,zarf:true,mudaf:'دَرْسُ',mudafEn:'lesson',mudafIlayh:'الصَّبَاحِ',mudafIlayhEn:'the morning',khabar:'مُفِيدٌ',khabarEn:'useful',phraseEn:'the morning lesson'}),
+ // بمعنى اللام — the source's own «غُلَامُ زَيْدٍ» and «حَصِيرُ الْمَسْجِدِ», plus two like them.
+ Object.freeze({key:'ghulamZayd',meaning:'lam',part:false,zarf:false,mudaf:'غُلَامُ',mudafEn:'boy',mudafIlayh:'زَيْدٍ',mudafIlayhEn:'Zayd',khabar:'مُجْتَهِدٌ',khabarEn:'hardworking',phraseEn:'Zayd’s boy'}),
+ Object.freeze({key:'hasirMasjid',meaning:'lam',part:false,zarf:false,mudaf:'حَصِيرُ',mudafEn:'mat',mudafIlayh:'الْمَسْجِدِ',mudafIlayhEn:'the mosque',khabar:'نَظِيفٌ',khabarEn:'clean',phraseEn:'the mosque’s mat'}),
+ Object.freeze({key:'kitabTalib',meaning:'lam',part:false,zarf:false,mudaf:'كِتَابُ',mudafEn:'book',mudafIlayh:'الطَّالِبِ',mudafIlayhEn:'the student',khabar:'جَدِيدٌ',khabarEn:'new',phraseEn:'the student’s book'})
+]);
+const IDAFA_MEANING_FRAME_BY_KEY=Object.freeze(Object.assign(Object.create(null),
+ Object.fromEntries(IDAFA_MEANING_FRAMES.map(frame=>[frame.key,frame]))));
+/* The pair index is the AUTHORITY. A meaning is looked up by the two words actually standing in the
+   sentence, never by the key a builder or a restored snapshot claims; the claimed key is then
+   required to agree with what the pair yields. That is what makes «بمعنى مِنْ» unforgeable: to get
+   it, a construction must literally be one of the registered part-of pairs. */
+const IDAFA_MEANING_FRAME_BY_PAIR=Object.freeze(Object.assign(Object.create(null),
+ Object.fromEntries(IDAFA_MEANING_FRAMES.map(frame=>[`${frame.mudaf}|${frame.mudafIlayh}`,frame]))));
+(()=>{
+ const seen=new Set(),pairs=new Set(),covered=new Set();
+ for(const frame of IDAFA_MEANING_FRAMES){
+  if(!Object.isFrozen(frame))throw new Error(`Iḍāfah frame ${frame.key} is not frozen.`);
+  if(seen.has(frame.key))throw new Error(`Iḍāfah frame key ${frame.key} is claimed twice.`);
+  seen.add(frame.key);
+  if(!IDAFA_MEANING_REGISTRY[frame.meaning])throw new Error(`Iḍāfah frame ${frame.key} names an unregistered meaning.`);
+  for(const field of ['mudaf','mudafIlayh','khabar','mudafEn','mudafIlayhEn','khabarEn','phraseEn']){
+   if(typeof frame[field]!=='string'||!frame[field])throw new Error(`Iḍāfah frame ${frame.key}.${field} is not a non-empty string.`);
+  }
+  // ONE canonical pair per meaning: the same two words may not be sold under two readings.
+  const pair=`${frame.mudaf}|${frame.mudafIlayh}`;
+  if(pairs.has(pair))throw new Error(`Iḍāfah pair ${pair} is registered twice.`);
+  pairs.add(pair);
+  // The ḍābiṭ must MATCH the meaning, in both directions. This is the check that makes the
+  // meaning a derived fact about the pair rather than a label typed beside it.
+  const derived=frame.part?'min':frame.zarf?'fi':'lam';
+  if(derived!==frame.meaning)throw new Error(`Iḍāfah frame ${frame.key} claims ${frame.meaning} but its ḍābiṭ yields ${derived}.`);
+  if(frame.part&&frame.zarf)throw new Error(`Iḍāfah frame ${frame.key} cannot be both a part and a ẓarf.`);
+  covered.add(frame.meaning);
+ }
+ for(const id of Object.keys(IDAFA_MEANING_REGISTRY)){
+  if(!covered.has(id))throw new Error(`The iḍāfah registry names ${id} but no frame produces it.`);
+  if(!Object.isFrozen(IDAFA_MEANING_REGISTRY[id]))throw new Error(`Iḍāfah meaning ${id} is not frozen.`);
+ }
+ // All three of the source's meanings must be present, or this is not p. 178's chapter.
+ if(covered.size!==3)throw new Error('The three source-backed meanings of the iḍāfah are not all produced.');
+})();
 const ATF_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
  singularPeople:Object.freeze({followed:Object.freeze({...singularPeople.find(item=>item.nom==='الْمُعَلِّمُ')}),follower:Object.freeze({...singularPeople.find(item=>item.nom==='الطَّبِيبُ')}),
   followedInflection:'singular',followerInflection:'singular'}),
@@ -8602,13 +8858,31 @@ const PHASE3A2_VERB_HINT='An exact registered person-bound present form built on
    particle, and كَيْ's licensing condition is precisely that this word is present. So the
    displayed sentence joins it to what follows while the token list keeps them distinct. This is
    the ONLY place surface composition may differ from a plain space-join. */
+/* لَامُ الْجَرِّ and لَامُ التَّعْلِيلِ are two identities on ONE spelling. The khafḍ registry is
+   declared before لَامُ التَّعْلِيلِ exists, so it cannot reference those bytes directly; instead the
+   two are compared here, where both records are in scope. A combining-mark order that drifted apart
+   would render identically and compare unequal, and this is where that is caught. */
+if(KHAFD_PARTICLE_REGISTRY.lam.surface!==KAY_TALIL_LAM.surface){
+ throw new Error('The jārrah lām and lām al-taʿlīl no longer share one canonical spelling.');
+}
 const PROCLITIC_PARTICLE_TYPES=Object.freeze([WAW_MAIYYA_TYPE,KAY_TALIL_LAM.particleType,'atfAmQuestion',
  /* J1a. «أَلَمْ» and «لِيَكْتُبْ» are written joined, exactly as «لِكَيْ» is, while each half stays its
     own token with its own iʿrāb. لَا is NOT here: «لَا يَكْتُبْ» is written as two words. */
  HAMZAT_TAQRIR.particleType,'lamAmr','lamDuaa',
  ATF_CONJUNCTION_REGISTRY.waw.particleType,ATF_CONJUNCTION_REGISTRY.fa.particleType,
  CONCEALED_AN_CONSTRUCTIONS.lamTalil.particleType,CONCEALED_AN_CONSTRUCTIONS.lamJuhud.particleType,
- CONCEALED_AN_CONSTRUCTIONS.faSababiyya.particleType,CONCEALED_AN_CONSTRUCTIONS.wawMaiyya.particleType]);
+ CONCEALED_AN_CONSTRUCTIONS.faSababiyya.particleType,CONCEALED_AN_CONSTRUCTIONS.wawMaiyya.particleType,
+ /* Wave 1. بِ، كَ، لِ and the three oath particles are written joined to the noun they govern
+    («بِمُحَمَّدٍ»، «كَمِشْكَاةٍ»، «لِمُحَمَّدٍ»، «وَاللَّهِ»، «بِاللَّهِ»، «تَاللَّهِ») while each
+    half stays its own token with its own iʿrāb, exactly as «لِكَيْ» and «أَلَمْ» already do.
+    مِنْ، رُبَّ، حَتَّى، مُذْ and مُنْذُ are NOT here: each is written as a separate word. */
+ ...Object.values(KHAFD_PARTICLE_REGISTRY).filter(record=>record.proclitic).map(record=>record.particleType)]);
+/* Every khafḍ particle type, the legacy generic `preposition` included. The four prepositions that
+   shipped before Wave 1 (إِلَى، عَلَى، عَنْ، فِي) keep the generic type and are untouched; the
+   structural machinery — the جار ومجرور relationship, the orphan checks, the attachment analysis —
+   asks this predicate rather than testing for one hard-coded type, so both lanes go down one path. */
+const KHAFD_PARTICLE_TYPES=Object.freeze(['preposition',...Object.values(KHAFD_PARTICLE_REGISTRY).map(record=>record.particleType)]);
+const isKhafdParticleType=type=>KHAFD_PARTICLE_TYPES.includes(type);
 /* Global ownership for particle source rules. Each particle type owns exactly one rule, and the
    governor rules are owned so tightly that no other token may carry them at all — a forged
    G_AN_NASB on a noun would otherwise be source-authorized and counted in validByRule as a
@@ -8627,6 +8901,10 @@ const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA
  maNafiyaKana:'R_MA_NAFIYA_KANA',laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
  ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
  ...Object.fromEntries(Object.values(ATF_CONTEXT_PARTICLES).map(item=>[item.particleType,item.ruleId])),
+ /* Wave 1 — each khafḍ identity owns exactly ONE source rule. Without this the two «بِ» identities
+    could trade rules freely: they share their bytes, so no surface check can tell them apart, and
+    بَاءُ الْقَسَمِ carrying R_KHAFD_BA passed every other check in validation. */
+ ...Object.fromEntries(Object.values(KHAFD_PARTICLE_REGISTRY).map(item=>[item.particleType,item.ruleId])),
  ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,item.ruleId]))});
 const PARTICLE_EXCLUSIVE_RULE_IDS=Object.freeze(['G_LAN_NASB','G_LAM_JAZM','G_SAWFA_FUTURE',
  'G_AN_NASB','G_KAY_NASB',IDHAN_GOVERNOR_RULE_ID,KAY_TALIL_LAM.ruleId,
@@ -8958,6 +9236,28 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_MUTLAQ_LAFZI_MANAWI:sourceRule('A mafʿūl muṭlaq is lafẓī when its wording carries the letters of the verb that makes it accusative, and maʿnawī when it agrees with that verb in meaning only.',[147],'Only the registered pairs; every declared division is verified against the two surfaces, so a pair cannot claim a division its own letters contradict. It states the division alone and never the naṣb, which is R_MAFUL_MUTLAQ_NASB.'),
  R_HARF_JARR:sourceRule('A noun after a verified preposition is khafḍ (genitive).',[13,174,175,176,177],'The internal legacy ID says JARR; displayed terminology follows Al-Tuḥfah and says khafḍ.'),
  R_MUDAF_ILAYH:sourceRule('A muḍāf ilayh is khafḍ by iḍāfah.',[174,175,177,178],'The immediately following second noun, or an attached pronoun, completes the iḍāfah.'),
+ /* Wave 1 — one rule per khafḍ-particle IDENTITY. Each states the meaning p. 13 / pp. 175–177 give
+    that particle and the restriction the source puts on what it may govern. They are separate rules
+    precisely so that a particle sharing bytes with another cannot inherit its authority: R_KHAFD_BA
+    and R_KHAFD_QASAM_BA are both «بِ» and are not interchangeable, and neither is reachable from
+    R_ATF_WAW, R_ATF_HATTA, G_LAM_AMR_JAZM or the نواصب's حَتَّى. */
+ R_KHAFD_MIN:sourceRule('Min is a particle of khafḍ whose meaning is the starting-point, and it governs both the explicit noun and the pronoun.',[13,175],'«ومن معانيها الابتداء، وتجر الاسم الظاهر والمضمر» (p. 13). Productive scope: an explicit governed noun. Its registered connective spelling مِنَ is used only before a word carrying the definite article, exactly as the source writes «سَافَرْتُ مِنَ الْقَاهِرَةِ».'),
+ R_KHAFD_RUBBA:sourceRule('Rubba is a particle of khafḍ whose meaning is fewness, and it governs nothing but the explicit noun.',[13,176],'«ومن معانيها التقليل، ولا تجر إلا الاسم الظاهر» (p. 176). Productive scope: the source’s own frame — an indefinite explicit noun with its naʿt — and no pronoun may ever follow it.'),
+ R_KHAFD_BA:sourceRule('The bāʾ is a particle of khafḍ whose meaning is carrying the verb over to its object, and it governs the explicit noun and the pronoun together.',[13,176],'«ومن معانيها التَّعْدِيَةُ، وتجر الاسم الظاهر والضمير جميعاً» (p. 176). Productive scope: an explicit governed noun after a verb of passing, matching the source’s «مَرَرْتُ بِالْوَادِي» and «مَرَرْتُ بِمُحَمَّدٍ وَخَالِدٍ». It is NOT بَاءُ الْقَسَمِ, which is a separate identity on the same bytes.'),
+ R_KHAFD_KAF:sourceRule('The kāf is a particle of khafḍ whose meaning is comparison, and it governs nothing but the explicit noun.',[13,176],'«ومن معانيها التَّشْبِيه، ولا تجر إلا الاسم الظاهر» (p. 176). Productive scope: a registered comparison frame. The kāf a learner already meets on the five nouns is an attached PRONOUN, not this particle.'),
+ R_KHAFD_LAM:sourceRule('The lām is a particle of khafḍ whose meanings include ownership, and it governs the explicit noun and the pronoun together.',[13,176],'«ومن معانيها المِلْكُ نحو «المَالُ لمحمدٍ»» (p. 13); p. 176 adds الاستحقاق. Productive scope: the source’s own ownership frame. It is none of لَامُ التَّعْلِيلِ, لَامُ الْأَمْرِ, لَامُ الدُّعَاءِ or لَامُ الْجُحُودِ — those govern verbs and are separate identities on the same bytes.'),
+ R_KHAFD_HATTA:sourceRule('Hattā also comes as a particle of khafḍ, giving the end-limit that is reached.',[127],'«وتأتي جارَّة نحو قوله تعالى ﴿حَتَّى مَطْلَعِ الْفَجْرِ﴾» (p. 127). This page, not the khafḍ chapter: pp. 175–177 list the khafḍ particles and do not include ḥattā. It is neither حَتَّى الْعَاطِفَةُ (p. 127) nor the ḥattā that licenses concealed أَنْ in a present verb (p. 76).'),
+ R_KHAFD_MUDH:sourceRule('Mudh is a particle of khafḍ that governs times, and it carries the sense of min when what follows it is past time.',[177],'«ومنها: «مُذْ» و«مُنْذُ» وَيَجُرَّانِ الأَزْمَانَ، وهما يدلان على معنى «من» إن كان ما بعدهما ماضياً» (p. 177). Productive scope: a registered PAST time-noun only, which is what fixes the meaning as min rather than fī. The source adds that a following verb, or a marfūʿ noun after it, makes it a NOUN instead; neither is produced here.'),
+ R_KHAFD_MUNDHU:sourceRule('Mundhu is a particle of khafḍ that governs times, and it carries the sense of min when what follows it is past time.',[177],'Same p. 177 sentence as مُذْ, and the same restriction: a registered PAST time-noun only. It is a separate identity with its own bytes and its own rule, so neither may be relabelled the other.'),
+ R_KHAFD_QASAM_WAW:sourceRule('The wāw of the oath is a particle of khafḍ and of oath, and it enters upon nothing but the explicit noun.',[13,177],'«الأول: الواو، وهي لا تَدْخُلُ إلا عَلَى الاسم الظاهرِ، نحو «والله»» (p. 13); p. 177 counts the three oath particles among the khafḍ particles. It is NOT وَاوُ الْعَطْفِ and NOT وَاوُ الْمَعِيَّةِ, both of which are separate identities on the same bytes.'),
+ R_KHAFD_QASAM_BA:sourceRule('The bāʾ of the oath is a particle of khafḍ and of oath, and it enters upon the explicit noun and the pronoun alike.',[13,177],'«والثاني: الباءُ، ولا تختص بلفظ دون لفظ، بل تدخل على الاسم الظاهر، نحو «بالله لأَجْتَهِدَنَّ» وعلى الضمير» (p. 13). Productive scope: the explicit لفظ الجلالة. It is NOT the bāʾ of التعدية, which is a separate identity on the same bytes.'),
+ R_KHAFD_QASAM_TA:sourceRule('The tāʾ of the oath is a particle of khafḍ and of oath, and it enters upon nothing but the name of Allah.',[13,177],'«والثالث: التاءُ، ولا تدخل إلا على لفظ الجلالة نحو ﴿وَتَاللَّهِ لَأَكِيدَنَّ أَصْنَامَكُمْ﴾» (p. 13). The restriction is the identity: this particle has exactly one governed noun, and producing it on any other is a validation failure.'),
+ /* Wave 1 — the three meanings of the iḍāfah. p. 177's matn gives two and p. 178's شرح supplies the
+    third with a ḍābiṭ for each. Each meaning is its own rule so that one cannot be swapped for
+    another in a snapshot: the rule is bound to the frozen pair, and the pair decides the meaning. */
+ R_IDAFA_MAANA_MIN:sourceRule('An iḍāfah is on the meaning of min when the muḍāf is a part and a portion of the muḍāf ilayh.',[177,178],'«فضَابطُهُ: أن يكون المضاف جُزْءًا وَبَعْضًا من المضاف إليه، نحو «جُبَّةُ صُوفٍ»» (p. 178). Only a registered pair whose second term is the material the first is made of; the ḍābiṭ is checked against the pair, never taken from a label.'),
+ R_IDAFA_MAANA_FI:sourceRule('An iḍāfah is on the meaning of fī when the muḍāf ilayh is the time or place within which the muḍāf falls.',[177,178],'«فضَابطُهُ: أن يكون المضاف إليه ظَرْفاً للمضاف، نحو قوله تعالى ﴿بَلْ مَكْرُ اللَّيْلِ﴾» (p. 178). Only a registered pair whose second term is a time-word standing as a ẓarf for the first.'),
+ R_IDAFA_MAANA_LAM:sourceRule('An iḍāfah is on the meaning of the lām when neither of the other two meanings fits it.',[177,178],'«فكُلُّ ما لا يصلح فيه أَحَدُ النوعين المذكورين، نحو «غُلَامُ زَيْدٍ» و«حَصِيرُ الْمَسْجِدِ»» (p. 178). This is the source’s RESIDUAL category, so it is asserted only where both other ḍābiṭs fail; the load-time check proves no lām pair is a part-of pair or a ẓarf pair.'),
  R_ISM_INNA_NASB:sourceRule('Inna and its sisters make their noun accusative.',[105,109,110],'Only the four explicitly generated sisters and a visible single noun.'),
  R_KHABAR_INNA_RAF:sourceRule('Inna and its sisters make their khabar nominative.',[105,109,110],'Only a visible single-word khabar in the generated templates.'),
  /* Phase QP1 — the claim was always about كان وأخواتها as a class; only the app's generated scope was
@@ -10435,6 +10735,21 @@ const AR={
  mafulMutlaqMudaf:w=>grammarSpec('noun','mafulMutlaq',{isMudaf:true}),
  prep:w=>grammarSpec('particle','particle',{particleType:'preposition',particleWord:w}),
  majrur:(w,p)=>grammarSpec('noun','majrur',{governorWord:p}),
+ /* Wave 1. `khafd` names an IDENTITY from the registry, not a spelling: the bytes come from the
+    record, and the optional second argument may only ask for that identity's registered connective
+    form (مِنَ). `idafaMeaning` marks a muḍāf ilayh as belonging to a frozen meaning frame; the
+    frame is still re-derived from the pair before anything renders. */
+ khafd:(id,word)=>{
+  const record=KHAFD_PARTICLE_REGISTRY[id];
+  /* The connective form is honoured ONLY when the identity actually registers one and the builder
+     actually asked for it. Comparing the two directly would make undefined===undefined true for
+     every particle that has no connective spelling, and hand the token an undefined surface. */
+  const connective=record.connectiveSurface&&word===record.connectiveSurface;
+  return grammarSpec('particle','particle',
+   {particleType:record.particleType,particleWord:connective?record.connectiveSurface:record.surface});
+ },
+ idafaMeaning:(w,frameKey)=>grammarSpec('noun','mudafIlayh',{idafaFrameKey:frameKey}),
+ idafaMeaningMudaf:w=>grammarSpec('noun','mubtada',{isMudaf:true}),
  mudaf:w=>grammarSpec('noun','mubtada',{isMudaf:true}),
  mudafIlayh:(w)=>grammarSpec('noun','mudafIlayh'),
  presentPred:(w)=>grammarSpec('verb','present',{conjugation:'regular',person:'3ms'}),
@@ -11860,6 +12175,8 @@ function configureParticle(token){
   laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,[NIDA_PARTICLE_TYPE]:NIDA_PARTICLE.ruleId,
   ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
   ...Object.fromEntries(Object.values(ATF_CONTEXT_PARTICLES).map(item=>[item.particleType,item.ruleId])),
+  // Wave 1 — each khafḍ identity carries its own rule, so بِ التعدية and بَاءُ الْقَسَمِ never share one.
+  ...Object.fromEntries(Object.values(KHAFD_PARTICLE_REGISTRY).map(item=>[item.particleType,item.ruleId])),
   ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,item.ruleId]))}[type]||'R_PARTICLE';
  // The lām of لِكَيْ is not a governor, so it carries its canonical surface here rather than in
  // GRAMMAR_RULES.governors — being absent from that map is exactly what stops it governing.
@@ -11875,6 +12192,16 @@ function configureParticle(token){
   ||(type===LA_JINS_PARTICLE_TYPE?LA_JINS_PARTICLE.surface:null)
   ||(type===WAW_MAIYYA_TYPE?WAW_MAIYYA.surface:null)
   ||(type===NIDA_PARTICLE_TYPE?NIDA_PARTICLE.surface:null)
+  /* Wave 1 — a khafḍ particle's bytes come from its own registry record, never from the builder's
+     string. مِنْ is the one identity with two registered spellings, so its connective form is
+     honoured only when the builder actually asked for it; anything else collapses to the base
+     form, which is what stops an unregistered spelling from reaching the DOM. There is no
+     surfaceHint rescue on this path: the registry is the only source of these bytes. */
+  ||(KHAFD_PARTICLE_BY_TYPE[type]
+    ?(KHAFD_PARTICLE_BY_TYPE[type].connectiveSurface&&token.grammar.particleWord===KHAFD_PARTICLE_BY_TYPE[type].connectiveSurface
+      ?KHAFD_PARTICLE_BY_TYPE[type].connectiveSurface
+      :KHAFD_PARTICLE_BY_TYPE[type].surface)
+    :null)
   ||token.grammar.particleWord||token.surfaceHint;
  token.word=token.expectedSurface;
 }
@@ -11950,7 +12277,7 @@ function resolveRelationships(data){
   }
  });
  tokens.forEach((item,index)=>{
-  if(item.grammar.type==='particle'&&item.grammar.particleType==='preposition'){
+  if(item.grammar.type==='particle'&&isKhafdParticleType(item.grammar.particleType)){
    const noun=tokens[index+1]?.grammar.role==='majrur'?tokens[index+1]:null;
    if(noun){const rel=addRelationship(data,'preposition',{governorId:item.id,nounId:noun.id});item.relations.governsId=noun.id;noun.relations.governorId=item.id;noun.governorId=item.id;}
   }
@@ -12184,7 +12511,7 @@ function resolveRelationships(data){
    relationship=addRelationship(data,'mubtadaKhabar',{mubtadaId:mubtada.id,khabarKind:'single',khabarId:khabar.id,tokenIds:[khabar.id]});
    khabar.relations.mubtadaId=mubtada.id;
   }else if(mubtada.grammar.delayed){
-   const anchor=tokens.slice(0,mIndex).find(item=>item.grammar.particleType==='preposition'||item.grammar.role==='adverb');
+   const anchor=tokens.slice(0,mIndex).find(item=>isKhafdParticleType(item.grammar.particleType)||item.grammar.role==='adverb');
    if(anchor){
     const phraseTokens=tokens.slice(tokens.indexOf(anchor),mIndex);
     relationship=addRelationship(data,'mubtadaKhabar',{mubtadaId:mubtada.id,khabarKind:'frontedPhrase',anchorId:anchor.id,tokenIds:phraseTokens.map(item=>item.id)});
@@ -12195,7 +12522,7 @@ function resolveRelationships(data){
     const phraseTokens=tokens.slice(mIndex+1);
     relationship=addRelationship(data,'mubtadaKhabar',{mubtadaId:mubtada.id,khabarKind:'verbalSentence',anchorId:verb.id,tokenIds:phraseTokens.map(item=>item.id)});
    }else{
-    const anchor=tokens.slice(mIndex+1).find(item=>item.grammar.particleType==='preposition'||item.grammar.role==='adverb');
+    const anchor=tokens.slice(mIndex+1).find(item=>isKhafdParticleType(item.grammar.particleType)||item.grammar.role==='adverb');
     if(anchor){
      const phraseTokens=tokens.slice(tokens.indexOf(anchor));
      relationship=addRelationship(data,'mubtadaKhabar',{mubtadaId:mubtada.id,khabarKind:'phrase',anchorId:anchor.id,tokenIds:phraseTokens.map(item=>item.id)});
@@ -12261,6 +12588,26 @@ function resolveRelationships(data){
   item.relations.concealedAnRelationshipId=relation.id;
  });
 }
+/* Wave 1 — the iḍāfah-meaning authority. Phase 10's rule is that metadata never authorizes a
+   meaning: the LEXICAL PAIR does. So the frame is re-derived from the two words actually present
+   and from the live muḍāf link, and a key carried on the token (a builder's declaration, or a
+   restored snapshot's claim) is only ever CHECKED against that derivation, never trusted in place
+   of it. Swapping «بمعنى مِنْ» for «بمعنى في» in a snapshot therefore cannot survive: the pair
+   still yields the original meaning and the two disagree. */
+function deriveIdafaMeaningAuthority(data,index){
+ const tokens=(data&&data.tokens)||[];
+ const token=tokens[index];
+ const claimed=token&&token.grammar&&token.grammar.idafaFrameKey||'';
+ if(!token||token.grammar.role!=='mudafIlayh')return{authorized:false,reason:'not a muḍāf ilayh',claimed};
+ const mudafId=token.relations&&token.relations.mudafId;
+ const mudaf=mudafId?tokens.find(item=>item.id===mudafId):null;
+ // The muḍāf must be the word immediately before it, and the iḍāfah link must already be built.
+ if(!mudaf||tokens[index-1]!==mudaf)return{authorized:false,reason:'no immediately preceding muḍāf',claimed};
+ const frame=IDAFA_MEANING_FRAME_BY_PAIR[`${mudaf.word}|${token.word}`]||null;
+ if(!frame)return{authorized:false,reason:'the pair is not a registered iḍāfah-meaning frame',claimed};
+ if(claimed&&claimed!==frame.key)return{authorized:false,reason:`claimed frame ${claimed} is not the pair's frame ${frame.key}`,claimed};
+ return{authorized:true,frame,meaning:IDAFA_MEANING_REGISTRY[frame.meaning],claimed};
+}
 function nounRoleArabic(token){
  const role=token.grammar.role;
  if(role==='mubtada')return token.grammar.delayed?'مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ بِالِابْتِدَاءِ':'مُبْتَدَأٌ مَرْفُوعٌ بِالِابْتِدَاءِ';
@@ -12270,7 +12617,20 @@ function nounRoleArabic(token){
  if(role==='object')return'مَفْعُولٌ بِهِ مَنْصُوبٌ بِالْفِعْلِ';
  if(role==='mafulMutlaq')return'مَفْعُولٌ مُطْلَقٌ مَنْصُوبٌ بِعَامِلِهِ';
  if(role==='majrur')return`اسْمٌ مَخْفُوضٌ بِـ«${token.grammar.governorWord}»`;
- if(role==='mudafIlayh')return'مُضَافٌ إِلَيْهِ مَخْفُوضٌ بِالْإِضَافَةِ';
+ if(role==='mudafIlayh'){
+  /* Phase 11 — the ordinary iʿrāb is NEVER replaced by the semantic comment. The learner still
+     reads what this word is; the source's meaning term is appended to it, and only when the pair
+     itself authorizes that reading. A token that declares a frame it cannot prove is a bug, and is
+     refused outright rather than quietly rendered without its meaning. */
+  const base='مُضَافٌ إِلَيْهِ مَخْفُوضٌ بِالْإِضَافَةِ';
+  const owner=token._data,authority=deriveIdafaMeaningAuthority(owner,owner?.tokens?.indexOf(token));
+  if(!authority.authorized){
+   if(authority.claimed)throw new Error(`Cannot render an unauthorized iḍāfah meaning: ${authority.reason}`);
+   return base;
+  }
+  if(!authority.claimed)return base;
+  return`${base}، وَالْإِضَافَةُ ${authority.meaning.clauseAr}؛ ${authority.meaning.dabitAr}`;
+ }
  if(role==='ismInna')return`اسْمُ «${token.grammar.governorWord}» مَنْصُوبٌ بِهِ`;
  if(role==='khabarInna')return`خَبَرُ «${token.grammar.governorWord}» مَرْفُوعٌ بِهِ`;
  if(role==='ismKana')return'اسْمُ «كَانَ» مَرْفُوعٌ بِهَا';
@@ -12571,6 +12931,20 @@ function renderVerbAnalysis(token){
 function renderParticleAnalysis(token){
  const type=token.grammar.particleType;
  if(type==='preposition'){token.ar=`${token.word}: حَرْفُ خَفْضٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A preposition, built and with no syntactic position.';return}
+ /* Wave 1. Every khafḍ particle the source names individually renders its OWN identity: the name
+    the source gives it, the meaning p. 13 / pp. 175–177 assign it, and — where the source states
+    one — the restriction on what it may govern. The clause is assembled from the frozen record, so
+    the two «بِ» identities and the two «وَ» identities cannot produce the same line. The four
+    prepositions that shipped before Wave 1 keep the generic clause directly above, unchanged. */
+ if(KHAFD_PARTICLE_BY_TYPE[type]){
+  const record=KHAFD_PARTICLE_BY_TYPE[type];
+  const governs=KHAFD_GOVERNS_CLAUSES[record.governs];
+  const kindAr=record.qasam?KHAFD_KIND_LABELS.qasam.ar:KHAFD_KIND_LABELS.plain.ar;
+  const kindEn=record.qasam?KHAFD_KIND_LABELS.qasam.en:KHAFD_KIND_LABELS.plain.en;
+  token.ar=`${token.word}: ${record.nameAr}${KHAFD_IRAAB_JOIN.ar}${kindAr}${KHAFD_IRAAB_BINAA.ar}${record.meaningAr}${KHAFD_IRAAB_GOVERNS.ar}${governs.ar}.`;
+  token.en=`${record.nameAr} — ${kindEn}. It is built and has no syntactic position; its meaning is ${record.meaningEn}, and ${governs.en}.`;
+  return;
+ }
  if(type==='inna'){token.ar=`${token.word}: ${token.grammar.particleIraab} مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle that governs its noun and khabar.';return}
  if(type==='lan'){token.ar=`${token.word}: حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of negation, future meaning, and naṣb.';return}
  if(type==='lam'){token.ar=`${token.word}: ${J1A_PARTICLE_IRAAB.lam.ar}`;token.en=J1A_PARTICLE_IRAAB.lam.en;return}
@@ -13229,6 +13603,16 @@ function whyVerbSubject(t){
 }
 const WHY_PARTICLE=Object.freeze({
  preposition:t=>({id:'WHY_PARTICLE_PREPOSITION',ar:`${wq(t.word)} حَرْفٌ مِنْ حُرُوفِ الْخَفْضِ، يَخْفِضُ الِاسْمَ بَعْدَهُ.`,en:`${eq(t.word)} is one of حُرُوفُ الْخَفْضِ; it makes the noun after it مَخْفُوضٌ.`}),
+ /* Wave 1 — one Why per khafḍ identity, never a shared boilerplate line. Each says which particle
+    this IS (the source's own name for it), what it means, and what it is allowed to govern, which
+    together are the reason the following noun is مَخْفُوضٌ rather than anything else. The oath
+    particles say so outright, because that is what separates them from the ordinary preposition
+    spelled the same way. */
+ ...Object.fromEntries(Object.values(KHAFD_PARTICLE_REGISTRY).map(record=>[record.particleType,t=>({
+  id:`WHY_PARTICLE_KHAFD_${record.id.toUpperCase()}`,
+  ar:`${wq(t.word)} ${record.nameAr}، ${record.qasam?'وَهُوَ حَرْفٌ مِنْ حُرُوفِ الْقَسَمِ، وَحُرُوفُ الْقَسَمِ مِنْ حُرُوفِ الْخَفْضِ':'وَهُوَ حَرْفٌ مِنْ حُرُوفِ الْخَفْضِ'}، مَعْنَاهُ ${record.meaningAr}، وَ${KHAFD_GOVERNS_CLAUSES[record.governs].ar}، فَيَخْفِضُ الِاسْمَ بَعْدَهُ.`,
+  en:`${eq(t.word)} is ${record.nameAr}, ${record.qasam?'one of حُرُوفُ الْقَسَمِ, and the oath particles are themselves حُرُوفُ الْخَفْضِ':'one of حُرُوفُ الْخَفْضِ'}. Its meaning is ${record.meaningEn}, and ${KHAFD_GOVERNS_CLAUSES[record.governs].en}; so it makes the noun after it مَخْفُوضٌ.`
+ })])),
  inna:t=>({id:'WHY_PARTICLE_INNA',ar:`${wq(t.word)} مِنْ «إِنَّ» وَأَخَوَاتِهَا، تَنْصِبُ الِاسْمَ وَتَرْفَعُ الْخَبَرَ.`,en:`${eq(t.word)} is one of «إِنَّ» and its sisters: it makes the اسْم مَنْصُوبٌ and the خَبَر مَرْفُوعٌ.`}),
  lan:t=>({id:'WHY_PARTICLE_LAN',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ، يَنْصِبُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is a particle of negation, naṣb, and future meaning; it makes the present verb مَنْصُوبٌ.`}),
  lam:t=>({id:'WHY_PARTICLE_LAM',ar:`${wq(t.word)} حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ، يَجْزِمُ الْفِعْلَ الْمُضَارِعَ.`,en:`${eq(t.word)} is a particle of negation, jazm, and past meaning; it makes the present verb مَجْزُومٌ.`}),
@@ -13306,6 +13690,19 @@ const WHY_MABNI_PRESENT_MAHALL=Object.freeze({
  an:Object.freeze({id:'WHY_PRESENT_NUUN_NISWAH_AN_MAHALL',ar:'وَسَبَقَهُ «أَنْ» وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ يَنْصِبُ بِنَفْسِهِ، فَهُوَ فِي مَحَلِّ نَصْبٍ، وَبِنَاؤُهُ وَصُورَتُهُ لَا يَتَغَيَّرَانِ.',en:'«أَنْ», a particle of maṣdar, naṣb, and future meaning that governs by itself, precedes it, so it is in the position of naṣb; its bināʾ and its spelling do not change.'}),
  kay:Object.freeze({id:'WHY_PRESENT_NUUN_NISWAH_KAY_MAHALL',ar:'وَسَبَقَهُ «كَيْ» وَهُوَ حَرْفُ مَصْدَرٍ وَنَصْبٍ يَنْصِبُ بِنَفْسِهِ؛ لِتَقَدُّمِ لَامِ التَّعْلِيلِ عَلَيْهِ لَفْظًا، فَهُوَ فِي مَحَلِّ نَصْبٍ، وَبِنَاؤُهُ وَصُورَتُهُ لَا يَتَغَيَّرَانِ.',en:'«كَيْ», a particle of maṣdar and naṣb that governs by itself because لَامُ التَّعْلِيلِ explicitly precedes it, comes before it, so it is in the position of naṣb; its bināʾ and its spelling do not change.'})
 });
+/* Wave 1 — why THIS iḍāfah carries THIS meaning. The explanation is the source's own ḍābiṭ, and it
+   is read off the frame the pair itself yields, so the learner is told the test rather than the
+   label: «جُبَّةُ صُوفٍ» is بمعنى مِنْ because the cloak is a part of the wool, «صَلَاةُ اللَّيْلِ»
+   is بمعنى فِي because the night is the time it falls within, and «غُلَامُ زَيْدٍ» is بمعنى اللام
+   because neither of the other two tests fits it. */
+function whyIdafaMeaning(token,data){
+ const authority=deriveIdafaMeaningAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized||!authority.claimed)return null;
+ const{frame,meaning}=authority;
+ return{id:`WHY_IDAFA_MAANA_${frame.meaning.toUpperCase()}`,
+  ar:`وَهَذِهِ الْإِضَافَةُ ${meaning.clauseAr}؛ ${meaning.dabitAr}.`,
+  en:`This iḍāfah is on ${meaning.meaningEn}, ${meaning.dabitEn}.`};
+}
 function buildTokenWhy(token,data){
  /* A token whose sign is not canonical has no Why. Rendering already refuses such an exercise
     before reaching this function, but buildTokenWhy is also reachable directly, and a quarantine
@@ -13330,6 +13727,12 @@ function buildTokenWhy(token,data){
   }
   if(token.grammar.role==='badal'){
    push(whyBadalCondition(token,data));
+  }
+  /* Wave 1 — the iḍāfah's own meaning, on the muḍāf ilayh where the learner is already looking.
+     It is an EXTRA line, not a replacement: the two lines above still say what this word is and
+     that it is مَخْفُوضٌ بِالْإِضَافَةِ. Frames that carry no registered meaning add nothing. */
+  if(token.grammar.role==='mudafIlayh'){
+   push(whyIdafaMeaning(token,data));
   }
   if(token.grammar.role==='mafulMutlaq'){
    push(whyMutlaqPurpose(token,data));
@@ -13655,7 +14058,7 @@ function buildRelationshipWhy(rel,data){
   push({id:'WHY_REL_KHABAR_POSITION',ar:'فَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.',en:'So the sentence is in the position of rafʿ as the خَبَر.'});
  }else{
   const fronted=rel.khabarKind==='frontedPhrase';
-  const isPrep=anchor.grammar.particleType==='preposition';
+  const isPrep=isKhafdParticleType(anchor.grammar.particleType);
   push(isPrep
    ?{id:'WHY_REL_JARR_MAJRUR',ar:`${wq(phrase)} حَرْفُ خَفْضٍ مَعَ الِاسْمِ الْمَخْفُوضِ بَعْدَهُ، فَهُمَا جَارٌّ وَمَجْرُورٌ.`,en:`${eq(phrase)} is a particle of khafḍ together with the noun it governs, so the two form a جَارٌّ وَمَجْرُورٌ.`}
    :{id:'WHY_REL_ZARF_PHRASE',ar:`${wq(phrase)} ظَرْفٌ مَعَ مَا أُضِيفَ إِلَيْهِ، فَهُوَ شِبْهُ جُمْلَةٍ.`,en:`${eq(phrase)} is a ظَرْف with the noun annexed to it, so it is a شِبْهُ جُمْلَةٍ.`});
@@ -13977,7 +14380,7 @@ function renderRelationshipAnalysis(data){
    sentenceRecipient.phraseLabel='Sentence';
    }else{
     const fronted=rel.khabarKind==='frontedPhrase';
-   const attachment=anchor.grammar.particleType==='preposition'
+   const attachment=isKhafdParticleType(anchor.grammar.particleType)
      ?`«${phrase}»: جَارٌّ وَمَجْرُورٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ${fronted?' مُقَدَّمٍ':''}`
      :`«${phrase}»: ظَرْفٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ${fronted?' مُقَدَّمٍ':''}`;
     const phraseRecipient=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)).filter(Boolean).at(-1)||anchor;
@@ -14562,7 +14965,25 @@ function validateExercise(data){
    const governed=token.relations.governsId&&tokenById.get(token.relations.governsId);
    if(!governed||governed.grammar.type!=='verb'||governed.tense!=='present')fail('E_ORPHAN_VERB_GOVERNOR','Verb governor is not linked to the immediately following present verb.',token);
   }
-  if(token.grammar.particleType==='preposition'&&!token.relations.governsId)fail('E_ORPHAN_PREPOSITION','Preposition is not linked to an immediately following genitive noun.',token);
+  if(isKhafdParticleType(token.grammar.particleType)&&!token.relations.governsId)fail('E_ORPHAN_PREPOSITION','Preposition is not linked to an immediately following genitive noun.',token);
+  /* Wave 1 — the source states, for several of these particles, exactly WHAT they may govern, and
+     that restriction is part of the identity rather than a note beside it. تاء القسم «لا تدخل إلا
+     على لفظ الجلالة» (p. 13), and مُذْ/مُنْذُ «يجران الأزمان» (p. 177). Enforced structurally so a
+     snapshot cannot move an oath tāʾ onto an ordinary noun and keep the oath analysis. */
+  {
+   const identity=KHAFD_PARTICLE_BY_TYPE[token.grammar.particleType||''];
+   if(identity&&token.relations.governsId){
+    const governed=tokenById.get(token.relations.governsId);
+    if(governed){
+     if(identity.governs==='lafzAlJalala'&&governed.word!==LAFZ_AL_JALALA.gen){
+      fail('E_KHAFD_GOVERNED_NOUN','This khafḍ particle may enter only upon the name of Allah.',token);
+     }
+     if(identity.governs==='azman'&&!WAVE1_HOSTS.pastTimes.some(item=>item.gen===governed.word)){
+      fail('E_KHAFD_GOVERNED_NOUN','Mudh and mundhu govern times; this is not a registered time-noun.',token);
+     }
+    }
+   }
+  }
   if(token.grammar.role==='object'&&(!token.relations.verbId||!relationships.some(rel=>rel.type==='verbObject'&&rel.objectId===token.id&&rel.verbId===token.relations.verbId)))fail('E_ORPHAN_OBJECT','Direct object is not linked to a verb.',token);
   if(token.grammar.role==='faail'&&(!token.relations.verbId||!relationships.some(rel=>rel.type==='verbSubject'&&rel.subjectId===token.id&&rel.verbId===token.relations.verbId)))fail('E_ORPHAN_SUBJECT','Explicit subject is not linked to a verb.',token);
   if(token.grammar.role==='naibFail'&&(!token.relations.passiveVerbId||!relationships.some(rel=>rel.type==='passiveDeputy'&&rel.deputyId===token.id&&rel.verbId===token.relations.passiveVerbId)))fail('E_ORPHAN_NAIB_FAIL','Deputy subject is not linked to its passive verb.',token);
@@ -15667,6 +16088,7 @@ add('particle','dual','jarr','ya',()=>{const d=pickVaried(duals.filter(isHumanNo
 add('particle','smp','jarr','ya',()=>{const p=pickVaried(smp,'particle-smp-gen',x=>x.gen);return{sentence:`إِلَى ${p.gen} رِسَالَةٌ`,translation:`There is a letter for ${p.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'إِلَى','الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
 add('particle','sfp','jarr','kasra',()=>{const p=pickVaried(sfp,'particle-sfp-gen',x=>x.gen);return{sentence:`إِلَى ${p.gen} رِسَالَةٌ`,translation:`There is a letter for ${p.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(p.gen,p.en,AR.majrur(p.gen,'إِلَى'),EN.majrur,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
 add('particle','fiveNouns','jarr','ya',()=>{const f=pickVaried(fiveNouns,'particle-five-noun-gen',x=>x.gen);return{sentence:`إِلَى ${f.gen} رِسَالَةٌ`,translation:`There is a letter for ${f.en}.`,tokens:[token('إِلَى','to',AR.prep('إِلَى'),EN.prep),token(f.gen,f.en,AR.fiveNounGen(f.gen,'إِلَى'),EN.fiveNoun,true),token('رِسَالَةٌ','a letter',AR.delayedMubtada('رِسَالَةٌ'),'A delayed mubtadaʾ; nominative.')]}});
+
 add('particle','present','nasb','fatha',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَنْ ${v.acc} ${o}`,translation:`He will not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَنْ','will not',AR.lan('لَنْ'),'A particle of negation, future meaning, and naṣb.'),token(v.acc,v.en,AR.presentPred(v.acc,'مَنْصُوبٌ بِـ«لَنْ»',VISIBLE_FATHA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lan'});
 add('particle','present','jazm','sukun',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`لَمْ ${v.juss} ${o}`,translation:`He did not ${v.en} ${objectEnglish(o)}.`,tokens:[token('لَمْ','did not',AR.lam('لَمْ'),'A particle of negation and jazm that gives past meaning.'),token(v.juss,v.en,AR.presentPred(v.juss,'مَجْزُومٌ بِـ«لَمْ»','السُّكُونُ الظَّاهِرُ عَلَى آخِرِهِ'),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'lam'});
 add('particle','present','raf','damma',()=>{const v=pickVerb(),o=pickVerbObject(v);return{sentence:`سَوْفَ ${v.pres} ${o}`,translation:`He will ${v.en} ${objectEnglish(o)}.`,tokens:[token('سَوْفَ','will',AR.future('سَوْفَ'),'A particle marking the future.'),token(v.pres,v.en,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present,true),token(o,objectEnglish(o),AR.object(o),EN.object)]}},{presentGovernor:'sawfa'});
@@ -16919,6 +17341,247 @@ function buildHaalMahallExercise(frameKey){
 add('noun','singular','nasb','fatha',
  ()=>buildHaalMahallExercise(pickVaried([...HAAL_MAHALL_FRAME_KEYS],'haal-mahall',String)),
  {...pastTemplateMetadata('3ms','explicit'),haalMahallFrameKeys:HAAL_MAHALL_FRAME_KEYS});
+
+/* ── Wave 1 — حُرُوفُ الْخَفْضِ, production ────────────────────────────────────────────────
+   Shape A (`noun` start): mubtadaʾ + جار ومجرور standing where the khabar goes — the shape the app
+   already ships for «الطَّالِبُ فِي الْمَسْجِدِ». Shape B (`particle` start): the particle heads the
+   sentence and the mubtadaʾ is delayed — the shape of «فِي الدَّارِ رَجُلٌ». Both are EXISTING
+   matrix cells, so no filter option and no filter tuple is invented by this wave.
+
+   The governed nouns come from pools already audited for morphology and English, which is what gives
+   مِنْ its singular / broken / dual / sound-masculine / sound-feminine / five-noun lanes with the
+   right khafḍ sign in each (kasrah, kasrah, yāʾ, yāʾ, kasrah, yāʾ) without inventing morphology.
+   Words the SOURCE requires and no pool owns — مُحَمَّدٍ for the lām of ownership, مِشْكَاةٍ for the
+   kāf of comparison, لفظ الجلالة for the three oaths, the times مُذْ and مُنْذُ govern, and رُبَّ's
+   own «رَجُلٍ كَرِيمٍ» — are registered as a closed, ROLE-BOUND table, exactly as every other
+   curriculum-owned vocabulary in this app is. */
+const WAVE1_HOSTS=Object.freeze({
+ minSources:Object.freeze([
+  Object.freeze({nom:'الرِّسَالَةُ',en:'the letter'}),Object.freeze({nom:'الْهَدِيَّةُ',en:'the gift'}),
+  Object.freeze({nom:'الْجَوَابُ',en:'the answer'}),Object.freeze({nom:'الْخَبَرُ',en:'the news'}),
+  Object.freeze({nom:'الطَّرْدُ',en:'the parcel'}),Object.freeze({nom:'الْأَمَانَةُ',en:'the trust'})
+ ]),
+ /* الباء of التعدية. Its objects are written joined to the particle, and its subjects are ordinary
+    registered people, so only the objects need Wave-1 English. */
+ baSubjects:Object.freeze([
+  Object.freeze({nom:'الطَّالِبُ',en:'the student'}),Object.freeze({nom:'الْمُعَلِّمُ',en:'the teacher'}),
+  Object.freeze({nom:'الرَّجُلُ',en:'the man'}),Object.freeze({nom:'الطَّبِيبُ',en:'the doctor'})
+ ]),
+ baObjects:Object.freeze([
+  Object.freeze({gen:'مُحَمَّدٍ',en:'Muhammad'}),Object.freeze({gen:'خَالِدٍ',en:'Khalid'}),
+  Object.freeze({gen:'زَيْدٍ',en:'Zayd'}),Object.freeze({gen:'صَاحِبٍ',en:'a companion'})
+ ]),
+ kafSubjects:Object.freeze([
+  Object.freeze({nom:'الْعِلْمُ',en:'the knowledge'}),Object.freeze({nom:'الصَّبْرُ',en:'patience'}),
+  Object.freeze({nom:'الْقَلْبُ',en:'the heart'}),Object.freeze({nom:'الْمُعَلِّمُ',en:'the teacher'}),
+  Object.freeze({nom:'الْعَدْلُ',en:'justice'}),Object.freeze({nom:'الْأَمَلُ',en:'hope'})
+ ]),
+ kafLikenesses:Object.freeze([
+  Object.freeze({gen:'النُّورِ',en:'light'}),Object.freeze({gen:'الْكَنْزِ',en:'a treasure'}),
+  Object.freeze({gen:'الْوَالِدِ',en:'a father'}),Object.freeze({gen:'مِشْكَاةٍ',en:'a lamp-niche'}),
+  Object.freeze({gen:'الْبَدْرِ',en:'the full moon'}),Object.freeze({gen:'الْمَطَرِ',en:'rain'})
+ ]),
+ lamOwned:Object.freeze([
+  Object.freeze({nom:'الْمَالُ',en:'the wealth'}),Object.freeze({nom:'الدَّارُ',en:'the house'}),
+  Object.freeze({nom:'الْقَلَمُ',en:'the pen'}),Object.freeze({nom:'الْحَقُّ',en:'the right'}),
+  Object.freeze({nom:'الْفَضْلُ',en:'the merit'}),Object.freeze({nom:'الْأَمْرُ',en:'the matter'})
+ ]),
+ lamOwners:Object.freeze([
+  Object.freeze({gen:'مُحَمَّدٍ',en:'Muhammad'}),Object.freeze({gen:'خَالِدٍ',en:'Khalid'}),
+  Object.freeze({gen:'زَيْدٍ',en:'Zayd'}),Object.freeze({gen:'طَالِبٍ',en:'a student'}),
+  Object.freeze({gen:'صَاحِبٍ',en:'a companion'}),Object.freeze({gen:'مُعَلِّمٍ',en:'a teacher'})
+ ]),
+ hattaSubjects:Object.freeze([
+  Object.freeze({nom:'الذِّكْرُ',en:'the remembrance'}),Object.freeze({nom:'الْقِرَاءَةُ',en:'the reading'}),
+  Object.freeze({nom:'الدَّرْسُ',en:'the lesson'}),Object.freeze({nom:'السَّهَرُ',en:'the night vigil'}),
+  Object.freeze({nom:'الْعَمَلُ',en:'the work'}),Object.freeze({nom:'الِانْتِظَارُ',en:'the waiting'})
+ ]),
+ hattaLimits:Object.freeze([
+  Object.freeze({gen:'الْفَجْرِ',en:'dawn'}),Object.freeze({gen:'الصَّبَاحِ',en:'the morning'}),
+  Object.freeze({gen:'الْمَسَاءِ',en:'the evening'}),Object.freeze({gen:'اللَّيْلِ',en:'the night'}),
+  Object.freeze({gen:'الظُّهْرِ',en:'noon'}),Object.freeze({gen:'الْعَصْرِ',en:'the afternoon'})
+ ]),
+ timeSubjects:Object.freeze([
+  Object.freeze({nom:'الصِّيَامُ',en:'the fasting'}),Object.freeze({nom:'السَّفَرُ',en:'the journey'}),
+  Object.freeze({nom:'الْغِيَابُ',en:'the absence'}),Object.freeze({nom:'الْمَطَرُ',en:'the rain'}),
+  Object.freeze({nom:'الْبِنَاءُ',en:'the building'}),Object.freeze({nom:'الْمَرَضُ',en:'the illness'})
+ ]),
+ pastTimes:Object.freeze([
+  Object.freeze({gen:'شَهْرٍ',en:'a month ago'}),Object.freeze({gen:'عَامٍ',en:'a year ago'}),
+  Object.freeze({gen:'أُسْبُوعٍ',en:'a week ago'}),Object.freeze({gen:'يَوْمٍ',en:'a day ago'}),
+  Object.freeze({gen:'زَمَنٍ',en:'a long time ago'}),Object.freeze({gen:'سَاعَةٍ',en:'an hour ago'})
+ ]),
+ rubbaHosts:Object.freeze([
+  Object.freeze({gen:'رَجُلٍ',en:'a man',naat:'كَرِيمٍ',naatEn:'generous'}),
+  Object.freeze({gen:'ضَيْفٍ',en:'a guest',naat:'كَرِيمٍ',naatEn:'generous'}),
+  Object.freeze({gen:'طَالِبٍ',en:'a student',naat:'مُجْتَهِدٍ',naatEn:'hardworking'}),
+  Object.freeze({gen:'صَاحِبٍ',en:'a companion',naat:'صَادِقٍ',naatEn:'truthful'})
+ ]),
+ rubbaDelayed:Object.freeze([
+  Object.freeze({ar:'صَدِيقٌ',en:'a friend'}),Object.freeze({ar:'نِعْمَةٌ',en:'a blessing'}),
+  Object.freeze({ar:'عَوْنٌ',en:'a help'}),Object.freeze({ar:'عِبْرَةٌ',en:'a lesson'})
+ ]),
+ /* The جواب of the oath is a nominal sentence headed by إِنَّ — the construction this app already
+    produces and analyses in full. The oath phrase itself is the جار ومجرور the chapter is about. */
+ oathSubjects:Object.freeze([
+  Object.freeze({acc:'الْعِلْمَ',en:'the knowledge'}),Object.freeze({acc:'الصِّدْقَ',en:'truthfulness'}),
+  Object.freeze({acc:'الصَّبْرَ',en:'patience'}),
+  Object.freeze({acc:'الْوَعْدَ',en:'the promise'}),Object.freeze({acc:'الْأَجْرَ',en:'the reward'})
+ ]),
+ oathAnswers:Object.freeze([
+  Object.freeze({ar:'نَافِعٌ',en:'beneficial'}),Object.freeze({ar:'نُورٌ',en:'a light'}),
+  Object.freeze({ar:'حَقٌّ',en:'true'}),Object.freeze({ar:'قَرِيبٌ',en:'near'}),
+  Object.freeze({ar:'عَظِيمٌ',en:'great'}),Object.freeze({ar:'ثَابِتٌ',en:'firm'})
+ ])
+});
+/* Role-bound English for every Wave-1 surface no existing pool owns. Same discipline as
+   GLOSS_FIXED_TOKENS: a surface is glossed only in the ROLE it was registered for, so none of these
+   words can lend its reading to a token standing somewhere else. It is BUILT from the frozen frames
+   rather than typed out again, so each English string has exactly one copy. */
+const WAVE1_GLOSS_BY_ROLE=(()=>{
+ const table=Object.create(null);
+ const put=(role,surface,en)=>{
+  if(!table[role])table[role]=Object.create(null);
+  if(table[role][surface]&&table[role][surface]!==en)throw new Error(`Wave-1 gloss conflict for «${surface}» in role ${role}.`);
+  table[role][surface]=en;
+ };
+ for(const item of WAVE1_HOSTS.minSources)put('mubtada',item.nom,item.en);
+ for(const item of WAVE1_HOSTS.baSubjects)put('mubtada',item.nom,item.en);
+ for(const item of WAVE1_HOSTS.baObjects)put('majrur',item.gen,item.en);
+ for(const item of WAVE1_HOSTS.kafSubjects)put('mubtada',item.nom,item.en);
+ for(const item of WAVE1_HOSTS.kafLikenesses)put('majrur',item.gen,item.en);
+ for(const item of WAVE1_HOSTS.lamOwned)put('mubtada',item.nom,item.en);
+ for(const item of WAVE1_HOSTS.lamOwners)put('majrur',item.gen,item.en);
+ for(const item of WAVE1_HOSTS.hattaSubjects)put('mubtada',item.nom,item.en);
+ for(const item of WAVE1_HOSTS.hattaLimits)put('majrur',item.gen,item.en);
+ for(const item of WAVE1_HOSTS.timeSubjects)put('mubtada',item.nom,item.en);
+ for(const item of WAVE1_HOSTS.pastTimes)put('majrur',item.gen,item.en);
+ for(const item of WAVE1_HOSTS.rubbaHosts)put('majrur',item.gen,item.en);
+ for(const item of WAVE1_HOSTS.rubbaDelayed)put('mubtada',item.ar,item.en);
+ for(const item of WAVE1_HOSTS.oathSubjects)put('ismInna',item.acc,item.en);
+ for(const item of WAVE1_HOSTS.oathAnswers)put('khabarInna',item.ar,item.en);
+ put('majrur',LAFZ_AL_JALALA.gen,LAFZ_AL_JALALA.en);
+ for(const frame of IDAFA_MEANING_FRAMES){
+  put('mubtada',frame.mudaf,frame.mudafEn);
+  put('mudafIlayh',frame.mudafIlayh,frame.mudafIlayhEn);
+  put('khabar',frame.khabar,frame.khabarEn);
+ }
+ for(const role of Object.keys(table))table[role]=Object.freeze(table[role]);
+ return Object.freeze(table);
+})();
+/* The one verb this wave registers. It exists so الباء can be shown doing what the source says it
+   does — carrying the verb over to the noun after it — and it is a frozen single-form lexeme, not
+   an extension of the audited general verb pools. */
+const WAVE1_BA_VERBS=Object.freeze([
+ Object.freeze({pres:'يَمُرُّ',third:'passes by',en:'pass by'}),
+ Object.freeze({pres:'يَمْضِي',third:'walks past',en:'walk past'})
+]);
+const wave1Pick=(pool,key)=>pickVaried(pool,key,item=>item.nom||item.gen||item.ar||item.acc||item.pres);
+const khafdToken=(id,word)=>token(word||KHAFD_PARTICLE_REGISTRY[id].surface,
+ KHAFD_PARTICLE_REGISTRY[id].gloss,AR.khafd(id,word),EN.prep);
+
+// مِنْ — الابتداء. Six lanes, one per khafḍ sign regime this chapter teaches.
+add('noun','singular','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.minSources,'w1-min-source'),p=pickPlace();
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.min.connectiveSurface} ${p.gen}`,translation:`${cap(s.en)} is from ${p.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('min',KHAFD_PARTICLE_REGISTRY.min.connectiveSurface),
+   token(p.gen,p.en,AR.majrur(p.gen,KHAFD_PARTICLE_REGISTRY.min.connectiveSurface),EN.majrur,true)]}});
+add('noun','broken','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.minSources,'w1-min-broken-source'),b=pickVaried(brokenThings,'w1-min-broken',x=>x.gen);
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.min.connectiveSurface} ${b.gen}`,translation:`${cap(s.en)} is from ${b.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('min',KHAFD_PARTICLE_REGISTRY.min.connectiveSurface),
+   token(b.gen,b.en,AR.majrur(b.gen,KHAFD_PARTICLE_REGISTRY.min.connectiveSurface),EN.majrur,true)]}});
+add('noun','dual','jarr','ya',()=>{const s=wave1Pick(WAVE1_HOSTS.minSources,'w1-min-dual-source'),d=pickVaried(duals,'w1-min-dual',x=>x.gen);
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.min.connectiveSurface} ${d.gen}`,translation:`${cap(s.en)} is from ${d.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('min',KHAFD_PARTICLE_REGISTRY.min.connectiveSurface),
+   token(d.gen,d.en,AR.majrur(d.gen,KHAFD_PARTICLE_REGISTRY.min.connectiveSurface,'الْيَاءُ؛ لِأَنَّهُ مُثَنًّى'),EN.majrur,true)]}});
+add('noun','smp','jarr','ya',()=>{const s=wave1Pick(WAVE1_HOSTS.minSources,'w1-min-smp-source'),p=pickVaried(smp,'w1-min-smp',x=>x.gen);
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.min.connectiveSurface} ${p.gen}`,translation:`${cap(s.en)} is from ${p.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('min',KHAFD_PARTICLE_REGISTRY.min.connectiveSurface),
+   token(p.gen,p.en,AR.majrur(p.gen,KHAFD_PARTICLE_REGISTRY.min.connectiveSurface,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.majrur,true)]}});
+add('noun','sfp','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.minSources,'w1-min-sfp-source'),p=pickVaried(sfp,'w1-min-sfp',x=>x.gen);
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.min.connectiveSurface} ${p.gen}`,translation:`${cap(s.en)} is from ${p.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('min',KHAFD_PARTICLE_REGISTRY.min.connectiveSurface),
+   token(p.gen,p.en,AR.majrur(p.gen,KHAFD_PARTICLE_REGISTRY.min.connectiveSurface),EN.majrur,true)]}});
+add('noun','fiveNouns','jarr','ya',()=>{const s=wave1Pick(WAVE1_HOSTS.minSources,'w1-min-five-source'),f=pickVaried(fiveNouns,'w1-min-five',x=>x.gen);
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.min.surface} ${f.gen}`,translation:`${cap(s.en)} is from ${f.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('min'),
+   token(f.gen,f.en,AR.fiveNounGen(f.gen,KHAFD_PARTICLE_REGISTRY.min.surface),EN.fiveNoun,true)]}});
+// الكاف — التشبيه، «ولا تجر إلا الاسم الظاهر».
+add('noun','singular','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.kafSubjects,'w1-kaf-subject'),l=wave1Pick(WAVE1_HOSTS.kafLikenesses,'w1-kaf-likeness');
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.kaf.surface}${l.gen}`,translation:`${cap(s.en)} is like ${l.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('kaf'),
+   token(l.gen,l.en,AR.majrur(l.gen,KHAFD_PARTICLE_REGISTRY.kaf.surface),EN.majrur,true)]}});
+// اللام — المِلْك، the source's own «الْمَالُ لِمُحَمَّدٍ».
+add('noun','singular','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.lamOwned,'w1-lam-owned'),o=wave1Pick(WAVE1_HOSTS.lamOwners,'w1-lam-owner');
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.lam.surface}${o.gen}`,translation:`${cap(s.en)} belongs to ${o.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('lam'),
+   token(o.gen,o.en,AR.majrur(o.gen,KHAFD_PARTICLE_REGISTRY.lam.surface),EN.majrur,true)]}});
+// حَتَّى الْجَارَّةُ — الغاية (p. 127).
+add('noun','singular','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.hattaSubjects,'w1-hatta-subject'),l=wave1Pick(WAVE1_HOSTS.hattaLimits,'w1-hatta-limit');
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.hatta.surface} ${l.gen}`,translation:`${cap(s.en)} lasts until ${l.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('hatta'),
+   token(l.gen,l.en,AR.majrur(l.gen,KHAFD_PARTICLE_REGISTRY.hatta.surface),EN.majrur,true)]}});
+// مُذْ و مُنْذُ — «ويجران الأزمان»، بمعنى مِنْ because the time named is past.
+add('noun','singular','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.timeSubjects,'w1-mudh-subject'),t=wave1Pick(WAVE1_HOSTS.pastTimes,'w1-mudh-time');
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.mudh.surface} ${t.gen}`,translation:`${cap(s.en)} has lasted since ${t.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('mudh'),
+   token(t.gen,t.en,AR.majrur(t.gen,KHAFD_PARTICLE_REGISTRY.mudh.surface),EN.majrur,true)]}});
+add('noun','singular','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.timeSubjects,'w1-mundhu-subject'),t=wave1Pick(WAVE1_HOSTS.pastTimes,'w1-mundhu-time');
+ return{sentence:`${s.nom} ${KHAFD_PARTICLE_REGISTRY.mundhu.surface} ${t.gen}`,translation:`${cap(s.en)} has lasted since ${t.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),khafdToken('mundhu'),
+   token(t.gen,t.en,AR.majrur(t.gen,KHAFD_PARTICLE_REGISTRY.mundhu.surface),EN.majrur,true)]}});
+// رُبَّ — التقليل، an explicit INDEFINITE noun carrying the naʿt the source's own frame gives it.
+add('particle','singular','jarr','kasra',()=>{const h=wave1Pick(WAVE1_HOSTS.rubbaHosts,'w1-rubba-host'),d=wave1Pick(WAVE1_HOSTS.rubbaDelayed,'w1-rubba-delayed');
+ return{sentence:`${KHAFD_PARTICLE_REGISTRY.rubba.surface} ${h.gen} ${d.ar}`,translation:`Seldom is ${h.en} ${d.en}.`,
+  tokens:[khafdToken('rubba'),token(h.gen,h.en,AR.majrur(h.gen,KHAFD_PARTICLE_REGISTRY.rubba.surface),EN.majrur,true),
+   token(d.ar,d.en,AR.delayedMubtada(d.ar),'A delayed mubtadaʾ; nominative.')]}});
+/* حُرُوفُ الْقَسَمِ — the oath phrase, then the إِنَّ sentence that answers it. Each oath particle
+   keeps its own restriction: the wāw enters only on an explicit noun, the bāʾ on the explicit noun
+   and the pronoun alike, and the tāʾ on nothing but لفظ الجلالة — which is why all three are shown
+   on it, the one noun every one of them may govern. */
+/* The oath's جواب uses the registered إِنَّ record itself, never a retyped copy of its bytes. */
+const INNA_SISTER=innaSisters.find(item=>item.gloss==='indeed');
+if(!INNA_SISTER)throw new Error('The إِنَّ record the oath jawāb needs is not registered.');
+const oathTemplate=id=>()=>{const s=wave1Pick(WAVE1_HOSTS.oathSubjects,`w1-oath-subject:${id}`),a=wave1Pick(WAVE1_HOSTS.oathAnswers,`w1-oath-answer:${id}`);
+ const record=KHAFD_PARTICLE_REGISTRY[id];
+ return{sentence:`${record.surface}${LAFZ_AL_JALALA.gen} ${INNA_SISTER.ar} ${s.acc} ${a.ar}`,
+  translation:`By Allah, ${s.en} is ${a.en}.`,
+  tokens:[khafdToken(id),token(LAFZ_AL_JALALA.gen,LAFZ_AL_JALALA.en,AR.majrur(LAFZ_AL_JALALA.gen,record.surface),EN.majrur,true),
+   token(INNA_SISTER.ar,INNA_SISTER.gloss,AR.particle(INNA_SISTER),'A particle that makes its noun accusative.'),
+   token(s.acc,s.en,AR.ismInna(s.acc,'إِنَّ'),EN.mubtada),
+   token(a.ar,a.en,AR.khabarInna(a.ar,'إِنَّ'),EN.khabar)]};
+};
+add('particle','singular','jarr','kasra',oathTemplate('qasamWaw'));
+add('particle','singular','jarr','kasra',oathTemplate('qasamBa'));
+add('particle','singular','jarr','kasra',oathTemplate('qasamTa'));
+/* مَعَانِي الْإِضَافَةِ — one lane per source-backed meaning. The frame is frozen and the meaning is
+   re-derived from the PAIR, so a learner meets «بمعنى مِنْ» only on a construction whose muḍāf
+   really is a part of its muḍāf ilayh. */
+const idafaMeaningTemplate=meaning=>()=>{
+ const frame=pickVaried(IDAFA_MEANING_FRAMES.filter(item=>item.meaning===meaning),`w1-idafa:${meaning}`,item=>item.key);
+ return{sentence:`${frame.mudaf} ${frame.mudafIlayh} ${frame.khabar}`,
+  translation:`The ${frame.mudafEn} of ${frame.mudafIlayhEn} is ${frame.khabarEn}.`,
+  tokens:[token(frame.mudaf,frame.mudafEn,AR.mudaf(frame.mudaf),EN.mudaf),
+   token(frame.mudafIlayh,frame.mudafIlayhEn,AR.idafaMeaning(frame.mudafIlayh,frame.key),EN.mudafIlayh,true),
+   token(frame.khabar,frame.khabarEn,AR.khabar(frame.khabar),EN.khabar)]};
+};
+add('noun','singular','jarr','kasra',idafaMeaningTemplate('lam'));
+add('noun','singular','jarr','kasra',idafaMeaningTemplate('min'));
+add('noun','singular','jarr','kasra',idafaMeaningTemplate('fi'));
+/* الْبَاءُ — التَّعْدِيَةُ. The source's meaning for this bāʾ is that it carries the verb over to
+   what follows it («ومن معانيها التَّعْدِيَةُ، وتجر الاسم الظاهر والضمير جميعاً»، p. 176; «مَرَرْتُ
+   بِالْوَادِي»، p. 13; «مَرَرْتُ بِمُحَمَّدٍ وَخَالِدٍ»، p. 175), so this lane is the one Wave-1 lane
+   that must carry a VERB: without one there is no transitivity for the bāʾ to effect, and the frame
+   would contradict the meaning its own iʿrāb states. The verb is a single frozen Wave-1 lexeme, not
+   an addition to the audited general pools, and it is deliberately NOT a preposition-action pair —
+   pairing it would route the particle's English through the pair registry and let the bāʾ of
+   التعدية and بَاءُ الْقَسَمِ resolve through one authority again. */
+registerVerbSet(WAVE1_BA_VERBS);
+add('noun','singular','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.baSubjects,'w1-ba-subject'),
+  v=wave1Pick(WAVE1_BA_VERBS,'w1-ba-verb'),o=wave1Pick(WAVE1_HOSTS.baObjects,'w1-ba-object');
+ return{sentence:`${s.nom} ${v.pres} ${KHAFD_PARTICLE_REGISTRY.ba.surface}${o.gen}`,translation:`${cap(s.en)} ${v.third} ${o.en}.`,
+  tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),
+   token(v.pres,v.third,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),
+   khafdToken('ba'),token(o.gen,o.en,AR.majrur(o.gen,KHAFD_PARTICLE_REGISTRY.ba.surface),EN.majrur,true)]}});
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

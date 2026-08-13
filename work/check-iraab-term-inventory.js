@@ -300,6 +300,26 @@ for (const r of observed) {
   if (r.status === 'ABSENT' && !r.missingReason) fail(`row ${r.key} is ABSENT but declares no missingReason`);
   if (!r.term || !r.chapter || !r.pages || !r.parent) fail(`row ${r.key} is missing required metadata`);
 }
+/* ── Wave 1 completeness ─────────────────────────────────────────────────────────────
+   The fourteen حروف الخفض / معاني الإضافة rows that were non-FULL before Wave 1, named
+   explicitly. Naming them is the point: a later change that quietly stops producing one of
+   these particles would otherwise only move a total, and totals drift without anyone noticing
+   which row moved. Each must be FULL on the strength of a live build, and the count is derived
+   from this list rather than written down as a number. */
+const WAVE1_KEYS = ['X_PREP_MIN', 'X_PREP_RUBBA', 'X_PREP_BA', 'X_PREP_KAF', 'X_PREP_LAM',
+  'X_PREP_WAW_QASAM', 'X_PREP_BA_QASAM', 'X_PREP_TA_QASAM', 'X_PREP_MUDH', 'X_PREP_MUNDHU',
+  'X_PREP_HATTA', 'X_IDAFA_LAM', 'X_IDAFA_MIN', 'X_IDAFA_FI'];
+const wave1 = WAVE1_KEYS.map(key => {
+  const row = observed.find(r => r.key === key);
+  if (!row) fail('Wave-1 row ' + key + ' is missing from the inventory');
+  return row;
+}).filter(Boolean);
+const wave1Full = wave1.filter(r => r.status === 'FULL').length;
+for (const row of wave1) {
+  if (row.status !== 'FULL') fail('Wave-1 row ' + row.key + ' is ' + row.status + ', not FULL');
+}
+if (wave1.length !== WAVE1_KEYS.length) fail('the Wave-1 row set did not resolve');
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -328,6 +348,7 @@ if (WRITE) {
 console.log(JSON.stringify({
   templates: api.templates.length, rounds: ROUNDS, builds: built,
   totals, randomizationTotals, marathon,
+  wave1: { name: 'حروف الخفض ومعاني الإضافة', target: WAVE1_KEYS.length, full: wave1Full },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

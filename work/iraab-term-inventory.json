@@ -9,24 +9,24 @@
  },
  "method": {
   "rounds": 200,
-  "templates": 202,
-  "buildsObserved": 40400,
+  "templates": 221,
+  "buildsObserved": 44200,
   "rule": "A row is FULL only when its canonical Arabic is observed in the rendered iʿrāb (token.ar / token.phraseAr). Appearing only in a Why explanation or in the definitions panel yields GENERIC_ONLY, never FULL."
  },
  "totals": {
   "TOTAL": 287,
-  "FULL": 199,
-  "GENERIC_ONLY": 10,
+  "FULL": 213,
+  "GENERIC_ONLY": 9,
   "PARTIAL": 1,
-  "ABSENT": 77,
+  "ABSENT": 64,
   "TRUE_BLOCKER": 0,
   "reconciles": true,
-  "percentFull": 69.3
+  "percentFull": 74.2
  },
  "randomizationTotals": {
-  "GOOD": 136,
-  "LIMITED": 64,
-  "NONE": 87
+  "GOOD": 144,
+  "LIMITED": 70,
+  "NONE": 73
  },
  "marathon": {
   "target": 56,
@@ -91,12 +91,12 @@
    "pages": "9–13",
    "parent": "أقسام الكلام",
    "status": "FULL",
-   "proof": "built 200× per template; «اسْمٌ» observed in the rendered iʿrāb across 46 template lane(s) [mode=standalone]",
+   "proof": "built 200× per template; «اسْمٌ» observed in the rendered iʿrāb across 62 template lane(s) [mode=standalone]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "اسْمٌ",
    "probeMode": "standalone",
-   "observedTemplateLanes": 46
+   "observedTemplateLanes": 62
   },
   {
    "key": "F_FIL",
@@ -119,12 +119,12 @@
    "pages": "9,17–18",
    "parent": "أقسام الكلام",
    "status": "FULL",
-   "proof": "built 200× per template; «حَرْفُ خَفْضٍ» observed in the rendered iʿrāb across 22 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «حَرْفُ خَفْضٍ» observed in the rendered iʿrāb across 38 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "حَرْفُ خَفْضٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 22
+   "observedTemplateLanes": 38
   },
   {
    "key": "F_MUARAB",
@@ -147,12 +147,12 @@
    "pages": "21–24",
    "parent": "الإعراب والبناء",
    "status": "FULL",
-   "proof": "built 200× per template; «مَبْنِيٌّ عَلَى» observed in the rendered iʿrāb across 121 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مَبْنِيٌّ عَلَى» observed in the rendered iʿrāb across 124 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مَبْنِيٌّ عَلَى",
    "probeMode": "contains",
-   "observedTemplateLanes": 121
+   "observedTemplateLanes": 124
   },
   {
    "key": "F_LA_MAHALL",
@@ -161,12 +161,12 @@
    "pages": "21–24",
    "parent": "البناء",
    "status": "FULL",
-   "proof": "built 200× per template; «لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ» observed in the rendered iʿrāb across 149 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ» observed in the rendered iʿrāb across 165 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 149
+   "observedTemplateLanes": 165
   },
   {
    "key": "S_RAF",
@@ -175,12 +175,12 @@
    "pages": "25",
    "parent": "أقسام الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مَرْفُوعٌ» observed in the rendered iʿrāb across 135 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مَرْفُوعٌ» observed in the rendered iʿrāb across 154 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مَرْفُوعٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 135
+   "observedTemplateLanes": 154
   },
   {
    "key": "S_NASB",
@@ -189,12 +189,12 @@
    "pages": "40",
    "parent": "أقسام الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مَنْصُوبٌ» observed in the rendered iʿrāb across 142 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مَنْصُوبٌ» observed in the rendered iʿrāb across 145 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مَنْصُوبٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 142
+   "observedTemplateLanes": 145
   },
   {
    "key": "S_KHAFD",
@@ -203,12 +203,12 @@
    "pages": "48",
    "parent": "أقسام الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مَخْفُوضٌ» observed in the rendered iʿrāb across 30 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مَخْفُوضٌ» observed in the rendered iʿrāb across 49 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مَخْفُوضٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 30
+   "observedTemplateLanes": 49
   },
   {
    "key": "S_JAZM",
@@ -231,12 +231,12 @@
    "pages": "25–39",
    "parent": "علامات الرفع",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ» observed in the rendered iʿrāb across 115 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ» observed in the rendered iʿrāb across 134 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 115
+   "observedTemplateLanes": 134
   },
   {
    "key": "G_WAW_RAF",
@@ -287,12 +287,12 @@
    "pages": "40–41,48",
    "parent": "علامات النصب",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ» observed in the rendered iʿrāb across 125 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ» observed in the rendered iʿrāb across 128 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 125
+   "observedTemplateLanes": 128
   },
   {
    "key": "G_ALIF_NASB",
@@ -357,12 +357,12 @@
    "pages": "48,62",
    "parent": "علامات الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ» observed in the rendered iʿrāb across 24 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ» observed in the rendered iʿrāb across 40 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 24
+   "observedTemplateLanes": 40
   },
   {
    "key": "G_YA_KHAFD",
@@ -371,12 +371,12 @@
    "pages": "50,66–67",
    "parent": "علامات الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ خَفْضِهِ الْيَاءُ» observed in the rendered iʿrāb across 7 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ خَفْضِهِ الْيَاءُ» observed in the rendered iʿrāb across 10 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ خَفْضِهِ الْيَاءُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 7
+   "observedTemplateLanes": 10
   },
   {
    "key": "G_DIPTOTE",
@@ -483,12 +483,12 @@
    "pages": "35,45,64–65",
    "parent": "مواضع علامات الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مُثَنًّى» observed in the rendered iʿrāb across 16 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُثَنًّى» observed in the rendered iʿrāb across 17 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُثَنًّى",
    "probeMode": "contains",
-   "observedTemplateLanes": 16
+   "observedTemplateLanes": 17
   },
   {
    "key": "L_SMP",
@@ -497,12 +497,12 @@
    "pages": "31,50,65",
    "parent": "مواضع علامات الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «جَمْعُ مُذَكَّرٍ سَالِمٌ» observed in the rendered iʿrāb across 15 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «جَمْعُ مُذَكَّرٍ سَالِمٌ» observed in the rendered iʿrāb across 16 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "جَمْعُ مُذَكَّرٍ سَالِمٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 15
+   "observedTemplateLanes": 16
   },
   {
    "key": "L_SFP",
@@ -511,12 +511,12 @@
    "pages": "30,44,49",
    "parent": "مواضع علامات الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «جَمْعُ مُؤَنَّثٍ سَالِمٌ» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «جَمْعُ مُؤَنَّثٍ سَالِمٌ» observed in the rendered iʿrāb across 12 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "جَمْعُ مُؤَنَّثٍ سَالِمٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 11
+   "observedTemplateLanes": 12
   },
   {
    "key": "L_BROKEN",
@@ -539,12 +539,12 @@
    "pages": "32,44,50,66–67",
    "parent": "مواضع علامات الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مِنَ الْأَسْمَاءِ الْخَمْسَةِ» observed in the rendered iʿrāb across 15 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مِنَ الْأَسْمَاءِ الْخَمْسَةِ» observed in the rendered iʿrāb across 16 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مِنَ الْأَسْمَاءِ الْخَمْسَةِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 15
+   "observedTemplateLanes": 16
   },
   {
    "key": "L_5VERBS",
@@ -665,12 +665,12 @@
    "pages": "70,73",
    "parent": "أقسام الأفعال",
    "status": "FULL",
-   "proof": "built 200× per template; «فِعْلٌ مُضَارِعٌ» observed in the rendered iʿrāb across 103 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «فِعْلٌ مُضَارِعٌ» observed in the rendered iʿrāb across 104 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "فِعْلٌ مُضَارِعٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 103
+   "observedTemplateLanes": 104
   },
   {
    "key": "V_AMR",
@@ -721,12 +721,12 @@
    "pages": "73",
    "parent": "محل المبني",
    "status": "FULL",
-   "proof": "built 200× per template; «فِي مَحَلِّ رَفْعٍ» observed in the rendered iʿrāb across 22 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «فِي مَحَلِّ رَفْعٍ» observed in the rendered iʿrāb across 23 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "فِي مَحَلِّ رَفْعٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 22
+   "observedTemplateLanes": 23
   },
   {
    "key": "V_MAHALL_NASB",
@@ -875,12 +875,12 @@
    "pages": "76",
    "parent": "نواصب المضارع",
    "status": "FULL",
-   "proof": "built 200× per template; «حَتَّى» observed in the rendered iʿrāb across 3 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «حَتَّى» observed in the rendered iʿrāb across 4 template lane(s) [mode=contains]",
    "missingReason": "",
-   "randomization": "LIMITED",
+   "randomization": "GOOD",
    "probe": "حَتَّى",
    "probeMode": "contains",
-   "observedTemplateLanes": 3
+   "observedTemplateLanes": 4
   },
   {
    "key": "N_FA_SABAB",
@@ -917,12 +917,12 @@
    "pages": "78",
    "parent": "نواصب المضارع",
    "status": "FULL",
-   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 72 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 74 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَوْ",
    "probeMode": "contains",
-   "observedTemplateLanes": 72
+   "observedTemplateLanes": 74
   },
   {
    "key": "N_AN_MUDMARA_JAWAZ",
@@ -987,12 +987,12 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمْ» observed in the rendered iʿrāb across 152 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمْ» observed in the rendered iʿrāb across 169 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمْ",
    "probeMode": "sentence",
-   "observedTemplateLanes": 152
+   "observedTemplateLanes": 169
   },
   {
    "key": "J_ALAMMA",
@@ -1001,12 +1001,12 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 36 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 38 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمَّا",
    "probeMode": "sentence",
-   "observedTemplateLanes": 36
+   "observedTemplateLanes": 38
   },
   {
    "key": "J_HAMZAT_TAQRIR",
@@ -1337,12 +1337,12 @@
    "pages": "87–90",
    "parent": "المرفوعات",
    "status": "FULL",
-   "proof": "built 200× per template; «فَاعِلٌ» observed in the rendered iʿrāb across 113 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «فَاعِلٌ» observed in the rendered iʿrāb across 114 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "فَاعِلٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 113
+   "observedTemplateLanes": 114
   },
   {
    "key": "M_FAIL_ZAHIR",
@@ -1365,12 +1365,12 @@
    "pages": "91–93",
    "parent": "أقسام المضمر",
    "status": "FULL",
-   "proof": "built 200× per template; «ضَمِيرٌ مُتَّصِلٌ» observed in the rendered iʿrāb across 21 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «ضَمِيرٌ مُتَّصِلٌ» observed in the rendered iʿrāb across 22 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "ضَمِيرٌ مُتَّصِلٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 21
+   "observedTemplateLanes": 22
   },
   {
    "key": "M_DAMIR_MUNFASIL",
@@ -1407,12 +1407,12 @@
    "pages": "91–93,130",
    "parent": "أقسام المضمر",
    "status": "FULL",
-   "proof": "built 200× per template; «مُسْتَتِرٌ جَوَازًا» observed in the rendered iʿrāb across 33 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُسْتَتِرٌ جَوَازًا» observed in the rendered iʿrāb across 34 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُسْتَتِرٌ جَوَازًا",
    "probeMode": "contains",
-   "observedTemplateLanes": 33
+   "observedTemplateLanes": 34
   },
   {
    "key": "M_WAW_JAMAAH",
@@ -1603,12 +1603,12 @@
    "pages": "99–100",
    "parent": "المرفوعات",
    "status": "FULL",
-   "proof": "built 200× per template; «مُبْتَدَأٌ» observed in the rendered iʿrāb across 55 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُبْتَدَأٌ» observed in the rendered iʿrāb across 71 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُبْتَدَأٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 55
+   "observedTemplateLanes": 71
   },
   {
    "key": "M_MUBTADA_MUDMAR",
@@ -1631,12 +1631,12 @@
    "pages": "103–104",
    "parent": "المبتدأ",
    "status": "FULL",
-   "proof": "built 200× per template; «مُبْتَدَأٌ مُؤَخَّرٌ» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُبْتَدَأٌ مُؤَخَّرٌ» observed in the rendered iʿrāb across 12 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُبْتَدَأٌ مُؤَخَّرٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 11
+   "observedTemplateLanes": 12
   },
   {
    "key": "M_KHABAR",
@@ -1645,12 +1645,12 @@
    "pages": "99–101",
    "parent": "المرفوعات",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 97 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 116 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 97
+   "observedTemplateLanes": 116
   },
   {
    "key": "M_KHABAR_MUFRAD",
@@ -1659,12 +1659,12 @@
    "pages": "101",
    "parent": "أقسام الخبر",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ مَرْفُوعٌ» observed in the rendered iʿrāb across 10 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ مَرْفُوعٌ» observed in the rendered iʿrāb across 13 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ مَرْفُوعٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 10
+   "observedTemplateLanes": 13
   },
   {
    "key": "M_KHABAR_MUQADDAM",
@@ -1673,12 +1673,12 @@
    "pages": "103–104",
    "parent": "أقسام الخبر",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٍ مُقَدَّمٍ» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٍ مُقَدَّمٍ» observed in the rendered iʿrāb across 12 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٍ مُقَدَّمٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 11
+   "observedTemplateLanes": 12
   },
   {
    "key": "M_KHABAR_JUMLA_ISMIYYA",
@@ -1701,12 +1701,12 @@
    "pages": "101–102",
    "parent": "أقسام الخبر",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ جُمْلَةٌ فِعْلِيَّةٌ» observed in the rendered iʿrāb across 19 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ جُمْلَةٌ فِعْلِيَّةٌ» observed in the rendered iʿrāb across 20 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ جُمْلَةٌ فِعْلِيَّةٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 19
+   "observedTemplateLanes": 20
   },
   {
    "key": "M_JUMLA_MAHALL_RAF",
@@ -1715,12 +1715,12 @@
    "pages": "101–102",
    "parent": "أقسام الخبر",
    "status": "FULL",
-   "proof": "built 200× per template; «فِي مَحَلِّ رَفْعٍ خَبَرٌ» observed in the rendered iʿrāb across 22 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «فِي مَحَلِّ رَفْعٍ خَبَرٌ» observed in the rendered iʿrāb across 23 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "فِي مَحَلِّ رَفْعٍ خَبَرٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 22
+   "observedTemplateLanes": 23
   },
   {
    "key": "M_RABIT",
@@ -1729,12 +1729,12 @@
    "pages": "102",
    "parent": "أقسام الخبر",
    "status": "FULL",
-   "proof": "built 200× per template; «الرَّابِطُ» observed in the rendered iʿrāb across 22 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «الرَّابِطُ» observed in the rendered iʿrāb across 23 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "الرَّابِطُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 22
+   "observedTemplateLanes": 23
   },
   {
    "key": "M_RABIT_DAMIR",
@@ -1743,12 +1743,12 @@
    "pages": "102",
    "parent": "الرابط",
    "status": "FULL",
-   "proof": "built 200× per template; «يَعُودُ عَلَى» observed in the rendered iʿrāb across 18 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «يَعُودُ عَلَى» observed in the rendered iʿrāb across 19 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "يَعُودُ عَلَى",
    "probeMode": "contains",
-   "observedTemplateLanes": 18
+   "observedTemplateLanes": 19
   },
   {
    "key": "M_RABIT_ISHARA",
@@ -1771,12 +1771,12 @@
    "pages": "101–102",
    "parent": "أقسام الخبر",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ شِبْهُ جُمْلَةٍ» observed in the rendered iʿrāb across 16 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ شِبْهُ جُمْلَةٍ» observed in the rendered iʿrāb across 28 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ شِبْهُ جُمْلَةٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 16
+   "observedTemplateLanes": 28
   },
   {
    "key": "M_JARR_MUTAALLIQ",
@@ -1785,12 +1785,12 @@
    "pages": "103–104",
    "parent": "شبه الجملة",
    "status": "FULL",
-   "proof": "built 200× per template; «مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ» observed in the rendered iʿrāb across 16 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ» observed in the rendered iʿrāb across 28 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 16
+   "observedTemplateLanes": 28
   },
   {
    "key": "M_ZARF_MUTAALLIQ",
@@ -1911,12 +1911,12 @@
    "pages": "106–107",
    "parent": "كان وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «بَاتَ» observed in the rendered iʿrāb across 12 template lane(s) [mode=kana]",
+   "proof": "built 200× per template; «بَاتَ» observed in the rendered iʿrāb across 13 template lane(s) [mode=kana]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "بَاتَ",
    "probeMode": "kana",
-   "observedTemplateLanes": 12
+   "observedTemplateLanes": 13
   },
   {
    "key": "K_SARA",
@@ -2023,12 +2023,12 @@
    "pages": "109–110",
    "parent": "إن وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «اسْمُ «إِنَّ»» observed in the rendered iʿrāb across 8 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «اسْمُ «إِنَّ»» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "اسْمُ «إِنَّ»",
    "probeMode": "contains",
-   "observedTemplateLanes": 8
+   "observedTemplateLanes": 11
   },
   {
    "key": "I_KHABAR_INNA",
@@ -2037,12 +2037,12 @@
    "pages": "109–110",
    "parent": "إن وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرُ «إِنَّ»» observed in the rendered iʿrāb across 8 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرُ «إِنَّ»» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرُ «إِنَّ»",
    "probeMode": "contains",
-   "observedTemplateLanes": 8
+   "observedTemplateLanes": 11
   },
   {
    "key": "I_INNA",
@@ -2051,12 +2051,12 @@
    "pages": "109",
    "parent": "إن وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «حَرْفُ تَوْكِيدٍ وَنَصْبٍ» observed in the rendered iʿrāb across 8 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «حَرْفُ تَوْكِيدٍ وَنَصْبٍ» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "حَرْفُ تَوْكِيدٍ وَنَصْبٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 8
+   "observedTemplateLanes": 11
   },
   {
    "key": "I_ANNA",
@@ -2065,12 +2065,12 @@
    "pages": "109",
    "parent": "إن وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «أَنَّ» observed in the rendered iʿrāb across 151 template lane(s) [mode=inna]",
+   "proof": "built 200× per template; «أَنَّ» observed in the rendered iʿrāb across 166 template lane(s) [mode=inna]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَنَّ",
    "probeMode": "inna",
-   "observedTemplateLanes": 151
+   "observedTemplateLanes": 166
   },
   {
    "key": "I_LAKINNA",
@@ -2597,12 +2597,12 @@
    "pages": "131–134",
    "parent": "التوابع",
    "status": "FULL",
-   "proof": "built 200× per template; «تَوْكِيدٌ» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «تَوْكِيدٌ» observed in the rendered iʿrāb across 14 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "تَوْكِيدٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 11
+   "observedTemplateLanes": 14
   },
   {
    "key": "T_TAWKID_LAFZI",
@@ -3745,12 +3745,12 @@
    "pages": "174–177",
    "parent": "المخفوضات",
    "status": "FULL",
-   "proof": "built 200× per template; «حَرْفُ خَفْضٍ» observed in the rendered iʿrāb across 22 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «حَرْفُ خَفْضٍ» observed in the rendered iʿrāb across 38 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "حَرْفُ خَفْضٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 22
+   "observedTemplateLanes": 38
   },
   {
    "key": "X_MAKHFUD_IDAFA",
@@ -3759,12 +3759,12 @@
    "pages": "174–178",
    "parent": "المخفوضات",
    "status": "FULL",
-   "proof": "built 200× per template; «مُضَافٌ إِلَيْهِ» observed in the rendered iʿrāb across 33 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُضَافٌ إِلَيْهِ» observed in the rendered iʿrāb across 37 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُضَافٌ إِلَيْهِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 33
+   "observedTemplateLanes": 37
   },
   {
    "key": "X_MUDAF",
@@ -3773,26 +3773,26 @@
    "pages": "177–178",
    "parent": "الإضافة",
    "status": "FULL",
-   "proof": "built 200× per template; «وَهُوَ مُضَافٌ» observed in the rendered iʿrāb across 32 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَهُوَ مُضَافٌ» observed in the rendered iʿrāb across 36 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَهُوَ مُضَافٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 32
+   "observedTemplateLanes": 36
   },
   {
    "key": "X_PREP_MIN",
    "term": "مِنْ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
-   "pages": "175–176",
+   "pages": "13,175–176",
    "parent": "حروف الخفض",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not among the four produced prepositions.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «مِنْ» observed in the rendered iʿrāb across 196 template lane(s) [mode=prep]",
+   "missingReason": "",
+   "randomization": "GOOD",
    "probe": "مِنْ",
    "probeMode": "prep",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 196
   },
   {
    "key": "X_PREP_ILA",
@@ -3801,12 +3801,12 @@
    "pages": "175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «إِلَى» observed in the rendered iʿrāb across 63 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «إِلَى» observed in the rendered iʿrāb across 69 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "إِلَى",
    "probeMode": "prep",
-   "observedTemplateLanes": 63
+   "observedTemplateLanes": 69
   },
   {
    "key": "X_PREP_AN",
@@ -3815,12 +3815,12 @@
    "pages": "175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «عَنْ» observed in the rendered iʿrāb across 21 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «عَنْ» observed in the rendered iʿrāb across 40 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "عَنْ",
    "probeMode": "prep",
-   "observedTemplateLanes": 21
+   "observedTemplateLanes": 40
   },
   {
    "key": "X_PREP_ALA",
@@ -3829,12 +3829,12 @@
    "pages": "175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «عَلَى» observed in the rendered iʿrāb across 200 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «عَلَى» observed in the rendered iʿrāb across 219 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "عَلَى",
    "probeMode": "prep",
-   "observedTemplateLanes": 200
+   "observedTemplateLanes": 219
   },
   {
    "key": "X_PREP_FI",
@@ -3843,110 +3843,110 @@
    "pages": "175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «فِي» observed in the rendered iʿrāb across 109 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «فِي» observed in the rendered iʿrāb across 113 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "فِي",
    "probeMode": "prep",
-   "observedTemplateLanes": 109
+   "observedTemplateLanes": 113
   },
   {
    "key": "X_PREP_RUBBA",
    "term": "رُبَّ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
-   "pages": "175–176",
+   "pages": "13,175–176",
    "parent": "حروف الخفض",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not produced.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «رُبَّ» observed in the rendered iʿrāb across 91 template lane(s) [mode=prep]",
+   "missingReason": "",
+   "randomization": "GOOD",
    "probe": "رُبَّ",
    "probeMode": "prep",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 91
   },
   {
    "key": "X_PREP_BA",
    "term": "الْبَاءُ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
-   "pages": "175–176",
+   "pages": "13,175–176",
    "parent": "حروف الخفض",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not produced.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «بِ» observed in the rendered iʿrāb across 221 template lane(s) [mode=prep]",
+   "missingReason": "",
+   "randomization": "GOOD",
    "probe": "بِ",
    "probeMode": "prep",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 221
   },
   {
    "key": "X_PREP_KAF",
    "term": "الْكَافُ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
-   "pages": "175–176",
+   "pages": "13,175–176",
    "parent": "حروف الخفض",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not produced as a preposition (the kāf that renders is the attached pronoun).",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «كَ» observed in the rendered iʿrāb across 219 template lane(s) [mode=prep]",
+   "missingReason": "",
+   "randomization": "GOOD",
    "probe": "كَ",
    "probeMode": "prep",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 219
   },
   {
    "key": "X_PREP_LAM",
    "term": "اللَّامُ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
-   "pages": "175–176",
+   "pages": "13,175–176",
    "parent": "حروف الخفض",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not produced as a preposition.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «لِ» observed in the rendered iʿrāb across 221 template lane(s) [mode=prep]",
+   "missingReason": "",
+   "randomization": "GOOD",
    "probe": "لِ",
    "probeMode": "prep",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 221
   },
   {
    "key": "X_PREP_WAW_QASAM",
    "term": "وَاوُ الْقَسَمِ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
-   "pages": "176",
+   "pages": "13,176–177",
    "parent": "حروف القسم",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "No oath lane.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «وَاوُ الْقَسَمِ» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
    "probe": "وَاوُ الْقَسَمِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "X_PREP_BA_QASAM",
    "term": "بَاءُ الْقَسَمِ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
-   "pages": "176",
+   "pages": "13,176–177",
    "parent": "حروف القسم",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "No oath lane.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «بَاءُ الْقَسَمِ» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
    "probe": "بَاءُ الْقَسَمِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "X_PREP_TA_QASAM",
    "term": "تَاءُ الْقَسَمِ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
-   "pages": "176",
+   "pages": "13,176–177",
    "parent": "حروف القسم",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "No oath lane.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «تَاءُ الْقَسَمِ» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
    "probe": "تَاءُ الْقَسَمِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "X_PREP_MUDH",
@@ -3954,13 +3954,13 @@
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
    "pages": "176–177",
    "parent": "حروف الخفض",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not produced.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 23 template lane(s) [mode=prep]",
+   "missingReason": "",
+   "randomization": "GOOD",
    "probe": "مُذْ",
    "probeMode": "prep",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 23
   },
   {
    "key": "X_PREP_MUNDHU",
@@ -3968,27 +3968,27 @@
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
    "pages": "176–177",
    "parent": "حروف الخفض",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not produced.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «مُنْذُ» observed in the rendered iʿrāb across 1 template lane(s) [mode=prep]",
+   "missingReason": "",
+   "randomization": "LIMITED",
    "probe": "مُنْذُ",
    "probeMode": "prep",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "X_PREP_HATTA",
    "term": "حَتَّى الْجَارَّةُ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
-   "pages": "176–177",
+   "pages": "127",
    "parent": "حروف الخفض",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not produced as a preposition.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «حَتَّى» observed in the rendered iʿrāb across 4 template lane(s) [mode=prep]",
+   "missingReason": "",
+   "randomization": "GOOD",
    "probe": "حَتَّى",
    "probeMode": "prep",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 4
   },
   {
    "key": "X_IDAFA_LAM",
@@ -3996,13 +3996,13 @@
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
    "pages": "177–178",
    "parent": "معاني الإضافة",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "p. 177–178 gives the iḍāfah three meanings (اللام، مِن، في); the app never names which one holds.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «عَلَى مَعْنَى اللَّامِ» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
    "probe": "عَلَى مَعْنَى اللَّامِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "X_IDAFA_MIN",
@@ -4010,13 +4010,13 @@
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
    "pages": "177–178",
    "parent": "معاني الإضافة",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Same.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «عَلَى مَعْنَى مِنْ» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
    "probe": "عَلَى مَعْنَى مِنْ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "X_IDAFA_FI",
@@ -4024,13 +4024,13 @@
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
    "pages": "177–178",
    "parent": "معاني الإضافة",
-   "status": "GENERIC_ONLY",
-   "proof": "built 200× per template; «عَلَى مَعْنَى فِي» observed in the rendered Why/definitions text only across 0 template lane(s) [mode=contains]",
-   "missingReason": "Same.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «عَلَى مَعْنَى فِي» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
    "probe": "عَلَى مَعْنَى فِي",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "P_SAWFA",

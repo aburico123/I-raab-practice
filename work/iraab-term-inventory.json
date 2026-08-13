@@ -15,18 +15,18 @@
  },
  "totals": {
   "TOTAL": 287,
-  "FULL": 197,
+  "FULL": 199,
   "GENERIC_ONLY": 10,
   "PARTIAL": 1,
-  "ABSENT": 79,
+  "ABSENT": 77,
   "TRUE_BLOCKER": 0,
   "reconciles": true,
-  "percentFull": 68.6
+  "percentFull": 69.3
  },
  "randomizationTotals": {
-  "GOOD": 135,
-  "LIMITED": 63,
-  "NONE": 89
+  "GOOD": 136,
+  "LIMITED": 64,
+  "NONE": 87
  },
  "marathon": {
   "target": 56,
@@ -1001,12 +1001,12 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 37 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 36 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمَّا",
    "probeMode": "sentence",
-   "observedTemplateLanes": 37
+   "observedTemplateLanes": 36
   },
   {
    "key": "J_HAMZAT_TAQRIR",
@@ -2316,13 +2316,13 @@
    "chapter": "باب النعت (pp. 116–123)",
    "pages": "116–118",
    "parent": "أقسام النعت",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not produced by any template lane.",
-   "randomization": "NONE",
-   "probe": "النَّعْتُ الْحَقِيقِيُّ",
+   "status": "FULL",
+   "proof": "built 200× per template; «نَعْتٌ حَقِيقِيٌّ» observed in the rendered iʿrāb across 7 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "GOOD",
+   "probe": "نَعْتٌ حَقِيقِيٌّ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 7
   },
   {
    "key": "T_NAAT_SABABI",
@@ -3520,13 +3520,13 @@
    "chapter": "باب المنادى (pp. 168–170)",
    "pages": "168–170",
    "parent": "أقسام المنادى",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Not produced by any template lane.",
-   "randomization": "NONE",
-   "probe": "الْمُنَادَى الْمُضَافُ",
+   "status": "FULL",
+   "proof": "built 200× per template; «وَنَوْعُهُ الْمُضَافُ» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
+   "probe": "وَنَوْعُهُ الْمُضَافُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "B_MUNADA_SHABIH",

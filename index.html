@@ -1018,7 +1018,6 @@ const J1A_PARTICLE_IRAAB=Object.freeze(Object.assign(Object.create(null),{
  lamma:Object.freeze({ar:'حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'A particle of negation and jazm that gives past meaning, with the negation continuing up to the moment of speaking.'}),
  lamAmr:Object.freeze({ar:'لَامُ الْأَمْرِ، حَرْفُ جَزْمٍ مَبْنِيٌّ عَلَى الْكَسْرِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lām al-amr: a particle of jazm asking for the act to be brought about.'}),
  laNahiya:Object.freeze({ar:'لَا النَّاهِيَةُ، حَرْفُ نَهْيٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lā al-nāhiyah: a particle of prohibition and jazm asking for the act to be refrained from.'}),
- inShart:Object.freeze({ar:'حَرْفُ شَرْطٍ جَازِمٌ بِاتِّفَاقِ النُّحَاةِ، يَجْزِمُ فِعْلَيْنِ: الْأَوَّلُ فِعْلُ الشَّرْطِ، وَالثَّانِي جَوَابُهُ وَجَزَاؤُهُ، مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'A conditional particle governing jazm by the agreement of the grammarians. It makes two verbs jussive: the first is the verb of the condition, the second its answer and recompense. It is built and has no syntactic position.'}),
  lamDuaa:Object.freeze({ar:'لَامُ الدُّعَاءِ، حَرْفُ جَزْمٍ مَبْنِيٌّ عَلَى الْكَسْرِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lām al-duʿāʾ: a particle of jazm asking, from the lower to the higher, for the act to be brought about.'}),
  laDuaaiyya:Object.freeze({ar:'لَا الدُّعَائِيَّةُ، حَرْفُ دُعَاءٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lā al-duʿāʾiyyah: a particle of supplication and jazm asking, from the lower to the higher, for the act to be withheld.'}),
  hamzatTaqrir:Object.freeze({ar:'هَمْزَةُ التَّقْرِيرِ، حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَ هُوَ الْجَازِمَ.',en:'Hamzat al-taqrīr, seeking acknowledgement of what follows. It is built and has no syntactic position, and it is not the jāzim.'})
@@ -1041,7 +1040,7 @@ const J1A_PARTICLE_IRAAB=Object.freeze(Object.assign(Object.create(null),{
 const J1A_PARTICLE_GLOSSES=Object.freeze(Object.assign(Object.create(null),{
  lamma:'did not yet',hamzatTaqrir:'did',lamAmr:'let',laNahiya:'not',
  // J1b. «may» carries the supplicatory modality that «let» carries for the command pair.
- lamDuaa:'may',laDuaaiyya:'may not',inShart:'if'
+ lamDuaa:'may',laDuaaiyya:'may not'
 }));
 /* The eight surfaces no vocabulary registry owns. Each is bound to the token TYPE that may carry
    it, so the same surface cannot borrow this gloss in another role. */
@@ -7422,6 +7421,29 @@ function deriveConditionAuthority(data,index){
  }
  return Object.freeze({authorized:true,reason:'',frameKey,governor:governor.id,role});
 }
+/* The combined analysis names أداة الشرط, which no token card claims, so it is the one place a
+   forged relationship could invent a sentence-level role out of nothing. Nothing downstream may
+   read rel.adahId/shartId/jawabId directly: this re-proves the whole structure from the tokens
+   with deriveConditionAuthority and then requires the RELATIONSHIP to agree with the proof —
+   same head, same two verbs, same frame, same أداة. A swapped pair, a relationship pasted onto
+   another exercise, or a renamed governor all fail here and render nothing. */
+function conditionRelationshipParts(rel,data){
+ const tokens=Array.isArray(data&&data.tokens)?data.tokens:[];
+ const head=tokens[0];
+ if(!head||head.grammar?.type!=='particle')return null;
+ const governor=CONDITION_GOVERNORS[head.grammar.particleType];
+ if(!governor||governor.id!==rel.governor||head.id!==rel.adahId)return null;
+ const offset=governor.requiresComplement?1:0;
+ const shart=tokens[1+offset],jawab=tokens[2+offset];
+ if(!shart||!jawab||shart.id!==rel.shartId||jawab.id!==rel.jawabId)return null;
+ const shartProof=deriveConditionAuthority(data,1+offset);
+ const jawabProof=deriveConditionAuthority(data,2+offset);
+ if(!shartProof.authorized||!jawabProof.authorized)return null;
+ if(shartProof.role!=='shart'||jawabProof.role!=='jawab')return null;
+ if(shartProof.frameKey!==rel.frameKey||jawabProof.frameKey!==rel.frameKey)return null;
+ if(shartProof.governor!==governor.id||jawabProof.governor!==governor.id)return null;
+ return{adah:head,shart,jawab,governor};
+}
 function exerciseConditionAuthority(data){
  const tokens=Array.isArray(data&&data.tokens)?data.tokens:[];
  for(let index=0;index<tokens.length;index++){
@@ -7870,9 +7892,25 @@ const WEAK_FINAL_BY_JUSS=Object.freeze(Object.assign(Object.create(null),
    «مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ» rather than جوازًا. That reuses PRESENT_CONCEALMENT['2ms'],
    which has always held the right answer and simply had no producible host until now. */
 const CONDITION_ROLES=Object.freeze(Object.assign(Object.create(null),{
+ /* p. 80 calls every jāzim an «أَدَاة», and p. 81's القسم الثاني is the الشرط half of them, so
+    this is the head's structural name in the combined analysis. Its own iʿrāb card keeps the
+    source's exact classification — حرف شرط جازم / اسم شرط جازم — and this name never replaces it. */
+ adah:Object.freeze({id:'adah',ar:'أَدَاةُ الشَّرْطِ',en:'the tool of the condition'}),
  shart:Object.freeze({id:'shart',ar:'فِعْلُ الشَّرْطِ',en:'the verb of the condition'}),
  jawab:Object.freeze({id:'jawab',ar:'جَوَابُ الشَّرْطِ وَجَزَاؤُهُ',en:'the answer of the condition and its recompense'})
 }));
+(()=>{
+ /* The three role names must share one spelling of «الشرط»: two spellings render identically
+    and compare unequal, which is exactly how a combining-mark drift would hide here. */
+ const shartWord=CONDITION_ROLES.shart.ar.split(' ')[1];
+ for(const id of ['adah','jawab']){
+  if(!CONDITION_ROLES[id].ar.includes(shartWord)){
+   throw new Error('Condition role '+id+' does not spell «الشرط» the way فعل الشرط does.');
+  }
+ }
+ const names=Object.values(CONDITION_ROLES).map(role=>role.ar);
+ if(new Set(names).size!==names.length)throw new Error('Two condition roles share one name.');
+})();
 const CONDITION_GOVERNORS=Object.freeze(Object.assign(Object.create(null),{
  /* النوع الأول: «حَرْفٌ بِاتِّفَاقٍ» — إِنْ alone. Its kind is recorded because p. 81 divides the
     two-verb jawāzim into ḥarf and ism, and the learner must be told which this is. */
@@ -8083,6 +8121,19 @@ const CONDITION_FRAME_BY_PAIR=Object.freeze(Object.assign(Object.create(null),
   if(!['harf','ism'].includes(governor.kind))throw new Error('Condition governor '+id+' has no ḥarf/ism classification.');
   if(!CONDITION_FRAME_KEYS.some(key=>CONDITION_FRAMES[key].governor===id)){
    throw new Error('Condition governor '+id+' has no frame, so it could never be practised.');
+  }
+ }
+})();
+(()=>{
+ /* One particle, one owner. Every conditional أداة is CONDITION_GOVERNORS's, identity clause and
+    gloss alike; the J1a tables own the one-verb jawāzim and the hamzah. A particle listed in both
+    would carry two identity clauses for one word, and whichever branch fired first would silently
+    decide which one the learner reads. */
+ for(const id of Object.keys(CONDITION_GOVERNORS)){
+  for(const [name,table] of [['iʿrāb',J1A_PARTICLE_IRAAB],['gloss',J1A_PARTICLE_GLOSSES]]){
+   if(Object.hasOwn(table,id)){
+    throw new Error('Conditional أداة '+id+' is also owned by the J1a '+name+' table.');
+   }
   }
  }
 })();
@@ -12538,6 +12589,18 @@ function buildRelationshipWhy(rel,data){
    en:`${eq(verb.word)} is the ʿāmil and ${eq(masdar.word)} is its own maṣdar, ${purpose.clauseEn}, so the verb makes it accusative as its mafʿūl muṭlaq.`});
   return{ids,ar,en};
  }
+ if(rel.type==='condition'){
+  const parts=conditionRelationshipParts(rel,data);
+  if(!parts)return{ids,ar,en};
+  const {adah,shart,jawab,governor}=parts;
+  push({id:'WHY_REL_CONDITION_ADAH',
+   ar:`${wq(adah.word)} ${CONDITION_ROLES.adah.ar}، وَهِيَ ${governor.nameAr}، فَجَزَمَتْ فِعْلَيْنِ.`,
+   en:`${eq(adah.word)} is ${CONDITION_ROLES.adah.en}, and it is ${governor.nameEn}, so it makes two verbs jussive.`});
+  push({id:'WHY_REL_CONDITION_ROLES',
+   ar:`فَالْأَوَّلُ ${wq(shart.word)} ${CONDITION_ROLES.shart.ar}، وَالثَّانِي ${wq(jawab.word)} ${CONDITION_ROLES.jawab.ar}.`,
+   en:`The first of them, ${eq(shart.word)}, is ${CONDITION_ROLES.shart.en}; the second, ${eq(jawab.word)}, is ${CONDITION_ROLES.jawab.en}.`});
+  return{ids,ar,en};
+ }
  if(rel.type==='nida'){
   const particle=data.tokens.find(item=>item.id===rel.particleId);
   const munada=data.tokens.find(item=>item.id===rel.munadaId);
@@ -12713,6 +12776,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='condition'){
+   const recipient=data.tokens.find(item=>item.id===rel.jawabId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='nida'){
    const recipient=data.tokens[data.tokens.length-1];
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -12783,6 +12851,18 @@ function renderRelationshipAnalysis(data){
   haal.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: عَامِلٌ وَصَاحِبُ حَالٍ مَعْرِفَةٌ وَحَالٌ نَكِرَةٌ مَنْصُوبَةٌ تُبَيِّنُ هَيْئَتَهُ وَقْتَ الْفِعْلِ.`;
   haal.phraseEn=`Together, “${phrase}” has an ʿāmil, a definite صاحب الحال, and an indefinite accusative haal describing that owner's condition during the event.`;
   haal.phraseLabel='Haal construction';
+ });
+ /* The conditional's combined block. The three parts are ONE structure, so they are named
+    together and from the frozen role registry; the أداة's own kind term stays on its own card.
+    The jawāb carries the block because it always ends the construction. */
+ data.relationships.filter(rel=>rel.type==='condition').forEach(rel=>{
+  const parts=conditionRelationshipParts(rel,data);
+  if(!parts)return;
+  const {adah,shart,jawab}=parts;
+  const phrase=data.tokens.map(item=>item.word).join(' ');
+  jawab.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: ${CONDITION_ROLES.adah.ar} ${wq(adah.word)}، وَ${CONDITION_ROLES.shart.ar} ${wq(shart.word)}، وَ${CONDITION_ROLES.jawab.ar} ${wq(jawab.word)}، وَالْأَدَاةُ جَزَمَتْهُمَا جَمِيعًا.`;
+  jawab.phraseEn=`Together, “${phrase}” is one conditional structure: ${CONDITION_ROLES.adah.en} “${adah.word}”, ${CONDITION_ROLES.shart.en} “${shart.word}”, and ${CONDITION_ROLES.jawab.en} “${jawab.word}” — the tool makes both verbs jussive.`;
+  jawab.phraseLabel='Conditional construction';
  });
  data.relationships.filter(rel=>rel.type==='nida').forEach(rel=>{
   const particle=data.tokens.find(item=>item.id===rel.particleId);
@@ -13608,6 +13688,13 @@ function validateExercise(data){
      ||rel.activePast!==authority.activePast||rel.formerObjectAcc!==authority.formerObjectAcc){
     fail('E_PASSIVE_RELATION','Passive-deputy relationship is not the canonical proof.',tokenById.get(rel.deputyId));
    }
+  }
+  /* Same standard as passiveDeputy: the relationship must BE the proof, not merely resemble it.
+     Without this a condition relationship pasted onto another exercise — or one whose two verbs
+     have traded places — would reach the learner as a silently withheld combined block instead
+     of a refusal, and the exercise would still validate. */
+  if(rel.type==='condition'&&!conditionRelationshipParts(rel,data)){
+   fail('E_CONDITION_RELATION','Conditional relationship is not the canonical proof.',tokenById.get(rel.jawabId));
   }
   if(rel.type==='zarf'){
    const zarf=tokenById.get(rel.zarfId);

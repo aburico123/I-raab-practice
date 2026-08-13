@@ -2936,6 +2936,24 @@ function runConditionalFocusedTests(){
         'the شرط verb does not print فعل الشرط');
       assert(jawab.ar.includes(api.CONDITION_ROLES.jawab.ar)&&!jawab.ar.includes(api.CONDITION_ROLES.shart.ar),
         'the جواب verb does not print جواب الشرط وجزاؤه');
+      /* 3b — the THIRD term. The two verbs name themselves; the head's own card names its
+         ḥarf/ism kind, not its structural role, so أداة الشرط exists only in the combined
+         block. Assert it from the frozen registry, and assert the block is on the jawāb —
+         the token that ends the construction. */
+      assert(jawab.phraseAr&&jawab.phraseLabel==='Conditional construction',
+        'the conditional built no combined analysis on its jawāb');
+      assert(data.tokens.filter(t=>t.phraseAr).length===1,
+        'the conditional combined analysis landed on more than one token');
+      for(const role of ['adah','shart','jawab']){
+        assert(jawab.phraseAr.includes(api.CONDITION_ROLES[role].ar),
+          'the combined conditional analysis omits '+role);
+      }
+      assert(jawab.phraseAr.includes(adah.word)&&jawab.phraseAr.includes(shart.word),
+        'the combined conditional analysis does not quote its own words');
+      assert(jawab.phraseWhy&&jawab.phraseWhy.ids.join(',')==='WHY_REL_CONDITION_ADAH,WHY_REL_CONDITION_ROLES',
+        'the combined conditional Why is not its own two canonical rules');
+      assert(jawab.phraseWhy.ar[0].includes(adahRec.nameAr),
+        'the combined conditional Why does not name the أداة\u2019s own kind');
       // 4 — each verb's SIGN comes from the canonical matrix for its OWN inflection.
       for(const [tok,rec] of [[shart,shartRec],[jawab,jawabRec]]){
         const expected=api.GRAMMAR_RULES.presentVerb[rec.inflection].jazm;
@@ -2978,6 +2996,9 @@ function runConditionalFocusedTests(){
         &&restored.translation===data.translation
         &&api.deriveConditionAuthority(restored,2+off).authorized,
         authority.frameKey+': changed presentation or lost its authority after History');
+      assert(restored.tokens.map(t=>t.phraseAr||'').join('|')===data.tokens.map(t=>t.phraseAr||'').join('|')
+        &&restored.tokens.find(t=>t.phraseWhy)?.phraseWhy.ids.join(',')===jawab.phraseWhy.ids.join(','),
+        authority.frameKey+': the combined conditional analysis did not survive History');
       trips++;
       framesSeen.add(authority.frameKey);
       if(!byLane.has(template.stableId))byLane.set(template.stableId,data);
@@ -3057,6 +3078,50 @@ function runConditionalFocusedTests(){
   forgeryRejects('a conditional snapshot forged into naṣb',s2=>{s2.tokens[1].state='nasb'});
   forgeryRejects('a conditional snapshot whose أداة was replaced',
     s2=>{s2.tokens[0].word='لَمْ';s2.tokens[0].surfaceHint='لَمْ';s2.tokens[0].grammar.particleType='lam';});
+  /* ---- the combined block is granted by the AUTHORITY, never by the relationship record ----
+     أداة الشرط is the one term no token card claims, so the relationship that carries it is the
+     one place a sentence-level role could be invented from nothing. Both attacks below rendered
+     the term happily, and validated clean, before conditionRelationshipParts existed. */
+  const relationRejects=(label,mutate)=>{
+    const data=clone(base);
+    mutate(data.relationships.find(rel=>rel.type==='condition'),data);
+    const codes=api.validateExercise(clone(data)).map(f=>f.code);
+    assert(codes.includes('E_CONDITION_RELATION'),label+' was not refused: '+(codes.join(',')||'no failures'));
+    const rendered=clone(data);
+    try{ api.renderExercise(rendered); }catch(error){ /* a refusal to render is also a refusal */ }
+    assert(!rendered.tokens.some(t=>(t.phraseAr||'').includes(api.CONDITION_ROLES.adah.ar)),
+      label+' still printed أداة الشرط to the learner');
+    negatives++;
+  };
+  relationRejects('a relationship whose شرط and جواب traded places',
+    rel=>{const t=rel.shartId;rel.shartId=rel.jawabId;rel.jawabId=t;});
+  relationRejects('a relationship naming another أداة',rel=>{rel.governor='mataShart'});
+  relationRejects('a relationship naming another frame',rel=>{rel.frameKey='studySucceed';rel.governor='manShart'});
+  relationRejects('a relationship pointing its head at one of the verbs',rel=>{rel.adahId=rel.shartId});
+  {
+    // the same relationship pasted onto an exercise that has no conditional structure at all
+    const host=api.buildTemplate(api.templates.find(t=>t.stableId==='T_NOUN_SINGULAR_RAF_DAMMA_01').id);
+    const data=clone(host);
+    const rel=clone(base.relationships.find(r=>r.type==='condition'));
+    rel.id=data.templateId+':RX';rel.adahId=data.tokens[0].id;
+    rel.shartId=data.tokens[0].id;rel.jawabId=data.tokens[data.tokens.length-1].id;
+    data.relationships.push(rel);
+    const codes=api.validateExercise(clone(data)).map(f=>f.code);
+    assert(codes.includes('E_CONDITION_RELATION'),
+      'a condition relationship pasted onto a plain nominal was accepted: '+(codes.join(',')||'no failures'));
+    const rendered=clone(data);
+    try{ api.renderExercise(rendered); }catch(error){}
+    assert(!rendered.tokens.some(t=>(t.phraseAr||'').includes(api.CONDITION_ROLES.adah.ar)),
+      'a plain nominal was given أداة الشرط by a pasted relationship');
+    negatives++;
+  }
+  /* One particle, one owner: Phase 2 moved every أداة onto CONDITION_GOVERNORS, and the J1a
+     tables must not keep a second identity clause for any of them. */
+  for(const id of Object.keys(api.CONDITION_GOVERNORS)){
+    assert(!Object.hasOwn(api.J1A_PARTICLE_IRAAB,id)&&!Object.hasOwn(api.J1A_PARTICLE_GLOSSES,id),
+      'conditional أداة '+id+' is owned by the J1a tables as well');
+    negatives++;
+  }
   console.log('Conditional إن (Phase 1) focused tests: '+builds+' canonical builds across '+framesSeen.size
     +' frames and 3 jazm regimes, '+trips+' History round trips, '+negatives+' negative/forgery boundaries — green');
 }

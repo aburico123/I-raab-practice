@@ -1484,6 +1484,8 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
     subject and the particle's modality (it is rebuilt that way by the governed-present rebuilder),
     so the shape reads it whole rather than reassembling it from the particle. */
  ,TS66:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:1:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
+ /* ظنّ — the authorized frame owns the whole English sentence, both target lanes alike. */
+ ,TS67:Object.freeze({parts:Object.freeze([Object.freeze({slot:'zannaSentence'})])})
  ,TS65:Object.freeze({parts:Object.freeze([Object.freeze({slot:'conditionSentence'})])})
  ,TS59:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
  ,TS60:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
@@ -1717,6 +1719,17 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  ,"T_VERB_SINGULAR_NASB_FATHA_32||verb:past,noun:faail,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_32",structure:"verb:past,noun:faail,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_33||verb:past,noun:faail,noun:object,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_33",structure:"verb:past,noun:faail,noun:object,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_PARTICLE_SINGULAR_NASB_FATHA_14||particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_14",structure:"particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa",shape:"TS45",copulaPlural:false})
+ /* ظنّ — one structure, ten lanes: the sister and its two accusatives. */
+ ,"T_VERB_SINGULAR_NASB_FATHA_35||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_35",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
+ ,"T_VERB_BROKEN_NASB_FATHA_02||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_BROKEN_NASB_FATHA_02",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
+ ,"T_VERB_DUAL_NASB_YA_04||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_DUAL_NASB_YA_04",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
+ ,"T_VERB_SFP_NASB_KASRASUB_01||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_SFP_NASB_KASRASUB_01",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
+ ,"T_VERB_FIVENOUNS_NASB_ALIF_02||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_FIVENOUNS_NASB_ALIF_02",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_36||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_36",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
+ ,"T_VERB_DUAL_NASB_YA_05||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_DUAL_NASB_YA_05",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
+ ,"T_VERB_SMP_NASB_YA_02||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_SMP_NASB_YA_02",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
+ ,"T_VERB_SFP_NASB_KASRASUB_02||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_SFP_NASB_KASRASUB_02",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
+ ,"T_VERB_FIVENOUNS_NASB_ALIF_03||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_FIVENOUNS_NASB_ALIF_03",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -1780,6 +1793,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='laJinsSentence')return canonicalLaJinsTranslation(exercise);
  if(bits[0]==='mafulAjlSentence')return canonicalMafulAjlTranslation(exercise);
  if(bits[0]==='mafulMaahSentence')return canonicalMafulMaahTranslation(exercise);
+ if(bits[0]==='zannaSentence')return canonicalZannaTranslation(exercise);
  if(bits[0]==='munadaSentence')return canonicalMunadaTranslation(exercise);
  if(bits[0]==='conditionSentence')return canonicalConditionTranslation(exercise);
  if(bits[0]==='copula'){
@@ -4700,6 +4714,149 @@ const MAFUL_MAAH_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
   reasonAr:'وَالشَّجَرَةُ لَا تُشَارِكُ فِي الْوُقُوفِ',reasonEn:'a tree cannot share in standing up',
   sentenceEn:'The guest stood alongside the tree.'})
 }));
+/* ظنّ وأخواتها — Al-Tuḥfah pp. 110–111, باب العوامل الداخلة على المبتدإ والخبر, القسم الثالث.
+
+   Matn p. 110: «وَأَمَّا ظَنَنْتُ وَأَخَوَاتُهَا فَإِنَّهَا تَنْصِبُ الْمُبْتَدَأَ وَالْخَبَرَ عَلَى أَنَّهُمَا مَفْعُولَانِ
+   لَهَا» — and the شرح names the two: «وَهِيَ تَدْخُلُ عَلَى الْمُبْتَدَإِ وَالْخَبَرِ فَتَنْصِبُهُمَا جَمِيعًا،
+   وَيُقَالُ لِلْمُبْتَدَإِ مَفْعُولٌ أَوَّلُ، وَلِلْخَبَرِ مَفْعُولٌ ثَانٍ.»
+
+   That sentence is the whole architecture. These are NOT two objects that happen to sit side by
+   side: they are a mubtadaʾ and its khabar that the verb has taken over, so every frame here owns
+   the underlying proposition in BOTH states, and the combined analysis shows the learner the
+   nominative original before it shows the two accusatives. A frame whose two accusatives do not
+   come from one registered proposition names no structure at all. */
+const ZANNA_FIRST_ROLE='mafulAwwal';
+const ZANNA_SECOND_ROLE='mafulThani';
+/* p. 111's four أقسام, in the شرح's own order and its own words. The class is not decoration: it
+   is what separates «ظننت» from «جعلت», and the learner should be able to say which one a given
+   sister belongs to. */
+const ZANNA_CLASSES=Object.freeze(Object.assign(Object.create(null),{
+ tarjih:Object.freeze({id:'tarjih',order:1,nameAr:'التَّرْجِيحُ',
+  clauseAr:'يُفِيدُ تَرْجِيحَ وُقُوعِ الْخَبَرِ',
+  clauseEn:'makes the occurrence of the predicate preponderant',expected:4}),
+ yaqin:Object.freeze({id:'yaqin',order:2,nameAr:'الْيَقِينُ',
+  clauseAr:'يُفِيدُ الْيَقِينَ وَتَحْقِيقَ وُقُوعِ الْخَبَرِ',
+  clauseEn:'conveys certainty, and that the predicate really occurred',expected:3}),
+ tasyir:Object.freeze({id:'tasyir',order:3,nameAr:'التَّصْيِيرُ',
+  clauseAr:'يُفِيدُ التَّصْيِيرَ وَالِانْتِقَالَ',
+  clauseEn:'conveys turning one thing into another, and transfer',expected:2}),
+ samInsight:Object.freeze({id:'samInsight',order:4,nameAr:'النِّسْبَةُ فِي السَّمْعِ',
+  clauseAr:'يُفِيدُ النِّسْبَةَ فِي السَّمْعِ',
+  clauseEn:'conveys attribution by way of hearing',expected:1})
+}));
+/* The ten sisters, in the matn's own order and its own first-person forms. This is their canonical
+   home: the surfaces are typed once here and registered into the verb index, so «ظَنَنْتُ» is a
+   past 1s form with تاء الفاعل exactly like «كَتَبْتُ», with no second spelling anywhere. */
+const ZANNA_VERBS=Object.freeze(Object.assign(Object.create(null),{
+ zanantu:Object.freeze({key:'zanantu',order:1,past:'ظَنَنْتُ',pastEn:'thought',classKey:'tarjih'}),
+ hasibtu:Object.freeze({key:'hasibtu',order:2,past:'حَسِبْتُ',pastEn:'reckoned',classKey:'tarjih'}),
+ khiltu:Object.freeze({key:'khiltu',order:3,past:'خِلْتُ',pastEn:'imagined',classKey:'tarjih'}),
+ zaamtu:Object.freeze({key:'zaamtu',order:4,past:'زَعَمْتُ',pastEn:'claimed',classKey:'tarjih'}),
+ raaytu:Object.freeze({key:'raaytu',order:5,past:'رَأَيْتُ',pastEn:'knew for certain',classKey:'yaqin'}),
+ alimtu:Object.freeze({key:'alimtu',order:6,past:'عَلِمْتُ',pastEn:'knew',classKey:'yaqin'}),
+ wajadtu:Object.freeze({key:'wajadtu',order:7,past:'وَجَدْتُ',pastEn:'found',classKey:'yaqin'}),
+ ittakhadhtu:Object.freeze({key:'ittakhadhtu',order:8,past:'اتَّخَذْتُ',pastEn:'took',classKey:'tasyir'}),
+ jaaltu:Object.freeze({key:'jaaltu',order:9,past:'جَعَلْتُ',pastEn:'made',classKey:'tasyir'}),
+ samitu:Object.freeze({key:'samitu',order:10,past:'سَمِعْتُ',pastEn:'heard',classKey:'samInsight'})
+}));
+const ZANNA_VERB_KEYS=Object.freeze(Object.keys(ZANNA_VERBS));
+/* Predicates this chapter needs in the accusative. The three agreeing plurals exist in the app only
+   in the nominative (dualPredicates / masculinePluralPredicates / femininePluralPredicates hold
+   «مُجْتَهِدَانِ» and its two friends), so each record LIFTS its nominative from that pool by English
+   and adds only the accusative. «صَدِيقًا» is new in both states — it is the source's own second
+   object in «ظننت محمداً صديقاً» and «اتخذت محمداً صديقاً», and التصيير needs a noun, not an
+   adjective. */
+const ZANNA_PREDICATES=Object.freeze(Object.assign(Object.create(null),{
+ dualHardworking:Object.freeze({key:'dualHardworking',inflection:'dual',en:'hardworking',
+  nomFrom:Object.freeze({pool:'dualPredicates',en:'hardworking'}),acc:'مُجْتَهِدَيْنِ'}),
+ smpHardworking:Object.freeze({key:'smpHardworking',inflection:'smp',en:'hardworking',
+  nomFrom:Object.freeze({pool:'masculinePluralPredicates',en:'hardworking'}),acc:'مُجْتَهِدِينَ'}),
+ sfpHardworking:Object.freeze({key:'sfpHardworking',inflection:'sfp',en:'hardworking',
+  nomFrom:Object.freeze({pool:'femininePluralPredicates',en:'hardworking'}),acc:'مُجْتَهِدَاتٍ'}),
+ friend:Object.freeze({key:'friend',inflection:'singular',en:'a friend',nom:'صَدِيقٌ',acc:'صَدِيقًا'})
+}));
+/* The underlying مبتدأ وخبر of every frame, in BOTH states. `first`/`second` name where each half
+   comes from; nothing is retyped, and a proposition whose two halves disagree in number or gender
+   would not be a sentence before ظنّ entered it either. */
+const ZANNA_PROPOSITIONS=Object.freeze(Object.assign(Object.create(null),{
+ studentHardworking:Object.freeze({key:'studentHardworking',
+  first:Object.freeze({pool:'singularPeople',en:'the student'}),
+  second:Object.freeze({pool:'singularPredicates',en:'hardworking'}),
+  en:'the student is hardworking'}),
+ twoStudentsHardworking:Object.freeze({key:'twoStudentsHardworking',
+  first:Object.freeze({pool:'duals',en:'the two students'}),
+  second:Object.freeze({predicate:'dualHardworking'}),
+  en:'the two students are hardworking'}),
+ studentsHardworking:Object.freeze({key:'studentsHardworking',
+  first:Object.freeze({pool:'brokenHuman',en:'the students'}),
+  second:Object.freeze({predicate:'smpHardworking'}),
+  en:'the students are hardworking'}),
+ femaleStudentsHardworking:Object.freeze({key:'femaleStudentsHardworking',
+  first:Object.freeze({pool:'sfp',en:'the female students'}),
+  second:Object.freeze({predicate:'sfpHardworking'}),
+  en:'the female students are hardworking'}),
+ brotherTruthful:Object.freeze({key:'brotherTruthful',
+  first:Object.freeze({pool:'fiveNouns',en:'your brother'}),
+  second:Object.freeze({pool:'singularPredicates',en:'truthful'}),
+  en:'your brother is truthful'}),
+ studentYourBrother:Object.freeze({key:'studentYourBrother',
+  first:Object.freeze({pool:'singularPeople',en:'the student'}),
+  second:Object.freeze({pool:'fiveNouns',en:'your brother'}),
+  en:'the student is your brother'}),
+ bookUseful:Object.freeze({key:'bookUseful',
+  first:Object.freeze({pool:'singularThings',en:'the book'}),
+  second:Object.freeze({pool:'masculineThingPredicates',en:'useful'}),
+  en:'the book is useful'}),
+ lessonUseful:Object.freeze({key:'lessonUseful',
+  first:Object.freeze({pool:'singularThings',en:'the lesson'}),
+  second:Object.freeze({pool:'masculineThingPredicates',en:'useful'}),
+  en:'the lesson is useful'}),
+ studentFriend:Object.freeze({key:'studentFriend',
+  first:Object.freeze({pool:'singularPeople',en:'the student'}),
+  second:Object.freeze({predicate:'friend'}),
+  en:'the student is a friend'})
+}));
+/* One frame = one sister over one proposition. سَمِعْتُ has no frame here: its own example is
+   «سَمِعْتُ خَلِيلًا يَقْرَأُ», whose second object is a SENTENCE, and that needs the clause-maḥall
+   layer. It is registered as a sister and named in the coverage matrix so nothing pretends the
+   family is complete without it. */
+const ZANNA_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ zanantuStudent:Object.freeze({verbKey:'zanantu',propKey:'studentHardworking',
+  sentenceEn:'I thought the student was hardworking.'}),
+ zanantuBrother:Object.freeze({verbKey:'zanantu',propKey:'brotherTruthful',
+  sentenceEn:'I thought your brother was truthful.'}),
+ zanantuStudentBrother:Object.freeze({verbKey:'zanantu',propKey:'studentYourBrother',
+  sentenceEn:'I thought the student was your brother.'}),
+ hasibtuTwoStudents:Object.freeze({verbKey:'hasibtu',propKey:'twoStudentsHardworking',
+  sentenceEn:'I reckoned the two students were hardworking.'}),
+ hasibtuBook:Object.freeze({verbKey:'hasibtu',propKey:'bookUseful',
+  sentenceEn:'I reckoned the book was useful.'}),
+ khiltuStudents:Object.freeze({verbKey:'khiltu',propKey:'studentsHardworking',
+  sentenceEn:'I imagined the students were hardworking.'}),
+ khiltuBook:Object.freeze({verbKey:'khiltu',propKey:'bookUseful',
+  sentenceEn:'I imagined the book was useful.'}),
+ zaamtuFemaleStudents:Object.freeze({verbKey:'zaamtu',propKey:'femaleStudentsHardworking',
+  sentenceEn:'I claimed the female students were hardworking.'}),
+ zaamtuStudent:Object.freeze({verbKey:'zaamtu',propKey:'studentHardworking',
+  sentenceEn:'I claimed the student was hardworking.'}),
+ raaytuBrother:Object.freeze({verbKey:'raaytu',propKey:'brotherTruthful',
+  sentenceEn:'I knew for certain your brother was truthful.'}),
+ raaytuStudent:Object.freeze({verbKey:'raaytu',propKey:'studentHardworking',
+  sentenceEn:'I knew for certain the student was hardworking.'}),
+ alimtuFemaleStudents:Object.freeze({verbKey:'alimtu',propKey:'femaleStudentsHardworking',
+  sentenceEn:'I knew the female students were hardworking.'}),
+ alimtuTwoStudents:Object.freeze({verbKey:'alimtu',propKey:'twoStudentsHardworking',
+  sentenceEn:'I knew the two students were hardworking.'}),
+ wajadtuStudent:Object.freeze({verbKey:'wajadtu',propKey:'studentHardworking',
+  sentenceEn:'I found the student to be hardworking.'}),
+ wajadtuStudents:Object.freeze({verbKey:'wajadtu',propKey:'studentsHardworking',
+  sentenceEn:'I found the students to be hardworking.'}),
+ ittakhadhtuFriend:Object.freeze({verbKey:'ittakhadhtu',propKey:'studentFriend',
+  sentenceEn:'I took the student as a friend.'}),
+ jaaltuLesson:Object.freeze({verbKey:'jaaltu',propKey:'lessonUseful',
+  sentenceEn:'I made the lesson useful.'})
+}));
+const ZANNA_ALL_PAIR_KEYS=Object.freeze(Object.keys(ZANNA_PAIR_REGISTRY));
 const MAFUL_MAAH_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_MAAH_PAIR_REGISTRY));
 /* Productive المنادى — Al-Tuḥfah pp. 168–170 (باب المنادى; المفعول من أجله begins p. 170).
 
@@ -8167,6 +8324,10 @@ const GRAMMAR_RULES=Object.freeze({
      written here. inflectNoun refuses to fall through to the matrix for the built kind. */
   munada:{state:'munadaAuthority',ruleId:'R_MUNADA_NASB',en:'A munada: the one called by a vocative particle. Built in the position of nasb for two of the five source types, ordinarily accusative for the other three.'},
   mafulMaah:{state:'nasb',ruleId:'R_MAFUL_MAAH_NASB',en:'A mafʿūl maʿah: the thing the action happened alongside, after a wāw that expressly means accompaniment; accusative.'},
+  /* p. 110. The mubtadaʾ and khabar a ẓanna sister took over. They are ONE structure, which is
+     why the authority proves them together and neither can be produced without the other. */
+  mafulAwwal:{state:'nasb',ruleId:'R_MAFUL_AWWAL_NASB',en:'The first object of ẓanna or one of its sisters — the mubtadaʾ it made accusative; accusative.'},
+  mafulThani:{state:'nasb',ruleId:'R_MAFUL_THANI_NASB',en:'The second object of ẓanna or one of its sisters — the khabar it made accusative; accusative.'},
   mafulAjl:{state:'nasb',ruleId:'R_MAFUL_AJL_NASB',en:'A mafʿūl lah: an inward maṣdar giving the reason the action happened; accusative.'},
   ismLa:{state:'nasb',ruleId:'R_ISM_LA_NASB',en:'The noun of «لا» that negates its whole class; accusative because «لا» works like «إنّ».'},
   khabarLa:{state:'raf',ruleId:'R_KHABAR_LA_RAF',en:'The khabar of «لا» that negates its whole class; nominative.'}
@@ -8337,13 +8498,17 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],weakFinal:['jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
- roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','mafulAjl','mafulMaah','munada','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
- relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','laJins','mafulAjl','mafulMaah','nida','preposition','idafa','inna','kana','concealedAn','follower','condition'],
+ roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','mafulAjl','mafulMaah','mafulAwwal','mafulThani','munada','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
+ relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','laJins','mafulAjl','mafulMaah','zanna','nida','preposition','idafa','inna','kana','concealedAn','follower','condition'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
     بدل الغلط. What remains unproduced of البدل is named exactly, because بدل البداء and بدل النسيان
     turn on a speaker's prior belief or change of mind, which no sentence surface carries. */
+ /* ظنّ وأخواتها ships nine of the matn's ten sisters. سَمِعْتُ is registered, classed and counted,
+    but not produced: p. 110's own example is «سَمِعْتُ خَلِيلًا يَقْرَأُ», whose second object is a
+    SENTENCE, and a clause holding a maḥall is a layer this chapter does not build. */
+ 'the sister سَمِعْتُ of ẓanna, whose second object is a verbal sentence',
  'imperative','diptote','naat sababi','atf bayan','badal al-badaa and badal al-nisyan',
  'badal of a verb from a verb',
  /* المفعول المطلق ships with its three meanings (تأكيد، نوع، عدد) and both divisions
@@ -8596,6 +8761,9 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_MUNADA_MABNI_DAMM:sourceRule('When the munada would be raised by a damma, it is built on the damma.',[169],'Only the registered single proper name and intended indefinite. The damma here is a binaʾ marker, never the iʿrab sign of rafʿ.'),
  R_MUNADA_MAHALL_NASB:sourceRule('The built munada occupies the position of nasb even though its word carries no iʿrab.',[169],'Recorded as a mahall and never as a state, so nothing downstream can read it as an ordinary accusative.'),
  R_MUNADA_NASB:sourceRule('The remaining three kinds of munada — the unintended indefinite, the mudaf, and the one resembling a mudaf — are accusative and nothing else.',[168,169,170],'Each goes through the ordinary noun nasb matrix, because each is genuinely muʿrab.'),
+ R_MAFUL_AWWAL_NASB:sourceRule('The mubtadaʾ that a ẓanna sister enters upon becomes its first object and is accusative.',[110],'Only inside a frozen ẓanna frame whose two accusatives are the two halves of ONE registered proposition, headed by a registered sister.'),
+ R_MAFUL_THANI_NASB:sourceRule('The khabar that a ẓanna sister enters upon becomes its second object and is accusative.',[110],'Only inside a frozen ẓanna frame whose two accusatives are the two halves of ONE registered proposition, headed by a registered sister.'),
+ R_ZANNA_CLASSES:sourceRule('The ten sisters of ẓanna divide into four groups: four make the predicate preponderant, three convey certainty, two convey turning one thing into another, and one conveys attribution by hearing.',[111],'Class membership is frozen per sister and counted against the source\u2019s own 4+3+2+1 at load time.'),
  R_MAFUL_MAAH_NASB:sourceRule('The mafʿūl maʿah is the accusative surplus noun naming the thing the action happened alongside, preceded by a wāw that expressly means accompaniment.',[172,173],'Only the kind p. 173 says «يتعين نصبه»: the companion cannot perform the ʿāmil’s action, so no ʿaṭf reading competes. The clause already has its own fāʿil, keeping the companion a فضلة rather than a second subject.'),
  R_WAW_MAIYYA:sourceRule('The wāw preceding a mafʿūl maʿah is express in indicating accompaniment; a wāw that merely could join two nouns is a conjunction instead.',[172,173],'It carries its own particle identity, so the ʿaṭf wāw this app already produces on the same surface can never authorize the frame, and its English gloss resolves by identity rather than by spelling.'),
  R_MAFUL_AJL_NASB:sourceRule('The mafʿūl lah is the accusative noun mentioned to explain the reason the action occurred.',[170,171],'Only registered inward-motive maṣdars in the third ḥāl — stripped of أل and of iḍāfah — where p. 172 makes naṣb the more frequent reading. The construction, not the word, is what licenses the role.'),
@@ -8862,6 +9030,7 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_VERB_ABSOLUTE_OBJECT:sourceRule('A verb is linked to the maṣdar of its own action that follows it and makes it accusative as a mafʿūl muṭlaq.',[146,147],'Only an exact registered pair authorized by frozen template metadata: the ʿāmil is the nearest preceding visible past verb, and the maṣdar, its optional direct object and its optional muḍāf ilayh are all the ones that pair names. Adjacency alone never creates the relation.'),
  RL_CONDITION_TWO_VERBS:sourceRule('A conditional particle is linked to the two verbs it makes jussive: the first is the verb of the condition, the second its answer and recompense.',[81],'Only an exact frozen conditional frame owned by its template. Adjacency alone never creates this link — the jawāb does not stand beside its أداة — and the ordered verb pair must name the frame, so swapping the two verbs identifies no frame at all.'),
  RL_NIDA_MUNADA:sourceRule('A vocative particle is linked to the noun it calls, and that link carries the subtype which decides whether the noun is built or accusative.',[168,169],'Only an exact frozen pair owned by its template; a noun standing after «يا» never becomes a munada by adjacency alone.'),
+ RL_ZANNA_TWO_OBJECTS:sourceRule('A sister of ẓanna is linked to the two accusatives it produced, which were the mubtadaʾ and the khabar of one underlying sentence.',[110],'Only an exact frozen frame owned by its template: the head must be a registered sister with its own bytes, and the two accusatives must be the two halves of the frame\u2019s own proposition, in order.'),
  RL_VERB_MAFUL_MAAH:sourceRule('A verb is linked to the companion the action happened alongside, and to the doer that performed it.',[172,173],'Only an exact frozen pair owned by its template, whose companion is registered as unable to share the act.'),
  RL_VERB_MAFUL_AJL:sourceRule('A verb is linked to the inward maṣdar that gives the reason it happened, and to the doer whose motive it is.',[170,171],'Only an exact frozen pair owned by its template; the motive must share the ʿāmil’s time and its doer.'),
  RL_LA_JINS_NOUN_KHABAR:sourceRule('«لا» that negates a whole class is linked to the noun it makes accusative and to the khabar it makes nominative.',[166,167],'Only an exact frozen pair owned by its template; adjacency alone never creates the relation.'),
@@ -9715,6 +9884,117 @@ function verifyMafulMaahRegistry(){
 verifyMafulMaahRegistry();
 /* المنادى. The built surfaces are registered too, so a built munādā still round-trips through the
    noun index — the index records the WORD, while state and bināʾ are decided per construction. */
+/* ظنّ. Resolution, registration and the load-time proof. */
+const ZANNA_NOUN_POOLS=Object.freeze({singularPeople,singularThings,places,brokenHuman,brokenThings,
+ duals,smp,sfp,fiveNouns});
+const ZANNA_PREDICATE_POOLS=Object.freeze({singularPredicates,dualPredicates,
+ masculinePluralPredicates,femininePluralPredicates,masculineThingPredicates,feminineThingPredicates});
+function zannaPoolRecord(pools,poolName,en,what){
+ const pool=pools[poolName];
+ if(!pool)throw new Error(`The ẓanna registry names an unknown ${what} pool: ${poolName}`);
+ const matches=pool.filter(item=>item.en===en);
+ if(matches.length!==1){
+  throw new Error(`The ẓanna registry matched ${matches.length} ${what} records for “${en}” in ${poolName}.`);
+ }
+ return matches[0];
+}
+/* A half of a proposition resolves to ONE record carrying both states and its declension. */
+function zannaHalf(spec){
+ if(spec.predicate){
+  const record=ZANNA_PREDICATES[spec.predicate];
+  if(!record)throw new Error(`The ẓanna registry names an unregistered predicate: ${spec.predicate}`);
+  const nom=record.nom||zannaPoolRecord(ZANNA_PREDICATE_POOLS,record.nomFrom.pool,record.nomFrom.en,'predicate').nom;
+  return Object.freeze({nom,acc:record.acc,en:record.en,inflection:record.inflection,owned:record});
+ }
+ const source=ZANNA_NOUN_POOLS[spec.pool]?zannaPoolRecord(ZANNA_NOUN_POOLS,spec.pool,spec.en,'noun')
+  :zannaPoolRecord(ZANNA_PREDICATE_POOLS,spec.pool,spec.en,'predicate');
+ const inflection=nounFormIndex.get(source.acc)?.inflection||'singular';
+ return Object.freeze({nom:source.nom,acc:source.acc,en:source.en,inflection,owned:null});
+}
+function zannaProposition(propKey){
+ const proposition=ZANNA_PROPOSITIONS[propKey];
+ if(!proposition)throw new Error(`Unknown ẓanna proposition: ${propKey}`);
+ return Object.freeze({key:propKey,en:proposition.en,
+  first:zannaHalf(proposition.first),second:zannaHalf(proposition.second)});
+}
+function zannaPairRecord(pairKey){
+ const pair=ZANNA_PAIR_REGISTRY[pairKey];
+ if(!pair)throw new Error(`Unknown ẓanna pair: ${pairKey}`);
+ const verb=ZANNA_VERBS[pair.verbKey];
+ if(!verb)throw new Error(`ẓanna pair ${pairKey} names an unregistered sister.`);
+ return Object.freeze({key:pairKey,verb,klass:ZANNA_CLASSES[verb.classKey],
+  proposition:zannaProposition(pair.propKey),sentenceEn:pair.sentenceEn});
+}
+function registerZannaForms(){
+ Object.values(ZANNA_VERBS).forEach(verb=>{
+  if(verbFormIndex.has(verb.past)){
+   throw new Error(`ẓanna sister ${verb.key} reuses an existing verb surface: ${verb.past}`);
+  }
+  verbFormIndex.set(verb.past,{lexeme:verb,form:'past',surface:verb.past,
+   morphology:Object.freeze({pastPerson:'1s'})});
+ });
+ Object.values(ZANNA_PREDICATES).forEach(record=>{
+  const nom=record.nom||zannaPoolRecord(ZANNA_PREDICATE_POOLS,record.nomFrom.pool,record.nomFrom.en,'predicate').nom;
+  const lexeme=Object.freeze({nom,acc:record.acc,gen:record.acc,en:record.en,inflection:record.inflection});
+  for(const surface of [record.acc,...(record.nom?[record.nom]:[])]){
+   const existing=nounFormIndex.get(surface);
+   if(existing&&existing.lexeme!==lexeme){
+    throw new Error(`ẓanna predicate collides with an existing noun surface: ${surface}`);
+   }
+   nounFormIndex.set(surface,{lexeme,inflection:record.inflection});
+  }
+ });
+}
+registerZannaForms();
+function verifyZannaRegistry(){
+ // 1 — the ten sisters, complete, in the matn's order, each in exactly one of the four أقسام.
+ const orders=ZANNA_VERB_KEYS.map(key=>ZANNA_VERBS[key].order);
+ if(orders.join(',')!=='1,2,3,4,5,6,7,8,9,10'){
+  throw new Error('The ẓanna sisters are not the matn\u2019s ten in the matn\u2019s order.');
+ }
+ const perClass=Object.create(null);
+ ZANNA_VERB_KEYS.forEach(key=>{
+  const verb=ZANNA_VERBS[key];
+  if(verb.key!==key)throw new Error(`ẓanna sister ${key} is not bound to its own key.`);
+  const klass=ZANNA_CLASSES[verb.classKey];
+  if(!klass)throw new Error(`ẓanna sister ${key} is in no registered قسم.`);
+  perClass[verb.classKey]=(perClass[verb.classKey]||0)+1;
+  const registered=verbFormIndex.get(verb.past);
+  if(registered?.form!=='past'||registered.morphology?.pastPerson!=='1s'){
+   throw new Error(`ẓanna sister ${key} did not round-trip through the verb index as a past 1s form.`);
+  }
+ });
+ // 2 — p. 111's own counts, 4 + 3 + 2 + 1 = 10. A miscounted قسم is a misread source.
+ Object.values(ZANNA_CLASSES).forEach(klass=>{
+  if((perClass[klass.id]||0)!==klass.expected){
+   throw new Error(`قسم ${klass.id} holds ${perClass[klass.id]||0} sisters, not the source's ${klass.expected}.`);
+  }
+ });
+ // 3 — every frame's proposition is a real مبتدأ وخبر, and both halves round-trip in both states.
+ ZANNA_ALL_PAIR_KEYS.forEach(pairKey=>{
+  const record=zannaPairRecord(pairKey);
+  const {first,second}=record.proposition;
+  if(first.acc===second.acc){
+   throw new Error(`ẓanna pair ${pairKey} uses one word as both objects.`);
+  }
+  [first,second].forEach(half=>{
+   if(!half.nom||!half.acc)throw new Error(`ẓanna pair ${pairKey} has a half with a missing state.`);
+   if(nounFormIndex.get(half.acc)?.inflection!==half.inflection){
+    throw new Error(`ẓanna pair ${pairKey} has a half outside the noun index: ${half.acc}`);
+   }
+   if(!GRAMMAR_RULES.nounInflection[half.inflection]?.nasb){
+    throw new Error(`ẓanna pair ${pairKey} has a half with no naṣb sign: ${half.inflection}`);
+   }
+  });
+  if(typeof record.sentenceEn!=='string'||!record.sentenceEn.trim()){
+   throw new Error(`ẓanna pair ${pairKey} carries no canonical English.`);
+  }
+ });
+ // 4 — the two role names are distinct, and neither collides with the ordinary مفعول به.
+ const labels=[nounRoleArabic({grammar:{role:ZANNA_FIRST_ROLE},state:'nasb'}),
+  nounRoleArabic({grammar:{role:ZANNA_SECOND_ROLE},state:'nasb'})];
+ if(labels[0]===labels[1])throw new Error('The two ẓanna objects share one label.');
+}
 function registerMunadaNounForms(){
  const records=[...Object.values(MUNADA_LEXEMES),...Object.values(MUNADA_COMPLEMENTS)];
  records.forEach(lexeme=>['binaaSurface','nom','acc','gen'].forEach(form=>{
@@ -9728,6 +10008,7 @@ function registerMunadaNounForms(){
  }));
 }
 registerMunadaNounForms();
+verifyZannaRegistry();
 /* Narrow byte/coherence gate. The load-bearing checks here are the two the chapter turns on: a
    built subtype must carry a bināʾ marker and NO accusative form, and an inflected one must carry
    an accusative and NO bināʾ marker. Neither can borrow the other's regime. */
@@ -9883,6 +10164,8 @@ const AR={
  laJinsParticle:()=>grammarSpec('particle','particle',{particleType:LA_JINS_PARTICLE_TYPE,particleWord:LA_JINS_PARTICLE.surface}),
  mafulAjl:w=>grammarSpec('noun',MAFUL_AJL_ROLE),
  mafulMaah:w=>grammarSpec('noun',MAFUL_MAAH_ROLE),
+ mafulAwwal:w=>grammarSpec('noun',ZANNA_FIRST_ROLE),
+ mafulThani:w=>grammarSpec('noun',ZANNA_SECOND_ROLE),
  munada:w=>grammarSpec('noun',MUNADA_ROLE),
  munadaMudaf:w=>grammarSpec('noun',MUNADA_ROLE,{isMudaf:true}),
  nidaParticle:()=>grammarSpec('particle','particle',{particleType:NIDA_PARTICLE_TYPE,particleWord:NIDA_PARTICLE.surface}),
@@ -10735,6 +11018,88 @@ function mafulMaahPairAt(data,index){
  }
  return null;
 }
+/* ظنّ. The template names the frames it may build; the frame names the sister and the proposition.
+   Nothing here reads a stored claim: the head must BE a registered sister by its own bytes, the
+   two accusatives must BE the frame proposition's own two halves in order, and each must carry
+   the role that half occupies. Swapping the two objects therefore names no frame — the same
+   ordered-pair discipline the conditional uses. */
+function zannaTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.zannaPairKeys?.length?template:null;
+}
+function zannaPairAt(data,index){
+ const template=zannaTemplateRecord(data),tokens=data?.tokens;
+ const token=tokens?.[index];
+ if(!template||!Array.isArray(tokens)||!token)return null;
+ const role=token.grammar?.role;
+ if(role!==ZANNA_FIRST_ROLE&&role!==ZANNA_SECOND_ROLE)return null;
+ const head=tokens[0],first=tokens[1],second=tokens[2];
+ if(!head||head.grammar?.type!=='verb'||head.tense!=='past')return null;
+ if(!first||!second||first.grammar?.role!==ZANNA_FIRST_ROLE||second.grammar?.role!==ZANNA_SECOND_ROLE)return null;
+ if(token!==first&&token!==second)return null;
+ for(const key of template.zannaPairKeys){
+  const record=zannaPairRecord(key);
+  if(head.word!==record.verb.past)continue;
+  if(first.word!==record.proposition.first.acc)continue;
+  if(second.word!==record.proposition.second.acc)continue;
+  return{record,role:token===first?'first':'second'};
+ }
+ return null;
+}
+function zannaRefusal(reason){return Object.freeze({authorized:false,reason,pairKey:'',role:''})}
+function deriveZannaAuthority(data,index){
+ const tokens=data?.tokens;
+ const token=tokens?.[index];
+ if(!token||token.grammar?.type!=='noun')return zannaRefusal('not-a-noun');
+ const role=token.grammar.role;
+ if(role!==ZANNA_FIRST_ROLE&&role!==ZANNA_SECOND_ROLE)return zannaRefusal('token-claims-no-zanna-role');
+ if(!zannaTemplateRecord(data))return zannaRefusal('template-declares-no-zanna-frame');
+ const found=zannaPairAt(data,index);
+ if(!found)return zannaRefusal('the-head-and-its-two-objects-are-not-a-registered-frame');
+ const {record}=found;
+ const head=tokens[0];
+ const registered=verbFormIndex.get(head.word);
+ if(registered?.form!=='past'||registered.lexeme!==record.verb){
+  return zannaRefusal('the-head-is-not-its-own-registered-sister');
+ }
+ if(!ZANNA_CLASSES[record.verb.classKey])return zannaRefusal('the-sister-is-in-no-registered-class');
+ return Object.freeze({authorized:true,reason:'',pairKey:record.key,role:found.role,
+  verbKey:record.verb.key,classKey:record.verb.classKey,propositionKey:record.proposition.key});
+}
+/* The relationship must BE the proof, never merely resemble it — the same standard passiveDeputy
+   and the conditional are held to. Without this a ẓanna relationship pasted onto another
+   exercise, or one whose two objects had traded ids, would still print «مفعول أول» to a learner. */
+function zannaRelationshipParts(rel,data){
+ const tokens=Array.isArray(data&&data.tokens)?data.tokens:[];
+ const verb=tokens[0],first=tokens[1],second=tokens[2];
+ if(!verb||!first||!second)return null;
+ if(verb.id!==rel.verbId||first.id!==rel.firstId||second.id!==rel.secondId)return null;
+ const authority=deriveZannaAuthority(data,2);
+ if(!authority.authorized||authority.role!=='second')return null;
+ const firstAuthority=deriveZannaAuthority(data,1);
+ if(!firstAuthority.authorized||firstAuthority.role!=='first')return null;
+ if(authority.pairKey!==rel.pairKey||firstAuthority.pairKey!==rel.pairKey)return null;
+ if(authority.verbKey!==rel.verbKey||authority.classKey!==rel.classKey)return null;
+ if(authority.propositionKey!==rel.propositionKey)return null;
+ return{verb,first,second,record:zannaPairRecord(authority.pairKey)};
+}
+function exerciseZannaAuthority(data){
+ const tokens=data?.tokens||[];
+ for(let index=0;index<tokens.length;index++){
+  const result=deriveZannaAuthority(data,index);
+  if(result.authorized)return result;
+ }
+ return null;
+}
+function canonicalZannaTranslation(data){
+ const authority=exerciseZannaAuthority(data);
+ return authority?ZANNA_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
+}
+function zannaWhyAuthority(token,data){
+ const authority=deriveZannaAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`Cannot explain an unauthorized ẓanna object: ${authority.reason}.`);
+ return{...authority,record:zannaPairRecord(authority.pairKey),verbWord:data.tokens[0].word};
+}
 function deriveMafulMaahAuthority(data,index){
  const tokens=data?.tokens;
  const token=Array.isArray(tokens)?tokens[index]:null;
@@ -10879,6 +11244,10 @@ function inflectNoun(token,tokens,index,data){
  }
  if(token.grammar.role===MAFUL_MAAH_ROLE&&!deriveMafulMaahAuthority(data,index).authorized){
   throw new Error(`The noun is not a canonically licensed mafʿūl maʿah: ${deriveMafulMaahAuthority(data,index).reason}.`);
+ }
+ if((token.grammar.role===ZANNA_FIRST_ROLE||token.grammar.role===ZANNA_SECOND_ROLE)
+   &&!deriveZannaAuthority(data,index).authorized){
+  throw new Error(`The noun is not a canonically licensed object of ẓanna: ${deriveZannaAuthority(data,index).reason}.`);
  }
  if(token.grammar.role===MAFUL_AJL_ROLE&&!deriveMafulAjlAuthority(data,index).authorized){
   throw new Error(`The noun is not a canonically licensed mafʿūl lah: ${deriveMafulAjlAuthority(data,index).reason}.`);
@@ -11116,6 +11485,7 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({condition:'RL_CONDITION_TWO_VERBS',
  laJins:'RL_LA_JINS_NOUN_KHABAR',
  mafulAjl:'RL_VERB_MAFUL_AJL',
  mafulMaah:'RL_VERB_MAFUL_MAAH',
+ zanna:'RL_ZANNA_TWO_OBJECTS',
  nida:'RL_NIDA_MUNADA',
  mubtadaKhabar:'RL_MUBTADA_REQUIRES_KHABAR',
  inna:'RL_INNA_NOUN_KHABAR',
@@ -11251,6 +11621,22 @@ function resolveRelationships(data){
    mahall:authority.mahall,pairKey:authority.pairKey});
   particle.relations.munadaId=item.id;particle.relations.nidaRelationshipId=relation.id;
   item.relations.governorId=particle.id;item.relations.nidaRelationshipId=relation.id;
+ });
+ /* ظنّ. One relationship for the whole structure, keyed off the SECOND object so it is created
+    once; both objects and the sister carry back-links, so History restores a structure rather
+    than three tokens that merely sit in the right order. */
+ tokens.forEach((item,index)=>{
+  if(item.grammar.role!==ZANNA_SECOND_ROLE)return;
+  const authority=deriveZannaAuthority(data,index);
+  if(!authority.authorized)return;
+  const verb=tokens[0],first=tokens[1];
+  const relation=addRelationship(data,'zanna',{verbId:verb.id,firstId:first.id,secondId:item.id,
+   pairKey:authority.pairKey,verbKey:authority.verbKey,classKey:authority.classKey,
+   propositionKey:authority.propositionKey});
+  verb.relations.zannaFirstId=first.id;
+  verb.relations.zannaSecondId=item.id;
+  first.relations.zannaRelationshipId=relation.id;
+  item.relations.zannaRelationshipId=relation.id;
  });
  tokens.forEach((item,index)=>{
   if(item.grammar.role!==MAFUL_MAAH_ROLE)return;
@@ -11481,6 +11867,10 @@ function nounRoleArabic(token){
   if(!authority.binaa)return'مُنَادًى مَنْصُوبٌ';
   return'مُنَادًى مَبْنِيٌّ عَلَى '+MUNADA_BINAA_SIGNS[authority.binaaSignId].ar+' فِي مَحَلِّ '+MUNADA_MAHALL.ar;
  }
+ /* The source's own two names. «مفعول به» alone would hide the whole point of the chapter — that
+    the two accusatives are a mubtadaʾ and a khabar, and which is which. */
+ if(role===ZANNA_FIRST_ROLE)return'مَفْعُولٌ أَوَّلُ مَنْصُوبٌ';
+ if(role===ZANNA_SECOND_ROLE)return'مَفْعُولٌ ثَانٍ مَنْصُوبٌ';
  if(role===MUSTATHNA_ROLE)return'مُسْتَثْنًى مَنْصُوبٌ';
  /* «اسْمُ لَا» rather than a bare «منصوب»: the naṣb here comes from لا working like إنّ, and the
     learner needs to see whose noun it is. The muḍāف clause is appended by the shared iḍāfah line. */
@@ -12160,6 +12550,20 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_MAFUL_MAAH',
   stateAr:()=>'وَالْمَفْعُولُ مَعَهُ مَنْصُوبٌ.',
   stateEn:()=>'The مَفْعُولٌ مَعَهُ is مَنْصُوبٌ.'},
+ mafulAwwal:{
+  id:()=>'WHY_ROLE_MAFUL_AWWAL',
+  ar:(t,data)=>`${wq(t.word)} كَانَ مُبْتَدَأً، فَلَمَّا دَخَلَ عَلَيْهِ ${wq(zannaWhyAuthority(t,data).verbWord)} صَارَ مَفْعُولًا أَوَّلَ لَهُ.`,
+  en:(t,data)=>`${eq(t.word)} was the mubtadaʾ; when ${eq(zannaWhyAuthority(t,data).verbWord)} entered upon it, it became that verb\u2019s first object.`,
+  stateId:()=>'WHY_STATE_MAFUL_AWWAL',
+  stateAr:()=>'وَالْمَفْعُولُ الْأَوَّلُ مَنْصُوبٌ.',
+  stateEn:()=>'The مَفْعُولٌ أَوَّلُ is مَنْصُوبٌ.'},
+ mafulThani:{
+  id:()=>'WHY_ROLE_MAFUL_THANI',
+  ar:(t,data)=>`${wq(t.word)} كَانَ خَبَرًا، فَلَمَّا دَخَلَ عَلَيْهِ ${wq(zannaWhyAuthority(t,data).verbWord)} صَارَ مَفْعُولًا ثَانِيًا لَهُ.`,
+  en:(t,data)=>`${eq(t.word)} was the khabar; when ${eq(zannaWhyAuthority(t,data).verbWord)} entered upon it, it became that verb\u2019s second object.`,
+  stateId:()=>'WHY_STATE_MAFUL_THANI',
+  stateAr:()=>'وَالْمَفْعُولُ الثَّانِي مَنْصُوبٌ.',
+  stateEn:()=>'The مَفْعُولٌ ثَانٍ is مَنْصُوبٌ.'},
  mafulAjl:{
   id:()=>'WHY_ROLE_MAFUL_AJL',
   ar:(t,data)=>`${wq(t.word)} ذُكِرَ بَيَانًا لِسَبَبِ وُقُوعِ ${wq(mafulAjlWhyAuthority(t,data).verbWord)}، فَهُوَ مَفْعُولٌ لِأَجْلِهِ.`,
@@ -12601,6 +13005,26 @@ function buildRelationshipWhy(rel,data){
    en:`The first of them, ${eq(shart.word)}, is ${CONDITION_ROLES.shart.en}; the second, ${eq(jawab.word)}, is ${CONDITION_ROLES.jawab.en}.`});
   return{ids,ar,en};
  }
+ if(rel.type==='zanna'){
+  const parts=zannaRelationshipParts(rel,data);
+  if(!parts)return{ids,ar,en};
+  const {verb,first,second,record}=parts;
+  const origin=`${record.proposition.first.nom} ${record.proposition.second.nom}`;
+  push({id:'WHY_REL_ZANNA_PROPOSITION',
+   ar:`أَصْلُ الْكَلَامِ ${wq(origin)}: ${wq(record.proposition.first.nom)} مُبْتَدَأٌ، وَ${wq(record.proposition.second.nom)} خَبَرُهُ.`,
+   en:`The underlying sentence is “${origin}”: “${record.proposition.first.nom}” is the mubtadaʾ and “${record.proposition.second.nom}” its khabar.`});
+  push({id:'WHY_REL_ZANNA_NASB',
+   ar:`فَلَمَّا دَخَلَ ${wq(verb.word)} عَلَيْهِمَا نَصَبَهُمَا جَمِيعًا، فَ${wq(first.word)} مَفْعُولٌ أَوَّلُ وَ${wq(second.word)} مَفْعُولٌ ثَانٍ.`,
+   en:`When ${eq(verb.word)} entered upon them it made both accusative, so ${eq(first.word)} is the first object and ${eq(second.word)} the second.`});
+  push({id:'WHY_REL_ZANNA_CLASS',
+   ar:record.verb.key==='zanantu'
+    ?`وَ${wq(verb.word)} ${record.klass.clauseAr}.`
+    :`وَ${wq(verb.word)} مِنْ أَخَوَاتِ ${wq(ZANNA_VERBS.zanantu.past)}، وَهُوَ ${record.klass.clauseAr}.`,
+   en:record.verb.key==='zanantu'
+    ?`${eq(verb.word)} ${record.klass.clauseEn}.`
+    :`${eq(verb.word)} is one of the sisters of ẓanna, and it ${record.klass.clauseEn}.`});
+  return{ids,ar,en};
+ }
  if(rel.type==='nida'){
   const particle=data.tokens.find(item=>item.id===rel.particleId);
   const munada=data.tokens.find(item=>item.id===rel.munadaId);
@@ -12786,6 +13210,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='zanna'){
+   const recipient=data.tokens.find(item=>item.id===rel.secondId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='mafulMaah'){
    const recipient=data.tokens.find(item=>item.id===rel.companionId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -12863,6 +13292,19 @@ function renderRelationshipAnalysis(data){
   jawab.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: ${CONDITION_ROLES.adah.ar} ${wq(adah.word)}، وَ${CONDITION_ROLES.shart.ar} ${wq(shart.word)}، وَ${CONDITION_ROLES.jawab.ar} ${wq(jawab.word)}، وَالْأَدَاةُ جَزَمَتْهُمَا جَمِيعًا.`;
   jawab.phraseEn=`Together, “${phrase}” is one conditional structure: ${CONDITION_ROLES.adah.en} “${adah.word}”, ${CONDITION_ROLES.shart.en} “${shart.word}”, and ${CONDITION_ROLES.jawab.en} “${jawab.word}” — the tool makes both verbs jussive.`;
   jawab.phraseLabel='Conditional construction';
+ });
+ /* ظنّ. The combined block is where the chapter actually lives: it shows the nominative sentence
+    FIRST and then what the sister did to it. The proof is re-derived; the relationship record is
+    only allowed to agree with it. */
+ data.relationships.filter(rel=>rel.type==='zanna').forEach(rel=>{
+  const parts=zannaRelationshipParts(rel,data);
+  if(!parts)return;
+  const {verb,first,second,record}=parts;
+  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const origin=`${record.proposition.first.nom} ${record.proposition.second.nom}`;
+  second.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: أَصْلُهُ «${origin}» مُبْتَدَأٌ وَخَبَرٌ، فَدَخَلَ عَلَيْهِمَا ${wq(verb.word)} فَنَصَبَهُمَا جَمِيعًا، فَصَارَ ${wq(first.word)} مَفْعُولًا أَوَّلَ وَ${wq(second.word)} مَفْعُولًا ثَانِيًا.`;
+  second.phraseEn=`Together, “${phrase}”: its origin is the sentence “${origin}”, a mubtadaʾ and its khabar. “${verb.word}” entered upon them and made both accusative, so “${first.word}” became its first object and “${second.word}” its second.`;
+  second.phraseLabel='Ẓanna construction';
  });
  data.relationships.filter(rel=>rel.type==='nida').forEach(rel=>{
   const particle=data.tokens.find(item=>item.id===rel.particleId);
@@ -13283,6 +13725,17 @@ function validateExercise(data){
     if(!authority.authorized)fail('E_MAFUL_MAAH_AUTHORITY',`Mafʿūl-maʿah authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_MAFUL_MAAH_NASB')fail('E_MAFUL_MAAH_RULE','The mafʿūl maʿah is not bound to its source rule.',token);
     if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mafulMaah requires nasb, not ${token.state}.`,token);
+   }else if(token.grammar.role===ZANNA_FIRST_ROLE||token.grammar.role===ZANNA_SECOND_ROLE){
+    /* Both objects answer ONE authority, and each is bound to its OWN source rule — the whole
+       chapter is that the two accusatives are not the same thing, so sharing a rule id would
+       let either be relabelled the other, or relabelled an ordinary مفعول به. */
+    const authority=deriveZannaAuthority(data,data.tokens.indexOf(token));
+    const expectedRule=GRAMMAR_RULES.roles[token.grammar.role].ruleId;
+    const expectedRole=token.grammar.role===ZANNA_FIRST_ROLE?'first':'second';
+    if(!authority.authorized)fail('E_ZANNA_AUTHORITY',`Ẓanna-object authority failed: ${authority.reason}.`,token);
+    else if(authority.role!==expectedRole)fail('E_ZANNA_ROLE','A ẓanna object claims the other object’s role.',token);
+    else if(token.ruleId!==expectedRule)fail('E_ZANNA_RULE','A ẓanna object is not bound to its own source rule.',token);
+    if(token.state!=='nasb')fail('E_ROLE_CASE',`Role ${token.grammar.role} requires nasb, not ${token.state}.`,token);
    }else if(token.grammar.role===MAFUL_AJL_ROLE){
     const authority=deriveMafulAjlAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_MAFUL_AJL_AUTHORITY',`Mafʿūl-lah authority failed: ${authority.reason}.`,token);
@@ -13582,6 +14035,12 @@ function validateExercise(data){
   if(token.grammar.role==='faail'&&(!token.relations.verbId||!relationships.some(rel=>rel.type==='verbSubject'&&rel.subjectId===token.id&&rel.verbId===token.relations.verbId)))fail('E_ORPHAN_SUBJECT','Explicit subject is not linked to a verb.',token);
   if(token.grammar.role==='naibFail'&&(!token.relations.passiveVerbId||!relationships.some(rel=>rel.type==='passiveDeputy'&&rel.deputyId===token.id&&rel.verbId===token.relations.passiveVerbId)))fail('E_ORPHAN_NAIB_FAIL','Deputy subject is not linked to its passive verb.',token);
   if(token.grammar.role==='mafulMutlaq'&&(!token.relations.amilId||!relationships.some(rel=>rel.type==='absoluteObject'&&rel.masdarId===token.id&&rel.verbId===token.relations.amilId)))fail('E_ORPHAN_MAFUL_MUTLAQ','Absolute object is not linked to the ʿāmil that makes it accusative.',token);
+  if((token.grammar.role===ZANNA_FIRST_ROLE||token.grammar.role===ZANNA_SECOND_ROLE)
+    &&(!token.relations.zannaRelationshipId||!relationships.some(rel=>rel.type==='zanna'
+      &&rel.id===token.relations.zannaRelationshipId
+      &&(rel.firstId===token.id||rel.secondId===token.id)))){
+   fail('E_ORPHAN_ZANNA_OBJECT','An object of ẓanna is not linked to the structure that made it accusative.',token);
+  }
   if((token.grammar.role===ISM_LA_ROLE||token.grammar.role===KHABAR_LA_ROLE)
     &&(!token.relations.governorId||!relationships.some(rel=>rel.type==='laJins'
       &&rel.particleId===token.relations.governorId
@@ -13695,6 +14154,9 @@ function validateExercise(data){
      of a refusal, and the exercise would still validate. */
   if(rel.type==='condition'&&!conditionRelationshipParts(rel,data)){
    fail('E_CONDITION_RELATION','Conditional relationship is not the canonical proof.',tokenById.get(rel.jawabId));
+  }
+  if(rel.type==='zanna'&&!zannaRelationshipParts(rel,data)){
+   fail('E_ZANNA_RELATION','Ẓanna relationship is not the canonical proof.',tokenById.get(rel.secondId));
   }
   if(rel.type==='zarf'){
    const zarf=tokenById.get(rel.zarfId);
@@ -14244,6 +14706,34 @@ function add(starts,form,state,sign,build,metadata={}){
  if(mafulMaahPairKeys.length&&!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
   throw new Error(`Template ${stableId} produces a mafʿūl maʿah without an explicit past ʿāmil and fāʿil.`);
  }
+ /* ظنّ. One template owns one target role and one declension lane, because the (form,state,sign)
+    tuple describes the TARGET and the two objects can decline differently — «ظننت الطلابَ
+    مجتهدينَ» is a fatḥah and a yāʾ in one sentence. Mixing lanes would let one stable ID promise
+    a filter it does not always satisfy. */
+ const zannaPairKeys=Object.freeze([...(metadata.zannaPairKeys||[])]);
+ if(zannaPairKeys.some((key,position)=>zannaPairKeys.indexOf(key)!==position||!ZANNA_PAIR_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered ẓanna pair.`);
+ }
+ const zannaTarget=metadata.zannaTarget||'';
+ if(zannaPairKeys.length){
+  if(zannaTarget!=='first'&&zannaTarget!=='second'){
+   throw new Error(`Template ${stableId} produces a ẓanna structure without naming which object it targets.`);
+  }
+  const lanes=new Set(zannaPairKeys.map(key=>{
+   const record=zannaPairRecord(key);
+   return zannaTarget==='first'?record.proposition.first.inflection:record.proposition.second.inflection;
+  }));
+  if(lanes.size!==1)throw new Error(`Template ${stableId} mixes ẓanna declension lanes.`);
+  if([...lanes][0]!==form){
+   throw new Error(`Template ${stableId} declares a ẓanna object of the wrong declension.`);
+  }
+  if(state!=='nasb')throw new Error(`Template ${stableId} declares a ẓanna object that is not accusative.`);
+  if(!pastCapabilities.some(item=>item.person==='1s'&&item.subjectMode==='attached')){
+   throw new Error(`Template ${stableId} produces a ẓanna structure without its first-person sister.`);
+  }
+ }else if(zannaTarget){
+  throw new Error(`Template ${stableId} names a ẓanna target with no ẓanna pairs.`);
+ }
  /* المفعول له. One template owns one shape: a motive after a bare clause and a motive after a
     transitive one are different structures. */
  const mafulAjlPairKeys=Object.freeze([...(metadata.mafulAjlPairKeys||[])]);
@@ -14361,6 +14851,8 @@ function add(starts,form,state,sign,build,metadata={}){
   laJinsPairKeys,
   mafulAjlPairKeys,
   mafulMaahPairKeys,
+  zannaPairKeys,
+  zannaTarget,
   munadaPairKeys,
   presentCapabilities,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
@@ -15771,6 +16263,51 @@ function buildJazmMabniPresentExercise(person){
 }
 add('particle','singular','nasb','fatha',()=>buildJazmMabniPresentExercise('3fp'),jazmMabniTemplateMetadata('3fp'));
 add('particle','singular','nasb','fatha',()=>buildJazmMabniPresentExercise('2fp'),jazmMabniTemplateMetadata('2fp'));
+/* ظنّ وأخواتها — Al-Tuḥfah pp. 110–111. Registered LAST, so no existing stable ID shifts.
+   The sentence is the source's own shape: a first-person sister, then the two accusatives that
+   were a mubtadaʾ and a khabar. Both objects are targetable, because both terms are new and the
+   learner has to be able to practise each by name. */
+function buildZannaExercise(pairKey,target){
+ const record=zannaPairRecord(pairKey);
+ const registered=verbFormIndex.get(record.verb.past);
+ if(registered?.form!=='past')throw new Error(`Ẓanna pair ${pairKey} names an unregistered sister.`);
+ const {first,second}=record.proposition;
+ return{sentence:'',translation:record.sentenceEn,tokens:[
+  token(record.verb.past,record.verb.pastEn,AR.past(record.verb.past,{person:'1s'}),
+   'A first-person past sister of ẓanna; it makes two nouns accusative.'),
+  token(first.acc,first.en,AR.mafulAwwal(first.acc),
+   'The first object — the mubtadaʾ this verb made accusative.',target==='first'),
+  token(second.acc,second.en,AR.mafulThani(second.acc),
+   'The second object — the khabar this verb made accusative.',target==='second')
+ ]};
+}
+const zannaMetadata=(keys,target)=>({...pastTemplateMetadata('1s','attached'),
+ zannaPairKeys:keys,zannaTarget:target});
+/* One lane per (target, declension). The keys are DERIVED from the registry so a new frame joins
+   the right lane automatically and can never be silently unreachable. */
+function zannaLaneKeys(target,inflection){
+ const keys=ZANNA_ALL_PAIR_KEYS.filter(key=>{
+  const record=zannaPairRecord(key);
+  const half=target==='first'?record.proposition.first:record.proposition.second;
+  return half.inflection===inflection;
+ });
+ if(!keys.length)throw new Error(`No ẓanna frame targets a ${inflection} ${target} object.`);
+ return Object.freeze(keys);
+}
+const zannaLane=(target,inflection)=>{
+ const keys=zannaLaneKeys(target,inflection);
+ return()=>buildZannaExercise(pickVaried([...keys],`zanna:${target}:${inflection}`,String),target);
+};
+add('verb','singular','nasb','fatha',zannaLane('first','singular'),zannaMetadata(zannaLaneKeys('first','singular'),'first'));
+add('verb','broken','nasb','fatha',zannaLane('first','broken'),zannaMetadata(zannaLaneKeys('first','broken'),'first'));
+add('verb','dual','nasb','ya',zannaLane('first','dual'),zannaMetadata(zannaLaneKeys('first','dual'),'first'));
+add('verb','sfp','nasb','kasraSub',zannaLane('first','sfp'),zannaMetadata(zannaLaneKeys('first','sfp'),'first'));
+add('verb','fiveNouns','nasb','alif',zannaLane('first','fiveNouns'),zannaMetadata(zannaLaneKeys('first','fiveNouns'),'first'));
+add('verb','singular','nasb','fatha',zannaLane('second','singular'),zannaMetadata(zannaLaneKeys('second','singular'),'second'));
+add('verb','dual','nasb','ya',zannaLane('second','dual'),zannaMetadata(zannaLaneKeys('second','dual'),'second'));
+add('verb','smp','nasb','ya',zannaLane('second','smp'),zannaMetadata(zannaLaneKeys('second','smp'),'second'));
+add('verb','sfp','nasb','kasraSub',zannaLane('second','sfp'),zannaMetadata(zannaLaneKeys('second','sfp'),'second'));
+add('verb','fiveNouns','nasb','alif',zannaLane('second','fiveNouns'),zannaMetadata(zannaLaneKeys('second','fiveNouns'),'second'));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

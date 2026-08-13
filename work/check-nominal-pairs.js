@@ -3507,13 +3507,10 @@ function runZannaFocusedTests(){
       assert(bucket.has(sign),'the '+label+' object never took the '+sign+' sign');
     }
   }
-  // 8 — nine of the ten sisters are produced; سَمِعْتُ is registered and deliberately not produced,
-  //     because its own example's second object is a SENTENCE.
+  // 8 — all ten sisters, and all four أقسام, are produced.
   assert(api.ZANNA_VERB_KEYS.length===10,'the matn\u2019s ten sisters are not all registered');
-  assert(versSeen.size===9&&!versSeen.has('samitu'),
-    'the produced sister set is not the nine: '+[...versSeen].join(','));
-  assert(classesSeen.size===3&&!classesSeen.has('samInsight'),
-    'the produced قسم set is not the three: '+[...classesSeen].join(','));
+  assert(versSeen.size===10,'the produced sister set is not the matn\u2019s ten: '+[...versSeen].join(','));
+  assert(classesSeen.size===4,'the produced قسم set is not the source\u2019s four: '+[...classesSeen].join(','));
   negatives+=api.ZANNA_VERB_KEYS.length;
   const otherThan=(list,current)=>{
     const found=list.find(item=>item!==current);

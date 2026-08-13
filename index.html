@@ -4852,7 +4852,9 @@ const ZANNA_PREDICATES=Object.freeze(Object.assign(Object.create(null),{
   nomFrom:Object.freeze({pool:'masculinePluralPredicates',en:'hardworking'}),acc:'مُجْتَهِدِينَ'}),
  sfpHardworking:Object.freeze({key:'sfpHardworking',inflection:'sfp',en:'hardworking',
   nomFrom:Object.freeze({pool:'femininePluralPredicates',en:'hardworking'}),acc:'مُجْتَهِدَاتٍ'}),
- friend:Object.freeze({key:'friend',inflection:'singular',en:'a friend',nom:'صَدِيقٌ',acc:'صَدِيقًا'})
+ friend:Object.freeze({key:'friend',inflection:'singular',en:'a friend',nom:'صَدِيقٌ',acc:'صَدِيقًا'}),
+ /* سَمِعْتُ's second object states what was HEARD of the first, so it names an act. */
+ reciting:Object.freeze({key:'reciting',inflection:'singular',en:'reciting',nom:'قَارِئٌ',acc:'قَارِئًا'})
 }));
 /* The underlying مبتدأ وخبر of every frame, in BOTH states. `first`/`second` name where each half
    comes from; nothing is retyped, and a proposition whose two halves disagree in number or gender
@@ -4890,6 +4892,10 @@ const ZANNA_PROPOSITIONS=Object.freeze(Object.assign(Object.create(null),{
   first:Object.freeze({pool:'singularThings',en:'the lesson'}),
   second:Object.freeze({pool:'masculineThingPredicates',en:'useful'}),
   en:'the lesson is useful'}),
+ studentReciting:Object.freeze({key:'studentReciting',
+  first:Object.freeze({pool:'singularPeople',en:'the student'}),
+  second:Object.freeze({predicate:'reciting'}),
+  en:'the student is reciting'}),
  studentFriend:Object.freeze({key:'studentFriend',
   first:Object.freeze({pool:'singularPeople',en:'the student'}),
   second:Object.freeze({predicate:'friend'}),
@@ -4933,7 +4939,13 @@ const ZANNA_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
  ittakhadhtuFriend:Object.freeze({verbKey:'ittakhadhtu',propKey:'studentFriend',
   sentenceEn:'I took the student as a friend.'}),
  jaaltuLesson:Object.freeze({verbKey:'jaaltu',propKey:'lessonUseful',
-  sentenceEn:'I made the lesson useful.'})
+  sentenceEn:'I made the lesson useful.'}),
+ /* القسم الرابع, «يُفِيدُ النِّسْبَةَ فِي السَّمْعِ». p. 110's own example «سَمِعْتُ خَلِيلًا يَقْرَأُ» puts a
+    SENTENCE in the second position; the matn's rule — that all ten make a mubtadaʾ and its khabar
+    accusative — is what this frame builds, on the single-word proposition «الطالبُ قارئٌ», exactly
+    as every other sister here is built on app vocabulary rather than on the شرح's own words. */
+ samituStudent:Object.freeze({verbKey:'samitu',propKey:'studentReciting',
+  sentenceEn:'I heard the student reciting.'})
 }));
 const ZANNA_ALL_PAIR_KEYS=Object.freeze(Object.keys(ZANNA_PAIR_REGISTRY));
 const MAFUL_MAAH_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_MAAH_PAIR_REGISTRY));
@@ -8584,10 +8596,6 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
     بدل الغلط. What remains unproduced of البدل is named exactly, because بدل البداء and بدل النسيان
     turn on a speaker's prior belief or change of mind, which no sentence surface carries. */
- /* ظنّ وأخواتها ships nine of the matn's ten sisters. سَمِعْتُ is registered, classed and counted,
-    but not produced: p. 110's own example is «سَمِعْتُ خَلِيلًا يَقْرَأُ», whose second object is a
-    SENTENCE, and a clause holding a maḥall is a layer this chapter does not build. */
- 'the sister سَمِعْتُ of ẓanna, whose second object is a verbal sentence',
  'imperative','diptote','naat sababi','atf bayan','badal al-badaa and badal al-nisyan',
  'badal of a verb from a verb',
  /* المفعول المطلق ships with its three meanings (تأكيد، نوع، عدد) and both divisions

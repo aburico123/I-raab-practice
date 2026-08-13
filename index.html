@@ -1470,6 +1470,10 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
     source's own «لم يَسْعَ عليٌّ» / «لَمْ يدْعُ محمَّدٌ» / «لم يُعْطِ محمَّدٌ». */
  /* Phase 1 — «If you study, you will succeed.» The whole English belongs to the frozen frame,
     because a conditional's two clauses are one meaning and cannot be assembled from parts. */
+ /* 1G — «They (women) did not open the book.» The verb's own canonical gloss already carries the
+    subject and the particle's modality (it is rebuilt that way by the governed-present rebuilder),
+    so the shape reads it whole rather than reassembling it from the particle. */
+ ,TS66:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:1:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
  ,TS65:Object.freeze({parts:Object.freeze([Object.freeze({slot:'conditionSentence'})])})
  ,TS59:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
  ,TS60:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
@@ -1574,6 +1578,9 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  /* J1b — the duʿāʾ pair. Four tokens, because the fāʿil is explicit: the supplication names who is
     being asked, which is what makes the direction «من الأدنى للأعلى» visible in the sentence. */
  /* J2 — the weak-final jazm family: four governors over an intransitive and a transitive frame. */
+ /* 1G — لَمْ over the mabnī nūn-al-niswah lane, for both of its persons. */
+ "T_PARTICLE_SINGULAR_NASB_FATHA_15||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_15",structure:"particle:particle,verb:present,noun:object",shape:"TS66",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_16||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_16",structure:"particle:particle,verb:present,noun:object",shape:"TS66",copulaPlural:false}),
  "T_PARTICLE_PRESENT_JAZM_SUKUN_09||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_09",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
  "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01",structure:"particle:particle,verb:present,noun:faail",shape:"TS59",copulaPlural:false}),
  "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02",structure:"particle:particle,verb:present,noun:faail",shape:"TS59",copulaPlural:false}),
@@ -1825,6 +1832,13 @@ function composeCanonicalTranslation(exercise){
  }
  return composed;
 }
+/* 1G — the two governors the mabnī governed lane may stand under, and the English modality each
+   carries. Keyed by canonical particle type, so a forged particle cannot borrow the other's
+   English, and a governor with no entry here refuses the rebuild outright. */
+const GOVERNED_PRESENT_MODALITY_EN=Object.freeze(Object.assign(Object.create(null),{
+ lan:Object.freeze({gloss:'will not',enHint:'A particle of naṣb.'}),
+ lam:Object.freeze({gloss:'did not',enHint:'A particle of negation and jazm that gives past meaning.'})
+}));
 function rebuildCanonicalHistoryPresentation(data,template){
  if(template?.pastPerson){
   const verb=data.tokens.find(token=>token?.grammar?.type==='verb'&&token.tense==='past');
@@ -1855,7 +1869,11 @@ function rebuildCanonicalHistoryPresentation(data,template){
   const registered=verbFormIndex.get(verb?.word);
   const morphology=authoritativeVerbMorphology(verb,data);
   const subject=GOVERNED_PRESENT_SUBJECT_EN[template.presentPerson];
-  if(!particle||particle.grammar.particleType!=='lan'||!verb||!object||!registered?.lexeme
+  /* 1G — this rebuilder serves TWO governors now: لَنْ («will not») and لَمْ («did not»). The
+     English modality belongs to the particle, so it is taken from the frozen table below keyed by
+     the particle's own canonical type — never from the stored gloss, and never assumed to be لَنْ. */
+  const modality=GOVERNED_PRESENT_MODALITY_EN[particle?.grammar?.particleType];
+  if(!particle||!modality||!verb||!object||!registered?.lexeme
     ||registered.surface!==verb.word||!subject||morphology.person!==template.presentPerson){
    throw new Error('Cannot rebuild canonical governed-present presentation.');
   }
@@ -1863,12 +1881,12 @@ function rebuildCanonicalHistoryPresentation(data,template){
   verb.lexeme=registered.lexeme;
   verb.surfaceHint=registered.surface;
   verb.expectedSurface=registered.surface;
-  particle.gloss='will not';
-  particle.enHint='A particle of naṣb.';
-  verb.gloss=`${subject.toLowerCase()} will not ${registered.lexeme.en}`;
+  particle.gloss=modality.gloss;
+  particle.enHint=modality.enHint;
+  verb.gloss=`${subject.toLowerCase()} ${modality.gloss} ${registered.lexeme.en}`;
   verb.enHint='An exact registered person-bound present form built on sukūn.';
   object.gloss=objectEn;
-  data.translation=`${subject} will not ${registered.lexeme.en} ${objectEn}.`;
+  data.translation=`${subject} ${modality.gloss} ${registered.lexeme.en} ${objectEn}.`;
   return;
  }
  if(template?.frontedPresent){
@@ -6805,6 +6823,17 @@ const PRESENT_BINAA_RULE_IDS=Object.freeze({'sukun-nuun-niswah':'R_PRESENT_NUUN_
    let a forged لَنْ rule authorize an أَنْ form. `requiresLam` carries كَيْ's licensing
    condition into the resolver, so a bare كَيْ can never derive a maḥall. */
 const MABNI_PRESENT_GOVERNORS=Object.freeze({
+ /* 1G — the first maḥall of JAZM. A verb built on sukūn for nūn al-niswah does not become
+    مَجْزُومٌ under a jāzim: its bināʾ and its spelling do not change, and it takes a POSITION
+    instead — «فِي مَحَلِّ جَزْمٍ». Saying «مجزوم بالسكون» of it would be false twice over, because
+    the sukūn it wears is bināʾ and was there before any governor arrived. */
+ lam:Object.freeze({
+  mahall:'jazm',
+  particleRuleId:'G_LAM_JAZM',
+  mahallRuleId:'R_PRESENT_NUUN_NISWAH_MAHALL_JAZM_LAM',
+  causeAr:'بِـ«لَمْ»',
+  causeEn:'because لَمْ governs it'
+ }),
  lan:Object.freeze({
   mahall:'nasb',
   particleRuleId:'G_LAN_NASB',
@@ -8446,6 +8475,9 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     «ولم يتصل بآخره ... ولا نون نسوة», so these forms are excluded from sign-based naṣb by the
     source itself. The bināʾ pages (73, 124) contain no maḥall claim, which is exactly why this
     is a separate rule rather than a widening of the bināʾ rule. */
+ /* 1G — the same claim p. 42 makes for لَنْ, made for a jāzim. The whole content of the analysis is
+    that the WORD does not change: it keeps its bināʾ and its spelling and gains a position only. */
+ R_PRESENT_NUUN_NISWAH_MAHALL_JAZM_LAM:sourceRule('A present verb built on sukūn for nūn al-niswah stands in the position of jazm when لَمْ governs it; its bināʾ and its spelling do not change.',[42,73,79,80,124],'Only an explicitly registered 3fp/2fp present form with nūn al-niswah attached, standing immediately after canonical لَمْ, whose government is reciprocal and exclusive. It authorizes the maḥall alone: the word is never called مَجْزُومٌ and never receives «وَعَلَامَةُ جَزْمِهِ», because the sukūn it wears is bināʾ and preceded the governor.'),
  R_PRESENT_NUUN_NISWAH_MAHALL_NASB_LAN:sourceRule('A present verb built on sukūn for nūn al-niswah is in the position of naṣb when immediately governed by لَنْ.',[42],'Only canonical لَنْ immediately preceding an explicitly registered 3fp/2fp nūn-al-niswah present form whose formClass is mabniPresent, endingClass nuun-niswah, binaaClass sukun-nuun-niswah, with empty state and null sign. It authorizes the naṣb maḥall alone: not the bināʾ, not the nūn component, not لَمْ or any other governor, not an ordinary present, not a five verb, and not nūn al-tawkīd. The surface does not change and no iʿrāb sign is introduced.'),
  /* Phase 3A2 — the whole word's POSITION under أَنْ. This claim is COMPOSED, and the composition
     is stated here rather than implied. Al-Tuḥfah p. 42 states the maḥall rule for the CLASS
@@ -11253,6 +11285,14 @@ const PRESENT_GOVERNOR_CAUSE_AR=Object.freeze(Object.assign(Object.create(null),
 /* J2 — the class term itself, so the learner practises «مُعْتَلُّ الْآخِرِ» rather than only its
    consequence. Named once, and asserted by the focused tests from this same constant. */
 const WEAK_FINAL_CLASS_AR='مُعْتَلُّ الْآخِرِ';
+/* 1G — the maḥall state words, in the genitive form «فِي مَحَلِّ …» takes. Separate from
+   stateArabic, which gives the muʿrab word («مَجْزُومٌ»); a built verb never receives that. */
+const MAHALL_STATE_AR=Object.freeze(Object.assign(Object.create(null),{
+ raf:'رَفْعٍ',nasb:'نَصْبٍ',jarr:'خَفْضٍ',jazm:'جَزْمٍ'
+}));
+const MAHALL_STATE_EN=Object.freeze(Object.assign(Object.create(null),{
+ raf:'rafʿ',nasb:'naṣb',jarr:'khafḍ',jazm:'jazm'
+}));
 const PRESENT_VERB_LABEL_AR='فِعْلٌ مُضَارِعٌ';
 const AFAL_KHAMSA_REASON_AR='؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ';
 function renderVerbAnalysis(token){
@@ -11290,9 +11330,16 @@ function renderVerbAnalysis(token){
      excludes it from the fatḥah sign, and p. 42 gives it «في محل نصب» instead. */
   const owner=token._tokens||[];
   const mabniMahall=deriveMabniPresentMahall(token._data||{tokens:owner},owner.indexOf(token));
-  const governed=mabniMahall&&mabniMahall.mahall==='nasb'?mabniMahall:null;
-  token.ar=`${token.word}: فِعْلٌ مُضَارِعٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنُونِ النِّسْوَةِ${governed?`، فِي مَحَلِّ نَصْبٍ ${governed.causeAr}`:''}.`;
-  token.en=`A present-tense verb built on sukūn because nūn al-niswah is directly attached to it.${governed?` It is in the position of naṣb ${governed.causeEn}; its bināʾ and its spelling do not change.`:''}`;
+  /* 1G — the maḥall is whatever the governor gives it. It was hard-coded to naṣb while لَنْ, أَنْ
+     and كَيْ were the only governors that could reach a built verb; لَمْ gives it JAZM, and the
+     clause has to say so. The state word comes from the same canonical table the muʿrab lane uses,
+     so the two can never drift apart. */
+  const governed=mabniMahall&&mabniMahall.mahall?mabniMahall:null;
+  const mahallAr=governed?MAHALL_STATE_AR[governed.mahall]:'';
+  const mahallEn=governed?MAHALL_STATE_EN[governed.mahall]:'';
+  if(governed&&(!mahallAr||!mahallEn))throw new Error(`No canonical maḥall wording for ${governed.mahall}`);
+  token.ar=`${token.word}: فِعْلٌ مُضَارِعٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنُونِ النِّسْوَةِ${governed?`، فِي مَحَلِّ ${mahallAr} ${governed.causeAr}`:''}.`;
+  token.en=`A present-tense verb built on sukūn because nūn al-niswah is directly attached to it.${governed?` It is in the position of ${mahallEn} ${governed.causeEn}; its bināʾ and its spelling do not change.`:''}`;
   return;
  }
  if(token.grammar.voice===PASSIVE_VOICE){
@@ -12970,7 +13017,11 @@ function validateExercise(data){
     }else{
      const spec=MABNI_PRESENT_GOVERNORS[governorMode];
      const particle=data.tokens[mabniIndex-1];
-     if(derived.mahall!=='nasb')fail('E_MABNI_PRESENT_MAHALL','The derived maḥall for a governed mabnī-present verb must be naṣb.',token);
+     /* 1G — the maḥall must be the one THIS governor gives, which is naṣb for لَنْ/أَنْ/كَيْ and jazm
+        for لَمْ. Pinning it to the governor's own frozen spec is stricter than the old blanket
+        "must be naṣb": a لَمْ-governed verb claiming naṣb now fails just as loudly as a لَنْ-governed
+        one claiming jazm. */
+     if(derived.mahall!==spec.mahall)fail('E_MABNI_PRESENT_MAHALL','The derived maḥall disagrees with the maḥall its governor gives.',token);
      /* Phase 3A2 — كَيْ's licensing lām is part of THIS verb's authorization, not only of the
         particle's own contract: without it كَيْ is not the governor at all, so the verb has no
         derived maḥall to claim. The resolver already withholds the maḥall (caught immediately
@@ -14016,6 +14067,20 @@ function buildGovernedPresentExercise(person){
 }
 // `governedPresent` is an explicit opt-in: only these templates use the governed presentation
 // rebuilder, so no pre-existing template can be reached by it.
+/* 1G — mirrors governedPresentTemplateMetadata, differing only in the governorMode it authorizes.
+   `governedPresent` stays true: the presentation rebuilder for this family is the same one, and the
+   English differs only in the particle's own gloss. */
+const jazmMabniTemplateMetadata=person=>({
+ presentPerson:person,
+ governedPresent:true,
+ presentCapabilities:[{
+  person,subjectMode:'attached',
+  formClass:PRESENT_MORPHOLOGY[person].formClass,
+  endingClass:PRESENT_MORPHOLOGY[person].endingClass,
+  binaaClass:PRESENT_MORPHOLOGY[person].binaaClass,
+  governorMode:'lam'
+ }]
+});
 const governedPresentTemplateMetadata=person=>({
  presentPerson:person,
  governedPresent:true,
@@ -15276,6 +15341,31 @@ function buildConditionExercise(){
 }
 add('particle','present','jazm','sukun',()=>buildConditionExercise(),
  {...presentTemplateMetadata('2ms','implicit'),presentGovernor:'inShart',conditionFrameKeys:[...CONDITION_FRAME_KEYS]});
+
+/* ===== 1G — لَمْ over the mabnī nūn-al-niswah lane ==============================================
+   The same two persons the لَنْ lane already produces, under a jāzim instead of a nāṣib. The verb
+   reuses the SAME registered surface: p. 42's whole point is that the word does not change, so a
+   second surface record would assert a difference that does not exist. The direct object stays the
+   learner's target, exactly as in the لَنْ lane — this verb has no state and no sign of its own, so
+   only its object can truthfully supply the template's singular/naṣb/fatḥah filter tuple. */
+function buildJazmMabniPresentExercise(person){
+ const action=pickVaried(advancedPresentActions,`jazm-mabni-action:${person}`,item=>item.past);
+ const surface=action.forms[person];
+ const object=pickVaried(action.obj,`jazm-mabni-object:${person}:${action.past}`,String);
+ const subject=GOVERNED_PRESENT_SUBJECT_EN[person];
+ const objectEn=nounEnglish(object,'acc');
+ return{
+  sentence:`لَمْ ${surface} ${object}`,
+  translation:`${subject} did not ${action.en} ${objectEn}.`,
+  tokens:[
+   token('لَمْ','did not',AR.lam('لَمْ'),J1A_PARTICLE_EN.lam),
+   token(surface,`${subject.toLowerCase()} did not ${action.en}`,AR.presentAdvanced(surface,person),'An exact registered person-bound present form built on sukūn.'),
+   token(object,objectEn,AR.object(object),EN.object,true)
+  ]
+ };
+}
+add('particle','singular','nasb','fatha',()=>buildJazmMabniPresentExercise('3fp'),jazmMabniTemplateMetadata('3fp'));
+add('particle','singular','nasb','fatha',()=>buildJazmMabniPresentExercise('2fp'),jazmMabniTemplateMetadata('2fp'));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

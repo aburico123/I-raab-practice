@@ -1613,6 +1613,10 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_VERB_SMP_RAF_WAW_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SMP_RAF_WAW_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
  "T_VERB_SMP_NASB_YA_01||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SMP_NASB_YA_01",structure:"verb:present,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
  "T_VERB_SFP_RAF_DAMMA_01||verb:past,noun:faail":Object.freeze({templateId:"T_VERB_SFP_RAF_DAMMA_01",structure:"verb:past,noun:faail",shape:"TS12",copulaPlural:true}),
+ /* Wave 2 — the attached-object lanes. Same two-token shape as the lane above (verb then its
+    explicit fāʿil); the attached object is INSIDE the verb word, so it occupies no slot. */
+ "T_VERB_SFP_RAF_DAMMA_03||verb:past,noun:faail":Object.freeze({templateId:"T_VERB_SFP_RAF_DAMMA_03",structure:"verb:past,noun:faail",shape:"TS12",copulaPlural:true}),
+ "T_VERB_SINGULAR_RAF_DAMMA_06||verb:past,noun:faail":Object.freeze({templateId:"T_VERB_SINGULAR_RAF_DAMMA_06",structure:"verb:past,noun:faail",shape:"TS12",copulaPlural:false}),
  "T_VERB_FIVENOUNS_RAF_WAW_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_FIVENOUNS_RAF_WAW_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_02||verb:kana,noun:ismKana,noun:khabarKana":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_02",structure:"verb:kana,noun:ismKana,noun:khabarKana",shape:"TS11",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_03||verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_03",structure:"verb:past,noun:object",shape:"TS13",copulaPlural:false}),
@@ -4008,6 +4012,19 @@ const femininePastActions=[
  {past:'حَضَرَتْ',pastEn:'arrived'},{past:'دَخَلَتْ',pastEn:'entered'},
  {past:'خَرَجَتْ',pastEn:'left'},{past:'جَلَسَتْ',pastEn:'sat down'},
  {past:'وَقَفَتْ',pastEn:'stood up'},{past:'سَافَرَتْ',pastEn:'traveled'}
+];
+/* p.157's construction: a past verb carrying the feminine tāʾ, نون الوقاية and the object yāʾ,
+   with its fāʿil following as an explicit noun. Every surface is stored whole — the nūn and the
+   yāʾ are never spliced onto a verb by string surgery, which is the same rule the rest of the past
+   paradigm follows. Only verbs whose already-audited object pools contain people are eligible,
+   because the attached object here denotes a person. */
+const objectPronounPastActions=[
+ {past:'زَارَ',pastEn:'visited me',forms:{'3fs-explicit-obj-yaa':'زَارَتْنِي'}},
+ {past:'سَاعَدَ',pastEn:'helped me',forms:{'3fs-explicit-obj-yaa':'سَاعَدَتْنِي'}},
+ {past:'سَمِعَ',pastEn:'heard me',forms:{'3fs-explicit-obj-yaa':'سَمِعَتْنِي'}},
+ {past:'زَارَ',pastEn:'visited me',forms:{'3ms-obj-yaa':'زَارَنِي'}},
+ {past:'سَاعَدَ',pastEn:'helped me',forms:{'3ms-obj-yaa':'سَاعَدَنِي'}},
+ {past:'سَمِعَ',pastEn:'heard me',forms:{'3ms-obj-yaa':'سَمِعَنِي'}}
 ];
 /* Phase 1 deliberately stores every enabled past surface. This is a small reviewed
    paradigm, not a general Arabic conjugator. Its object pools are strict subsets of
@@ -7271,17 +7288,38 @@ const COMPONENT_REGISTRY=Object.freeze({
  'alif-fariqa':Object.freeze({category:'orthographic',syntacticRole:'notApplicable',mahall:'notApplicable',binaaSign:null,letterAr:'الْأَلِفُ',nameAr:'الْأَلِفُ الْفَارِقَةُ',nameEn:'the differentiating alif (alif fāriqah)',ruleId:'C_ALIF_FARIQA'}),
  /* Phase 1 — attached rafʿ pronouns of the past verb. Al-Tuḥfah (workspace scan p.72):
     «وَالتَّاءُ، أَوْ نَا أَوِ النُّونُ فَاعِلٌ، مَبْنِيٌّ عَلَى الضَّمِّ أَوِ الْفَتْحِ أَوِ الْكَسْرِ أَوِ السُّكُونِ فِي مَحَلِّ رَفْعٍ». */
- 'taa-fail-1s':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'damma',letterAr:'تُ',nameAr:'تَاءُ الْفَاعِلِ',nameEn:'the subject tāʾ (tāʾ al-fāʿil, first person)',ruleId:'C_TAA_FAIL_1S'}),
- 'taa-fail-2ms':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'fatha',letterAr:'تَ',nameAr:'تَاءُ الْفَاعِلِ',nameEn:'the subject tāʾ (tāʾ al-fāʿil, masculine addressee)',ruleId:'C_TAA_FAIL_2MS'}),
- 'taa-fail-2fs':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'kasra',letterAr:'تِ',nameAr:'تَاءُ الْفَاعِلِ',nameEn:'the subject tāʾ (tāʾ al-fāʿil, feminine addressee)',ruleId:'C_TAA_FAIL_2FS'}),
+ /* The three tāʾs share ONE collective name at p.72 («كَتَاءِ الْفَاعِلِ») and are then named
+    person by person: the source's own model iʿrāb calls the 1s tāʾ «ضَمِيرُ الْمُتَكَلِّمِ»
+    (p.157), p.73 calls the addressee tāʾ «لِلْمُخَاطَبِ», and p.91 separates «ضَمِيرُ الْمُخَاطَبِ
+    الْوَاحِدِ الْمُذَكَّرِ» (ضَرَبْتَ) from «ضَمِيرُ الْمُخَاطَبَةِ الْوَاحِدَةِ الْمُؤَنَّثَةِ»
+    (ضَرَبْتِ). The person subtype is the NAME, because it is the claim a learner must actually
+    make: تَاءُ الْفَاعِلِ cannot tell these three apart, and their bināʾ differs precisely BY
+    person. The collective class is carried in collectiveAr and stays learner-facing in the Why. */
+ 'taa-fail-1s':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'damma',letterAr:'تُ',nameAr:'تَاءُ الْمُتَكَلِّمِ',collectiveAr:'تَاءَاتِ الْفَاعِلِ',nameEn:'the first-person subject tāʾ (tāʾ al-mutakallim)',ruleId:'C_TAA_FAIL_1S'}),
+ 'taa-fail-2ms':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'fatha',letterAr:'تَ',nameAr:'تَاءُ الْمُخَاطَبِ',collectiveAr:'تَاءَاتِ الْفَاعِلِ',nameEn:'the masculine-addressee subject tāʾ (tāʾ al-mukhāṭab)',ruleId:'C_TAA_FAIL_2MS'}),
+ 'taa-fail-2fs':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'kasra',letterAr:'تِ',nameAr:'تَاءُ الْمُخَاطَبَةِ',collectiveAr:'تَاءَاتِ الْفَاعِلِ',nameEn:'the feminine-addressee subject tāʾ (tāʾ al-mukhāṭabah)',ruleId:'C_TAA_FAIL_2FS'}),
  'naa-failin':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'sukun',letterAr:'نَا',nameAr:'نَا الْفَاعِلِينَ',nameEn:'nā al-fāʿilīn (the “we” subject pronoun)',ruleId:'C_NAA_FAILIN'}),
  'alif-ithnain':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'sukun',letterAr:'ا',nameAr:'أَلِفُ الِاثْنَيْنِ',nameEn:'the dual alif (alif al-ithnayn)',ruleId:'C_ALIF_ITHNAIN'}),
  'nuun-niswah':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'fatha',letterAr:'نَ',nameAr:'نُونُ النِّسْوَةِ',nameEn:'nūn al-niswah (the feminine-plural subject nūn)',ruleId:'C_NUUN_NISWAH'}),
- 'yaa-mukhataba':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'sukun',letterAr:'ي',nameAr:'يَاءُ الْمُخَاطَبَةِ',nameEn:'the feminine-address yāʾ (yāʾ al-mukhāṭabah)',ruleId:'C_YAA_MUKHATABA'})
+ 'yaa-mukhataba':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'sukun',letterAr:'ي',nameAr:'يَاءُ الْمُخَاطَبَةِ',nameEn:'the feminine-address yāʾ (yāʾ al-mukhāṭabah)',ruleId:'C_YAA_MUKHATABA'}),
+ /* Al-Tuḥfah p.157 parses the ending of «لَقِيَتْنِي» in three separate pieces: «وَالتَّاءُ
+    عَلَامَةُ التَّأْنِيثِ، وَالنُّونُ لِلْوِقَايَةِ، وَالْيَاءُ ضَمِيرُ الْمُتَكَلِّمِ مَفْعُولٌ بِهِ،
+    مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ». Note what the source does and does not give: the
+    yāʾ gets an explicit bināʾ AND maḥall, so it carries both; the nūn gets NEITHER, so it carries
+    binaaSign null and claims no bināʾ at all. That is the same gate that keeps نونا التوكيد out of
+    this registry — a component's bināʾ must be source-verified, and inventing a plausible one for
+    the nūn would be exactly the kind of unsourced claim this file refuses. functionAr carries the
+    source's own three-word account of what the nūn is for («لِلْوِقَايَةِ»). */
+ 'nuun-wiqaya':Object.freeze({category:'particle',syntacticRole:'none',mahall:'none',binaaSign:null,functionAr:'لِلْوِقَايَةِ',functionEn:'for protection',letterAr:'النُّونُ',nameAr:'نُونُ الْوِقَايَةِ',nameEn:'the protective nūn (nūn al-wiqāyah)',ruleId:'C_NUUN_WIQAYA'}),
+ 'yaa-mutakallim-maful':Object.freeze({category:'pronoun',syntacticRole:'maful',mahall:'nasb',binaaSign:'sukun',letterAr:'الْيَاءُ',nameAr:'يَاءُ الْمُتَكَلِّمِ',nameEn:'the first-person object yāʾ (yāʾ al-mutakallim)',ruleId:'C_YAA_MUTAKALLIM_MAFUL'})
 });
 const COMPONENT_CATEGORIES=Object.freeze({pronoun:1,particle:1,orthographic:1});
-const COMPONENT_ROLE_AR=Object.freeze({fail:'فَاعِلٌ'});
-const COMPONENT_ROLE_EN=Object.freeze({fail:'fāʿil'});
+/* A component's role is data, and there is now more than one: p.157 gives the same verb an
+   internal fāʿil-less tāʾ and an internal mafʿūl yāʾ. Keeping both in one table is what lets
+   renderComponentAnalysis stay a single function and stops a naṣb role from ever borrowing the
+   rafʿ wording. */
+const COMPONENT_ROLE_AR=Object.freeze({fail:'فَاعِلٌ',maful:'مَفْعُولٌ بِهِ'});
+const COMPONENT_ROLE_EN=Object.freeze({fail:'fāʿil',maful:'mafʿūl bihi'});
 const COMPONENT_MAHALL_AR=Object.freeze({raf:'رَفْعٍ',nasb:'نَصْبٍ',jarr:'خَفْضٍ'});
 const COMPONENT_MAHALL_EN=Object.freeze({raf:'rafʿ',nasb:'naṣb',jarr:'khafḍ'});
 const COMPONENT_BINAA_AR=Object.freeze({sukun:'السُّكُونِ',fatha:'الْفَتْحِ',damma:'الضَّمِّ',kasra:'الْكَسْرِ'});
@@ -7291,6 +7329,11 @@ function componentRegistryError(reg){
  if(!COMPONENT_CATEGORIES[reg.category])return `unknown category ${reg.category}`;
  if(reg.category==='orthographic'&&(reg.syntacticRole!=='notApplicable'||reg.mahall!=='notApplicable'||reg.binaaSign!==null))return 'orthographic component must be notApplicable/notApplicable/null';
  if(reg.category==='particle'&&(reg.syntacticRole!=='none'||reg.mahall!=='none'))return 'particle component must be none/none';
+ /* A particle may legitimately have NO bināʾ: p.157 states one for the feminine tāʾ and none for
+    نون الوقاية. null means "the source does not say", and the renderer omits the clause rather
+    than guessing. Anything other than null must be a bināʾ the tables can actually spell. */
+ if(reg.binaaSign!==null&&!COMPONENT_BINAA_AR[reg.binaaSign])return `unknown bināʾ sign ${reg.binaaSign}`;
+ if(reg.binaaSign===null&&!['particle','orthographic'].includes(reg.category))return 'only a particle or orthographic component may omit its bināʾ';
  if(reg.category==='pronoun'&&(!COMPONENT_ROLE_AR[reg.syntacticRole]||!COMPONENT_MAHALL_AR[reg.mahall]))return 'pronoun component must carry a real role and maḥall';
  return null;
 }
@@ -7300,8 +7343,17 @@ function renderComponentAnalysis(c){
   c.ar=`«${c.letterAr}» ${c.nameAr}: ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى ${COMPONENT_BINAA_AR[c.binaaSign]} فِي مَحَلِّ ${COMPONENT_MAHALL_AR[c.mahall]} ${COMPONENT_ROLE_AR[c.syntacticRole]}.`;
   c.en=`${cap(c.nameEn)} is a connected pronoun, built on ${COMPONENT_BINAA_EN[c.binaaSign]}, in the position of ${COMPONENT_MAHALL_EN[c.mahall]} as the ${COMPONENT_ROLE_EN[c.syntacticRole]}.`;
  }else if(c.category==='particle'){
-  c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ مَبْنِيٌّ عَلَى ${COMPONENT_BINAA_AR[c.binaaSign]} لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَ فَاعِلًا.`;
-  c.en=`${cap(c.nameEn)} is a particle built on ${COMPONENT_BINAA_EN[c.binaaSign]}; it has no position in iʿrāb and is not the fāʿil.`;
+  /* Two shapes, because the source gives two. A particle whose bināʾ IS stated says it; one
+     whose bināʾ is not stated says what it is FOR instead, and never invents a bināʾ. Both end
+     with the same denial of any iʿrāb position, and the no-bināʾ shape also denies the object
+     role, because in this very construction the letter beside it IS the object. */
+  if(c.binaaSign===null){
+   c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ ${c.functionAr}، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَ فَاعِلًا وَلَا مَفْعُولًا.`;
+   c.en=`${cap(c.nameEn)} is a particle ${c.functionEn}; it has no position in iʿrāb, and is neither the fāʿil nor the mafʿūl.`;
+  }else{
+   c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ مَبْنِيٌّ عَلَى ${COMPONENT_BINAA_AR[c.binaaSign]} لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَ فَاعِلًا.`;
+   c.en=`${cap(c.nameEn)} is a particle built on ${COMPONENT_BINAA_EN[c.binaaSign]}; it has no position in iʿrāb and is not the fāʿil.`;
+  }
  }else{
   c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ زَائِدٌ لِلتَّفْرِيقِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
   c.en=`${cap(c.nameEn)} is an orthographic addition for differentiation; it has no position in iʿrāb.`;
@@ -7310,7 +7362,7 @@ function renderComponentAnalysis(c){
 function makeComponent(kind,ownerId,index){
  const reg=COMPONENT_REGISTRY[kind];
  if(!reg)throw new Error(`Unknown internal-component kind: ${kind}`);
- const c={id:`${ownerId}:C${index}`,kind,category:reg.category,syntacticRole:reg.syntacticRole,mahall:reg.mahall,binaaSign:reg.binaaSign,letterAr:reg.letterAr,nameAr:reg.nameAr,nameEn:reg.nameEn,ruleId:reg.ruleId,ar:'',en:''};
+ const c={id:`${ownerId}:C${index}`,kind,category:reg.category,syntacticRole:reg.syntacticRole,mahall:reg.mahall,binaaSign:reg.binaaSign,functionAr:reg.functionAr||'',functionEn:reg.functionEn||'',letterAr:reg.letterAr,nameAr:reg.nameAr,nameEn:reg.nameEn,ruleId:reg.ruleId,ar:'',en:''};
  renderComponentAnalysis(c);
  return c;
 }
@@ -7322,7 +7374,7 @@ function componentInstanceError(c,ownerId,index){
  for(const key of ['category','syntacticRole','mahall','binaaSign','ruleId']){
   if(c[key]!==canonical[key])return{code:'E_COMPONENT_INVARIANT',message:`component ${c.kind} field ${key} (${c[key]}) disagrees with the registry (${canonical[key]})`};
  }
- for(const key of ['letterAr','nameAr','nameEn','ar','en']){
+ for(const key of ['letterAr','nameAr','nameEn','functionAr','functionEn','ar','en']){
   if(c[key]!==canonical[key])return{code:'E_COMPONENT_PRESENTATION',message:`component ${c.kind} presentation field ${key} is not canonical`};
  }
  const registryError=componentRegistryError(reg);
@@ -7337,7 +7389,17 @@ const PAST_MORPHOLOGY=Object.freeze({
  '1p':Object.freeze({tense:'past',person:'1p',subjectMode:'attached',endingClass:'naa-failin',binaaClass:'estimated-fath-incidental-sukun',feminineTaa:false}),
  '3md':Object.freeze({tense:'past',person:'3md',subjectMode:'attached',endingClass:'alif-ithnain',binaaClass:'visible-fath',feminineTaa:false}),
  '3mp':Object.freeze({tense:'past',person:'3mp',subjectMode:'attached',endingClass:'waw-jamaaah',binaaClass:'estimated-fath-munasabah',feminineTaa:false}),
- '3fp':Object.freeze({tense:'past',person:'3fp',subjectMode:'attached',endingClass:'nuun-niswah',binaaClass:'estimated-fath-incidental-sukun',feminineTaa:false})
+ '3fp':Object.freeze({tense:'past',person:'3fp',subjectMode:'attached',endingClass:'nuun-niswah',binaaClass:'estimated-fath-incidental-sukun',feminineTaa:false}),
+ /* p.157's «لَقِيَتْنِي»: the feminine tāʾ, نون الوقاية and the object yāʾ all sit inside one verb.
+    The SUBJECT is still the following explicit noun — an attached object pronoun changes nothing
+    about who the fāʿil is — so subjectMode stays 'explicit', and the bināʾ stays visible fatḥ
+    exactly as p.157 says («مَبْنِيٌّ عَلَى الْفَتْحِ»): a sākinah tāʾ is not a moving rafʿ pronoun,
+    so it never triggers p.72's estimated-fatḥ rule. */
+ '3fs-explicit-obj-yaa':Object.freeze({tense:'past',person:'3fs-explicit-obj-yaa',subjectMode:'explicit',endingClass:'taa-taniith-nuun-wiqaya-yaa',binaaClass:'visible-fath',feminineTaa:true}),
+ /* p.142's «أَطَاعَنِي مُحَمَّدٌ»: the same protective nūn and object yāʾ with no feminine tāʾ before
+    them. subjectMode is 'explicit' rather than the bare 3ms 'contextual', because this lane always
+    states its fāʿil — which is what makes the yāʾ unmistakably the object and not the subject. */
+ '3ms-obj-yaa':Object.freeze({tense:'past',person:'3ms-obj-yaa',subjectMode:'explicit',endingClass:'nuun-wiqaya-yaa',binaaClass:'visible-fath',feminineTaa:false})
 });
 const PAST_ENDING_COMPONENTS=Object.freeze({
  'taa-taniith':Object.freeze(['taa-taniith-sakina']),
@@ -7347,7 +7409,10 @@ const PAST_ENDING_COMPONENTS=Object.freeze({
  'naa-failin':Object.freeze(['naa-failin']),
  'alif-ithnain':Object.freeze(['alif-ithnain']),
  'waw-jamaaah':Object.freeze(['waw-jamaaah','alif-fariqa']),
- 'nuun-niswah':Object.freeze(['nuun-niswah'])
+ 'nuun-niswah':Object.freeze(['nuun-niswah']),
+ /* Order is the reading order of the written word, which is also p.157's own order. */
+ 'taa-taniith-nuun-wiqaya-yaa':Object.freeze(['taa-taniith-sakina','nuun-wiqaya','yaa-mutakallim-maful']),
+ 'nuun-wiqaya-yaa':Object.freeze(['nuun-wiqaya','yaa-mutakallim-maful'])
 });
 const PAST_BINAA_RULE_IDS=Object.freeze({
  'visible-fath':'R_PAST_FATH_VISIBLE',
@@ -9354,9 +9419,9 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_PAST_FATH_EST_INCIDENTAL_SUKUN:sourceRule('A past verb attached to a moving rafʿ pronoun has estimated fatḥ whose appearance is prevented by incidental sukūn, avoiding four successive vowels in what is like one word.',[72],'Generated scope: explicitly stored 1s, 2ms, 2fs, 1p, and 3fp past forms only.'),
  C_WAW_JAMAAH_FAIL:sourceRule('Wāw al-jamāʿah is a connected pronoun built on sukūn, in the place of rafʿ as the fāʿil.',[38,67,71,72,91],'Workspace scan p.38 directly analyzes the present-attached wāw as a fāʿil built on sukūn in the position of rafʿ; p.72 gives the parallel past analysis, and pp.67 and 91 attest the existing five-verb path.'),
  C_TAA_TANIITH_SAKINA:sourceRule('The sākinah tāʾ of the past verb is a ḥarf that marks its subject noun as feminine; it is not the fāʿil and has no place in iʿrāb.',[15,16,88,91],'Workspace scan: the sākinah tāʾ enters only the past verb and marks «the noun to which the verb is attributed» as feminine — «قَالَتْ عَائِشَةُ», where عَائِشَةُ is the fāʿil, not the tāʾ (p.15); it is sākinah in its original form (p.16). The explicit feminine fāʿil is a following noun, «حَضَرَتْ هِنْدٌ» (p.88), while «ضَرَبَتْ» is the هي form whose subject is a hidden pronoun, not the tāʾ (p.91).'),
- C_TAA_FAIL_1S:sourceRule('The 1s subject tāʾ is a connected pronoun built on ḍamm in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 1s past form ending in تُ.'),
- C_TAA_FAIL_2MS:sourceRule('The 2ms subject tāʾ is a connected pronoun built on fatḥ in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 2ms past form ending in تَ.'),
- C_TAA_FAIL_2FS:sourceRule('The 2fs subject tāʾ is a connected pronoun built on kasr in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 2fs past form ending in تِ.'),
+ C_TAA_FAIL_1S:sourceRule("The 1s subject tāʾ is the mutakallim pronoun: a connected pronoun built on ḍamm in the position of rafʿ as fāʿil.",[72,91,157],"Only an explicitly registered 1s past form ending in تُ. p.157’s model iʿrāb names this very tāʾ «ضمير المتكلم فاعل، مبني على الضم في محل رفع»; p.91 lists «ضربتُ» as ضمير المتكلم الواحد."),
+ C_TAA_FAIL_2MS:sourceRule("The 2ms subject tāʾ is the mukhāṭab pronoun: a connected pronoun built on fatḥ in the position of rafʿ as fāʿil.",[72,73,91],"Only an explicitly registered 2ms past form ending in تَ. p.73 assigns the tāʾ «للمخاطب» and p.91 lists «ضربتَ» as ضمير المخاطب الواحد المذكر."),
+ C_TAA_FAIL_2FS:sourceRule("The 2fs subject tāʾ is the mukhāṭabah pronoun: a connected pronoun built on kasr in the position of rafʿ as fāʿil.",[72,91],"Only an explicitly registered 2fs past form ending in تِ. p.91 lists «ضربتِ» as ضمير المخاطبة الواحدة المؤنثة."),
  C_NAA_FAILIN:sourceRule('Nā al-fāʿilīn is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 1p past form.'),
  C_ALIF_ITHNAIN:secondarySupportedRule('Alif al-ithnayn is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[71],'Al-Tuḥfah p.71 controls the whole past verb’s visible-fatḥ analysis; Daʿkūr p.86 supplies the exact component analysis.','C_ALIF_ITHNAIN',[DAKUR_ALIF_ITHNAIN]),
  /* Scope expanded in Phase 2b-B from past-only to past + present. The component analysis is
@@ -9398,6 +9463,11 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     resolve to concealed أَنْ and are excluded, so this rule can never authorize them. */
  R_PRESENT_NUUN_NISWAH_MAHALL_NASB_KAY:sourceRule('A present verb built on sukūn for nūn al-niswah is in the position of naṣb when immediately governed by كَيْ whose lām al-taʿlīl is explicitly present.',[42,73,76,124],'Composed authority, page by page: p. 42 states the maḥall rule for a present verb preceded by a nāṣib and attached to nūn al-niswah, illustrating it with لَنْ and containing no كَيْ example; p. 76 states that كَيْ makes the present verb manṣūb by itself when لام التعليل precedes it لفظاً, placing it in that same class; pp. 73 and 124 state and apply the bināʾ on sukūn. Production is limited to canonical كَيْ immediately preceded by an explicit لام التعليل token and immediately preceding an explicitly registered 3fp/2fp nūn-al-niswah present form whose formClass is mabniPresent, endingClass nuun-niswah, binaaClass sukun-nuun-niswah, with empty state and null sign. It authorizes the naṣb maḥall alone: not the bināʾ, not the nūn component, not bare كَيْ, not the estimated (تقديراً) lām, not كَيْ as a mere حرف تعليل under a concealed أَنْ, not أَنْ, not لَنْ, not لَمْ, not an ungoverned form, not an ordinary present, not a five verb, and not nūn al-tawkīd. The surface does not change and no iʿrāb sign is introduced.'),
  C_YAA_MUKHATABA:sourceRule('Yāʾ al-mukhāṭabah is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[38],'Only an explicitly registered surface-unambiguous 2fs present five-verb form in rafʿ.'),
+ /* Two rules, not one, because p.157 makes two separate claims about two different letters, and a
+    letter that has no place in iʿrāb must never be able to borrow the rule of the pronoun beside
+    it. The nūn's rule asserts no bināʾ, because the source asserts none. */
+ C_NUUN_WIQAYA:sourceRule('Nūn al-wiqāyah is a ḥarf that must separate a verb from the first-person object yāʾ; it has no place in iʿrāb and is neither the fāʿil nor the mafʿūl.',[142,157],'Only the explicitly registered past surfaces that carry the first-person object yāʾ. Attested twice: p.142 names it and states its office — «وَيَجِبُ أَنْ يُفْصَلَ بَيْنَهَا وَبَيْنَ الْفِعْلِ بِنُونٍ تُسَمَّى نُونَ الْوِقَايَةِ», with «أَطَاعَنِي مُحَمَّدٌ» — and p.157’s model iʿrāb of «لَقِيَتْنِي هِنْدٌ بَاكِيَةً» says «وَالنُّونُ لِلْوِقَايَةِ». Neither page gives it a bināʾ or a maḥall, so this rule claims neither.'),
+ C_YAA_MUTAKALLIM_MAFUL:sourceRule('The first-person object yāʾ is a connected pronoun built on sukūn in the position of naṣb as mafʿūl bihi.',[95,157],'Only the explicitly registered past surfaces that carry it. p.157: «وَالْيَاءُ ضَمِيرُ الْمُتَكَلِّمِ مَفْعُولٌ بِهِ، مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ»; p.95 parses the parallel attached «نَا» of «سَيَزُورُنَا الْقَاضِي» as «مَفْعُولٌ بِهِ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ». It is deliberately NOT the classification «مَفْعُولٌ بِهِ مُضْمَرٌ مُتَّصِلٌ», which belongs to باب المفعول به.'),
  C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from the original wāw; it has no grammatical role and no place in iʿrāb.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[91],'Al Jazeera Learning Arabic («الألف الفارقة») names the rule and gives كَتَبُوا / لم يكتُبُوا / اكْتُبُوا. Workspace scan separately attests the written spelling «ضَرَبُوا» (p.91) as form-only; that attestation does not authorize this rule.'),
  R_KANA_PAST_DEFICIENT:sourceRule('Kāna and its sisters are deficient past verbs that raise their noun and make their khabar accusative.',[76,105,106,107,108],'The registered unconditional family surfaces use the app’s single-noun/single-khabar template; canonical كَانَ also appears in the exact مَا كَانَ + lām al-juḥūd frame, whose following verbal clause is its khabar. Other conditional operators and weak-final أَمْسَى / أَضْحَى remain excluded.',[IA_KANA]),
 
@@ -9856,6 +9926,7 @@ registerVerbSet(thingPrepActions);
 registerVerbSet(femininePastActions,{pastPerson:'3fs-explicit'});
 registerVerbSet(brokenObjectActions);
 registerAdvancedPastSet(advancedPastActions);
+registerAdvancedPastSet(objectPronounPastActions);
 registerAdvancedPresentSet(advancedPresentActions);
 registerPassiveVerbCapabilities();
 registerMutlaqVerbCapabilities();
@@ -13557,6 +13628,47 @@ function whySignVerb(t){
   ar:`وَهُوَ مُضَارِعٌ صَحِيحُ الْآخِرِ لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ، فَعَلَامَةُ ${st.sign} ${sign.ar}.`,
   en:`It is a sound-ended present verb with nothing attached to its end, so its sign of ${st.signEn} is ${sign.en}.`};
 }
+/* Why for an attached rafʿ pronoun. One builder for every such component in both tenses, so a
+   person can never end up with another person's explanation. It answers each of the four
+   questions separately and from the registry, never from boilerplate: WHICH pronoun (the
+   person-specific name), why it is the fāʿil (the verb is attributed to it — p.72 «وَالتَّاءُ
+   ... فَاعِلٌ»), why its maḥall is rafʿ (the fāʿil is marfūʿ — p.87), and why its bināʾ is this
+   particular one (its own registry bināʾ; pronouns are built, so the sign is bināʾ and not an
+   iʿrāb sign — the distinction Phase 9 turns on). collectiveAr, present only on the three tāʾs,
+   restores p.72's collective class name «تَاءُ الْفَاعِلِ», which the person-specific card name
+   no longer states; it is written in the genitive plural so the clause reads correctly, and the
+   clause is skipped entirely for components that have no collective class. */
+function attachedSubjectWhy(id,component){
+ const binaa=COMPONENT_BINAA_AR[component.binaaSign];
+ const binaaEn=COMPONENT_BINAA_EN[component.binaaSign];
+ if(!binaa||!binaaEn)throw new Error(`WHY: attached subject ${component.nameAr} has no canonical bināʾ`);
+ const collectiveAr=component.collectiveAr?`، وَهِيَ مِنْ ${component.collectiveAr}`:'';
+ return{id,
+  ar:`وَ${component.nameAr} ضَمِيرٌ مُتَّصِلٌ${collectiveAr}، أُسْنِدَ إِلَيْهِ الْفِعْلُ فَوَقَعَ فَاعِلًا، وَحُكْمُ الْفَاعِلِ الرَّفْعُ فَهُوَ فِي مَحَلِّ رَفْعٍ، وَبُنِيَ عَلَى ${binaa}؛ لِأَنَّ الضَّمَائِرَ كُلَّهَا مَبْنِيَّةٌ.`,
+  en:`${cap(component.nameEn)} is a connected pronoun attached to the verb. The verb is attributed to it, so it is the فَاعِلٌ; the ruling of the فَاعِل is rafʿ, so it stands in the position of rafʿ; and because every pronoun is مَبْنِيٌّ, it is built on ${binaaEn} rather than taking an iʿrāb sign.`};
+}
+/* The object side of p.157's parse. Derived from the ending class, exactly as whyVerbSubject is,
+   so the explanation cannot drift from the components actually rendered. Returns a list because
+   the construction contributes two independent facts, and neither may be folded into the other:
+   the nūn has no iʿrāb position, the yāʾ has one. */
+function whyVerbObjectComponents(t){
+ if(t.tense!=='past')return[];
+ const kinds=PAST_ENDING_COMPONENTS[t.grammar?.morphology?.endingClass]||[];
+ const lines=[];
+ for(const kind of kinds){
+  if(kind==='nuun-wiqaya'){
+   lines.push({id:'WHY_NUUN_WIQAYA',
+    ar:'وَالنُّونُ نُونُ الْوِقَايَةِ، فَصَلَتْ بَيْنَ الْفِعْلِ وَيَاءِ الْمُتَكَلِّمِ فَوَقَتْ آخِرَهُ، وَهِيَ حَرْفٌ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَتْ فَاعِلًا وَلَا مَفْعُولًا.',
+    en:'The nūn is nūn al-wiqāyah: it stands between the verb and the first-person yāʾ and so guards the verb’s ending. It is a particle with no position in iʿrāb, and it is neither the فَاعِل nor the مَفْعُول.'});
+  }else if(COMPONENT_REGISTRY[kind]?.syntacticRole==='maful'){
+   const component=COMPONENT_REGISTRY[kind];
+   lines.push({id:'WHY_YAA_MUTAKALLIM_MAFUL',
+    ar:`وَ${component.nameAr} ضَمِيرٌ مُتَّصِلٌ، وَقَعَ عَلَيْهِ فِعْلُ الْفَاعِلِ فَهُوَ مَفْعُولٌ بِهِ، وَحُكْمُ الْمَفْعُولِ بِهِ النَّصْبُ فَهُوَ فِي مَحَلِّ نَصْبٍ، وَبُنِيَ عَلَى ${COMPONENT_BINAA_AR[component.binaaSign]}؛ لِأَنَّ الضَّمَائِرَ كُلَّهَا مَبْنِيَّةٌ.`,
+    en:`${cap(component.nameEn)} is a connected pronoun. The subject’s action falls upon it, so it is the مَفْعُولٌ بِهِ; the ruling of the مَفْعُول بِهِ is naṣb, so it stands in the position of naṣb; and because every pronoun is مَبْنِيٌّ, it is built on ${COMPONENT_BINAA_EN[component.binaaSign]}.`});
+  }
+ }
+ return lines;
+}
 function whyVerbSubject(t){
  if(t.tense==='past'){
   const morphology=t.grammar.morphology;
@@ -13569,9 +13681,9 @@ function whyVerbSubject(t){
     'alif-ithnain':'WHY_SUBJECT_ALIF_ITHNAIN','waw-jamaaah':'WHY_SUBJECT_WAW_JAMAAH',
     'nuun-niswah':'WHY_SUBJECT_NUUN_NISWAH'
    };
-   return{id:ids[kind],ar:`وَ${component.nameAr} ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.`,en:`${cap(component.nameEn)} is attached to the verb and is its فَاعِلٌ.`};
+   return attachedSubjectWhy(ids[kind],component);
   }
-  if(morphology?.endingClass==='taa-taniith')return{id:'WHY_TAA_TANIITH_NOT_SUBJECT',ar:'وَتَاءُ التَّأْنِيثِ السَّاكِنَةُ حَرْفٌ لِلتَّأْنِيثِ، وَلَيْسَتْ فَاعِلًا؛ فَالْفَاعِلُ هُوَ الِاسْمُ الظَّاهِرُ بَعْدَ الْفِعْلِ.',en:'The sākinah feminine tāʾ marks feminine gender and is not the فَاعِلٌ; the following explicit noun is the subject.'};
+  if(PAST_ENDING_COMPONENTS[morphology?.endingClass]?.includes('taa-taniith-sakina'))return{id:'WHY_TAA_TANIITH_NOT_SUBJECT',ar:'وَتَاءُ التَّأْنِيثِ السَّاكِنَةُ حَرْفٌ لِلتَّأْنِيثِ، وَلَيْسَتْ فَاعِلًا؛ فَالْفَاعِلُ هُوَ الِاسْمُ الظَّاهِرُ بَعْدَ الْفِعْلِ.',en:'The sākinah feminine tāʾ marks feminine gender and is not the فَاعِلٌ; the following explicit noun is the subject.'};
   if(t.relations&&t.relations.subjectType==='implicit')return{id:'WHY_SUBJECT_HIDDEN',ar:'وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هُوَ».',en:'Its فَاعِل is a hidden pronoun understood as «هُوَ».'};
   return null;
  }
@@ -13580,12 +13692,12 @@ function whyVerbSubject(t){
     analysis: «ونون النسوة فاعل، مبني على الفتح في محل رفع». */
  if(t.inflection===MABNI_NUUN_NISWAH){
   const component=COMPONENT_REGISTRY['nuun-niswah'];
-  return{id:'WHY_SUBJECT_NUUN_NISWAH',ar:`وَ${component.nameAr} ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.`,en:`${cap(component.nameEn)} is attached to the verb and is its فَاعِلٌ.`};
+  return attachedSubjectWhy('WHY_SUBJECT_NUUN_NISWAH',component);
  }
  if(t.inflection==='afalKhamsa'){
   const kind=PRESENT_ENDING_COMPONENTS[t.grammar.morphology?.endingClass]?.find(item=>COMPONENT_REGISTRY[item]?.syntacticRole==='fail');
   const component=COMPONENT_REGISTRY[kind];
-  return{id:'WHY_SUBJECT_ATTACHED',ar:`وَ${component.nameAr} ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.`,en:`${cap(component.nameEn)} is attached to it and is its فَاعِل.`};
+  return attachedSubjectWhy('WHY_SUBJECT_ATTACHED',component);
  }
  if(t.relations&&t.relations.subjectType==='implicit'){
   // Built from the same tables the whole-word analysis uses, so the concealment class and
@@ -13784,6 +13896,7 @@ function buildTokenWhy(token,data){
    else if(token.grammar.morphology?.binaaClass==='estimated-fath-incidental-sukun')push({id:'WHY_PAST_FATH_EST_INCIDENTAL_SUKUN',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ؛ لِاشْتِغَالِ الْمَحَلِّ بِالسُّكُونِ الْعَارِضِ لِدَفْعِ كَرَاهَةِ تَوَالِي أَرْبَعِ مُتَحَرِّكَاتٍ فِيمَا هُوَ كَالْكَلِمَةِ الْوَاحِدَةِ.',en:'The past verb is مَبْنِيٌّ on an estimated fatḥ because incidental sukūn occupies the position, avoiding four successive vowels in what functions like one word.'});
    else throw new Error(`WHY: unknown past bināʾ class “${token.grammar.morphology?.binaaClass}”`);
    if(token.grammar.voice!==PASSIVE_VOICE)push(whyVerbSubject(token));
+   whyVerbObjectComponents(token).forEach(push);
   }else if(token.tense==='kana'){
    /* Phase QP1 — the same rule, now naming the operator actually present. The CLAIM is unchanged
       (كان وأخواتها ترفع الاسم وتنصب الخبر), so this stays one Why rule rather than one per sister. */
@@ -16045,6 +16158,12 @@ add('verb','dual','nasb','ya',()=>{const s=pickPerson(),d=pickVaried(duals,'verb
 add('verb','smp','raf','waw',()=>{const v=pickGeneralVerb(),p=pickVaried(smp,'verb-smp-subjects',x=>x.nom),o=pickGeneralObject(v,p);return{sentence:`${v.past} ${p.nom} ${o.acc}`,translation:`${cap(p.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(p.nom,p.en,AR.faail(p.nom,'الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),'The sound masculine plural subject; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}},pastTemplateMetadata('3ms','explicit'));
 add('verb','smp','nasb','ya',()=>{const s=pickPerson(),p=pickVaried(smp,'verb-smp-objects',x=>x.acc),a=pickHumanAction();return{sentence:`${a.pres} ${s.nom} ${p.acc}`,translation:`${cap(s.en)} ${a.third} ${p.en}.`,tokens:[token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),token(s.nom,s.en,AR.faail(s.nom),'The subject of the verb; nominative.'),token(p.acc,p.en,AR.object(p.acc,'الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ'),EN.object,true)]}});
 add('verb','sfp','raf','damma',()=>{const a=pickVaried(femininePastActions,'feminine-past-actions',x=>x.past),p=pickVaried(sfp,'verb-sfp-subjects',x=>x.nom);return{sentence:`${a.past} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(a.past,a.pastEn,AR.past(a.past),'A past-tense verb; the final tāʾ marks feminine gender.'),token(p.nom,p.en,AR.faail(p.nom),'The sound feminine plural subject; nominative.',true)]}},pastTemplateMetadata('3fs-explicit','explicit'));
+/* p.157's frame, on the sound-feminine-plural fāʿil this cell already teaches — «حَضَرَتِ
+   الْهِنْدَاتُ» (p.90) is the source's own tāʾ-with-plural-feminine-subject pattern. Registered in
+   the EXISTING verb/sfp/raf/damma cell rather than a new one: the target word is still a sound
+   feminine plural in rafʿ by ḍammah, so the filter matrix is unchanged and only this cell gains a
+   second sentence shape. The verb is not the target; its three internal components are what this
+   lane exists to make practiceable. */
 add('verb','fiveNouns','raf','waw',()=>{const v=pickGeneralVerb(),f=pickVaried(fiveNouns,'verb-five-noun-subjects',x=>x.nom),o=pickGeneralObject(v,f);return{sentence:`${v.past} ${f.nom} ${o.acc}`,translation:`${cap(f.en)} ${v.pastEn} ${o.en}.`,tokens:[token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),token(f.nom,f.en,AR.faail(f.nom),'The subject of the verb; nominative.',true),token(o.acc,o.en,AR.object(o.acc),EN.object)]}},pastTemplateMetadata('3ms','explicit'));
 /* Phase QP1 — one template, the whole family. The operator is drawn from the frozen registry through
    the same deterministic rotation every other template uses, so every registered sister is reached
@@ -17582,6 +17701,17 @@ add('noun','singular','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.baSubjec
   tokens:[token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada),
    token(v.pres,v.third,AR.presentPred(v.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),
    khafdToken('ba'),token(o.gen,o.en,AR.majrur(o.gen,KHAFD_PARTICLE_REGISTRY.ba.surface),EN.majrur,true)]}});
+
+/* ── Wave 2: the p.157 / p.142 attached-object lanes ──────────────────────────────────────
+   Registered LAST on purpose. add() assigns a template's ordinal by call order within its
+   family, so registering these two in the middle of their families would renumber every later
+   template's stableId — and stableIds are pinned throughout work/check-nominal-pairs.js. Placed
+   here they take the highest ordinals in their families and no existing id moves. */
+/* p.142's masculine frame, in the verb/singular/raf/damma cell the explicit singular fāʿil
+   already occupies. Two lanes, two genders, one component analysis. */
+add('verb','singular','raf','damma',()=>{const a=pickVaried(objectPronounPastActions.filter(item=>item.forms['3ms-obj-yaa']),'object-pronoun-past-actions-3ms',x=>x.past),surface=a.forms['3ms-obj-yaa'],p=pickVaried(singularPeople,'verb-objyaa-singular-subjects',x=>x.nom);return{sentence:`${surface} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(surface,a.pastEn,AR.past(surface),'A past-tense verb carrying the protective nūn and the first-person object pronoun.'),token(p.nom,p.en,AR.faail(p.nom),'The subject of the verb; nominative.',true)]}},pastTemplateMetadata('3ms-obj-yaa','explicit'));
+add('verb','sfp','raf','damma',()=>{const a=pickVaried(objectPronounPastActions.filter(item=>item.forms['3fs-explicit-obj-yaa']),'object-pronoun-past-actions',x=>x.past),surface=a.forms['3fs-explicit-obj-yaa'],p=pickVaried(sfp,'verb-objyaa-sfp-subjects',x=>x.nom);return{sentence:`${surface} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(surface,a.pastEn,AR.past(surface),'A past-tense verb carrying the feminine tāʾ, the protective nūn, and the first-person object pronoun.'),token(p.nom,p.en,AR.faail(p.nom),'The sound feminine plural subject; nominative.',true)]}},pastTemplateMetadata('3fs-explicit-obj-yaa','explicit'));
+
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

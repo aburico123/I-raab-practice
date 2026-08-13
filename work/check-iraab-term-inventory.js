@@ -113,7 +113,21 @@ for (let i = 0; i < api.templates.length; i++) {
     built++;
     sentences.add(skeleton(data.sentence));
     for (const token of data.tokens) {
-      for (const line of [token.ar, token.phraseAr]) {
+      /* The rendered iʿrāb has THREE surfaces, not two. Besides the whole-word card
+         (token.ar) and the combined-analysis card (token.phraseAr), every internal component
+         renders its OWN iʿrāb line: `<div class="component-iraab" lang="ar">` at the single
+         answers-panel render site, sitting between the whole-word iʿrāb and the Why block.
+         That div is iʿrāb the learner performs, not explanation about it, so a term that
+         reaches it IS practised. Omitting it silently under-counted every word-internal
+         term: وَاوُ الْجَمَاعَةِ scored FULL only by the accident of also being named in a
+         rābiṭ phrase sentence, while its own component card — the one place a learner ever
+         parses that wāw — did not count at all. The why/definition corpora are untouched, so
+         the distinction this file exists to enforce (performing a term vs. being told it) is
+         unchanged. Component lines are `«letter» name: body`, which the card-head regex
+         below cannot match, so `cardHeads` and the particle sets derived from it are
+         unaffected. */
+      const componentIraab = (token.components || []).map(component => component.ar);
+      for (const line of [token.ar, token.phraseAr, ...componentIraab]) {
         if (!line) continue;
         const s = skeleton(line);
         if (!iraabLines.has(s)) iraabLines.set(s, new Set());
@@ -165,6 +179,36 @@ function standalone(needle) {
   for (const [line, ids] of iraabLines) if (re.test(line)) ids.forEach(id => tpl.add(id));
   return tpl;
 }
+/* Does this needle ever occur as a WORD, rather than as letters buried inside a longer one?
+   skeleton() strips every ḥarakah, so a short probe can be swallowed whole: «إِيَّا» reduces to
+   "ايا", which is a substring of «أَيَّانَ» — and that coincidence alone once scored the attached
+   object-pronoun row FULL even though no إيا pronoun exists anywhere in the app. Used by the
+   probe-integrity invariant below, which is what turns that class of silent false positive into
+   a loud failure. */
+/* The left boundary may be a one-letter proclitic — وَ/فَ/لَ/بِ/كَ are written joined to the word
+   that follows, so «وَنَعْتٌ حَقِيقِيٌّ» really is the term نَعْتٌ حَقِيقِيٌّ and must not be read
+   as a coincidence. The RIGHT boundary admits no such licence: every false positive this check
+   exists to catch is a probe continuing into a different word (كِلَا→كَلَام, إِيَّا/أَيَا→أَيَّانَ). */
+const PROCLITIC = '[\\u0648\\u0641\\u0644\\u0628\\u0643]?';
+function probeOccurrence(needle) {
+  const s = skeleton(needle);
+  if (!s) return { standalone: false, swallowedBy: '' };
+  const re = new RegExp('(^|[^\\u0621-\\u064A])' + PROCLITIC + s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^\\u0621-\\u064A])');
+  let swallowedBy = '';
+  for (const line of iraabLines.keys()) {
+    if (re.test(line)) return { standalone: true, swallowedBy: '' };
+    if (!swallowedBy) {
+      const at = line.indexOf(s);
+      if (at >= 0) {
+        let start = at, end = at + s.length;
+        while (start > 0 && line[start - 1] !== ' ') start--;
+        while (end < line.length && line[end] !== ' ') end++;
+        swallowedBy = line.slice(start, end);
+      }
+    }
+  }
+  return { standalone: false, swallowedBy };
+}
 
 function observe(row) {
   const mode = row.mode || 'contains';
@@ -205,7 +249,16 @@ function observe(row) {
      is why the registry modes never fall through to the mentioned-only test. */
   const lexical = ['kana', 'inna', 'prep'].includes(mode);
   let status;
-  if (tpl.size === 0) status = (!lexical && mentionedOnly(row.probe)) ? 'GENERIC_ONLY' : 'ABSENT';
+  if (tpl.size === 0) {
+    /* TRUE_BLOCKER is the one status a row may ASK for, and it is granted only when the term is
+       genuinely not produced — a declaration can never mask a row that does reach the learner,
+       because this branch is unreachable once anything is observed. It outranks GENERIC_ONLY on
+       purpose: "the source cannot support this" is a stronger and more useful statement than
+       "the term appears in explanation text". The declaration must carry its written proof, and
+       the assertions below reject a short or missing one. */
+    status = row.trueBlocker ? 'TRUE_BLOCKER'
+      : (!lexical && mentionedOnly(row.probe)) ? 'GENERIC_ONLY' : 'ABSENT';
+  }
   else if (row.partial) status = 'PARTIAL';
   else status = 'FULL';
 
@@ -226,9 +279,9 @@ const observed = rows.map(row => {
     pages: row.pages,
     parent: row.parent,
     status: o.status,
-    proof: o.status === 'ABSENT' ? ''
+    proof: ['ABSENT', 'TRUE_BLOCKER'].includes(o.status) ? ''
       : `built ${ROUNDS}× per template; «${row.probe}» observed in the rendered ${o.status === 'GENERIC_ONLY' ? 'Why/definitions text only' : 'iʿrāb'} across ${o.templates} template lane(s) [mode=${row.mode || 'contains'}]`,
-    missingReason: o.status === 'FULL' ? '' : (row.missingReason || (o.status === 'GENERIC_ONLY'
+    missingReason: o.status === 'FULL' ? '' : (o.status === 'TRUE_BLOCKER' ? row.trueBlocker : row.missingReason || (o.status === 'GENERIC_ONLY'
       ? 'The term is named in explanation or definition text, but the learner never says it as its own classification while performing iʿrāb.'
       : 'Not produced by any template lane.')),
     randomization: o.randomization,
@@ -296,9 +349,35 @@ const inventory = {
 for (const r of observed) {
   if (!STATUSES.includes(r.status)) fail(`row ${r.key} has invalid status ${r.status}`);
   if (!RANDOMIZATION.includes(r.randomization)) fail(`row ${r.key} has invalid randomization ${r.randomization}`);
-  if (r.status !== 'ABSENT' && !r.proof) fail(`row ${r.key} is ${r.status} but declares no proof`);
+  if (!['ABSENT', 'TRUE_BLOCKER'].includes(r.status) && !r.proof) fail(`row ${r.key} is ${r.status} but declares no proof`);
   if (r.status === 'ABSENT' && !r.missingReason) fail(`row ${r.key} is ABSENT but declares no missingReason`);
+  /* A blocker is a CLAIM, so it must be argued, not asserted: the row has to carry a written proof
+     long enough to name the source pages it checked and the architectural rule it hit. And a row
+     that declares a blocker while actually being produced is a stale declaration, not a blocker. */
+  if (r.status === 'TRUE_BLOCKER' && (r.missingReason || '').length < 200) {
+    fail(`row ${r.key} is TRUE_BLOCKER but its proof is missing or too short to be a proof`);
+  }
+  const authored = rows.find(x => x.key === r.key);
+  if (authored && authored.trueBlocker && r.status !== 'TRUE_BLOCKER') {
+    fail(`row ${r.key} declares a true blocker but the app yields ${r.status}; the declaration is stale and must be removed`);
+  }
   if (!r.term || !r.chapter || !r.pages || !r.parent) fail(`row ${r.key} is missing required metadata`);
+}
+/* ── probe integrity ────────────────────────────────────────────────────────────────────
+   A bare `contains` probe that is credited as practised must occur at least once as its own
+   word. Without this, any probe short enough to hide inside an unrelated word scores itself
+   FULL forever and nobody can see why: that is exactly how «إِيَّا» rode along inside «أَيَّانَ».
+   A row that genuinely needs different matching says so with an explicit mode — which is the
+   fix this check forces, rather than silently loosening what FULL means. */
+for (const r of observed) {
+  /* Only a row CREDITED with practice has something to prove here. ABSENT and GENERIC_ONLY both
+     mean the iʿrāb corpus matched nothing at all, so there is no occurrence to classify. */
+  if (r.probeMode !== 'contains' || !['FULL', 'PARTIAL'].includes(r.status)) continue;
+  const occurrence = probeOccurrence(r.probe);
+  if (!occurrence.standalone)
+    fail(`row ${r.key} is ${r.status} but «${r.probe}» never occurs as a standalone term: every match ` +
+      `is letters inside a longer word (e.g. «${occurrence.swallowedBy}»), so the status is a false ` +
+      `positive. Give the row an explicit mode rather than loosening what FULL means.`);
 }
 /* ── Wave 1 completeness ─────────────────────────────────────────────────────────────
    The fourteen حروف الخفض / معاني الإضافة rows that were non-FULL before Wave 1, named
@@ -319,6 +398,41 @@ for (const row of wave1) {
   if (row.status !== 'FULL') fail('Wave-1 row ' + row.key + ' is ' + row.status + ', not FULL');
 }
 if (wave1.length !== WAVE1_KEYS.length) fail('the Wave-1 row set did not resolve');
+
+/* ── Wave 2 completeness ─────────────────────────────────────────────────────────────
+   The nine باب الفاعل / pronoun rows that were non-FULL before Wave 2, named for the same reason
+   Wave 1's are named. Eight had to become FULL on the strength of a live build. The ninth,
+   ضَمِيرٌ مُنْفَصِلٌ, is a proved source blocker and is REQUIRED to stay TRUE_BLOCKER: counting it
+   as done would be a lie, and quietly letting it become FULL would mean someone had invented the
+   bināʾ the source withholds — so this pin fails in BOTH directions. Every row is accounted for,
+   and target == full + blocked is asserted rather than written down. */
+const WAVE2_KEYS = ['M_TAA_FAIL_1S', 'M_TAA_FAIL_2MS', 'M_TAA_FAIL_2FS', 'M_NAA_FAILIN',
+  'M_YAA_MUKHATABA', 'M_TAA_TANIITH', 'M_ALIF_FARIQA', 'M_NUUN_WIQAYA', 'M_DAMIR_MUNFASIL'];
+const WAVE2_BLOCKED = ['M_DAMIR_MUNFASIL'];
+const wave2 = WAVE2_KEYS.map(key => {
+  const row = observed.find(r => r.key === key);
+  if (!row) fail('Wave-2 row ' + key + ' is missing from the inventory');
+  return row;
+}).filter(Boolean);
+for (const row of wave2) {
+  const mustBlock = WAVE2_BLOCKED.includes(row.key);
+  const expected = mustBlock ? 'TRUE_BLOCKER' : 'FULL';
+  if (row.status !== expected) {
+    fail('Wave-2 row ' + row.key + ' is ' + row.status + ', not ' + expected +
+      (mustBlock ? ' — a blocked row that changes status needs its proof re-examined, not its pin edited' : ''));
+  }
+}
+const wave2Full = wave2.filter(r => r.status === 'FULL').length;
+const wave2Blocked = wave2.filter(r => r.status === 'TRUE_BLOCKER').length;
+if (wave2.length !== WAVE2_KEYS.length) fail('the Wave-2 row set did not resolve');
+if (wave2Full + wave2Blocked !== WAVE2_KEYS.length) fail('Wave-2 rows are not all either FULL or blocked');
+/* Every Wave-2 row lives in the chapter this wave was scoped to, so a later edit cannot quietly
+   move an unrelated row into the pin to make the count come out. */
+for (const row of wave2) {
+  if (!/^(باب الفاعل|المقدمات)/.test(row.chapter) && row.parent !== 'علامات الفعل') {
+    fail('Wave-2 row ' + row.key + ' is not in the wave\'s scope: ' + row.chapter);
+  }
+}
 
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
@@ -349,6 +463,7 @@ console.log(JSON.stringify({
   templates: api.templates.length, rounds: ROUNDS, builds: built,
   totals, randomizationTotals, marathon,
   wave1: { name: 'حروف الخفض ومعاني الإضافة', target: WAVE1_KEYS.length, full: wave1Full },
+  wave2: { name: 'باب الفاعل والضمائر', target: WAVE2_KEYS.length, full: wave2Full, trueBlocker: wave2Blocked },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

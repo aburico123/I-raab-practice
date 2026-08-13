@@ -1582,6 +1582,8 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_PARTICLE_SINGULAR_NASB_FATHA_15||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_15",structure:"particle:particle,verb:present,noun:object",shape:"TS66",copulaPlural:false}),
  "T_PARTICLE_SINGULAR_NASB_FATHA_16||particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_16",structure:"particle:particle,verb:present,noun:object",shape:"TS66",copulaPlural:false}),
  "T_PARTICLE_PRESENT_JAZM_SUKUN_09||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_PRESENT_JAZM_SUKUN_09",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
+ "T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07||particle:particle,verb:present,verb:present":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07",structure:"particle:particle,verb:present,verb:present",shape:"TS65",copulaPlural:false}),
  "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01",structure:"particle:particle,verb:present,noun:faail",shape:"TS59",copulaPlural:false}),
  "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02",structure:"particle:particle,verb:present,noun:faail",shape:"TS59",copulaPlural:false}),
  "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03||particle:particle,verb:present,noun:faail":Object.freeze({templateId:"T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03",structure:"particle:particle,verb:present,noun:faail",shape:"TS60",copulaPlural:false}),
@@ -7726,6 +7728,15 @@ const WEAK_FINAL_LETTERS=Object.freeze(Object.assign(Object.create(null),{
  ya:Object.freeze({id:'ya',glyph:'ي',ar:'الْيَاءُ',en:'yāʾ',evidenceAr:'الْكَسْرَةُ',evidenceEn:'the kasrah'})
 }));
 const WEAK_FINAL_VERBS=Object.freeze(Object.assign(Object.create(null),{
+ /* 1D-2 — the same frozen system, extended rather than duplicated: three 2ms families whose
+    pres→juss round trip is proven by the identical invariant, so the conditional lane can exercise
+    حذف حرف العلة on a verb whose subject is «أَنْتَ». `person` defaults to the 3ms the J2 lanes use. */
+ saaTaa:Object.freeze({key:'saaTaa',letter:'alif',person:'2ms',past:'سَعَى',pres:'تَسْعَى',juss:'تَسْعَ',
+  en:'strive',third:'strives',pastEn:'strove',objectKeys:Object.freeze([])}),
+ samaTaa:Object.freeze({key:'samaTaa',letter:'waw',person:'2ms',past:'سَمَا',pres:'تَسْمُو',juss:'تَسْمُ',
+  en:'rise',third:'rises',pastEn:'rose',objectKeys:Object.freeze([])}),
+ hadaTaa:Object.freeze({key:'hadaTaa',letter:'ya',person:'2ms',past:'هَدَى',pres:'تَهْدِي',juss:'تَهْدِ',
+  en:'guide',third:'guides',pastEn:'guided',objectKeys:Object.freeze([])}),
  saa:Object.freeze({key:'saa',letter:'alif',past:'سَعَى',pres:'يَسْعَى',juss:'يَسْعَ',
   en:'strive',third:'strives',pastEn:'strove',objectKeys:Object.freeze([])}),
  baqiya:Object.freeze({key:'baqiya',letter:'alif',past:'بَقِيَ',pres:'يَبْقَى',juss:'يَبْقَ',
@@ -7763,6 +7774,8 @@ const WEAK_FINAL_BY_JUSS=Object.freeze(Object.assign(Object.create(null),
   for(const name of ['past','pres','juss','en','third','pastEn']){
    if(typeof verb[name]!=='string'||!verb[name])throw new Error('Weak-final verb '+key+'.'+name+' is not a non-empty string.');
   }
+  const person=verb.person||'3ms';
+  if(!PRESENT_MORPHOLOGY[person])throw new Error('Weak-final verb '+key+' names an unsupported person.');
   if(!verb.pres.endsWith(letter.glyph)){
    throw new Error('Weak-final verb '+key+' does not actually end in the weak letter it claims: '+verb.pres);
   }
@@ -7772,7 +7785,11 @@ const WEAK_FINAL_BY_JUSS=Object.freeze(Object.assign(Object.create(null),
   if(Object.values(WEAK_FINAL_LETTERS).some(item=>verb.juss.endsWith(item.glyph))){
    throw new Error('Weak-final jussive '+verb.juss+' still ends in a weak letter.');
   }
-  for(const surface of [verb.past,verb.pres,verb.juss]){
+  /* Uniqueness is required of the PRODUCED surfaces — the marfūʿ form the round trip proves and the
+     jussive form that is registered and shown. The past may legitimately repeat: تَسْعَى and يَسْعَى
+     are two persons of ONE lemma, so both records name سَعَى, and forbidding that would forbid the
+     second person rather than catch a mistake. */
+  for(const surface of [verb.pres,verb.juss]){
    if(seen.has(surface))throw new Error('Weak-final surface '+surface+' is claimed twice.');
    seen.add(surface);
   }
@@ -7831,22 +7848,64 @@ const CONDITION_GOVERNORS=Object.freeze(Object.assign(Object.create(null),{
 /* The frames. A conditional is only meaningful if the condition and its answer belong together, so
    each frame owns BOTH verbs and their English, and nothing is combined at random. */
 const CONDITION_VERBS=Object.freeze(Object.assign(Object.create(null),{
- dhakara:Object.freeze({key:'dhakara',juss:'تُذَاكِرْ',en:'study',person:'2ms'}),
- najaha:Object.freeze({key:'najaha',juss:'تَنْجَحْ',en:'succeed',person:'2ms'}),
- saala:Object.freeze({key:'saala',juss:'تَسْأَلْ',en:'ask',person:'2ms'}),
- afham:Object.freeze({key:'afham',juss:'تَفْهَمْ',en:'understand',person:'2ms'}),
- sabir:Object.freeze({key:'sabir',juss:'تَصْبِرْ',en:'be patient',person:'2ms'}),
- zfar:Object.freeze({key:'zfar',juss:'تَظْفَرْ',en:'attain',person:'2ms'})
+ /* 1D — every conditional verb now declares the inflection lane it belongs to, so the SIGN it
+    receives comes from the canonical present-verb matrix for that lane rather than from the frame.
+    `owned` says who registered the surface: the sound 2ms forms are this registry's own, while the
+    weak-final and five-verb surfaces are already owned by their own registries and are only
+    referenced here — one surface, one owner, never two. */
+ dhakara:Object.freeze({key:'dhakara',juss:'تُذَاكِرْ',en:'study',person:'2ms',inflection:'regular',owned:true}),
+ najaha:Object.freeze({key:'najaha',juss:'تَنْجَحْ',en:'succeed',person:'2ms',inflection:'regular',owned:true}),
+ saala:Object.freeze({key:'saala',juss:'تَسْأَلْ',en:'ask',person:'2ms',inflection:'regular',owned:true}),
+ afham:Object.freeze({key:'afham',juss:'تَفْهَمْ',en:'understand',person:'2ms',inflection:'regular',owned:true}),
+ sabir:Object.freeze({key:'sabir',juss:'تَصْبِرْ',en:'be patient',person:'2ms',inflection:'regular',owned:true}),
+ zfar:Object.freeze({key:'zfar',juss:'تَظْفَرْ',en:'attain',person:'2ms',inflection:'regular',owned:true}),
+ // Weak-final, owned by WEAK_FINAL_VERBS and proven there by its pres→juss round trip.
+ saaTaa:Object.freeze({key:'saaTaa',juss:'تَسْعَ',en:'strive',person:'2ms',inflection:'weakFinal',owned:false}),
+ samaTaa:Object.freeze({key:'samaTaa',juss:'تَسْمُ',en:'rise',person:'2ms',inflection:'weakFinal',owned:false}),
+ hadaTaa:Object.freeze({key:'hadaTaa',juss:'تَهْدِ',en:'guide',person:'2ms',inflection:'weakFinal',owned:false}),
+ // Five verbs, owned by the general verb registry; 3mp, so their subject is the attached wāw.
+ /* A 3mp surface's canonical gloss is «they + the lexeme's own English», so these records carry
+    exactly that: the builder and the canonical rebuilding path must agree byte for byte. */
+ darasuu:Object.freeze({key:'darasuu',juss:'يَدْرُسُوا',en:'they study',person:'3mp',inflection:'afalKhamsa',owned:false}),
+ hafizuu:Object.freeze({key:'hafizuu',juss:'يَحْفَظُوا',en:'they memorize',person:'3mp',inflection:'afalKhamsa',owned:false}),
+ samiuu:Object.freeze({key:'samiuu',juss:'يَسْمَعُوا',en:'they hear',person:'3mp',inflection:'afalKhamsa',owned:false}),
+ qarauu:Object.freeze({key:'qarauu',juss:'يَقْرَؤُوا',en:'they read',person:'3mp',inflection:'afalKhamsa',owned:false})
 }));
 const CONDITION_FRAMES=Object.freeze(Object.assign(Object.create(null),{
+ /* Grouped by the SHART's morphology, because the template's (form, state, sign) tuple describes
+    the learner's target and the target is the verb of the condition. Several frames deliberately
+    MIX the two regimes — a weak-final condition answered by a sound-final verb — so the learner
+    meets two different jazm signs inside one sentence. */
  studySucceed:Object.freeze({key:'studySucceed',governor:'inShart',shartKey:'dhakara',jawabKey:'najaha',
   en:'If you study, you will succeed.'}),
  askUnderstand:Object.freeze({key:'askUnderstand',governor:'inShart',shartKey:'saala',jawabKey:'afham',
   en:'If you ask, you will understand.'}),
  patienceAttain:Object.freeze({key:'patienceAttain',governor:'inShart',shartKey:'sabir',jawabKey:'zfar',
-  en:'If you are patient, you will attain.'})
+  en:'If you are patient, you will attain.'}),
+ studyRise:Object.freeze({key:'studyRise',governor:'inShart',shartKey:'dhakara',jawabKey:'samaTaa',
+  en:'If you study, you will rise.'}),
+ striveSucceed:Object.freeze({key:'striveSucceed',governor:'inShart',shartKey:'saaTaa',jawabKey:'najaha',
+  en:'If you strive, you will succeed.'}),
+ guideAttain:Object.freeze({key:'guideAttain',governor:'inShart',shartKey:'hadaTaa',jawabKey:'zfar',
+  en:'If you guide, you will attain.'}),
+ riseUnderstand:Object.freeze({key:'riseUnderstand',governor:'inShart',shartKey:'samaTaa',jawabKey:'afham',
+  en:'If you rise, you will understand.'}),
+ studyMemorizeFive:Object.freeze({key:'studyMemorizeFive',governor:'inShart',shartKey:'darasuu',jawabKey:'hafizuu',
+  en:'If they study, they will memorize.'}),
+ listenMemorizeFive:Object.freeze({key:'listenMemorizeFive',governor:'inShart',shartKey:'samiuu',jawabKey:'hafizuu',
+  en:'If they hear, they will memorize.'}),
+ readMemorizeFive:Object.freeze({key:'readMemorizeFive',governor:'inShart',shartKey:'qarauu',jawabKey:'hafizuu',
+  en:'If they read, they will memorize.'})
 }));
 const CONDITION_FRAME_KEYS=Object.freeze(Object.keys(CONDITION_FRAMES));
+/* One group per shart inflection: the template that owns a group declares exactly its keys, so a
+   frame can never be built under a template whose (form, state, sign) tuple does not describe it. */
+const CONDITION_FRAMES_BY_SHART_INFLECTION=Object.freeze(Object.assign(Object.create(null),
+ ['regular','weakFinal','afalKhamsa'].reduce((all,inflection)=>{
+  all[inflection]=Object.freeze(CONDITION_FRAME_KEYS.filter(key=>
+   CONDITION_VERBS[CONDITION_FRAMES[key].shartKey].inflection===inflection));
+  return all;
+ },{})));
 /* Keyed by the ORDERED pair, which is what makes a فعل الشرط ↔ جواب الشرط swap identify no frame. */
 const CONDITION_FRAME_BY_PAIR=Object.freeze(Object.assign(Object.create(null),
  Object.fromEntries(CONDITION_FRAME_KEYS.map(key=>[
@@ -7863,6 +7922,13 @@ const CONDITION_FRAME_BY_PAIR=Object.freeze(Object.assign(Object.create(null),
    if(typeof verb[name]!=='string'||!verb[name])throw new Error('Condition verb '+key+'.'+name+' is not a non-empty string.');
   }
   if(!PRESENT_MORPHOLOGY[verb.person])throw new Error('Condition verb '+key+' names an unsupported person.');
+  if(typeof verb.owned!=='boolean')throw new Error('Condition verb '+key+' does not say who owns its surface.');
+  if(verb.inflection==='weakFinal'&&!Object.prototype.hasOwnProperty.call(WEAK_FINAL_BY_JUSS,verb.juss)){
+   throw new Error('Condition verb '+key+' claims weakFinal but is not in the weak-final registry.');
+  }
+  if(verb.owned&&verb.inflection!=='regular'){
+   throw new Error('Condition verb '+key+' owns a surface that another registry already owns.');
+  }
   if(surfaces.has(verb.juss))throw new Error('Condition surface '+verb.juss+' is claimed twice.');
   surfaces.add(verb.juss);
  }
@@ -7874,6 +7940,9 @@ const CONDITION_FRAME_BY_PAIR=Object.freeze(Object.assign(Object.create(null),
   if(!shart||!jawab)throw new Error('Condition frame '+key+' names an unregistered verb.');
   if(shart.juss===jawab.juss)throw new Error('Condition frame '+key+' repeats one verb as both condition and answer.');
   if(shart.person!==jawab.person)throw new Error('Condition frame '+key+' mixes persons across its two verbs.');
+  if(!CONDITION_FRAMES_BY_SHART_INFLECTION[shart.inflection]?.includes(key)){
+   throw new Error('Condition frame '+key+' is not grouped under its own shart inflection.');
+  }
   if(typeof frame.en!=='string'||!frame.en)throw new Error('Condition frame '+key+' has no English.');
  }
  for(const id of Object.keys(CONDITION_GOVERNORS)){
@@ -7984,6 +8053,15 @@ const GRAMMAR_RULES=Object.freeze({
   if(governor.surface!==entry.surface)throw new Error(`One-verb jāzim ${id} disagrees with the governor table on its Arabic surface.`);
   if(governor.ruleId!==entry.ruleId)throw new Error(`One-verb jāzim ${id} disagrees with the governor table on its source rule.`);
   if(governor.conditionSetId)throw new Error(`One-verb jāzim ${id} names a conditional governor.`);
+ }
+ /* Deferred to here because it reads GRAMMAR_RULES: every conditional verb's inflection must be a
+    lane the canonical present-verb matrix actually gives a jazm sign for, so a frame can never ask
+    for a sign that does not exist. */
+ for(const key of Object.keys(CONDITION_VERBS)){
+  const verb=CONDITION_VERBS[key];
+  if(!GRAMMAR_RULES.presentVerb[verb.inflection]||!GRAMMAR_RULES.presentVerb[verb.inflection].jazm){
+   throw new Error('Condition verb '+key+' names an inflection with no jazm sign: '+verb.inflection);
+  }
  }
  for(const id of Object.keys(CONDITION_GOVERNORS)){
   const entry=CONDITION_GOVERNORS[id];
@@ -8784,6 +8862,14 @@ registerMissingFollowerForms(Object.values(TAWKID_LEXEMES),'singular');
 function registerConditionVerbs(){
  for(const key of Object.keys(CONDITION_VERBS)){
   const record=CONDITION_VERBS[key];
+  // A referenced surface belongs to another registry; registering it again would create a second
+  // owner for one word, which is exactly what the ownership flag exists to prevent.
+  if(!record.owned){
+   if(!verbFormIndex.has(record.juss)){
+    throw new Error(`Conditional surface ${record.juss} claims another owner but is not registered.`);
+   }
+   continue;
+  }
   if(verbFormIndex.has(record.juss)){
    throw new Error(`Conditional surface ${record.juss} is already owned by another verb record.`);
   }
@@ -8798,7 +8884,12 @@ function registerWeakFinalVerbs(){
   if(verbFormIndex.has(lexeme.juss)){
    throw new Error(`Weak-final surface ${lexeme.juss} is already owned by another verb record.`);
   }
-  verbFormIndex.set(lexeme.juss,{lexeme,form:'juss',surface:lexeme.juss,morphology:Object.freeze({})});
+  /* A 2ms family must carry its reading explicitly: without it LEGACY_PRESENT_PERSON would resolve
+     the jussive form to 3ms and the verb would be analysed with the wrong hidden pronoun. */
+  const morphology=lexeme.person&&lexeme.person!=='3ms'
+   ?Object.freeze({presentPerson:lexeme.person,presentPersonCandidates:Object.freeze([lexeme.person])})
+   :Object.freeze({});
+  verbFormIndex.set(lexeme.juss,{lexeme,form:'juss',surface:lexeme.juss,morphology});
  }
 }
 function registerDuaaVerbs(){
@@ -9553,8 +9644,13 @@ const AR={
  // deriveConditionAuthority proves it, and validateExercise refuses the exercise when it cannot.
  // exactPresentRaf marks a person-bound registered surface (a legacy field name); 2ms is outside
  // the generic 3ms/3mp lane, so the canonical marker must be present and true.
- shartVerb:(w,person)=>grammarSpec('verb','present',{conjugation:'regular',person,exactPresentRaf:true,shartRole:'shart'}),
- jawabVerb:(w,person)=>grammarSpec('verb','present',{conjugation:'regular',person,exactPresentRaf:true,shartRole:'jawab'}),
+ /* exactPresentRaf marks a PERSON-BOUND registered surface (a legacy field name). It is true for
+    2ms, which is outside the generic 3ms/3mp lane, and false for the 3mp five-verb forms, which
+    are inside it — so it is derived from the person rather than asserted. */
+ shartVerb:(w,person,conjugation)=>grammarSpec('verb','present',
+  {conjugation,person,exactPresentRaf:!GENERIC_PRESENT_PERSONS.includes(person),shartRole:'shart'}),
+ jawabVerb:(w,person,conjugation)=>grammarSpec('verb','present',
+  {conjugation,person,exactPresentRaf:!GENERIC_PRESENT_PERSONS.includes(person),shartRole:'jawab'}),
  hamzatTaqrir:w=>grammarSpec('particle','particle',{particleType:HAMZAT_TAQRIR.particleType,particleWord:w}),
  an:w=>grammarSpec('particle','particle',{particleType:'an',particleWord:w}),
  kay:w=>grammarSpec('particle','particle',{particleType:'kay',particleWord:w}),
@@ -15279,8 +15375,11 @@ add('particle','present','jazm','sukun',()=>buildDuaaExercise('laDuaaiyya'),duaa
 
    Intransitive families take no object; transitive ones draw theirs from the objects their own
    frozen record names, so no verb is ever handed a complement it does not take. */
-const WEAK_FINAL_INTRANSITIVE=Object.freeze(WEAK_FINAL_KEYS.filter(key=>!WEAK_FINAL_VERBS[key].objectKeys.length));
-const WEAK_FINAL_TRANSITIVE=Object.freeze(WEAK_FINAL_KEYS.filter(key=>WEAK_FINAL_VERBS[key].objectKeys.length));
+/* The J2 lanes produce the THIRD-person families only; the 2ms ones exist for the conditional lane,
+   whose subject is «أَنْتَ». Both draw on the same registry and the same invariant. */
+const WEAK_FINAL_THIRD_PERSON=Object.freeze(WEAK_FINAL_KEYS.filter(key=>(WEAK_FINAL_VERBS[key].person||'3ms')==='3ms'));
+const WEAK_FINAL_INTRANSITIVE=Object.freeze(WEAK_FINAL_THIRD_PERSON.filter(key=>!WEAK_FINAL_VERBS[key].objectKeys.length));
+const WEAK_FINAL_TRANSITIVE=Object.freeze(WEAK_FINAL_THIRD_PERSON.filter(key=>WEAK_FINAL_VERBS[key].objectKeys.length));
 const WEAK_FINAL_GOVERNORS=Object.freeze(['lam','lamma','lamAmr','laNahiya']);
 const WEAK_FINAL_LEAD_EN=Object.freeze(Object.assign(Object.create(null),{
  lam:(subject,verb,object)=>`${cap(subject)} did not ${verb}${object}.`,
@@ -15324,23 +15423,37 @@ for(const transitive of [false,true]){
    nothing else, which is the source's «إِنْ تُذَاكِرْ تَنْجَحْ» exactly. Both verbs are 2ms, so both
    carry «مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ», the analysis the source gives them. Frames rotate
    deterministically, so the rule is practised over changing vocabulary rather than one sentence. */
-function buildConditionExercise(){
- const frameKey=pickVaried([...CONDITION_FRAME_KEYS],'condition-frame',String);
+function buildConditionExercise(shartInflection){
+ const keys=CONDITION_FRAMES_BY_SHART_INFLECTION[shartInflection];
+ const frameKey=pickVaried([...keys],`condition-frame:${shartInflection}`,String);
  const frame=CONDITION_FRAMES[frameKey];
  const governor=CONDITION_GOVERNORS[frame.governor];
  const shart=CONDITION_VERBS[frame.shartKey],jawab=CONDITION_VERBS[frame.jawabKey];
+ const verbHint=inflection=>inflection==='afalKhamsa'?EN.fiveVerb:EN.present;
  return{
   sentence:`${governor.surface} ${shart.juss} ${jawab.juss}`,
   translation:frame.en,
   tokens:[
    token(governor.surface,governor.gloss,AR.inShart(governor.surface),J1A_PARTICLE_IRAAB[governor.particleType].en),
-   token(shart.juss,shart.en,AR.shartVerb(shart.juss,shart.person),EN.present,true),
-   token(jawab.juss,jawab.en,AR.jawabVerb(jawab.juss,jawab.person),EN.present)
+   token(shart.juss,shart.en,AR.shartVerb(shart.juss,shart.person,shart.inflection),verbHint(shart.inflection),true),
+   token(jawab.juss,jawab.en,AR.jawabVerb(jawab.juss,jawab.person,jawab.inflection),verbHint(jawab.inflection))
   ]
  };
 }
-add('particle','present','jazm','sukun',()=>buildConditionExercise(),
- {...presentTemplateMetadata('2ms','implicit'),presentGovernor:'inShart',conditionFrameKeys:[...CONDITION_FRAME_KEYS]});
+/* 1D — one template per SHART morphology, because the (form, state, sign) tuple a template declares
+   describes the learner's target and the target is the verb of the condition. The jawāb is free to
+   carry a different regime, which is what makes the mixed-sign frames possible. */
+const conditionTemplateMetadata=(shartInflection,person)=>({
+ ...presentTemplateMetadata(person,person==='3mp'?'attached':'implicit'),
+ presentGovernor:'inShart',
+ conditionFrameKeys:[...CONDITION_FRAMES_BY_SHART_INFLECTION[shartInflection]]
+});
+add('particle','present','jazm','sukun',()=>buildConditionExercise('regular'),
+ conditionTemplateMetadata('regular','2ms'));
+add('particle','weakFinal','jazm','hadhfIllah',()=>buildConditionExercise('weakFinal'),
+ conditionTemplateMetadata('weakFinal','2ms'));
+add('particle','fiveVerbs','jazm','nunDropped',()=>buildConditionExercise('afalKhamsa'),
+ conditionTemplateMetadata('afalKhamsa','3mp'));
 
 /* ===== 1G — لَمْ over the mabnī nūn-al-niswah lane ==============================================
    The same two persons the لَنْ lane already produces, under a jāzim instead of a nāṣib. The verb

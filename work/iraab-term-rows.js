@@ -389,15 +389,23 @@ const rows = [
   R('B_MUNADA_MUDAF', 'الْمُضَافُ', CH.munada, '168–170', 'أقسام المنادى', 'وَنَوْعُهُ الْمُضَافُ'),
   R('B_MUNADA_SHABIH', 'الشَّبِيهُ بِالْمُضَافِ', CH.munada, '168–170', 'أقسام المنادى', 'الشَّبِيهُ بِالْمُضَافِ'),
   R('B_MUNADA_MABNI_DAMM', 'مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ نَصْبٍ', CH.munada, '169', 'بناء المنادى', 'مَبْنِيٌّ عَلَى الضَّمِّ'),
-  R('B_MUNADA_MABNI_ALIF', 'مَبْنِيٌّ عَلَى الْأَلِفِ (الْمُثَنَّى)', CH.munada, '169', 'بناء المنادى', 'مَبْنِيٌّ عَلَى الْأَلِفِ',
-    { missingReason: 'deliberatelyNotGenerated: the built munada of the dual.' }),
-  R('B_MUNADA_MABNI_WAW', 'مَبْنِيٌّ عَلَى الْوَاوِ (جَمْعُ الْمُذَكَّرِ السَّالِمُ)', CH.munada, '169', 'بناء المنادى', 'مَبْنِيٌّ عَلَى الْوَاوِ',
-    { missingReason: 'deliberatelyNotGenerated: the built munada of the sound masculine plural.' }),
-  R('B_NIDA_HAMZA', 'الْهَمْزَةُ — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', 'الْهَمْزَةُ لِلنِّدَاءِ',
-    { missingReason: 'deliberatelyNotGenerated: the sisters of «يا» which p. 168 names but this app does not produce.' }),
-  R('B_NIDA_AY', 'أَيْ — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', 'أَيْ لِلنِّدَاءِ', { missingReason: 'Same.' }),
-  R('B_NIDA_AYA', 'أَيَا — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', 'أَيَا', { mode: 'standalone', missingReason: 'Same. Probe tightened after the substring false positive: the old bare probe was swallowed by an unrelated word, so this row read FULL while never being produced. The implementing wave must re-check that this probe matches its real rendered surface.' }),
-  R('B_NIDA_HAYA', 'هَيَا — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', 'هَيَا', { missingReason: 'Same.' }),
+  /* Wave 7 — implemented. p. 169: «وإن كان يرفع بالألف نيابة عن الضمة — وذلك المثنى — فإنه يبنى
+     على الألف، نحو: يا محمدان ويا فاطمتان». The discriminator is «مُنَادًى» in the same rendered
+     line, because the alif is also an ordinary iʿrāb sign elsewhere in the app. */
+  R('B_MUNADA_MABNI_ALIF', 'مَبْنِيٌّ عَلَى الْأَلِفِ (الْمُثَنَّى)', CH.munada, '169', 'بناء المنادى', "مَبْنِيٌّ عَلَى الْأَلِفِ",
+    { requires: 'مُنَادًى' }),
+  /* pp. 169–170: «وإن كان يُرفع بالواو نيابة عن الضمة — وذلك جمع المذكر السالم — فإنه يبنى على
+     الواو نحو: يا محمدون». */
+  R('B_MUNADA_MABNI_WAW', 'مَبْنِيٌّ عَلَى الْوَاوِ (جَمْعُ الْمُذَكَّرِ السَّالِمُ)', CH.munada, '169–170', 'بناء المنادى', "مَبْنِيٌّ عَلَى الْوَاوِ",
+    { requires: 'مُنَادًى' }),
+  /* Wave 7 — the four sisters p. 168 names, each now produced on that page's OWN example for it:
+     «أَزَيْدُ أَقْبِلْ»، «أَيْ إبراهيمُ تَفَهَّمْ»، «أَيَا شَجَرَ الْخَابُورِ»، «هيا مُحَمَّدُ تَعَالَ». Each probe
+     is the particle's own naming clause, which is what separates it from its sisters — the bare
+     surfaces are too short to probe safely. */
+  R('B_NIDA_HAMZA', 'الْهَمْزَةُ — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', "الْهَمْزَةُ لِلنِّدَاءِ"),
+  R('B_NIDA_AY', 'أَيْ — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', "«أَيْ» لِلنِّدَاءِ"),
+  R('B_NIDA_AYA', 'أَيَا — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', "«أَيَا» لِلنِّدَاءِ"),
+  R('B_NIDA_HAYA', 'هَيَا — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', "«هَيَا» لِلنِّدَاءِ"),
   R('B_MAFUL_AJL', 'مَفْعُولٌ لِأَجْلِهِ مَنْصُوبٌ', CH.mafulAjl, '170–172', 'المنصوبات', 'مَفْعُولٌ لِأَجْلِهِ'),
   R('B_MAFUL_AJL_AL', 'الْمَفْعُولُ لَهُ الْمُقْتَرِنُ بِأَلْ', CH.mafulAjl, '172', 'أقسام المفعول له', 'الْمُقْتَرِنُ بِأَلْ',
     { missingReason: 'deliberatelyNotGenerated: p. 172 makes khafḍ the more frequent reading there.' }),

@@ -1243,8 +1243,10 @@ function resolveCanonicalTokenGloss(data,token,index){
  if(type==='particle'&&token.grammar?.particleType===LA_JINS_PARTICLE_TYPE){
   return LA_JINS_PARTICLE.gloss;
  }
- if(type==='particle'&&token.grammar?.particleType===NIDA_PARTICLE_TYPE){
-  return NIDA_PARTICLE.gloss;
+ /* All five أدوات النداء mean one thing in English, so they share one gloss — but the gloss is
+    keyed on the vocative CATEGORY, not on any one particle's bytes. */
+ if(type==='particle'&&isNidaParticleType(token.grammar?.particleType)){
+  return NIDA_GLOSS;
  }
  /* Same problem, same solution: «وَ» is the ʿaṭf conjunction on one reading and the wāw of
     accompaniment on another, and only the particle's identity separates the two glosses. */
@@ -1919,6 +1921,11 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  ,"T_PARTICLE_SINGULAR_NASB_FATHA_11||particle:particle,noun:munada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_11",structure:"particle:particle,noun:munada",shape:"TS48",copulaPlural:false})
  ,"T_PARTICLE_SINGULAR_NASB_FATHA_12||particle:particle,noun:munada,noun:mudafIlayh":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_12",structure:"particle:particle,noun:munada,noun:mudafIlayh",shape:"TS48",copulaPlural:false})
  ,"T_PARTICLE_SINGULAR_NASB_FATHA_13||particle:particle,noun:munada,particle:particle,noun:majrur":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_13",structure:"particle:particle,noun:munada,particle:particle,noun:majrur",shape:"TS48",copulaPlural:false})
+ /* Wave 7 — the dual and sound-masculine-plural built munada. Same token shape and the same TS48
+    whole-sentence composer as the singular lanes: the frozen pair owns the English, so a new
+    declension never earns a shape of its own. */
+ ,"T_PARTICLE_DUAL_NASB_YA_02||particle:particle,noun:munada":Object.freeze({templateId:"T_PARTICLE_DUAL_NASB_YA_02",structure:"particle:particle,noun:munada",shape:"TS48",copulaPlural:false})
+ ,"T_PARTICLE_SMP_NASB_YA_02||particle:particle,noun:munada":Object.freeze({templateId:"T_PARTICLE_SMP_NASB_YA_02",structure:"particle:particle,noun:munada",shape:"TS48",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_34||verb:past,noun:faail,particle:particle,noun:mafulMaah":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_34",structure:"verb:past,noun:faail,particle:particle,noun:mafulMaah",shape:"TS47",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_32||verb:past,noun:faail,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_32",structure:"verb:past,noun:faail,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_33||verb:past,noun:faail,noun:object,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_33",structure:"verb:past,noun:faail,noun:object,noun:mafulAjl",shape:"TS46",copulaPlural:false})
@@ -5980,16 +5987,75 @@ const MAFUL_MAAH_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_MAAH_PAIR_REGISTR
    matn's own ruling examples are «يَا زَيْدُ» and «يَا رَجُلُ», and the شرح's type examples — «يا
    مُحَمَّدُ», «يا فاطمةُ», «يا ظالِمُ», «يا حميدًا فِعْلُهُ», «يا محبًّا لِلْخَيْرِ» — are bare vocatives
    too. The imperatives in the p. 170 examples are incidental to those sentences, not part of the
-   ruling, so bare vocative utterances are produced and no imperative shell was needed. */
+   ruling, so bare vocative utterances are produced and no imperative shell was needed.
+
+   Wave 7 finished the chapter. What was missing was not a type but two of the three bināʾ MARKERS
+   — the alif of «يا محمدانِ» and the wāw of «يا محمدونَ» — and the four sisters of «يا» that p. 168
+   names. Both gaps are now produced, and both brought their own architecture: the marker follows
+   the DECLENSION, so a munādā lane is now (نوع، declension) rather than نوع alone; and an أداة is
+   an identity rather than a category, so every pair names its own and «يَا مُحَمَّدُ» / «هَيَا مُحَمَّدُ»
+   are two different exercises over one head. */
 const MUNADA_ROLE='munada';
 const NIDA_PARTICLE_TYPE='nidaa';
-const NIDA_PARTICLE=Object.freeze({surface:'يَا',particleType:NIDA_PARTICLE_TYPE,
- ruleId:'R_HARF_NIDA',gloss:'O',nameAr:'حَرْفُ نِدَاءٍ',nameEn:'a particle of calling'});
+/* Wave 7 — أَدَوَاتُ النِّدَاءِ, p. 168. The matn defines the munādā as «المطلوب إقباله بـ«يا» أو
+   إحدى أخواتها», and the شرح then NAMES the sisters and gives each its own example: «الهمزة نحو:
+   أزيدُ أَقْبِلْ»، «و«أَيْ» نحو: أَيْ إبراهيمُ تَفَهَّمْ»، «و«أَيَا» نحو: أَيَا شَجَرَ الْخَابُورِ ...»،
+   «و«هَيَا» نحو: هيا مُحَمَّدُ تَعَالَ». All five are therefore produced, each on the source's OWN
+   example rather than as a relabelled «يا»: three call a مفرد علم, one calls a مضاف, and the
+   همزة is the one written joined to what it calls — which is why it is the only member of this
+   category in PROCLITIC_PARTICLE_TYPES. Each carries its own source rule, so no sister can
+   borrow «يا»'s ownership, and one shared gloss because all five mean the same thing in English.
+   p. 168 states no condition separating them (no near/far distinction is taught here), so none
+   is invented; what differs per particle is its identity, its bytes and its orthography. */
+const NIDA_GLOSS='O';
+const NIDA_PARTICLES=Object.freeze(Object.assign(Object.create(null),{
+ ya:Object.freeze({id:'ya',surface:'يَا',particleType:NIDA_PARTICLE_TYPE,proclitic:false,
+  ruleId:'R_HARF_NIDA',nameAr:'حَرْفُ نِدَاءٍ',nameEn:'a particle of calling',
+  iraabAr:'حَرْفُ نِدَاءٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',iraabEn:'A particle of calling.',
+  whyAr:'حَرْفُ نِدَاءٍ، طَلَبَ بِهِ الْمُتَكَلِّمُ إِقْبَالَ مَنْ بَعْدَهُ.',whyEn:'is a particle of calling: the speaker uses it to ask the one after it to turn toward him.'}),
+ hamza:Object.freeze({id:'hamza',surface:'أَ',particleType:'nidaaHamza',proclitic:true,
+  ruleId:'R_HARF_NIDA_HAMZA',nameAr:'الْهَمْزَةُ لِلنِّدَاءِ',nameEn:'the hamzah of calling',
+  iraabAr:'الْهَمْزَةُ لِلنِّدَاءِ، حَرْفُ نِدَاءٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',
+  iraabEn:'The hamzah of calling, one of the sisters of «yā».',
+  whyAr:'حَرْفُ نِدَاءٍ مِنْ أَخَوَاتِ «يَا»، طَلَبَ بِهِ الْمُتَكَلِّمُ إِقْبَالَ مَنْ بَعْدَهُ.',whyEn:'is a particle of calling, one of the sisters of «yā»: the speaker uses it to ask the one after it to turn toward him.'}),
+ ay:Object.freeze({id:'ay',surface:'أَيْ',particleType:'nidaaAy',proclitic:false,
+  ruleId:'R_HARF_NIDA_AY',nameAr:'«أَيْ» لِلنِّدَاءِ',nameEn:'the particle «ay»',
+  iraabAr:'«أَيْ» لِلنِّدَاءِ، حَرْفُ نِدَاءٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',
+  iraabEn:'The particle «ay», one of the sisters of «yā».',
+  whyAr:'حَرْفُ نِدَاءٍ مِنْ أَخَوَاتِ «يَا»، طَلَبَ بِهِ الْمُتَكَلِّمُ إِقْبَالَ مَنْ بَعْدَهُ.',whyEn:'is a particle of calling, one of the sisters of «yā»: the speaker uses it to ask the one after it to turn toward him.'}),
+ aya:Object.freeze({id:'aya',surface:'أَيَا',particleType:'nidaaAya',proclitic:false,
+  ruleId:'R_HARF_NIDA_AYA',nameAr:'«أَيَا» لِلنِّدَاءِ',nameEn:'the particle «ayā»',
+  iraabAr:'«أَيَا» لِلنِّدَاءِ، حَرْفُ نِدَاءٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',
+  iraabEn:'The particle «ayā», one of the sisters of «yā».',
+  whyAr:'حَرْفُ نِدَاءٍ مِنْ أَخَوَاتِ «يَا»، طَلَبَ بِهِ الْمُتَكَلِّمُ إِقْبَالَ مَنْ بَعْدَهُ.',whyEn:'is a particle of calling, one of the sisters of «yā»: the speaker uses it to ask the one after it to turn toward him.'}),
+ haya:Object.freeze({id:'haya',surface:'هَيَا',particleType:'nidaaHaya',proclitic:false,
+  ruleId:'R_HARF_NIDA_HAYA',nameAr:'«هَيَا» لِلنِّدَاءِ',nameEn:'the particle «hayā»',
+  iraabAr:'«هَيَا» لِلنِّدَاءِ، حَرْفُ نِدَاءٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',
+  iraabEn:'The particle «hayā», one of the sisters of «yā».',
+  whyAr:'حَرْفُ نِدَاءٍ مِنْ أَخَوَاتِ «يَا»، طَلَبَ بِهِ الْمُتَكَلِّمُ إِقْبَالَ مَنْ بَعْدَهُ.',whyEn:'is a particle of calling, one of the sisters of «yā»: the speaker uses it to ask the one after it to turn toward him.'})
+}));
+const NIDA_PARTICLE=NIDA_PARTICLES.ya;
+const NIDA_PARTICLE_BY_TYPE=Object.freeze(Object.assign(Object.create(null),
+ Object.fromEntries(Object.values(NIDA_PARTICLES).map(item=>[item.particleType,item]))));
+const NIDA_PARTICLE_BY_SURFACE=Object.freeze(Object.assign(Object.create(null),
+ Object.fromEntries(Object.values(NIDA_PARTICLES).map(item=>[item.surface,item]))));
+const isNidaParticleType=type=>Object.prototype.hasOwnProperty.call(NIDA_PARTICLE_BY_TYPE,type||'');
+const NIDA_PROCLITIC_TYPES=Object.freeze(Object.values(NIDA_PARTICLES).filter(item=>item.proclitic).map(item=>item.particleType));
 /* What a built munādā is built UPON. The source names three (ḍammah, alif, wāw); only ḍammah is
    produced, so only ḍammah is registered — an unproduced marker in the table would be a claim the
    app cannot demonstrate. */
 const MUNADA_BINAA_SIGNS=Object.freeze(Object.assign(Object.create(null),{
- damma:Object.freeze({id:'damma',ar:'الضَّمِّ',en:'a ḍammah',ruleId:'R_MUNADA_MABNI_DAMM'})
+ damma:Object.freeze({id:'damma',ar:'الضَّمِّ',en:'a ḍammah',ruleId:'R_MUNADA_MABNI_DAMM',
+  raisedAr:'يُرْفَعُ بِالضَّمَّةِ',raisedEn:'is raised by a ḍammah'}),
+ /* p. 169's two substitute markers, in the source's own terms — «نيابة عن الضمة». The dual and
+    the sound masculine plural are not raised by a ḍammah, so «يُبْنَى عَلَى مَا يُرْفَعُ بِهِ» does
+    not put a ḍammah on them: it puts the alif on one and the wāw on the other. */
+ alif:Object.freeze({id:'alif',ar:'الْأَلِفِ',en:'the alif',ruleId:'R_MUNADA_MABNI_ALIF',
+  raisedAr:'يُرْفَعُ بِالْأَلِفِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مُثَنًّى',
+  raisedEn:'is raised by the alif standing in for the ḍammah, because it is a dual'}),
+ waw:Object.freeze({id:'waw',ar:'الْوَاوِ',en:'the wāw',ruleId:'R_MUNADA_MABNI_WAW',
+  raisedAr:'يُرْفَعُ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ',
+  raisedEn:'is raised by the wāw standing in for the ḍammah, because it is a sound masculine plural'})
 }));
 const MUNADA_MAHALL=Object.freeze({ar:'نَصْبٍ',en:'naṣb',state:'nasb'});
 const MUNADA_SUBTYPES=Object.freeze({
@@ -6019,13 +6085,29 @@ const MUNADA_SUBTYPE_LABELS=Object.freeze({
    the two built surfaces (both without tanwīn, as the matn requires) and two indefinite
    accusatives. */
 const MUNADA_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
- muhammad:Object.freeze({binaaSurface:'مُحَمَّدُ',en:'Muhammad',inflection:'singular'}),
+ muhammad:Object.freeze({binaaSurface:'مُحَمَّدُ',en:'Muhammad',inflection:'singular',properName:true}),
+ /* p. 169's own ruling example «يَا زَيْدُ», and the شرح's «أَزَيْدُ أَقْبِلْ» for the hamzah. */
+ zayd:Object.freeze({binaaSurface:'زَيْدُ',en:'Zayd',inflection:'singular',properName:true}),
+ /* «أَيْ إبراهيمُ تَفَهَّمْ» — p. 168's own example of أَيْ. */
+ ibrahim:Object.freeze({binaaSurface:'إِبْرَاهِيمُ',en:'Ibrahim',inflection:'singular',properName:true}),
+ /* p. 169: «وإن كان يرفع بالألف نيابة عن الضمة — وذلك المثنى — فإنه يبنى على الألف، نحو: يا
+    مُحَمَّدَانِ ويا فاطِمَتَانِ». Both of the source's dual examples are registered, so the dual
+    lane varies rather than repeating one word. */
+ muhammadDual:Object.freeze({binaaSurface:'مُحَمَّدَانِ',en:'the two Muhammads',inflection:'dual',properName:true}),
+ fatimaDual:Object.freeze({binaaSurface:'فَاطِمَتَانِ',en:'the two Fatimas',inflection:'dual',properName:true}),
+ /* pp. 169-170: «وإن كان يُرفع بالواو نيابة عن الضمة — وذلك جمع المذكر السالم — فإنه يبنى على
+    الواو نحو: يا مُحَمَّدُونَ». */
+ muhammadPlural:Object.freeze({binaaSurface:'مُحَمَّدُونَ',en:'the Muhammads',inflection:'smp',properName:true}),
  rajul:Object.freeze({binaaSurface:'رَجُلُ',en:'man',inflection:'singular'}),
  ghafil:Object.freeze({acc:'غَافِلًا',en:'heedless one',inflection:'singular'}),
- haris:Object.freeze({acc:'حَرِيصًا',en:'eager one',inflection:'singular'})
+ haris:Object.freeze({acc:'حَرِيصًا',en:'eager one',inflection:'singular'}),
+ /* The head of p. 168's أَيَا example, «أَيَا شَجَرَ الْخَابُورِ». A مضاف, so it is manṣūb and
+    carries no tanwīn — the iḍāfah, not the vocative, is what strips it. */
+ shajar:Object.freeze({acc:'شَجَرَ',en:'trees',inflection:'singular'})
 }));
 const MUNADA_COMPLEMENTS=Object.freeze(Object.assign(Object.create(null),{
- khayr:Object.freeze({nom:'الْخَيْرُ',acc:'الْخَيْرَ',gen:'الْخَيْرِ',en:'good',inflection:'singular'})
+ khayr:Object.freeze({nom:'الْخَيْرُ',acc:'الْخَيْرَ',gen:'الْخَيْرِ',en:'good',inflection:'singular'}),
+ khabur:Object.freeze({nom:'الْخَابُورُ',acc:'الْخَابُورَ',gen:'الْخَابُورِ',en:'the Khabur',inflection:'singular'})
 }));
 function munadaPreposition(surface){
  const action=humanPrepActions.find(item=>item.prep===surface);
@@ -6044,41 +6126,99 @@ function munadaNoun(poolName,en){
    complement (if any) has to follow. */
 const MUNADA_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
  /* «يَا مُحَمَّدُ» — the شرح's own type-1 example, built on ḍammah in maḥall naṣb. */
- muhammadCall:Object.freeze({subtype:MUNADA_SUBTYPES.mufradAlam,lexemeKey:'muhammad',
+ muhammadCall:Object.freeze({particleKey:'ya',subtype:MUNADA_SUBTYPES.mufradAlam,lexemeKey:'muhammad',
   binaaSignId:'damma',complement:null,sentenceEn:'O Muhammad!'}),
  /* «يَا رَجُلُ» — the matn's own type-2 ruling example: an indefinite meant of one particular man,
     so it is built without tanwīn exactly like the proper name. */
- rajulCall:Object.freeze({subtype:MUNADA_SUBTYPES.nakiraMaqsuda,lexemeKey:'rajul',
+ rajulCall:Object.freeze({particleKey:'ya',subtype:MUNADA_SUBTYPES.nakiraMaqsuda,lexemeKey:'rajul',
   binaaSignId:'damma',complement:null,sentenceEn:'O man!'}),
  /* «يَا غَافِلًا» — the preacher's call in the شرح: no particular person is meant, so it is manṣūb
     with tanwīn rather than built. */
- ghafilCall:Object.freeze({subtype:MUNADA_SUBTYPES.nakiraGhayrMaqsuda,lexemeKey:'ghafil',
+ ghafilCall:Object.freeze({particleKey:'ya',subtype:MUNADA_SUBTYPES.nakiraGhayrMaqsuda,lexemeKey:'ghafil',
   binaaSignId:'',complement:null,sentenceEn:'O heedless one, whoever you are!'}),
  /* «يَا طَالِبَ الْعِلْمِ» — the شرح's own type-4 example, on the existing iḍāfah engine. */
- seekerCall:Object.freeze({subtype:MUNADA_SUBTYPES.mudaf,lexemeKey:null,
+ seekerCall:Object.freeze({particleKey:'ya',subtype:MUNADA_SUBTYPES.mudaf,lexemeKey:null,
   binaaSignId:'',complement:Object.freeze({kind:'idafa',headKey:'laJinsSeeker',pool:'singularThings',en:'the knowledge'}),
   sentenceEn:'O seeker of knowledge!'}),
  /* «يَا حَرِيصًا عَلَى الْخَيْرِ» — the شرح's own type-5 example (p. 170). What completes its meaning
     is a جار ومجرور, which the existing preposition machinery already builds. */
- harisCall:Object.freeze({subtype:MUNADA_SUBTYPES.shabih,lexemeKey:'haris',
+ harisCall:Object.freeze({particleKey:'ya',subtype:MUNADA_SUBTYPES.shabih,lexemeKey:'haris',
   binaaSignId:'',complement:Object.freeze({kind:'prepositional',prep:'عَلَى',complementKey:'khayr'}),
-  sentenceEn:'O you who are eager for what is good!'})
+  sentenceEn:'O you who are eager for what is good!'}),
+ /* ══ Wave 7 ══ The four sisters of «يا», each on the شرح's OWN example for that particle, and
+    the two bināʾ markers p. 169 gives the built munādā besides the ḍammah. Nothing here is a
+    relabelled «يا» pair: each names a different أداة, and three of the four call a different
+    noun. «أَيَا» deliberately calls a مضاف, because that is the example p. 168 gives it — which
+    also proves a sister works over the MANṢŪB regime and not only over the built one. */
+ /* «أَزَيْدُ أَقْبِلْ» — p. 168. The hamzah is written joined to the noun it calls. */
+ zaydHamzaCall:Object.freeze({particleKey:'hamza',subtype:MUNADA_SUBTYPES.mufradAlam,lexemeKey:'zayd',
+  binaaSignId:'damma',complement:null,sentenceEn:'O Zayd!'}),
+ /* «أَيْ إبراهيمُ تَفَهَّمْ» — p. 168. */
+ ibrahimAyCall:Object.freeze({particleKey:'ay',subtype:MUNADA_SUBTYPES.mufradAlam,lexemeKey:'ibrahim',
+  binaaSignId:'damma',complement:null,sentenceEn:'O Ibrahim!'}),
+ /* «هيا مُحَمَّدُ تَعَالَ» — p. 168. Same head as muhammadCall and a different أداة, which is what
+    makes the two pairs a real same-surface boundary rather than a duplicate. */
+ muhammadHayaCall:Object.freeze({particleKey:'haya',subtype:MUNADA_SUBTYPES.mufradAlam,lexemeKey:'muhammad',
+  binaaSignId:'damma',complement:null,sentenceEn:'O Muhammad!'}),
+ /* «أَيَا شَجَرَ الْخَابُورِ» — p. 168's own example of أَيَا, and a second مضاف lane. */
+ shajarAyaCall:Object.freeze({particleKey:'aya',subtype:MUNADA_SUBTYPES.mudaf,lexemeKey:null,
+  binaaSignId:'',complement:Object.freeze({kind:'idafa',headKey:'munadaShajar',complementKey:'khabur'}),
+  sentenceEn:'O trees of the Khabur!'}),
+ /* «يا مُحَمَّدَانِ» و«يا فاطِمَتَانِ» و«يَا مُحَمَّدُونَ» — pp. 169-170. Built like the singular
+    proper name, but each on the marker that would RAISE it, which is the whole ruling. */
+ muhammadDualCall:Object.freeze({particleKey:'ya',subtype:MUNADA_SUBTYPES.mufradAlam,lexemeKey:'muhammadDual',
+  binaaSignId:'alif',complement:null,sentenceEn:'O you two Muhammads!'}),
+ fatimaDualCall:Object.freeze({particleKey:'ya',subtype:MUNADA_SUBTYPES.mufradAlam,lexemeKey:'fatimaDual',
+  binaaSignId:'alif',complement:null,sentenceEn:'O you two Fatimas!'}),
+ muhammadPluralCall:Object.freeze({particleKey:'ya',subtype:MUNADA_SUBTYPES.mufradAlam,lexemeKey:'muhammadPlural',
+  binaaSignId:'waw',complement:null,sentenceEn:'O you Muhammads!'})
 }));
 const MUNADA_ALL_PAIR_KEYS=Object.freeze(Object.keys(MUNADA_PAIR_REGISTRY));
 /* The munādā's own surface, wherever it comes from: a built form, an inflected accusative, or the
    head of an iḍāfah reused from another chapter's registry. */
-function munadaHeadSurface(pair){
+/* The heads an iḍāfah munādā may be built on. «طَالِبَ» is the «لا» al-jins chapter's own record,
+   reused rather than retyped; «شَجَرَ» is this chapter's. A key outside this table is no head. */
+const MUNADA_IDAFA_HEADS=Object.freeze(Object.assign(Object.create(null),{
+ laJinsSeeker:()=>LA_JINS_LEXEMES.seeker,
+ munadaShajar:()=>MUNADA_LEXEMES.shajar
+}));
+/* The munādā's own lexical record, wherever it comes from: this chapter's table, or the iḍāfah
+   head table. Everything the subtype has to agree with — the surface, the English, the
+   declension and the proper-name identity — is read off this ONE record. */
+function munadaHeadLexeme(pair){
  if(pair.complement?.kind==='idafa'){
-  if(pair.complement.headKey!=='laJinsSeeker')throw new Error(`Unknown munādā iḍāfah head: ${pair.complement.headKey}`);
-  return LA_JINS_LEXEMES.seeker.acc;
+  const head=MUNADA_IDAFA_HEADS[pair.complement.headKey];
+  if(!head)throw new Error(`Unknown munādā iḍāfah head: ${pair.complement.headKey}`);
+  return head();
  }
  const lexeme=MUNADA_LEXEMES[pair.lexemeKey];
  if(!lexeme)throw new Error(`The munādā registry names an unregistered lexeme: ${pair.lexemeKey}`);
+ return lexeme;
+}
+function munadaHeadSurface(pair){
+ const lexeme=munadaHeadLexeme(pair);
  return MUNADA_SUBTYPE_LABELS[pair.subtype].binaa?lexeme.binaaSurface:lexeme.acc;
 }
-function munadaHeadEnglish(pair){
- if(pair.complement?.kind==='idafa')return LA_JINS_LEXEMES.seeker.en;
- return MUNADA_LEXEMES[pair.lexemeKey].en;
+function munadaHeadEnglish(pair){return munadaHeadLexeme(pair).en}
+/* The DECLENSION is the head's own, never the template's claim about it: p. 169 makes the bināʾ
+   marker follow it, and the focus/form filter compares against it. */
+function munadaHeadInflection(pair){return munadaHeadLexeme(pair).inflection}
+/* The muḍāf ilayh of an iḍāfah munādā: either a general-pool noun named by its gloss, or one of
+   this chapter's own complement records. */
+function munadaIdafaComplement(complement){
+ if(complement.complementKey){
+  const record=MUNADA_COMPLEMENTS[complement.complementKey];
+  if(!record)throw new Error(`The munādā registry names an unregistered complement: ${complement.complementKey}`);
+  return record;
+ }
+ return munadaNoun(complement.pool,complement.en);
+}
+/* The vocative particle a pair is spoken with. A pair without a registered أداة is unusable: the
+   whole chapter is «المطلوب إقباله بـ«يا» أو إحدى أخواتها», so no munādā exists without one. */
+function munadaParticleRecord(pair){
+ const record=NIDA_PARTICLES[pair.particleKey];
+ if(!record)throw new Error(`The munādā registry names an unregistered vocative particle: ${pair.particleKey}`);
+ return record;
 }
 /* ══ Wave 4 — بَابُ النَّعْتِ, pp. 116–123 ═══════════════════════════════════════════════════
    Two source systems live in this chapter and neither is a relabelling of anything already here.
@@ -9908,6 +10048,11 @@ const PROCLITIC_PARTICLE_TYPES=Object.freeze([WAW_MAIYYA_TYPE,KAY_TALIL_LAM.part
  /* J1a. «أَلَمْ» and «لِيَكْتُبْ» are written joined, exactly as «لِكَيْ» is, while each half stays its
     own token with its own iʿrāb. لَا is NOT here: «لَا يَكْتُبْ» is written as two words. */
  HAMZAT_TAQRIR.particleType,'lamAmr','lamDuaa',
+ /* Wave 7 — p. 168's «أَزَيْدُ أَقْبِلْ» prints the vocative hamzah ON the noun it calls, exactly
+    as «لِيَكْتُبْ» prints لام الأمر on its verb. It is the ONLY أداة نداء written that way; «يا»,
+    «أَيْ», «أَيَا» and «هَيَا» are separate words, so the list names the hamzah's own type and
+    not the shared vocative category. */
+ ...NIDA_PROCLITIC_TYPES,
  ATF_CONJUNCTION_REGISTRY.waw.particleType,ATF_CONJUNCTION_REGISTRY.fa.particleType,
  CONCEALED_AN_CONSTRUCTIONS.lamTalil.particleType,CONCEALED_AN_CONSTRUCTIONS.lamJuhud.particleType,
  CONCEALED_AN_CONSTRUCTIONS.faSababiyya.particleType,CONCEALED_AN_CONSTRUCTIONS.wawMaiyya.particleType,
@@ -9950,6 +10095,10 @@ const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA
  [ISTITHNA_MA_NAFIYA.particleType]:ISTITHNA_MA_NAFIYA.ruleId,
  [ISTITHNA_MA_MASDARIYYA.particleType]:ISTITHNA_MA_MASDARIYYA.ruleId,
  istithnaKhalaHarf:'R_ISTITHNA_KHALA_HARF',
+ /* Wave 7 — أدوات النداء were the one particle family with NO owner entry at all, so any of them
+    could cite any rule and nothing refused it. Each of the five now owns exactly one rule, which
+    is what keeps «أَيَا» from being explained by «يا»'s authority. */
+ ...Object.fromEntries(Object.values(NIDA_PARTICLES).map(item=>[item.particleType,item.ruleId])),
  ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
  ...Object.fromEntries(Object.values(ATF_CONTEXT_PARTICLES).map(item=>[item.particleType,item.ruleId])),
  /* Wave 1 — each khafḍ identity owns exactly ONE source rule. Without this the two «بِ» identities
@@ -9968,6 +10117,8 @@ const PARTICLE_EXCLUSIVE_RULE_IDS=Object.freeze(['G_LAN_NASB','G_LAM_JAZM','G_SA
  // is the ḥarf reading of خلا وأخواتها: the noun it governs carries R_HARF_JARR like any other
  // مخفوض, so nothing but the أداة itself has business naming this rule.
  ISTITHNA_MA_NAFIYA.ruleId,ISTITHNA_MA_MASDARIYYA.ruleId,'R_ISTITHNA_KHALA_HARF',
+ // Wave 7 — and no token that is not the أداة itself may name a vocative rule.
+ ...Object.values(NIDA_PARTICLES).map(item=>item.ruleId),
  ...new Set(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>item.ruleId)),
  ...Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>item.ruleId)]);
 function particleRuleOwnerFailure(token){
@@ -10094,10 +10245,8 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
     answer, so it is named here instead. */
  'the mafʿūl maʿah where p. 173 permits BOTH naṣb on accompaniment and ʿaṭf on what precedes it',
  'the mafʿūl maʿah whose ʿāmil is an ism fāʿil rather than a verb (الأمير حاضر والجيشَ)',
- /* المنادى produces all five source types. What is not produced is two of the three binaʾ MARKERS
-    the source names for the built kind, and the sisters of «يا». */
- 'the built munada of the dual and the sound masculine plural, which p. 169 builds on alif and on waw',
- 'the sisters of «يا» — الهمزة، أَيْ، أَيَا، هَيَا — which p. 168 names but this app does not produce',
+ /* Wave 7 — المنادى now produces all five source types, all three of p. 169's bināʾ markers and
+    all five of p. 168's أدوات. Nothing from pp. 168-170 is deferred, so nothing is named here. */
  'weak-final estimated signs','unproduced rhetorical subcases of the concealed-an constructions',
  /* J1a shipped لَا النَّاهِيَةُ and لَامُ الْأَمْرِ; J1b shipped لَامُ الدُّعَاءِ and لَا الدُّعَائِيَّةُ on a
     reviewed duʿāʾ frame layer. All six one-verb jawāzim of pp. 79–81 are now produced, so nothing
@@ -10287,9 +10436,21 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  /* Al-Tuhfah pp. 168-170, باب المنادى. The binaʾ ruling, the marker, the mahall and the nasb
     ruling are four separate claims because the source states them separately — and because
     collapsing any two of them is precisely how «مبني على الضم» becomes «مرفوع». */
- R_HARF_NIDA:sourceRule('The munada is the one whose attention is sought by «ya» or one of its sisters.',[168],'Only «يا» itself. Its sisters — الهمزة، أَيْ، أَيَا، هَيَا — are named by the source but not produced.'),
- R_MUNADA_MABNI:sourceRule('A munada that is a single proper name or an intended indefinite is BUILT, on whatever it would be raised by, without tanwin; it carries no iʿrab of its own.',[168,169],'Only the damma marker is produced. The source also builds the dual on alif and the sound masculine plural on waw; neither is generated, so neither is registered. Such a munada is given no iʿrab state and no iʿrab sign at all.'),
+ R_HARF_NIDA:sourceRule('The munada is the one whose attention is sought by «ya» or one of its sisters.',[168],'Only «يا» itself; each of its four sisters carries its own rule below.'),
+ /* Wave 7 — p. 168 names أخوات «يا» and gives each its own example, so each is its own
+    identity with its own ownership. The source states no condition distinguishing them —
+    no near/far division is taught in this chapter — so none is claimed here either. */
+ R_HARF_NIDA_HAMZA:sourceRule('The hamzah is one of the sisters of «ya», as in «a-Zaydu aqbil».',[168],'Only the registered hamzah frame. It is written joined to the noun it calls, as the source prints it.'),
+ R_HARF_NIDA_AY:sourceRule('«Ay» is one of the sisters of «ya», as in «ay Ibrahimu tafahham».',[168],'Only the registered «ay» frame.'),
+ R_HARF_NIDA_AYA:sourceRule('«Aya» is one of the sisters of «ya», as in «aya shajara al-Khaburi».',[168],'Only the registered «aya» frame, whose munada is the mudaf the source itself calls with it.'),
+ R_HARF_NIDA_HAYA:sourceRule('«Haya» is one of the sisters of «ya», as in «haya Muhammadu taala».',[168],'Only the registered «haya» frame.'),
+ R_MUNADA_MABNI:sourceRule('A munada that is a single proper name or an intended indefinite is BUILT, on whatever it would be raised by, without tanwin; it carries no iʿrab of its own.',[168,169],'All three of the source\u2019s binaʾ markers are produced, one per declension. Such a munada is given no iʿrab state and no iʿrab sign at all.'),
  R_MUNADA_MABNI_DAMM:sourceRule('When the munada would be raised by a damma, it is built on the damma.',[169],'Only the registered single proper name and intended indefinite. The damma here is a binaʾ marker, never the iʿrab sign of rafʿ.'),
+ /* p. 169: «وإن كان يرفع بالألف نيابة عن الضمة — وذلك المثنى — فإنه يبنى على الألف»، and the
+    same sentence for the sound masculine plural on pp. 169-170. Two markers, two rules: the
+    ruling is one, but what each declension is RAISED by is a different fact about it. */
+ R_MUNADA_MABNI_ALIF:sourceRule('A dual munada is raised by the alif standing in for the damma, so it is built on the alif.',[169],'Only the registered dual proper names. The alif here is a binaʾ marker, never the iʿrab sign of rafʿ.'),
+ R_MUNADA_MABNI_WAW:sourceRule('A sound-masculine-plural munada is raised by the waw standing in for the damma, so it is built on the waw.',[169,170],'Only the registered sound-masculine-plural proper name. The waw here is a binaʾ marker, never the iʿrab sign of rafʿ.'),
  R_MUNADA_MAHALL_NASB:sourceRule('The built munada occupies the position of nasb even though its word carries no iʿrab.',[169],'Recorded as a mahall and never as a state, so nothing downstream can read it as an ordinary accusative.'),
  R_MUNADA_NASB:sourceRule('The remaining three kinds of munada — the unintended indefinite, the mudaf, and the one resembling a mudaf — are accusative and nothing else.',[168,169,170],'Each goes through the ordinary noun nasb matrix, because each is genuinely muʿrab.'),
  R_HAAL_ISTIFHAM_MABNI:sourceRule('An interrogative noun standing as a haal is built, not inflected, and must be put before every other part of the sentence.',[155],'Only inside a frozen frame whose head is that exact interrogative and whose sahib al-hal is definite.'),
@@ -12037,12 +12198,39 @@ verifyHaalMahallRegistry();
    built subtype must carry a bināʾ marker and NO accusative form, and an inflected one must carry
    an accusative and NO bināʾ marker. Neither can borrow the other's regime. */
 function verifyMunadaRegistry(){
- if(GLOSS_CLOSED_PARTICLES[NIDA_PARTICLE.surface]||GLOSS_FIXED_TOKENS[NIDA_PARTICLE.surface]){
-  throw new Error('«يَا» already has a fixed gloss owner; the vocative particle would duplicate it.');
+ /* Wave 7 — five identities now, and each has to clear the same three gates «يا» cleared alone:
+    it may not steal a gloss another table owns, it may not enter the governor table (it calls a
+    noun, it does not govern a verb), and its own iʿrāb clause must be its own. */
+ const nidaRecords=Object.values(NIDA_PARTICLES);
+ const seenSurface=new Set(),seenType=new Set(),seenRule=new Set(),seenClause=new Set();
+ nidaRecords.forEach(record=>{
+  ['id','surface','particleType','ruleId','nameAr','nameEn','iraabAr','iraabEn','whyAr','whyEn'].forEach(field=>{
+   if(typeof record[field]!=='string'||!record[field])throw new Error(`Vocative particle ${record.id}.${field} is not a non-empty string.`);
+  });
+  if(!Object.isFrozen(record))throw new Error(`Vocative particle ${record.id} is mutable.`);
+  if(GLOSS_CLOSED_PARTICLES[record.surface]||GLOSS_FIXED_TOKENS[record.surface]){
+   throw new Error(`${record.surface} already has a fixed gloss owner; the vocative particle would duplicate it.`);
+  }
+  if(GRAMMAR_RULES.governors[record.particleType]){
+   throw new Error('A vocative particle entered the verb governor table; it calls a noun.');
+  }
+  if(!record.iraabAr.endsWith('.'))throw new Error(`Vocative particle ${record.id} has a truncated iʿrāb clause.`);
+  if(!record.iraabAr.startsWith(record.nameAr))throw new Error(`Vocative particle ${record.id} does not open its iʿrāb clause with its own name.`);
+  if(record.id!=='ya'&&!record.nameAr.includes(record.surface)&&record.id!=='hamza'){
+   throw new Error(`Vocative particle ${record.id} names bytes other than its own surface.`);
+  }
+  if(record.proclitic!==NIDA_PROCLITIC_TYPES.includes(record.particleType)){
+   throw new Error(`Vocative particle ${record.id} disagrees with the proclitic table.`);
+  }
+  seenSurface.add(record.surface);seenType.add(record.particleType);
+  seenRule.add(record.ruleId);seenClause.add(record.iraabAr);
+ });
+ if(seenSurface.size!==nidaRecords.length||seenType.size!==nidaRecords.length
+   ||seenRule.size!==nidaRecords.length||seenClause.size!==nidaRecords.length){
+  throw new Error('Two vocative particles share a surface, a type, a source rule or an iʿrāb clause.');
  }
- if(GRAMMAR_RULES.governors[NIDA_PARTICLE_TYPE]){
-  throw new Error('The vocative particle entered the verb governor table; it calls a noun.');
- }
+ /* The five the source actually names, and no sixth. */
+ if(nidaRecords.length!==5)throw new Error('أدوات النداء registered here are not the five p. 168 names.');
  Object.entries(MUNADA_BINAA_SIGNS).forEach(([key,marker])=>{
   if(!marker.ar||!marker.en||!marker.ruleId)throw new Error(`Munādā bināʾ marker ${key} is incomplete.`);
   /* The ḍammah of bināʾ and the ḍammah of rafʿ are the SAME diacritic making DIFFERENT claims, so
@@ -12072,6 +12260,24 @@ function verifyMunadaRegistry(){
   if(!label)throw new Error(`Munādā pair ${key} names an unregistered subtype.`);
   const head=munadaHeadSurface(pair);
   if(!head)throw new Error(`Munādā pair ${key} resolves to no head surface.`);
+  munadaParticleRecord(pair);
+  /* Wave 7 — الْمُفْرَدُ الْعَلَمُ is a claim about the WORD, not about the label. The lexical record
+     has to carry proper-name identity for the pair to be typed as one, and a record that does
+     carry it may not be typed as anything else: p. 169 separates «يا زيدُ» from «يا رجلُ»
+     precisely there, and both are built on a ḍammah, so nothing downstream could tell them
+     apart if the label alone decided. */
+  const headLexeme=munadaHeadLexeme(pair);
+  if((pair.subtype===MUNADA_SUBTYPES.mufradAlam)!==(headLexeme.properName===true)){
+   throw new Error(`Munādā pair ${key} types a head as ${pair.subtype} against its own proper-name identity.`);
+  }
+  if(!['singular','dual','smp'].includes(munadaHeadInflection(pair))){
+   throw new Error(`Munādā pair ${key} has no registered declension.`);
+  }
+  /* p. 169 gives ONE marker per declension. A dual built on a ḍammah, or a singular built on
+     the alif, would be the source's ruling with its own reason removed. */
+  if(label.binaa&&pair.binaaSignId!=={singular:'damma',dual:'alif',smp:'waw'}[munadaHeadInflection(pair)]){
+   throw new Error(`Built munādā pair ${key} names a bināʾ marker its declension is not raised by.`);
+  }
   if(label.binaa){
    if(!MUNADA_BINAA_SIGNS[pair.binaaSignId]){
     throw new Error(`Built munādā pair ${key} names no registered bināʾ marker.`);
@@ -12087,7 +12293,7 @@ function verifyMunadaRegistry(){
    }
   }
   if(pair.complement?.kind==='idafa'){
-   const complement=munadaNoun(pair.complement.pool,pair.complement.en);
+   const complement=munadaIdafaComplement(pair.complement);
    if(nounFormIndex.get(complement.gen)?.lexeme!==complement){
     throw new Error(`Munādā pair ${key} names a muḍāf ilayh outside the noun index.`);
    }
@@ -12220,7 +12426,7 @@ const AR={
  haalIstifham:()=>grammarSpec('noun',HAAL_ROLE,{inflection:'singular',builtHaal:true}),
  munada:w=>grammarSpec('noun',MUNADA_ROLE),
  munadaMudaf:w=>grammarSpec('noun',MUNADA_ROLE,{isMudaf:true}),
- nidaParticle:()=>grammarSpec('particle','particle',{particleType:NIDA_PARTICLE_TYPE,particleWord:NIDA_PARTICLE.surface}),
+ nidaParticle:record=>grammarSpec('particle','particle',{particleType:record.particleType,particleWord:record.surface}),
  wawMaiyya:()=>grammarSpec('particle','particle',{particleType:WAW_MAIYYA_TYPE,particleWord:WAW_MAIYYA.surface}),
  mustathna:w=>grammarSpec('noun',MUSTATHNA_ROLE),
  mustathnaMudaf:w=>grammarSpec('noun',MUSTATHNA_ROLE,{isMudaf:true}),
@@ -13748,8 +13954,12 @@ function munadaPairAt(data,index){
   if(!pair||!label)continue;
   if(index!==1)continue;
   const particle=tokens[0];
-  if(particle?.grammar?.type!=='particle'||particle.grammar.particleType!==NIDA_PARTICLE_TYPE)continue;
-  if(particle.word!==NIDA_PARTICLE.surface)continue;
+  /* Wave 7 — the أداة is the PAIR's, not the category's. «يَا مُحَمَّدُ» and «هَيَا مُحَمَّدُ» share
+     one head surface and differ only here, so matching on the shared vocative type would let
+     either pair authorize either sentence. Both the identity and its bytes must agree. */
+  const particleRecord=munadaParticleRecord(pair);
+  if(particle?.grammar?.type!=='particle'||particle.grammar.particleType!==particleRecord.particleType)continue;
+  if(particle.word!==particleRecord.surface)continue;
   const head=munadaHeadSurface(pair);
   if(munada.word!==head||munada.surfaceHint!==head)continue;
   const complement=pair.complement;
@@ -13759,7 +13969,7 @@ function munadaPairAt(data,index){
   }
   if(complement.kind==='idafa'){
    if(tokens.length!==3||!munada.grammar.isMudaf)continue;
-   const registered=munadaNoun(complement.pool,complement.en);
+   const registered=munadaIdafaComplement(complement);
    if(tokens[2]?.grammar?.role!=='mudafIlayh'||tokens[2].word!==registered.gen)continue;
    return{key,pair,label,particle,munada,complementTokens:[tokens[2]]};
   }
@@ -13805,7 +14015,12 @@ function deriveMunadaAuthority(data,index){
   particleId:found.particle.id,particleWord:found.particle.word,
   munadaId:token.id,munadaWord:token.word,
   complementIds:Object.freeze(found.complementTokens.map(item=>item.id)),
-  inflection:'singular'});
+  /* The complement's WORDS travel with the authority so the Why can name the very thing that
+     makes this a muḍāf or a شبيه بالمضاف, instead of restating the type's definition. */
+  complementKind:found.pair.complement?.kind||'',
+  complementWords:Object.freeze(found.complementTokens.map(item=>item.word)),
+  particleKey:found.pair.particleKey,particleType:found.particle.grammar.particleType,
+  inflection:munadaHeadInflection(found.pair)});
 }
 function canonicalMunadaTranslation(data){
  const index=data?.tokens?.findIndex(token=>token.grammar?.role===MUNADA_ROLE)??-1;
@@ -14134,7 +14349,9 @@ function configureParticle(token){
   ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).map(item=>[item.particleType,item.ruleId])),
   [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',maMasdariyyaZarfiyya:'R_MA_MASDARIYYA_ZARFIYYA',
-  laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,[NIDA_PARTICLE_TYPE]:NIDA_PARTICLE.ruleId,
+  laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,
+  // Wave 7 — each أداة نداء owns its own source rule; none of the four sisters cites «يا»'s.
+  ...Object.fromEntries(Object.values(NIDA_PARTICLES).map(item=>[item.particleType,item.ruleId])),
   // Wave 6 — three more identities, each with a rule of its own. Two share «مَا»'s bytes with two
   // particles already in this table, and no two of the four may ever share a rule.
   [ISTITHNA_MA_NAFIYA.particleType]:ISTITHNA_MA_NAFIYA.ruleId,
@@ -14167,7 +14384,7 @@ function configureParticle(token){
     :null)
   ||(type===LA_JINS_PARTICLE_TYPE?LA_JINS_PARTICLE.surface:null)
   ||(type===WAW_MAIYYA_TYPE?WAW_MAIYYA.surface:null)
-  ||(type===NIDA_PARTICLE_TYPE?NIDA_PARTICLE.surface:null)
+  ||(NIDA_PARTICLE_BY_TYPE[type]?NIDA_PARTICLE_BY_TYPE[type].surface:null)
   /* Wave 1 — a khafḍ particle's bytes come from its own registry record, never from the builder's
      string. مِنْ is the one identity with two registered spellings, so its connective form is
      honoured only when the builder actually asked for it; anything else collapses to the base
@@ -14330,7 +14547,10 @@ function resolveRelationships(data){
      reference by the relationship validator, and this one names a bināʾ marker, not a token. */
   const relation=addRelationship(data,'nida',{particleId:particle.id,munadaId:item.id,
    subtype:authority.subtype,binaa:authority.binaa,binaaMarker:authority.binaaSignId,
-   mahall:authority.mahall,pairKey:authority.pairKey});
+   mahall:authority.mahall,pairKey:authority.pairKey,
+   // Wave 7 — the أداة's identity travels on the link, so swapping «يا» for «هَيَا» on a
+   // restored exercise is a link that no longer matches its own re-derivation.
+   particleKey:authority.particleKey,particleType:authority.particleType});
   particle.relations.munadaId=item.id;particle.relations.nidaRelationshipId=relation.id;
   item.relations.governorId=particle.id;item.relations.nidaRelationshipId=relation.id;
  });
@@ -15167,7 +15387,7 @@ function renderParticleAnalysis(token){
     مَا النافية one at p. 115 and gives this one none, exactly as نون الوقاية is rendered without one.
     Inventing a bināʾ here to make the two cards look alike would be inventing source. */
  if(type==='maMasdariyyaZarfiyya'){token.ar=`${token.word}: ${KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya.nameAr}، ${KANA_NO_MAHALL_AR}.`;token.en='Mā al-maṣdariyyah al-ẓarfiyyah, the particle whose presence lets dāma govern.';return}
- if(type===NIDA_PARTICLE_TYPE){token.ar=`${token.word}: ${NIDA_PARTICLE.nameAr} مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of calling.';return}
+ if(isNidaParticleType(type)){const record=NIDA_PARTICLE_BY_TYPE[type];token.ar=`${token.word}: ${record.iraabAr}`;token.en=record.iraabEn;return}
  if(type===WAW_MAIYYA_TYPE){token.ar=`${token.word}: ${WAW_MAIYYA.nameAr}، حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='The wāw of accompaniment; it is not a conjunction here.';return}
  if(type===LA_JINS_PARTICLE_TYPE){token.ar=`${token.word}: ${LA_JINS_PARTICLE.nameAr}، تَعْمَلُ عَمَلَ «إِنَّ»، مَبْنِيَّةٌ عَلَى السُّكُونِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.`;token.en='The لا that negates a whole class; it works like «إنّ».';return}
  if(type===ISTITHNA_ILLA_TYPE){token.ar=`${token.word}: ${ISTITHNA_TOOLS.illa.nameAr} مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of exception; it excludes what follows it from what precedes it.';return}
@@ -15265,14 +15485,25 @@ function whyMunadaRuling(token,data){
  const authority=munadaWhyAuthority(token,data);
  const label=MUNADA_SUBTYPE_LABELS[authority.subtype];
  if(!authority.binaa){
+  /* Wave 7 — for the two dependent types the line names the very words that make them what they
+     are. p. 169 defines الشبيه بالمضاف as «ما اتصل به شيء من تمام معناه»; saying that without
+     saying WHICH attached thing leaves the learner to guess which reading was taken. */
+  const attached=authority.complementWords.join(' ');
+  const extraAr=authority.complementKind==='idafa'?`، وَقَدْ أُضِيفَ إِلَى ${wq(attached)}`
+   :authority.complementKind==='prepositional'?`، وَقَدِ اتَّصَلَ بِهِ ${wq(attached)} مِمَّا يَتِمُّ بِهِ مَعْنَاهُ`:'';
+  const extraEn=authority.complementKind==='idafa'?`, and here that noun is ${eq(attached)}`
+   :authority.complementKind==='prepositional'?`, and here that something is ${eq(attached)}`:'';
   return{id:'WHY_MUNADA_NASB',
-   ar:`وَنَوْعُهُ ${label.ar}، ${label.senseAr}، وَهَذَا النَّوْعُ مَنْصُوبٌ لَا غَيْرُ.`,
-   en:`It is ${label.en} — ${label.senseEn} — and this kind of munada is accusative and nothing else.`};
+   ar:`وَنَوْعُهُ ${label.ar}، ${label.senseAr}${extraAr}، وَهَذَا النَّوْعُ مَنْصُوبٌ لَا غَيْرُ.`,
+   en:`It is ${label.en} — ${label.senseEn}${extraEn} — and this kind of munada is accusative and nothing else.`};
  }
  const marker=MUNADA_BINAA_SIGNS[authority.binaaSignId];
+ /* The marker is not a fact on its own: p. 169 derives it from what the word would be RAISED by,
+    so the line states the raising first and the bināʾ second. That is what keeps a learner from
+    reading «مبني على الألف» as an invention rather than as the dual's own rafʿ sign. */
  return{id:'WHY_MUNADA_MABNI',
-  ar:`وَنَوْعُهُ ${label.ar}، وَهَذَا النَّوْعُ يُبْنَى عَلَى مَا يُرْفَعُ بِهِ مِنْ غَيْرِ تَنْوِينٍ، فَبُنِيَ عَلَى ${marker.ar}؛ وَلَيْسَ مَرْفُوعًا، بَلْ هُوَ فِي مَحَلِّ ${MUNADA_MAHALL.ar}.`,
-  en:`It is ${label.en}, and this kind is built on whatever would raise it, without tanwin — here on ${marker.en}. It is not marfuʿ: it holds the position of ${MUNADA_MAHALL.en}.`};
+  ar:`وَنَوْعُهُ ${label.ar}، وَهَذَا النَّوْعُ يُبْنَى عَلَى مَا يُرْفَعُ بِهِ مِنْ غَيْرِ تَنْوِينٍ، وَهُوَ ${marker.raisedAr}، فَبُنِيَ عَلَى ${marker.ar}؛ وَلَيْسَ مَرْفُوعًا، بَلْ هُوَ فِي مَحَلِّ ${MUNADA_MAHALL.ar}.`,
+  en:`It is ${label.en}, and this kind is built on whatever would raise it, without tanwin — it ${marker.raisedEn}, so it is built on ${marker.en}. It is not marfuʿ: it holds the position of ${MUNADA_MAHALL.en}.`};
 }
 function mafulMaahWhyAuthority(token,data){
  const authority=deriveMafulMaahAuthority(data,data?.tokens?.indexOf(token));
@@ -16061,7 +16292,11 @@ const WHY_PARTICLE=Object.freeze({
     the whole kind, and that is why it governs at all. */
  /* The wāw's own line has to do the separating work: it states that this wāw is «نص في المعية»,
     which is precisely what an ʿaṭf wāw is not. */
- [NIDA_PARTICLE_TYPE]:t=>({id:'WHY_PARTICLE_NIDA',ar:`${wq(t.word)} حَرْفُ نِدَاءٍ، طَلَبَ بِهِ الْمُتَكَلِّمُ إِقْبَالَ مَنْ بَعْدَهُ.`,en:`${eq(t.word)} is a particle of calling: the speaker uses it to ask the one after it to turn toward him.`}),
+ /* Wave 7 — one Why per أداة, generated from the frozen record so a sister can never render
+    «يا»'s explanation. «يا» keeps its own id and its own wording unchanged. */
+ ...Object.fromEntries(Object.values(NIDA_PARTICLES).map(record=>[record.particleType,t=>({
+  id:record.id==='ya'?'WHY_PARTICLE_NIDA':`WHY_PARTICLE_NIDA_${record.id.toUpperCase()}`,
+  ar:`${wq(t.word)} ${record.whyAr}`,en:`${eq(t.word)} ${record.whyEn}`})])),
  [WAW_MAIYYA_TYPE]:t=>({id:'WHY_PARTICLE_WAW_MAIYYA',ar:`${wq(t.word)} وَاوُ الْمَعِيَّةِ، نَصٌّ فِي الدَّلَالَةِ عَلَى الْمُصَاحَبَةِ، وَلَيْسَتْ عَاطِفَةً؛ فَمَا بَعْدَهَا مَنْصُوبٌ لَا تَابِعٌ.`,en:`${eq(t.word)} is the wāw of accompaniment — express, not merely possible — and it is not a conjunction, so what follows it is accusative rather than a follower.`}),
  [LA_JINS_PARTICLE_TYPE]:t=>({id:'WHY_PARTICLE_LA_NAFIYA_JINS',ar:`${wq(t.word)} نَافِيَةٌ لِلْجِنْسِ، تَنْفِي الْحُكْمَ عَنِ الْجِنْسِ كُلِّهِ، وَتَعْمَلُ عَمَلَ «إِنَّ» فَتَنْصِبُ الِاسْمَ وَتَرْفَعُ الْخَبَرَ.`,en:`${eq(t.word)} negates the whole class, not one instance, and it works like «إنّ»: accusative for its noun, nominative for its khabar.`}),
  [ISTITHNA_ILLA_TYPE]:t=>({id:'WHY_PARTICLE_ISTITHNA_ILLA',ar:`${wq(t.word)} حَرْفُ اسْتِثْنَاءٍ، يُخْرِجُ مَا بَعْدَهُ مِنْ حُكْمِ مَا قَبْلَهُ.`,en:`${eq(t.word)} is a particle of exception: it takes what follows it out of the ruling given to what precedes it.`}),
@@ -17890,7 +18125,8 @@ function validateExercise(data){
    if(!authority.authorized||rel.particleId!==authority.particleId||rel.munadaId!==authority.munadaId
      ||rel.subtype!==authority.subtype||Boolean(rel.binaa)!==Boolean(authority.binaa)
      ||rel.binaaMarker!==authority.binaaSignId||rel.mahall!==authority.mahall
-     ||rel.pairKey!==authority.pairKey){
+     ||rel.pairKey!==authority.pairKey||rel.particleKey!==authority.particleKey
+     ||rel.particleType!==authority.particleType){
     fail('E_MUNADA_RELATION','Vocative relationship is not the canonical proof.',munada);
    }
   }
@@ -18095,7 +18331,7 @@ function validateExercise(data){
   const rel=relationships.find(candidate=>candidate.id===item.relations.nidaRelationshipId&&candidate.type==='nida');
   const particle=tokenById.get(item.relations.governorId);
   if(!rel||rel.munadaId!==item.id||rel.particleId!==particle?.id
-    ||particle?.grammar.particleType!==NIDA_PARTICLE_TYPE
+    ||!isNidaParticleType(particle?.grammar.particleType)
     ||particle?.relations.munadaId!==item.id||particle?.relations.nidaRelationshipId!==rel.id){
    fail('E_MUNADA_RELATION','A munada must have exactly one reciprocal canonical link to its vocative particle.',item);
   }
@@ -18505,7 +18741,13 @@ function add(starts,form,state,sign,build,metadata={}){
  if(munadaPairKeys.length){
   const subtypes=new Set(munadaPairKeys.map(key=>MUNADA_PAIR_REGISTRY[key].subtype));
   if(subtypes.size!==1)throw new Error(`Template ${stableId} mixes munada subtypes.`);
-  if(form!=='singular')throw new Error(`Template ${stableId} declares a munada of the wrong declension.`);
+  /* Wave 7 — and one template owns one DECLENSION too. p. 169 gives the built kind a different
+     bināʾ marker per declension, and the focus/form filter compares the focus's own inflection
+     against this lane, so a mixed lane would let one stable ID authorize two markers. The
+     declension is read off the head's lexical record, never off the lane's own claim. */
+  const declensions=new Set(munadaPairKeys.map(key=>munadaHeadInflection(MUNADA_PAIR_REGISTRY[key])));
+  if(declensions.size!==1)throw new Error(`Template ${stableId} mixes munada declensions.`);
+  if(form!==[...declensions][0])throw new Error(`Template ${stableId} declares a munada of the wrong declension.`);
  }
  /* المفعول معه. */
  const mafulMaahPairKeys=Object.freeze([...(metadata.mafulMaahPairKeys||[])]);
@@ -20087,15 +20329,16 @@ function buildMunadaExercise(pairKey){
  const label=MUNADA_SUBTYPE_LABELS[pair.subtype];
  const head=munadaHeadSurface(pair),headEn=munadaHeadEnglish(pair);
  const isMudaf=pair.complement?.kind==='idafa';
+ const particleRecord=munadaParticleRecord(pair);
  const tokens=[
-  token(NIDA_PARTICLE.surface,NIDA_PARTICLE.gloss,AR.nidaParticle(),''),
+  token(particleRecord.surface,NIDA_GLOSS,AR.nidaParticle(particleRecord),''),
   token(head,headEn,isMudaf?AR.munadaMudaf(head):AR.munada(head),
    label.binaa
     ?'The one called; built without tanwin, holding the position of nasb.'
     :'The one called; accusative and nothing else.',true)
  ];
  if(isMudaf){
-  const complement=munadaNoun(pair.complement.pool,pair.complement.en);
+  const complement=munadaIdafaComplement(pair.complement);
   tokens.push(token(complement.gen,complement.en,AR.mudafIlayh(complement.gen),EN.mudafIlayh));
  }else if(pair.complement?.kind==='prepositional'){
   const prep=munadaPreposition(pair.complement.prep);
@@ -20107,14 +20350,39 @@ function buildMunadaExercise(pairKey){
  }
  return{sentence:'',translation:pair.sentenceEn,tokens};
 }
-const munadaKeysFor=subtype=>Object.freeze(MUNADA_ALL_PAIR_KEYS.filter(key=>MUNADA_PAIR_REGISTRY[key].subtype===subtype));
+const munadaKeysFor=(subtype,inflection)=>Object.freeze(MUNADA_ALL_PAIR_KEYS.filter(key=>
+ MUNADA_PAIR_REGISTRY[key].subtype===subtype&&munadaHeadInflection(MUNADA_PAIR_REGISTRY[key])===inflection));
 const munadaMetadata=keys=>({munadaPairKeys:keys});
 const pickedMunada=keys=>buildMunadaExercise(pickVaried(keys,'munada-'+keys[0],String));
-[MUNADA_SUBTYPES.mufradAlam,MUNADA_SUBTYPES.nakiraMaqsuda,MUNADA_SUBTYPES.nakiraGhayrMaqsuda,
- MUNADA_SUBTYPES.mudaf,MUNADA_SUBTYPES.shabih].forEach(subtype=>{
- const keys=munadaKeysFor(subtype);
- add('particle','singular','nasb','fatha',()=>pickedMunada(keys),munadaMetadata(keys));
+/* Wave 7 — one lane per (نوع، declension). The subtype was always the lane, because the five types
+   build different token shapes over two state regimes; the declension joins it because p. 169
+   gives the built kind a different bināʾ marker for each, and because the word-level filters
+   compare the focus's own inflection against the lane. The SIGN each lane declares is the
+   ordinary naṣb sign of that declension — a built focus is exempt from the sign comparison,
+   exactly as the singular built lanes have been since this chapter shipped. The five singular
+   lanes keep their original order so their stable IDs do not move. */
+const MUNADA_TEMPLATE_LANES=Object.freeze([
+ Object.freeze({subtype:MUNADA_SUBTYPES.mufradAlam,inflection:'singular',sign:'fatha'}),
+ Object.freeze({subtype:MUNADA_SUBTYPES.mufradAlam,inflection:'dual',sign:'ya'}),
+ Object.freeze({subtype:MUNADA_SUBTYPES.mufradAlam,inflection:'smp',sign:'ya'}),
+ Object.freeze({subtype:MUNADA_SUBTYPES.nakiraMaqsuda,inflection:'singular',sign:'fatha'}),
+ Object.freeze({subtype:MUNADA_SUBTYPES.nakiraGhayrMaqsuda,inflection:'singular',sign:'fatha'}),
+ Object.freeze({subtype:MUNADA_SUBTYPES.mudaf,inflection:'singular',sign:'fatha'}),
+ Object.freeze({subtype:MUNADA_SUBTYPES.shabih,inflection:'singular',sign:'fatha'})
+]);
+MUNADA_TEMPLATE_LANES.forEach(lane=>{
+ const keys=munadaKeysFor(lane.subtype,lane.inflection);
+ if(!keys.length)throw new Error(`The munādā lane ${lane.subtype}/${lane.inflection} registers no pair.`);
+ add('particle',lane.inflection,'nasb',lane.sign,()=>pickedMunada(keys),munadaMetadata(keys));
 });
+/* Every registered pair must be reachable through exactly one lane, or a pair would exist that no
+   learner can ever be shown and no test can ever build. */
+(()=>{
+ const reached=MUNADA_TEMPLATE_LANES.flatMap(lane=>munadaKeysFor(lane.subtype,lane.inflection));
+ if(new Set(reached).size!==reached.length||reached.length!==MUNADA_ALL_PAIR_KEYS.length){
+  throw new Error('The munādā lanes do not cover every registered pair exactly once.');
+ }
+})();
 const laJinsMetadata=keys=>({laJinsPairKeys:keys});
 const pickedLaJins=()=>buildLaJinsExercise(pickVaried(LA_JINS_ALL_PAIR_KEYS,'la-jins',String));
 add('particle','singular','nasb','fatha',()=>pickedLaJins(),laJinsMetadata(LA_JINS_ALL_PAIR_KEYS));

@@ -319,6 +319,17 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   MUNADA_ROLE,
   NIDA_PARTICLE_TYPE,
   NIDA_PARTICLE,
+  NIDA_PARTICLES,
+  NIDA_PARTICLE_BY_TYPE,
+  NIDA_GLOSS,
+  isNidaParticleType,
+  MUNADA_COMPLEMENTS,
+  MUNADA_ALL_PAIR_KEYS,
+  MUNADA_TEMPLATE_LANES,
+  munadaHeadLexeme,
+  munadaHeadInflection,
+  munadaParticleRecord,
+  munadaIdafaComplement,
   MUNADA_SUBTYPES,
   MUNADA_SUBTYPE_LABELS,
   MUNADA_BINAA_SIGNS,
@@ -1845,9 +1856,27 @@ function runMunadaFocusedTests(){
   const templateFor=pairKey=>api.templates.find(item=>item.munadaPairKeys.includes(pairKey));
   const built=new Map();
   let builds=0,trips=0,negatives=0;
+  const particlesSeen=new Set(),markersSeen=new Set(),declensionsSeen=new Set();
   assert(Object.isFrozen(api.MUNADA_PAIR_REGISTRY)&&Object.isFrozen(api.MUNADA_LEXEMES)
-    &&Object.isFrozen(api.MUNADA_SUBTYPE_LABELS)&&Object.isFrozen(api.MUNADA_BINAA_SIGNS),
+    &&Object.isFrozen(api.MUNADA_SUBTYPE_LABELS)&&Object.isFrozen(api.MUNADA_BINAA_SIGNS)
+    &&Object.isFrozen(api.NIDA_PARTICLES)&&Object.isFrozen(api.MUNADA_COMPLEMENTS),
     'a munada registry is mutable');
+  /* Wave 7 — أدوات النداء. p. 168 names «يا» and four sisters; each must be its own identity,
+     with its own bytes, its own type, its own source rule and its own iʿrab clause, and only
+     the hamzah may be written joined to what it calls. */
+  {
+    const records=Object.values(api.NIDA_PARTICLES);
+    assert(records.length===5,'the five أدوات النداء of p. 168 are not all registered');
+    for(const field of ['surface','particleType','ruleId','iraabAr'])
+      assert(new Set(records.map(r=>r[field])).size===5,'two vocative particles share a '+field);
+    assert(records.every(r=>Object.isFrozen(r)&&api.isSourceAuthorized(r.ruleId)),
+      'a vocative particle is mutable or unowned');
+    assert(records.filter(r=>r.proclitic).length===1&&api.NIDA_PARTICLES.hamza.proclitic,
+      'the proclitic vocative is not the hamzah alone');
+    assert(records.every(r=>!api.GRAMMAR_RULES.governors[r.particleType]),
+      'a vocative particle entered the verb governor table');
+    negatives+=4;
+  }
   /* The source names five types; all five must actually be produced, or this is a different
      chapter than the one claimed. */
   const producedSubtypes=new Set(Object.values(api.MUNADA_PAIR_REGISTRY).map(pair=>pair.subtype));
@@ -1878,9 +1907,31 @@ function runMunadaFocusedTests(){
     const label=api.MUNADA_SUBTYPE_LABELS[pair.subtype];
     assert(authority.authorized&&authority.pairKey===pairKey&&authority.subtype===pair.subtype,
       pairKey+' did not earn exact munada authority');
-    assert(particle.grammar.type==='particle'&&particle.grammar.particleType===api.NIDA_PARTICLE_TYPE
-      &&particle.word===api.NIDA_PARTICLE.surface&&particle.ruleId===api.NIDA_PARTICLE.ruleId,
+    /* Wave 7 — the أداة is the PAIR's, never the category's: «يَا مُحَمَّدُ» and «هَيَا مُحَمَّدُ» differ
+       only here, so a category-level check would let either authorize either sentence. */
+    const particleRecord=api.munadaParticleRecord(pair);
+    assert(particle.grammar.type==='particle'&&particle.grammar.particleType===particleRecord.particleType
+      &&particle.word===particleRecord.surface&&particle.ruleId===particleRecord.ruleId
+      &&particle.gloss===api.NIDA_GLOSS,
       pairKey+' lost the vocative particle identity');
+    assert(particle.ar===particleRecord.surface+': '+particleRecord.iraabAr&&particle.en===particleRecord.iraabEn,
+      pairKey+' did not print its own vocative particle iʿrab');
+    assert(particle.why.ids.includes(particleRecord.id==='ya'?'WHY_PARTICLE_NIDA'
+      :'WHY_PARTICLE_NIDA_'+particleRecord.id.toUpperCase()),pairKey+' explained the wrong vocative particle');
+    assert(api.isSourceAuthorized(particleRecord.ruleId),pairKey+' lost the particle source ownership');
+    /* p. 168 prints «أَزَيْدُ» joined and every other أداة as a separate word. */
+    assert(data.sentence.startsWith(particleRecord.proclitic
+      ?particleRecord.surface+munada.word:particleRecord.surface+' '),
+      pairKey+' wrote its vocative particle with the wrong orthography');
+    particlesSeen.add(particleRecord.id);
+    markersSeen.add(pair.binaaSignId||'-');
+    declensionsSeen.add(api.munadaHeadInflection(pair));
+    /* الْمُفْرَدُ الْعَلَمُ is a claim about the WORD. «يا زيدُ» and «يا رجلُ» are both built on a
+       ḍammah, so only the lexical record separates them. */
+    assert((pair.subtype===api.MUNADA_SUBTYPES.mufradAlam)===(api.munadaHeadLexeme(pair).properName===true),
+      pairKey+' types its head against its own proper-name identity');
+    assert(munada.inflection===api.munadaHeadInflection(pair)&&template.form===munada.inflection,
+      pairKey+' does not stand in the declension lane its own head belongs to');
     assert(munada.target&&munada.word===api.munadaHeadSurface(pair),pairKey+' did not make the munada the focus');
     if(label.binaa){
       /* The built regime. Every one of these is a separate claim the source makes, and each is
@@ -1891,10 +1942,20 @@ function runMunadaFocusedTests(){
       assert(munada.mahall==='nasb'&&munada.mahallRuleId==='R_MUNADA_MAHALL_NASB',
         pairKey+' lost the position of nasb');
       assert(munada.ruleId==='R_MUNADA_MABNI',pairKey+' is not bound to the binaʾ source rule');
-      assert(munada.ar.includes('مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ نَصْبٍ')
+      /* Wave 7 — the marker is read from the registry rather than pinned to the ḍammah, because
+         p. 169 gives the built kind three of them, one per declension. */
+      const marker=api.MUNADA_BINAA_SIGNS[pair.binaaSignId];
+      assert(marker&&marker.ruleId==='R_MUNADA_MABNI_'+pair.binaaSignId.toUpperCase().replace('DAMMA','DAMM')
+        &&api.isSourceAuthorized(marker.ruleId),pairKey+' binaʾ marker is unregistered or unowned');
+      assert(pair.binaaSignId==={singular:'damma',dual:'alif',smp:'waw'}[api.munadaHeadInflection(pair)],
+        pairKey+' is built on a marker its declension is not raised by');
+      assert(munada.ar.includes('مَبْنِيٌّ عَلَى '+marker.ar+' فِي مَحَلِّ '+api.MUNADA_MAHALL.ar)
         &&!munada.ar.includes('مَنْصُوبٌ')&&!munada.ar.includes('مَرْفُوعٌ')
         &&!munada.ar.includes('وَعَلَامَةُ'),
         pairKey+' printed an iʿrab claim on a built munada');
+      /* The marker is not a bare fact: p. 169 derives it from what the word would be RAISED by. */
+      assert(munada.why.ar.join(' ').includes(marker.raisedAr),
+        pairKey+' did not explain what raises the word its binaʾ marker follows');
       assert(munada.why.ids.includes('WHY_MUNADA_MABNI')&&munada.why.ids.includes('WHY_STATE_MUNADA_MAHALL')
         &&!munada.why.ids.some(id=>id.startsWith('WHY_SIGN')),
         pairKey+' Why explained a sign a built munada does not have');
@@ -1915,15 +1976,22 @@ function runMunadaFocusedTests(){
       assert(munada.grammar.isMudaf&&data.tokens[2].grammar.role==='mudafIlayh'
         &&data.tokens[2].state==='jarr'&&data.tokens[2].ar.includes('مَخْفُوضٌ')
         &&!data.tokens[2].ar.includes('مَجْرُورٌ'),pairKey+' lost the idafa frame or its khafd wording');
+      // Wave 7 — and the Why must name the very word it is joined to, not just define the type.
+      assert(munada.why.ar.join(' ').includes('أُضِيفَ إِلَى «'+data.tokens[2].word+'»'),
+        pairKey+' did not name the noun its idafa is with');
     }
     // The shabih type's complement is the jar-majrur that completes its meaning.
     if(pair.subtype===api.MUNADA_SUBTYPES.shabih){
       assert(!munada.grammar.isMudaf&&data.tokens[2].grammar.particleType==='preposition'
         &&data.tokens[3].grammar.role==='majrur'&&data.tokens[3].ar.includes('مَخْفُوضٌ'),
         pairKey+' lost the complement that makes it resemble a mudaf');
+      assert(munada.why.ar.join(' ').includes('اتَّصَلَ بِهِ «'+data.tokens[2].word+' '+data.tokens[3].word+'»'),
+        pairKey+' did not name the thing that completes its meaning');
     }
     assert(relation&&relation.ruleId==='RL_NIDA_MUNADA'&&relation.munadaId===munada.id
       &&relation.particleId===particle.id&&relation.subtype===pair.subtype
+      &&relation.particleKey===pair.particleKey&&relation.particleType===particleRecord.particleType
+      &&relation.binaaMarker===pair.binaaSignId
       &&Boolean(relation.binaa)===Boolean(label.binaa),pairKey+' lacks its canonical vocative relationship');
     assert(api.isSourceAuthorized(munada.ruleId)&&api.isSourceAuthorized(relation.ruleId)
       &&api.isSourceAuthorized('R_HARF_NIDA'),pairKey+' lost source ownership');
@@ -1939,6 +2007,14 @@ function runMunadaFocusedTests(){
       pairKey+' lost its binaʾ/mahall analysis after History');
     built.set(pairKey,data);builds++;trips++;
   }
+  /* The chapter's own taxonomy, asserted over what was actually produced: five أدوات (p. 168),
+     three bināʾ markers (p. 169) and the three declensions those markers belong to. */
+  assert(particlesSeen.size===5,'only '+particlesSeen.size+' of the five أدوات النداء are productive');
+  assert(['damma','alif','waw'].every(id=>markersSeen.has(id)),
+    'the three binaʾ markers of p. 169 are not all productive: '+[...markersSeen].join(','));
+  assert(['singular','dual','smp'].every(id=>declensionsSeen.has(id)),
+    'the built munada is not produced in all three declensions: '+[...declensionsSeen].join(','));
+  negatives+=3;
   const mustReject=(label,source,mutate,expected='E_MUNADA_AUTHORITY')=>{
     const data=clone(source);mutate(data);const failures=api.validateExercise(data);
     assert(failures.some(item=>item.code===expected),label+' was accepted: '+failures.map(item=>item.code).join(','));negatives++;
@@ -2008,6 +2084,76 @@ function runMunadaFocusedTests(){
     const rebuilt=api.restoreExerciseSnapshot(forged);
     assert(!rebuilt||(!rebuilt.tokens[1].state&&rebuilt.tokens[1].mahall==='nasb'),
       'History restored a built munada as an ordinary accusative');
+    negatives++;
+  }
+  /* ═══ Wave 7 negatives ═══ Every new authority gets its own forgery, and each is mutated on its
+     own field so that no two of them are secretly the same check. */
+  const dualBase=built.get('muhammadDualCall'),smpBase=built.get('muhammadPluralCall');
+  const hamzaBase=built.get('zaydHamzaCall'),ayaBase=built.get('shajarAyaCall');
+  const hayaBase=built.get('muhammadHayaCall');
+  // 1 — a dual built on the singular's marker, and the reverse. The declension decides, p. 169.
+  mustReject('dual munada built on a damma',dualBase,data=>{data.tokens[1].binaaSign='damma'},'E_MUNADA_BINAA');
+  mustReject('sound-masculine-plural munada built on the alif',smpBase,data=>{data.tokens[1].binaaSign='alif'},'E_MUNADA_BINAA');
+  mustReject('singular munada built on the waw',builtBase,data=>{data.tokens[1].binaaSign='waw'},'E_MUNADA_BINAA');
+  // 2 — a dual munada made an ordinary manṣūb dual, which is what the alif marker exists to deny.
+  mustReject('dual munada forged into an accusative dual',dualBase,data=>{
+    const m=data.tokens[1];m.state='nasb';m.binaaSign='';m.mahall='';m.mahallRuleId='';
+    m.sign={id:'ya',ar:'الْيَاءُ',en:'the yāʾ'};
+  });
+  mustReject('dual munada stripped of its mahall',dualBase,data=>{data.tokens[1].mahall=''},'E_MUNADA_MAHALL');
+  /* 3 — the أداة. «يَا مُحَمَّدُ» and «هَيَا مُحَمَّدُ» are BOTH real sentences of this chapter and both
+     live in the مفرد علم lane, so swapping the particle does not produce nonsense — it produces
+     the OTHER registered pair. What must not survive is the recorded analysis following it: the
+     link still names the pair and the أداة it was built with, so it no longer re-derives. */
+  mustReject('«ya» swapped for «haya» over the same head',builtBase,data=>{
+    data.tokens[0].word=api.NIDA_PARTICLES.haya.surface;
+    data.tokens[0].grammar.particleType=api.NIDA_PARTICLES.haya.particleType;
+  },'E_MUNADA_RELATION');
+  mustReject('«haya» swapped for «ya» over the same head',hayaBase,data=>{
+    data.tokens[0].word=api.NIDA_PARTICLES.ya.surface;
+    data.tokens[0].grammar.particleType=api.NIDA_PARTICLES.ya.particleType;
+  },'E_MUNADA_RELATION');
+  mustReject('a vocative particle keeping its type but taking another sister\u2019s bytes',hamzaBase,data=>{
+    data.tokens[0].word=api.NIDA_PARTICLES.ay.surface;
+  });
+  mustReject('the recorded particle identity forged on the link',hayaBase,data=>{
+    data.relationships.find(item=>item.type==='nida').particleKey='ya';
+  },'E_MUNADA_RELATION');
+  mustReject('the recorded particle type forged on the link',hamzaBase,data=>{
+    data.relationships.find(item=>item.type==='nida').particleType=api.NIDA_PARTICLE_TYPE;
+  },'E_MUNADA_RELATION');
+  mustReject('a vocative particle citing another sister\u2019s source rule',ayaBase,data=>{
+    data.tokens[0].ruleId=api.NIDA_PARTICLES.ya.ruleId;
+  },'E_PARTICLE_RULE_OWNER');
+  // 4 — the أَيَا example is a real idafa; deleting it must not leave a shabih or a bare munada.
+  mustReject('the «aya» mudaf stripped of its idafa',ayaBase,data=>{data.tokens[1].grammar.isMudaf=false});
+  mustReject('the «aya» mudaf ilayh replaced',ayaBase,data=>{
+    const other=api.MUNADA_COMPLEMENTS.khayr;
+    data.tokens[2].word=other.gen;data.tokens[2].surfaceHint=other.gen;data.tokens[2].expectedSurface=other.gen;
+  });
+  mustReject('a mudaf munada relabelled shabih on the link',ayaBase,data=>{
+    data.relationships.find(item=>item.type==='nida').subtype=api.MUNADA_SUBTYPES.shabih;
+  },'E_MUNADA_RELATION');
+  // 5 — proper-name forgery: a registered non-proper head standing in a مفرد علم lane.
+  mustReject('an intended indefinite wearing the proper-name lane',builtBase,data=>{
+    const m=data.tokens[1],other=api.MUNADA_LEXEMES.rajul.binaaSurface;
+    m.word=other;m.surfaceHint=other;m.expectedSurface=other;
+  });
+  // 6 — byte mutation on each of the three new binaʾ surfaces.
+  for(const [key,base] of [['muhammadDual',dualBase],['muhammadPlural',smpBase],['zayd',hamzaBase]]){
+    mustReject('a mutated '+key+' surface',base,data=>{
+      const m=data.tokens[1],forged=api.MUNADA_LEXEMES[key].binaaSurface.slice(0,-1);
+      m.word=forged;m.surfaceHint=forged;m.expectedSurface=forged;
+    });
+  }
+  // 7 — History forgery over the two new markers: a snapshot claiming naṣb must rebuild as binaʾ.
+  for(const [name,base] of [['dual',dualBase],['sound masculine plural',smpBase]]){
+    const forged=api.createExerciseSnapshot(base);
+    forged.tokens[1].state='nasb';forged.tokens[1].binaaSign='';forged.tokens[1].mahall='';
+    const rebuilt=api.restoreExerciseSnapshot(forged);
+    assert(!rebuilt||(!rebuilt.tokens[1].state&&rebuilt.tokens[1].mahall==='nasb'
+      &&rebuilt.tokens[1].binaaSign===api.MUNADA_PAIR_REGISTRY[base.tokens[1].word===api.MUNADA_LEXEMES.muhammadDual.binaaSurface?'muhammadDualCall':'muhammadPluralCall'].binaaSignId),
+      'History restored a built '+name+' munada as an ordinary accusative');
     negatives++;
   }
   console.log('Munada focused tests: '+builds+' canonical builds, '+trips+' History round trips, '
@@ -5378,7 +5524,7 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 // G_LAMMA_JAZM, G_LAM_AMR_JAZM and G_LA_NAHIYA_JAZM are three new governors, and G_HAMZAT_TAQRIR
 // owns هَمْزَةُ التَّقْرِيرِ's identity WITHOUT any government — أَلَمْ and أَلَمَّا are governed by the
 // existing G_LAM_JAZM and by G_LAMMA_JAZM, so neither needs a governor rule of its own.
-assert(Object.keys(api.SOURCE_REGISTRY).length===208,`Expected 208 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===214,`Expected 214 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -10006,7 +10152,7 @@ for(const t of api.templates){
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
   // J1a appends exactly ten: five one-verb jawāzim × the two proven jazm regimes. All are appended,
   // so every pre-existing stableId is unchanged — pinned directly below by keeping لَمْ at _01.
-  assert(api.templates.length===247,`Expected 247 templates after Phase 2, found ${api.templates.length}`);
+  assert(api.templates.length===249,`Expected 249 templates after Phase 2, found ${api.templates.length}`);
   assert(api.templates.filter(t=>t.state==='jazm').map(t=>t.stableId).join(' | ')
     ==='T_NOUN_PRESENT_JAZM_SUKUN_01 | T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_01 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_02 | T_PARTICLE_PRESENT_JAZM_SUKUN_03 | T_PARTICLE_PRESENT_JAZM_SUKUN_04 | T_PARTICLE_PRESENT_JAZM_SUKUN_05 | T_PARTICLE_PRESENT_JAZM_SUKUN_06 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06 | T_PARTICLE_PRESENT_JAZM_SUKUN_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_08 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08 | T_PARTICLE_PRESENT_JAZM_SUKUN_09 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_10 | T_PARTICLE_PRESENT_JAZM_SUKUN_11 | T_PARTICLE_PRESENT_JAZM_SUKUN_12 | T_PARTICLE_PRESENT_JAZM_SUKUN_13 | T_PARTICLE_PRESENT_JAZM_SUKUN_14 | T_PARTICLE_PRESENT_JAZM_SUKUN_15 | T_PARTICLE_PRESENT_JAZM_SUKUN_16 | T_PARTICLE_PRESENT_JAZM_SUKUN_17 | T_PARTICLE_PRESENT_JAZM_SUKUN_18 | T_PARTICLE_PRESENT_JAZM_SUKUN_19 | T_PARTICLE_PRESENT_JAZM_SUKUN_20 | T_PARTICLE_PRESENT_JAZM_SUKUN_21',
     'the jazm template ordinals shifted: لَمْ must keep _01 in both families and J1a/J1b must append only');
@@ -12486,7 +12632,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===247,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===249,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
@@ -13917,7 +14063,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===247,'the repair block changed the production template count');
+  assert(api.templates.length===249,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -14038,7 +14184,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===254,'the structural map holds '+registeredKeys.length+' keys, not 254');
+    assert(registeredKeys.length===256,'the structural map holds '+registeredKeys.length+' keys, not 256');
     assert(registeredShapes.length===80,'the shape registry holds '+registeredShapes.length+' shapes, not 80');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
@@ -14134,7 +14280,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===247,'the map covers '+mappedTemplates.size+' templates, not 247');
+    assert(mappedTemplates.size===249,'the map covers '+mappedTemplates.size+' templates, not 249');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -14196,7 +14342,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===254,'only '+keysSeen.size+' of the 243 structural keys were observed');
+    assert(keysSeen.size===256,'only '+keysSeen.size+' of the 256 structural keys were observed');
     assert(shapesSeen.size===80,'only '+shapesSeen.size+' of the 80 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
@@ -14531,7 +14677,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===254,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===256,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -14875,7 +15021,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
        frames of five tokens each (the نفي, the ʿāmil, the مستثنى منه, the أداة and the excepted
        word — one of them an iḍāfah, so six), three ناقص frames, the مقصور أداة lane, and three
        خلا frames of which one carries «ما» المصدرية as a fifth token. */
-    assert([856,857,858,859].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 856-859 across the registered ʿaṭf context rotation)');
+    assert([860,861,862,863].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 860-863 across the registered ʿaṭf context rotation)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -15064,7 +15210,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===247,'the presentation repair changed the template count');
+    assert(api.templates.length===249,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -16982,7 +17128,7 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===208,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules or the Wave-4 naʿt/maʿrifah rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===214,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules, the Wave-4 naʿt/maʿrifah rules or the Wave-7 munādā rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
@@ -17004,8 +17150,8 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   }
   assert(!Object.prototype.hasOwnProperty.call(api.GRAMMAR_RULES.governors,'hamzatTaqrir'),
     'هَمْزَةُ التَّقْرِيرِ entered the governor table and could now govern');
-  assert(api.templates.length===247,'the production template count does not include the J1a additions');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===254
+  assert(api.templates.length===249,'the production template count does not include the J1a additions');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===256
     &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===80,
     'the composer authority does not include the J1a mappings');
   p7Cases+=8;
@@ -18010,7 +18156,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===247,`Expected 247 production templates, found ${api.templates.length}`);
+assert(api.templates.length===249,`Expected 249 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);

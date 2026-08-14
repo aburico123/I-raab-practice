@@ -764,6 +764,111 @@ if (wave6.length !== WAVE6_KEYS.length) fail('the Wave-6 row set did not resolve
   }
 }
 
+/* ── WAVE 7 — بَابُ الْمُنَادَى, pp. 168–170 ──────────────────────────────────────────────────
+   The wave started with SIX non-FULL rows and every one of them turned out to be taught outright:
+   two bināʾ markers p. 169 gives the built munādā besides the ḍammah, and the four sisters of «يا»
+   p. 168 names with an example each. Nothing in this chapter was excluded and nothing blocked, so
+   all six are pinned FULL and the whole bāb is pinned complete.
+
+   Status alone would not prove the chapter, because six FULL rows are reachable by an engine that
+   has printed the right words in the wrong grammar. The structure below is therefore pinned too,
+   and every value it compares against is READ OUT OF THE APP's registries:
+     · five أدوات, each with its own bytes, type, source rule and naming clause, and each actually
+       reaching the rendered iʿrāb — a sister that exists only in a registry is not practised;
+     · three bināʾ markers, one per declension, each reaching a rendered «مُنَادًى ... فِي مَحَلِّ
+       نَصْبٍ» line — the ruling of p. 169 is that the marker FOLLOWS the declension, so a chapter
+       that produced all three on singulars would have taught the opposite of the source;
+     · bināʾ and iʿrāb kept apart on the SAME line: no built munādā line may also say «مَنْصُوبٌ»
+       or carry an iʿrāb sign clause, which is the one confusion this bāb exists to prevent;
+     · all five أقسام of p. 168 registered and productive. */
+const WAVE7_KEYS = ['B_MUNADA_MABNI_ALIF', 'B_MUNADA_MABNI_WAW',
+  'B_NIDA_HAMZA', 'B_NIDA_AY', 'B_NIDA_AYA', 'B_NIDA_HAYA'];
+{
+  for (const key of WAVE7_KEYS) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('Wave-7 row ' + key + ' is missing from the inventory'); continue; }
+    if (!/^باب المنادى/.test(row.chapter)) fail('Wave-7 row ' + key + ' is not in the wave scope: ' + row.chapter);
+    if (row.status !== 'FULL') fail('Wave-7 row ' + key + ' is ' + row.status + ', not FULL');
+  }
+  const chapterRows = rows.filter(r => /^باب المنادى/.test(r.chapter));
+  const chapterObserved = observed.filter(r => /^باب المنادى/.test(r.chapter));
+  if (chapterRows.length !== 14) fail('باب المنادى holds ' + chapterRows.length + ' rows, not the fourteen it should');
+  const notFull = chapterObserved.filter(r => r.status !== 'FULL');
+  if (notFull.length) fail('باب المنادى still has non-FULL rows: ' + notFull.map(r => r.key).join(', '));
+
+  /* ── أدوات النداء, p. 168 ───────────────────────────────────────────────────────────── */
+  const particles = Object.values(api.NIDA_PARTICLES || {});
+  if (particles.length !== 5) {
+    fail('p. 168 names «يا» and four sisters; the app registers ' + particles.length + ' أدوات نداء');
+  }
+  for (const field of ['surface', 'particleType', 'ruleId', 'iraabAr']) {
+    if (new Set(particles.map(p => p[field])).size !== particles.length) {
+      fail('two أدوات نداء share a ' + field + ', so a learner cannot tell them apart');
+    }
+  }
+  for (const particle of particles) {
+    if (!templatesFor(particle.nameAr, 'حَرْفُ نِدَاءٍ').size) {
+      fail('the أداة «' + particle.surface + '» never names itself in a rendered iʿrāb line');
+    }
+    /* Written joined or not, each أداة is still its OWN token with its own card — which is how
+       p. 168's «أَزَيْدُ» is parsed as two words rather than one. */
+    if (!cardHeads.has(skeleton(particle.surface))) {
+      fail('the أداة «' + particle.surface + '» has no iʿrāb card of its own');
+    }
+  }
+  if (particles.filter(p => p.proclitic).length !== 1) {
+    fail('exactly one أداة نداء — the hamzah of «أَزَيْدُ» — is written joined to what it calls');
+  }
+
+  /* ── بناء المنادى, p. 169: one marker per declension ─────────────────────────────────── */
+  const markers = api.MUNADA_BINAA_SIGNS || {};
+  for (const id of ['damma', 'alif', 'waw']) {
+    if (!markers[id]) { fail('p. 169 gives the built munādā the ' + id + ' marker; the app has none'); continue; }
+    if (!templatesFor('مَبْنِيٌّ عَلَى ' + markers[id].ar, 'فِي مَحَلِّ ' + api.MUNADA_MAHALL.ar).size) {
+      fail('the built munādā is never rendered on the ' + id + ' marker in the position of naṣb');
+    }
+  }
+  {
+    const pairs = Object.values(api.MUNADA_PAIR_REGISTRY || {});
+    const builtPairs = pairs.filter(p => api.MUNADA_SUBTYPE_LABELS[p.subtype].binaa);
+    const expected = { singular: 'damma', dual: 'alif', smp: 'waw' };
+    for (const pair of builtPairs) {
+      const declension = api.munadaHeadInflection(pair);
+      if (pair.binaaSignId !== expected[declension]) {
+        fail('a built munādā of the ' + declension + ' is built on ' + pair.binaaSignId
+          + ', not on what p. 169 says raises it');
+      }
+    }
+    if (new Set(builtPairs.map(p => api.munadaHeadInflection(p))).size !== 3) {
+      fail('the built munādā is not produced in all three declensions p. 169 rules on');
+    }
+    if (Object.keys(api.MUNADA_SUBTYPES).length !== 5) {
+      fail('p. 168 divides the munādā into five أنواع; the app models '
+        + Object.keys(api.MUNADA_SUBTYPES).length);
+    }
+    for (const subtype of Object.keys(api.MUNADA_SUBTYPES)) {
+      if (!pairs.some(p => p.subtype === subtype)) fail('the نوع ' + subtype + ' is registered but never produced');
+    }
+    /* The proper-name claim is the WORD's, not the label's: «يا زيدُ» and «يا رجلُ» are both built
+       on a ḍammah and only the lexical record separates the علم from the نكرة مقصودة. */
+    for (const pair of pairs) {
+      const properName = api.munadaHeadLexeme(pair).properName === true;
+      if ((pair.subtype === api.MUNADA_SUBTYPES.mufradAlam) !== properName) {
+        fail('a munādā pair types its head as ' + pair.subtype + ' against its own proper-name identity');
+      }
+    }
+  }
+
+  /* ── bināʾ is not iʿrāb, on the same rendered line ───────────────────────────────────── */
+  for (const [line] of iraabLines) {
+    if (!line.includes(skeleton('مُنَادًى مَبْنِيٌّ'))) continue;
+    if (line.includes(skeleton('مَنْصُوبٌ')) || line.includes(skeleton('مَرْفُوعٌ'))
+      || line.includes(skeleton('وَعَلَامَةُ'))) {
+      fail('a built munādā line also states an iʿrāb: ' + line);
+    }
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -801,6 +906,8 @@ console.log(JSON.stringify({
   wave6: { name: 'باب الاستثناء', target: WAVE6_KEYS.length + WAVE6_SOURCE_EXCLUDED.length,
     full: wave6.filter(r => r.status === 'FULL').length,
     sourceExcluded: WAVE6_SOURCE_EXCLUDED.length },
+  wave7: { name: 'باب المنادى', target: WAVE7_KEYS.length,
+    full: WAVE7_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

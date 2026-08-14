@@ -1265,6 +1265,14 @@ function resolveCanonicalTokenGloss(data,token,index){
  if(type==='particle'&&KHAFD_PARTICLE_BY_TYPE[token.grammar?.particleType||'']){
   return KHAFD_PARTICLE_BY_TYPE[token.grammar.particleType].gloss;
  }
+ /* Wave 3 — the two conditional مَا identities share their bytes and must not share their English.
+    مَا النافية is «not»; مَا المصدرية الظرفية is «as long as». The surface table below holds «مَا»
+    → «not», so without this branch دَامَ's particle would silently borrow the negation's gloss and
+    the composed sentence would read as a denial. Resolved by TYPE, exactly as the khafḍ particles
+    and the one-verb jawāzim above are. */
+ if(type==='particle'&&KANA_CONDITION_PARTICLES[token.grammar?.particleType||'']){
+  return KANA_CONDITION_PARTICLES[token.grammar.particleType].en;
+ }
  if(type==='particle'){
   return Object.prototype.hasOwnProperty.call(GLOSS_CLOSED_PARTICLES,surface)
    ?GLOSS_CLOSED_PARTICLES[surface]:null;
@@ -1280,7 +1288,7 @@ function resolveCanonicalTokenGloss(data,token,index){
     app already produced and only answers for the sisters added beside it. The two agree on كَانَ,
     and a test asserts that they do rather than leaving it to inspection. */
  if(type==='verb'&&token.tense==='kana'){
-  const sister=kanaSisterRecord(surface);
+  const sister=kanaSisterByVerb(surface);
   return sister?sister.en:null;
  }
  /* 4c — a productive true naʿt gets its adjective gloss from the exact authorized pair. Shared
@@ -1461,6 +1469,11 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  TS72:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" has lasted "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:2"}),Object.freeze({"lit":"."})])}),
  TS73:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" is "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:2"}),Object.freeze({"lit":"."})])}),
  TS74:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":", "}),Object.freeze({"slot":"gloss:3"}),Object.freeze({"lit":" is "}),Object.freeze({"slot":"gloss:4"}),Object.freeze({"lit":"."})])}),
+/* Wave 3. TS75 — the مَا-negated sisters: the negation is مَا own gloss (slot 0), the verb glosses
+    bare (slot 1), and the composer supplies the auxiliary around them, so the English negates once.
+    TS76 — مَا دَامَ, whose main clause is a nominal sentence and whose particle glosses «as long as». */
+ TS75:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:2:cap"}),Object.freeze({"lit":" has "}),Object.freeze({"slot":"gloss:0"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:3"}),Object.freeze({"lit":"."})])}),
+ TS76:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" is "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:2"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:4"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:3"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:5"}),Object.freeze({"lit":"."})])}),
  TS16:Object.freeze({parts:Object.freeze([Object.freeze({lit:"There is "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
  TS17:Object.freeze({parts:Object.freeze([Object.freeze({lit:"There is "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:" for "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
  TS18:Object.freeze({parts:Object.freeze([Object.freeze({lit:"He "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
@@ -1557,6 +1570,10 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  ,TS54:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let them not '}),Object.freeze({slot:'verb:1:en'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:'.'})])})
 }));
 const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),{
+ /* Wave 3 — the three كان-family lanes added for the conditional sisters. */
+ "T_PARTICLE_SINGULAR_NASB_FATHA_17||particle:particle,verb:kana,noun:ismKana,noun:khabarKana":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_17",structure:"particle:particle,verb:kana,noun:ismKana,noun:khabarKana",shape:"TS75",copulaPlural:false}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_18||particle:particle,verb:kana,noun:ismKana,noun:khabarKana":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_18",structure:"particle:particle,verb:kana,noun:ismKana,noun:khabarKana",shape:"TS75",copulaPlural:false}),
+ "T_NOUN_SINGULAR_NASB_FATHA_05||noun:mubtada,noun:khabar,particle:particle,verb:kana,noun:ismKana,noun:khabarKana":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_05",structure:"noun:mubtada,noun:khabar,particle:particle,verb:kana,noun:ismKana,noun:khabarKana",shape:"TS76",copulaPlural:false}),
  /* Wave 1 — حروف الخفض and معاني الإضافة. The six مِنْ lanes and the kāf compose with the
     existing TS02, and the three iḍāfah-meaning lanes with the existing TS04; the lām, ḥattā,
     مُذْ/مُنْذُ, رُبَّ and the three oaths each needed a shape of their own. */
@@ -4093,36 +4110,186 @@ const innaSisters=[
    the rest are named here with the reason they wait, so the gap is a fact a reader can check rather
    than a silence.
 
-   PRODUCED — single-word past operators whose fatḥ is VISIBLE and whose government is
-   unconditional, so the existing «فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ» analysis is exactly
-   true of them and nothing else has to be built.
+   Wave 3 completes the family. Every member p. 106 names is now produced, and the two things that
+   held five of them back are built rather than deferred:
 
-   NOT PRODUCED, and why:
-     • أَمْسَى، أَضْحَى — both end in ألف مقصورة, so their fatḥ is مُقَدَّر, not ظاهر. Rendering them
-       with the visible-fatḥ clause above would be false, and a correct estimated-fatḥ bināʾ is the
-       category GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated already excludes as
-       "weak-final estimated signs". It needs its own page and its own render branch.
-     • مَا زَالَ، مَا انْفَكَّ، مَا فَتِئَ، مَا بَرِحَ، مَا دَامَ — these operate only with the
-       preceding مَا (نافية for the four, مَصْدَرِيَّة ظَرْفِيَّة for دَامَ), so the bare verb may not be
-       produced as though it governed unconditionally. Producing them properly means TWO tokens —
-       مَا with its own analysis, then the verb — because «مَا زَالَ» carrying one verb's iʿrāb would
-       attribute فِعْلٌ مَاضٍ نَاقِصٌ to مَا as well, which is untrue. This app has no مَا particle
-       type and no registered page analysing مَا النافية or مَا المصدرية الظرفية in its own right, and
-       a four-token structure is a new composer key besides. Both are additions, not registrations. */
+     • THE SISTER IDENTITY IS NOT THE VERB SURFACE. p. 106 names five members as TWO words
+       («مَا زَالَ»), and p. 115 parses that construction as two tokens — «ما: حرف نفي مبني على
+       السكون لا محل له من الإعراب» and «زال: فعل ماض ناقص يرفع الاسم وينصب الخبر». So a record
+       carries BOTH: `ar` is the identity the source names the sister by, and `verbAr` is the one
+       word the verb token actually is. Nothing ever renders «مَا زَالَ» as one verb's iʿrāb, which
+       would attribute فِعْلٌ مَاضٍ نَاقِصٌ to مَا as well.
+
+     • THE ESTIMATED FATḤ IS SOURCE-BACKED. أَمْسَى and أَضْحَى end in ألف مقصورة, so their fatḥ is
+       مُقَدَّر. p. 20 gives the doctrine («وأما التقديري فهو: ما يمنع من التلفظ به مانع من تَعَذُّر…»)
+       and p. 21 gives this exact case («فما كان آخره ألفاً لازمة تُقَدَّر عليه جميعُ الحركات
+       للتعذر»), so `estimated-fath-taadhdhur` states what the source states and nothing more.
+
+   `condition` encodes p. 108's own division من جهة العمل, which is the whole reason these five may
+   not be produced bare. It is a POINTER to a frozen particle identity, never a boolean: the frame
+   has to contain that exact token or the sister is not authorized at all. */
 const kanaSisters=[
- {ar:'كَانَ',en:'was'},
- {ar:'أَصْبَحَ',en:'became'},
- {ar:'صَارَ',en:'came to be'},
- {ar:'ظَلَّ',en:'remained'},
- {ar:'بَاتَ',en:'spent the night being'},
- {ar:'لَيْسَ',en:'is not'}
+ {ar:'كَانَ',verbAr:'كَانَ',en:'was',binaaClass:'visible-fath',condition:null},
+ {ar:'أَمْسَى',verbAr:'أَمْسَى',en:'ended the day being',binaaClass:'estimated-fath-taadhdhur',condition:null},
+ {ar:'أَصْبَحَ',verbAr:'أَصْبَحَ',en:'became',binaaClass:'visible-fath',condition:null},
+ {ar:'أَضْحَى',verbAr:'أَضْحَى',en:'spent the forenoon being',binaaClass:'estimated-fath-taadhdhur',condition:null},
+ {ar:'صَارَ',verbAr:'صَارَ',en:'came to be',binaaClass:'visible-fath',condition:null},
+ {ar:'ظَلَّ',verbAr:'ظَلَّ',en:'remained',binaaClass:'visible-fath',condition:null},
+ {ar:'بَاتَ',verbAr:'بَاتَ',en:'spent the night being',binaaClass:'visible-fath',condition:null},
+ {ar:'لَيْسَ',verbAr:'لَيْسَ',en:'is not',binaaClass:'visible-fath',condition:null},
+ {ar:'مَا زَالَ',verbAr:'زَالَ',en:'ceased being',binaaClass:'visible-fath',condition:'maNafiyaKana'},
+ {ar:'مَا انْفَكَّ',verbAr:'انْفَكَّ',en:'stopped being',binaaClass:'visible-fath',condition:'maNafiyaKana'},
+ {ar:'مَا فَتِئَ',verbAr:'فَتِئَ',en:'left off being',binaaClass:'visible-fath',condition:'maNafiyaKana'},
+ {ar:'مَا بَرِحَ',verbAr:'بَرِحَ',en:'ceased to be',binaaClass:'visible-fath',condition:'maNafiyaKana'},
+ {ar:'مَا دَامَ',verbAr:'دَامَ',en:'remains',binaaClass:'visible-fath',condition:'maMasdariyyaZarfiyya'}
 ];
+/* The family as the SOURCE names it: this is what «كان وأخواتها» means, and it is what the
+   curriculum inventory checks membership against. It is not a list of verb surfaces. */
 const KANA_SURFACES=Object.freeze(kanaSisters.map(item=>item.ar));
-/* The bare verbs whose ناقص operation is CONDITIONAL. Named so the tests can assert the app never
-   produces them as unconditional operators, rather than merely failing to mention them. */
-const KANA_CONDITIONAL_BARE=Object.freeze(['زَالَ','انْفَكَّ','فَتِئَ','بَرِحَ','دَامَ']);
+/* The one-word verb surfaces a verb token may actually carry. Disjoint from the two-word identities
+   above by construction, and asserted to be so at load time. */
+const KANA_VERB_SURFACES=Object.freeze(kanaSisters.map(item=>item.verbAr));
+/* The bare verbs whose ناقص operation is CONDITIONAL (p. 108). Named so the tests can assert the app
+   never produces them WITHOUT their required particle, rather than merely failing to mention them. */
+const KANA_CONDITIONAL_BARE=Object.freeze(kanaSisters.filter(item=>item.condition).map(item=>item.verbAr));
+/* p. 108, «وتنقسم هذه الأفعال ـ من جهة العمل ـ إلى ثلاثة أقسام». The counts are the source's own and
+   are asserted at load time, so a sister that quietly changed قسم fails loudly. */
+const KANA_AMAL_DIVISIONS=Object.freeze({
+ maMasdariyyaZarfiyya:Object.freeze({count:1,
+  ar:'مَا يَعْمَلُ هَذَا الْعَمَلَ بِشَرْطِ تَقَدُّمِ «مَا» الْمَصْدَرِيَّةِ الظَّرْفِيَّةِ عَلَيْهِ',
+  en:'operates only when mā al-maṣdariyyah al-ẓarfiyyah precedes it'}),
+ maNafiyaKana:Object.freeze({count:4,
+  ar:'مَا يَعْمَلُ هَذَا الْعَمَلَ بِشَرْطِ أَنْ يَتَقَدَّمَ عَلَيْهِ نَفْيٌ',
+  en:'operates only when a negation precedes it'}),
+ unconditional:Object.freeze({count:8,
+  ar:'مَا يَعْمَلُ هَذَا الْعَمَلَ بِغَيْرِ شَرْطٍ',
+  en:'operates with no precondition'})
+});
+/* The same three أقسام phrased to FOLLOW the sister's name, for the construction card. The source's
+   own sentence («ما يعمل هذا العمل بشرط …») is a relative clause and cannot simply be apposed. */
+const KANA_AMAL_CLAUSE_AR=Object.freeze(Object.assign(Object.create(null),{
+ maMasdariyyaZarfiyya:'لَا يَعْمَلُ عَمَلَهُ إِلَّا بِتَقَدُّمِ «مَا» الْمَصْدَرِيَّةِ الظَّرْفِيَّةِ عَلَيْهِ',
+ maNafiyaKana:'لَا يَعْمَلُ عَمَلَهُ إِلَّا أَنْ يَتَقَدَّمَ عَلَيْهِ نَفْيٌ',
+ unconditional:'يَعْمَلُ عَمَلَهُ بِغَيْرِ شَرْطٍ'
+}));
+const KANA_AMAL_CLAUSE_EN=Object.freeze(Object.assign(Object.create(null),{
+ maMasdariyyaZarfiyya:'operates only when mā al-maṣdariyyah al-ẓarfiyyah precedes it',
+ maNafiyaKana:'operates only when a negation precedes it',
+ unconditional:'operates with no precondition'
+}));
+/* «مِنْ أَخَوَاتِ» — sliced from the definitions panel's own «أَخَوَاتِهَا» so the two cannot drift. */
+const KANA_SISTERS_OF_AR='مِنْ أَخَوَاتِ';
+/* p. 108's two conditions, each as an exact PARTICLE IDENTITY the frame must contain. The surface is
+   taken from the sister's own registered identity, so «مَا زَالَ» is guaranteed to be exactly the
+   particle token plus the verb token — asserted below rather than assumed.
+   The two identities SHARE their surface and must never be told apart by it: مَا النافية and مَا
+   المصدرية الظرفية are different words that happen to be spelled alike, and the app already carries
+   three further مَا identities (مَا الشرطية, and the two عطف negations). Nothing here ever resolves an
+   identity from bytes; the frame names the particleType and the authority compares that. */
+const KANA_CONDITION_PARTICLES=Object.freeze(Object.assign(Object.create(null),{
+ maNafiyaKana:Object.freeze({condition:'maNafiyaKana',particleType:'maNafiyaKana',ruleId:'R_MA_NAFIYA_KANA',
+  surface:kanaSisters.find(item=>item.condition==='maNafiyaKana').ar.split(' ')[0],en:'not',
+  nameAr:'حَرْفُ نَفْيٍ'}),
+ maMasdariyyaZarfiyya:Object.freeze({condition:'maMasdariyyaZarfiyya',particleType:'maMasdariyyaZarfiyya',
+  ruleId:'R_MA_MASDARIYYA_ZARFIYYA',
+  surface:kanaSisters.find(item=>item.condition==='maMasdariyyaZarfiyya').ar.split(' ')[0],en:'as long as',
+  nameAr:'«مَا» الْمَصْدَرِيَّةُ الظَّرْفِيَّةُ'})
+}));
+/* Byte safety, both directions. The identity must be exactly particle + space + verb, the two
+   conditions must agree on the surface they share, and they must NOT agree on anything else. */
+for(const item of kanaSisters){
+ if(!item.condition)continue;
+ const required=KANA_CONDITION_PARTICLES[item.condition];
+ if(!required)throw new Error('kāna sister names an unregistered condition: '+item.ar);
+ if(item.ar!==required.surface+' '+item.verbAr){
+  throw new Error('kāna sister identity is not its particle plus its verb: '+item.ar);
+ }
+}
+if(KANA_CONDITION_PARTICLES.maNafiyaKana.surface!==KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya.surface){
+ throw new Error('the two conditional مَا identities disagree about their shared surface');
+}
+if(KANA_CONDITION_PARTICLES.maNafiyaKana.particleType===KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya.particleType
+ ||KANA_CONDITION_PARTICLES.maNafiyaKana.ruleId===KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya.ruleId){
+ throw new Error('the two conditional مَا identities collapsed onto one authority');
+}
+/* The genitive the source's own division sentence uses must still be the same two words as the
+   nominative name above; a damma→kasra swap on each word is the only difference. */
+{
+ const nominative=KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya.nameAr;
+ const genitive=nominative.split(' ').map(word=>word.replace(/\u064F$/,'\u0650')).join(' ');
+ if(!KANA_AMAL_DIVISIONS.maMasdariyyaZarfiyya.ar.includes(genitive)){
+  throw new Error('the mā al-maṣdariyyah name and p. 108\'s division sentence have drifted apart');
+ }
+ if(!KANA_AMAL_CLAUSE_AR.maMasdariyyaZarfiyya.includes(genitive)){
+  throw new Error('the mā al-maṣdariyyah name and its construction clause have drifted apart');
+ }
+}
+/* THE PROOF IS THE STRUCTURE, not a flag. Re-derives from the tokens alone whether this deficient
+   verb is operating lawfully: an unconditional sister always is; a conditional one only when the
+   exact particle its قسم requires stands immediately before it, carries that particle's own
+   particleType, its canonical surface and its own source rule. Called by the renderer, by Why and
+   by validateExercise, so a snapshot that deletes مَا or swaps its identity cannot be restored. */
+function deriveKanaConditionAuthority(data,index){
+ const tokens=data&&Array.isArray(data.tokens)?data.tokens:[];
+ const withheld=reason=>({authorized:false,reason,sister:null,particle:null});
+ const verb=tokens[index];
+ if(!verb||verb.tense!=='kana')return withheld('not-a-deficient-verb');
+ const sister=kanaSisterByVerb(verb.word);
+ if(!sister)return withheld('not-a-registered-sister');
+ if(verb.expectedSurface&&verb.expectedSurface!==sister.verbAr)return withheld('verb-surface-not-canonical');
+ if(!sister.condition)return{authorized:true,reason:'',sister,particle:null};
+ const required=KANA_CONDITION_PARTICLES[sister.condition];
+ if(!required)return withheld('unknown-condition');
+ const particle=tokens[index-1];
+ if(!particle)return withheld('required-particle-absent');
+ if(particle.grammar?.type!=='particle')return withheld('token-before-the-sister-is-not-a-particle');
+ if(particle.grammar.particleType!==required.particleType)return withheld('preceding-particle-is-a-different-identity');
+ if(particle.word!==required.surface)return withheld('particle-surface-not-canonical');
+ if(particle.ruleId&&particle.ruleId!==required.ruleId)return withheld('particle-does-not-cite-its-own-rule');
+ return{authorized:true,reason:'',sister,particle};
+}
 function kanaSisterRecord(surface){
  return kanaSisters.find(item=>item.ar===surface)||null;
+}
+/* The lookup the verb lane uses: a verb token carries the ONE-word surface, so resolving it by the
+   two-word identity would fail closed for exactly the five sisters Wave 3 added. Kept separate from
+   kanaSisterRecord so neither lookup can answer for the other's key space. */
+function kanaSisterByVerb(surface){
+ return kanaSisters.find(item=>item.verbAr===surface)||null;
+}
+/* Wave 3 — the deficient-verb card, assembled from named parts so that every sister renders the
+   SAME clause and only the bināʾ differs. Each Arabic constant has exactly one home here; the
+   renderer and the harness both read these, so no clause is ever written twice.
+   p. 115 supplies the operating clause in the source's own words; pp. 20–21 supply the estimated
+   fatḥ and its preventer for the two weak-final sisters. */
+const KANA_DEFICIENT_LABEL_AR="فِعْلٌ مَاضٍ نَاقِصٌ";
+const KANA_OPERATION_CLAUSE_AR="فَيَرْفَعُ اسْمَهُ وَيَنْصِبُ خَبَرَهُ";
+const KANA_NO_MAHALL_AR="لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ";
+const KANA_BINAA_CLAUSE_AR=Object.freeze(Object.assign(Object.create(null),{
+ 'visible-fath':"مَبْنِيٌّ عَلَى الْفَتْحِ",
+ 'estimated-fath-taadhdhur':"مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ عَلَى آخِرِهِ، مَنَعَ مِنْ ظُهُورِهِ التَّعَذُّرُ"
+}));
+const KANA_BINAA_CLAUSE_EN=Object.freeze(Object.assign(Object.create(null),{
+ 'visible-fath':'built on the visible fatḥah',
+ 'estimated-fath-taadhdhur':'built on an estimated fatḥah at its end, prevented from appearing by taʿadhdhur — a permanent alif cannot carry a vowel'
+}));
+/* A sister may not silently acquire a bināʾ class nobody renders, and a rendered class may not lose
+   its clause. Both directions are checked here rather than left to a test. */
+for(const item of kanaSisters){
+ if(!KANA_BINAA_CLAUSE_AR[item.binaaClass]||!KANA_BINAA_CLAUSE_EN[item.binaaClass]){
+  throw new Error('kāna sister has no bināʾ clause: '+item.ar);
+ }
+ if(/\s/.test(item.verbAr))throw new Error('a kāna verb surface is multi-word: '+item.verbAr);
+ if(item.condition&&item.ar===item.verbAr)throw new Error('a conditional kāna sister has no particle in its identity: '+item.ar);
+ if(!item.condition&&item.ar!==item.verbAr)throw new Error('an unconditional kāna sister is not its own verb: '+item.ar);
+}
+if(new Set(KANA_SURFACES).size!==KANA_SURFACES.length)throw new Error('the kāna family repeats an identity');
+if(new Set(KANA_VERB_SURFACES).size!==KANA_VERB_SURFACES.length)throw new Error('the kāna family repeats a verb surface');
+/* p. 108's own counts: 1 + 4 + 8 = 13 أفعال. Derived from the registry and compared with the
+   source's numbers, so adding or losing a sister fails here instead of quietly changing a قسم. */
+for(const [key,division] of Object.entries(KANA_AMAL_DIVISIONS)){
+ const actual=kanaSisters.filter(item=>(item.condition||'unconditional')===key).length;
+ if(actual!==division.count)throw new Error('kāna ʿamal division '+key+' holds '+actual+', not the source\'s '+division.count);
 }
 const singularPredicates=[...adjectives];
 const dualPredicates=[
@@ -5437,7 +5604,45 @@ function pickGeneralObject(verb,excludeNoun){
 function pickPerson(){return pickVaried(singularPeople,'people',n=>n.nom)}
 function pickPlace(){return pickVaried(places,'places',n=>n.nom)}
 function pickInna(){return pickVaried(innaSisters,'particles',p=>p.ar)}
-function pickKana(){return pickVaried(kanaSisters,'kana-sisters',p=>p.ar)}
+/* Only the eight of p. 108's third قسم — «ما يعمل هذا العمل بغير شرط» — may head the bare
+   three-token lane. The five conditional sisters have their own lanes, which carry the particle
+   their عمل depends on; offering them here would produce them without it. */
+/* Wave 3 — مَا دَامَ needs a main clause, and the source's own example is one: «لَا أَعْذِلُ خَالِدًا
+   مَا دُمْتُ حَيًّا» (p. 108) is a statement completed by a مَا دَامَ clause, not a bare sentence. These
+   frames keep that shape with a nominal main clause, and each pairs a proposition with a condition
+   that actually bears on it — a سيّارة does not stay generous because a book is clean. Every word is
+   an existing registered lexeme, looked up by its nominative so the glosses and the declension come
+   from the same registries every other lane uses. */
+const MA_DAMA_FRAMES=Object.freeze([
+ Object.freeze({mubtada:'the teacher',khabar:'happy',ism:'the student',khabarKana:'hardworking'}),
+ Object.freeze({mubtada:'the friend',khabar:'well-liked',ism:'the statement',khabarKana:'truthful'}),
+ Object.freeze({mubtada:'the neighbor',khabar:'generous',ism:'the guest',khabarKana:'kind'}),
+ Object.freeze({mubtada:'the principal',khabar:'fair',ism:'the worker',khabarKana:'trustworthy'})
+]);
+/* Frames name their words by ENGLISH, which is ASCII and unique in these registries. Naming them by
+   their Arabic would mean a second copy of each surface in this file, and two copies of an Arabic
+   word in one project is exactly how combining-mark order drifts apart unseen. Fail closed at load:
+   a frame naming a word no registry owns would otherwise only surface as a broken gloss inside a
+   built exercise. */
+function maDamaNoun(en){
+ const found=[...singularPeople,...singularThings].find(item=>item.en===en);
+ if(!found)throw new Error('a مَا دَامَ frame names an unregistered noun: '+en);
+ return found;
+}
+function maDamaAdjective(en){
+ const found=adjectives.find(item=>item.en===en);
+ if(!found)throw new Error('a مَا دَامَ frame names an unregistered adjective: '+en);
+ return found;
+}
+for(const frame of MA_DAMA_FRAMES){
+ maDamaNoun(frame.mubtada);maDamaNoun(frame.ism);
+ maDamaAdjective(frame.khabar);maDamaAdjective(frame.khabarKana);
+}
+if(new Set(MA_DAMA_FRAMES.map(f=>f.mubtada+'|'+f.ism)).size!==MA_DAMA_FRAMES.length)throw new Error('a مَا دَامَ frame is duplicated');
+function pickKana(){return pickVaried(kanaSisters.filter(item=>!item.condition),'kana-sisters',p=>p.ar)}
+function pickConditionalKana(condition,key){
+ return pickVaried(kanaSisters.filter(item=>item.condition===condition),key,p=>p.ar);
+}
 function innaCopula(particle,plural){return particle.ar==='لَيْتَ'?'were':(plural?'are':'is')}
 function pickHumanAction(){return pickVaried(humanActions,'human-actions',a=>a.pres)}
 function pickHumanPrepAction(){return pickVaried(humanPrepActions,'human-prep-actions',a=>`${a.pres}:${a.prep}`)}
@@ -8963,7 +9168,7 @@ const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA
  ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).map(item=>[item.particleType,item.ruleId])),
  [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,
- maNafiyaKana:'R_MA_NAFIYA_KANA',laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
+ maNafiyaKana:'R_MA_NAFIYA_KANA',maMasdariyyaZarfiyya:'R_MA_MASDARIYYA_ZARFIYYA',laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
  ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
  ...Object.fromEntries(Object.values(ATF_CONTEXT_PARTICLES).map(item=>[item.particleType,item.ruleId])),
  /* Wave 1 — each khafḍ identity owns exactly ONE source rule. Without this the two «بِ» identities
@@ -8991,6 +9196,13 @@ function composeSentence(tokens){
   return text+separator+token.word;
  },'');
 }
+/* The only two noun roles whose token may cite a rule other than the one GRAMMAR_RULES.roles binds
+   to them: both are the bināʾ reading of a role that is otherwise muʿrab, and both are source-owned
+   (munādā p. 169, interrogative ḥāl p. 155). Anything else is a role borrowing another's authority. */
+const ROLE_RULE_VARIANTS=Object.freeze(Object.assign(Object.create(null),{
+ munada:Object.freeze(['R_MUNADA_MABNI']),
+ haal:Object.freeze(['R_HAAL_ISTIFHAM_MABNI'])
+}));
 const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr']},
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
@@ -9469,7 +9681,16 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  C_NUUN_WIQAYA:sourceRule('Nūn al-wiqāyah is a ḥarf that must separate a verb from the first-person object yāʾ; it has no place in iʿrāb and is neither the fāʿil nor the mafʿūl.',[142,157],'Only the explicitly registered past surfaces that carry the first-person object yāʾ. Attested twice: p.142 names it and states its office — «وَيَجِبُ أَنْ يُفْصَلَ بَيْنَهَا وَبَيْنَ الْفِعْلِ بِنُونٍ تُسَمَّى نُونَ الْوِقَايَةِ», with «أَطَاعَنِي مُحَمَّدٌ» — and p.157’s model iʿrāb of «لَقِيَتْنِي هِنْدٌ بَاكِيَةً» says «وَالنُّونُ لِلْوِقَايَةِ». Neither page gives it a bināʾ or a maḥall, so this rule claims neither.'),
  C_YAA_MUTAKALLIM_MAFUL:sourceRule('The first-person object yāʾ is a connected pronoun built on sukūn in the position of naṣb as mafʿūl bihi.',[95,157],'Only the explicitly registered past surfaces that carry it. p.157: «وَالْيَاءُ ضَمِيرُ الْمُتَكَلِّمِ مَفْعُولٌ بِهِ، مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ»; p.95 parses the parallel attached «نَا» of «سَيَزُورُنَا الْقَاضِي» as «مَفْعُولٌ بِهِ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ». It is deliberately NOT the classification «مَفْعُولٌ بِهِ مُضْمَرٌ مُتَّصِلٌ», which belongs to باب المفعول به.'),
  C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from the original wāw; it has no grammatical role and no place in iʿrāb.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[91],'Al Jazeera Learning Arabic («الألف الفارقة») names the rule and gives كَتَبُوا / لم يكتُبُوا / اكْتُبُوا. Workspace scan separately attests the written spelling «ضَرَبُوا» (p.91) as form-only; that attestation does not authorize this rule.'),
- R_KANA_PAST_DEFICIENT:sourceRule('Kāna and its sisters are deficient past verbs that raise their noun and make their khabar accusative.',[76,105,106,107,108],'The registered unconditional family surfaces use the app’s single-noun/single-khabar template; canonical كَانَ also appears in the exact مَا كَانَ + lām al-juḥūd frame, whose following verbal clause is its khabar. Other conditional operators and weak-final أَمْسَى / أَضْحَى remain excluded.',[IA_KANA]),
+ R_KANA_PAST_DEFICIENT:sourceRule('Kāna and its sisters are deficient past verbs that raise their noun and make their khabar accusative.',[76,105,106,107,108],'All thirteen sisters p. 106 enumerates. The eight unconditional ones of p. 108’s third قسم head the bare three-token lane; the five conditional ones appear only in a frame that contains the exact particle their عمل depends on. Canonical كَانَ also appears in the مَا كَانَ + lām al-juḥūd frame, whose following verbal clause is its khabar. The weak-final pair cite R_KANA_PAST_FATH_EST_TAADHDHUR instead, because their bināʾ differs.',[IA_KANA]),
+ /* Wave 3 — أَمْسَى and أَضْحَى. The DEFICIENCY and the government are p. 106–108’s, exactly as for
+    their eleven sisters; what is separate here is only the bināʾ marker, because these two end in a
+    permanent alif. p. 20 states the doctrine of the estimated sign and names its three preventers
+    («ما يمنع من التلفظ به مانع من تَعَذُّر، أو استِثقال، أو مناسَبَة … منع من ظهورها التعذر، أو الثقل»)
+    and p. 21 assigns this case to that first preventer in as many words: «فما كان آخره ألفاً لازمة
+    تُقَدَّر عليه جميعُ الحركات للتعذر». «جميع الحركات» is what licenses applying it to a bināʾ fatḥah
+    and not only to an iʿrāb sign; the app already renders two other estimated-fatḥ bināʾ classes for
+    the past (pp. 71–72), so this is the third member of an existing category, not a new claim. */
+ R_KANA_PAST_FATH_EST_TAADHDHUR:sourceRule('A deficient past verb ending in a permanent alif is built on an estimated fatḥah whose appearance taʿadhdhur prevents.',[20,21,71,106,107,108],'Only the two registered weak-final family surfaces أَمْسَى and أَضْحَى. It authorizes the bināʾ marker alone: the government, the roles and the states are R_KANA_PAST_DEFICIENT’s, and no noun and no other verb may cite it.',[IA_KANA]),
 
  G_LAN_NASB:sourceRule('Lan is a particle of negation, naṣb, and future meaning.',[73,74],'It must be immediately followed by the present verb it governs.'),
  /* Phase 3A1 — أَنْ. Al-Tuḥfah p. 75 lists it first among «القسم الأول ـ وهو الذي يَنصُب الفعل
@@ -9528,7 +9749,12 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  G_FA_SABABIYYA_CONCEALED_AN:sourceRule('Fāʾ al-sababiyyah licenses a present verb through أَنْ concealed obligatorily in the answer to negation or request.',[76,77],'Production uses only one exact negation frame; arbitrary fāʾ and every unproved request subtype are excluded.'),
  G_WAW_MAIYYA_CONCEALED_AN:sourceRule('Wāw al-maʿiyyah licenses a present verb through أَنْ concealed obligatorily after negation or request.',[76,77],'Production uses only one exact negation-and-accompaniment frame; ordinary conjunction is excluded.'),
  G_AW_CONCEALED_AN:sourceRule('Aw licenses a present verb through أَنْ concealed obligatorily when it means illā or ilā.',[78],'Production uses only the exact registered “until” (إِلَى أَنْ) frame; ordinary disjunction is excluded.'),
- R_MA_NAFIYA_KANA:sourceRule('Mā negates kāna in the canonical lām al-juḥūd frame.',[76],'Only مَا immediately before canonical كَانَ in the registered lām al-juḥūd templates.'),
+ R_MA_NAFIYA_KANA:sourceRule('Mā is a particle of negation; p. 115 parses it «حرف نفي مبني على السكون لا محل له من الإعراب».',[76,107,108,115],'Only canonical مَا immediately before canonical كَانَ in the registered lām al-juḥūd templates, or immediately before one of the four sisters whose عمل p. 108 makes conditional on a preceding نفي (زَالَ، انْفَكَّ، فَتِئَ، بَرِحَ).'),
+ /* Wave 3 — p. 108 names this identity and states exactly one thing about it: that دَامَ operates
+    only when it precedes. That is all this rule authorizes. It deliberately does NOT authorize a
+    bināʾ marker (the source gives none) nor a maḥall for the clause it opens (the source gives
+    none), and both omissions are named in GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated. */
+ R_MA_MASDARIYYA_ZARFIYYA:sourceRule('Mā al-maṣdariyyah al-ẓarfiyyah is the particle whose precedence is the condition of dāma’s government.',[108],'Only canonical مَا immediately before canonical دَامَ in the registered مَا دَامَ frames. It authorizes the identity alone: no bināʾ marker, no maḥall for its clause, and no other verb may depend on it.'),
  R_LA_NAFIYA_CONTEXT:sourceRule('Lā supplies the negation required before fāʾ al-sababiyyah or wāw al-maʿiyyah.',[76,77],'Only the exact registered negative-result and negative-accompaniment templates; it is not lā al-nāhiyah and does not govern jazm.'),
  G_LAM_JAZM:sourceRule('Lam is a particle of negation, jazm, and conversion to past meaning.',[79,80],'It must be immediately followed by the present verb it governs. It governs alone and also under هَمْزَة التَّقْرِير in أَلَمْ, where the hamzah is an addition onto it and never a second governor.'),
  /* J1a — the four remaining rules of القسم الأول. Al-Tuḥfah p. 80 states each identity in its own
@@ -10866,6 +11092,7 @@ const AR={
  lamTalil:w=>grammarSpec('particle','particle',{particleType:KAY_TALIL_LAM.particleType,particleWord:w}),
  concealedAnParticle:(w,particleType)=>grammarSpec('particle','particle',{particleType,particleWord:w}),
  maNafiyaKana:w=>grammarSpec('particle','particle',{particleType:'maNafiyaKana',particleWord:w}),
+ maMasdariyyaZarfiyya:w=>grammarSpec('particle','particle',{particleType:'maMasdariyyaZarfiyya',particleWord:w}),
  laNafiyaContext:w=>grammarSpec('particle','particle',{particleType:'laNafiyaContext',particleWord:w}),
  future:w=>grammarSpec('particle','particle',{particleType:'sawfa',particleWord:w}),
  presentFive:(w)=>grammarSpec('verb','present',{conjugation:'afalKhamsa',person:'3mp'}),
@@ -10875,8 +11102,8 @@ const AR={
  adverbMudaf:w=>grammarSpec('noun','adverb',{isMudaf:true}),
  adverbBare:w=>grammarSpec('noun','adverb'),
  kana:w=>grammarSpec('verb','kana',{person:'3ms'}),
- ismKana:w=>grammarSpec('noun','ismKana'),
- khabarKana:w=>grammarSpec('noun','khabarKana'),
+ ismKana:(w,p)=>grammarSpec('noun','ismKana',{governorWord:p}),
+ khabarKana:(w,p)=>grammarSpec('noun','khabarKana',{governorWord:p}),
  naat:w=>grammarSpec('noun','naat'),
  atf:w=>grammarSpec('noun','atf'),
  tawkid:w=>grammarSpec('noun','tawkid'),
@@ -12141,10 +12368,14 @@ function inflectVerb(token,tokens,index){
   /* Phase QP1 — the surface is RESOLVED from the frozen family registry rather than hard-coded, so
      widening the family is a registry edit and an unregistered surface fails closed here instead of
      being silently accepted as a deficient verb. */
-  const sister=kanaSisterRecord(token.surfaceHint||token.word);
+  const sister=kanaSisterByVerb(token.surfaceHint||token.word);
   if(!sister)throw new Error(`Not a registered kāna-family operator: ${token.surfaceHint||token.word}`);
-  token.ruleId='R_KANA_PAST_DEFICIENT';
-  token.expectedSurface=sister.ar;
+  /* Wave 3 — the bināʾ class is the sister's OWN property and is never stored on the token: the
+     renderer re-resolves it from this same frozen record, so a snapshot cannot carry a forged
+     bināʾ past the restore path. أَمْسَى / أَضْحَى end in ألف مقصورة and take the estimated fatḥ of
+     pp. 20–21; everything else keeps the visible fatḥ it already had. */
+  token.ruleId=sister.binaaClass==='estimated-fath-taadhdhur'?'R_KANA_PAST_FATH_EST_TAADHDHUR':'R_KANA_PAST_DEFICIENT';
+  token.expectedSurface=sister.verbAr;
   token.word=token.expectedSurface;
   return;
  }
@@ -12242,7 +12473,7 @@ function configureParticle(token){
   lamDuaa:'G_LAM_DUAA_JAZM',laDuaaiyya:'G_LA_DUAA_JAZM',
   ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).map(item=>[item.particleType,item.ruleId])),
   [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
- [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',
+ [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',maMasdariyyaZarfiyya:'R_MA_MASDARIYYA_ZARFIYYA',
   laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,[NIDA_PARTICLE_TYPE]:NIDA_PARTICLE.ruleId,
   ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
   ...Object.fromEntries(Object.values(ATF_CONTEXT_PARTICLES).map(item=>[item.particleType,item.ruleId])),
@@ -12704,8 +12935,12 @@ function nounRoleArabic(token){
  }
  if(role==='ismInna')return`اسْمُ «${token.grammar.governorWord}» مَنْصُوبٌ بِهِ`;
  if(role==='khabarInna')return`خَبَرُ «${token.grammar.governorWord}» مَرْفُوعٌ بِهِ`;
- if(role==='ismKana')return'اسْمُ «كَانَ» مَرْفُوعٌ بِهَا';
- if(role==='khabarKana')return'خَبَرُ «كَانَ» مَنْصُوبٌ بِهَا';
+ /* Wave 3 — the governor is NAMED, exactly as it is for إِنَّ directly above. It was hard-coded to
+    «كَانَ», so every one of the family's other twelve sisters attributed its اسم and its خبر to a
+    verb that was not in the sentence. governorWord is written by the builder and re-derived from
+    the kāna relationship by validateExercise, so a relabelled snapshot cannot survive restore. */
+ if(role==='ismKana')return`اسْمُ «${token.grammar.governorWord}» مَرْفُوعٌ بِهِ`;
+ if(role==='khabarKana')return`خَبَرُ «${token.grammar.governorWord}» مَنْصُوبٌ بِهِ`;
  if(role==='naat')return`نَعْتٌ ${stateArabic(token.state)} تَابِعٌ لِمَنْعُوتِهِ`;
  if(role==='atf')return`مَعْطُوفٌ ${stateArabic(token.state)} عَلَى مَعْطُوفٍ عَلَيْهِ`;
  if(role==='tawkid'){
@@ -12898,8 +13133,13 @@ function renderVerbAnalysis(token){
   return;
  }
  if(token.tense==='kana'){
-  token.ar=`${token.word}: فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
-  token.en='A deficient past-tense verb built on fatḥah, with no syntactic position of its own.';
+  /* Wave 3 — the sister is re-resolved from the frozen registry HERE rather than trusted from the
+     token, so which bināʾ clause prints is a property of which sister this actually is. A snapshot
+     carrying a forged class cannot survive this, because nothing about the class is stored. */
+  const sister=kanaSisterByVerb(token.word);
+  if(!sister)throw new Error(`Not a registered kāna-family operator: ${token.word}`);
+  token.ar=`${token.word}: ${KANA_DEFICIENT_LABEL_AR} ${KANA_BINAA_CLAUSE_AR[sister.binaaClass]}، ${KANA_NO_MAHALL_AR}.`;
+  token.en=`A deficient past-tense verb ${KANA_BINAA_CLAUSE_EN[sister.binaaClass]}, with no syntactic position of its own.`;
   return;
  }
  /* Phase 2b-B — built on sukūn, so it takes NO مرفوع/منصوب/مجزوم, no «وعلامة … », and no
@@ -13070,7 +13310,12 @@ function renderParticleAnalysis(token){
   token.ar=`${token.word}: ${concealed.nameAr.replace(/ِ$/u,'ُ')}، حَرْفٌ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
   token.en=`${concealed.nameEn}; it licenses the canonical concealed-an construction.`;return;
  }
- if(type==='maNafiyaKana'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle in the canonical negated-kāna frame.';return}
+ if(type==='maNafiyaKana'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle, built on sukūn, with no syntactic position of its own.';return}
+ /* p. 108 names this identity — «مَا» الْمَصْدَرِيَّةُ الظَّرْفِيَّةُ — as the condition of دَامَ's عمل, and
+    names nothing else about it. It therefore renders its NAME and no bināʾ marker: the source gives
+    مَا النافية one at p. 115 and gives this one none, exactly as نون الوقاية is rendered without one.
+    Inventing a bināʾ here to make the two cards look alike would be inventing source. */
+ if(type==='maMasdariyyaZarfiyya'){token.ar=`${token.word}: ${KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya.nameAr}، ${KANA_NO_MAHALL_AR}.`;token.en='Mā al-maṣdariyyah al-ẓarfiyyah, the particle whose presence lets dāma govern.';return}
  if(type===NIDA_PARTICLE_TYPE){token.ar=`${token.word}: ${NIDA_PARTICLE.nameAr} مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of calling.';return}
  if(type===WAW_MAIYYA_TYPE){token.ar=`${token.word}: ${WAW_MAIYYA.nameAr}، حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='The wāw of accompaniment; it is not a conjunction here.';return}
  if(type===LA_JINS_PARTICLE_TYPE){token.ar=`${token.word}: ${LA_JINS_PARTICLE.nameAr}، تَعْمَلُ عَمَلَ «إِنَّ»، مَبْنِيَّةٌ عَلَى السُّكُونِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.`;token.en='The لا that negates a whole class; it works like «إنّ».';return}
@@ -13381,14 +13626,18 @@ const WHY_ROLE=Object.freeze({
   stateEn:t=>`خَبَرُ ${eq(t.grammar.governorWord)} is مَرْفُوعٌ.`},
  ismKana:{
   id:()=>'WHY_ROLE_ISM_KANA',
-  ar:t=>`دَخَلَتْ «كَانَ» عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَـ${wq(t.word)} اسْمُهَا.`,
-  en:t=>`Kāna entered upon the nominal sentence, so ${eq(t.word)} is its اسْم.`,
-  stateId:()=>'WHY_STATE_ISM_KANA',stateAr:()=>'وَاسْمُ «كَانَ» مَرْفُوعٌ.',stateEn:()=>'اسْمُ «كَانَ» is مَرْفُوعٌ.'},
+  ar:t=>`دَخَلَتْ ${wq(t.grammar.governorWord)} عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَـ${wq(t.word)} اسْمُهَا.`,
+  en:t=>`${eq(t.grammar.governorWord)} entered upon the nominal sentence, so ${eq(t.word)} is its اسْم.`,
+  stateId:()=>'WHY_STATE_ISM_KANA',
+  stateAr:t=>`وَاسْمُ ${wq(t.grammar.governorWord)} مَرْفُوعٌ.`,
+  stateEn:t=>`اسْمُ ${eq(t.grammar.governorWord)} is مَرْفُوعٌ.`},
  khabarKana:{
   id:()=>'WHY_ROLE_KHABAR_KANA',
-  ar:t=>`${wq(t.word)} أَخْبَرَ عَنِ اسْمِ «كَانَ»، فَهُوَ خَبَرُهَا.`,
-  en:t=>`${eq(t.word)} gives information about اسْم «كَانَ», so it is its خَبَر.`,
-  stateId:()=>'WHY_STATE_KHABAR_KANA',stateAr:()=>'وَخَبَرُ «كَانَ» مَنْصُوبٌ.',stateEn:()=>'خَبَرُ «كَانَ» is مَنْصُوبٌ.'},
+  ar:t=>`${wq(t.word)} أَخْبَرَ عَنِ اسْمِ ${wq(t.grammar.governorWord)}، فَهُوَ خَبَرُهَا.`,
+  en:t=>`${eq(t.word)} gives information about اسْم ${eq(t.grammar.governorWord)}, so it is its خَبَر.`,
+  stateId:()=>'WHY_STATE_KHABAR_KANA',
+  stateAr:t=>`وَخَبَرُ ${wq(t.grammar.governorWord)} مَنْصُوبٌ.`,
+  stateEn:t=>`خَبَرُ ${eq(t.grammar.governorWord)} is مَنْصُوبٌ.`},
  naat:{
   id:()=>'WHY_ROLE_NAAT_HAQIQI',
   ar:t=>`${wq(t.word)} وَصَفَ الِاسْمَ الَّذِي قَبْلَهُ، فَهُوَ نَعْتٌ حَقِيقِيٌّ لَهُ.`,
@@ -13749,7 +13998,28 @@ const WHY_PARTICLE=Object.freeze({
     themselves are stated once, on the verb they actually govern, so a learner meets them where the
     naṣb happens rather than twice in two places. */
  [IDHAN_PARTICLE_TYPE]:t=>({id:'WHY_PARTICLE_IDHAN',ar:`${wq(t.word)} حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ، تَنْصِبُ الْفِعْلَ الْمُضَارِعَ بِنَفْسِهَا بِشُرُوطٍ ثَلَاثَةٍ.`,en:`${eq(t.word)} is a particle of answer, recompense, and naṣb; it makes the present verb مَنْصُوبٌ by itself, on three conditions.`}),
- maNafiyaKana:t=>({id:'WHY_PARTICLE_MA_NAFIYA_KANA',ar:`${wq(t.word)} حَرْفُ نَفْيٍ نَفَى «كَانَ» فِي هَذَا التَّرْكِيبِ.`,en:`${eq(t.word)} negates kāna in this construction.`}),
+ maNafiyaKana:(t,data)=>{
+  /* The verb this مَا actually negates, re-derived from the sentence. In the lām al-juḥūd frame
+     that is كَانَ; before one of p. 108's four conditional sisters it is that sister's own verb. */
+  const tokens=data&&Array.isArray(data.tokens)?data.tokens:[];
+  const next=tokens[tokens.indexOf(t)+1];
+  const negated=next&&next.tense==='kana'?next.word:'';
+  if(!negated)throw new Error('WHY: مَا النافية does not precede a deficient verb');
+  return{id:'WHY_PARTICLE_MA_NAFIYA_KANA',
+   ar:`${wq(t.word)} حَرْفُ نَفْيٍ نَفَى ${wq(negated)} فِي هَذَا التَّرْكِيبِ.`,
+   en:`${eq(t.word)} negates ${eq(negated)} in this construction.`};
+ },
+ maMasdariyyaZarfiyya:(t,data)=>{
+  /* The name already contains «مَا», so the token word is not repeated; and what performs the عمل
+     is the VERB, re-derived from the sentence, not the two-word identity. */
+  const tokens=data&&Array.isArray(data.tokens)?data.tokens:[];
+  const next=tokens[tokens.indexOf(t)+1];
+  const governed=next&&next.tense==='kana'?next.word:'';
+  if(!governed)throw new Error('WHY: مَا المصدرية الظرفية does not precede a deficient verb');
+  return{id:'WHY_PARTICLE_MA_MASDARIYYA_ZARFIYYA',
+   ar:`${KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya.nameAr}، وَبِتَقَدُّمِهَا عَمِلَ ${wq(governed)} عَمَلَ ${wq(KANA_SURFACES[0])}.`,
+   en:`This is mā al-maṣdariyyah al-ẓarfiyyah; because it precedes, ${eq(governed)} governs exactly as kāna does.`};
+ },
  laNafiyaContext:t=>({id:'WHY_PARTICLE_LA_NAFIYA_CONTEXT',ar:`${wq(t.word)} حَرْفُ نَفْيٍ لَا يَعْمَلُ الْجَزْمَ هُنَا.`,en:`${eq(t.word)} is a negating particle and does not govern jazm here.`}),
  /* «إِلَّا» excludes; it does not govern. Saying so on the particle itself is what keeps a learner
     from reading the naṣb that follows as government by إِلَّا rather than naṣb على الاستثناء. */
@@ -13901,7 +14171,13 @@ function buildTokenWhy(token,data){
    /* Phase QP1 — the same rule, now naming the operator actually present. The CLAIM is unchanged
       (كان وأخواتها ترفع الاسم وتنصب الخبر), so this stays one Why rule rather than one per sister. */
    push({id:'WHY_KANA',ar:`${wq(token.word)} فِعْلٌ مَاضٍ نَاقِصٌ يَدْخُلُ عَلَى الْجُمْلَةِ الِاسْمِيَّةِ، فَيَرْفَعُ اسْمَهُ وَيَنْصِبُ خَبَرَهُ.`,en:`${eq(token.word)} is a deficient past verb that enters a nominal sentence: its اسْم is مَرْفُوعٌ and its خَبَر is مَنْصُوبٌ.`});
-   push({id:'WHY_MABNI_KANA',ar:'وَهُوَ مَبْنِيٌّ عَلَى الْفَتْحِ.',en:'It is مَبْنِيٌّ on the فَتْحَة.'});
+   /* Wave 3 — the bināʾ clause comes from the SISTER, not from a constant. It was hard-coded to the
+      visible fatḥ, which made this line contradict the card above it for أَمْسَى and أَضْحَى. Both
+      now read the one clause table, so they cannot disagree. */
+   const kanaSister=kanaSisterByVerb(token.word);
+   if(!kanaSister)throw new Error(`WHY: not a registered kāna-family operator “${token.word}”`);
+   push({id:'WHY_MABNI_KANA',ar:`وَهُوَ ${KANA_BINAA_CLAUSE_AR[kanaSister.binaaClass]}.`,
+    en:`It is ${KANA_BINAA_CLAUSE_EN[kanaSister.binaaClass]}.`});
   }else if(token.inflection===MABNI_NUUN_NISWAH){
    /* Deliberately NOT whyStateVerb/whySignVerb: those claim مرفوع/منصوب/مجزوم and name an
       iʿrāb sign, neither of which is true of a مبني verb. */
@@ -13942,7 +14218,10 @@ function buildTokenWhy(token,data){
  }else if(type==='particle'){
   const make=WHY_PARTICLE[token.grammar.particleType];
   if(!make)throw new Error(`WHY: no rule for particle type “${token.grammar.particleType}”`);
-  push(make(token));
+  /* Wave 3 — `data` is passed so a particle whose meaning depends on what follows it can say so.
+     مَا النافية used to name «كَانَ» unconditionally, which is false in «مَا زَالَ»: the word it
+     negates is زَالَ, and كَانَ is not in the sentence at all. */
+  push(make(token,data));
   push(WHY_MABNI_PARTICLE);
  }else throw new Error(`WHY: no rule for token type “${type}”`);
  return{ids,ar,en};
@@ -13950,6 +14229,32 @@ function buildTokenWhy(token,data){
 function buildRelationshipWhy(rel,data){
  const ids=[],ar=[],en=[];
  const push=s=>{ids.push(s.id);ar.push(s.ar);en.push(s.en)};
+ /* Wave 3 — the combined block for a deficient-verb construction. It re-derives the sister and its
+    قسم through deriveKanaConditionAuthority rather than reading the record, so it says nothing the
+    structure does not currently prove; if the authority withholds, no Why is produced and the
+    renderer has already withheld the card too. */
+ if(rel.type==='kana'){
+  const verb=data.tokens.find(item=>item.id===rel.governorId);
+  const ism=data.tokens.find(item=>item.id===rel.ismId);
+  const khabar=data.tokens.find(item=>item.id===rel.khabarId);
+  if(!verb||!ism||!khabar)return{ids,ar,en};
+  const authority=deriveKanaConditionAuthority(data,data.tokens.indexOf(verb));
+  if(!authority.authorized)return{ids,ar,en};
+  const sister=authority.sister;
+  push({id:'WHY_REL_KANA_SISTER',
+   ar:`${wq(sister.ar)} ${KANA_SISTERS_OF_AR} ${wq(KANA_SURFACES[0])}، دَخَلَ عَلَى الْمُبْتَدَإِ وَالْخَبَرِ فَرَفَعَ ${wq(ism.word)} اسْمًا لَهُ وَنَصَبَ ${wq(khabar.word)} خَبَرًا لَهُ.`,
+   en:`${sister.ar} is one of the sisters of kāna: it entered upon a mubtadaʾ and khabar, raising ${eq(ism.word)} as its اسْم and making ${eq(khabar.word)} its مَنْصُوب خَبَر.`});
+  if(authority.particle){
+   push({id:'WHY_REL_KANA_CONDITION',
+    ar:`وَهُوَ ${KANA_AMAL_CLAUSE_AR[sister.condition]}، وَقَدْ تَقَدَّمَتْهُ ${wq(authority.particle.word)} هُنَا، فَتَمَّ شَرْطُ عَمَلِهِ.`,
+    en:`It ${KANA_AMAL_CLAUSE_EN[sister.condition]}, and that particle does precede it here, so the condition of its government is met.`});
+  }else{
+   push({id:'WHY_REL_KANA_UNCONDITIONAL',
+    ar:`وَهُوَ ${KANA_AMAL_CLAUSE_AR.unconditional}.`,
+    en:`It ${KANA_AMAL_CLAUSE_EN.unconditional}.`});
+  }
+  return{ids,ar,en};
+ }
  if(rel.type==='passiveDeputy'){
   const verb=data.tokens.find(item=>item.id===rel.verbId);
   const deputy=data.tokens.find(item=>item.id===rel.deputyId);
@@ -14195,6 +14500,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='kana'){
+   const recipient=data.tokens.find(item=>item.id===rel.governorId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   /* The maṣdar carries the combined analysis, not the verb: the ʿāmil can stand several tokens
      earlier, and the combined block belongs beside the word the exercise is actually about. */
   if(rel.type==='absoluteObject'){
@@ -14268,6 +14578,25 @@ function attachWhyExplanations(data){
  });
 }
 function renderRelationshipAnalysis(data){
+ /* Wave 3 — the kāna construction card. This is where the learner is told WHICH sister this is:
+    the sister identity p. 106 names it by (two words for the five conditional ones), the قسم من
+    جهة العمل p. 108 puts it in, and the government it performs on the two nouns. Every field is
+    re-derived here from the frozen registry through deriveKanaConditionAuthority; nothing is read
+    off the relationship record, so a record edited in a snapshot changes nothing on this card. */
+ data.relationships.filter(rel=>rel.type==='kana'&&rel.khabarKind==='single').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.governorId);
+  const ism=data.tokens.find(item=>item.id===rel.ismId);
+  const khabar=data.tokens.find(item=>item.id===rel.khabarId);
+  if(!verb||!ism||!khabar)return;
+  const authority=deriveKanaConditionAuthority(data,data.tokens.indexOf(verb));
+  if(!authority.authorized)return;
+  const sister=authority.sister;
+  const division=sister.condition||'unconditional';
+  const phrase=(authority.particle?[authority.particle.word]:[]).concat([verb.word,ism.word,khabar.word]).join(' ');
+  verb.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: «${sister.ar}» ${KANA_SISTERS_OF_AR} «${KANA_SURFACES[0]}»، وَهُوَ ${KANA_AMAL_CLAUSE_AR[division]}، ${KANA_OPERATION_CLAUSE_AR} «${ism.word}» وَ«${khabar.word}».`;
+  verb.phraseEn=`Together, “${phrase}” is the sister ${sister.ar} of kāna, which ${KANA_AMAL_CLAUSE_EN[division]}; it raises its noun “${ism.word}” and makes its khabar “${khabar.word}” accusative.`;
+  verb.phraseLabel='Deficient-verb construction';
+ });
  data.relationships.filter(rel=>rel.type==='passiveDeputy').forEach(rel=>{
   const verb=data.tokens.find(item=>item.id===rel.verbId);
   const deputy=data.tokens.find(item=>item.id===rel.deputyId);
@@ -14669,6 +14998,17 @@ function validateExercise(data){
   // lane may carry a whole-word maḥall rule at all.
   if(mahallRuleOwnerFailure(token,data))fail('E_MAHALL_RULE_OWNER','This token may not carry a whole-word maḥall rule; only a governed mabnī-present verb owns that field.',token);
   if(voiceRuleOwnerFailure(token,data))fail('E_VOICE_RULE_OWNER','This token does not own the passive-form source rule it carries.',token);
+  /* Wave 3 — a noun's SOURCE RULE must be the one its ROLE owns. Every productive noun role binds
+     to exactly one rule; the only two that legitimately carry something else are the built munādā
+     and the built interrogative ḥāl, whose bināʾ variant is named here rather than skipped, so a
+     third variant appearing later fails loudly instead of widening the hole. */
+  if(token.grammar.type==='noun'&&token.grammar.role){
+   const owner=GRAMMAR_RULES.roles[token.grammar.role];
+   const permitted=ROLE_RULE_VARIANTS[token.grammar.role]||[];
+   if(owner&&owner.ruleId&&token.ruleId!==owner.ruleId&&!permitted.includes(token.ruleId)){
+    fail('E_ROLE_RULE_OWNER','A noun cites a source rule that belongs to a different role.',token);
+   }
+  }
   if(Object.prototype.hasOwnProperty.call(token.grammar||{},'voice')&&token.grammar.voice!==PASSIVE_VOICE){
    fail('E_VOICE_OWNER','A token may carry a voice field only for the canonical passive voice.',token);
   }
@@ -15177,8 +15517,27 @@ function validateExercise(data){
    if(!authorization.authorized)fail('E_CONCEALED_AN_CONSTRUCTION',`This particle does not stand in its canonical concealed-an construction: ${authorization.reason}.`,token);
   }
   if(token.grammar.particleType==='maNafiyaKana'||token.grammar.particleType==='laNafiyaContext'){
-   const licensed=data.tokens.some((candidate,index)=>deriveConcealedAnNasb(data,index).authorized);
-   if(!licensed)fail('E_CONCEALED_AN_CONTEXT','A negation-context particle may occur only inside its canonical concealed-an construction.',token);
+   /* Wave 3 widens this by exactly one host, and structurally. مَا النافية now has two canonical
+      places: the lām al-juḥūd frame it already had, and immediately before one of p. 108's four
+      نفي-conditional sisters — where it is not decoration but the thing that makes the verb
+      govern at all. The second licence is granted only when THIS token is the very particle that
+      authority accepted, so a مَا sitting anywhere else in such a sentence is still rejected. */
+   const licensed=data.tokens.some((candidate,index)=>deriveConcealedAnNasb(data,index).authorized)
+    ||data.tokens.some((candidate,index)=>{
+      const authority=deriveKanaConditionAuthority(data,index);
+      return authority.authorized&&authority.particle===token;
+    });
+   if(!licensed)fail('E_CONCEALED_AN_CONTEXT','A negation-context particle may occur only inside its canonical concealed-an construction or before a sister whose ʿamal requires it.',token);
+  }
+  /* مَا المصدرية الظرفية has exactly ONE canonical place and no other: before دَامَ. It carries no
+     other function anywhere in this app, so an occurrence the authority does not accept is a
+     forgery rather than an unusual context. */
+  if(token.grammar.particleType==='maMasdariyyaZarfiyya'){
+   const licensed=data.tokens.some((candidate,index)=>{
+    const authority=deriveKanaConditionAuthority(data,index);
+    return authority.authorized&&authority.particle===token;
+   });
+   if(!licensed)fail('E_KANA_CONDITION','Mā al-maṣdariyyah al-ẓarfiyyah may occur only immediately before the sister whose ʿamal it licenses.',token);
   }
   if(token.grammar?.kanaKhabar===true){
    const authorization=deriveConcealedAnNasb(data,data.tokens.indexOf(token));
@@ -15535,6 +15894,27 @@ function validateExercise(data){
   const exactOne=khabarKana.length+verbalKhabarKana.length===1;
   const ordered=kana.length===1&&ismKana.length===1&&exactOne&&data.tokens.indexOf(kana[0])<data.tokens.indexOf(ismKana[0])&&data.tokens.indexOf(ismKana[0])<data.tokens.indexOf(khabar);
   if(!(ordered&&relationships.some(rel=>rel.type==='kana'&&rel.governorId===kana[0].id&&rel.ismId===ismKana[0].id&&rel.khabarId===khabar.id)))fail('E_KANA_PAIR','Kāna structure is incomplete, out of order, or unlinked.');
+  /* Wave 3 — three claims that used to be unchecked, each re-derived rather than trusted.
+     (a) the operator is a REGISTERED sister and carries the rule its bināʾ class demands;
+     (b) both governed nouns name THIS verb as their governor, so «اسم كان» can never be printed
+         over a sentence governed by أَمْسَى — nor one sister's اسم relabelled another's;
+     (c) a conditional sister is actually standing in the construction p. 108 requires. */
+  if(kana.length===1){
+   const verb=kana[0];
+   const sister=kanaSisterByVerb(verb.word);
+   if(!sister)fail('E_KANA_SISTER','The deficient verb is not a registered member of كان وأخواتها.',verb);
+   else{
+    const expectedRule=sister.binaaClass==='estimated-fath-taadhdhur'?'R_KANA_PAST_FATH_EST_TAADHDHUR':'R_KANA_PAST_DEFICIENT';
+    if(verb.ruleId!==expectedRule)fail('E_KANA_SISTER','The deficient verb does not cite the rule its bināʾ class requires.',verb);
+    const authority=deriveKanaConditionAuthority(data,data.tokens.indexOf(verb));
+    if(!authority.authorized)fail('E_KANA_CONDITION',`This sister is not standing in the construction its ʿamal requires: ${authority.reason}.`,verb);
+    for(const governed of [ismKana[0],khabarKana[0]].filter(Boolean)){
+     if(governed.grammar.governorWord!==sister.verbAr){
+      fail('E_KANA_GOVERNOR','A governed noun names a deficient verb that is not the one governing it.',governed);
+     }
+    }
+   }
+  }
  }
  if(data.tokens.some(item=>item.grammar.particleType==='lan')&&!/will not/i.test(data.translation))fail('E_LAN_TRANSLATION','Lan sentence lacks “will not” in its translation.');
  /* J1a widens this by exactly one shape. It was written when لَمْ only ever headed a plain negative
@@ -16169,7 +16549,7 @@ add('verb','fiveNouns','raf','waw',()=>{const v=pickGeneralVerb(),f=pickVaried(f
    the same deterministic rotation every other template uses, so every registered sister is reached
    without adding a template; the ism's rafʿ sign and the khabar's naṣb sign come from the canonical
    matrix exactly as they did when كَانَ was the only member. */
-add('verb','singular','nasb','fatha',()=>{const k=pickKana(),s=pickPerson(),a=pickVaried(singularPredicates,'kana-predicates',x=>x.acc);return{sentence:`${k.ar} ${s.nom} ${a.acc}`,translation:`${cap(s.en)} ${k.en} ${a.en}.`,tokens:[token(k.ar,k.en,AR.kana(k.ar),'A deficient past-tense verb.'),token(s.nom,s.en,AR.ismKana(s.nom),'The noun of kāna; nominative.'),token(a.acc,a.en,AR.khabarKana(a.acc),'The khabar of kāna; accusative.',true)]}});
+add('verb','singular','nasb','fatha',()=>{const k=pickKana(),s=pickPerson(),a=pickVaried(singularPredicates,'kana-predicates',x=>x.acc);return{sentence:`${k.verbAr} ${s.nom} ${a.acc}`,translation:`${cap(s.en)} ${k.en} ${a.en}.`,tokens:[token(k.verbAr,k.en,AR.kana(k.verbAr),'A deficient past-tense verb.'),token(s.nom,s.en,AR.ismKana(s.nom,k.verbAr),'The noun of the deficient verb; nominative.'),token(a.acc,a.en,AR.khabarKana(a.acc,k.verbAr),'The khabar of the deficient verb; accusative.',true)]}});
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('1s'),pastTemplateMetadata('1s','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('2ms'),pastTemplateMetadata('2ms','attached',true));
 add('verb','singular','nasb','fatha',()=>buildAdvancedPastExercise('2fs'),pastTemplateMetadata('2fs','attached',true));
@@ -16367,7 +16747,7 @@ function buildConcealedAnExercise(constructionId,lane){
  if(constructionId==='lamJuhud')return{
   sentence:'',translation:`${cap(subjectEn)} ${plural?'were':'was'} not going to ${target.en} ${objectEn}.`,
   tokens:[token('مَا','not',AR.maNafiyaKana('مَا'),'A negating particle.'),token('كَانَ','was',AR.kana('كَانَ'),'A deficient past-tense verb.'),
-   token(subjectAr,subjectEn,AR.ismKana(subjectAr),'The noun of kāna; nominative.'),connector,targetToken,
+   token(subjectAr,subjectEn,AR.ismKana(subjectAr,kanaSisterRecord(KANA_SURFACES[0]).verbAr),'The noun of kāna; nominative.'),connector,targetToken,
    token(frame.targetObject,objectEn,AR.object(frame.targetObject),EN.object)]
  };
  const prefixVerb=token(prefix.pres,prefix.en,AR.presentPred(prefix.pres),EN.present);
@@ -17711,6 +18091,48 @@ add('noun','singular','jarr','kasra',()=>{const s=wave1Pick(WAVE1_HOSTS.baSubjec
    already occupies. Two lanes, two genders, one component analysis. */
 add('verb','singular','raf','damma',()=>{const a=pickVaried(objectPronounPastActions.filter(item=>item.forms['3ms-obj-yaa']),'object-pronoun-past-actions-3ms',x=>x.past),surface=a.forms['3ms-obj-yaa'],p=pickVaried(singularPeople,'verb-objyaa-singular-subjects',x=>x.nom);return{sentence:`${surface} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(surface,a.pastEn,AR.past(surface),'A past-tense verb carrying the protective nūn and the first-person object pronoun.'),token(p.nom,p.en,AR.faail(p.nom),'The subject of the verb; nominative.',true)]}},pastTemplateMetadata('3ms-obj-yaa','explicit'));
 add('verb','sfp','raf','damma',()=>{const a=pickVaried(objectPronounPastActions.filter(item=>item.forms['3fs-explicit-obj-yaa']),'object-pronoun-past-actions',x=>x.past),surface=a.forms['3fs-explicit-obj-yaa'],p=pickVaried(sfp,'verb-objyaa-sfp-subjects',x=>x.nom);return{sentence:`${surface} ${p.nom}`,translation:`${cap(p.en)} ${a.pastEn}.`,tokens:[token(surface,a.pastEn,AR.past(surface),'A past-tense verb carrying the feminine tāʾ, the protective nūn, and the first-person object pronoun.'),token(p.nom,p.en,AR.faail(p.nom),'The sound feminine plural subject; nominative.',true)]}},pastTemplateMetadata('3fs-explicit-obj-yaa','explicit'));
+/* ══ Wave 3 — كَانَ وَأَخَوَاتُهَا, the five sisters whose عمل p. 108 makes conditional ══════════
+   Appended after every existing registration on purpose: add() numbers a template by call order
+   WITHIN its family, so inserting one beside its relatives would renumber every later stableId in
+   that family and every pin that names one. */
+function maNafiyaKanaLane(ismPool,ismKey){
+ return()=>{
+  const sister=pickConditionalKana('maNafiyaKana','w3-ma-nafiya-sisters');
+  const particle=KANA_CONDITION_PARTICLES.maNafiyaKana;
+  const ism=pickVaried(ismPool(),ismKey,item=>item.nom);
+  const khabar=pickVaried(singularPredicates,'w3-ma-nafiya-predicates',item=>item.acc);
+  return{
+   sentence:`${particle.surface} ${sister.verbAr} ${ism.nom} ${khabar.acc}`,
+   translation:`${cap(ism.en)} has ${particle.en} ${sister.en} ${khabar.en}.`,
+   tokens:[
+    token(particle.surface,particle.en,AR.maNafiyaKana(particle.surface),'The negation this sister’s government depends on.'),
+    token(sister.verbAr,sister.en,AR.kana(sister.verbAr),'A deficient past-tense verb.'),
+    token(ism.nom,ism.en,AR.ismKana(ism.nom,sister.verbAr),'The noun of the deficient verb; nominative.'),
+    token(khabar.acc,khabar.en,AR.khabarKana(khabar.acc,sister.verbAr),'The khabar of the deficient verb; accusative.',true)]};
+ };
+}
+add('particle','singular','nasb','fatha',maNafiyaKanaLane(()=>singularPeople,'w3-ma-nafiya-people'));
+add('particle','singular','nasb','fatha',maNafiyaKanaLane(()=>fiveNouns,'w3-ma-nafiya-five-nouns'));
+/* مَا دَامَ is NOT مَا زَالَ with a different verb. Its مَا is a different word — p. 108 calls it
+   الْمَصْدَرِيَّةُ الظَّرْفِيَّةُ, not نَافِيَة — and its clause qualifies a statement rather than making
+   one, so it is built with the main clause the source's own example has. */
+add('noun','singular','nasb','fatha',()=>{
+ const sister=pickConditionalKana('maMasdariyyaZarfiyya','w3-ma-dama-sister');
+ const particle=KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya;
+ const frame=pickVaried(MA_DAMA_FRAMES,'w3-ma-dama-frames',item=>item.mubtada);
+ const mubtada=maDamaNoun(frame.mubtada),khabar=maDamaAdjective(frame.khabar);
+ const ism=maDamaNoun(frame.ism),khabarKana=maDamaAdjective(frame.khabarKana);
+ return{
+  sentence:`${mubtada.nom} ${khabar.nom} ${particle.surface} ${sister.verbAr} ${ism.nom} ${khabarKana.acc}`,
+  translation:`${cap(mubtada.en)} is ${khabar.en} ${particle.en} ${ism.en} ${sister.en} ${khabarKana.en}.`,
+  tokens:[
+   token(mubtada.nom,mubtada.en,AR.mubtada(mubtada.nom),EN.mubtada),
+   token(khabar.nom,khabar.en,AR.khabar(khabar.nom),EN.khabar),
+   token(particle.surface,particle.en,AR.maMasdariyyaZarfiyya(particle.surface),'The particle whose precedence lets this sister govern.'),
+   token(sister.verbAr,sister.en,AR.kana(sister.verbAr),'A deficient past-tense verb.'),
+   token(ism.nom,ism.en,AR.ismKana(ism.nom,sister.verbAr),'The noun of the deficient verb; nominative.'),
+   token(khabarKana.acc,khabarKana.en,AR.khabarKana(khabarKana.acc,sister.verbAr),'The khabar of the deficient verb; accusative.',true)]};
+});
 
 
 const recent=[]; const HISTORY=40;

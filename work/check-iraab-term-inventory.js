@@ -153,6 +153,7 @@ for (let i = 0; i < api.templates.length; i++) {
 /* ── membership sets taken from the app's OWN registries (never typed here) ─────────── */
 const setOf = list => new Set(list.map(skeleton));
 const kanaSet = setOf(api.KANA_SURFACES);
+const KANA_VERB_SET = setOf(api.KANA_VERB_SURFACES || []);
 const innaSet = setOf(api.innaSisters.map(s => s.ar));
 const atfSet = setOf(Object.values(api.ATF_CONJUNCTION_REGISTRY).map(c => c.surface || c.ar || ''));
 const tawkidSet = setOf(Object.values(api.TAWKID_PAIR_REGISTRY || {}).map(p => p.word || p.ar || p.surface || ''));
@@ -238,7 +239,15 @@ function observe(row) {
     const s = skeleton(row.probe);
     let member = set.has(s);
     if (!member) for (const v of set) if (v.includes(s) && Math.abs(v.length - s.length) <= 1) member = true;
-    tpl = member ? (templatesFor(row.probe).size ? templatesFor(row.probe) : new Set(['<registry>'])) : new Set();
+    /* Wave 3 STRENGTHENS this. It used to read: membership in the app's registry, and if the term
+       never actually reached an iʿrāb line, a <registry> sentinel stood in for one — so a row could
+       be FULL on the strength of being LISTED. That is exactly the proof the completion standard
+       rejects: a registry entry is not something a learner can encounter. Membership is now a
+       PRECONDITION, and the observed iʿrāb lanes are the proof. A registered term nothing produces
+       is ABSENT, and says so.
+       Removing the sentinel changed no existing row: every lexical row that was FULL already had
+       real lanes. It is here so that the next one cannot slip through. */
+    tpl = member ? templatesFor(row.probe) : new Set();
   } else {
     tpl = templatesFor(row.probe);
   }
@@ -372,7 +381,14 @@ for (const r of observed) {
 for (const r of observed) {
   /* Only a row CREDITED with practice has something to prove here. ABSENT and GENERIC_ONLY both
      mean the iʿrāb corpus matched nothing at all, so there is no occurrence to classify. */
-  if (r.probeMode !== 'contains' || !['FULL', 'PARTIAL'].includes(r.status)) continue;
+  /* Wave 3 widens this from the "contains" mode alone to every mode whose evidence is a SUBSTRING
+     match. The registry modes end in templatesFor(), which is that same substring test, so «كَانَ»
+     buried inside «الْمَكَانِ» would have credited the row exactly as «إِيَّا» inside «أَيَّانَ» once
+     did. The five two-word sisters make the risk concrete: their probes are long enough to look
+     unmistakable and are matched just as loosely. The "standalone" mode already enforces this by
+     construction, and "card" and "sentence" carry their own whole-word tests. */
+  const SUBSTRING_MODES = ['contains', 'kana', 'inna', 'atf', 'tawkid', 'prep'];
+  if (!SUBSTRING_MODES.includes(r.probeMode) || !['FULL', 'PARTIAL'].includes(r.status)) continue;
   const occurrence = probeOccurrence(r.probe);
   if (!occurrence.standalone)
     fail(`row ${r.key} is ${r.status} but «${r.probe}» never occurs as a standalone term: every match ` +
@@ -434,6 +450,47 @@ for (const row of wave2) {
   }
 }
 
+/* ── Wave 3 completeness ─────────────────────────────────────────────────────────────
+   The seven كان وأخواتها rows that were non-FULL before Wave 3, named for the same reason Waves 1
+   and 2 name theirs: a later change that quietly stops producing one of these would otherwise only
+   move a total. All seven had to become FULL on a live build, and NONE of them is permitted to be a
+   blocker — the source produces every member of this family, so a blocker here would mean something
+   was withdrawn rather than proved. Two properties are asserted beyond the status, because they are
+   what makes these rows honest rather than merely present:
+     · every row is in this wave's own chapter, so an unrelated row cannot be moved into the pin;
+     · the five CONDITIONAL sisters must still be conditional in the app's own registry, so the
+       count of unconditional operators can never grow by relabelling one of them. */
+const WAVE3_KEYS = ['K_AMSA', 'K_ADHA', 'K_MA_ZALA', 'K_MA_INFAKKA', 'K_MA_FATIA', 'K_MA_BARIHA', 'K_MA_DAMA'];
+const wave3 = WAVE3_KEYS.map(key => {
+  const row = observed.find(r => r.key === key);
+  if (!row) fail('Wave-3 row ' + key + ' is missing from the inventory');
+  return row;
+}).filter(Boolean);
+for (const row of wave3) {
+  if (row.status !== 'FULL') fail('Wave-3 row ' + row.key + ' is ' + row.status + ', not FULL');
+  if (!/^باب العوامل الداخلة على المبتدأ والخبر/.test(row.chapter)) {
+    fail('Wave-3 row ' + row.key + ' is not in the wave\'s scope: ' + row.chapter);
+  }
+  if (row.parent !== 'كان وأخواتها') fail('Wave-3 row ' + row.key + ' left the كان family: ' + row.parent);
+}
+const wave3Full = wave3.filter(r => r.status === 'FULL').length;
+if (wave3.length !== WAVE3_KEYS.length) fail('the Wave-3 row set did not resolve');
+if (wave3Full !== WAVE3_KEYS.length) fail('Wave-3 is not complete: ' + wave3Full + ' of ' + WAVE3_KEYS.length);
+/* p. 108's own division, read back out of the app: 8 unconditional + 4 نفي-conditional + 1
+   مَا المصدرية الظرفية = the 13 the matn enumerates. Asserted here as well as at load time because
+   this is the property that would break silently if a conditional sister were ever produced bare. */
+{
+  const sisters = api.kanaSisters || [];
+  const conditional = sisters.filter(s => s.condition);
+  if (sisters.length !== 13) fail('the kāna family holds ' + sisters.length + ' sisters, not the matn\'s 13');
+  if (conditional.length !== 5) fail('the kāna family holds ' + conditional.length + ' conditional sisters, not 5');
+  if (conditional.filter(s => s.condition === 'maNafiyaKana').length !== 4) fail('p. 108\'s نفي قسم is not four verbs');
+  if (conditional.filter(s => s.condition === 'maMasdariyyaZarfiyya').length !== 1) fail('p. 108\'s مَا المصدرية قسم is not one verb');
+  for (const s of conditional) {
+    if (!KANA_VERB_SET.has(skeleton(s.verbAr))) fail('a conditional sister lost its verb surface: ' + s.ar);
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -464,6 +521,7 @@ console.log(JSON.stringify({
   totals, randomizationTotals, marathon,
   wave1: { name: 'حروف الخفض ومعاني الإضافة', target: WAVE1_KEYS.length, full: wave1Full },
   wave2: { name: 'باب الفاعل والضمائر', target: WAVE2_KEYS.length, full: wave2Full, trueBlocker: wave2Blocked },
+  wave3: { name: 'كان وأخواتها', target: WAVE3_KEYS.length, full: wave3Full },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

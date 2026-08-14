@@ -567,6 +567,75 @@ if (observed.find(r => r.key === 'T_MARIFA_MAWSUL').status !== 'TRUE_BLOCKER') {
   }
 }
 
+/* ── Wave 5 — بَابُ التَّوْكِيدِ, pp. 131–134 ──────────────────────────────────────────────
+   The wave started with six non-FULL rows in this chapter. Four were implementable and are pinned
+   FULL here; two — كِلَا/كِلْتَا and عَامَّة — turned out not to be taught by this source at all and
+   moved to `sourceExcluded`, which is this inventory's standing answer to a term the book does not
+   contain (a TRUE_BLOCKER means "taught but unbuildable", which these are not).
+
+   The exclusion is pinned BIDIRECTIONALLY, because "we deleted the row" is not a proof:
+     · neither term may reappear as a counted row, and
+     · both must be named in sourceExcluded with a reason, and
+     · the app must not produce either surface anywhere in its iʿrāb — so if a later wave ever does
+       build one, this fails loudly instead of leaving a silently-dropped target.
+
+   The four FULL rows are further required to be structurally dependent, not merely present: p. 133
+   makes أَجْمَع follow كُلّ and makes its three توابع follow أَجْمَع, so every one of them must carry a
+   `chainAfter` in the app's own registry. A future refactor that let أَكْتَعُونَ stand alone would keep
+   all four rows FULL while destroying what the chapter teaches; this catches that. */
+const WAVE5_KEYS = ['T_TAWKID_AJMA', 'T_TAWKID_AKTA', 'T_TAWKID_ABTA', 'T_TAWKID_ABSA'];
+const WAVE5_SOURCE_EXCLUDED = ['كِلَا وَكِلْتَا', 'عَامَّةٌ'];
+/* The individual SURFACES to watch, not just the row terms: a later wave that started producing
+   these would spell «كِلَا» on its own, never the dictionary phrase «كِلَا وَكِلْتَا», so watching only
+   the phrase would let the exclusion be violated without anything noticing. */
+const WAVE5_EXCLUDED_SURFACES = ['كِلَا', 'كِلْتَا', 'عَامَّةٌ', 'عَامَّتُهُمْ'];
+const wave5 = WAVE5_KEYS.map(key => {
+  const row = observed.find(r => r.key === key);
+  if (!row) fail('Wave-5 row ' + key + ' is missing from the inventory');
+  return row;
+}).filter(Boolean);
+for (const row of wave5) {
+  if (!/^باب التوكيد/.test(row.chapter)) {
+    fail('Wave-5 row ' + row.key + ' is not in the wave\'s scope: ' + row.chapter);
+  }
+  if (row.status !== 'FULL') fail('Wave-5 row ' + row.key + ' is ' + row.status + ', not FULL');
+}
+const wave5Full = wave5.filter(r => r.status === 'FULL').length;
+if (wave5.length !== WAVE5_KEYS.length) fail('the Wave-5 row set did not resolve');
+{
+  const excludedTerms = new Set(sourceExcluded.map(item => skeleton(item.term)));
+  const rowTerms = new Set(rows.map(r => skeleton(r.term)));
+  for (const term of WAVE5_SOURCE_EXCLUDED) {
+    const s = skeleton(term);
+    if (!excludedTerms.has(s)) fail('«' + term + '» is not pinned in sourceExcluded');
+    if (rowTerms.has(s)) fail('«' + term + '» came back as a counted row after being source-excluded');
+  }
+  for (const surface of WAVE5_EXCLUDED_SURFACES) {
+    if (standalone(surface).size) {
+      fail('«' + surface + '» is source-excluded but the app now produces it in the iʿrāb; ' +
+        'if this source does teach it, the exclusion must be retired deliberately');
+    }
+  }
+  /* The dependency of p. 133, read out of the app rather than out of this file. */
+  const pairs = api.TAWKID_PAIR_REGISTRY || {};
+  const dependent = Object.values(pairs).filter(p => p.chainAfter);
+  if (dependent.length < 4) {
+    fail('the app holds ' + dependent.length + ' dependent emphasis words, fewer than أجمع + its three توابع');
+  }
+  const bySemantic = new Map(Object.values(pairs).map(p => [p.semanticKey, p]));
+  for (const [semantic, after] of [['ajma', 'kull'], ['akta', 'ajma'], ['abta', 'akta'], ['absa', 'abta']]) {
+    const found = Object.values(pairs).filter(p => p.semanticKey === semantic);
+    if (!found.length) fail('the app registers no «' + semantic + '» emphasis word');
+    else if (!found.some(p => p.chainAfter === after)) {
+      fail('«' + semantic + '» no longer has to follow «' + after + '», which p. 133 requires of it');
+    }
+    if (found.some(p => p.pronounId)) {
+      fail('«' + semantic + '» acquired an attached pronoun; p. 134 parses it with a sign and no مضاف إليه');
+    }
+  }
+  if (!bySemantic.has('kull') || !bySemantic.get('kull')) fail('كُلّ is no longer registered to license أجمع');
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -599,6 +668,8 @@ console.log(JSON.stringify({
   wave2: { name: 'باب الفاعل والضمائر', target: WAVE2_KEYS.length, full: wave2Full, trueBlocker: wave2Blocked },
   wave3: { name: 'كان وأخواتها', target: WAVE3_KEYS.length, full: wave3Full },
   wave4: { name: 'باب النعت', target: WAVE4_KEYS.length, full: wave4Full, trueBlocker: wave4Blocked },
+  wave5: { name: 'باب التوكيد', target: WAVE5_KEYS.length, full: wave5Full,
+    sourceExcluded: WAVE5_SOURCE_EXCLUDED.length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

@@ -290,14 +290,16 @@ const rows = [
   R('T_TAWKID_NAFS', 'النَّفْسُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'نَفْسُهُ'),
   R('T_TAWKID_AYN', 'الْعَيْنُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'عَيْنُهُ'),
   R('T_TAWKID_KULL', 'كُلٌّ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'كُلَّهُ'),
-  R('T_TAWKID_KILA', 'كِلَا وَكِلْتَا', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'كِلَا', { mode: 'standalone', missingReason: 'p. 132 lists كلا وكلتا among ألفاظ التوكيد المعنوي; not in TAWKID_PAIR_REGISTRY. Probe tightened after the substring false positive: the old bare probe was swallowed by an unrelated word, so this row read FULL while never being produced. The implementing wave must re-check that this probe matches its real rendered surface.' }),
-  R('T_TAWKID_AJMA', 'أَجْمَعُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'أَجْمَع', { missingReason: 'Not in TAWKID_PAIR_REGISTRY (5 pairs only).' }),
-  R('T_TAWKID_AKTA', 'أَكْتَعُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'أَكْتَع', { missingReason: 'Not registered.' }),
-  R('T_TAWKID_ABTA', 'أَبْتَعُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'أَبْتَع', { missingReason: 'Not registered.' }),
-  R('T_TAWKID_ABSA', 'أَبْصَعُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'أَبْصَع', { missingReason: 'Not registered.' }),
+  /* Wave 5. The probe is the word's REAL rendered surface, not its dictionary form: «أَجْمَعُ»
+     skeletons to "اجمع", which is letters inside "اجمعون", and the probe-integrity invariant
+     rightly refuses to call that a practised term. `requires` ties the surface to the line that
+     parses it AS emphasis, so the row can never be satisfied by the word appearing as anything
+     else. p. 134 renders it in rafʿ as أَجْمَعُونَ and pp. 132/134 in naṣb/khafḍ as أَجْمَعِينَ. */
+  R('T_TAWKID_AJMA', 'أَجْمَعُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'أَجْمَعُونَ', { requires: 'تَوْكِيدٌ' }),
+  R('T_TAWKID_AKTA', 'أَكْتَعُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'أَكْتَعُونَ', { requires: 'تَوْكِيدٌ' }),
+  R('T_TAWKID_ABTA', 'أَبْتَعُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'أَبْتَعُونَ', { requires: 'تَوْكِيدٌ' }),
+  R('T_TAWKID_ABSA', 'أَبْصَعُ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'أَبْصَعُونَ', { requires: 'تَوْكِيدٌ' }),
   R('T_TAWKID_JAMI', 'جَمِيعٌ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'جَمِيعُهُمْ'),
-  R('T_TAWKID_AMMA', 'عَامَّةٌ', CH.tawkid, '132–134', 'ألفاظ التوكيد المعنوي', 'عَامَّتُهُمْ',
-    { missingReason: 'p. 132 lists عامّة among ألفاظ التوكيد المعنوي; not registered.' }),
   R('T_BADAL', 'بَدَلٌ تَابِعٌ لِلْمُبْدَلِ مِنْهُ', CH.badal, '135–137', 'التوابع', 'تَابِعٌ لِلْمُبْدَلِ مِنْهُ'),
   R('T_BADAL_KULL', 'بَدَلُ الْكُلِّ مِنَ الْكُلِّ (بَدَلُ الشَّيْءِ مِنَ الشَّيْءِ)', CH.badal, '135–137', 'أقسام البدل', 'بَدَلُ الْكُلِّ مِنَ الْكُلِّ'),
   R('T_BADAL_BAAD', 'بَدَلُ الْبَعْضِ مِنَ الْكُلِّ', CH.badal, '135–137', 'أقسام البدل', 'بَدَلُ الْبَعْضِ مِنَ الْكُلِّ'),
@@ -444,7 +446,17 @@ const sourceExcluded = [
   { term: 'جُمْلَةٌ فِي مَحَلِّ نَصْبٍ حَالٌ', reason: 'Never stated. The only «في محل نصب» in the chapter is p. 155\'s interrogative كَيْفَ, which IS built.' },
   { term: 'حَالٌ شِبْهُ جُمْلَةٍ', reason: 'Never stated in this chapter.' },
   { term: 'وَاوُ الْحَالِ', reason: 'The ḥāl chapter teaches no waw al-ḥāl.' },
-  { term: 'الرَّابِطُ لِلْحَالِ', reason: 'No rābiṭ is required of the ḥāl in this source; the rābiṭ belongs to the sentence khabar of p. 102.' }
+  { term: 'الرَّابِطُ لِلْحَالِ', reason: 'No rābiṭ is required of the ḥāl in this source; the rābiṭ belongs to the sentence khabar of p. 102.' },
+  /* Wave 5. Both were carried as tawkīd rows whose missingReason ASSERTED that «p. 132 lists» them.
+     p. 132 does not. The matn's enumeration is closed and complete — «وَيَكُونُ بِأَلْفَاظٍ مَعْلُومَةٍ،
+     وَهِيَ: النَّفْسُ، وَالْعَيْنُ، وَكُلٌّ، وَأَجْمَعُ، وَتَوَابِعُ أَجْمَعَ، وَهِيَ: أَكْتَعُ، وَأَبْتَعُ، وَأَبْصَعُ» — and
+     the شرح adds exactly one word to it, جَمِيع, as كُلّ's like. Neither كِلَا/كِلْتَا nor عَامَّة appears
+     anywhere in pp. 131–135, and pp. 35–36 define المثنى with no مُلحقات either, so كِلَا is not
+     taught by this book at all. Both belong to the LONGER lists of other books (Ibn ʿAqīl on the
+     Alfiyyah), and importing a larger taxonomy is exactly what this inventory exists to prevent.
+     Verified by reading the complete bāb from the page images, not from the old comment. */
+  { term: 'كِلَا وَكِلْتَا', reason: 'Not among ألفاظ التوكيد in this source. pp. 131–135 enumerate النفس، العين، كل، أجمع، أكتع، أبتع، أبصع (matn) plus جميع (شرح), and no more; pp. 35–36 define المثنى without ملحقات, so this book never teaches كلا/كلتا in any role. The row\'s previous missingReason cited a p. 132 listing that is not there.' },
+  { term: 'عَامَّةٌ', reason: 'Not among ألفاظ التوكيد in this source; it appears nowhere in pp. 131–135. Its row likewise cited a p. 132 listing that is not there. It is an addition of the longer Alfiyyah-tradition lists, not of this matn or its شرح.' }
 ];
 
 /* Source-backed facts that are NOT sayable in an iʿrāb, so they are not rows.

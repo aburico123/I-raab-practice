@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,laJinsPairKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseTarget,haalMahallFrameKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],laJinsPairKeys:[...laJinsPairKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,tawkidChainFrame,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,laJinsPairKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseTarget,haalMahallFrameKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],tawkidChainFrame,isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],laJinsPairKeys:[...laJinsPairKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -125,10 +125,24 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   TAWKID_KIND,
   TAWKID_SUBTYPES,
   TAWKID_ATTACHED_PRONOUNS,
+  stateArabic,
+  inflectionReasonArabic,
   TAWKID_PAIR_REGISTRY,
+  TAWKID_LEXEMES,
+  TAWKID_ALL_PAIR_KEYS,
+  TAWKID_SMP_LEXEMES,
+  TAWKID_PLURAL_LEXEMES,
+  TAWKID_STRENGTHEN_STEMS,
+  TAWKID_SMP_ENDINGS,
+  TAWKID_STRENGTHENING_KEYS,
+  TAWKID_CHAIN_ORDINALS,
+  TAWKID_CHAIN_FRAMES,
+  TAWKID_CHAIN_FRAME_KEYS,
   deriveTawkidFollowerAuthority,
   buildTawkidExercise,
+  buildTawkidChainExercise,
   canonicalTawkidTranslation,
+  canonicalTawkidChainTranslation,
   BADAL_KIND,
   BADAL_SUBTYPES,
   BADAL_PRONOUN_REQUIRED,
@@ -828,13 +842,16 @@ function runAtfFocusedTests(){
 runAtfFocusedTests();
 if(process.env.NAHW_FOCUSED_ATF==='1')process.exit(0);
 function runTawkidFocusedTests(){
+  /* Wave 5 — the one-follower templates are the ones with NO chain frame. The registry now also
+     holds the links of p. 133's emphasis runs, and those are never built standalone by design, so
+     they are covered by runTawkidChainFocusedTests below rather than swept up here. */
   const templatesByState=Object.fromEntries(['raf','nasb','jarr'].map(state=>[
-    state,api.templates.find(item=>item.followerKind===api.TAWKID_KIND&&item.state===state)
+    state,api.templates.find(item=>item.followerKind===api.TAWKID_KIND&&item.state===state&&!item.tawkidChainFrame)
   ]));
   assert(Object.values(templatesByState).every(Boolean),'the productive tawkīd family does not cover rafʿ, naṣb, and khafḍ');
   const analyzed=(template,built)=>api.completeNominalAnalysis({...built,templateId:template.stableId,
     templateStarts:template.starts,templateForm:template.form,templateState:template.state,templateSign:template.sign});
-  const cases=Object.keys(api.TAWKID_PAIR_REGISTRY).map(pairKey=>[pairKey,'nasb']);
+  const cases=api.TAWKID_ALL_PAIR_KEYS.map(pairKey=>[pairKey,'nasb']);
   for(const pairKey of ['lafziStudent','nafsSingularM','jamiiStudents']){
     cases.push([pairKey,'raf'],[pairKey,'jarr']);
   }
@@ -915,6 +932,285 @@ function runTawkidFocusedTests(){
 }
 runTawkidFocusedTests();
 if(process.env.NAHW_FOCUSED_TAWKID==='1')process.exit(0);
+/* ---- Wave 5: سلسلة التوكيد — أَجْمَع and its توابع ------------------------------------------
+   Al-Tuḥfah p. 132's matn completes ألفاظ التوكيد المعنوي with أَجْمَع، أَكْتَع، أَبْتَع، أَبْصَع, and
+   p. 133 attaches the two conditions that make them a different KIND of emphasis word rather than
+   four more entries on a list: أَجْمَع emphasizes only after كُلٍّ (غالباً), and its three توابع
+   «لا يُؤَكَّدُ بها استقلالاً». p. 134 then parses one of them for us — «أجمعون: توكيد ثانٍ مرفوع،
+   وعلامة رفعه الواو نيابة عن الضمة لأنه جمع مذكر سالم» — which fixes three things at once: the
+   ordinal identity, the sound-masculine-plural declension, and the ABSENCE of a مضاف إليه.
+
+   Everything below is asserted against those facts, and every negative attacks one of them. */
+function runTawkidChainFocusedTests(){
+  const clone=value=>JSON.parse(JSON.stringify(value));
+  const chainTemplates=api.templates.filter(item=>item.tawkidChainFrame);
+  assert(chainTemplates.length===api.TAWKID_CHAIN_FRAME_KEYS.length*3,
+    'the emphasis-run family does not cover every frame in rafʿ, naṣb and khafḍ');
+  let positives=0,negatives=0,historyRuns=0;
+  /* BYTE SAFETY. The four new surfaces exist nowhere else in the app, so they are rebuilt here from
+     the app's own code-point pieces and compared. A test carrying its own hand-typed Arabic copy
+     would be comparing Arabic against Arabic across two files, which is exactly where combining-mark
+     ORDER has drifted invisibly in this repo before. */
+  const stems=api.TAWKID_STRENGTHEN_STEMS,endings=api.TAWKID_SMP_ENDINGS;
+  for(const [key,stemKey] of [['ajmaSmp','ajma'],['aktaSmp','akta'],['abtaSmp','abta'],['absaSmp','absa']]){
+    const lexeme=api.TAWKID_SMP_LEXEMES[key];
+    assert(lexeme.nom===stems[stemKey]+endings.nom&&lexeme.acc===stems[stemKey]+endings.oblique
+      &&lexeme.gen===stems[stemKey]+endings.oblique,key+' is not its canonical stem plus the sound-plural ending');
+    assert(lexeme.acc===lexeme.gen&&lexeme.nom!==lexeme.acc,
+      key+' does not decline as a sound masculine plural (wāw in rafʿ, yāʾ in naṣb and khafḍ)');
+    assert([...stems[stemKey]].length===7&&[...lexeme.nom].length===11,
+      key+' stem or nominative has drifted in code-point length');
+    positives++;
+  }
+  /* كُلُّهُمْ must be كُلُّهُ's stem carrying the registered plural pronoun, never a second spelling. */
+  for(const [state,form] of [['raf','nom'],['nasb','acc'],['jarr','gen']]){
+    const singular=api.TAWKID_LEXEMES.kullHu[form],plural=api.TAWKID_PLURAL_LEXEMES.kullHum[form];
+    const hu=api.TAWKID_ATTACHED_PRONOUNS.hu.surfaceByState[state];
+    const hum=api.TAWKID_ATTACHED_PRONOUNS.hum.surfaceByState[state];
+    assert(plural===singular.slice(0,singular.length-hu.length)+hum,
+      'كُلُّهُمْ in '+state+' is not the registered كُلّ stem plus the registered plural pronoun');
+    positives++;
+  }
+  const analyzed=(template,built)=>api.completeNominalAnalysis({...built,templateId:template.stableId,
+    templateStarts:template.starts,templateForm:template.form,templateState:template.state,templateSign:template.sign});
+  const built=new Map();
+  /* Every Arabic string compared below is taken from the APP's own canonical record. A literal
+     typed here would be Arabic-versus-Arabic across two files, which is the exact shape of the
+     combining-mark drift this repo has been bitten by before. */
+  const ordinalAr=position=>api.TAWKID_CHAIN_ORDINALS[position].ar;
+  const smpReason=api.inflectionReasonArabic('smp');
+  const manawiLabel=api.TAWKID_SUBTYPES.manawi;
+  for(const template of chainTemplates){
+    const frameKey=template.tawkidChainFrame,frame=api.TAWKID_CHAIN_FRAMES[frameKey];
+    const host=template.state;
+    const data=analyzed(template,api.buildTawkidChainExercise(frameKey,host));
+    built.set(frameKey+'/'+host,data);
+    const links=data.tokens.filter(item=>item.grammar.role==='tawkid');
+    assert(links.length===frame.linkKeys.length,frameKey+'/'+host+' did not build its whole run');
+    const head=data.tokens[data.tokens.indexOf(links[0])-1];
+    assert(head&&head.grammar.role!=='tawkid',frameKey+'/'+host+' has no head noun before its run');
+    links.forEach((link,offset)=>{
+      const pairKey=frame.linkKeys[offset],pair=api.TAWKID_PAIR_REGISTRY[pairKey];
+      const index=data.tokens.indexOf(link);
+      const authority=api.deriveTawkidFollowerAuthority(data,index);
+      /* IDENTITY: the exact registered lexeme, its place in the run, and the word it was licensed
+         by — not merely "some tawkīd". */
+      assert(authority.authorized&&authority.pairKey===pairKey&&authority.semanticKey===pair.semanticKey
+        &&authority.subtype===api.TAWKID_SUBTYPES.manawi&&authority.chainPosition===offset+1
+        &&authority.chainAfter===(pair.chainAfter||'')&&authority.headId===head.id,
+        pairKey+'/'+host+' lost its lexeme, run position, licensor or muʾakkad');
+      assert(link.word===pair.follower[{raf:'nom',nasb:'acc',jarr:'gen'}[host]],
+        pairKey+'/'+host+' is not the registered surface for its state');
+      /* AGREEMENT + STATE/SIGN: the whole run inherits the ONE head noun's state, and every
+         strengthening word takes its sign from the sound-masculine-plural row of the shared matrix. */
+      assert(link.state===host&&link.state===head.state,pairKey+'/'+host+' did not inherit the muʾakkad state');
+      assert(link.inflection===pair.followerInflection,pairKey+'/'+host+' is not declining as its registered inflection');
+      assert(api.safeSignId(link.sign)===api.GRAMMAR_RULES.nounInflection[link.inflection][host][0],
+        pairKey+'/'+host+' bypassed the canonical noun sign matrix');
+      if(pair.followerInflection==='smp'){
+        assert(api.safeSignId(link.sign)===(host==='raf'?'waw':'ya'),
+          pairKey+'/'+host+' does not take the wāw/yāʾ p. 134 names for a sound masculine plural');
+        assert(link.ar.includes(smpReason.replace(/^؛\s*/,'')),pairKey+'/'+host+' does not state its sound-plural reason');
+      }
+      /* PRONOUN ATTACHMENT, both directions. p. 134 gives أجمعون a sign and nothing else; كُلّ is
+         parsed as مضاف with its ضمير after it. */
+      if(pair.strengthening){
+        assert(!authority.pronounKey&&!authority.antecedentGender&&!authority.antecedentNumber,
+          pairKey+' claims an attached pronoun the source never gives it');
+        assert(!link.ar.includes('مُضَافٌ إِلَيْهِ')&&!link.ar.includes('ضَمِيرٌ مُتَّصِلٌ'),
+          pairKey+' renders an attached pronoun it does not have');
+        assert(Object.values(api.TAWKID_ATTACHED_PRONOUNS)
+          .every(item=>!link.word.endsWith(item.surfaceByState[host])),
+          pairKey+' ends in a registered attached pronoun');
+      }else{
+        const pronoun=api.TAWKID_ATTACHED_PRONOUNS[pair.pronounId];
+        assert(pronoun&&link.word.endsWith(pronoun.surfaceByState[host])
+          &&authority.antecedentGender===pronoun.gender&&authority.antecedentNumber===pronoun.number
+          &&link.ar.includes('ضَمِيرٌ مُتَّصِلٌ')&&link.ar.includes('مُضَافٌ إِلَيْهِ'),
+          pairKey+'/'+host+' lost the attached pronoun the source requires of it');
+      }
+      /* SOURCE OWNERSHIP + the exact learner-facing identity, including p. 134's ordinal. */
+      assert(link.ruleId==='R_TAWKID'&&api.isSourceAuthorized(link.ruleId),pairKey+' lost source ownership');
+      assert(authority.subtype===manawiLabel&&link.ar.includes('تَوْكِيدٌ مَعْنَوِيٌّ'+ordinalAr(offset+1)),
+        pairKey+'/'+host+' does not name its ordinal emphasis identity');
+      assert(link.ar.includes(api.stateArabic(host)),pairKey+'/'+host+' does not state its case');
+      /* SACRED KHAFḌ TERMINOLOGY: the learner-facing label stays مَخْفُوضٌ, never مجرور. */
+      if(host==='jarr')assert(link.ar.includes(api.stateArabic('jarr'))&&!/مجرور|مَجْرُور/.test(link.ar),
+        pairKey+' uses the wrong learner-facing khafḍ terminology');
+      /* WHY: subtype, muʾakkad, state inheritance and the lexeme's own licence. */
+      const roleWhy=offset===0?'WHY_ROLE_TAWKID_MANAWI':'WHY_ROLE_TAWKID_CHAIN';
+      assert(link.why.ids.includes(roleWhy)&&link.why.ids.includes('WHY_STATE_TAWKID_INHERITED')
+        &&link.why.ids.includes('WHY_TAWKID_'+pair.semanticKey.toUpperCase()),
+        pairKey+'/'+host+' has an incomplete Why');
+      assert(JSON.stringify(link.why).includes(head.word),
+        pairKey+'/'+host+' never names the word it emphasizes');
+      const relation=data.relationships.find(item=>item.kind===api.TAWKID_KIND&&item.followerId===link.id);
+      assert(relation&&relation.headId===head.id&&relation.chainPosition===offset+1
+        &&relation.chainAfter===(pair.chainAfter||'')&&relation.state===host
+        &&relation.pairKey===pairKey&&relation.ruleId==='RL_FOLLOWER_AGREEMENT',
+        pairKey+'/'+host+' lost its canonical run relationship');
+      positives++;
+    });
+    /* Every middle link is a follower AND a followed; both links must survive together. */
+    assert(data.relationships.filter(item=>item.kind===api.TAWKID_KIND).length===links.length,
+      frameKey+'/'+host+' did not record one relationship per link of the run');
+    assert(api.composeCanonicalTranslation(data)===data.translation,
+      frameKey+'/'+host+' builder translation differs from the canonical composer');
+    const snapshot=api.createExerciseSnapshot(data),restored=snapshot&&api.restoreExerciseSnapshot(snapshot);
+    assert(restored&&api.validateExercise(clone(restored)).length===0,frameKey+'/'+host+' failed its History round trip');
+    assert(restored.tokens.filter(item=>item.grammar.role==='tawkid')
+      .every((item,offset)=>item.ar===links[offset].ar),frameKey+'/'+host+' rendered differently after History');
+    historyRuns++;
+  }
+  const mustReject=(label,source,mutate,code='E_TAWKID_AUTHORITY')=>{
+    const data=clone(source);mutate(data);
+    const failures=api.validateExercise(data);
+    assert(failures.some(item=>item.code===code),label+' was accepted: '+failures.map(item=>item.code).join(','));
+    negatives++;
+  };
+  const kullAjma=built.get('kullThenAjma/raf'),tawabi=built.get('ajmaTawabi/raf');
+  const kullAjmaNasb=built.get('kullThenAjma/nasb'),tawabiJarr=built.get('ajmaTawabi/jarr');
+  const linkAt=(data,offset)=>data.tokens.filter(item=>item.grammar.role==='tawkid')[offset];
+  /* 1. The dependency of p. 133, attacked from every side. */
+  mustReject('أجمعون left standing with no كُلٍّ before it',kullAjma,data=>{
+    data.tokens.splice(data.tokens.indexOf(linkAt(data,0)),1);
+  });
+  mustReject('a تابع of أجمع standing alone',tawabi,data=>{
+    data.tokens.splice(data.tokens.indexOf(linkAt(data,0)),1);
+  });
+  mustReject('the run reordered against the source order',tawabi,data=>{
+    const second=linkAt(data,1),third=linkAt(data,2);
+    const a=data.tokens.indexOf(second),b=data.tokens.indexOf(third);
+    data.tokens[a]=third;data.tokens[b]=second;
+  });
+  mustReject('أكتعون promoted over أجمعون',tawabi,data=>{
+    linkAt(data,0).word=api.TAWKID_SMP_LEXEMES.aktaSmp.nom;
+  });
+  mustReject('one strengthening lexeme swapped for another',tawabi,data=>{
+    linkAt(data,2).word=api.TAWKID_SMP_LEXEMES.absaSmp.nom;
+  });
+  mustReject('كُلٌّ swapped for جَمِيعٌ inside the licensed run',kullAjma,data=>{
+    linkAt(data,0).word=api.TAWKID_LEXEMES.jamiiHum.nom;
+  });
+  /* 2. The pronoun boundary, both directions. */
+  mustReject('أجمعون handed an attached pronoun',kullAjma,data=>{
+    linkAt(data,1).word=api.TAWKID_SMP_LEXEMES.ajmaSmp.nom+api.TAWKID_ATTACHED_PRONOUNS.hum.surfaceByState.raf;
+  });
+  mustReject('كُلُّهُمْ stripped of its attached pronoun',kullAjma,data=>{
+    linkAt(data,0).word=api.TAWKID_LEXEMES.kullHu.nom;
+  });
+  mustReject('كُلُّهُمْ given the singular pronoun its plural antecedent does not license',kullAjma,data=>{
+    linkAt(data,0).word=api.TAWKID_LEXEMES.kullHu.nom;
+    linkAt(data,1).word=api.TAWKID_SMP_LEXEMES.ajmaSmp.nom;
+  });
+  /* 3. State, sign and agreement. */
+  mustReject('a link of the run given a state its head does not have',kullAjma,data=>{linkAt(data,1).state='nasb'});
+  mustReject('the head restated without its run following',kullAjma,data=>{
+    const head=data.tokens.find(item=>item.grammar.role==='faail');head.state='nasb';
+  });
+  mustReject('the sound-plural naṣb surface used in rafʿ',tawabi,data=>{
+    linkAt(data,1).word=api.TAWKID_SMP_LEXEMES.aktaSmp.acc;
+  });
+  /* The sign matrix is what refuses this, not the label table: a sound masculine plural takes the
+     wāw p. 134 names, and a visible ḍammah on it is the wrong sign for the inflection. */
+  mustReject('a sound-plural sign replaced by a singular ḍammah',tawabi,data=>{
+    linkAt(data,1).sign=api.canonicalSignCopy?api.canonicalSignCopy('damma'):{id:'damma'};
+  },'E_NOUN_SIGN');
+  mustReject('a sound-plural word relabelled as a singular declension',tawabi,data=>{linkAt(data,1).inflection='singular'});
+  /* 4. The muʾakkad itself. */
+  mustReject('the run re-pointed at a different muʾakkad',kullAjma,data=>{
+    data.tokens.find(item=>item.grammar.role==='faail').word='الْمُعَلِّمُ';
+  });
+  mustReject('an ordinary noun relabelled as a link of the run',kullAjma,data=>{
+    data.tokens.find(item=>item.grammar.role==='object').grammar.role='tawkid';
+  });
+  mustReject('a link of the run relabelled a naʿt',tawabi,data=>{
+    linkAt(data,3).grammar.role='naat';
+  },'E_NAAT_AUTHORITY');
+  /* 5. Subtype authority. Changing only the label must not buy the other قسم: لفظي demands an exact
+     repetition of the muʾakkad, which no strengthening word is. */
+  mustReject('a maʿnawī run relabelled lafẓī by its stored relationship',tawabi,data=>{
+    data.relationships.find(item=>item.kind===api.TAWKID_KIND).subtype=api.TAWKID_SUBTYPES.lafzi;
+  },'E_FOLLOWER_RELATION');
+  /* 6. Source-rule ownership: Wave 3's role/rule gate must still bite here. */
+  mustReject('a link citing another role’s source rule',kullAjma,data=>{linkAt(data,1).ruleId='R_NAAT'},'E_ROLE_RULE_OWNER');
+  mustReject('a link citing the badal rule',tawabi,data=>{linkAt(data,2).ruleId='R_BADAL'},'E_ROLE_RULE_OWNER');
+  /* 7. The relationship graph. */
+  mustReject('a link’s follower relationship deleted',tawabi,data=>{
+    const target=linkAt(data,2);
+    data.relationships=data.relationships.filter(item=>item.followerId!==target.id);
+  },'E_TAWKID_RELATION');
+  mustReject('a run relationship re-pointed at the wrong head',kullAjmaNasb,data=>{
+    data.relationships.find(item=>item.kind===api.TAWKID_KIND).headId=data.tokens[0].id;
+  },'E_FOLLOWER_RELATION');
+  mustReject('a link renumbered inside its run',tawabiJarr,data=>{
+    const relations=data.relationships.filter(item=>item.kind===api.TAWKID_KIND);
+    relations[relations.length-1].chainPosition=1;
+  },'E_FOLLOWER_RELATION');
+  mustReject('a link’s licensor rewritten',tawabi,data=>{
+    data.relationships.find(item=>item.kind===api.TAWKID_KIND&&item.chainAfter==='ajma').chainAfter='kull';
+  },'E_FOLLOWER_RELATION');
+  /* 8. History forgeries — the snapshot must be discarded and rebuilt canonically, not trusted. */
+  for(const [label,mutate,check] of [
+    ['run position',snapshot=>{snapshot.relationships.filter(item=>item.kind===api.TAWKID_KIND).at(-1).chainPosition=1},
+      rebuilt=>rebuilt.relationships.filter(item=>item.kind===api.TAWKID_KIND).at(-1).chainPosition!==1],
+    ['licensing lexeme',snapshot=>{snapshot.relationships.filter(item=>item.kind===api.TAWKID_KIND).at(-1).chainAfter='kull'},
+      rebuilt=>rebuilt.relationships.filter(item=>item.kind===api.TAWKID_KIND).at(-1).chainAfter==='abta'],
+    ['emphasis lexeme',snapshot=>{snapshot.relationships.filter(item=>item.kind===api.TAWKID_KIND).at(-1).semanticKey='nafs'},
+      rebuilt=>rebuilt.relationships.filter(item=>item.kind===api.TAWKID_KIND).at(-1).semanticKey==='absa'],
+    ['attached pronoun',snapshot=>{snapshot.relationships.filter(item=>item.kind===api.TAWKID_KIND).at(-1).pronounKey='hum'},
+      rebuilt=>rebuilt.relationships.filter(item=>item.kind===api.TAWKID_KIND).at(-1).pronounKey==='']
+  ]){
+    const snapshot=api.createExerciseSnapshot(tawabi);
+    mutate(snapshot);
+    const rebuilt=api.restoreExerciseSnapshot(snapshot);
+    assert(rebuilt&&check(rebuilt),'History trusted a forged '+label+' instead of rebuilding it');
+    negatives++;
+  }
+  /* A snapshot whose Arabic BYTES were altered must not restore at all. */
+  for(const [label,mutate] of [
+    ['a strengthening word respelled',snapshot=>{
+      snapshot.tokens.filter(item=>item.grammar.role==='tawkid').at(-1).word=api.TAWKID_SMP_LEXEMES.absaSmp.acc}],
+    ['the head noun respelled',snapshot=>{
+      snapshot.tokens.find(item=>item.grammar.role==='faail').word='الْمُعَلِّمُ'}]
+  ]){
+    const snapshot=api.createExerciseSnapshot(tawabi);
+    mutate(snapshot);
+    const rebuilt=api.restoreExerciseSnapshot(snapshot);
+    assert(!rebuilt||api.validateExercise(clone(rebuilt)).length>0
+      ||rebuilt.tokens.filter(item=>item.grammar.role==='tawkid').at(-1).word===api.TAWKID_SMP_LEXEMES.absaSmp.nom,
+      'History accepted '+label);
+    negatives++;
+  }
+  /* 9. Cross-kind: a run may not be read as any other follower, nor grown out of one. */
+  for(const data of [kullAjma,tawabi]){
+    const index=data.tokens.indexOf(linkAt(data,1));
+    assert(api.deriveNaatFollowerAuthority(data,index).authorized===false
+      &&api.deriveAtfFollowerAuthority(data,index).authorized===false
+      &&api.deriveBadalFollowerAuthority(data,index).authorized===false,
+      'a link of an emphasis run crossed into another follower authority');
+    negatives++;
+  }
+  /* 10. Template authority: no chain pair may be reached by a template that does not own its frame,
+     and no ordinary tawkīd template may name a dependent word at all. */
+  for(const template of api.templates.filter(item=>item.followerKind===api.TAWKID_KIND)){
+    const dependents=template.followerPairKeys.filter(key=>api.TAWKID_PAIR_REGISTRY[key].chainAfter);
+    assert(template.tawkidChainFrame?
+      template.followerPairKeys.join()===api.TAWKID_CHAIN_FRAMES[template.tawkidChainFrame].linkKeys.join()
+      :dependents.length===0,
+      template.stableId+' may reach a dependent emphasis word it does not own');
+    negatives++;
+  }
+  assert(api.TAWKID_ALL_PAIR_KEYS.every(key=>!api.TAWKID_PAIR_REGISTRY[key].chainAfter),
+    'a dependent emphasis word leaked into the independent tawkīd key list');
+  assert(api.TAWKID_STRENGTHENING_KEYS.length===5
+    &&api.TAWKID_STRENGTHENING_KEYS.every(key=>!api.TAWKID_PAIR_REGISTRY[key].pronounId),
+    'the strengthening-word set is not exactly the five pronoun-less emphasis words');
+  console.log('Tawkid chain (Wave 5) focused tests: '+positives+' canonical assertions, '
+    +historyRuns+' History round trips, '+negatives+' negative/adversarial boundaries — green');
+}
+runTawkidChainFocusedTests();
+if(process.env.NAHW_FOCUSED_TAWKID_CHAIN==='1')process.exit(0);
 /* ---- البدل: focused, deterministic coverage of the four kinds. -----------------------------
    Al-Tuḥfah pp. 135–138. Every kind is built through frozen template authority, proven to inherit
    its mubdal minhu's state, to take its own canonical sign, and to carry — or refuse — the ضمير
@@ -5262,7 +5558,13 @@ const expectedPastTemplateCapabilities={
   /* Wave 2 — the p.157 / p.142 attached-object lanes. Both state their fāʿil explicitly:
      the attached yāʾ is the OBJECT, so the subject must be the following noun and nothing else. */
   T_VERB_SFP_RAF_DAMMA_03:'3fs-explicit-obj-yaa/explicit',
-  T_VERB_SINGULAR_RAF_DAMMA_06:'3ms-obj-yaa/explicit'
+  T_VERB_SINGULAR_RAF_DAMMA_06:'3ms-obj-yaa/explicit',
+  /* Wave 5 — the two emphasis runs of p. 133 in their two verb-headed hosts. The khafḍ host is
+     particle-headed and declares no past capability, so only four appear here. */
+  T_VERB_SMP_RAF_WAW_05:'3ms/explicit',
+  T_VERB_SMP_NASB_YA_03:'3ms/explicit',
+  T_VERB_SMP_RAF_WAW_06:'3ms/explicit',
+  T_VERB_SMP_NASB_YA_04:'3ms/explicit'
 };
 const declaredPastTemplates=api.templates.filter(template=>template.pastCapabilities.length);
 assert(declaredPastTemplates.length===Object.keys(expectedPastTemplateCapabilities).length,
@@ -9150,7 +9452,7 @@ for(const t of api.templates){
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
   // J1a appends exactly ten: five one-verb jawāzim × the two proven jazm regimes. All are appended,
   // so every pre-existing stableId is unchanged — pinned directly below by keeping لَمْ at _01.
-  assert(api.templates.length===230,`Expected 230 templates after Phase 2, found ${api.templates.length}`);
+  assert(api.templates.length===236,`Expected 236 templates after Phase 2, found ${api.templates.length}`);
   assert(api.templates.filter(t=>t.state==='jazm').map(t=>t.stableId).join(' | ')
     ==='T_NOUN_PRESENT_JAZM_SUKUN_01 | T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_01 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_02 | T_PARTICLE_PRESENT_JAZM_SUKUN_03 | T_PARTICLE_PRESENT_JAZM_SUKUN_04 | T_PARTICLE_PRESENT_JAZM_SUKUN_05 | T_PARTICLE_PRESENT_JAZM_SUKUN_06 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06 | T_PARTICLE_PRESENT_JAZM_SUKUN_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_08 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08 | T_PARTICLE_PRESENT_JAZM_SUKUN_09 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_10 | T_PARTICLE_PRESENT_JAZM_SUKUN_11 | T_PARTICLE_PRESENT_JAZM_SUKUN_12 | T_PARTICLE_PRESENT_JAZM_SUKUN_13 | T_PARTICLE_PRESENT_JAZM_SUKUN_14 | T_PARTICLE_PRESENT_JAZM_SUKUN_15 | T_PARTICLE_PRESENT_JAZM_SUKUN_16 | T_PARTICLE_PRESENT_JAZM_SUKUN_17 | T_PARTICLE_PRESENT_JAZM_SUKUN_18 | T_PARTICLE_PRESENT_JAZM_SUKUN_19 | T_PARTICLE_PRESENT_JAZM_SUKUN_20 | T_PARTICLE_PRESENT_JAZM_SUKUN_21',
     'the jazm template ordinals shifted: لَمْ must keep _01 in both families and J1a/J1b must append only');
@@ -11630,7 +11932,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===230,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===236,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
@@ -13057,7 +13359,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===230,'the repair block changed the production template count');
+  assert(api.templates.length===236,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -13178,8 +13480,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===237,'the structural map holds '+registeredKeys.length+' keys, not 237');
-    assert(registeredShapes.length===79,'the shape registry holds '+registeredShapes.length+' shapes, not 79');
+    assert(registeredKeys.length===243,'the structural map holds '+registeredKeys.length+' keys, not 243');
+    assert(registeredShapes.length===80,'the shape registry holds '+registeredShapes.length+' shapes, not 80');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
     /* The 87 inherited keys and 22 inherited shapes are untouched: later productive lanes append
@@ -13229,7 +13531,10 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       const khabarClauseKeys=registeredKeys.filter(key=>khabarClauseTemplateIds.some(id=>key.startsWith(id+'||')));
       const haalMahallTemplateIds=api.templates.filter(item=>item.haalMahallFrameKeys.length).map(item=>item.stableId);
       const haalMahallKeys=registeredKeys.filter(key=>haalMahallTemplateIds.some(id=>key.startsWith(id+'||')));
-      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35','TS36','TS37','TS38','TS39','TS40','TS41','TS42','TS43','TS44','TS45','TS46','TS47','TS48','TS67','TS68','TS69','TS77','TS78','TS79'];
+      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35','TS36','TS37','TS38','TS39','TS40','TS41','TS42','TS43','TS44','TS45','TS46','TS47','TS48','TS67','TS68','TS69','TS77','TS78','TS79',
+        /* Wave 5 — سلسلة التوكيد. A productive lane shape like the rest of this list, so it must not
+           be counted among the inherited shapes the assertion below fences off. */
+        'TS80'];
       const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===148,'the inherited structural-key set changed: '+inheritedKeys.length);
@@ -13265,7 +13570,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===230,'the map covers '+mappedTemplates.size+' templates, not 230');
+    assert(mappedTemplates.size===236,'the map covers '+mappedTemplates.size+' templates, not 236');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -13327,8 +13632,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===237,'only '+keysSeen.size+' of the 237 structural keys were observed');
-    assert(shapesSeen.size===79,'only '+shapesSeen.size+' of the 79 composer shapes were observed');
+    assert(keysSeen.size===243,'only '+keysSeen.size+' of the 243 structural keys were observed');
+    assert(shapesSeen.size===80,'only '+shapesSeen.size+' of the 80 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -13662,7 +13967,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===237,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===243,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -13678,7 +13983,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
           }
           for(const part of SHAPES[m.shape].parts){
             if(typeof part.slot!=='string'||part.slot==='copula'
-              ||part.slot==='atfSentence'||part.slot==='tawkidSentence'||part.slot==='badalSentence'
+              ||part.slot==='atfSentence'||part.slot==='tawkidSentence'||part.slot==='tawkidChainSentence'||part.slot==='badalSentence'
               ||part.slot==='passiveSentence'||part.slot==='mutlaqSentence'||part.slot==='mafulFihSentence'
               ||part.slot==='haalSentence'||part.slot==='tamyizSentence'||part.slot==='mustathnaSentence'||part.slot==='laJinsSentence'||part.slot==='mafulAjlSentence'||part.slot==='mafulMaahSentence'||part.slot==='munadaSentence'||part.slot==='conditionSentence'||part.slot==='zannaSentence'||part.slot==='khabarClauseSentence'||part.slot==='haalMahallSentence')continue;
             const index=Number(part.slot.split(':')[1]);
@@ -13999,7 +14304,10 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
        word-internal, so it adds components rather than tokens. */
     /* Wave 4 adds seventeen: three five-token سببي lanes — manʿūt, naʿt, the noun it raises, and
        the two the host contributes — and one two-token demonstrative lane. */
-    assert([768,769,770,771].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 768-771 across the registered ʿaṭf context rotation)');
+    /* Wave 5 adds thirty-six: the two emphasis runs of p. 133 across three hosts each. The كُلّ+أَجْمَع
+       frame is five tokens per host (host word, the two-word run, and the two the host contributes)
+       and the أجمع+توابعه frame is seven (the same hosts around a four-word run). */
+    assert([804,805,806,807].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 804-807 across the registered ʿaṭf context rotation)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -14188,7 +14496,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===230,'the presentation repair changed the template count');
+    assert(api.templates.length===236,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -16128,9 +16436,9 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   }
   assert(!Object.prototype.hasOwnProperty.call(api.GRAMMAR_RULES.governors,'hamzatTaqrir'),
     'هَمْزَةُ التَّقْرِيرِ entered the governor table and could now govern');
-  assert(api.templates.length===230,'the production template count does not include the J1a additions');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===237
-    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===79,
+  assert(api.templates.length===236,'the production template count does not include the J1a additions');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===243
+    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===80,
     'the composer authority does not include the J1a mappings');
   p7Cases+=8;
 }
@@ -17127,7 +17435,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===230,`Expected 230 production templates, found ${api.templates.length}`);
+assert(api.templates.length===236,`Expected 236 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);

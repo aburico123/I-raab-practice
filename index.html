@@ -1551,6 +1551,11 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  TS35:Object.freeze({parts:Object.freeze([Object.freeze({lit:'There is '}),Object.freeze({slot:'gloss:3'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'followerPhrase:1'}),Object.freeze({lit:'.'})])}),
  TS36:Object.freeze({parts:Object.freeze([Object.freeze({slot:'atfSentence'})])}),
  TS37:Object.freeze({parts:Object.freeze([Object.freeze({slot:'tawkidSentence'})])}),
+ /* Wave 5 — سلسلة التوكيد. One shape for both frames and all three hosts, as TS37 serves the
+    single-follower chapter: the whole English is settled by the proven run and its head noun.
+    Numbered TS80 because this object is appended to in several places and TS43–TS79 are already
+    taken further down; a duplicate key here would silently take the later entry's shape. */
+ TS80:Object.freeze({parts:Object.freeze([Object.freeze({slot:'tawkidChainSentence'})])}),
  /* البدل — one shape for all three hosts and all four kinds, exactly as TS37 serves tawkīd: the
     English is composed by the canonical badal translator from the registered pair, so a new label
     never earns a new shape. */
@@ -1824,6 +1829,14 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_VERB_SINGULAR_RAF_DAMMA_03||verb:past,noun:faail,noun:tawkid,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_RAF_DAMMA_03",structure:"verb:past,noun:faail,noun:tawkid,noun:object",shape:"TS37",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_18||verb:past,noun:faail,noun:object,noun:tawkid":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_18",structure:"verb:past,noun:faail,noun:object,noun:tawkid",shape:"TS37",copulaPlural:false}),
  "T_PARTICLE_SINGULAR_JARR_KASRA_04||particle:particle,noun:majrur,noun:tawkid,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_04",structure:"particle:particle,noun:majrur,noun:tawkid,noun:mubtada",shape:"TS37",copulaPlural:false}),
+ /* Wave 5 — the two emphasis runs of p. 133 across three hosts. The run LENGTH is part of the
+    structure, so a two-word run can never be filed under the four-word frame's key. */
+ "T_VERB_SMP_RAF_WAW_05||verb:past,noun:faail,noun:tawkid,noun:tawkid,noun:object":Object.freeze({templateId:"T_VERB_SMP_RAF_WAW_05",structure:"verb:past,noun:faail,noun:tawkid,noun:tawkid,noun:object",shape:"TS80",copulaPlural:false}),
+ "T_VERB_SMP_NASB_YA_03||verb:past,noun:faail,noun:object,noun:tawkid,noun:tawkid":Object.freeze({templateId:"T_VERB_SMP_NASB_YA_03",structure:"verb:past,noun:faail,noun:object,noun:tawkid,noun:tawkid",shape:"TS80",copulaPlural:false}),
+ "T_PARTICLE_SMP_JARR_YA_02||particle:particle,noun:majrur,noun:tawkid,noun:tawkid,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SMP_JARR_YA_02",structure:"particle:particle,noun:majrur,noun:tawkid,noun:tawkid,noun:mubtada",shape:"TS80",copulaPlural:false}),
+ "T_VERB_SMP_RAF_WAW_06||verb:past,noun:faail,noun:tawkid,noun:tawkid,noun:tawkid,noun:tawkid,noun:object":Object.freeze({templateId:"T_VERB_SMP_RAF_WAW_06",structure:"verb:past,noun:faail,noun:tawkid,noun:tawkid,noun:tawkid,noun:tawkid,noun:object",shape:"TS80",copulaPlural:false}),
+ "T_VERB_SMP_NASB_YA_04||verb:past,noun:faail,noun:object,noun:tawkid,noun:tawkid,noun:tawkid,noun:tawkid":Object.freeze({templateId:"T_VERB_SMP_NASB_YA_04",structure:"verb:past,noun:faail,noun:object,noun:tawkid,noun:tawkid,noun:tawkid,noun:tawkid",shape:"TS80",copulaPlural:false}),
+ "T_PARTICLE_SMP_JARR_YA_03||particle:particle,noun:majrur,noun:tawkid,noun:tawkid,noun:tawkid,noun:tawkid,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SMP_JARR_YA_03",structure:"particle:particle,noun:majrur,noun:tawkid,noun:tawkid,noun:tawkid,noun:tawkid,noun:mubtada",shape:"TS80",copulaPlural:false}),
  /* البدل — five structures across two declension families and three states, all composed by the one
     canonical badal translator, so they share TS38 rather than earning a shape each. */
  "T_VERB_FIVENOUNS_RAF_WAW_02||verb:past,noun:faail,noun:badal":Object.freeze({templateId:"T_VERB_FIVENOUNS_RAF_WAW_02",structure:"verb:past,noun:faail,noun:badal",shape:"TS38",copulaPlural:false}),
@@ -1939,6 +1952,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  const bits=spec.split(':');
  if(bits[0]==='atfSentence')return canonicalAtfTranslation(exercise);
  if(bits[0]==='tawkidSentence')return canonicalTawkidTranslation(exercise);
+ if(bits[0]==='tawkidChainSentence')return canonicalTawkidChainTranslation(exercise);
  if(bits[0]==='badalSentence')return canonicalBadalTranslation(exercise);
  if(bits[0]==='passiveSentence')return canonicalPassiveTranslation(exercise);
  if(bits[0]==='mutlaqSentence')return canonicalMutlaqTranslation(exercise);
@@ -3802,34 +3816,163 @@ const TAWKID_ATTACHED_PRONOUNS=Object.freeze(Object.assign(Object.create(null),{
   surfaceByState:Object.freeze({raf:'هُمْ',nasb:'هُمْ',jarr:'هِمْ'}),
   binaaByState:Object.freeze({raf:'السُّكُونِ',nasb:'السُّكُونِ',jarr:'السُّكُونِ'})})
 }));
+/* Wave 5 — swapping one registered attached pronoun for another WITHOUT retyping the host word.
+   كُلُّهُمْ is كُلُّ + هُمْ, and its stem is already owned by kullHu; hand-typing a second copy is
+   exactly how combining-mark order has drifted invisibly in this repo before. The suffix comes from
+   TAWKID_ATTACHED_PRONOUNS, which is the single owner of every attached-pronoun surface, and the
+   swap throws rather than guessing if the host does not actually end in the pronoun it claims. */
+function tawkidPronounSwap(lexeme,fromId,toId,en){
+ const from=TAWKID_ATTACHED_PRONOUNS[fromId],to=TAWKID_ATTACHED_PRONOUNS[toId];
+ if(!from||!to)throw new Error(`Unknown attached pronoun in a tawkīd lexeme: ${fromId}/${toId}`);
+ const swap=(word,state)=>{
+  const suffix=from.surfaceByState[state];
+  if(!word.endsWith(suffix))throw new Error(`Tawkīd lexeme «${word}» does not carry «${suffix}».`);
+  return word.slice(0,word.length-suffix.length)+to.surfaceByState[state];
+ };
+ return Object.freeze({nom:swap(lexeme.nom,'raf'),acc:swap(lexeme.acc,'nasb'),gen:swap(lexeme.gen,'jarr'),en});
+}
+/* Wave 5 — أَجْمَع and its three توابع (p. 132 matn, p. 133 شرح). These four surfaces exist nowhere
+   else in the app, so there is no canonical record to copy them from — and a hand-typed Arabic
+   literal is precisely what byte safety forbids for a comparison-critical string. Each stem is
+   therefore assembled from named code points and each ending is written once, so the spelling has a
+   single owner and drifts nowhere. The endings are the sound-masculine-plural pair the source names
+   at p. 134: «وعلامة رفعه الواو نيابة عن الضمة لأنه جمع مذكر سالم», and «مررت بالقوم أجمعين». */
+const AR_LETTER=Object.freeze({alifHamza:'أ',ba:'ب',ta:'ت',jim:'ج',sad:'ص',
+ ayn:'ع',kaf:'ك',mim:'م',nun:'ن',waw:'و',ya:'ي',
+ fatha:'َ',damma:'ُ',kasra:'ِ',sukun:'ْ'});
+/* Every stem is أَ + Cْ + Cَ + ع — the أفعل pattern all four share. */
+function tawkidStrengthenStem(second,third){
+ const L=AR_LETTER;
+ return L.alifHamza+L.fatha+second+L.sukun+third+L.fatha+L.ayn;
+}
+const TAWKID_STRENGTHEN_STEMS=Object.freeze({
+ /* أَجْمَع */ ajma:tawkidStrengthenStem(AR_LETTER.jim,AR_LETTER.mim),
+ /* أَكْتَع */ akta:tawkidStrengthenStem(AR_LETTER.kaf,AR_LETTER.ta),
+ /* أَبْتَع */ abta:tawkidStrengthenStem(AR_LETTER.ba,AR_LETTER.ta),
+ /* أَبْصَع */ absa:tawkidStrengthenStem(AR_LETTER.ba,AR_LETTER.sad)
+});
+/* ُونَ for rafʿ, ِينَ for naṣb and khafḍ. */
+const TAWKID_SMP_ENDINGS=Object.freeze({
+ nom:AR_LETTER.damma+AR_LETTER.waw+AR_LETTER.nun+AR_LETTER.fatha,
+ oblique:AR_LETTER.kasra+AR_LETTER.ya+AR_LETTER.nun+AR_LETTER.fatha
+});
+function tawkidStrengthenLexeme(stemKey,en){
+ const stem=TAWKID_STRENGTHEN_STEMS[stemKey];
+ if(!stem)throw new Error(`Unknown strengthening stem: ${stemKey}`);
+ return Object.freeze({nom:stem+TAWKID_SMP_ENDINGS.nom,acc:stem+TAWKID_SMP_ENDINGS.oblique,
+  gen:stem+TAWKID_SMP_ENDINGS.oblique,en});
+}
 const TAWKID_LEXEMES=Object.freeze({
  nafsHu:Object.freeze({nom:'نَفْسُهُ',acc:'نَفْسَهُ',gen:'نَفْسِهِ',en:'himself'}),
  aynHu:Object.freeze({nom:'عَيْنُهُ',acc:'عَيْنَهُ',gen:'عَيْنِهِ',en:'himself'}),
  kullHu:Object.freeze({nom:'كُلُّهُ',acc:'كُلَّهُ',gen:'كُلِّهِ',en:'the whole of it'}),
  jamiiHum:Object.freeze({nom:'جَمِيعُهُمْ',acc:'جَمِيعَهُمْ',gen:'جَمِيعِهِمْ',en:'all of them'})
 });
+/* The plural-antecedent كُلّ the chain of p. 133 needs, and the four strengthening words. Kept in a
+   second frozen table so the singular-inflected words above and the sound-plural words below are
+   registered under their own inflections rather than one blanket default. */
+const TAWKID_SMP_LEXEMES=Object.freeze({
+ ajmaSmp:tawkidStrengthenLexeme('ajma','all of them'),
+ aktaSmp:tawkidStrengthenLexeme('akta','all of them, every one'),
+ abtaSmp:tawkidStrengthenLexeme('abta','all of them, without exception'),
+ absaSmp:tawkidStrengthenLexeme('absa','all of them, one and all')
+});
+const TAWKID_PLURAL_LEXEMES=Object.freeze({
+ kullHum:tawkidPronounSwap(TAWKID_LEXEMES.kullHu,'hu','hum','all of them')
+});
+/* Wave 5 — the two dependency facts p. 133 states, and the ONLY thing that licenses the four
+   strengthening words:
+     • «ولا يؤكد بهذا اللفظ إلا بعد «كُلٍّ» غالباً» — أَجْمَع normally emphasizes only after كُلّ.
+     • «وهذه الألفاظ لا يُؤَكَّدُ بها استقلالاً» — أَكْتَع/أَبْتَع/أَبْصَع never emphasize on their own;
+       they come after أَجْمَع, in that order, «جَاءَ الْقَوْمُ أَجْمَعُونَ، أَكْتَعُونَ، أَبْتَعُونَ، أَبْصَعُونَ».
+   A pair therefore names the emphasis word it must FOLLOW, not merely the noun the whole run
+   emphasizes. `chainAfter:''` means this word attaches to the head noun itself, which is what every
+   pre-Wave-5 pair does and keeps doing. A word with a `chainAfter` that is not actually preceded by
+   an AUTHORIZED tawkīd of that lexeme is refused outright, so «جاء القوم أكتعون» can never build.
+   `strengthening` marks the words the source attaches NO pronoun to: نَفْس/عَيْن/كُلّ/جَمِيع must carry
+   the ضمير عائد, and أَجْمَع and its توابع must not, so neither can be forged into the other by
+   dropping or adding a suffix. */
 const TAWKID_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
- lafziStudent:Object.freeze({subtype:TAWKID_SUBTYPES.lafzi,semanticKey:'exactRepetition',
+ lafziStudent:Object.freeze({subtype:TAWKID_SUBTYPES.lafzi,semanticKey:'exactRepetition',chainAfter:'',
   followed:Object.freeze({...singularPeople[0]}),follower:Object.freeze({...singularPeople[0]}),
   followedInflection:'singular',followerInflection:'singular',pronounId:'',
   conditionAr:'لِأَنَّ اللَّفْظَ نَفْسَهُ أُعِيدَ لِلتَّقْوِيَةِ',conditionEn:'the identical noun is repeated to strengthen it',phraseEn:'the very student'}),
- nafsSingularM:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'nafs',
+ nafsSingularM:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'nafs',chainAfter:'',
   followed:Object.freeze({...singularPeople.find(item=>item.en==='the teacher')}),follower:TAWKID_LEXEMES.nafsHu,
   followedInflection:'singular',followerInflection:'singular',pronounId:'hu',antecedentGender:'masculine',antecedentNumber:'singular',
   conditionAr:'لِأَنَّ لَفْظَ «النَّفْسِ» مُضَافٌ إِلَى ضَمِيرٍ يُطَابِقُ الْمُؤَكَّدَ',conditionEn:'nafs carries an attached pronoun agreeing with its masculine singular antecedent',phraseEn:'the teacher himself'}),
- aynSingularM:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'ayn',
+ aynSingularM:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'ayn',chainAfter:'',
   followed:Object.freeze({...singularPeople.find(item=>item.en==='the guest')}),follower:TAWKID_LEXEMES.aynHu,
   followedInflection:'singular',followerInflection:'singular',pronounId:'hu',antecedentGender:'masculine',antecedentNumber:'singular',
   conditionAr:'لِأَنَّ لَفْظَ «الْعَيْنِ» مُضَافٌ إِلَى ضَمِيرٍ يُطَابِقُ الْمُؤَكَّدَ',conditionEn:'ʿayn carries an attached pronoun agreeing with its masculine singular antecedent',phraseEn:'the guest himself'}),
- kullBook:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'kull',
+ kullBook:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'kull',chainAfter:'',
   followed:Object.freeze({...singularThings.find(item=>item.en==='the book')}),follower:TAWKID_LEXEMES.kullHu,
   followedInflection:'singular',followerInflection:'singular',pronounId:'hu',antecedentGender:'masculine',antecedentNumber:'singular',
   conditionAr:'لِأَنَّ لَفْظَ «كُلٍّ» أَحَاطَ بِأَجْزَاءِ الْمُؤَكَّدِ وَأُضِيفَ إِلَى ضَمِيرِهِ',conditionEn:'kull emphasizes the whole of a divisible antecedent and carries its agreeing pronoun',phraseEn:'the entire book'}),
- jamiiStudents:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'jamii',
+ jamiiStudents:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'jamii',chainAfter:'',
   followed:Object.freeze({...brokenHuman.find(item=>item.en==='the students')}),follower:TAWKID_LEXEMES.jamiiHum,
   followedInflection:'broken',followerInflection:'singular',pronounId:'hum',antecedentGender:'masculine',antecedentNumber:'plural',
-  conditionAr:'لِأَنَّ لَفْظَ «جَمِيعٍ» أُضِيفَ إِلَى ضَمِيرِ جَمْعٍ يُطَابِقُ الْمُؤَكَّدَ',conditionEn:'jamīʿ carries an attached masculine plural pronoun agreeing with the group antecedent',phraseEn:'all the students'})
+  conditionAr:'لِأَنَّ لَفْظَ «جَمِيعٍ» أُضِيفَ إِلَى ضَمِيرِ جَمْعٍ يُطَابِقُ الْمُؤَكَّدَ',conditionEn:'jamīʿ carries an attached masculine plural pronoun agreeing with the group antecedent',phraseEn:'all the students'}),
+ /* كُلٌّ over a masculine human plural — the shape p. 133's own drill uses, «جَاءَ رِجَالُ الْجَيْشِ
+    كُلُّهُمْ أَجْمَعُونَ», and the one the Qurʾānic witness uses, ﴿فَسَجَدَ الْمَلَائِكَةُ كُلُّهُمْ
+    أَجْمَعُونَ﴾. `followedOptions` rather than one hardwired noun, because p. 132 requires only that
+    the pronoun MATCH the muʾakkad — every masculine human plural in the lexicon satisfies هُمْ
+    equally, and pinning one would teach the sentence instead of the rule. */
+ kullPluralGroup:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'kull',chainAfter:'',
+  followedOptions:Object.freeze(brokenHuman.map(item=>Object.freeze({...item}))),follower:TAWKID_PLURAL_LEXEMES.kullHum,
+  followedInflection:'broken',followerInflection:'singular',pronounId:'hum',antecedentGender:'masculine',antecedentNumber:'plural',
+  conditionAr:'لِأَنَّ لَفْظَ «كُلٍّ» أَحَاطَ بِأَفْرَادِ الْمُؤَكَّدِ وَأُضِيفَ إِلَى ضَمِيرٍ يُطَابِقُهُ',
+  conditionEn:'kull takes in every member of the antecedent and carries an attached pronoun matching it',phraseEn:'all of them'}),
+ /* أَجْمَعُ after كُلٍّ — الغالب. p. 134 parses this very word «أجمعون: توكيد ثانٍ مرفوع، وعلامة رفعه
+    الواو نيابة عن الضمة لأنه جمع مذكر سالم»: a SECOND tawkīd, sound-masculine-plural, and with no
+    مضاف إليه of its own. Hence pronounId '' and strengthening true. */
+ ajmaAfterKull:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'ajma',chainAfter:'kull',strengthening:true,
+  followed:TAWKID_PLURAL_LEXEMES.kullHum,follower:TAWKID_SMP_LEXEMES.ajmaSmp,
+  followedInflection:'singular',followerInflection:'smp',pronounId:'',antecedentGender:'',antecedentNumber:'',
+  conditionAr:'لِأَنَّ «أَجْمَعَ» لَا يُؤَكَّدُ بِهِ فِي الْغَالِبِ إِلَّا بَعْدَ «كُلٍّ»، وَقَدْ تَقَدَّمَتْهُ هُنَا',
+  conditionEn:'ajmaʿ normally emphasizes only after kull, and kull does precede it here',phraseEn:'all of them together'}),
+ /* أَجْمَعُ directly after its muʾakkad — the شرح's own توابع example at p. 133, «جَاءَ الْقَوْمُ
+    أَجْمَعُونَ، أَكْتَعُونَ...», which is غير الغالب but is the source's own wording and is the only
+    shape in which it ever shows the three توابع. */
+ ajmaDirect:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'ajma',chainAfter:'',strengthening:true,
+  followedOptions:Object.freeze(brokenHuman.map(item=>Object.freeze({...item}))),follower:TAWKID_SMP_LEXEMES.ajmaSmp,
+  followedInflection:'broken',followerInflection:'smp',pronounId:'',antecedentGender:'',antecedentNumber:'',
+  conditionAr:'لِأَنَّ «أَجْمَعَ» مِنْ أَلْفَاظِ التَّوْكِيدِ الْمَعْنَوِيِّ الْمَعْدُودَةِ فِي الْمَتْنِ، وَقَدْ أُكِّدَ بِهِ الْجَمْعُ',
+  conditionEn:'ajmaʿ is one of the emphasis words the matn enumerates, and it emphasizes a plural here',phraseEn:'all of them'}),
+ /* توابع أجمع. Each one names the word it must come after, so the run can only ever be built in the
+    order the source writes it, and none of the three can stand without أَجْمَع in front of it. */
+ aktaAfterAjma:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'akta',chainAfter:'ajma',strengthening:true,
+  followed:TAWKID_SMP_LEXEMES.ajmaSmp,follower:TAWKID_SMP_LEXEMES.aktaSmp,
+  followedInflection:'smp',followerInflection:'smp',pronounId:'',antecedentGender:'',antecedentNumber:'',
+  conditionAr:'لِأَنَّ «أَكْتَعَ» مِنْ تَوَابِعِ «أَجْمَعَ» لَا يُؤَكَّدُ بِهِ اسْتِقْلَالًا، وَقَدْ جَاءَ بَعْدَهُ لِزِيَادَةِ التَّقْوِيَةِ',
+  conditionEn:'aktaʿ is one of the followers of ajmaʿ, never used to emphasize on its own, and it comes after it here for added strength',phraseEn:'every one of them'}),
+ abtaAfterAkta:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'abta',chainAfter:'akta',strengthening:true,
+  followed:TAWKID_SMP_LEXEMES.aktaSmp,follower:TAWKID_SMP_LEXEMES.abtaSmp,
+  followedInflection:'smp',followerInflection:'smp',pronounId:'',antecedentGender:'',antecedentNumber:'',
+  conditionAr:'لِأَنَّ «أَبْتَعَ» مِنْ تَوَابِعِ «أَجْمَعَ» لَا يُؤَكَّدُ بِهِ اسْتِقْلَالًا، وَقَدْ جَاءَ عَلَى تَرْتِيبِهِ بَعْدَ «أَكْتَعَ»',
+  conditionEn:'abtaʿ is one of the followers of ajmaʿ, never used to emphasize on its own, and it comes in its source order after aktaʿ',phraseEn:'without exception'}),
+ absaAfterAbta:Object.freeze({subtype:TAWKID_SUBTYPES.manawi,semanticKey:'absa',chainAfter:'abta',strengthening:true,
+  followed:TAWKID_SMP_LEXEMES.abtaSmp,follower:TAWKID_SMP_LEXEMES.absaSmp,
+  followedInflection:'smp',followerInflection:'smp',pronounId:'',antecedentGender:'',antecedentNumber:'',
+  conditionAr:'لِأَنَّ «أَبْصَعَ» مِنْ تَوَابِعِ «أَجْمَعَ» لَا يُؤَكَّدُ بِهِ اسْتِقْلَالًا، وَقَدْ خَتَمَ التَّرْتِيبَ بَعْدَ «أَبْتَعَ»',
+  conditionEn:'abṣaʿ is one of the followers of ajmaʿ, never used to emphasize on its own, and it closes the source order after abtaʿ',phraseEn:'one and all'})
 }));
+/* The emphasis words that carry no attached pronoun, taken from the registry itself so the two
+   facts can never disagree. */
+const TAWKID_STRENGTHENING_KEYS=Object.freeze(Object.keys(TAWKID_PAIR_REGISTRY)
+ .filter(key=>TAWKID_PAIR_REGISTRY[key].strengthening===true));
+/* How a link of an emphasis run is named. Position 1 adds nothing — «تَوْكِيدٌ مَعْنَوِيٌّ» is what the
+   app has always said and what pp. 131–132 teach. Position 2 is the source's own «تَوْكِيدٌ ثَانٍ»
+   (p. 134, parsing أجمعون after كلهم); positions 3–5 continue that same naming for the run p. 133
+   writes out in full, «أَجْمَعُونَ، أَكْتَعُونَ، أَبْتَعُونَ، أَبْصَعُونَ». The table stops at 5 because the
+   source's longest run is five words, so a sixth link fails loudly instead of being named. */
+const TAWKID_CHAIN_ORDINALS=Object.freeze({
+ 1:Object.freeze({ar:'',en:''}),
+ 2:Object.freeze({ar:' ثَانٍ',en:'second '}),
+ 3:Object.freeze({ar:' ثَالِثٌ',en:'third '}),
+ 4:Object.freeze({ar:' رَابِعٌ',en:'fourth '}),
+ 5:Object.freeze({ar:' خَامِسٌ',en:'fifth '})
+});
 const fiveNouns=[
  {nom:'أَبُوكَ',acc:'أَبَاكَ',gen:'أَبِيكَ',en:'your father',base:'أب'},
  {nom:'أَخُوكَ',acc:'أَخَاكَ',gen:'أَخِيكَ',en:'your brother',base:'أخ'},
@@ -9917,7 +10060,12 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
     the tongue outruns the intention and the speaker corrects it aloud, is produced here, because it
     is the one an exercise can state truthfully about its own composed speech. */
  R_BADAL:sourceRule('A badal follows its mubdal minhu in all of its iʿrāb; it is the follower actually intended by the ruling, with no intermediary.',[135,136,137,138],'Productive scope: the registered muṭābiq, baʿḍ-min-kull, ishtimāl and ghalaṭ pairs only. بدل البعض and بدل الاشتمال are produced only with the source-required attached pronoun returning to the mubdal minhu, and بدل المطابق and بدل الغلط only without one. Part-whole and association senses come from the frozen pair registry, never inferred from the words. بدل البداء and بدل النسيان are not produced: both are defined by a speaker’s prior belief or change of mind, which this exercise model does not represent. Badal of a verb from a verb is not produced.'),
- R_TAWKID:sourceRule('A registered lafẓī or maʿnawī tawkīd follows its muʾakkad in iʿrāb; maʿnawī forms use the source-required word, antecedent meaning, and agreeing attached pronoun.',[131,132,133,134],'Productive scope: exact noun repetition; singular masculine نَفْس/عَيْن; divisible singular كُلّ; masculine-plural جَمِيع. أَجْمَع and its dependent strengthening forms are not independently produced.'),
+ /* Wave 5 completes the matn's enumeration. p. 132 lists النَّفْس، الْعَيْن، كُلّ، أَجْمَع and توابع أجمع
+    (أَكْتَع، أَبْتَع، أَبْصَع); the شرح adds جَمِيع as كُلّ's like. p. 133 supplies the two conditions that
+    make the last four different in KIND from the first four rather than merely later in a list:
+    أَجْمَع emphasizes only after كُلّ (غالباً), and its three توابع «لا يُؤَكَّدُ بها استقلالاً». Neither
+    كِلَا/كِلْتَا nor عَامَّة is in this source's list at all, and neither is produced. */
+ R_TAWKID:sourceRule('A registered lafẓī or maʿnawī tawkīd follows its muʾakkad in iʿrāb; maʿnawī forms use the source-required word, antecedent meaning, and agreeing attached pronoun, and the dependent forms only in the order and after the word the source requires.',[131,132,133,134],'Productive scope: exact noun repetition; singular masculine نَفْس/عَيْن; divisible singular كُلّ; كُلّ and جَمِيع over a masculine human plural; أَجْمَع, produced after كُلّ and in the شرح’s own توابع run; and أَكْتَع/أَبْتَع/أَبْصَع, produced only after أَجْمَع in the source order. The first four take the required attached pronoun and the last four take none. كِلَا/كِلْتَا and عَامَّة are not produced: this source never lists them among ألفاظ التوكيد.'),
 
  R_SINGULAR_RAF_DAMMA:sourceRule('Visible ḍammah raises a regular singular noun.',[26],'Only nouns whose ending accepts a visible ḍammah.'),
  R_SINGULAR_NASB_FATHA:sourceRule('Visible fatḥah makes a regular singular noun accusative.',[48],'Only nouns whose ending accepts a visible fatḥah.'),
@@ -10329,6 +10477,12 @@ registerMissingFollowerForms([NAAT_LEXEMES.hardworkingDual],'dual');
 registerMissingFollowerForms([NAAT_LEXEMES.hardworkingSmp],'smp');
 registerMissingFollowerForms([NAAT_LEXEMES.hardworkingSfp],'sfp');
 registerMissingFollowerForms(Object.values(TAWKID_LEXEMES),'singular');
+/* Wave 5. كُلُّهُمْ declines as an ordinary singular exactly as كُلُّهُ does; أَجْمَعُونَ and its three
+   توابع decline as sound masculine plurals, which is the whole reason p. 134 names the wāw «نيابة
+   عن الضمة». Registering them under their OWN inflection is what makes inflectNoun hand the sign
+   matrix «smp» rather than defaulting them to a visible ḍammah they do not take. */
+registerMissingFollowerForms(Object.values(TAWKID_PLURAL_LEXEMES),'singular');
+registerMissingFollowerForms(Object.values(TAWKID_SMP_LEXEMES),'smp');
 /* Wave 4. The proper names and the سببي adjectives enter the surface index like any other noun, so
    inflectNoun resolves their exact registered form rather than trusting a builder's spelling. The
    مرفوع nouns are registered under their OWN inflection — أَبُوهُ as one of الأسماء الخمسة so that it
@@ -11780,19 +11934,43 @@ function tawkidTemplateRecord(data){
  const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
  return template?.followerKind===TAWKID_KIND?template:null;
 }
+/* Wave 5 — locate the whole emphasis RUN this token sits in. Walking left past every adjacent
+   tawkīd finds the one head noun the entire run emphasizes, and the token's 1-based position in
+   that run. p. 134 needs both: it parses «كل» as «توكيد لرجال» — named against the head — and the
+   very next word as «توكيد ثانٍ», named by its place in the run. A run may only ever hang off a
+   real noun that is not itself a follower, so no run can grow out of a naʿt, a maʿṭūf or a badal. */
+function tawkidChainAt(data,index){
+ const tokens=data?.tokens;
+ if(!Array.isArray(tokens)||!tokens[index]||tokens[index].grammar?.role!=='tawkid')return null;
+ let first=index;
+ while(first>0&&tokens[first-1]?.grammar?.role==='tawkid')first--;
+ const head=tokens[first-1];
+ if(!head||head.grammar?.type!=='noun'||['naat','atf','tawkid','badal'].includes(head.grammar?.role))return null;
+ return{head,position:index-first+1,previous:index>first?tokens[index-1]:null};
+}
+/* The muʾakkad a pair is matched against is the token DIRECTLY before it — the head noun for a word
+   that emphasizes independently, the previous emphasis word for one of p. 133's dependent forms.
+   `followedOptions` lets one pair accept any of a set of equally valid antecedents; a pair that
+   names a single `followed` behaves exactly as it did before. */
+function tawkidFollowedRecords(pair){return pair.followedOptions||[pair.followed]}
 function tawkidPairAt(data,index){
  const template=tawkidTemplateRecord(data);
- const follower=data?.tokens?.[index],followed=data?.tokens?.[index-1];
- if(!template||!follower||!followed||follower.grammar?.role!=='tawkid'
-   ||followed.grammar?.type!=='noun'||['naat','atf','tawkid'].includes(followed.grammar?.role))return null;
- const state=followed.state||follower.state;
+ const follower=data?.tokens?.[index];
+ if(!template||!follower)return null;
+ const located=tawkidChainAt(data,index);
+ if(!located)return null;
+ const {head,position,previous}=located;
+ const followed=previous||head;
+ /* The STATE is read off the head noun, never off the neighbour: every link of a run inherits from
+    the one muʾakkad, so a middle link cannot quietly re-anchor the rest of the run to itself. */
+ const state=head.state||follower.state;
  const formKey={raf:'nom',nasb:'acc',jarr:'gen'}[state];
  if(!formKey)return null;
  for(const key of template.followerPairKeys){
   const pair=TAWKID_PAIR_REGISTRY[key];
-  if(pair&&pair.followed[formKey]===followed.word&&pair.follower[formKey]===follower.word){
-   return{key,pair,state,followed,follower};
-  }
+  if(!pair||pair.follower[formKey]!==follower.word)continue;
+  const followedRecord=tawkidFollowedRecords(pair).find(item=>item[formKey]===followed.word);
+  if(followedRecord)return{key,pair,state,head,followed,follower,position,previous,followedRecord};
  }
  return null;
 }
@@ -11803,23 +11981,54 @@ function tawkidPairAt(data,index){
 function deriveTawkidFollowerAuthority(data,index){
  const found=tawkidPairAt(data,index);
  if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
- const {key,pair,state,followed,follower}=found;
- if(follower.state!==state)return Object.freeze({authorized:false,reason:'state-mismatch'});
+ const {key,pair,state,head,followed,follower,position,previous}=found;
+ if(follower.state!==state||followed.state!==state){
+  return Object.freeze({authorized:false,reason:'state-mismatch'});
+ }
  if(followed.inflection!==pair.followedInflection||follower.inflection!==pair.followerInflection){
   return Object.freeze({authorized:false,reason:'inflection-mismatch'});
  }
+ /* Wave 5 — the dependency of p. 133, proved structurally rather than declared. A pair that names a
+    `chainAfter` must be preceded by an emphasis word that is ITSELF authorized and is the exact
+    lexeme named; a pair that names none must be the first word of the run. Asking the previous
+    token's own authority (rather than reading a label off it) is what stops «جاء القوم أكتعون» and
+    stops a run being reordered into «أبصعون أبتعون». */
+ if(pair.chainAfter){
+  if(position<2||!previous)return Object.freeze({authorized:false,reason:'dependent-emphasis-word-stands-alone'});
+  const before=deriveTawkidFollowerAuthority(data,index-1);
+  if(!before.authorized)return Object.freeze({authorized:false,reason:'dependent-emphasis-word-follows-an-unauthorized-tawkid'});
+  if(before.semanticKey!==pair.chainAfter)return Object.freeze({authorized:false,reason:'dependent-emphasis-word-follows-the-wrong-lexeme'});
+  if(before.headId!==head.id)return Object.freeze({authorized:false,reason:'chain-does-not-share-one-muakkad'});
+ }else if(position!==1||previous){
+  return Object.freeze({authorized:false,reason:'independent-emphasis-word-inside-a-run'});
+ }
  if(pair.subtype===TAWKID_SUBTYPES.lafzi){
   if(followed.word!==follower.word)return Object.freeze({authorized:false,reason:'lafzi-not-exact-repetition'});
+  if(pair.strengthening||pair.pronounId)return Object.freeze({authorized:false,reason:'lafzi-may-not-declare-manawi-conditions'});
  }else if(pair.subtype===TAWKID_SUBTYPES.manawi){
-  const pronoun=TAWKID_ATTACHED_PRONOUNS[pair.pronounId];
-  if(!pronoun||pronoun.gender!==pair.antecedentGender||pronoun.number!==pair.antecedentNumber){
-   return Object.freeze({authorized:false,reason:'pronoun-agreement-mismatch'});
+  /* أَجْمَع and its توابع take no مضاف إليه — p. 134 parses «أجمعون» with a sign and nothing else,
+     where «كل» and «نفس» are each parsed as مضاف with the ضمير after them. So the two families are
+     separated by whether a registered attached pronoun is actually on the end of the word, in both
+     directions: a strengthening word carrying one, or a نفس/عين/كل/جميع missing one, is refused. */
+  const carriesPronoun=Object.values(TAWKID_ATTACHED_PRONOUNS)
+   .some(item=>follower.word.endsWith(item.surfaceByState[state]));
+  if(pair.strengthening){
+   if(pair.pronounId||pair.antecedentGender||pair.antecedentNumber){
+    return Object.freeze({authorized:false,reason:'strengthening-word-declares-an-attached-pronoun'});
+   }
+   if(carriesPronoun)return Object.freeze({authorized:false,reason:'strengthening-word-carries-an-attached-pronoun'});
+  }else{
+   const pronoun=TAWKID_ATTACHED_PRONOUNS[pair.pronounId];
+   if(!pronoun||pronoun.gender!==pair.antecedentGender||pronoun.number!==pair.antecedentNumber){
+    return Object.freeze({authorized:false,reason:'pronoun-agreement-mismatch'});
+   }
+   const suffix=pronoun.surfaceByState[state];
+   if(!suffix||!follower.word.endsWith(suffix))return Object.freeze({authorized:false,reason:'attached-pronoun-mismatch'});
   }
-  const suffix=pronoun.surfaceByState[state];
-  if(!suffix||!follower.word.endsWith(suffix))return Object.freeze({authorized:false,reason:'attached-pronoun-mismatch'});
  }else return Object.freeze({authorized:false,reason:'unknown-subtype'});
  return Object.freeze({authorized:true,reason:'',kind:TAWKID_KIND,pairKey:key,subtype:pair.subtype,
   semanticKey:pair.semanticKey,state,followedId:followed.id,followerId:follower.id,
+  headId:head.id,chainPosition:position,chainAfter:pair.chainAfter||'',
   pronounKey:pair.pronounId,antecedentGender:pair.antecedentGender||'',antecedentNumber:pair.antecedentNumber||'',
   conditionAr:pair.conditionAr,conditionEn:pair.conditionEn});
 }
@@ -13430,10 +13639,19 @@ function resolveRelationships(data){
   else if(authority.kind===ATF_KIND)Object.assign(fields,{conjunctionId:authority.conjunctionId,conjunctionKey:authority.conjunctionKey});
   else Object.assign(fields,{pairKey:authority.pairKey,subtype:authority.subtype,semanticKey:authority.semanticKey,
    pronounKey:authority.pronounKey,antecedentGender:authority.antecedentGender,antecedentNumber:authority.antecedentNumber});
+  /* Wave 5 — an emphasis RUN records where each link sits and which head the whole run returns to,
+     so a snapshot cannot renumber «توكيد ثانٍ» into a first tawkīd or re-point one link at a
+     different muʾakkad while leaving its neighbours alone. */
+  if(authority.kind===TAWKID_KIND)Object.assign(fields,{headId:authority.headId,
+   chainPosition:authority.chainPosition,chainAfter:authority.chainAfter});
   const relation=addRelationship(data,'follower',fields);
   const followed=tokens.find(token=>token.id===authority.followedId);
   followed.relations.followerId=item.id;
-  followed.relations.followerRelationshipId=relation.id;
+  /* The two ends of a follower link are stored under DIFFERENT keys. They used to share one, which
+     was invisible while every follower ran alone — but the middle word of an emphasis run is a
+     follower of the word before it AND the followed of the word after it, and one key meant the
+     second link silently overwrote the first, leaving the middle word's own link unfindable. */
+  followed.relations.followedRelationshipId=relation.id;
   item.relations.followedId=followed.id;
   item.relations.followerRelationshipId=relation.id;
   if(authority.kind===ATF_KIND){
@@ -13535,7 +13753,13 @@ function nounRoleArabic(token){
   const data=token._data,authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
   if(!authority.authorized)throw new Error(`Cannot render unauthorized tawkīd: ${authority.reason}`);
   const subtype=authority.subtype===TAWKID_SUBTYPES.lafzi?'لَفْظِيٌّ':'مَعْنَوِيٌّ';
-  return`تَوْكِيدٌ ${subtype} ${stateArabic(token.state)} تَابِعٌ لِمُؤَكَّدِهِ`;
+  /* Wave 5 — p. 134 does NOT re-name the muʾakkad for a second emphasis word. Where it says «وكل:
+     توكيد لرجال» of the first, it says «أجمعون: توكيد ثانٍ مرفوع» of the next: a chained tawkīd is
+     identified by its PLACE in the run. That ordinal is carried here rather than flattening every
+     link to a bare «تَوْكِيدٌ», and position 1 renders exactly the wording it always has. */
+  const ordinal=TAWKID_CHAIN_ORDINALS[authority.chainPosition];
+  if(!ordinal)throw new Error(`No canonical ordinal for tawkīd position ${authority.chainPosition}`);
+  return`تَوْكِيدٌ ${subtype}${ordinal.ar} ${stateArabic(token.state)} تَابِعٌ لِمُؤَكَّدِهِ`;
  }
  if(role==='badal'){
   const data=token._data,authority=deriveBadalFollowerAuthority(data,data?.tokens?.indexOf(token));
@@ -13694,7 +13918,9 @@ function renderNounAnalysis(token){
  if(token.grammar.role==='tawkid'){
   const data=token._data,authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
   if(!authority.authorized)throw new Error(`Cannot render unauthorized tawkīd: ${authority.reason}`);
-  english=`A ${authority.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd following its muʾakkad in iʿrāb.`;
+  const ordinal=TAWKID_CHAIN_ORDINALS[authority.chainPosition];
+  if(!ordinal)throw new Error(`No canonical ordinal for tawkīd position ${authority.chainPosition}`);
+  english=`A ${ordinal.en}${authority.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd following its muʾakkad in iʿrāb.`;
   if(authority.pronounKey){
    const pronoun=TAWKID_ATTACHED_PRONOUNS[authority.pronounKey];
    const suffix=pronoun.surfaceByState[token.state],binaa=pronoun.binaaByState[token.state];
@@ -14137,6 +14363,20 @@ function tawkidWhyAuthority(token,data){
  if(!authority.authorized)throw new Error(`WHY: tawkīd is not authorized (${authority.reason}).`);
  return authority;
 }
+/* The two words a tawkīd Why has to be able to name: the head noun the whole run emphasizes, and —
+   for a dependent word — the emphasis word it was licensed by. Both are read off the authority's
+   own ids, never off a neighbouring position, so the Why can never name a word the authority did
+   not actually prove. */
+function tawkidHeadWord(authority,data){
+ const head=data?.tokens?.find(item=>item.id===authority.headId);
+ if(!head)throw new Error('WHY: the tawkīd run has no head noun.');
+ return head.word;
+}
+function tawkidFollowedWord(authority,data){
+ const followed=data?.tokens?.find(item=>item.id===authority.followedId);
+ if(!followed)throw new Error('WHY: the tawkīd has no muʾakkad token.');
+ return followed.word;
+}
 function whyTawkidCondition(token,data){
  const authority=tawkidWhyAuthority(token,data);
  return{id:`WHY_TAWKID_${authority.semanticKey.toUpperCase()}`,
@@ -14329,14 +14569,29 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_ATF_INHERITED',
   stateAr:t=>`وَالْمَعْطُوفُ يَتْبَعُ الْمَعْطُوفَ عَلَيْهِ فِي الْإِعْرَابِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A maʿṭūf follows its maʿṭūf ʿalayh in iʿrāb state, so this one is ${stateArabic(t.state)} like it.`},
+ /* Wave 5 — the Why now NAMES the muʾakkad. «It is an emphasis word in its registered construction»
+    told the learner the app had authorized it, not which word in front of them is being emphasized,
+    and a run of five emphasis words is unreadable without that. A dependent word additionally says
+    which emphasis word licensed it, because for أَكْتَع/أَبْتَع/أَبْصَع that is the entire reason they
+    are allowed to be there at all (p. 133). */
  tawkid:{
-  id:(t,data)=>tawkidWhyAuthority(t,data).subtype===TAWKID_SUBTYPES.lafzi?'WHY_ROLE_TAWKID_LAFZI':'WHY_ROLE_TAWKID_MANAWI',
-  ar:(t,data)=>tawkidWhyAuthority(t,data).subtype===TAWKID_SUBTYPES.lafzi
-   ?`${wq(t.word)} أُعِيدَ لَفْظُهُ لِلتَّقْوِيَةِ، فَهُوَ تَوْكِيدٌ لَفْظِيٌّ.`
-   :`${wq(t.word)} مِنْ أَلْفَاظِ التَّوْكِيدِ الْمَعْنَوِيِّ فِي تَرْكِيبِهِ الْمُسَجَّلِ، فَهُوَ تَوْكِيدٌ مَعْنَوِيٌّ.`,
-  en:(t,data)=>tawkidWhyAuthority(t,data).subtype===TAWKID_SUBTYPES.lafzi
-   ?`${eq(t.word)} repeats the muʾakkad's own wording for strength, so it is تَوْكِيدٌ لَفْظِيٌّ.`
-   :`${eq(t.word)} is a source-licensed semantic-emphasis word in this registered construction, so it is تَوْكِيدٌ مَعْنَوِيٌّ.`,
+  id:(t,data)=>{const authority=tawkidWhyAuthority(t,data);
+   return authority.chainPosition>1?'WHY_ROLE_TAWKID_CHAIN'
+    :authority.subtype===TAWKID_SUBTYPES.lafzi?'WHY_ROLE_TAWKID_LAFZI':'WHY_ROLE_TAWKID_MANAWI'},
+  ar:(t,data)=>{const authority=tawkidWhyAuthority(t,data),head=tawkidHeadWord(authority,data);
+   if(authority.chainPosition>1){
+    return`${wq(t.word)} جَاءَ بَعْدَ ${wq(tawkidFollowedWord(authority,data))} فِي سِلْسِلَةِ التَّوْكِيدِ، وَالْمُؤَكَّدُ بِهَا جَمِيعًا ${wq(head)}، فَهُوَ تَوْكِيدٌ${TAWKID_CHAIN_ORDINALS[authority.chainPosition].ar}.`;
+   }
+   return authority.subtype===TAWKID_SUBTYPES.lafzi
+    ?`${wq(t.word)} أُعِيدَ بِهِ لَفْظُ ${wq(head)} لِلتَّقْوِيَةِ، فَهُوَ تَوْكِيدٌ لَفْظِيٌّ.`
+    :`${wq(t.word)} مِنْ أَلْفَاظِ التَّوْكِيدِ الْمَعْنَوِيِّ، وَقَدْ أُكِّدَ بِهِ ${wq(head)}، فَهُوَ تَوْكِيدٌ مَعْنَوِيٌّ.`},
+  en:(t,data)=>{const authority=tawkidWhyAuthority(t,data),head=tawkidHeadWord(authority,data);
+   if(authority.chainPosition>1){
+    return`${eq(t.word)} comes after ${eq(tawkidFollowedWord(authority,data))} in the emphasis run, and the whole run emphasizes ${eq(head)}, so it is a ${TAWKID_CHAIN_ORDINALS[authority.chainPosition].en}tawkīd.`;
+   }
+   return authority.subtype===TAWKID_SUBTYPES.lafzi
+    ?`${eq(t.word)} repeats the wording of ${eq(head)} for strength, so it is تَوْكِيدٌ لَفْظِيٌّ.`
+    :`${eq(t.word)} is a source-licensed semantic-emphasis word and it emphasizes ${eq(head)}, so it is تَوْكِيدٌ مَعْنَوِيٌّ.`},
   stateId:()=>'WHY_STATE_TAWKID_INHERITED',
   stateAr:t=>`وَالتَّوْكِيدُ يَتْبَعُ مُؤَكَّدَهُ فِي الْإِعْرَابِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A tawkīd follows its muʾakkad in iʿrāb state, so this one is ${stateArabic(t.state)} like it.`},
@@ -15128,9 +15383,19 @@ function buildRelationshipWhy(rel,data){
   }
   if(rel.kind===TAWKID_KIND){
    const subtype=rel.subtype===TAWKID_SUBTYPES.lafzi?'لَفْظِيٌّ':'مَعْنَوِيٌّ';
-   push({id:'WHY_REL_TAWKID_STATE_INHERITANCE',
-    ar:`${wq(follower.word)} تَوْكِيدٌ ${subtype} لِـ${wq(followed.word)}، فَتَبِعَهُ فِي حُكْمِهِ الْإِعْرَابِيِّ وَصَارَ ${stateArabic(follower.state)} مِثْلَهُ.`,
-    en:`${eq(follower.word)} is ${rel.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd of ${eq(followed.word)}, so it inherits its iʿrāb state and is ${stateArabic(follower.state)} like it.`});
+   /* A dependent emphasis word inherits from the HEAD of the run, not from the emphasis word it
+      happens to sit behind. Saying «أَجْمَعُونَ is tawkīd of كُلِّهِمْ» would teach the learner that a
+      tawkīd can be the muʾakkad of the next one, which is not what p. 134 does: it keeps «رجال» as
+      the muʾakkad throughout and calls أجمعون a SECOND tawkīd. */
+   const head=data.tokens.find(item=>item.id===rel.headId)||followed;
+   const ordinal=TAWKID_CHAIN_ORDINALS[rel.chainPosition]||TAWKID_CHAIN_ORDINALS[1];
+   push({id:rel.chainPosition>1?'WHY_REL_TAWKID_CHAIN_INHERITANCE':'WHY_REL_TAWKID_STATE_INHERITANCE',
+    ar:rel.chainPosition>1
+     ?`${wq(follower.word)} تَوْكِيدٌ${ordinal.ar} جَاءَ بَعْدَ ${wq(followed.word)}، وَالْمُؤَكَّدُ ${wq(head.word)}، فَتَبِعَهُ فِي حُكْمِهِ الْإِعْرَابِيِّ وَصَارَ ${stateArabic(follower.state)} مِثْلَهُ.`
+     :`${wq(follower.word)} تَوْكِيدٌ ${subtype} لِـ${wq(followed.word)}، فَتَبِعَهُ فِي حُكْمِهِ الْإِعْرَابِيِّ وَصَارَ ${stateArabic(follower.state)} مِثْلَهُ.`,
+    en:rel.chainPosition>1
+     ?`${eq(follower.word)} is a ${ordinal.en}tawkīd coming after ${eq(followed.word)}, and the muʾakkad is ${eq(head.word)}, so it inherits that word's iʿrāb state and is ${stateArabic(follower.state)} like it.`
+     :`${eq(follower.word)} is ${rel.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd of ${eq(followed.word)}, so it inherits its iʿrāb state and is ${stateArabic(follower.state)} like it.`});
    return{ids,ar,en};
   }
   if(rel.kind===BADAL_KIND){
@@ -15478,8 +15743,14 @@ function renderRelationshipAnalysis(data){
   }
   if(rel.kind===TAWKID_KIND){
    const subtype=rel.subtype===TAWKID_SUBTYPES.lafzi?'لَفْظِيٌّ':'مَعْنَوِيٌّ';
-   followed.phraseAr=`وَالتَّرْكِيبُ «${followed.word} ${follower.word}»: مُؤَكَّدٌ وَتَوْكِيدٌ ${subtype} تَابِعٌ لَهُ فِي الْإِعْرَابِ.`;
-   followed.phraseEn=`Together, “${followed.word} ${follower.word}” is a muʾakkad with its ${rel.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd inheriting its state.`;
+   const head=data.tokens.find(item=>item.id===rel.headId)||followed;
+   const ordinal=TAWKID_CHAIN_ORDINALS[rel.chainPosition]||TAWKID_CHAIN_ORDINALS[1];
+   followed.phraseAr=rel.chainPosition>1
+    ?`وَالتَّرْكِيبُ «${followed.word} ${follower.word}»: تَوْكِيدٌ وَتَوْكِيدٌ${ordinal.ar} بَعْدَهُ، وَالْمُؤَكَّدُ بِهِمَا «${head.word}».`
+    :`وَالتَّرْكِيبُ «${followed.word} ${follower.word}»: مُؤَكَّدٌ وَتَوْكِيدٌ ${subtype} تَابِعٌ لَهُ فِي الْإِعْرَابِ.`;
+   followed.phraseEn=rel.chainPosition>1
+    ?`Together, “${followed.word} ${follower.word}” is an emphasis word and the ${ordinal.en}tawkīd after it; both emphasize “${head.word}”.`
+    :`Together, “${followed.word} ${follower.word}” is a muʾakkad with its ${rel.subtype===TAWKID_SUBTYPES.lafzi?'lafẓī':'maʿnawī'} tawkīd inheriting its state.`;
    followed.phraseLabel='Follower';
    return;
   }
@@ -16445,7 +16716,9 @@ function validateExercise(data){
      ||rel.kind===ATF_KIND&&(rel.conjunctionId!==authority.conjunctionId||rel.conjunctionKey!==authority.conjunctionKey)
      ||(rel.kind===TAWKID_KIND||rel.kind===BADAL_KIND)&&(rel.pairKey!==authority.pairKey||rel.subtype!==authority.subtype
        ||rel.semanticKey!==authority.semanticKey||rel.pronounKey!==authority.pronounKey
-       ||rel.antecedentGender!==authority.antecedentGender||rel.antecedentNumber!==authority.antecedentNumber)){
+       ||rel.antecedentGender!==authority.antecedentGender||rel.antecedentNumber!==authority.antecedentNumber)
+     ||rel.kind===TAWKID_KIND&&(rel.headId!==authority.headId||rel.chainPosition!==authority.chainPosition
+       ||rel.chainAfter!==authority.chainAfter)){
     fail('E_FOLLOWER_RELATION','Follower relationship is not the canonical follower proof.',follower);
    }
   }
@@ -16454,7 +16727,7 @@ function validateExercise(data){
   const rel=relationships.find(candidate=>candidate.id===item.relations.followerRelationshipId&&candidate.type==='follower');
   const followed=tokenById.get(item.relations.followedId);
   if(!rel||rel.followerId!==item.id||rel.followedId!==followed?.id
-    ||followed?.relations.followerId!==item.id||followed?.relations.followerRelationshipId!==rel.id){
+    ||followed?.relations.followerId!==item.id||followed?.relations.followedRelationshipId!==rel.id){
    fail('E_NAAT_RELATION','A naʿt must have exactly one reciprocal canonical link to its manʿūt.',item);
   }
   if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
@@ -16467,7 +16740,7 @@ function validateExercise(data){
   const conjunction=tokenById.get(item.relations.conjunctionId);
   if(!rel||rel.kind!==ATF_KIND||rel.followerId!==item.id||rel.followedId!==followed?.id
     ||rel.conjunctionId!==conjunction?.id||followed?.relations.followerId!==item.id
-    ||followed?.relations.followerRelationshipId!==rel.id||conjunction?.relations.followerId!==item.id
+    ||followed?.relations.followedRelationshipId!==rel.id||conjunction?.relations.followerId!==item.id
     ||conjunction?.relations.followedId!==followed.id||conjunction?.relations.followerRelationshipId!==rel.id){
    fail('E_ATF_RELATION','A maʿṭūf must have exactly one reciprocal canonical link through its conjunction to its maʿṭūf ʿalayh.',item);
   }
@@ -16479,7 +16752,7 @@ function validateExercise(data){
   const rel=relationships.find(candidate=>candidate.id===item.relations.followerRelationshipId&&candidate.type==='follower');
   const followed=tokenById.get(item.relations.followedId);
   if(!rel||rel.kind!==TAWKID_KIND||rel.followerId!==item.id||rel.followedId!==followed?.id
-    ||followed?.relations.followerId!==item.id||followed?.relations.followerRelationshipId!==rel.id){
+    ||followed?.relations.followerId!==item.id||followed?.relations.followedRelationshipId!==rel.id){
    fail('E_TAWKID_RELATION','A tawkīd must have exactly one reciprocal canonical link to its muʾakkad.',item);
   }
   if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
@@ -16490,7 +16763,7 @@ function validateExercise(data){
   const rel=relationships.find(candidate=>candidate.id===item.relations.followerRelationshipId&&candidate.type==='follower');
   const followed=tokenById.get(item.relations.followedId);
   if(!rel||rel.kind!==BADAL_KIND||rel.followerId!==item.id||rel.followedId!==followed?.id
-    ||followed?.relations.followerId!==item.id||followed?.relations.followerRelationshipId!==rel.id){
+    ||followed?.relations.followerId!==item.id||followed?.relations.followedRelationshipId!==rel.id){
    fail('E_BADAL_RELATION','A badal must have exactly one reciprocal canonical link to its mubdal minhu.',item);
   }
   if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length!==1){
@@ -16860,6 +17133,23 @@ function add(starts,form,state,sign,build,metadata={}){
  if(followerPairKeys.some((key,position)=>followerPairKeys.indexOf(key)!==position||!followerRegistry[key])){
   throw new Error(`Template ${stableId} names a duplicate or unregistered follower pair.`);
  }
+ /* Wave 5 — the ONLY road into an emphasis run. A template that declares a frame must offer exactly
+    that frame's links, in the source's order; a template that declares none may not name a
+    dependent word at all. Without both halves an ordinary tawkīd template could list أَكْتَع among
+    its pairs and stand it up with no أَجْمَع in front of it, which is the one thing p. 133 forbids. */
+ const tawkidChainFrame=metadata.tawkidChainFrame||'';
+ if(tawkidChainFrame){
+  const frame=TAWKID_CHAIN_FRAMES[tawkidChainFrame];
+  if(!frame||followerKind!==TAWKID_KIND){
+   throw new Error(`Template ${stableId} declares an unknown or non-tawkīd chain frame.`);
+  }
+  if(followerPairKeys.length!==frame.linkKeys.length
+    ||followerPairKeys.some((key,position)=>key!==frame.linkKeys[position])){
+   throw new Error(`Template ${stableId} does not offer exactly its chain frame's links in order.`);
+  }
+ }else if(followerPairKeys.some(key=>followerRegistry===TAWKID_PAIR_REGISTRY&&TAWKID_PAIR_REGISTRY[key].chainAfter)){
+  throw new Error(`Template ${stableId} names a dependent emphasis word without a chain frame.`);
+ }
  if(followerConjunctionKeys.some((key,position)=>followerConjunctionKeys.indexOf(key)!==position||!ATF_CONJUNCTION_REGISTRY[key])){
   throw new Error(`Template ${stableId} names a duplicate or unregistered conjunction.`);
  }
@@ -17106,6 +17396,7 @@ function add(starts,form,state,sign,build,metadata={}){
   followerKind,
   followerPairKeys,
   followerConjunctionKeys,
+  tawkidChainFrame,
   isharaLexemeKeys,
   mutlaqPairKeys,
   mafulFihPairKeys,
@@ -17728,7 +18019,94 @@ add('particle','singular','jarr','kasra',()=>buildAtfExercise('waw','singularPla
    because maʿnawī agreement is carried by the attached pronoun rather than by pretending the
    emphasis word is a naʿt. */
 const TAWKID_RAF_PAIR_KEYS=Object.freeze(['lafziStudent','nafsSingularM','aynSingularM','jamiiStudents']);
-const TAWKID_ALL_PAIR_KEYS=Object.freeze(Object.keys(TAWKID_PAIR_REGISTRY));
+/* The words that emphasize on their own. This list is NOT Object.keys(registry) any more: the six
+   Wave-5 entries are links of a run and are drawn only through a chain frame, so an ordinary
+   one-follower template can never reach أَجْمَع or its توابع and accidentally stand one up alone. */
+const TAWKID_ALL_PAIR_KEYS=Object.freeze(['lafziStudent','nafsSingularM','aynSingularM','kullBook','jamiiStudents']);
+/* ---- سِلْسِلَةُ التَّوْكِيدِ (p. 133) ------------------------------------------------------------
+   Two frames, and both are shapes the source itself writes:
+     • «كُلُّهُمْ أَجْمَعُونَ» — الغالب. ﴿فَسَجَدَ الْمَلَائِكَةُ كُلُّهُمْ أَجْمَعُونَ﴾, and the drill at
+       p. 133 «جَاءَ رِجَالُ الْجَيْشِ كُلُّهُمْ أَجْمَعُونَ» whose iʿrāb at p. 134 is the wording this
+       whole feature renders.
+     • «أَجْمَعُونَ، أَكْتَعُونَ، أَبْتَعُونَ، أَبْصَعُونَ» — the شرح's own توابع example, and the only
+       place it ever shows the three dependent words.
+   The head noun varies over the masculine human plurals, because every one of them satisfies the
+   agreement p. 132 actually requires; the run itself is fixed, because its order is the source's. */
+const TAWKID_CHAIN_FRAMES=Object.freeze(Object.assign(Object.create(null),{
+ kullThenAjma:Object.freeze({linkKeys:Object.freeze(['kullPluralGroup','ajmaAfterKull']),
+  targetKeys:Object.freeze(['ajmaAfterKull']),translationPhrase:'all of them together'}),
+ ajmaTawabi:Object.freeze({linkKeys:Object.freeze(['ajmaDirect','aktaAfterAjma','abtaAfterAkta','absaAfterAbta']),
+  targetKeys:Object.freeze(['ajmaDirect','aktaAfterAjma','abtaAfterAkta','absaAfterAbta']),
+  translationPhrase:'every single one of them'})
+}));
+const TAWKID_CHAIN_FRAME_KEYS=Object.freeze(Object.keys(TAWKID_CHAIN_FRAMES));
+/* The head lexemes a frame may stand on are the ones its FIRST link already accepts, read off that
+   pair rather than restated, so the two can never drift apart. */
+function tawkidChainHeads(frame){
+ return tawkidFollowedRecords(TAWKID_PAIR_REGISTRY[frame.linkKeys[0]]);
+}
+function tawkidChainTranslationFor(frame,host,headEn){
+ if(host==='raf')return`${cap(headEn)}, ${frame.translationPhrase}, visited the friend.`;
+ if(host==='jarr')return`There is a question about ${headEn}, ${frame.translationPhrase}.`;
+ return`The student visited ${headEn}, ${frame.translationPhrase}.`;
+}
+/* The two fixed frame words. They are LOOKED UP in the shared lexicon rather than spelled here:
+   an identically-looking literal typed at this site does not have to carry the same combining-mark
+   order as the lexicon's copy, and when it does not, every downstream authority that resolves a
+   noun BY SURFACE — the gloss table, the object's governing verb — silently fails to find it. That
+   is not hypothetical; it is what these two words did on their first run. */
+const TAWKID_CHAIN_FRIEND=singularPeople.find(item=>item.en==='the friend');
+const TAWKID_CHAIN_STUDENT=singularPeople.find(item=>item.en==='the student');
+const TAWKID_CHAIN_QUESTION=Object.freeze({nom:'سُؤَالٌ',en:'a question'});
+if(!TAWKID_CHAIN_FRIEND||!TAWKID_CHAIN_STUDENT){
+ throw new Error('The tawkīd chain frames need «the friend» and «the student» in the shared lexicon.');
+}
+function buildTawkidChainExercise(frameKey,host){
+ const frame=TAWKID_CHAIN_FRAMES[frameKey];
+ if(!frame)throw new Error(`Unknown tawkīd chain frame: ${frameKey}`);
+ const state={raf:'raf',nasb:'nasb',jarr:'jarr'}[host],formKey={raf:'nom',nasb:'acc',jarr:'gen'}[state];
+ if(!formKey)throw new Error(`Unknown tawkīd chain host: ${host}`);
+ const head=pickVaried(tawkidChainHeads(frame),`tawkid-chain-head-${frameKey}-${host}`,item=>item[formKey]);
+ const targetKey=pickVaried(frame.targetKeys,`tawkid-chain-target-${frameKey}-${host}`,String);
+ const links=frame.linkKeys.map(key=>{
+  const pair=TAWKID_PAIR_REGISTRY[key];
+  const word=pair.follower[formKey];
+  return token(word,pair.follower.en,AR.tawkid(word),
+   `A maʿnawī tawkīd inheriting its muʾakkad's state.`,key===targetKey);
+ });
+ const translation=tawkidChainTranslationFor(frame,host,head.en);
+ if(host==='jarr')return{sentence:'',translation,tokens:[
+  token('عَنْ','about',AR.prep('عَنْ'),EN.prep),
+  token(head[formKey],head.en,AR.majrur(head[formKey],'عَنْ'),'The muʾakkad governed by the preposition.'),
+  ...links,token(TAWKID_CHAIN_QUESTION.nom,TAWKID_CHAIN_QUESTION.en,
+   AR.delayedMubtada(TAWKID_CHAIN_QUESTION.nom),'A delayed mubtadaʾ; nominative.')
+ ]};
+ const verb=verbs.find(item=>item.past==='زَارَ');
+ if(host==='raf')return{sentence:'',translation,tokens:[
+  token(verb.past,verb.pastEn,AR.past(verb.past),'A past-tense verb built on its canonical ending.'),
+  token(head[formKey],head.en,AR.faail(head[formKey]),'The muʾakkad and explicit subject.'),
+  ...links,token(TAWKID_CHAIN_FRIEND.acc,TAWKID_CHAIN_FRIEND.en,AR.object(TAWKID_CHAIN_FRIEND.acc),EN.object)
+ ]};
+ return{sentence:'',translation,tokens:[
+  token(verb.past,verb.pastEn,AR.past(verb.past),'A past-tense verb built on its canonical ending.'),
+  token(TAWKID_CHAIN_STUDENT.nom,TAWKID_CHAIN_STUDENT.en,AR.faail(TAWKID_CHAIN_STUDENT.nom),'The explicit subject.'),
+  token(head[formKey],head.en,AR.object(head[formKey]),'The muʾakkad and direct object.'),...links
+ ]};
+}
+/* The chain's translation, re-derived on History restore exactly as the single-follower one is. */
+function canonicalTawkidChainTranslation(data){
+ const template=tawkidTemplateRecord(data);
+ if(!template||!template.tawkidChainFrame)return null;
+ const frame=TAWKID_CHAIN_FRAMES[template.tawkidChainFrame];
+ const followerIndex=data?.tokens?.findIndex(item=>item.grammar?.role==='tawkid')??-1;
+ const authority=deriveTawkidFollowerAuthority(data,followerIndex);
+ if(!frame||!authority.authorized)return null;
+ const head=data.tokens.find(item=>item.id===authority.headId);
+ const formKey={raf:'nom',nasb:'acc',jarr:'gen'}[template.state];
+ const record=head&&formKey?tawkidChainHeads(frame).find(item=>item[formKey]===head.word):null;
+ const host={raf:'raf',nasb:'nasb',jarr:'jarr'}[template.state];
+ return record&&host?tawkidChainTranslationFor(frame,host,record.en):null;
+}
 function tawkidTranslationFor(pair,host){
  if(host==='raf')return`${cap(pair.phraseEn)} visited the friend.`;
  if(host==='jarr')return`There is a question about ${pair.phraseEn}.`;
@@ -19006,6 +19384,27 @@ add('noun','singular','raf','damma',()=>pickedSababi(SABABI_ALL_FRAME_KEYS,'w4-s
 add('particle','singular','nasb','fatha',()=>pickedSababi(SABABI_ALL_FRAME_KEYS,'w4-sababi-nasb','nasb'),sababiMetadata(SABABI_ALL_FRAME_KEYS));
 add('particle','singular','jarr','kasra',()=>pickedSababi(SABABI_ALL_FRAME_KEYS,'w4-sababi-jarr','jarr'),sababiMetadata(SABABI_ALL_FRAME_KEYS));
 add('noun','smp','raf','waw',()=>buildIsharaExercise('haaulaa'),{isharaLexemeKeys:['haaulaa']});
+/* Wave 5 — the emphasis runs of p. 133, one template per frame per host. A template declares the
+   ONE frame it may build and gets exactly that frame's links as its permitted pairs, so a run can
+   never be assembled out of a frame the template does not own, and no ordinary one-follower
+   template can reach a dependent word. The target is a sound masculine plural in all six, which is
+   why they register under `smp` and take the wāw/yāʾ p. 134 names rather than a singular's ḍammah.
+
+   Registered HERE, at the very end, and not up beside the other tawkīd templates: a stableId is
+   `T_<family>_<ordinal>` with the ordinal assigned in registration order, so inserting a template
+   into the middle of a family silently renumbers every later member of that family — and those ids
+   are pinned by the translation structure map. Adding these three families' members last is what
+   keeps every existing id exactly where it was. */
+const tawkidChainMetadata=(frameKey,extra={})=>({...extra,followerKind:TAWKID_KIND,
+ followerPairKeys:TAWKID_CHAIN_FRAMES[frameKey].linkKeys,tawkidChainFrame:frameKey});
+for(const frameKey of TAWKID_CHAIN_FRAME_KEYS){
+ add('verb','smp','raf','waw',()=>buildTawkidChainExercise(frameKey,'raf'),
+  tawkidChainMetadata(frameKey,pastTemplateMetadata('3ms','explicit')));
+ add('verb','smp','nasb','ya',()=>buildTawkidChainExercise(frameKey,'nasb'),
+  tawkidChainMetadata(frameKey,pastTemplateMetadata('3ms','explicit')));
+ add('particle','smp','jarr','ya',()=>buildTawkidChainExercise(frameKey,'jarr'),
+  tawkidChainMetadata(frameKey));
+}
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

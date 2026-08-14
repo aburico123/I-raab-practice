@@ -331,15 +331,13 @@ const rows = [
   R('B_ZARF_HUNA', 'هُنَا', CH.zarf, '151–152', 'ظرف المكان المبني', 'هُنَا',
     { mode: 'card', missingReason: 'Same deferral as ثَمَّ.' }),
   R('B_HAAL', 'حَالٌ مَنْصُوبٌ', CH.haal, '153–157', 'المنصوبات', 'حَالٌ'),
-  R('B_HAAL_FAIL', 'حَالٌ مُبَيِّنٌ لِهَيْئَةِ الْفَاعِلِ', CH.haal, '154,157', 'أقسام الحال', 'مُبَيِّنٌ لِهَيْئَةِ الْفَاعِلِ',
-    { missingReason: 'p. 154 and the p. 157 model parse both use this exact wording; the app prints only the generic حال.' }),
-  R('B_HAAL_MAFUL', 'حَالٌ مُبَيِّنٌ لِهَيْئَةِ الْمَفْعُولِ بِهِ', CH.haal, '154,157', 'أقسام الحال', 'مُبَيِّنٌ لِهَيْئَةِ الْمَفْعُولِ',
-    { missingReason: 'Same: p. 157 parses «جديدًا: حال مبين لهيئة المفعول به».' }),
+  /* Wave 9. Both aqsām are produced now. The قسم is read off whichever token the frozen frame
+     actually yields as the صاحب, so the card reads the way p. 157's own answer key reads:
+     «حال مبين لهيئة الفاعل منصوب، وعلامة نصبه الفتحة الظاهرة». The pages field gains 156 because
+     p. 156's تمرينات ٢/٣ set the learner the same two labels in the book's own words. */
+  R('B_HAAL_FAIL', 'حَالٌ مُبَيِّنٌ لِهَيْئَةِ الْفَاعِلِ', CH.haal, '154,156,157', 'أقسام الحال', 'مُبَيِّنٌ لِهَيْئَةِ الْفَاعِلِ'),
+  R('B_HAAL_MAFUL', 'حَالٌ مُبَيِّنٌ لِهَيْئَةِ الْمَفْعُولِ بِهِ', CH.haal, '154,156,157', 'أقسام الحال', 'مُبَيِّنٌ لِهَيْئَةِ الْمَفْعُولِ'),
   R('B_HAAL_ISTIFHAM', 'اسْمُ اسْتِفْهَامٍ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ نَصْبٍ حَالٌ', CH.haal, '155', 'الحال المبنية', 'فِي مَحَلِّ نَصْبٍ حَالٌ'),
-  R('B_HAAL_MUAWWAL', 'الِاسْمُ الْمُؤَوَّلُ بِالصَّرِيحِ', CH.haal, '154', 'أقسام الحال', 'الْمُؤَوَّلُ بِالصَّرِيحِ',
-    { missingReason: 'p. 154 analyses «جاء محمد يضحك» as «في تأويل ضاحكًا»; the app builds no muʾawwal ḥāl (deliberatelyNotGenerated).' }),
-  R('B_HAAL_FADLA', 'الْفَضْلَةُ', CH.haal, '153–154', 'تعريف الحال', 'الْفَضْلَةُ',
-    { missingReason: 'Part of the sharḥ\'s own definition; never printed.' }),
   R('B_TAMYIZ', 'تَمْيِيزٌ مَنْصُوبٌ', CH.tamyiz, '157–161', 'المنصوبات', 'تَمْيِيزٌ'),
   R('B_TAMYIZ_DHAT', 'تَمْيِيزُ ذَاتٍ', CH.tamyiz, '158', 'أقسام التمييز', 'تَمْيِيزُ ذَاتٍ'),
   R('B_TAMYIZ_NISBAH', 'تَمْيِيزُ نِسْبَةٍ', CH.tamyiz, '158–159', 'أقسام التمييز', 'تَمْيِيزُ نِسْبَةٍ'),
@@ -499,7 +497,18 @@ const notCounted = [
      منصوب», which utters its classification verbatim and therefore IS a row. المكيلات and
      الموزونات were already here; العدد and المساحات had rows, which split one list in two. */
   { term: 'الْعَدَدُ / الْمَوْزُونَات / الْمَكِيلَات / الْمِسَاحَات', pages: '158', reason: 'The four positions p. 158 says a tamyīz al-dhāt may follow. Not iʿrāb terms: the source’s own model answers at p. 161 parse these very constructions as «تمييز لعشرين» and «تمييز لذراع», naming the mumayyaz. All four are taught in the Why corpus; the three مقادير are additionally productive, and the number position is not — 11–99 need the bināʾ of أحد عشر or the ملحق-by-SMP signs of عشرين, morphology this engine does not model.' },
-  { term: 'تَمْيِيزُ الْمُفْرَدِ / تَمْيِيزُ الْجُمْلَةِ', pages: '158', reason: 'Alternative NAMES for تمييز ذات / تمييز نسبة, which already have rows. Counting both would double-count one target.' }
+  { term: 'تَمْيِيزُ الْمُفْرَدِ / تَمْيِيزُ الْجُمْلَةِ', pages: '158', reason: 'Alternative NAMES for تمييز ذات / تمييز نسبة, which already have rows. Counting both would double-count one target.' },
+  /* Wave 9 CORRECTION. Both were carried as ḥāl rows, and both are genuinely in the source — but
+     both belong to the sharḥ's gloss OF ITS OWN DEFINITION, not to any parse. p. 153 gives the
+     definition as «الاسم، الفضلة، المنصوب، المُفَسِّر لما انبهم من الهيئات», and p. 154 then walks the
+     four qayds one at a time, each opening «وقولنا: "X"». الفضلة and المؤول بالصريح are two of those
+     glosses. The test that settles it is the one Wave 8 established: p. 157's own «تدريب على
+     الإعراب» parses two ḥāl sentences in full and says «حال مبين لهيئة الفاعل منصوب بالفتحة
+     الظاهرة» — no فضلة, no تأويل. Contrast «مبين لهيئة …», which that same answer key utters
+     verbatim and which therefore keeps its rows. Note the qayd «المنصوب» is not a third deletion:
+     the state IS uttered, and B_HAAL already carries it. */
+  { term: 'الْفَضْلَةُ', pages: '153–154', reason: 'One of the four qayds of the sharḥ’s definition (p. 153), glossed at p. 154 as «ليس جزءاً من الكلام؛ فخرج به الخبر» — a statement of what the definition excludes, not a word the learner utters. p. 157’s own model answers parse a ḥāl as «حال مبين لهيئة الفاعل منصوب بالفتحة الظاهرة» with no فضلة in the line. The idea is enforced structurally (a ḥāl frame already has its fāʿil) and explained in the Why; it is not a separate direct target.' },
+  { term: 'الِاسْمُ الْمُؤَوَّلُ بِالصَّرِيحِ', pages: '154', reason: 'Appears only inside the gloss of the qayd «الاسم»: «يشمل الصريح مثل ضاحكاً … ويشمل المؤول بالصريح مثل يَضْحَكُ … فإنه في تأويل ضاحكاً». It names how a sentence-shaped ḥāl is UNDERSTOOD, and the chapter never parses يضحك with it — nor with any modern حال جملة label, which is separately source-excluded. p. 158 confirms the direction of the contrast from the tamyīz side: «وقولنا الصريح لإخراج الاسم المؤول … بخلاف الحال كما سبق». Explanatory analysis, not a sayable iʿrāb term.' }
 ];
 
 module.exports = { rows, sourceExcluded, notCounted, CH };

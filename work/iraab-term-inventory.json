@@ -14,19 +14,19 @@
   "rule": "A row is FULL only when its canonical Arabic is observed in the rendered iʿrāb (token.ar / token.phraseAr). Appearing only in a Why explanation or in the definitions panel yields GENERIC_ONLY, never FULL."
  },
  "totals": {
-  "TOTAL": 282,
-  "FULL": 249,
+  "TOTAL": 280,
+  "FULL": 251,
   "GENERIC_ONLY": 5,
   "PARTIAL": 1,
-  "ABSENT": 25,
+  "ABSENT": 21,
   "TRUE_BLOCKER": 2,
   "reconciles": true,
-  "percentFull": 88.3
+  "percentFull": 89.6
  },
  "randomizationTotals": {
   "GOOD": 154,
-  "LIMITED": 96,
-  "NONE": 32
+  "LIMITED": 98,
+  "NONE": 28
  },
  "marathon": {
   "target": 56,
@@ -93,6 +93,16 @@
    "term": "تَمْيِيزُ الْمُفْرَدِ / تَمْيِيزُ الْجُمْلَةِ",
    "pages": "158",
    "reason": "Alternative NAMES for تمييز ذات / تمييز نسبة, which already have rows. Counting both would double-count one target."
+  },
+  {
+   "term": "الْفَضْلَةُ",
+   "pages": "153–154",
+   "reason": "One of the four qayds of the sharḥ’s definition (p. 153), glossed at p. 154 as «ليس جزءاً من الكلام؛ فخرج به الخبر» — a statement of what the definition excludes, not a word the learner utters. p. 157’s own model answers parse a ḥāl as «حال مبين لهيئة الفاعل منصوب بالفتحة الظاهرة» with no فضلة in the line. The idea is enforced structurally (a ḥāl frame already has its fāʿil) and explained in the Why; it is not a separate direct target."
+  },
+  {
+   "term": "الِاسْمُ الْمُؤَوَّلُ بِالصَّرِيحِ",
+   "pages": "154",
+   "reason": "Appears only inside the gloss of the qayd «الاسم»: «يشمل الصريح مثل ضاحكاً … ويشمل المؤول بالصريح مثل يَضْحَكُ … فإنه في تأويل ضاحكاً». It names how a sentence-shaped ḥāl is UNDERSTOOD, and the chapter never parses يضحك with it — nor with any modern حال جملة label, which is separately source-excluded. p. 158 confirms the direction of the contrast from the tamyīz side: «وقولنا الصريح لإخراج الاسم المؤول … بخلاف الحال كما سبق». Explanatory analysis, not a sayable iʿrāb term."
   }
  ],
  "rows": [
@@ -988,13 +998,13 @@
    "pages": "78",
    "parent": "نواصب المضارع",
    "status": "FULL",
-   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 98 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 99 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَوْ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 98
+   "observedTemplateLanes": 99
   },
   {
    "key": "N_AN_MUDMARA_JAWAZ",
@@ -1063,13 +1073,13 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمْ» observed in the rendered iʿrāb across 200 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمْ» observed in the rendered iʿrāb across 201 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمْ",
    "probeMode": "sentence",
    "probeRequires": "",
-   "observedTemplateLanes": 200
+   "observedTemplateLanes": 201
   },
   {
    "key": "J_ALAMMA",
@@ -1078,13 +1088,13 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 37 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 38 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمَّا",
    "probeMode": "sentence",
    "probeRequires": "",
-   "observedTemplateLanes": 37
+   "observedTemplateLanes": 38
   },
   {
    "key": "J_HAMZAT_TAQRIR",
@@ -1768,13 +1778,13 @@
    "pages": "99–101",
    "parent": "المرفوعات",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 126 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 125 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 126
+   "observedTemplateLanes": 125
   },
   {
    "key": "M_KHABAR_MUFRAD",
@@ -2218,13 +2228,13 @@
    "pages": "109",
    "parent": "إن وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «أَنَّ» observed in the rendered iʿrāb across 191 template lane(s) [mode=inna]",
+   "proof": "built 200× per template; «أَنَّ» observed in the rendered iʿrāb across 192 template lane(s) [mode=inna]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَنَّ",
    "probeMode": "inna",
    "probeRequires": "",
-   "observedTemplateLanes": 191
+   "observedTemplateLanes": 192
   },
   {
    "key": "I_LAKINNA",
@@ -3250,31 +3260,31 @@
    "key": "B_HAAL_FAIL",
    "term": "حَالٌ مُبَيِّنٌ لِهَيْئَةِ الْفَاعِلِ",
    "chapter": "باب الحال (pp. 153–157)",
-   "pages": "154,157",
+   "pages": "154,156,157",
    "parent": "أقسام الحال",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "p. 154 and the p. 157 model parse both use this exact wording; the app prints only the generic حال.",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «مُبَيِّنٌ لِهَيْئَةِ الْفَاعِلِ» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
    "probe": "مُبَيِّنٌ لِهَيْئَةِ الْفَاعِلِ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "B_HAAL_MAFUL",
    "term": "حَالٌ مُبَيِّنٌ لِهَيْئَةِ الْمَفْعُولِ بِهِ",
    "chapter": "باب الحال (pp. 153–157)",
-   "pages": "154,157",
+   "pages": "154,156,157",
    "parent": "أقسام الحال",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Same: p. 157 parses «جديدًا: حال مبين لهيئة المفعول به».",
-   "randomization": "NONE",
+   "status": "FULL",
+   "proof": "built 200× per template; «مُبَيِّنٌ لِهَيْئَةِ الْمَفْعُولِ» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
    "probe": "مُبَيِّنٌ لِهَيْئَةِ الْمَفْعُولِ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 0
+   "observedTemplateLanes": 1
   },
   {
    "key": "B_HAAL_ISTIFHAM",
@@ -3290,36 +3300,6 @@
    "probeMode": "contains",
    "probeRequires": "",
    "observedTemplateLanes": 1
-  },
-  {
-   "key": "B_HAAL_MUAWWAL",
-   "term": "الِاسْمُ الْمُؤَوَّلُ بِالصَّرِيحِ",
-   "chapter": "باب الحال (pp. 153–157)",
-   "pages": "154",
-   "parent": "أقسام الحال",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "p. 154 analyses «جاء محمد يضحك» as «في تأويل ضاحكًا»; the app builds no muʾawwal ḥāl (deliberatelyNotGenerated).",
-   "randomization": "NONE",
-   "probe": "الْمُؤَوَّلُ بِالصَّرِيحِ",
-   "probeMode": "contains",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
-  },
-  {
-   "key": "B_HAAL_FADLA",
-   "term": "الْفَضْلَةُ",
-   "chapter": "باب الحال (pp. 153–157)",
-   "pages": "153–154",
-   "parent": "تعريف الحال",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Part of the sharḥ's own definition; never printed.",
-   "randomization": "NONE",
-   "probe": "الْفَضْلَةُ",
-   "probeMode": "contains",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
   },
   {
    "key": "B_TAMYIZ",
@@ -4168,13 +4148,13 @@
    "pages": "176–177",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 32 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 33 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُذْ",
    "probeMode": "prep",
    "probeRequires": "",
-   "observedTemplateLanes": 32
+   "observedTemplateLanes": 33
   },
   {
    "key": "X_PREP_MUNDHU",

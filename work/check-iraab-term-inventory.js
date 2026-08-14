@@ -967,6 +967,77 @@ const WAVE8_NOT_COUNTED = ['تَمْيِيزُ الْعَدَدِ', 'تَمْي�
   }
 }
 
+/* ── Wave 9 — باب الحال, pp. 153–157 ───────────────────────────────────────────────────────────
+   Four non-FULL rows resolved: two produced, two removed as counting-rule corrections.
+
+   Pinned in both directions, because each half can rot independently. The two aqsām must be
+   produced AND must be produced as two DIFFERENT labels off two different صاحب roles — one label
+   reaching both lanes would satisfy a naive «is it printed» check while destroying the division
+   p. 154 draws. The two removals must stay out of the rows, stay recorded, and — the claim that
+   justified removing them — must never appear on an iʿrāb card. الفضلة additionally has to stay
+   TAUGHT: it is a real qayd of the source's definition, and removing a row must not remove a
+   lesson. And p. 155's built ḥāl must keep its bare «في محل نصب حال»: the source gives the
+   interrogative no قسم, so a قسم leaking onto that lane would be an invented term. */
+const WAVE9_KEYS = ['B_HAAL_FAIL', 'B_HAAL_MAFUL'];
+const WAVE9_NOT_COUNTED = ['الْفَضْلَةُ', 'الِاسْمُ الْمُؤَوَّلُ بِالصَّرِيحِ'];
+{
+  for (const key of WAVE9_KEYS) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('Wave-9 row ' + key + ' is missing from the inventory'); continue; }
+    if (!/^باب الحال/.test(row.chapter)) fail('Wave-9 row ' + key + ' is not in the wave scope: ' + row.chapter);
+    if (row.status !== 'FULL') fail('Wave-9 row ' + key + ' is ' + row.status + ', not FULL');
+  }
+  const chapterRows = rows.filter(r => /^باب الحال/.test(r.chapter));
+  const chapterObserved = observed.filter(r => /^باب الحال/.test(r.chapter));
+  if (chapterRows.length !== 4) fail('باب الحال holds ' + chapterRows.length + ' rows, not the four it should');
+  const notFull = chapterObserved.filter(r => r.status !== 'FULL');
+  if (notFull.length) fail('باب الحال still has non-FULL rows: ' + notFull.map(r => r.key).join(', '));
+
+  /* The division is real: two distinct labels, each on its own lane, neither on the other's. */
+  {
+    const labels = Object.values(api.HAAL_HOST_LABELS || {});
+    if (labels.length !== 2) fail('p. 154 divides the ḥāl in two; the app registers ' + labels.length);
+    if (new Set(labels.map(l => l.ar)).size !== labels.length) fail('the two aqsām of p. 154 share one label');
+    for (const label of labels) {
+      const lanes = templatesFor(label.ar);
+      if (!lanes.size) fail('the قسم «' + label.ar + '» never reaches a rendered card');
+      for (const other of labels) {
+        if (other.ar !== label.ar && templatesFor(label.ar, other.ar).size) {
+          fail('one card carries both aqsām of p. 154 at once');
+        }
+      }
+    }
+    /* p. 155 parses كَيْفَ as «في محل نصب حال من علي» and gives it no قسم. Discriminated by
+       «اسم استفهام», which only the built lane prints — NOT by HAAL_MAHALL.ar, whose skeleton
+       «نصب» is also a substring of the ordinary lane's own «وعلامة نصبه». */
+    for (const label of labels) {
+      if (templatesFor(label.ar, api.HAAL_ISTIFHAM.nameAr).size) {
+        fail('the built ḥāl of p. 155 borrowed the p. 157 قسم, which the source does not give it');
+      }
+    }
+  }
+
+  /* The two removals, both ways. */
+  {
+    const notCountedText = notCounted.map(item => skeleton(item.term)).join(' | ');
+    const rowTerms = new Set(rows.map(r => skeleton(r.term)));
+    for (const term of WAVE9_NOT_COUNTED) {
+      const t = skeleton(term);
+      if (!notCountedText.includes(t)) fail('«' + term + '» is not recorded in notCounted');
+      if (rowTerms.has(t)) fail('«' + term + '» came back as a counted row after the counting-rule correction');
+      if (templatesFor(term).size) {
+        fail('«' + term + '» is not an iʿrāb term but the app now prints it on a card; ' +
+          'if the book does parse one that way, the correction must be retired deliberately');
+      }
+    }
+    /* الفضلة stays taught. المؤول بالصريح does not have to be: it is the one term this chapter
+       explains in order to describe a construction the app deliberately does not generate. */
+    if (!mentionedOnly('الْفَضْلَةُ') && !mentionedOnly('فَضْلَةٌ')) {
+      fail('«الفضلة» is a qayd of the source’s own definition and is no longer taught anywhere');
+    }
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -1009,6 +1080,9 @@ console.log(JSON.stringify({
   wave8: { name: 'باب التمييز', target: WAVE8_KEYS.length + WAVE8_NOT_COUNTED.length,
     full: WAVE8_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
     notCounted: WAVE8_NOT_COUNTED.length },
+  wave9: { name: 'باب الحال', target: WAVE9_KEYS.length + WAVE9_NOT_COUNTED.length,
+    full: WAVE9_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
+    notCounted: WAVE9_NOT_COUNTED.length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

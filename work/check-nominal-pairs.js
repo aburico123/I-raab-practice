@@ -191,6 +191,12 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   /* الحال المفردة — Al-Tuḥfah pp. 153–157. */
   HAAL_ROLE,
   HAAL_OWNER_ROLES,
+  HAAL_NAME_AR,
+  HAAL_NAME_AR_CPS,
+  HAAL_HOST_LABELS,
+  HAAL_LEXEME_POOLS,
+  haalLabelByteDrift,
+  haalQismAmbiguity,
   HAAL_LEXEMES,
   HAAL_PAIR_REGISTRY,
   haalNoun,
@@ -3595,10 +3601,26 @@ function runHaalFocusedTests(){
       pairKey+' lacks its canonical event/owner relationship');
     assert(api.isSourceAuthorized(haal.ruleId)&&api.isSourceAuthorized(relation.ruleId),
       pairKey+' lost source ownership');
-    assert(haal.ar.includes('حَالٌ مَنْصُوبٌ')&&!haal.ar.includes('نَعْتٌ')
-      &&haal.why.ids.includes('WHY_ROLE_HAAL')&&haal.why.ids.includes('WHY_STATE_HAAL')
+    /* Wave 9 — the card must read the way p. 157's own answer key reads: «حال مبين لهيئة الفاعل
+       منصوب…». Composed entirely from app exports; not one Arabic byte is retyped here, so an
+       invisible mark reordering in index.html cannot be papered over by the same slip in the test. */
+    const qism=api.HAAL_HOST_LABELS[pair.ownerRole];
+    assert(qism,pairKey+' has no source qism label');
+    /* «جديداً: حال مبين لهيئة المفعول به منصوب، وعلامة نصبه الفتحة الظاهرة» — the قسم sits between
+       the role name and the state, exactly as p. 157 orders it, and the sign clause follows. */
+    const expectedLine=api.HAAL_NAME_AR+' '+qism.ar+' '+api.stateArabic('nasb');
+    const otherQism=api.HAAL_HOST_LABELS[pair.ownerRole===api.HAAL_OWNER_ROLES.subject
+      ?api.HAAL_OWNER_ROLES.object:api.HAAL_OWNER_ROLES.subject];
+    assert(haal.ar.includes(expectedLine)&&!haal.ar.includes('نَعْتٌ')
+      &&!haal.ar.includes(otherQism.ar),
+      pairKey+' does not print the p. 157 haal line: got «'+haal.ar+'» want «'+expectedLine+'»');
+    assert(haal.why.ids.includes('WHY_ROLE_HAAL')&&haal.why.ids.includes('WHY_STATE_HAAL')
       &&haal.why.ids.includes('WHY_HAAL_DEFINITENESS')
+      &&haal.why.ar.some(line=>line.includes(qism.ar))
+      &&haal.why.en.some(line=>line.includes(qism.en))
       &&haal.phraseWhy?.ids.includes('WHY_REL_HAAL_OWNER'),pairKey+' Why/iʿrāb chain is incomplete');
+    assert(authority.sahibRole===sahib.grammar.role,
+      pairKey+' reads its qism off the declaration rather than off the frame');
     assert(haal.phraseLabel==='Haal construction'&&data.tokens.every(item=>item===haal||!item.phraseAr),
       pairKey+' put the combined analysis somewhere other than the haal');
     assert(api.canonicalHaalTranslation(data)===pair.sentenceEn
@@ -3666,8 +3688,129 @@ function runHaalFocusedTests(){
   assert(rebuiltRelation&&rebuiltRelation.sahibRole==='object'&&rebuiltRelation.pairKey==='garmentNew'
     &&rebuiltRelation.sahibId===rebuilt.tokens[2].id,
     'History did not discard and canonically rebuild a forged haal relationship');negatives++;
+  /* ---- Wave 9 — the قسم of p. 157 ------------------------------------------------------------
+     Everything below exists because the card now says «حال مبين لهيئة الفاعل/المفعول به» rather
+     than a bare «حال منصوب». The claim is falsifiable in exactly three ways: the wrong قسم could be
+     printed, a قسم could be printed for a ḥāl the source would leave unlabelled, or the Arabic
+     could drift. One block per way. */
+  let wave9=0,wave9Negatives=0;
+  const faailLabel=api.HAAL_HOST_LABELS[api.HAAL_OWNER_ROLES.subject];
+  const objectLabel=api.HAAL_HOST_LABELS[api.HAAL_OWNER_ROLES.object];
+  assert(faailLabel&&objectLabel&&faailLabel.ar!==objectLabel.ar,
+    'the two p. 154 aqsām are not two distinct labels');wave9++;
+  // 1 — each lane prints its OWN قسم, and the p. 157 word order: حال، قسم، state، then the sign.
+  for(const [pairKey,data] of built){
+    const pair=api.HAAL_PAIR_REGISTRY[pairKey];
+    const haal=data.tokens.find(item=>item.grammar.role===api.HAAL_ROLE);
+    const mine=api.HAAL_HOST_LABELS[pair.ownerRole];
+    const theirs=pair.ownerRole===api.HAAL_OWNER_ROLES.subject?objectLabel:faailLabel;
+    assert(haal.ar.indexOf(api.HAAL_NAME_AR)<haal.ar.indexOf(mine.ar)
+      &&haal.ar.indexOf(mine.ar)<haal.ar.indexOf(api.stateArabic('nasb'))
+      &&!haal.ar.includes(theirs.ar),pairKey+' does not carry its own qism in the p. 157 order');
+    wave9++;
+  }
+  // 2 — the قسم is read off the frame. Moving the صاحب must move the label, not just the record.
+  assert(api.deriveHaalAuthority(subjectBase,2).sahibRole===api.HAAL_OWNER_ROLES.subject
+    &&api.deriveHaalAuthority(objectBase,3).sahibRole===api.HAAL_OWNER_ROLES.object,
+    'the qism is not derived from the frame');wave9++;
+  mustReject('صاحب relabelled so the frame contradicts its pair',objectBase,data=>{
+    data.tokens[2].grammar={...data.tokens[2].grammar,role:'faail'};
+  });
+  mustReject('qism forged onto the token itself',subjectBase,data=>{
+    data.tokens[1].grammar={...data.tokens[1].grammar,role:'object'};
+  });
+  mustReject('stored qism swapped in History',objectBase,data=>{
+    data.relationships.find(item=>item.type==='haal').sahibRole=api.HAAL_OWNER_ROLES.subject;
+  },'E_HAAL_RELATION');
+  wave9Negatives+=3;
+  // 3 — the p. 154 «محتملاً للأمرين» gate. A ḥāl that could be read of either takes NO label.
+  assert(api.haalQismAmbiguity(api.HAAL_OWNER_ROLES.subject,'person')===''
+    &&api.haalQismAmbiguity(api.HAAL_OWNER_ROLES.object,'thing')==='',
+    'the ambiguity gate rejects the source’s own labelled shapes');wave9++;
+  assert(api.haalQismAmbiguity(api.HAAL_OWNER_ROLES.object,'person')!==''
+    &&api.haalQismAmbiguity(api.HAAL_OWNER_ROLES.subject,'thing')!==''
+    &&api.haalQismAmbiguity('mubtada','person')!=='',
+    'the ambiguity gate would label a haal p. 154 leaves unlabelled');wave9Negatives+=3;
+  assert(Object.entries(api.HAAL_LEXEMES).every(([,entry])=>
+    api.HAAL_LEXEME_POOLS[entry.describes]?.includes(entry.lexeme)),
+    'a haal lexeme does not belong to the pool its describes claims');wave9++;
+  for(const [pairKey,pair] of Object.entries(api.HAAL_PAIR_REGISTRY)){
+    assert(api.haalQismAmbiguity(pair.ownerRole,api.HAAL_LEXEMES[pair.haalKey].describes)==='',
+      pairKey+' would print a qism the source leaves unlabelled');wave9++;
+  }
+  /* 4 — same-surface role safety. An indefinite manṣūb adjective is also the shape of a تمييز, and
+     p. 154's «الفضلة … فخرج به الخبر» is the source's own warning that it can be mistaken for a
+     خبر. None of those roles may be reachable by relabelling this token. */
+  mustReject('haal relabelled tamyiz',subjectBase,data=>{
+    const h=data.tokens[2];h.grammar={...h.grammar,role:api.TAMYIZ_ROLE};h.ruleId='R_TAMYIZ_NASB';
+  },'E_TAMYIZ_AUTHORITY');
+  /* A khabar needs a mubtadaʾ this clause does not have — the structural form of «فخرج به الخبر». */
+  mustReject('haal relabelled khabar',subjectBase,data=>{
+    const h=data.tokens[2];h.grammar={...h.grammar,role:'khabar'};h.ruleId='R_KHABAR_RAF';
+  },'E_KHABAR_NO_MUBTADA');
+  /* The subject lane's event is intransitive, so there is no ʿāmil to own an object. */
+  mustReject('haal relabelled maful bihi',subjectBase,data=>{
+    const h=data.tokens[2];h.grammar={...h.grammar,role:'object'};h.ruleId='R_MAFUL_NASB';
+  },'E_ORPHAN_OBJECT');
+  wave9Negatives+=3;
+  /* الفضلة is notCounted, not untaught: p. 154's own reason for excluding the خبر has to stay on
+     the card, or the removal silently deleted a lesson. */
+  {
+    const fadlah=[...built.values()].every(data=>{
+      const haal=data.tokens.find(item=>item.grammar.role===api.HAAL_ROLE);
+      return haal.why.ar.some(line=>line.includes('فَضْلَةٌ'))
+        &&haal.why.en.some(line=>line.includes('فَضْلَة'));
+    });
+    assert(fadlah,'«الفضلة» was removed as a row and also lost as a lesson');wave9++;
+  }
+  // 5 — byte drift. The pins are what make the label comparable across three files.
+  assert(!api.haalLabelByteDrift(api.HAAL_NAME_AR,api.HAAL_NAME_AR_CPS)
+    &&!api.haalLabelByteDrift(faailLabel.ar,faailLabel.cps)
+    &&!api.haalLabelByteDrift(objectLabel.ar,objectLabel.cps),
+    'a haal label has drifted from its pinned bytes');wave9++;
+  const shadda='ّ',kasra='ِ';
+  assert(faailLabel.ar.includes(kasra+shadda),'the pinned label lost the mark order it was pinned for');
+  assert(api.haalLabelByteDrift(faailLabel.ar.split(kasra+shadda).join(shadda+kasra),faailLabel.cps),
+    'an invisible shadda/kasra reordering was not detected');wave9Negatives++;
+  assert(api.haalLabelByteDrift(faailLabel.ar,objectLabel.cps)
+    &&api.haalLabelByteDrift(api.HAAL_NAME_AR+' ',api.HAAL_NAME_AR_CPS),
+    'byte drift is not detected across labels');wave9Negatives+=2;
+  /* 5 — the two gates above are LOAD-time, and a load-time gate that no test can trip is a gate
+     that can be deleted without anything going red. So the source is mutated on disk and the whole
+     harness re-run against it in a child process: each mutation must make the app refuse to load.
+     Skipped inside that child run itself, or it would recurse. */
+  if(process.env.NAHW_HAAL_MUTANT!=='1'){
+    const os=require('node:os'),cp=require('node:child_process');
+    const dir=fs.mkdtempSync(require('node:path').join(os.tmpdir(),'nahw-haal-mutant-'));
+    const mutations=[
+      ['a haal lexeme claiming the wrong pool',
+        /(new:Object\.freeze\(\{lexeme:uniqueHaalLexeme\(masculineThingPredicates,'new'\)[^}]*describes:')thing(')/,'$1person$2'],
+      /* The p. 154 case proper: an object-owner pair whose ḥāl is a person-adjective. Nothing is
+         mis-declared — the lexeme truthfully belongs to its pool — so only the ambiguity gate can
+         catch it, which is «لَقِيتُ عَبْدَ الله رَاكِباً», the example the book refuses to label. */
+      ['an object-owner pair whose haal could equally be read of its faail',
+        /(garmentNew:Object\.freeze\([\s\S]*?haalKey:')new(')/,'$1calm$2'],
+      ['a qism label edited away from its pinned bytes',
+        /(faail:Object\.freeze\(\{ar:')مُبَيِّنٌ/u,'$1مُبَيَّنٌ'],
+      ['the haal role name edited away from its pinned bytes',
+        /(const HAAL_NAME_AR=')حَالٌ(';)/u,'$1حَالًا$2']
+    ];
+    for(const [label,pattern,replacement] of mutations){
+      const mutated=html.replace(pattern,replacement);
+      assert(mutated!==html,'wave-9 mutation "'+label+'" did not match anything');
+      const target=require('node:path').join(dir,'mutant.html');
+      fs.writeFileSync(target,mutated,'utf8');
+      const run=cp.spawnSync(process.execPath,[__filename,target],
+        {encoding:'utf8',env:{...process.env,NAHW_HAAL_MUTANT:'1',NAHW_FOCUSED_HAAL:'1'}});
+      assert(run.status!==0,'wave-9 mutation "'+label+'" was accepted by a full harness run');
+      wave9Negatives++;
+    }
+    fs.rmSync(dir,{recursive:true,force:true});
+  }
   console.log('Haal focused tests: '+builds+' canonical builds, '+trips+' History round trips, '
     +negatives+' negative/collision boundaries — green');
+  console.log('  Wave-9 qism of p. 157: '+wave9+' canonical checks and '+wave9Negatives
+    +' adversarial checks; both aqsām derived from the frame, ambiguity gate and byte pins live');
 }
 runHaalFocusedTests();
 if(process.env.NAHW_FOCUSED_HAAL==='1')process.exit(0);
@@ -5053,6 +5196,13 @@ function runBuiltHaalFocusedTests(){
       record.key+': the built ḥāl printed an iʿrāb state instead of a maḥall');
     assert(!head.ar.includes(api.GRAMMAR_SIGNS.fatha.ar),
       record.key+': the built ḥāl printed a SIGN, which belongs to the muʿrab lane');
+    /* Wave-9 regression. p. 155 parses كيف as «في محل نصب حال من علي» — it names the صاحب and no
+       قسم at all — so the p. 157 division must not leak onto this lane from the muʿrab one. */
+    assert(Object.values(api.HAAL_HOST_LABELS).every(qism=>
+      !head.ar.includes(qism.ar)&&!head.why.ar.some(line=>line.includes(qism.ar))),
+      record.key+': the built ḥāl borrowed the p. 157 qism, which p. 155 does not give it');
+    assert(head.why.ids.includes('WHY_STATE_HAAL_MAHALL')&&!head.why.ids.includes('WHY_STATE_HAAL'),
+      record.key+': the built ḥāl took the muʿrab state line');
     // 4 — صاحب الحال keeps the same canonical relationship the inflected ḥāl has.
     const rel=data.relationships.find(r=>r.type==='haal');
     assert(rel&&rel.haalId===head.id&&rel.verbId===verb.id&&rel.sahibId===sahib.id

@@ -5040,16 +5040,65 @@ const MAFUL_FIH_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_FIH_PAIR_REGISTRY)
    section, so this first productive lane is honestly limited to masculine singular pairs. */
 const HAAL_ROLE='haal';
 const HAAL_OWNER_ROLES=Object.freeze({subject:'faail',object:'object'});
+/* Wave 9 — the قسم the learner actually utters. p. 154 divides the ḥāl by whose هيئة it makes
+   plain — «قد يكون بياناً لصفة الفاعل، نحو: جَاءَ عَبْدُ الله رَاكِباً أو بياناً لصفة المفعول به، نحو:
+   رَكِبْتُ الْفَرَسَ مُسْرَجاً» — and unlike a definition-clause that division reaches the parse: p. 156's
+   تمرينات ٢/٣ set the learner to build «حالاً مبيناً لهيئة الفاعل» and «حالاً مبيناً لهيئة المفعول به»,
+   and p. 157's own model answers say it outright: «وباكية: حال مبين لهيئة الفاعل منصوب بالفتحة
+   الظاهرة» and «جديداً: حال مبين لهيئة المفعول به منصوب، وعلامة نصبه الفتحة الظاهرة». So the label
+   is the source's, in the source's own order: حال، then the قسم، then the state.
+
+   Keyed by the صاحب's own grammatical role, so the label is read off the frame and never declared;
+   HAAL_OWNER_ROLES already spells those two roles, which is why no third mapping exists here. */
+const HAAL_NAME_AR='حَالٌ';
+const HAAL_NAME_AR_CPS='062d 064e 0627 0644 064c';
+const HAAL_HOST_LABELS=Object.freeze(Object.assign(Object.create(null),{
+ faail:Object.freeze({ar:'مُبَيِّنٌ لِهَيْئَةِ الْفَاعِلِ',en:'clarifying the condition of the fāʿil',
+  /* Exact bytes, pinned: an invisible reordering of ي + kasra + shadda, or a ة for a ت, would
+     otherwise pass review and silently break every downstream comparison. */
+  cps:'0645 064f 0628 064e 064a 0650 0651 0646 064c 0020 0644 0650 0647 064e 064a 0652 0626 064e 0629 0650 0020 0627 0644 0652 0641 064e 0627 0639 0650 0644 0650'}),
+ object:Object.freeze({ar:'مُبَيِّنٌ لِهَيْئَةِ الْمَفْعُولِ بِهِ',en:'clarifying the condition of the mafʿūl bihi',
+  cps:'0645 064f 0628 064e 064a 0650 0651 0646 064c 0020 0644 0650 0647 064e 064a 0652 0626 064e 0629 0650 0020 0627 0644 0652 0645 064e 0641 0652 0639 064f 0648 0644 0650 0020 0628 0650 0647 0650'})
+}));
 function uniqueHaalLexeme(pool,en){
  const matches=pool.filter(item=>item.en===en);
  if(matches.length!==1)throw new Error(`The haal registry matched ${matches.length} canonical adjective records for “${en}”.`);
  return matches[0];
 }
+/* `describes` is what keeps the p. 157 قسم honest. p. 154 warns in its own words that the
+   attribution can fail to be decidable — «وقد يكون محتملاً للأمرين جميعاً، نحو: لَقِيتُ عَبْدَ الله
+   رَاكِباً» — and the book pointedly gives that example NO label. Every example it does label is
+   settled by the words themselves: رَاكِباً in «جَاءَ عَبْدُ الله رَاكِباً» has no rival because the event
+   takes no object at all, and مُسْرَجاً/جَدِيداً in «رَكِبْتُ الْفَرَسَ مُسْرَجاً» / «لَبِسْتُ الثَّوْبَ
+   جَدِيداً» cannot be said of the person who rode or wore. Recorded here, checked against real pool
+   membership at load, and required to match the صاحب's role — so this engine can only ever label a
+   ḥāl whose صاحب is the sole candidate. */
+const HAAL_LEXEME_POOLS=Object.freeze({person:adjectives,thing:masculineThingPredicates});
+/* Both gates are written as predicates over their arguments, not as inline checks of the one
+   registry they guard, so the suite can hand them forged input. A gate reachable only by the data
+   it protects is a gate no test can prove is still doing anything. */
+function haalLabelByteDrift(text,pinned){
+ return [...text].map(ch=>ch.codePointAt(0).toString(16).padStart(4,'0')).join(' ')!==pinned;
+}
+function haalQismAmbiguity(ownerRole,describes){
+ if(!HAAL_HOST_LABELS[ownerRole])return 'names a صاحب role p. 154 gives no قسم for';
+ /* «جَاءَ عَبْدُ الله رَاكِباً»: no object is in the frame at all, so the fāʿil is the only candidate —
+    but the adjective must still be sayable of a person. */
+ if(ownerRole===HAAL_OWNER_ROLES.subject&&describes!=='person'){
+  return `describes a ${describes} and cannot be its human fāʿil's هيئة`;
+ }
+ /* «لَبِسْتُ الثَّوْبَ جَدِيداً»: the fāʿil is a person and the ḥāl is a thing-predicate, so p. 154's
+    «محتملاً للأمرين» reading is closed off by the words themselves and not merely by the label. */
+ if(ownerRole===HAAL_OWNER_ROLES.object&&describes!=='thing'){
+  return 'could equally be read of its fāʿil, and p. 154 leaves that case unlabelled';
+ }
+ return '';
+}
 const HAAL_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
- smiling:Object.freeze({lexeme:uniqueHaalLexeme(adjectives,'smiling'),inflection:'singular',gender:'masculine',number:'singular'}),
- happy:Object.freeze({lexeme:uniqueHaalLexeme(adjectives,'happy'),inflection:'singular',gender:'masculine',number:'singular'}),
- calm:Object.freeze({lexeme:uniqueHaalLexeme(adjectives,'calm'),inflection:'singular',gender:'masculine',number:'singular'}),
- new:Object.freeze({lexeme:uniqueHaalLexeme(masculineThingPredicates,'new'),inflection:'singular',gender:'masculine',number:'singular'})
+ smiling:Object.freeze({lexeme:uniqueHaalLexeme(adjectives,'smiling'),inflection:'singular',gender:'masculine',number:'singular',describes:'person'}),
+ happy:Object.freeze({lexeme:uniqueHaalLexeme(adjectives,'happy'),inflection:'singular',gender:'masculine',number:'singular',describes:'person'}),
+ calm:Object.freeze({lexeme:uniqueHaalLexeme(adjectives,'calm'),inflection:'singular',gender:'masculine',number:'singular',describes:'person'}),
+ new:Object.freeze({lexeme:uniqueHaalLexeme(masculineThingPredicates,'new'),inflection:'singular',gender:'masculine',number:'singular',describes:'thing'})
 }));
 function haalNoun(poolName,en){
  const pool={singularPeople,singularThings}[poolName];
@@ -11541,6 +11590,20 @@ function verifyHaalRegistry(){
   if(entry.inflection!=='singular'||entry.gender!=='masculine'||entry.number!=='singular'){
    throw new Error(`Haal lexeme ${key} falls outside the declared first productive lane.`);
   }
+  const pool=HAAL_LEXEME_POOLS[entry.describes];
+  if(!pool||!pool.includes(lexeme)){
+   throw new Error(`Haal lexeme ${key} does not actually belong to the ${entry.describes} pool it claims.`);
+  }
+ });
+ /* p. 157's wording is comparison-critical in three files. Pinned by codepoint so a silent
+    reordering of ي + kasra + shadda, or a ة swapped for a ت, fails at load instead of at review. */
+ if(haalLabelByteDrift(HAAL_NAME_AR,HAAL_NAME_AR_CPS)){
+  throw new Error('The haal role name has drifted from its pinned bytes.');
+ }
+ Object.entries(HAAL_HOST_LABELS).forEach(([role,label])=>{
+  if(haalLabelByteDrift(label.ar,label.cps)){
+   throw new Error(`The haal qism label for ${role} has drifted from its pinned bytes.`);
+  }
  });
  Object.entries(HAAL_PAIR_REGISTRY).forEach(([key,pair])=>{
   const verb=haalVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
@@ -11554,6 +11617,8 @@ function verifyHaalRegistry(){
   if(!/^ال/u.test(subject.nom)||object&&!/^ال/u.test(object.acc)){
    throw new Error(`Haal pair ${key} does not name a definite صاحب frame.`);
   }
+  const ambiguity=haalQismAmbiguity(pair.ownerRole,entry.describes);
+  if(ambiguity)throw new Error(`Haal pair ${key} ${ambiguity}.`);
   if(pair.ownerRole===HAAL_OWNER_ROLES.subject){
    if(object)throw new Error(`Subject-owner haal pair ${key} unexpectedly names an object.`);
   }else if(pair.ownerRole===HAAL_OWNER_ROLES.object){
@@ -13454,9 +13519,16 @@ function deriveHaalAuthority(data,index){
  if(found.sahib.state&&found.sahib.state!==(found.pair.ownerRole===HAAL_OWNER_ROLES.subject?'raf':'nasb')){
   return Object.freeze({authorized:false,reason:'sahib-state-mismatch'});
  }
+ /* The قسم p. 157 utters is READ OFF the صاحب the frame produced, not off the pair's declaration.
+    The frozen pair only has to agree — so a registry edit that renamed the قسم without moving the
+    صاحب, or a token tree whose صاحب is no longer the role the pair claims, refuses here instead of
+    printing a label the sentence does not support. */
+ const sahibRole=found.sahib.grammar?.role;
+ if(!HAAL_HOST_LABELS[sahibRole])return Object.freeze({authorized:false,reason:'sahib-role-has-no-source-qism'});
+ if(sahibRole!==found.pair.ownerRole)return Object.freeze({authorized:false,reason:'sahib-role-contradicts-its-pair'});
  return Object.freeze({authorized:true,reason:'',pairKey:found.key,verbId:found.verb.id,
   verbWord:found.verb.word,sahibId:found.sahib.id,sahibWord:found.sahib.word,
-  sahibRole:found.pair.ownerRole,haalId:token.id,haalWord:token.word,
+  sahibRole,haalId:token.id,haalWord:token.word,
   gender:found.pair.gender,number:found.pair.number,inflection:found.haalEntry.inflection});
 }
 function canonicalHaalTranslation(data){
@@ -15323,7 +15395,14 @@ function nounRoleArabic(token){
  if(isBuiltHaal(token)){
   return HAAL_ISTIFHAM.nameAr+' مَبْنِيٌّ عَلَى '+HAAL_ISTIFHAM.binaaAr+' فِي مَحَلِّ '+HAAL_MAHALL.ar+' حَالٌ';
  }
- if(role===HAAL_ROLE)return'حَالٌ مَنْصُوبٌ';
+ /* p. 157's model answers carry the قسم on the card itself — «حال مبين لهيئة الفاعل منصوب بالفتحة
+    الظاهرة» — so unlike the tamyīz below, whose untransformed kinds the source parses bare, the
+    ordinary ḥāl always names whose هيئة it clarifies. The state keeps its own canonical word. */
+ if(role===HAAL_ROLE){
+  const data=token._data,authority=deriveHaalAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized haal: ${authority.reason}`);
+  return`${HAAL_NAME_AR} ${HAAL_HOST_LABELS[authority.sahibRole].ar} ${stateArabic(token.state)}`;
+ }
  /* The subtype is deliberately NOT folded into this label. Al-Tuḥfah's own iʿrāb drills at p. 161
     say «تمييز لعشرين، منصوب» and «تمييز نسبة محوَّل عن المبتدأ منصوب» — the division belongs to the
     analysis, not to the core case label, so it is carried by the Why and the combined block. */
@@ -15440,7 +15519,7 @@ function renderNounAnalysis(token){
  }else if(token.grammar.role===HAAL_ROLE){
   const data=token._data,authority=deriveHaalAuthority(data,data?.tokens?.indexOf(token));
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized haal: ${authority.reason}`);
-  english=`A haal describing the condition of ${authority.sahibWord} at the time of ${authority.verbWord}; accusative.`;
+  english=`A haal ${HAAL_HOST_LABELS[authority.sahibRole].en}, describing the condition of ${authority.sahibWord} at the time of ${authority.verbWord}; accusative.`;
  }
  if(token.grammar.role===ISM_LA_ROLE||token.grammar.role===KHABAR_LA_ROLE){
   const data=token._data;
@@ -16005,11 +16084,17 @@ function whyTamyizConditions(token,data){
    +(nominal?` the mubtadaʾ once it already has its khabar ${eq(authority.verbWord)}.`
      :` ${eq(authority.verbWord)} once it already has its subject.`)};
 }
+/* Wave 9 — «الفضلة» is folded in here rather than given a line of its own, and the source is why:
+   p. 155 defines تمام الكلام as «أن يأخذ الفعل فاعلَهُ والمبتدأ خَبَرَهُ», which is the same fact
+   p. 154 states as «الفضلة … ليس جزءاً من الكلام؛ فخرج به الخَبَرُ» — one observation about the
+   clause, said twice. It is notCounted as a ROW because no parse utters it, but it is the reason
+   this accusative is a ḥāl and not a khabar, so the learner still has to be told it. (A token
+   carries at most four Why statements; a fifth would have cost the sign or the state its line.) */
 function whyHaalConditions(token,data){
  const authority=haalWhyAuthority(token,data);
  return{id:'WHY_HAAL_DEFINITENESS',
-  ar:`وَ${wq(authority.sahibWord)} مَعْرِفَةٌ، وَ${wq(token.word)} نَكِرَةٌ جَاءَتْ بَعْدَ تَمَامِ الْكَلَامِ.` ,
-  en:`Its صاحب ${eq(authority.sahibWord)} is definite, and ${eq(token.word)} is indefinite after a complete clause.`};
+  ar:`وَ${wq(authority.sahibWord)} مَعْرِفَةٌ، وَ${wq(token.word)} نَكِرَةٌ فَضْلَةٌ جَاءَتْ بَعْدَ تَمَامِ الْكَلَامِ بِأَخْذِ ${wq(authority.verbWord)} فَاعِلَهُ؛ وَبِهٰذَا خَرَجَ الْخَبَرُ.`,
+  en:`Its صاحب ${eq(authority.sahibWord)} is definite, and ${eq(token.word)} is an indefinite فَضْلَة coming after the clause is complete — ${eq(authority.verbWord)} already has its subject — which is what separates a ḥāl from a خَبَر.`};
 }
 /* One line, and which line it is depends on what the source actually says about this word. For a
    place ẓarf that line is load-bearing — p. 151 lets only the مبهم be manṣūb — so it states the
@@ -16377,8 +16462,19 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_TAMYIZ',stateAr:()=>'وَالتَّمْيِيزُ مَنْصُوبٌ.',stateEn:()=>'The تَمْيِيزٌ is مَنْصُوبٌ.'},
  haal:{
   id:()=>'WHY_ROLE_HAAL',
-  ar:(t,data)=>`${wq(t.word)} بَيَّنَ هَيْئَةَ ${wq(haalWhyAuthority(t,data).sahibWord)} وَقْتَ وُقُوعِ ${wq(haalWhyAuthority(t,data).verbWord)}، فَهُوَ حَالٌ.`,
-  en:(t,data)=>`${eq(t.word)} describes the temporary condition of ${eq(haalWhyAuthority(t,data).sahibWord)} when ${eq(haalWhyAuthority(t,data).verbWord)} occurred, so it is a حَالٌ.`,
+  /* The قسم is named here for the inflected ḥāl because p. 157's own answers name it. The built
+     one is left bare on purpose: p. 155 parses كيف as «في محل نصب حال من علي» — it names the صاحب
+     and no قسم at all — and that authority carries no صاحب role to read one off. */
+  ar:(t,data)=>{
+   const authority=haalWhyAuthority(t,data);
+   const qism=authority.built?'':` ${HAAL_HOST_LABELS[authority.sahibRole].ar}`;
+   return`${wq(t.word)} بَيَّنَ هَيْئَةَ ${wq(authority.sahibWord)} وَقْتَ وُقُوعِ ${wq(authority.verbWord)}، فَهُوَ حَالٌ${qism}.`;
+  },
+  en:(t,data)=>{
+   const authority=haalWhyAuthority(t,data);
+   const qism=authority.built?'':` ${HAAL_HOST_LABELS[authority.sahibRole].en}`;
+   return`${eq(t.word)} describes the temporary condition of ${eq(authority.sahibWord)} when ${eq(authority.verbWord)} occurred, so it is a حَالٌ${qism}.`;
+  },
   stateId:t=>isBuiltHaal(t)?'WHY_STATE_HAAL_MAHALL':'WHY_STATE_HAAL',
   stateAr:t=>isBuiltHaal(t)
    ?'وَالْحَالُ الْمَبْنِيُّ لَا إِعْرَابَ لِلَفْظِهِ، وَإِنَّمَا هُوَ فِي مَحَلِّ '+HAAL_MAHALL.ar+'.'

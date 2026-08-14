@@ -355,18 +355,21 @@ const rows = [
     { missingReason: 'Same deferral; also needs أفعل التفضيل.' }),
   R('B_MUSTATHNA', 'مُسْتَثْنًى مَنْصُوبٌ', CH.istithna, '162–165', 'المنصوبات', 'مُسْتَثْنًى'),
   R('B_ILLA', 'إِلَّا — حَرْفُ اسْتِثْنَاءٍ', CH.istithna, '162–163', 'أدوات الاستثناء', 'حَرْفُ اسْتِثْنَاءٍ'),
-  R('B_GHAYR', 'غَيْرَ — اسْمُ اسْتِثْنَاءٍ', CH.istithna, '164–165', 'أدوات الاستثناء', 'اسْمُ اسْتِثْنَاءٍ',
-    { missingReason: 'ISTITHNA_TOOLS.ghayr is declared but never renders: no غير lane is produced.' }),
-  R('B_ISTITHNA_TAMM_MANFI', 'الْمُسْتَثْنَى مِنْ كَلَامٍ تَامٍّ مَنْفِيٍّ', CH.istithna, '164', 'أقسام الاستثناء', 'تَامٍّ مَنْفِيٍّ',
-    { missingReason: 'deliberatelyNotGenerated: p. 164 permits both badal and naṣb, which the engine does not model.' }),
-  R('B_ISTITHNA_MUFARRAGH', 'الِاسْتِثْنَاءُ الْمُفَرَّغُ', CH.istithna, '164', 'أقسام الاستثناء', 'الْمُفَرَّغُ',
-    { missingReason: 'deliberatelyNotGenerated: its state follows the ʿāmil before إلا.' }),
-  R('B_ISTITHNA_MUNQATI', 'الِاسْتِثْنَاءُ الْمُنْقَطِعُ', CH.istithna, '163–164', 'أقسام الاستثناء', 'الْمُنْقَطِعُ',
-    { missingReason: 'deliberatelyNotGenerated: the excepted noun is not part of the group.' }),
-  R('B_ISTITHNA_SIWA', 'سِوًى / سُوًى / سَوَاءٌ', CH.istithna, '164–165', 'أدوات الاستثناء', 'سِوَى',
-    { missingReason: 'deliberatelyNotGenerated: not produced.' }),
-  R('B_ISTITHNA_KHALA', 'خَلَا / عَدَا / حَاشَا', CH.istithna, '165', 'أدوات الاستثناء', 'حَاشَا',
-    { missingReason: 'deliberatelyNotGenerated: their noun may be either manṣūb or makhfūḍ.' }),
+  R('B_GHAYR', 'غَيْرَ — اسْمُ اسْتِثْنَاءٍ', CH.istithna, '164–165', 'أدوات الاستثناء', 'اسْمُ اسْتِثْنَاءٍ'),
+  R('B_ISTITHNA_TAMM_MANFI', 'الْمُسْتَثْنَى مِنْ كَلَامٍ تَامٍّ مَنْفِيٍّ', CH.istithna, '164', 'أقسام الاستثناء', 'تَامٍّ مَنْفِيٍّ'),
+  /* WAVE 6 — TERMINOLOGY CORRECTION, not a new row and not a deletion. This row was authored as
+     «الِاسْتِثْنَاءُ الْمُفَرَّغُ» with a probe on «الْمُفَرَّغُ». That word appears NOWHERE in pp. 162–165.
+     What the book DOES teach, in full, is the same regime under its own name: p. 163's third of
+     «ثَلَاثَةَ أَحْوَالٍ», and p. 164's «وَإِنْ كَانَ الْكَلَامُ السَّابِقُ نَاقِصًا … كَانَ الْمُسْتَثْنَى عَلَى حَسَبِ مَا
+     قَبْلَ إِلَّا مِنَ الْعَوَامِلِ», with all three of its ʿāmil readings and an example of each. So this is
+     the OPPOSITE of the Wave-5 كِلَا case: there the row was fiction and had to go; here the row is
+     source-backed and only its NAME was imported from a later tradition. Renamed to the source's
+     own wording, with the probe following the name. Verified bidirectionally from the page images:
+     «مفرغ» absent from the whole bāb; «ناقص» present on pp. 163, 164 and 165 as the technical term
+     for exactly this regime. */
+  R('B_ISTITHNA_NAQIS', 'الْمُسْتَثْنَى مِنْ كَلَامٍ نَاقِصٍ', CH.istithna, '163–164', 'أقسام الاستثناء', 'كَلَامٍ نَاقِصٍ'),
+  R('B_ISTITHNA_SIWA', 'سِوًى / سُوًى / سَوَاءٌ', CH.istithna, '164–165', 'أدوات الاستثناء', 'سِوَى'),
+  R('B_ISTITHNA_KHALA', 'خَلَا / عَدَا / حَاشَا', CH.istithna, '165', 'أدوات الاستثناء', 'حَاشَا'),
   R('B_LA_JINS', 'لَا النَّافِيَةُ لِلْجِنْسِ', CH.laJins, '166–167', 'المنصوبات', 'لَا النَّافِيَةُ لِلْجِنْسِ'),
   R('B_ISM_LA_MUDAF', 'اسْمُ لَا مَنْصُوبٌ (الْمُضَافُ)', CH.laJins, '166–167', 'اسم لا', 'اسْمُ «لَا»'),
   R('B_KHABAR_LA', 'خَبَرُ لَا مَرْفُوعٌ', CH.laJins, '166', 'خبر لا', 'خَبَرُ «لَا»'),
@@ -456,7 +459,21 @@ const sourceExcluded = [
      Alfiyyah), and importing a larger taxonomy is exactly what this inventory exists to prevent.
      Verified by reading the complete bāb from the page images, not from the old comment. */
   { term: 'كِلَا وَكِلْتَا', reason: 'Not among ألفاظ التوكيد in this source. pp. 131–135 enumerate النفس، العين، كل، أجمع، أكتع، أبتع، أبصع (matn) plus جميع (شرح), and no more; pp. 35–36 define المثنى without ملحقات, so this book never teaches كلا/كلتا in any role. The row\'s previous missingReason cited a p. 132 listing that is not there.' },
-  { term: 'عَامَّةٌ', reason: 'Not among ألفاظ التوكيد in this source; it appears nowhere in pp. 131–135. Its row likewise cited a p. 132 listing that is not there. It is an addition of the longer Alfiyyah-tradition lists, not of this matn or its شرح.' }
+  { term: 'عَامَّةٌ', reason: 'Not among ألفاظ التوكيد in this source; it appears nowhere in pp. 131–135. Its row likewise cited a p. 132 listing that is not there. It is an addition of the longer Alfiyyah-tradition lists, not of this matn or its شرح.' },
+  /* Wave 6. The one row of باب الاستثناء that this book does not teach, and the proof runs in BOTH
+     directions rather than resting on the word's absence alone:
+       · NEGATIVE — «منقطع» (and «متصل», its pair) appear nowhere in pp. 162–165. The whole bāb was
+         read from the page images: p. 162 defines الاستثناء and sorts the eight أدوات into three
+         أنواع; p. 163 gives the noun after «إلا» its three أحوال; p. 164 works through all three and
+         then treats the four اسم أدوات; p. 165 treats خلا وأخواتها and closes with أسئلة. No division
+         of الاستثناء into متصل/منقطع occurs at any point.
+       · POSITIVE — p. 162's own definition EXCLUDES it. The book defines the bāb as «الإخراج بإلا
+         أو إحدى أخواتها، لشيءٍ لولا ذلك الإخراجُ لكان داخلاً فيما قبل الأداة»: the excepted thing is one
+         that WOULD have been inside had it not been excepted. الاستثناء المنقطع is by construction
+         the case where it would not have been, so it falls outside the definition this book gives,
+         not merely outside its examples.
+     A term this source does not teach is not a blocked target; it is not in the curriculum. */
+  { term: 'الِاسْتِثْنَاءُ الْمُنْقَطِعُ', reason: 'Absent from pp. 162–165 in both name and case, and positively excluded by the definition p. 162 gives the bāb: «لشيءٍ لولا ذلك الإخراجُ لكان داخلاً فيما قبل الأداة» requires الاتصال, which is exactly what a منقطع exception lacks. The row’s previous missingReason — «the excepted noun is not part of the group» — was in fact a statement of why this source cannot teach it.' }
 ];
 
 /* Source-backed facts that are NOT sayable in an iʿrāb, so they are not rows.

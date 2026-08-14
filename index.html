@@ -1296,6 +1296,21 @@ function resolveCanonicalTokenGloss(data,token,index){
  if(type==='particle'&&KANA_CONDITION_PARTICLES[token.grammar?.particleType||'']){
   return KANA_CONDITION_PARTICLES[token.grammar.particleType].en;
  }
+ /* Wave 6 — and the same problem a third time, for باب الاستثناء's own identities. «مَا» is «not»
+    as the نفي that makes the speech منفي and «apart from» as the مَا المصدرية of p. 165, and the
+    surface table below holds only one of those. خَلَا/عَدَا/حَاشَا are resolved here on BOTH of their
+    readings — as a ḥarf by type, as a verb by the registry record their own لexeme carries — so the
+    same three words gloss identically whichever identity the frame gives them. */
+ if(type==='particle'&&token.grammar?.particleType===ISTITHNA_MA_NAFIYA.particleType)return ISTITHNA_MA_NAFIYA.gloss;
+ if(type==='particle'&&token.grammar?.particleType===ISTITHNA_MA_MASDARIYYA.particleType)return ISTITHNA_MA_MASDARIYYA.gloss;
+ if(type==='particle'&&token.grammar?.particleType==='istithnaKhalaHarf'){
+  const tool=ISTITHNA_DUAL_TOOLS.find(item=>item.surface===surface);
+  return tool?tool.gloss:null;
+ }
+ if(type==='verb'){
+  const tool=ISTITHNA_DUAL_TOOLS.find(item=>item.surface===surface);
+  if(tool)return tool.gloss;
+ }
  if(type==='particle'){
   return Object.prototype.hasOwnProperty.call(GLOSS_CLOSED_PARTICLES,surface)
    ?GLOSS_CLOSED_PARTICLES[surface]:null;
@@ -1347,6 +1362,14 @@ function resolveCanonicalTokenGloss(data,token,index){
     their attached pronoun and are not free vocabulary, and even the muṭābiq five-noun is glossed
     from the pair rather than from its lexicon entry so that all four kinds answer one authority. */
  if(type==='noun'&&token.grammar.role==='badal'){
+  /* Wave 6 — an exception badal is curriculum-owned by the ISTITHNĀʾ registry instead, and it is
+     asked first so a badal template can never lend it one of its own follower readings. */
+  const istithna=deriveIstithnaBadalAuthority(data,index);
+  if(istithna.authorized){
+   const pair=MUSTATHNA_PAIR_REGISTRY[istithna.pairKey];
+   const tool=ISTITHNA_TOOLS[istithna.toolKey];
+   return tool.kind===ISTITHNA_TOOL_KINDS.noun?tool.en:MUSTATHNA_LEXEMES[pair.mustathnaKey].lexeme.en;
+  }
   const found=badalPairAt(data,index);
   return found?.pair?.follower?.en||null;
  }
@@ -1871,6 +1894,24 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  /* الاستثناء: the particle lane and the غَيْر iḍāfah lane are genuinely different structures. */
  ,"T_VERB_SINGULAR_NASB_FATHA_30||verb:past,noun:faail,particle:particle,noun:mustathna":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_30",structure:"verb:past,noun:faail,particle:particle,noun:mustathna",shape:"TS44",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_31||verb:past,noun:faail,noun:mustathna,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_31",structure:"verb:past,noun:faail,noun:mustathna,noun:mudafIlayh",shape:"TS44",copulaPlural:false})
+ /* Wave 6 — باب الاستثناء's other two أحوال and its other two أنواع of أداة. All eleven reuse TS44,
+    which resolves the WHOLE sentence through the canonical istithnāʾ translator: every lane's
+    English is owned by the frozen record that licensed the construction, so a new frame shape never
+    earns a new shape entry. The structures differ because the frames genuinely differ — a منفي
+    frame leads with its نفي, a ناقص one has no مستثنى منه, and a خلا frame's أداة is a verb on one
+    reading and a particle on the other — and each is pinned here so no stable ID can authorize a
+    shape addressing tokens its exercise does not have. */
+ ,"T_VERB_SINGULAR_JARR_KASRA_01||verb:past,noun:faail,noun:mustathna,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_JARR_KASRA_01",structure:"verb:past,noun:faail,noun:mustathna,noun:mudafIlayh",shape:"TS44",copulaPlural:false})
+ ,"T_PARTICLE_SINGULAR_NASB_FATHA_20||particle:particle,verb:past,noun:faail,particle:particle,noun:mustathna":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_20",structure:"particle:particle,verb:past,noun:faail,particle:particle,noun:mustathna",shape:"TS44",copulaPlural:false})
+ ,"T_PARTICLE_SINGULAR_NASB_FATHA_21||particle:particle,verb:past,noun:faail,noun:mustathna,noun:mudafIlayh":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_21",structure:"particle:particle,verb:past,noun:faail,noun:mustathna,noun:mudafIlayh",shape:"TS44",copulaPlural:false})
+ ,"T_PARTICLE_SINGULAR_RAF_DAMMA_01||particle:particle,verb:past,noun:faail,particle:particle,noun:badal":Object.freeze({templateId:"T_PARTICLE_SINGULAR_RAF_DAMMA_01",structure:"particle:particle,verb:past,noun:faail,particle:particle,noun:badal",shape:"TS44",copulaPlural:false})
+ ,"T_PARTICLE_SINGULAR_RAF_DAMMA_02||particle:particle,verb:past,noun:faail,noun:badal,noun:mudafIlayh":Object.freeze({templateId:"T_PARTICLE_SINGULAR_RAF_DAMMA_02",structure:"particle:particle,verb:past,noun:faail,noun:badal,noun:mudafIlayh",shape:"TS44",copulaPlural:false})
+ ,"T_PARTICLE_SINGULAR_RAF_DAMMA_03||particle:particle,verb:past,particle:particle,noun:faail":Object.freeze({templateId:"T_PARTICLE_SINGULAR_RAF_DAMMA_03",structure:"particle:particle,verb:past,particle:particle,noun:faail",shape:"TS44",copulaPlural:false})
+ ,"T_PARTICLE_SINGULAR_NASB_FATHA_22||particle:particle,verb:past,noun:faail,particle:particle,noun:object":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_22",structure:"particle:particle,verb:past,noun:faail,particle:particle,noun:object",shape:"TS44",copulaPlural:false})
+ ,"T_PARTICLE_SINGULAR_JARR_KASRA_11||particle:particle,verb:past,noun:faail,particle:particle,particle:particle,noun:majrur":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_11",structure:"particle:particle,verb:past,noun:faail,particle:particle,particle:particle,noun:majrur",shape:"TS44",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_37||verb:past,noun:faail,verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_37",structure:"verb:past,noun:faail,verb:past,noun:object",shape:"TS44",copulaPlural:false})
+ ,"T_VERB_SINGULAR_JARR_KASRA_02||verb:past,noun:faail,particle:particle,noun:majrur":Object.freeze({templateId:"T_VERB_SINGULAR_JARR_KASRA_02",structure:"verb:past,noun:faail,particle:particle,noun:majrur",shape:"TS44",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_38||verb:past,noun:faail,particle:particle,verb:past,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_38",structure:"verb:past,noun:faail,particle:particle,verb:past,noun:object",shape:"TS44",copulaPlural:false})
  /* المنادى: five subtypes, four token shapes. The built pair declares the tuple of its MAHALL —
     the same convention the mabni present verb already uses, since neither has a state of its own. */
  ,"T_PARTICLE_SINGULAR_NASB_FATHA_09||particle:particle,noun:munada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_09",structure:"particle:particle,noun:munada",shape:"TS48",copulaPlural:false})
@@ -5149,28 +5190,124 @@ const TAMYIZ_ALL_PAIR_KEYS=Object.freeze(Object.keys(TAMYIZ_PAIR_REGISTRY));
    تام = «أن يُذكَر فيه المستثنى منه»; ناقص = «ألّا يُذكَر فيه المستثنى منه»; مُوجَب = «ألّا يسبقه نفي
    أو شبهه», where شبه النفي is النهي and الاستفهام.
 
-   ONLY الحالة الأولى is produced. That is deliberate and it is the whole reason this chapter is
-   scoped this way: it is the one حال where the source states a single obligatory analysis, so it
-   is the one حال an exercise can present as the answer. الثانية and الثالثة are جواز and
-   عامل-dependent respectively, and printing either as though it were the ruling would teach a
-   جواز as a وجوب. They are named in the coverage matrix instead.
+   WAVE 6 — all three أحوال are now produced, and the REGIME is the thing being taught. Each is a
+   separate answer, so each is a separate lane, and no lane may be relabelled as another:
 
-   Two أدوات are productive, both under that same first حال. «إِلَّا» is a حرف, so the مستثنى after
-   it carries the naṣb itself. «غَيْر» is an اسم: p. 164 says the noun after it «يجب جَرُّهُ
-   بإضافة الأداة إليه», while «الأداة نفسها… تأخذ حكم الاسم الواقع بعد إلا» — so غَيْرَ is the
-   منصوب مستثنى and what follows is its مضاف إليه مخفوض. */
+     تام موجب  → مستثنى منصوب على الاستثناء, obligatory.
+     تام منفي  → TWO registered readings, because the source gives two: the إتباع على البدلية it
+                 puts first, and the naṣb على الاستثناء it calls «على قلة». Both are produced, as
+                 separate exercises, each stating that the other is available.
+     ناقص      → NO مستثنى منه exists in the frame at all, and the noun after «إلا» takes the role
+                 its own ʿāmil imposes — فاعل مرفوع, مفعول به منصوب, or مخفوض بحرف الخفض. It is
+                 emphatically NOT given the مستثنى role: that is the entire content of p. 164's
+                 third ḥāل, and labelling it «مستثنى منصوب» would invert the lesson.
+
+   The regime is never read off a metadata flag. deriveIstithnaRegime re-derives it from the tokens
+   actually present — is there a مستثنى منه, is there a نفي token before the أداة — and the frozen
+   pair's declared regime must AGREE with what the tokens say or the exercise is refused.
+
+   الأدوات. p. 162's matn counts eight and the شرح sorts them into three أنواع, and this app now
+   produces all three:
+     • النوع الأول, «ما يكون حرفاً دائماً»: «إِلَّا». The مستثنى after it carries the case itself.
+     • النوع الثاني, «ما يكون اسماً دائماً»: «سِوَى», «سُوَى», «سَوَاءٌ», «غَيْرُ». p. 164: what follows
+       one of these «يجب جَرُّهُ بإضافة الأداة إليه» while «الأداة نفسها… تأخذ حكم الاسم الواقع بعد
+       إلا» — so the أداة is the word that carries the case, and its complement is مضاف إليه مخفوض.
+       Two of the four end in a permanent alif, so their sign is estimated (p. 21).
+     • النوع الثالث, «ما يكون حرفاً تارة ويكون فعلاً تارة أخرى»: «خَلَا», «عَدَا», «حَاشَا». p. 165
+       gives the learner the choice and explains it: reckon them verbs and the noun is a مفعول به
+       منصوب with a فاعل ضمير مستتر وجوباً; reckon them حروف and the noun is مخفوض بها. Unless
+       «ما» المصدرية precedes, and then «وَجَبَ نصبُ ما بعدها» because «ما» المصدرية enters only
+       upon verbs.
+
+   الاستثناء المنقطع is NOT here, and its absence is a source fact rather than a scope decision:
+   p. 162 defines the باب as «الإخراج بإلا أو إحدى أخواتها، لشيءٍ لولا ذلك الإخراجُ لكان داخلاً فيما
+   قبل الأداة» — the excepted thing WOULD have been included. A منقطع exception is by construction
+   the case where it would not have been, and neither the word «منقطع» nor the case appears anywhere
+   in pp. 162–165. الاتصال is therefore checked pair by pair below, in both directions. */
 const MUSTATHNA_ROLE='mustathna';
-const ISTITHNA_TOOL_KINDS=Object.freeze({particle:'particle',noun:'noun'});
+const ISTITHNA_TOOL_KINDS=Object.freeze({particle:'particle',noun:'noun',dual:'dual'});
+/* p. 163's three أحوال, as identifiers. The learner-facing names are the source's own words. */
+const ISTITHNA_REGIMES=Object.freeze({tammMujab:'tammMujab',tammManfi:'tammManfi',naqis:'naqis'});
+const ISTITHNA_REGIME_LABELS=Object.freeze(Object.assign(Object.create(null),{
+ tammMujab:Object.freeze({ar:'تَامٍّ مُوجَبٍ',bareAr:'تَامٌّ مُوجَبٌ',en:'complete and affirmative'}),
+ tammManfi:Object.freeze({ar:'تَامٍّ مَنْفِيٍّ',bareAr:'تَامٌّ مَنْفِيٌّ',en:'complete but negated'}),
+ naqis:Object.freeze({ar:'نَاقِصٍ',bareAr:'نَاقِصٌ',en:'incomplete'})
+}));
+/* The two readings p. 164 permits when the speech is تام منفي, and the three ordinary roles p. 164
+   hands the noun when the speech is ناقص. Both sets are closed. */
+const ISTITHNA_OPTIONS=Object.freeze({nasb:'nasb',badal:'badal'});
+/* The source's own names for the two readings, and its own ranking of them: p. 164 states the
+   إتباع first and calls the naṣb «على قلة». One frozen record, so the learner-facing wording and
+   every test that checks it read the same bytes. */
+const ISTITHNA_OPTION_LABELS=Object.freeze(Object.assign(Object.create(null),{
+ nasb:Object.freeze({ar:'النَّصْبُ عَلَى الِاسْتِثْنَاءِ',rankAr:'وَهُوَ عَلَى قِلَّةٍ',
+  en:'naṣb on istithnāʾ',rankEn:'which the source calls the lesser of the two'}),
+ badal:Object.freeze({ar:'الْإِتْبَاعُ عَلَى الْبَدَلِيَّةِ',rankAr:'وَهُوَ الْوَجْهُ الْمُقَدَّمُ',
+  en:'following it as a badal',rankEn:'which the source states first'})
+}));
+const ISTITHNA_BOTH_READINGS_AR='فَجَازَ فِيهِ الْوَجْهَانِ';
+const ISTITHNA_NAQIS_ROLES=Object.freeze(['faail','object','majrur']);
 const ISTITHNA_ILLA_TYPE='istithnaIlla';
 const ISTITHNA_TOOLS=Object.freeze(Object.assign(Object.create(null),{
  illa:Object.freeze({key:'illa',kind:ISTITHNA_TOOL_KINDS.particle,surface:'إِلَّا',
   particleType:ISTITHNA_ILLA_TYPE,ruleId:'R_ISTITHNA_ILLA',gloss:'except',
   nameAr:'حَرْفُ اسْتِثْنَاءٍ',nameEn:'a particle of exception'}),
- /* غَيْر is registered accusative-only: this lane never produces it in any other state, and a
-    rafʿ or khafḍ form the app cannot build has no business in the noun index. */
- ghayr:Object.freeze({key:'ghayr',kind:ISTITHNA_TOOL_KINDS.noun,acc:'غَيْرَ',inflection:'singular',
-  en:'other than',nameAr:'اسْمُ اسْتِثْنَاءٍ',nameEn:'a noun of exception'})
+ /* النوع الثاني — «ما يكون اسماً دائماً». Each carries only the forms a lane actually renders: a
+    case form the app cannot build has no business in the noun index. غَيْر now needs BOTH acc and
+    nom, because p. 164's second ḥāl puts it in rafʿ as a badal («مَا يَزُورُنِي أَحَدٌ غيرُ الأخيارِ»)
+    as readily as in naṣb; سِوَى and سُوَى are مقصور, so one surface serves every state — which is
+    precisely what «تُقَدَّر عليه جميعُ الحركات» means, and why they carry `inflection:'maqsur'`. */
+ ghayr:Object.freeze({key:'ghayr',kind:ISTITHNA_TOOL_KINDS.noun,acc:'غَيْرَ',nom:'غَيْرُ',
+  inflection:'singular',en:'other than',nameAr:'اسْمُ اسْتِثْنَاءٍ',nameEn:'a noun of exception',
+  ruleId:'R_ISTITHNA_SIWA'}),
+ siwaKasr:Object.freeze({key:'siwaKasr',kind:ISTITHNA_TOOL_KINDS.noun,acc:'سِوَى',nom:'سِوَى',
+  inflection:'maqsur',en:'other than',nameAr:'اسْمُ اسْتِثْنَاءٍ',nameEn:'a noun of exception',
+  ruleId:'R_ISTITHNA_SIWA'}),
+ siwaDamm:Object.freeze({key:'siwaDamm',kind:ISTITHNA_TOOL_KINDS.noun,acc:'سُوَى',nom:'سُوَى',
+  inflection:'maqsur',en:'other than',nameAr:'اسْمُ اسْتِثْنَاءٍ',nameEn:'a noun of exception',
+  ruleId:'R_ISTITHNA_SIWA'}),
+ sawaa:Object.freeze({key:'sawaa',kind:ISTITHNA_TOOL_KINDS.noun,acc:'سَوَاءَ',nom:'سَوَاءُ',
+  inflection:'singular',en:'other than',nameAr:'اسْمُ اسْتِثْنَاءٍ',nameEn:'a noun of exception',
+  ruleId:'R_ISTITHNA_SIWA'}),
+ /* النوع الثالث — «ما يكون حرفاً تارة ويكون فعلاً تارة أخرى». One record per أداة carrying BOTH
+    identities, because the whole of p. 165 is that the two are available for the same word: the
+    reading is chosen by the frame and then proven, and the record can never supply one identity
+    while the frame is built on the other. */
+ khala:Object.freeze({key:'khala',kind:ISTITHNA_TOOL_KINDS.dual,surface:'خَلَا',gloss:'apart from',
+  verbRuleId:'R_ISTITHNA_KHALA_FIL',harfRuleId:'R_ISTITHNA_KHALA_HARF',
+  particleType:'istithnaKhalaHarf',
+  verbNameAr:'فِعْلٌ مَاضٍ',harfNameAr:'حَرْفُ خَفْضٍ وَاسْتِثْنَاءٍ',
+  nameEn:'an exceptive that is read either as a past verb or as a particle of khafḍ'}),
+ ada:Object.freeze({key:'ada',kind:ISTITHNA_TOOL_KINDS.dual,surface:'عَدَا',gloss:'apart from',
+  verbRuleId:'R_ISTITHNA_KHALA_FIL',harfRuleId:'R_ISTITHNA_KHALA_HARF',
+  particleType:'istithnaKhalaHarf',
+  verbNameAr:'فِعْلٌ مَاضٍ',harfNameAr:'حَرْفُ خَفْضٍ وَاسْتِثْنَاءٍ',
+  nameEn:'an exceptive that is read either as a past verb or as a particle of khafḍ'}),
+ hasha:Object.freeze({key:'hasha',kind:ISTITHNA_TOOL_KINDS.dual,surface:'حَاشَا',gloss:'apart from',
+  verbRuleId:'R_ISTITHNA_KHALA_FIL',harfRuleId:'R_ISTITHNA_KHALA_HARF',
+  particleType:'istithnaKhalaHarf',
+  verbNameAr:'فِعْلٌ مَاضٍ',harfNameAr:'حَرْفُ خَفْضٍ وَاسْتِثْنَاءٍ',
+  nameEn:'an exceptive that is read either as a past verb or as a particle of khafḍ'})
 }));
+/* The نفي that makes the speech منفي, as its own identity. p. 164 names it — «لتقدم «ما» النافية»
+   — and PHASE-9's rule applies with full force: the app already owns two other «مَا»s, the one
+   p. 108 makes زال's عمل depend on and «ما» المصدرية الظرفية, and neither may authorize an
+   exception regime. Same surface, three offices, three particleTypes, three source rules. */
+const ISTITHNA_MA_NAFIYA=Object.freeze({surface:'مَا',particleType:'istithnaMaNafiya',
+ ruleId:'R_ISTITHNA_MA_NAFIYA',gloss:'not',
+ nameAr:'حَرْفُ نَفْيٍ',nameEn:'a particle of negation'});
+/* «ما» المصدرية of p. 165, likewise its own identity: it is what removes the choice between the
+   verb and the ḥarf readings of خلا/عدا/حاشا, and it negates nothing. */
+const ISTITHNA_MA_MASDARIYYA=Object.freeze({surface:'مَا',particleType:'istithnaMaMasdariyya',
+ ruleId:'R_ISTITHNA_MA_MASDARIYYA',gloss:'apart from',
+ nameAr:'مَا الْمَصْدَرِيَّةُ',nameEn:'the maṣdar-forming mā, which enters only upon verbs'});
+/* «نفي أو شبهه» (p. 163), as a closed list of identities. The شرح names شبه النفي explicitly —
+   «النَّهْيُ، والاستفهام» — so an interrogative or prohibitive particle standing before the أداة
+   makes the speech منفي just as a plain negation does. Declared HERE rather than beside the
+   authorities that consult it, because the load-time verifier proves membership in it. */
+const ISTITHNA_NEGATION_PARTICLE_TYPES=Object.freeze([ISTITHNA_MA_NAFIYA.particleType,
+ 'maNafiyaKana','laNafiyaContext',
+ 'atfBalNegation','atfLakinNegation','atfAmQuestion','lan','lam']);
 /* The مستثنى itself, and the point of every one of them being an indefinite singular person: the
    source's own examples exclude ONE individual from a named group, and الاتصال — the مستثنى being
    genuinely part of the مستثنى منه — is checked pair by pair below. */
@@ -5197,26 +5334,177 @@ function mustathnaVerb(spec){
  if(!capability)throw new Error(`The istithnāʾ registry names an unknown intransitive capability: ${spec.capabilityKey}`);
  return Object.freeze({past:capability.past,pastEn:capability.pastEn});
 }
+/* Wave 6 — the transitive ʿāmil and the prepositional one the ناقص lanes need, resolved from the
+   app's OWN registered vocabulary rather than retyped. p. 164's third ḥāل turns on which ʿāmil
+   stands before «إلا», so this chapter needs one of each kind. */
+/* Every Arabic surface this chapter needs is LOOKED UP, never retyped — the byte policy that
+   Wave 5 learned the hard way. A frame names its object by its English gloss and the record comes
+   back from the app's own vocabulary, so a combining-mark difference is impossible rather than
+   merely unlikely. The ʿāmil must additionally LICENSE that object, which is the app's existing
+   semantic gate and is what keeps «قَرَأَ الْمَاءَ» out of the chapter. */
+function mustathnaObject(en){
+ const matches=singularThings.filter(item=>item.en===en);
+ if(matches.length!==1)throw new Error(`The istithnāʾ registry matched ${matches.length} object records for “${en}”.`);
+ return matches[0];
+}
+function mustathnaTransitiveVerb(verbEn,objectEn){
+ const matches=verbs.filter(item=>item.en===verbEn);
+ if(matches.length!==1)throw new Error(`The istithnāʾ registry matched ${matches.length} verb records for “${verbEn}”.`);
+ const lexeme=matches[0];
+ const registered=verbFormIndex.get(lexeme.past);
+ if(registered?.form!=='past')throw new Error(`The istithnāʾ registry names an unregistered transitive ʿāmil: ${verbEn}`);
+ const object=mustathnaObject(objectEn);
+ if(!Array.isArray(lexeme.obj)||!lexeme.obj.includes(object.acc)){
+  throw new Error(`The istithnāʾ ʿāmil “${verbEn}” does not license the object “${objectEn}”.`);
+ }
+ return Object.freeze({past:lexeme.past,pastEn:lexeme.pastEn,object});
+}
+function mustathnaPlace(en){
+ const matches=places.filter(item=>item.en===en);
+ if(matches.length!==1)throw new Error(`The istithnāʾ registry matched ${matches.length} place records for “${en}”.`);
+ return matches[0];
+}
 const MUSTATHNA_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
- /* «قَامَ الْقَوْمُ إِلَّا زَيْدًا» (p. 163) on this app's explicit-fāʿil past frame. The ʿāmils are
+ /* ── الحالة الأولى: تام موجب ───────────────────────────────────────────────────────────────
+    «قَامَ الْقَوْمُ إِلَّا زَيْدًا» (p. 163) on this app's explicit-fāʿil past frame. The ʿāmils are
     intransitive, so no مفعول به can stand beside the مستثنى and be confused with it. */
- studentsIlla:Object.freeze({toolKey:'illa',verb:Object.freeze({capabilityKey:'qaama'}),
+ studentsIlla:Object.freeze({regime:ISTITHNA_REGIMES.tammMujab,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'illa',verb:Object.freeze({capabilityKey:'qaama'}),
   wholeEn:'the students',mustathnaKey:'student',
   sentenceEn:'The students stood up except one student.'}),
- guestsIlla:Object.freeze({toolKey:'illa',verb:Object.freeze({capabilityKey:'jalasa'}),
+ guestsIlla:Object.freeze({regime:ISTITHNA_REGIMES.tammMujab,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'illa',verb:Object.freeze({capabilityKey:'jalasa'}),
   wholeEn:'the guests',mustathnaKey:'guest',
   sentenceEn:'The guests sat down except one guest.'}),
- menIlla:Object.freeze({toolKey:'illa',verb:Object.freeze({capabilityKey:'waqafa'}),
+ menIlla:Object.freeze({regime:ISTITHNA_REGIMES.tammMujab,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'illa',verb:Object.freeze({capabilityKey:'waqafa'}),
   wholeEn:'the men',mustathnaKey:'man',
   sentenceEn:'The men stood except one man.'}),
  /* «قَامَ الْقَوْمُ غَيْرَ زَيْدٍ» (p. 164): غَيْرَ carries the naṣb, its complement the khafḍ. */
- studentsGhayr:Object.freeze({toolKey:'ghayr',verb:Object.freeze({capabilityKey:'qaama'}),
+ studentsGhayr:Object.freeze({regime:ISTITHNA_REGIMES.tammMujab,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'ghayr',verb:Object.freeze({capabilityKey:'qaama'}),
   wholeEn:'the students',mustathnaKey:'student',
   sentenceEn:'The students stood up, all but one student.'}),
- guestsGhayr:Object.freeze({toolKey:'ghayr',verb:Object.freeze({capabilityKey:'jalasa'}),
+ guestsGhayr:Object.freeze({regime:ISTITHNA_REGIMES.tammMujab,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'ghayr',verb:Object.freeze({capabilityKey:'jalasa'}),
   wholeEn:'the guests',mustathnaKey:'guest',
-  sentenceEn:'The guests sat down, all but one guest.'})
+  sentenceEn:'The guests sat down, all but one guest.'}),
+ /* The other three أدوات of p. 162's second نوع, on that same first ḥāl — «نصبتها وجوباً على
+    الاستثناء» — so the learner meets all four of «ما يكون اسماً دائماً» and meets two of them
+    carrying an ESTIMATED sign, which is the only place in this app a noun does. */
+ menSiwaKasr:Object.freeze({regime:ISTITHNA_REGIMES.tammMujab,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'siwaKasr',verb:Object.freeze({capabilityKey:'waqafa'}),
+  wholeEn:'the men',mustathnaKey:'man',
+  sentenceEn:'The men stood, all but one man.'}),
+ studentsSiwaDamm:Object.freeze({regime:ISTITHNA_REGIMES.tammMujab,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'siwaDamm',verb:Object.freeze({capabilityKey:'qaada'}),
+  wholeEn:'the students',mustathnaKey:'student',
+  sentenceEn:'The students sat, all but one student.'}),
+ guestsSawaa:Object.freeze({regime:ISTITHNA_REGIMES.tammMujab,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'sawaa',verb:Object.freeze({capabilityKey:'jalasa'}),
+  wholeEn:'the guests',mustathnaKey:'guest',
+  sentenceEn:'The guests sat down, all but one guest.'}),
+ /* ── الحالة الثانية: تام منفي، وفيه رِوَايَتَانِ ─────────────────────────────────────────────
+    «مَا قَامَ الْقَوْمُ إِلَّا زَيْدٌ» و«إِلَّا زَيْدًا» (p. 164). The pair's `option` is the reading
+    this exercise TEACHES; the other is stated in the combined block, because the source's point is
+    that both are open, with the naṣb «على قلة». */
+ studentsIllaManfiBadal:Object.freeze({regime:ISTITHNA_REGIMES.tammManfi,option:ISTITHNA_OPTIONS.badal,
+  toolKey:'illa',verb:Object.freeze({capabilityKey:'qaama'}),
+  wholeEn:'the students',mustathnaKey:'student',
+  sentenceEn:'None of the students stood up but one student.'}),
+ guestsIllaManfiBadal:Object.freeze({regime:ISTITHNA_REGIMES.tammManfi,option:ISTITHNA_OPTIONS.badal,
+  toolKey:'illa',verb:Object.freeze({capabilityKey:'jalasa'}),
+  wholeEn:'the guests',mustathnaKey:'guest',
+  sentenceEn:'None of the guests sat down but one guest.'}),
+ studentsIllaManfiNasb:Object.freeze({regime:ISTITHNA_REGIMES.tammManfi,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'illa',verb:Object.freeze({capabilityKey:'qaama'}),
+  wholeEn:'the students',mustathnaKey:'student',
+  sentenceEn:'None of the students stood up except one student.'}),
+ menIllaManfiNasb:Object.freeze({regime:ISTITHNA_REGIMES.tammManfi,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'illa',verb:Object.freeze({capabilityKey:'waqafa'}),
+  wholeEn:'the men',mustathnaKey:'man',
+  sentenceEn:'None of the men stood except one man.'}),
+ /* «مَا يَزُورُنِي أَحَدٌ غيرُ الأخيارِ» أو «غَيْرَ الأخيارِ» (p. 164) — the same two readings for the
+    اسم أداة, on this app's past frame. In the إتباع reading غَيْرُ itself is the badal and takes
+    the rafʿ; its مضاف إليه stays مخفوض either way, which is «مجرور لا غير». */
+ studentsGhayrManfiBadal:Object.freeze({regime:ISTITHNA_REGIMES.tammManfi,option:ISTITHNA_OPTIONS.badal,
+  toolKey:'ghayr',verb:Object.freeze({capabilityKey:'qaama'}),
+  wholeEn:'the students',mustathnaKey:'student',
+  sentenceEn:'None of the students stood up but one student.'}),
+ guestsGhayrManfiNasb:Object.freeze({regime:ISTITHNA_REGIMES.tammManfi,option:ISTITHNA_OPTIONS.nasb,
+  toolKey:'ghayr',verb:Object.freeze({capabilityKey:'jalasa'}),
+  wholeEn:'the guests',mustathnaKey:'guest',
+  sentenceEn:'None of the guests sat down except one guest.'})
 }));
+/* ── الحالة الثالثة: الكلام الناقص ────────────────────────────────────────────────────────────
+   A SEPARATE registry, because these frames have a different shape and a different claim: there is
+   no مستثنى منه to name, and the noun after «إلا» is not a مستثنى at all. Each frame declares the
+   ʿāmil standing before «إلا» and the role that ʿāmil imposes — «على حسب ما قبل إلا من العوامل» —
+   and the builder resolves both back to registered records.
+
+   p. 164's three examples, one per ʿāmil: «مَا حَضَرَ إِلَّا عَلِيٌّ» (رفع على الفاعلية), «مَا رَأَيْتُ
+   إِلَّا عَلِيًّا» (نصب على المفعولية), «مَا مَرَرْتُ إِلَّا بِزَيْدٍ» (جرّ بحرف الجر). */
+const ISTITHNA_NAQIS_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ faailStudent:Object.freeze({role:'faail',verb:Object.freeze({capabilityKey:'qaama'}),
+  nounKey:'student',prep:'',
+  sentenceEn:'Nobody stood up but one student.'}),
+ faailGuest:Object.freeze({role:'faail',verb:Object.freeze({capabilityKey:'jalasa'}),
+  nounKey:'guest',prep:'',
+  sentenceEn:'Nobody sat down but one guest.'}),
+ /* Every word here is named by its English and looked up in the app's own vocabulary; nothing in
+    this chapter is hand-typed Arabic that already exists somewhere else in the file. */
+ objectBook:Object.freeze({role:'object',verbEn:'read',subjectEn:'the student',
+  objectEn:'the book',prep:'',
+  sentenceEn:'The student read nothing but the book.'}),
+ objectLesson:Object.freeze({role:'object',verbEn:'memorize',subjectEn:'the student',
+  objectEn:'the lesson',prep:'',
+  sentenceEn:'The student memorized nothing but the lesson.'}),
+ majrurMosque:Object.freeze({role:'majrur',verb:Object.freeze({capabilityKey:'jalasa'}),
+  subjectEn:'the students',placeEn:'the mosque',prep:'فِي',
+  sentenceEn:'The students sat down nowhere but in the mosque.'}),
+ majrurLibrary:Object.freeze({role:'majrur',verb:Object.freeze({capabilityKey:'qaada'}),
+  subjectEn:'the men',placeEn:'the library',prep:'فِي',
+  sentenceEn:'The men sat nowhere but in the library.'})
+}));
+const ISTITHNA_NAQIS_ALL_KEYS=Object.freeze(Object.keys(ISTITHNA_NAQIS_REGISTRY));
+/* ── النوع الثالث: خلا، عدا، حاشا ─────────────────────────────────────────────────────────────
+   Also its own registry, and also because the CLAIM differs: p. 165 does not make these an ordinary
+   exception with a settled case at all. Each frame declares which of the two readings it teaches,
+   and whether «ما» المصدرية precedes — which is what makes the naṣb obligatory instead of optional.
+   The مستثنى منه is present in all of them, exactly as the source's own «قَامَ الْقَوْمُ خَلَا زَيْدًا،
+   وَزَيْدٍ» has it. */
+const ISTITHNA_KHALA_READINGS=Object.freeze({fil:'fil',harf:'harf'});
+const ISTITHNA_KHALA_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ studentsKhalaFil:Object.freeze({toolKey:'khala',reading:ISTITHNA_KHALA_READINGS.fil,masdariyya:false,
+  verb:Object.freeze({capabilityKey:'qaama'}),wholeEn:'the students',mustathnaKey:'student',
+  sentenceEn:'The students stood up, one student apart.'}),
+ guestsAdaFil:Object.freeze({toolKey:'ada',reading:ISTITHNA_KHALA_READINGS.fil,masdariyya:false,
+  verb:Object.freeze({capabilityKey:'jalasa'}),wholeEn:'the guests',mustathnaKey:'guest',
+  sentenceEn:'The guests sat down, one guest apart.'}),
+ menHashaFil:Object.freeze({toolKey:'hasha',reading:ISTITHNA_KHALA_READINGS.fil,masdariyya:false,
+  verb:Object.freeze({capabilityKey:'waqafa'}),wholeEn:'the men',mustathnaKey:'man',
+  sentenceEn:'The men stood, one man apart.'}),
+ studentsKhalaHarf:Object.freeze({toolKey:'khala',reading:ISTITHNA_KHALA_READINGS.harf,masdariyya:false,
+  verb:Object.freeze({capabilityKey:'qaama'}),wholeEn:'the students',mustathnaKey:'student',
+  sentenceEn:'The students stood up, one student apart.'}),
+ guestsAdaHarf:Object.freeze({toolKey:'ada',reading:ISTITHNA_KHALA_READINGS.harf,masdariyya:false,
+  verb:Object.freeze({capabilityKey:'jalasa'}),wholeEn:'the guests',mustathnaKey:'guest',
+  sentenceEn:'The guests sat down, one guest apart.'}),
+ menHashaHarf:Object.freeze({toolKey:'hasha',reading:ISTITHNA_KHALA_READINGS.harf,masdariyya:false,
+  verb:Object.freeze({capabilityKey:'waqafa'}),wholeEn:'the men',mustathnaKey:'man',
+  sentenceEn:'The men stood, one man apart.'}),
+ /* «قام القوم ما خلا زيداً» — «لا يجوز فيه إلا نصب زيد» (p. 165). */
+ studentsMaKhala:Object.freeze({toolKey:'khala',reading:ISTITHNA_KHALA_READINGS.fil,masdariyya:true,
+  verb:Object.freeze({capabilityKey:'qaama'}),wholeEn:'the students',mustathnaKey:'student',
+  sentenceEn:'The students stood up, one student apart.'}),
+ guestsMaAda:Object.freeze({toolKey:'ada',reading:ISTITHNA_KHALA_READINGS.fil,masdariyya:true,
+  verb:Object.freeze({capabilityKey:'jalasa'}),wholeEn:'the guests',mustathnaKey:'guest',
+  sentenceEn:'The guests sat down, one guest apart.'}),
+ menMaHasha:Object.freeze({toolKey:'hasha',reading:ISTITHNA_KHALA_READINGS.fil,masdariyya:true,
+  verb:Object.freeze({capabilityKey:'waqafa'}),wholeEn:'the men',mustathnaKey:'man',
+  sentenceEn:'The men stood, one man apart.'})
+}));
+const ISTITHNA_KHALA_ALL_KEYS=Object.freeze(Object.keys(ISTITHNA_KHALA_REGISTRY));
 const MUSTATHNA_ALL_PAIR_KEYS=Object.freeze(Object.keys(MUSTATHNA_PAIR_REGISTRY));
 /* Productive «لا» النافية للجنس — Al-Tuḥfah pp. 166–168 (باب لا; المنادى begins p. 168).
 
@@ -6116,7 +6404,16 @@ const GRAMMAR_SIGN_SOURCE=Object.freeze({
  /* J2 — the third jazm sign. Al-Tuḥfah p. 57's matn: «وَأَمَّا الْحَذْفُ فَيَكُونُ عَلَامَةً لِلْجَزْمِ
     فِي الْفِعْلِ الْمُضَارِعِ الْمُعْتَلِّ الْآخِرِ، وَفِي الْأَفْعَالِ الْخَمْسَةِ». Two places, one matn
     sign — so ḥadhf al-nūn above and this one are siblings, and neither may stand for the other. */
- hadhfIllah:{id:'hadhfIllah',ar:'حَذْفُ حَرْفِ الْعِلَّةِ',en:'deletion of the weak letter'}
+ hadhfIllah:{id:'hadhfIllah',ar:'حَذْفُ حَرْفِ الْعِلَّةِ',en:'deletion of the weak letter'},
+ /* Wave 6 — the ONE noun sign this app estimates. p. 21 states the doctrine and names the word:
+    «فما كان آخره ألفاً لازمة تُقَدَّر عليه جميعُ الحركات للتعذر، ويسمى الاسمُ المنتهي بالألف
+    مقصوراً». «سِوَى» and «سُوَى» — two of the four أدوات p. 162 makes «اسماً دائماً» — end in
+    exactly that permanent alif, so the naṣb p. 164 gives them can only ever be estimated. Only
+    naṣb is registered because only naṣb is produced; p. 21's «جميع الحركات» would license the
+    other two, and neither is claimed until a lane actually renders it. */
+ fathaMuqaddaraTaadhdhur:{id:'fathaMuqaddaraTaadhdhur',
+  ar:'فَتْحَةٌ مُقَدَّرَةٌ عَلَى الْأَلِفِ مَنَعَ مِنْ ظُهُورِهَا التَّعَذُّرُ',
+  en:'an estimated fatḥah at the end, prevented from appearing by taʿadhdhur'}
 });
 /* Phase 3B0-pre hardening — the registry is rebuilt as a NULL-PROTOTYPE store of DEEPLY FROZEN
    records. Two separate defects made the previous shape unsafe:
@@ -8040,6 +8337,10 @@ function componentInstanceError(c,ownerId,index){
 }
 const PAST_MORPHOLOGY=Object.freeze({
  '3ms':Object.freeze({tense:'past',person:'3ms',subjectMode:'contextual',endingClass:'none',binaaClass:'visible-fath',feminineTaa:false}),
+ /* Wave 6 — the same third-person masculine past, but for a verb whose last letter is a permanent
+    alif: خَلَا، عَدَا، حَاشَا on the verb reading p. 165 gives them. Everything about the PERSON is
+    3ms's; only the bināʾ marker differs, and it differs for the reason p. 21 states. */
+ '3ms-alif-lazima':Object.freeze({tense:'past',person:'3ms-alif-lazima',subjectMode:'contextual',endingClass:'none',binaaClass:'estimated-fath-taadhdhur',feminineTaa:false}),
  '3fs-explicit':Object.freeze({tense:'past',person:'3fs-explicit',subjectMode:'explicit',endingClass:'taa-taniith',binaaClass:'visible-fath',feminineTaa:true}),
  '1s':Object.freeze({tense:'past',person:'1s',subjectMode:'attached',endingClass:'taa-fail-1s',binaaClass:'estimated-fath-incidental-sukun',feminineTaa:false}),
  '2ms':Object.freeze({tense:'past',person:'2ms',subjectMode:'attached',endingClass:'taa-fail-2ms',binaaClass:'estimated-fath-incidental-sukun',feminineTaa:false}),
@@ -8075,7 +8376,9 @@ const PAST_ENDING_COMPONENTS=Object.freeze({
 const PAST_BINAA_RULE_IDS=Object.freeze({
  'visible-fath':'R_PAST_FATH_VISIBLE',
  'estimated-fath-munasabah':'R_PAST_FATH_EST_MUNASABAH',
- 'estimated-fath-incidental-sukun':'R_PAST_FATH_EST_INCIDENTAL_SUKUN'
+ 'estimated-fath-incidental-sukun':'R_PAST_FATH_EST_INCIDENTAL_SUKUN',
+ // Wave 6 — the fourth class, for a past verb ending in a permanent alif (p. 21).
+ 'estimated-fath-taadhdhur':'R_PAST_FATH_EST_TAADHDHUR'
 });
 const PRESENT_MORPHOLOGY=Object.freeze({
  '3ms':Object.freeze({tense:'present',person:'3ms',subjectMode:'contextual',formClass:'ordinary',endingClass:'none'}),
@@ -8817,7 +9120,12 @@ function authoritativeVerbMorphology(token,data=null){
  const base=PAST_MORPHOLOGY[person];
  if(!base)return{registered:false,feminineTaa:false};
  const result={...base,registered:true};
- if(person==='3ms'){
+ /* `contextual` is not an answer — it means the answer is in the sentence. Whether a third-person
+    masculine past has an explicit fāʿil or a concealed one is settled by whether one actually
+    follows it, never by the token. Wave 6 keys this on the MODE rather than on the person '3ms'
+    literal, so خَلَا/عَدَا/حَاشَا — a third-person masculine past under a different bināʾ class —
+    are resolved by the same structural question rather than falling through with no mode at all. */
+ if(base.subjectMode==='contextual'){
   const tokens=data?.tokens||[];
   const index=tokens.indexOf(token);
   const explicit=index>=0&&tokens.slice(index+1).some(candidate=>candidate?.grammar?.role==='faail');
@@ -9475,7 +9783,12 @@ const GRAMMAR_RULES=Object.freeze({
   dual:{raf:['alif','R_DUAL_RAF_ALIF'],nasb:['ya','R_DUAL_NASB_YA'],jarr:['ya','R_DUAL_JARR_YA']},
   smp:{raf:['waw','R_SMP_RAF_WAW'],nasb:['ya','R_SMP_NASB_YA'],jarr:['ya','R_SMP_JARR_YA']},
   sfp:{raf:['damma','R_SFP_RAF_DAMMA'],nasb:['kasraSub','R_SFP_NASB_KASRA'],jarr:['kasra','R_SFP_JARR_KASRA']},
-  fiveNouns:{raf:['waw','R_FIVE_NOUNS_RAF_WAW'],nasb:['alif','R_FIVE_NOUNS_NASB_ALIF'],jarr:['ya','R_FIVE_NOUNS_JARR_YA']}
+  fiveNouns:{raf:['waw','R_FIVE_NOUNS_RAF_WAW'],nasb:['alif','R_FIVE_NOUNS_NASB_ALIF'],jarr:['ya','R_FIVE_NOUNS_JARR_YA']},
+  /* Wave 6 — الاسم المقصور (p. 21). NASB ONLY, deliberately: «سِوَى» and «سُوَى» reach this app
+     in exactly one state, the naṣb على الاستثناء of p. 164, and a rafʿ or khafḍ cell here would
+     be a claim about signs no lane renders. Asking for one throws in inflectNoun, which is the
+     intended answer rather than a gap. */
+  maqsur:{nasb:['fathaMuqaddaraTaadhdhur','R_MAQSUR_NASB_FATHA_MUQADDARA']}
  },
  presentVerb:{
   regular:{raf:['damma','R_MUDARI_RAF_DAMMA'],nasb:['fatha','R_MUDARI_NASB_FATHA'],jazm:['sukun','R_MUDARI_JAZM_SUKUN']},
@@ -9607,7 +9920,13 @@ const PROCLITIC_PARTICLE_TYPES=Object.freeze([WAW_MAIYYA_TYPE,KAY_TALIL_LAM.part
    shipped before Wave 1 (إِلَى، عَلَى، عَنْ، فِي) keep the generic type and are untouched; the
    structural machinery — the جار ومجرور relationship, the orphan checks, the attachment analysis —
    asks this predicate rather than testing for one hard-coded type, so both lanes go down one path. */
-const KHAFD_PARTICLE_TYPES=Object.freeze(['preposition',...Object.values(KHAFD_PARTICLE_REGISTRY).map(record=>record.particleType)]);
+/* Wave 6 — the ḥarf reading of خلا/عدا/حاشا joins this list because it genuinely governs khafḍ
+   («وإن قدَّرتهن حروفاً خفضت ما بعدها على أنه مجرور بها», p. 165), so the جار ومجرور link, the
+   orphan checks and the attachment analysis must all see it. It is NOT a member of
+   KHAFD_PARTICLE_REGISTRY: that registry is باب المخفوضات' own closed list of حروف الخفض, and
+   p. 174's list does not contain these three. */
+const KHAFD_PARTICLE_TYPES=Object.freeze(['preposition',
+ ...Object.values(KHAFD_PARTICLE_REGISTRY).map(record=>record.particleType),'istithnaKhalaHarf']);
 const isKhafdParticleType=type=>KHAFD_PARTICLE_TYPES.includes(type);
 /* Global ownership for particle source rules. Each particle type owns exactly one rule, and the
    governor rules are owned so tightly that no other token may carry them at all — a forged
@@ -9625,6 +9944,12 @@ const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA
  [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,
  maNafiyaKana:'R_MA_NAFIYA_KANA',maMasdariyyaZarfiyya:'R_MA_MASDARIYYA_ZARFIYYA',laNafiyaContext:'R_LA_NAFIYA_CONTEXT',
+ /* Wave 6 — PHASE 9 in one line. «مَا» now wears four different identities in this app and each
+    owns exactly one rule, so the نفي that makes an exception منفي can never be authorized by
+    p. 108's kāna-sister condition or by مَا المصدرية الظرفية, nor they by it. */
+ [ISTITHNA_MA_NAFIYA.particleType]:ISTITHNA_MA_NAFIYA.ruleId,
+ [ISTITHNA_MA_MASDARIYYA.particleType]:ISTITHNA_MA_MASDARIYYA.ruleId,
+ istithnaKhalaHarf:'R_ISTITHNA_KHALA_HARF',
  ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
  ...Object.fromEntries(Object.values(ATF_CONTEXT_PARTICLES).map(item=>[item.particleType,item.ruleId])),
  /* Wave 1 — each khafḍ identity owns exactly ONE source rule. Without this the two «بِ» identities
@@ -9639,6 +9964,10 @@ const PARTICLE_EXCLUSIVE_RULE_IDS=Object.freeze(['G_LAN_NASB','G_LAM_JAZM','G_SA
  'G_LAMMA_JAZM','G_LAM_AMR_JAZM','G_LA_NAHIYA_JAZM','G_LAM_DUAA_JAZM','G_LA_DUAA_JAZM',
  ...Object.values(CONDITION_GOVERNORS).map(item=>item.ruleId),HAMZAT_TAQRIR.ruleId,
  'R_MA_NAFIYA_KANA','R_LA_NAFIYA_CONTEXT',
+ // Wave 6 — the two مَا identities of this chapter are owned as tightly as every other مَا, and so
+ // is the ḥarf reading of خلا وأخواتها: the noun it governs carries R_HARF_JARR like any other
+ // مخفوض, so nothing but the أداة itself has business naming this rule.
+ ISTITHNA_MA_NAFIYA.ruleId,ISTITHNA_MA_MASDARIYYA.ruleId,'R_ISTITHNA_KHALA_HARF',
  ...new Set(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>item.ruleId)),
  ...Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>item.ruleId)]);
 function particleRuleOwnerFailure(token){
@@ -9666,15 +9995,26 @@ const ROLE_RULE_VARIANTS=Object.freeze(Object.assign(Object.create(null),{
  munada:Object.freeze(['R_MUNADA_MABNI']),
  haal:Object.freeze(['R_HAAL_ISTIFHAM_MABNI']),
  naat:Object.freeze(['R_NAAT_SABABI']),
- mubtada:Object.freeze(['R_ISM_ISHARA_MABNI'])
+ mubtada:Object.freeze(['R_ISM_ISHARA_MABNI']),
+ /* Wave 6 — الاستثناء pp. 163–164. Two more variants, and both are the SOURCE's own second
+    reading of a role it already owns, exactly as سببي is for the naʿt:
+      · mustathnā — R_MUSTATHNA_NASB states the وجوب of the first ḥāl in its own words, so the
+        permissible naṣb of the second («ويجوز فيه على قلةٍ») cannot borrow it.
+      · badal — R_BADAL is the badal chapter's agreement rule; the إتباع على البدلية of p. 164 is
+        licensed by the EXCEPTION, and which of the two a token carries is re-derived from whether
+        the frame proves an exception, never from the rule it happens to name. */
+ mustathna:Object.freeze(['R_MUSTATHNA_NASB_TAMM_MANFI']),
+ badal:Object.freeze(['R_MUSTATHNA_BADAL_TAMM_MANFI'])
 }));
 const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
- noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr']},
+ noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr'],
+  // p. 21's مقصور reaches production in one state only; see GRAMMAR_RULES.nounInflection.maqsur.
+  maqsur:['nasb']},
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],weakFinal:['jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
  roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','mafulAjl','mafulMaah','mafulAwwal','mafulThani','munada','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','naatSababiMarfu','atf','tawkid','badal'],
- relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','laJins','mafulAjl','mafulMaah','zanna','nida','preposition','idafa','inna','kana','concealedAn','follower','condition'],
+ relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','istithnaNaqis','istithnaKhala','laJins','mafulAjl','mafulMaah','zanna','nida','preposition','idafa','inna','kana','concealedAn','follower','condition'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
     productive, and البدل now produces بدل الكل، بدل البعض، بدل الاشتمال and the spoken-slip ضرب of
@@ -9972,7 +10312,21 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_LA_JINS_CONDITIONS:sourceRule('«لا» governs obligatorily on four conditions: its noun is indefinite, its noun is joined to it with no separator, its khabar is indefinite too, and «لا» is not repeated.',[166,167],'All four are proven structurally on the token graph: definiteness by surface, adjacency by position, and repetition by counting the particle. Losing any one refuses the exercise rather than re-analysing it.'),
  R_MUSTATHNA_NASB:sourceRule('A noun excepted by إلا is accusative on istithnāʾ when the preceding speech is complete and affirmative; the excepting noun غير takes that same ruling, and what follows غير is khafḍ by its iḍāfah.',[162,163,164],'Only the first of the three أحوال — the one the source makes obligatory. Registered pairs name the ʿāmil, the mustathnā minhu, the أداة and the excluded individual, and الاتصال is checked so nothing is excepted from a group it does not belong to.'),
  R_ISTITHNA_CONDITIONS:sourceRule('Speech is complete (tāmm) when the mustathnā minhu is mentioned in it, and affirmative (mūjab) when no negation — nor its likeness, prohibition and interrogation — precedes it; only then is naṣb on istithnāʾ obligatory.',[163],'Both conditions are proven structurally: the mustathnā minhu is the pair’s own marfūʿ fāʿil, and no negating, prohibiting or interrogative particle may stand before the أداة. When either fails the exercise is refused rather than re-analysed.'),
- R_ISTITHNA_ILLA:sourceRule('إلا is a particle of exception; it is built and has no syntactic position of its own.',[162,163],'Only the registered exception constructions of the first ḥāl. It is deliberately absent from the governor table: it makes the noun after it accusative on istithnāʾ, and governs no verb.'),
+ R_ISTITHNA_ILLA:sourceRule('إلا is a particle of exception; it is built and has no syntactic position of its own.',[162,163],'Only the registered exception constructions this app produces — the first ḥāl of p. 163, the second ḥāl of p. 164 in both of its readings, and the third. It is deliberately absent from the governor table: where it makes the noun after it accusative it does so على الاستثناء, and it governs no verb.'),
+ /* ── Wave 6 — باب الاستثناء, pp. 162–165 ─────────────────────────────────────────────────────
+    p. 163 gives the noun after «إلا» «ثَلَاثَةَ أَحْوَالٍ», and the whole chapter hangs on which one
+    the SPEECH BEFORE the أداة puts you in. The three rules below are that division, one rule per
+    ḥāl, deliberately not merged: R_MUSTATHNA_NASB already states the first as وجوب, and folding
+    the second into it would tell the learner that «منصوب» is simply what follows «إلا». */
+ R_MUSTATHNA_NASB_TAMM_MANFI:sourceRule('When the preceding speech is complete but negated, naṣb on istithnāʾ stays permissible — the source calls it the lesser of the two readings («ويجوز فيه على قلةٍ النصبُ على الاستثناءِ»), beside the إتباع on badaliyyah.',[163,164],'Only a registered tāmm-manfī pair whose نفي token is actually present before the أداة and whose مستثنى منه is the pair’s own marfūʿ fāʿil. It is the naṣb HALF of p. 164’s second ḥāl and claims nothing about the first: a مُوجَب frame may not cite it, and it may not be cited where the مستثنى منه is absent.'),
+ R_MUSTATHNA_BADAL_TAMM_MANFI:sourceRule('When the preceding speech is complete but negated, the noun after إلا may instead follow what precedes إلا as a badal from it — «لأن المستثنى منه مرفوع، وبدل المرفوع مرفوع».',[163,164],'Only a registered tāmm-manfī pair in its badal reading. The source names the إتباع «على البَدَلية» and settles the case by the mubdal minhu’s own case; it assigns the exception no قسم of badal, and none of p. 136’s four ḍawābiṭ fits — بدل الكل requires the badal to be عين المبدل منه, and بدل البعض and بدل الاشتمال each require a ضمير عائد this construction has none of — so no kind label is rendered and none is invented.'),
+ R_ISTITHNA_NAQIS_AWAMIL:sourceRule('When the preceding speech is incomplete — the mustathnā minhu not mentioned at all, which the source says can only happen under negation — the noun after إلا is inflected «على حسب ما قبل إلا من العوامل»: raised as a fāʿil, made accusative as a mafʿūl bihi, or put in khafḍ by a particle of khafḍ, exactly as the ʿāmil demands.',[163,164],'Only a registered nāqiṣ frame: a نفي token before the ʿāmil, a canonical إلا, NO مستثنى منه anywhere in the frame, and the noun after إلا carrying the ordinary role its own ʿāmil gives it. The noun is never given the مستثنى role and never cites R_MUSTATHNA_NASB — that is the whole content of the third ḥāl.'),
+ R_ISTITHNA_MA_NAFIYA:sourceRule('Mā is a particle of negation; it is what makes the speech before إلا manfī rather than mūjab. p. 164 names it in as many words — «والكلام مع ذلك منفيٌّ لتقدم «ما» النافية» — and p. 115 parses it «حرف نفي مبني على السكون لا محل له من الإعراب».',[115,163,164],'Only canonical مَا standing at the head of a registered باب الاستثناء frame, immediately before that frame’s past ʿāmil. It is a SEPARATE identity from the مَا of p. 108 whose sisters’ عمل depends on it and from مَا المصدرية الظرفية: same surface, different office, and neither may authorize the other’s construction.'),
+ R_ISTITHNA_MA_MASDARIYYA:sourceRule('When «ما» المصدرية precedes خلا, عدا or حاشا the noun after them must be accusative, because «ما» المصدرية enters only upon verbs, so the أداة is a verb البتة.',[165],'Only canonical مَا immediately before a registered خلا/عدا/حاشا token in the verb reading of that frame. It removes the choice p. 165 otherwise gives; it does not itself govern the noun, which stays a مفعول به of the أداة.'),
+ R_ISTITHNA_SIWA:sourceRule('سِوَى, سُوَى, سَوَاء and غَيْر are nouns of exception: what follows one of them is in khafḍ by its iḍāfah — «مجرور لا غير» — while the أداة itself takes the ruling the noun after إلا would have had.',[162,164,165],'Only the registered members of p. 162’s second نوع («ما يكون اسماً دائماً»), each as the muḍāf of its own frozen pair. The أداة’s own state is decided by the frame’s regime and never by the word: the same four take naṣb obligatorily in a تام موجب frame and follow ما قبلها in the other two ḥāls.'),
+ R_ISTITHNA_KHALA_FIL:sourceRule('خلا, عدا and حاشا may be reckoned verbs, and then what follows them is a mafʿūl bihi accusative, their fāʿil being a pronoun concealed obligatorily.',[162,165],'Only the verb reading of a registered خلا/عدا/حاشا frame. p. 162 puts the three in a نوع of their own — «ما يكون حرفاً تارة ويكون فعلاً تارة أخرى» — and p. 165 draws the consequence: «فإن قدَّرتَهُنَّ أفعالاً نَصَبْتَ ما بعدها على أنه مفعول به، والفاعل ضمير مستتر وجوباً».'),
+ R_ISTITHNA_KHALA_HARF:sourceRule('خلا, عدا and حاشا may instead be reckoned particles of khafḍ, and then what follows them is makhfūḍ by them.',[162,165],'Only the ḥarf reading of a registered خلا/عدا/حاشا frame, and never where «ما» المصدرية precedes: p. 165 makes that reading impossible there. «وإن قدَّرتهن حروفاً خفضت ما بعدها».'),
+ R_MAQSUR_NASB_FATHA_MUQADDARA:sourceRule('A noun ending in a permanent alif is called maqṣūr, and every vowel is estimated on it because taʿadhdhur prevents it from appearing.',[21],'Only the two registered maqṣūr أدوات of this chapter, سِوَى and سُوَى, and only in naṣb — the one state p. 164 gives them in a frame this app produces. It authorizes the SIGN alone: the state is the role’s, and no other noun may cite it.'),
  R_TAMYIZ_NASB:sourceRule('A tamyīz is the plain accusative noun that interprets what was left vague, whether the vagueness is in an entity or in a relation.',[157,158],'Only a registered indefinite accusative named by a frozen productive pair, standing last after an ʿāmil that already has its explicit fāʿil. Being indefinite and accusative never makes a noun a tamyīz on its own.'),
  R_TAMYIZ_DHAT:sourceRule('Tamyīz al-dhāt, also called tamyīz al-mufrad, lifts the vagueness off a noun named before it whose reality is left unstated; it follows a number or a measure of weight, volume or area.',[158],'Only the measures of weight and volume registered here, each clarified by the exact noun its frozen pair names. Numbers and areas are not produced: the counting frame needs number morphology this engine does not model.'),
  R_TAMYIZ_NISBAH:sourceRule('Tamyīz al-nisbah, also called tamyīz al-jumlah, lifts the vagueness off a relation stated in the clause before it; it is either transformed from an original fāʿil, mafʿūl or mubtadaʾ, or not transformed at all.',[158,159],'Only the untransformed (غير محوَّل) kind, on frozen pairs whose ʿāmil already governs a definite object, so no omitted-muḍāf original has to be claimed. All three transformed kinds remain deferred.'),
@@ -10123,6 +10477,12 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_PASSIVE_PAST_FORM:sourceRule('A past verb is changed to the passive by ḍamm on its first letter and kasr on the letter before its last.',[96,97,98],'Only the explicit passive-past surfaces in PASSIVE_VERB_CAPABILITIES; no string transformation is performed.'),
  R_PAST_FATH_EST_MUNASABAH:sourceRule('A past verb attached to wāw al-jamāʿah has estimated fatḥ because the position is occupied by the vowel of munāsabah.',[71,72],'Generated scope: explicitly stored third-person masculine-plural past forms only.'),
  R_PAST_FATH_EST_INCIDENTAL_SUKUN:sourceRule('A past verb attached to a moving rafʿ pronoun has estimated fatḥ whose appearance is prevented by incidental sukūn, avoiding four successive vowels in what is like one word.',[72],'Generated scope: explicitly stored 1s, 2ms, 2fs, 1p, and 3fp past forms only.'),
+ /* Wave 6 — the fourth past bināʾ class. p. 20 states the doctrine of the estimated mark and names
+    its three preventers; p. 21 assigns the permanent alif to the first of them in as many words —
+    «فما كان آخره ألفاً لازمة تُقَدَّر عليه جميعُ الحركات للتعذر» — and «جميع الحركات» is what lets it
+    reach a bināʾ fatḥah and not only an iʿrāb sign. كان's two weak-final sisters already cite the
+    same reasoning under their own rule; this is that reasoning for an ordinary past verb. */
+ R_PAST_FATH_EST_TAADHDHUR:sourceRule('A past verb ending in a permanent alif is built on an estimated fatḥah whose appearance taʿadhdhur prevents.',[20,21,71,165],'Only the three registered exceptive أدوات خَلَا, عَدَا and حَاشَا, and only on the verb reading p. 165 gives them. It authorizes the bināʾ marker alone; كان’s weak-final sisters keep their own rule, because their deficiency is a separate claim.'),
  C_WAW_JAMAAH_FAIL:sourceRule('Wāw al-jamāʿah is a connected pronoun built on sukūn, in the place of rafʿ as the fāʿil.',[38,67,71,72,91],'Workspace scan p.38 directly analyzes the present-attached wāw as a fāʿil built on sukūn in the position of rafʿ; p.72 gives the parallel past analysis, and pp.67 and 91 attest the existing five-verb path.'),
  C_TAA_TANIITH_SAKINA:sourceRule('The sākinah tāʾ of the past verb is a ḥarf that marks its subject noun as feminine; it is not the fāʿil and has no place in iʿrāb.',[15,16,88,91],'Workspace scan: the sākinah tāʾ enters only the past verb and marks «the noun to which the verb is attributed» as feminine — «قَالَتْ عَائِشَةُ», where عَائِشَةُ is the fāʿil, not the tāʾ (p.15); it is sākinah in its original form (p.16). The explicit feminine fāʿil is a following noun, «حَضَرَتْ هِنْدٌ» (p.88), while «ضَرَبَتْ» is the هي form whose subject is a hidden pronoun, not the tāʾ (p.91).'),
  C_TAA_FAIL_1S:sourceRule("The 1s subject tāʾ is the mutakallim pronoun: a connected pronoun built on ḍamm in the position of rafʿ as fāʿil.",[72,91,157],"Only an explicitly registered 1s past form ending in تُ. p.157’s model iʿrāb names this very tāʾ «ضمير المتكلم فاعل، مبني على الضم في محل رفع»; p.91 lists «ضربتُ» as ضمير المتكلم الواحد."),
@@ -10293,7 +10653,13 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  RL_VERB_MAFUL_MAAH:sourceRule('A verb is linked to the companion the action happened alongside, and to the doer that performed it.',[172,173],'Only an exact frozen pair owned by its template, whose companion is registered as unable to share the act.'),
  RL_VERB_MAFUL_AJL:sourceRule('A verb is linked to the inward maṣdar that gives the reason it happened, and to the doer whose motive it is.',[170,171],'Only an exact frozen pair owned by its template; the motive must share the ʿāmil’s time and its doer.'),
  RL_LA_JINS_NOUN_KHABAR:sourceRule('«لا» that negates a whole class is linked to the noun it makes accusative and to the khabar it makes nominative.',[166,167],'Only an exact frozen pair owned by its template; adjacency alone never creates the relation.'),
- RL_ISTITHNA_EXCLUSION:sourceRule('A registered mustathnā is linked to the ʿāmil that makes it accusative, to the mustathnā minhu it is excluded from, and to the أداة that excludes it.',[162,163,164],'Only an exact frozen pair owned by its template. The mustathnā minhu is named structurally as the pair’s fāʿil, never as the nearest preceding noun.'),
+ RL_ISTITHNA_EXCLUSION:sourceRule('A registered mustathnā is linked to the ʿāmil it stands under, to the mustathnā minhu it is excluded from, and to the أداة that excludes it.',[162,163,164],'Only an exact frozen pair owned by its template, in either of the two TĀMM regimes — the mūjab one of p. 163 and the manfī one of p. 164, in both of that one’s readings. The mustathnā minhu is named structurally as the pair’s fāʿil, never as the nearest preceding noun.'),
+ /* Wave 6 — the third ḥāl has no exclusion link to draw, because it has no مستثنى منه. Giving it
+    RL_ISTITHNA_EXCLUSION would have asserted a participant the frame deliberately lacks, so the
+    relationship it does have — أداة, ʿāmil, and the noun the ʿāmil governs THROUGH the أداة — is
+    its own type with its own rule. */
+ RL_ISTITHNA_NAQIS_AWAMIL:sourceRule('In an incomplete exception the noun after إلا is linked to the ʿāmil standing before إلا, which governs it exactly as it would have governed it had إلا not been there.',[163,164],'Only a registered nāqiṣ frame whose مستثنى منه is genuinely absent. The link names the ʿāmil and the role it imposes; it asserts no مستثنى منه and no exclusion.'),
+ RL_ISTITHNA_KHALA_CHOICE:sourceRule('A noun excepted by خلا, عدا or حاشا is linked to that أداة under the reading the frame takes, and to the ʿāmil and the mustathnā minhu of the clause around it; both readings remain open unless «ما» المصدرية precedes.',[162,165],'Only a registered خلا frame. The link records WHICH reading is on screen and whether «ما» المصدرية has closed the other; it never records a settled case for the word, because p. 165 gives it none until the reading is chosen.'),
  RL_TAMYIZ_MUBAYYAN:sourceRule('A registered tamyīz is linked to the ʿāmil that makes it accusative and, when it is a tamyīz al-dhāt, to the vague noun it interprets.',[157,158,159],'Only an exact frozen pair owned by its template. A tamyīz al-nisbah is linked to its ʿāmil alone, because the vagueness it lifts belongs to the relation rather than to any one token; adjacency never creates either link.'),
  RL_HAAL_OWNER:sourceRule('A registered haal is linked to the event that makes it accusative and to the definite صاحب whose condition it describes.',[153,154,155,156,157],'Only an exact frozen pair owned by its template. The صاحب is named structurally as the fāʿil or mafʿūl bihi; proximity and a manṣūb adjective surface never create the relation.'),
  RL_MUBTADA_REQUIRES_KHABAR:sourceRule('Every generated mubtadaʾ has a complete linked khabar.',[99,100,101,102,103,104,130,161,167],'Direct, verbal-sentence, attached prepositional/adverbial, and fronted attached-khabar forms only.',[IA_NOMINAL,IA_PHRASE_KHABAR]),
@@ -10925,8 +11291,12 @@ function verifyTamyizRegistry(){
 }
 verifyTamyizRegistry();
 /* الاستثناء. The مستثنى surfaces and «غَيْرَ» are new curriculum vocabulary and enter the index here. */
+const ISTITHNA_NOUN_TOOLS=Object.freeze(Object.values(ISTITHNA_TOOLS)
+ .filter(tool=>tool.kind===ISTITHNA_TOOL_KINDS.noun));
+const ISTITHNA_DUAL_TOOLS=Object.freeze(Object.values(ISTITHNA_TOOLS)
+ .filter(tool=>tool.kind===ISTITHNA_TOOL_KINDS.dual));
 function registerMustathnaNounForms(){
- const records=[...Object.values(MUSTATHNA_NEW_LEXEMES),ISTITHNA_TOOLS.ghayr];
+ const records=[...Object.values(MUSTATHNA_NEW_LEXEMES),...ISTITHNA_NOUN_TOOLS];
  records.forEach(lexeme=>['nom','acc','gen'].forEach(form=>{
   const surface=lexeme[form];
   if(!surface)return;
@@ -10934,10 +11304,28 @@ function registerMustathnaNounForms(){
   if(existing&&existing.lexeme!==lexeme){
    throw new Error(`Istithnāʾ lexeme collides with an existing noun surface: ${surface}`);
   }
-  nounFormIndex.set(surface,{lexeme,inflection:'singular'});
+  /* The اسم أداة carries its OWN inflection class. سِوَى and سُوَى are مقصور — one surface for every
+     state — and that is not a convenience: it is p. 21's rule, and it is why their sign is
+     estimated rather than visible. */
+  nounFormIndex.set(surface,{lexeme,inflection:lexeme.inflection||'singular'});
  }));
 }
 registerMustathnaNounForms();
+/* خَلَا، عَدَا، حَاشَا enter the VERB index too, because on p. 165's first reading that is exactly
+   what they are. They are registered under their own past person so that the bināʾ they receive is
+   the estimated one their permanent alif requires, and they are deliberately NOT added to the
+   general verb pools: no ordinary sentence may pick them up as an action. */
+function registerIstithnaDualToolVerbs(){
+ ISTITHNA_DUAL_TOOLS.forEach(tool=>{
+  if(verbFormIndex.has(tool.surface)){
+   throw new Error(`Istithnāʾ أداة reuses an existing verb surface: ${tool.surface}`);
+  }
+  verbFormIndex.set(tool.surface,{lexeme:Object.freeze({past:tool.surface,pastEn:tool.gloss,
+   en:tool.gloss,istithnaToolKey:tool.key}),
+   form:'past',surface:tool.surface,morphology:Object.freeze({pastPerson:'3ms-alif-lazima'})});
+ });
+}
+registerIstithnaDualToolVerbs();
 /* Narrow byte/coherence gate for الاستثناء, matching the discipline of the chapters before it.
    Beyond the byte round-trip it checks the two things that make this chapter's ONE productive حال
    true: the مستثنى is indefinite (an excluded individual, not the group), and it is genuinely part
@@ -10958,17 +11346,96 @@ function verifyMustathnaRegistry(){
   const whole=mustathnaWhole(entry.wholeEn);
   if(!whole)throw new Error(`Mustathnā lexeme ${key} names no مستثنى منه.`);
  });
- const ghayr=ISTITHNA_TOOLS.ghayr;
- if(nounFormIndex.get(ghayr.acc)?.lexeme!==ghayr){
-  throw new Error('The istithnāʾ noun «غَيْرَ» did not round-trip through the noun index.');
- }
- if(ghayr.nom||ghayr.gen)throw new Error('«غَيْرَ» registers case forms no productive lane uses.');
+ /* Byte gate for the four اسم أدوات: every registered surface must resolve to its OWN record in
+    the live noun index, and none may carry a case form no lane produces. غَيْر now legitimately
+    carries nom as well as acc, because p. 164 puts it in rafʿ on the إتباع reading. */
+ ISTITHNA_NOUN_TOOLS.forEach(tool=>{
+  ['nom','acc'].forEach(form=>{
+   if(!tool[form])throw new Error(`The istithnāʾ noun «${tool.key}» has no ${form} surface.`);
+   if(nounFormIndex.get(tool[form])?.lexeme!==tool){
+    throw new Error(`The istithnāʾ noun «${tool[form]}» did not round-trip through the noun index.`);
+   }
+  });
+  if(tool.gen)throw new Error(`«${tool.acc}» registers a case form no productive lane uses.`);
+  if(!GRAMMAR_RULES.nounInflection[tool.inflection]?.nasb){
+   throw new Error(`The istithnāʾ noun «${tool.acc}» declares an inflection class with no naṣb cell.`);
+  }
+  /* A مقصور أداة must have ONE surface for both states — that is what «تُقَدَّر عليه جميعُ
+     الحركات» means — and a صحيح one must have two. Getting this backwards would print a visible
+     fatḥah on a word that cannot carry one, or an estimated one on a word that can. */
+  if((tool.inflection==='maqsur')!==(tool.nom===tool.acc)){
+   throw new Error(`The istithnāʾ noun «${tool.acc}» disagrees with its own inflection class about whether its states differ.`);
+  }
+ });
  if(GRAMMAR_RULES.governors[ISTITHNA_ILLA_TYPE]){
   throw new Error('«إِلَّا» entered the governor table; it governs no verb in this chapter.');
  }
+ /* PHASE 8 — «إِلَّا» has exactly ONE record. Proven rather than asserted: no other أداة in this
+    chapter may carry its surface or its particle type. */
+ Object.values(ISTITHNA_TOOLS).forEach(tool=>{
+  if(tool.key==='illa')return;
+  if(tool.surface===ISTITHNA_TOOLS.illa.surface||tool.acc===ISTITHNA_TOOLS.illa.surface){
+   throw new Error(`A second «${ISTITHNA_TOOLS.illa.surface}» record exists: ${tool.key}`);
+  }
+  if(tool.particleType===ISTITHNA_ILLA_TYPE){
+   throw new Error(`Istithnāʾ أداة ${tool.key} claims «إِلَّا»'s particle identity.`);
+  }
+ });
+ /* PHASE 9 — and the three «مَا» identities this app now owns are three, not one. */
+ [[ISTITHNA_MA_NAFIYA,'istithnā negation'],[ISTITHNA_MA_MASDARIYYA,'istithnā maṣdariyyah']]
+  .forEach(([record,label])=>{
+   if(record.surface!==KANA_CONDITION_PARTICLES.maNafiyaKana.surface){
+    throw new Error(`The ${label} مَا no longer shares the canonical مَا surface; one of the two drifted.`);
+   }
+   [KANA_CONDITION_PARTICLES.maNafiyaKana,KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya].forEach(other=>{
+    if(record.particleType===other.particleType||record.ruleId===other.ruleId){
+     throw new Error(`The ${label} مَا shares an identity or a source rule with a كان-family مَا.`);
+    }
+   });
+  });
+ if(ISTITHNA_MA_NAFIYA.particleType===ISTITHNA_MA_MASDARIYYA.particleType
+   ||ISTITHNA_MA_NAFIYA.ruleId===ISTITHNA_MA_MASDARIYYA.ruleId){
+  throw new Error('The two istithnāʾ مَا identities collapsed into one.');
+ }
+ if(!ISTITHNA_NEGATION_PARTICLE_TYPES.includes(ISTITHNA_MA_NAFIYA.particleType)){
+  throw new Error('The istithnāʾ نفي is not counted as a negation by the regime derivation.');
+ }
+ if(ISTITHNA_NEGATION_PARTICLE_TYPES.includes(ISTITHNA_MA_MASDARIYYA.particleType)){
+  throw new Error('«ما» المصدرية is being counted as a negation; it negates nothing.');
+ }
+ /* النوع الثالث — both identities present on one record, and each usable only as itself. */
+ ISTITHNA_DUAL_TOOLS.forEach(tool=>{
+  const registered=verbFormIndex.get(tool.surface);
+  if(registered?.form!=='past'||registered.surface!==tool.surface
+    ||registered.morphology?.pastPerson!=='3ms-alif-lazima'){
+   throw new Error(`Istithnāʾ أداة «${tool.surface}» did not round-trip through the verb index as a past form with an estimated bināʾ.`);
+  }
+  if(nounFormIndex.has(tool.surface)){
+   throw new Error(`Istithnāʾ أداة «${tool.surface}» also entered the noun index; it is a حرف or a فعل, never an اسم.`);
+  }
+  if(!isKhafdParticleType(tool.particleType)){
+   throw new Error(`Istithnāʾ أداة «${tool.surface}» cannot put the noun after it in khafḍ.`);
+  }
+  if(KHAFD_PARTICLE_REGISTRY[tool.key]){
+   throw new Error(`Istithnāʾ أداة «${tool.surface}» entered باب المخفوضات' closed list of حروف الخفض.`);
+  }
+ });
  Object.entries(MUSTATHNA_PAIR_REGISTRY).forEach(([key,pair])=>{
   const tool=ISTITHNA_TOOLS[pair.toolKey];
   if(!tool)throw new Error(`Istithnāʾ pair ${key} names an unregistered أداة.`);
+  if(tool.kind===ISTITHNA_TOOL_KINDS.dual){
+   throw new Error(`Istithnāʾ pair ${key} names an أداة that belongs to the خلا family's own registry.`);
+  }
+  if(!Object.values(ISTITHNA_REGIMES).includes(pair.regime)||pair.regime===ISTITHNA_REGIMES.naqis){
+   throw new Error(`Istithnāʾ pair ${key} declares no tāmm regime.`);
+  }
+  if(!Object.values(ISTITHNA_OPTIONS).includes(pair.option)){
+   throw new Error(`Istithnāʾ pair ${key} declares no registered reading.`);
+  }
+  /* p. 163 makes the first ḥāl وجوب النصب, so the إتباع may exist only in the second. */
+  if(pair.option===ISTITHNA_OPTIONS.badal&&pair.regime!==ISTITHNA_REGIMES.tammManfi){
+   throw new Error(`Istithnāʾ pair ${key} offers the badal reading outside تام منفي.`);
+  }
   const verb=mustathnaVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
   if(registeredVerb?.form!=='past'||registeredVerb.surface!==verb.past){
    throw new Error(`Istithnāʾ pair ${key} names an unregistered past ʿāmil.`);
@@ -10986,6 +11453,118 @@ function verifyMustathnaRegistry(){
   }
   if(typeof pair.sentenceEn!=='string'||!pair.sentenceEn.trim()){
    throw new Error(`Istithnāʾ pair ${key} carries no canonical English.`);
+  }
+ });
+ /* ── الحالة الثالثة ─────────────────────────────────────────────────────────────────────────
+    The load-bearing check here is the one the regime is NAMED for: the frame must not contain the
+    مستثنى منه. It is proven the hard way — the class of the noun after «إلا» is worked out, and
+    then no other noun in the frame may belong to it. */
+ Object.entries(ISTITHNA_NAQIS_REGISTRY).forEach(([key,frame])=>{
+  if(!ISTITHNA_NAQIS_ROLES.includes(frame.role)){
+   throw new Error(`Nāqiṣ istithnāʾ frame ${key} names a role the third ḥāل does not produce.`);
+  }
+  const verb=frame.verbEn?mustathnaTransitiveVerb(frame.verbEn,frame.objectEn):mustathnaVerb(frame.verb);
+  const registeredVerb=verbFormIndex.get(verb.past);
+  if(registeredVerb?.form!=='past'||registeredVerb.surface!==verb.past){
+   throw new Error(`Nāqiṣ istithnāʾ frame ${key} names an unregistered ʿāmil.`);
+  }
+  if(frame.role==='majrur'){
+   if(!frame.prep)throw new Error(`Nāqiṣ istithnāʾ frame ${key} claims khafḍ with no حرف خفض.`);
+   const place=mustathnaPlace(frame.placeEn);
+   if(nounFormIndex.get(place.gen)?.lexeme!==place){
+    throw new Error(`Nāqiṣ istithnāʾ frame ${key} names a place outside the noun index.`);
+   }
+  }else if(frame.prep){
+   throw new Error(`Nāqiṣ istithnāʾ frame ${key} carries a حرف خفض its role does not use.`);
+  }
+  if(frame.role==='object'&&nounFormIndex.get(verb.object.acc)?.lexeme!==verb.object){
+   throw new Error(`Nāqiṣ istithnāʾ frame ${key} names an object outside the noun index.`);
+  }
+  if(frame.role==='faail'){
+   const entry=MUSTATHNA_LEXEMES[frame.nounKey];
+   if(!entry)throw new Error(`Nāqiṣ istithnāʾ frame ${key} names an unregistered noun.`);
+   if(frame.subjectEn){
+    throw new Error(`Nāqiṣ istithnāʾ frame ${key} carries a second fāʿil beside the one after «إلا».`);
+   }
+  }
+  /* The frame's own subject, where it has one, must NOT be the group the noun after «إلا» would
+     be excepted from — otherwise the speech would be تام and this would be the second ḥāل wearing
+     the third one's label. For the two roles that carry a subject the subject is a person or a
+     group of people and the noun after «إلا» is a thing or a place, so the classes are disjoint by
+     construction; this proves it rather than trusting it. */
+  if(frame.subjectEn){
+   const excludedFrom=frame.role==='object'
+    ?null
+    :MUSTATHNA_LEXEMES[frame.nounKey]?.wholeEn||null;
+   if(excludedFrom&&excludedFrom===frame.subjectEn){
+    throw new Error(`Nāqiṣ istithnāʾ frame ${key} names the very group its noun belongs to; the speech would be تام.`);
+   }
+  }
+  if(typeof frame.sentenceEn!=='string'||!frame.sentenceEn.trim()){
+   throw new Error(`Nāqiṣ istithnāʾ frame ${key} carries no canonical English.`);
+  }
+ });
+ /* ── النوع الثالث ───────────────────────────────────────────────────────────────────────────── */
+ Object.entries(ISTITHNA_KHALA_REGISTRY).forEach(([key,frame])=>{
+  const tool=ISTITHNA_TOOLS[frame.toolKey];
+  if(!tool||tool.kind!==ISTITHNA_TOOL_KINDS.dual){
+   throw new Error(`خلا frame ${key} names an أداة outside p. 162's third نوع.`);
+  }
+  if(!Object.values(ISTITHNA_KHALA_READINGS).includes(frame.reading)){
+   throw new Error(`خلا frame ${key} declares no registered reading.`);
+  }
+  /* p. 165's own argument, enforced: «ما» المصدرية «لا تدخل إلا على الأفعال»، so a frame that
+     carries it and still claims the ḥarf reading is claiming the source's counter-example. */
+  if(frame.masdariyya&&frame.reading!==ISTITHNA_KHALA_READINGS.fil){
+   throw new Error(`خلا frame ${key} keeps the ḥarf reading under «ما» المصدرية, which p. 165 closes.`);
+  }
+  const verb=mustathnaVerb(frame.verb),registeredVerb=verbFormIndex.get(verb.past);
+  if(registeredVerb?.form!=='past'||registeredVerb.surface!==verb.past){
+   throw new Error(`خلا frame ${key} names an unregistered ʿāmil.`);
+  }
+  const whole=mustathnaWhole(frame.wholeEn);
+  if(nounFormIndex.get(whole.nom)?.lexeme!==whole){
+   throw new Error(`خلا frame ${key} names a مستثنى منه outside the noun index.`);
+  }
+  const entry=MUSTATHNA_LEXEMES[frame.mustathnaKey];
+  if(!entry)throw new Error(`خلا frame ${key} names an unregistered مستثنى.`);
+  if(entry.wholeEn!==frame.wholeEn){
+   throw new Error(`خلا frame ${key} excepts a ${frame.mustathnaKey} from a group it does not belong to.`);
+  }
+  if(typeof frame.sentenceEn!=='string'||!frame.sentenceEn.trim()){
+   throw new Error(`خلا frame ${key} carries no canonical English.`);
+  }
+ });
+ /* Both readings must actually be reachable for each of the three, or the chapter would teach a
+    choice it never shows. Same for the «ما» المصدرية case that closes the choice. */
+ ISTITHNA_DUAL_TOOLS.forEach(tool=>{
+  const frames=Object.values(ISTITHNA_KHALA_REGISTRY).filter(frame=>frame.toolKey===tool.key);
+  Object.values(ISTITHNA_KHALA_READINGS).forEach(reading=>{
+   if(!frames.some(frame=>frame.reading===reading&&!frame.masdariyya)){
+    throw new Error(`«${tool.surface}» never appears in its ${reading} reading; p. 165 gives both.`);
+   }
+  });
+  if(!frames.some(frame=>frame.masdariyya)){
+   throw new Error(`«${tool.surface}» never appears after «ما» المصدرية, which p. 165 makes decisive.`);
+  }
+ });
+ /* And every regime/reading the source teaches must be reachable somewhere, so a future edit that
+    quietly drops a lane fails at load rather than silently narrowing the curriculum. */
+ [[ISTITHNA_REGIMES.tammMujab,ISTITHNA_OPTIONS.nasb],[ISTITHNA_REGIMES.tammManfi,ISTITHNA_OPTIONS.nasb],
+  [ISTITHNA_REGIMES.tammManfi,ISTITHNA_OPTIONS.badal]].forEach(([regime,option])=>{
+  if(!Object.values(MUSTATHNA_PAIR_REGISTRY).some(pair=>pair.regime===regime&&pair.option===option)){
+   throw new Error(`No istithnāʾ pair produces ${regime}/${option}.`);
+  }
+ });
+ ISTITHNA_NAQIS_ROLES.forEach(role=>{
+  if(!Object.values(ISTITHNA_NAQIS_REGISTRY).some(frame=>frame.role===role)){
+   throw new Error(`The third ḥāl never produces the ${role} reading p. 164 gives it.`);
+  }
+ });
+ /* All four of p. 162's «ما يكون اسماً دائماً» must be produced; that is the row this wave is for. */
+ ISTITHNA_NOUN_TOOLS.forEach(tool=>{
+  if(!Object.values(MUSTATHNA_PAIR_REGISTRY).some(pair=>pair.toolKey===tool.key)){
+   throw new Error(`The اسم أداة «${tool.acc}» is registered but never produced.`);
   }
  });
 }
@@ -11646,6 +12225,15 @@ const AR={
  mustathna:w=>grammarSpec('noun',MUSTATHNA_ROLE),
  mustathnaMudaf:w=>grammarSpec('noun',MUSTATHNA_ROLE,{isMudaf:true}),
  istithnaParticle:t=>grammarSpec('particle','particle',{particleType:t.particleType,particleWord:t.surface}),
+ /* Wave 6. The badal reading of an اسم أداة declares only that it is a badal and a muḍāf; that it
+    is THE exception's badal is proven from the frame, never from this declaration. */
+ istithnaBadalMudaf:w=>grammarSpec('noun','badal',{isMudaf:true}),
+ istithnaMaNafiya:()=>grammarSpec('particle','particle',
+  {particleType:ISTITHNA_MA_NAFIYA.particleType,particleWord:ISTITHNA_MA_NAFIYA.surface}),
+ istithnaMaMasdariyya:()=>grammarSpec('particle','particle',
+  {particleType:ISTITHNA_MA_MASDARIYYA.particleType,particleWord:ISTITHNA_MA_MASDARIYYA.surface}),
+ istithnaKhalaHarf:t=>grammarSpec('particle','particle',
+  {particleType:t.particleType,particleWord:t.surface}),
  atfParticle:record=>grammarSpec('particle','particle',{particleType:record.particleType,particleWord:record.surface})
 };
 const EN={mubtada:'',khabar:'',object:'',prep:'',majrur:'',mudaf:'',mudafIlayh:'',present:'',fiveVerb:'',fiveNoun:''};
@@ -11662,6 +12250,11 @@ function objectEnglish(word){return nounEnglish(word,'acc')}
 function stateArabic(state){return{raf:'مَرْفُوعٌ',nasb:'مَنْصُوبٌ',jarr:'مَخْفُوضٌ',jazm:'مَجْزُومٌ'}[state]}
 function signActionArabic(state){return{raf:'رَفْعِهِ',nasb:'نَصْبِهِ',jarr:'خَفْضِهِ',jazm:'جَزْمِهِ'}[state]}
 function inflectionReasonArabic(inflection){
+ /* Wave 6 — p. 21 names the class as well as the rule («ويسمى الاسمُ المنتهي بالألف مقصوراً»), and
+    the learner needs the name beside the estimated sign or the sign looks arbitrary. Written as its
+    own branch rather than added to the table below so that not one byte of the existing four
+    reasons is retyped. */
+ if(inflection==='maqsur')return '؛ لِأَنَّهُ اسْمٌ مَقْصُورٌ';
  return{dual:'؛ لِأَنَّهُ مُثَنًّى',smp:'؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ',sfp:'؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ',fiveNouns:'؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ'}[inflection]||'';
 }
 function inferNounInflection(word){
@@ -12459,57 +13052,107 @@ function canonicalTamyizTranslation(data){
    pair names; and it is مُوجَب, because no negation, prohibition or interrogative particle stands
    anywhere before the أداة. Lose either, and the source's answer stops being وجوب النصب — so the
    authority withholds instead of quietly producing a different حال's analysis. */
-const ISTITHNA_NEGATION_PARTICLE_TYPES=Object.freeze(['maNafiyaKana','laNafiyaContext',
- 'atfBalNegation','atfLakinNegation','atfAmQuestion','lan','lam']);
+/* ── PHASE 4: the regime is STRUCTURE, never a label ───────────────────────────────────────────
+   Everything about this chapter follows from two yes/no questions the شرح itself asks (p. 163):
+   is the مستثنى منه mentioned — «معنى كون الكلام السابق تاماً: أن يُذْكَرَ فيه المستثنى منه» — and
+   is it preceded by نفي or its likeness. So the regime is COMPUTED from the tokens, and the frozen
+   pair's declared regime is then required to agree with the answer. A pair that says «tammManfi»
+   over a frame carrying no negation is refused; so is a «tammMujab» pair whose frame acquired one.
+
+   `wholeIndex` is the index of the مستثنى منه or -1. It is found by IDENTITY — the pair's own
+   registered group surface standing as the frame's fāʿil — never by "the noun before the أداة",
+   which is exactly the shortcut PHASE 10 forbids. */
+function deriveIstithnaRegime(tokens,toolIndex,wholeIndex){
+ if(!Array.isArray(tokens)||toolIndex<0)return null;
+ const complete=wholeIndex>=0&&wholeIndex<toolIndex;
+ const negated=tokens.slice(0,toolIndex).some(item=>item?.grammar?.type==='particle'
+  &&ISTITHNA_NEGATION_PARTICLE_TYPES.includes(item.grammar.particleType));
+ if(!complete)return negated?ISTITHNA_REGIMES.naqis:null;
+ return negated?ISTITHNA_REGIMES.tammManfi:ISTITHNA_REGIMES.tammMujab;
+}
 function mustathnaTemplateRecord(data){
  const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
  return template?.mustathnaPairKeys?.length?template:null;
 }
-function mustathnaPairAt(data,index){
+function istithnaNaqisTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.istithnaNaqisKeys?.length?template:null;
+}
+function istithnaKhalaTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.istithnaKhalaKeys?.length?template:null;
+}
+/* The excepted word carries the case in BOTH tāmm regimes; only which case differs. The role it
+   wears differs too — مستثنى in the naṣb reading, بدل in the إتباع reading — so the lookup is
+   given the role it must find rather than assuming one. */
+const ISTITHNA_OPTION_ROLES=Object.freeze({nasb:MUSTATHNA_ROLE,badal:'badal'});
+const ISTITHNA_OPTION_STATES=Object.freeze({nasb:'nasb',badal:'raf'});
+function istithnaTammPairAt(data,index){
  const template=mustathnaTemplateRecord(data),tokens=data?.tokens;
- const mustathna=Array.isArray(tokens)?tokens[index]:null;
- if(!template||!mustathna||mustathna.grammar?.type!=='noun'||mustathna.grammar.role!==MUSTATHNA_ROLE)return null;
+ const excepted=Array.isArray(tokens)?tokens[index]:null;
+ if(!template||!excepted||excepted.grammar?.type!=='noun')return null;
  for(const key of template.mustathnaPairKeys){
   const pair=MUSTATHNA_PAIR_REGISTRY[key],tool=pair&&ISTITHNA_TOOLS[pair.toolKey];
   const entry=pair&&MUSTATHNA_LEXEMES[pair.mustathnaKey];
   const lexeme=entry&&entry.lexeme;
   if(!pair||!tool||!entry||!lexeme)continue;
+  if(excepted.grammar.role!==ISTITHNA_OPTION_ROLES[pair.option])continue;
   const isParticle=tool.kind===ISTITHNA_TOOL_KINDS.particle;
-  if(tokens.length!==4||index!==(isParticle?3:2))continue;
-  const verb=tokens[0],whole=tokens[1];
+  /* The frame's shape is read off the TOKENS, not off the pair's declaration. A منفي frame leads
+     with its نفي and everything shifts by one, and whether this frame does is decided by looking:
+     a مُوجَب frame opens with its ʿāmil, so a leading PARTICLE can only be the negation. Deriving
+     the offset from the declared regime instead would make the shape check and the regime check
+     one check wearing two names — the declaration would be choosing the slots it is then compared
+     against, and a mislabelled pair would be refused for having the wrong LENGTH rather than for
+     lying about its regime. This way the two are genuinely independent. */
+  const lead=tokens[0]?.grammar?.type==='particle'?1:0;
+  const expectedLength=4+lead;
+  if(tokens.length!==expectedLength)continue;
+  if(index!==lead+(isParticle?3:2))continue;
+  const negation=lead?tokens[0]:null;
+  if(lead&&(negation.grammar.particleType!==ISTITHNA_MA_NAFIYA.particleType
+    ||negation.word!==ISTITHNA_MA_NAFIYA.surface))continue;
+  const verb=tokens[lead],whole=tokens[lead+1];
   const registeredVerb=mustathnaVerb(pair.verb),registeredWhole=mustathnaWhole(pair.wholeEn);
   if(verb.grammar?.type!=='verb'||verb.tense!=='past')continue;
   if(verb.word!==registeredVerb.past||verb.surfaceHint!==registeredVerb.past)continue;
   if(whole.grammar?.role!=='faail')continue;
   if(whole.word!==registeredWhole.nom||whole.surfaceHint!==registeredWhole.nom)continue;
+  const formKey=ISTITHNA_OPTION_STATES[pair.option]==='raf'?'nom':'acc';
   if(isParticle){
-   const particle=tokens[2];
+   const particle=tokens[lead+2];
    if(particle?.grammar?.type!=='particle'||particle.grammar.particleType!==tool.particleType)continue;
    if(particle.word!==tool.surface)continue;
-   if(mustathna.word!==lexeme.acc||mustathna.surfaceHint!==lexeme.acc)continue;
-   return{key,pair,tool,entry,lexeme,verb,whole,particle,mustathna,complement:null};
+   if(excepted.word!==lexeme[formKey]||excepted.surfaceHint!==lexeme[formKey])continue;
+   return{key,pair,tool,entry,lexeme,verb,whole,particle,negation,excepted,complement:null,
+    wholeIndex:lead+1,toolIndex:lead+2};
   }
-  /* غَيْرَ is itself the مستثنى, and what follows is its مضاف إليه — the noun the exception is
-     really about, in khafḍ by the iḍāfah, exactly as p. 164 requires. */
-  const complement=tokens[3];
-  if(mustathna.word!==tool.acc||mustathna.surfaceHint!==tool.acc)continue;
-  if(!mustathna.grammar.isMudaf)continue;
+  /* An اسم أداة is itself the excepted word, and what follows is its مضاف إليه — the noun the
+     exception is really about, in khafḍ by the iḍāfah, «مجرور لا غير», exactly as p. 164 requires. */
+  const complement=tokens[lead+3];
+  if(excepted.word!==tool[formKey]||excepted.surfaceHint!==tool[formKey])continue;
+  if(!excepted.grammar.isMudaf)continue;
   if(complement?.grammar?.role!=='mudafIlayh')continue;
   if(complement.word!==lexeme.gen||complement.surfaceHint!==lexeme.gen)continue;
-  return{key,pair,tool,entry,lexeme,verb,whole,particle:null,mustathna,complement};
+  return{key,pair,tool,entry,lexeme,verb,whole,particle:null,negation,excepted,complement,
+   wholeIndex:lead+1,toolIndex:lead+2};
  }
  return null;
 }
-function deriveMustathnaAuthority(data,index){
+/* One authority for both tāmm regimes and both readings. It answers for a مستثنى token; the badal
+   reading has its own entry point below which shares every one of these proofs. */
+function deriveIstithnaTammAuthority(data,index){
  const tokens=data?.tokens;
  const token=Array.isArray(tokens)?tokens[index]:null;
- if(!token||token.grammar?.type!=='noun'||token.grammar.role!==MUSTATHNA_ROLE){
-  return Object.freeze({authorized:false,reason:'not-a-mustathna-token'});
- }
- const found=mustathnaPairAt(data,index);
+ if(!token||token.grammar?.type!=='noun')return Object.freeze({authorized:false,reason:'not-a-noun-token'});
+ const found=istithnaTammPairAt(data,index);
  if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
- if(token.state&&token.state!=='nasb')return Object.freeze({authorized:false,reason:'mustathna-not-nasb'});
- const declaredInflection=found.tool.kind===ISTITHNA_TOOL_KINDS.noun?found.tool.inflection:found.entry.inflection;
+ const {pair,tool,entry}=found;
+ const expectedState=ISTITHNA_OPTION_STATES[pair.option];
+ if(token.state&&token.state!==expectedState){
+  return Object.freeze({authorized:false,reason:'excepted-noun-state-mismatch'});
+ }
+ const declaredInflection=tool.kind===ISTITHNA_TOOL_KINDS.noun?tool.inflection:entry.inflection;
  if(token.inflection&&token.inflection!==declaredInflection){
   return Object.freeze({authorized:false,reason:'mustathna-inflection-mismatch'});
  }
@@ -12518,25 +13161,254 @@ function deriveMustathnaAuthority(data,index){
  if(found.whole.state&&found.whole.state!=='raf'){
   return Object.freeze({authorized:false,reason:'mustathna-minhu-not-marfu'});
  }
- /* مُوجَب — «ألّا يسبقه نفي أو شبهه», and شبه النفي is النهي والاستفهام (p. 163). Any of them
-    before the أداة would move the exercise into الحالة الثانية, which is جواز, not وجوب. */
- const toolIndex=found.particle?tokens.indexOf(found.particle):index;
- const negated=tokens.slice(0,toolIndex).some(item=>item?.grammar?.type==='particle'
-  &&ISTITHNA_NEGATION_PARTICLE_TYPES.includes(item.grammar.particleType));
- if(negated)return Object.freeze({authorized:false,reason:'speech-is-not-mujab'});
- return Object.freeze({authorized:true,reason:'',pairKey:found.key,toolKey:found.tool.key,
-  toolKind:found.tool.kind,verbId:found.verb.id,verbWord:found.verb.word,
+ /* PHASE 4 — the regime, recomputed from the tokens and only THEN compared with the declaration.
+    «معنى كونه مُوجَباً: ألا يسبقه نفي أو شبهه»، «ومعنى كونه منفياً: أن يسبقه أحد هذه الأشياء»
+    (p. 163). A pair that claims one regime over a frame that structurally is the other is refused
+    outright rather than quietly re-analysed. */
+ const regime=deriveIstithnaRegime(tokens,found.toolIndex,found.wholeIndex);
+ if(regime!==pair.regime)return Object.freeze({authorized:false,reason:'regime-does-not-match-structure'});
+ /* …and the إتباع reading exists only in the منفي regime. p. 163 makes the first ḥāl وجوب النصب,
+    so a badal standing in a مُوجَب exception would be teaching a reading the source forbids. */
+ if(pair.option===ISTITHNA_OPTIONS.badal&&regime!==ISTITHNA_REGIMES.tammManfi){
+  return Object.freeze({authorized:false,reason:'badal-reading-outside-tamm-manfi'});
+ }
+ /* البدل follows its مبدل منه IN IʿRĀB — «لأن المستثنى منه مرفوع، وبدل المرفوع مرفوع» — so the
+    two states are compared rather than assumed, and a badal whose head lost its rafʿ is refused. */
+ if(pair.option===ISTITHNA_OPTIONS.badal&&found.whole.state&&token.state
+   &&found.whole.state!==token.state){
+  return Object.freeze({authorized:false,reason:'badal-does-not-follow-its-mubdal-minhu'});
+ }
+ return Object.freeze({authorized:true,reason:'',pairKey:found.key,toolKey:tool.key,
+  toolKind:tool.kind,regime,option:pair.option,
+  verbId:found.verb.id,verbWord:found.verb.word,
   wholeId:found.whole.id,wholeWord:found.whole.word,
-  toolId:found.particle?found.particle.id:found.mustathna.id,toolWord:found.particle?found.particle.word:found.mustathna.word,
+  negationId:found.negation?found.negation.id:'',negationWord:found.negation?found.negation.word:'',
+  toolId:found.particle?found.particle.id:found.excepted.id,
+  toolWord:found.particle?found.particle.word:found.excepted.word,
   mustathnaId:token.id,mustathnaWord:token.word,
   complementId:found.complement?found.complement.id:'',
   excludedWord:found.complement?found.complement.word:token.word,
-  inflection:declaredInflection});
+  state:expectedState,inflection:declaredInflection});
 }
+/* The مستثنى entry point keeps its name and its contract: it answers ONLY for a token wearing the
+   مستثنى role, so nothing that used it can be handed a badal by this wave's widening. */
+function mustathnaPairAt(data,index){
+ const token=data?.tokens?.[index];
+ if(token?.grammar?.role!==MUSTATHNA_ROLE)return null;
+ return istithnaTammPairAt(data,index);
+}
+function deriveMustathnaAuthority(data,index){
+ const token=data?.tokens?.[index];
+ if(!token||token.grammar?.type!=='noun'||token.grammar.role!==MUSTATHNA_ROLE){
+  return Object.freeze({authorized:false,reason:'not-a-mustathna-token'});
+ }
+ const authority=deriveIstithnaTammAuthority(data,index);
+ if(!authority.authorized)return authority;
+ if(authority.option!==ISTITHNA_OPTIONS.nasb){
+  return Object.freeze({authorized:false,reason:'mustathna-role-on-a-badal-reading'});
+ }
+ if(authority.state!=='nasb')return Object.freeze({authorized:false,reason:'mustathna-not-nasb'});
+ return authority;
+}
+/* …and the badal entry point, its exact mirror. PHASE 12: this is not a lane that prints the word
+   «بَدَلٌ». Both structures must hold — the exception must be proven (registered pair, real نفي,
+   real مستثنى منه, canonical أداة) AND the badal relationship must be proven (the follower carries
+   its head's own state, and الاتصال makes it genuinely one of the group it follows). Lose either
+   and nothing is authorized. */
+function deriveIstithnaBadalAuthority(data,index){
+ const token=data?.tokens?.[index];
+ if(!token||token.grammar?.type!=='noun'||token.grammar.role!=='badal'){
+  return Object.freeze({authorized:false,reason:'not-a-badal-token'});
+ }
+ if(!mustathnaTemplateRecord(data))return Object.freeze({authorized:false,reason:'not-an-istithna-template'});
+ const authority=deriveIstithnaTammAuthority(data,index);
+ if(!authority.authorized)return authority;
+ if(authority.option!==ISTITHNA_OPTIONS.badal){
+  return Object.freeze({authorized:false,reason:'badal-role-on-a-nasb-reading'});
+ }
+ return authority;
+}
+/* ── الحالة الثالثة, proven the same way and with the opposite emphasis ────────────────────────
+   Here the load-bearing fact is an ABSENCE, so it is checked as one: no token in the frame may be
+   the مستثنى منه, and no token may wear the مستثنى role at all. PHASE 7 in one function. */
+function istithnaNaqisFrameAt(data){
+ const template=istithnaNaqisTemplateRecord(data),tokens=data?.tokens;
+ if(!template||!Array.isArray(tokens))return null;
+ for(const key of template.istithnaNaqisKeys){
+  const frame=ISTITHNA_NAQIS_REGISTRY[key];
+  if(!frame||!ISTITHNA_NAQIS_ROLES.includes(frame.role))continue;
+  const negation=tokens[0];
+  if(negation?.grammar?.type!=='particle'
+    ||negation.grammar.particleType!==ISTITHNA_MA_NAFIYA.particleType
+    ||negation.word!==ISTITHNA_MA_NAFIYA.surface)continue;
+  const verb=tokens[1];
+  if(verb?.grammar?.type!=='verb'||verb.tense!=='past')continue;
+  const registeredVerb=frame.verbEn
+   ?mustathnaTransitiveVerb(frame.verbEn,frame.objectEn)
+   :mustathnaVerb(frame.verb);
+  if(verb.word!==registeredVerb.past||verb.surfaceHint!==registeredVerb.past)continue;
+  /* The subject, where the frame has an explicit one, sits between the ʿāmil and «إلا». It is a
+     فاعل and it is NOT the مستثنى منه: what the exception is taken from is the class of the noun
+     AFTER «إلا», and that class is nowhere named. The verifier proves the two never coincide. */
+  const subjectCount=frame.role==='faail'?0:1;
+  const illaIndex=2+subjectCount;
+  const prepCount=frame.prep?1:0;
+  if(tokens.length!==illaIndex+1+prepCount+1)continue;
+  const illa=tokens[illaIndex];
+  if(illa?.grammar?.type!=='particle'||illa.grammar.particleType!==ISTITHNA_ILLA_TYPE
+    ||illa.word!==ISTITHNA_TOOLS.illa.surface)continue;
+  const noun=tokens[tokens.length-1];
+  if(noun?.grammar?.type!=='noun'||noun.grammar.role!==frame.role)continue;
+  if(tokens.some(item=>item?.grammar?.role===MUSTATHNA_ROLE))continue;
+  let subject=null,preposition=null,record=null;
+  if(subjectCount){
+   subject=tokens[2];
+   if(subject.grammar?.role!=='faail')continue;
+   const registeredSubject=frame.subjectEn==='the students'||frame.subjectEn==='the men'
+    ?mustathnaWhole(frame.subjectEn)
+    :singularPeople.find(item=>item.en===frame.subjectEn);
+   if(!registeredSubject||subject.word!==registeredSubject.nom
+     ||subject.surfaceHint!==registeredSubject.nom)continue;
+  }
+  if(prepCount){
+   preposition=tokens[illaIndex+1];
+   if(preposition?.grammar?.type!=='particle'||preposition.grammar.particleType!=='preposition'
+     ||preposition.word!==frame.prep)continue;
+  }
+  if(frame.role==='majrur'){
+   record=mustathnaPlace(frame.placeEn);
+   if(noun.word!==record.gen||noun.surfaceHint!==record.gen)continue;
+  }else if(frame.role==='object'){
+   record=registeredVerb.object;
+   if(!record||noun.word!==record.acc||noun.surfaceHint!==record.acc)continue;
+  }else{
+   const entry=MUSTATHNA_LEXEMES[frame.nounKey];
+   record=entry&&entry.lexeme;
+   if(!record||noun.word!==record.nom||noun.surfaceHint!==record.nom)continue;
+  }
+  return{key,frame,verb,negation,illa,subject,preposition,noun,record,illaIndex};
+ }
+ return null;
+}
+function deriveIstithnaNaqisAuthority(data,index){
+ const tokens=data?.tokens;
+ const found=istithnaNaqisFrameAt(data);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-naqis-frame'});
+ if(index!==undefined&&index!==null&&tokens[index]!==found.noun){
+  return Object.freeze({authorized:false,reason:'not-the-noun-after-illa'});
+ }
+ /* ناقص «ولا يكون إلا منفياً» (p. 163) — recomputed, not declared. With no مستثنى منه the regime
+    function can only answer نَاقِص or nothing, and nothing is what an unnegated frame gets. */
+ const regime=deriveIstithnaRegime(tokens,found.illaIndex,-1);
+ if(regime!==ISTITHNA_REGIMES.naqis){
+  return Object.freeze({authorized:false,reason:'incomplete-speech-is-not-negated'});
+ }
+ const expectedState={faail:'raf',object:'nasb',majrur:'jarr'}[found.frame.role];
+ if(found.noun.state&&found.noun.state!==expectedState){
+  return Object.freeze({authorized:false,reason:'noun-does-not-follow-its-amil'});
+ }
+ return Object.freeze({authorized:true,reason:'',frameKey:found.key,regime,
+  role:found.frame.role,state:expectedState,
+  verbId:found.verb.id,verbWord:found.verb.word,
+  negationId:found.negation.id,negationWord:found.negation.word,
+  illaId:found.illa.id,illaWord:found.illa.word,
+  subjectId:found.subject?found.subject.id:'',subjectWord:found.subject?found.subject.word:'',
+  prepId:found.preposition?found.preposition.id:'',prepWord:found.preposition?found.preposition.word:'',
+  nounId:found.noun.id,nounWord:found.noun.word});
+}
+/* ── النوع الثالث: خلا، عدا، حاشا ─────────────────────────────────────────────────────────────
+   The reading is a declaration of the FRAME and a fact about the TOKEN at once, and the two must
+   agree: a frame that says «فعل» must actually carry a verb token, one that says «حرف» must carry
+   a khafḍ particle, and «ما» المصدرية may stand in the frame only where the reading is the verb —
+   which is p. 165's whole argument, not a convention. */
+function istithnaKhalaFrameAt(data){
+ const template=istithnaKhalaTemplateRecord(data),tokens=data?.tokens;
+ if(!template||!Array.isArray(tokens))return null;
+ for(const key of template.istithnaKhalaKeys){
+  const frame=ISTITHNA_KHALA_REGISTRY[key],tool=frame&&ISTITHNA_TOOLS[frame.toolKey];
+  const entry=frame&&MUSTATHNA_LEXEMES[frame.mustathnaKey];
+  const lexeme=entry&&entry.lexeme;
+  if(!frame||!tool||!lexeme||tool.kind!==ISTITHNA_TOOL_KINDS.dual)continue;
+  const lead=frame.masdariyya?1:0;
+  if(tokens.length!==4+lead)continue;
+  const verb=tokens[0],whole=tokens[1];
+  const registeredVerb=mustathnaVerb(frame.verb),registeredWhole=mustathnaWhole(frame.wholeEn);
+  if(verb.grammar?.type!=='verb'||verb.tense!=='past')continue;
+  if(verb.word!==registeredVerb.past||verb.surfaceHint!==registeredVerb.past)continue;
+  if(whole.grammar?.role!=='faail')continue;
+  if(whole.word!==registeredWhole.nom||whole.surfaceHint!==registeredWhole.nom)continue;
+  if(lead){
+   const masdariyya=tokens[2];
+   if(masdariyya?.grammar?.type!=='particle'
+     ||masdariyya.grammar.particleType!==ISTITHNA_MA_MASDARIYYA.particleType
+     ||masdariyya.word!==ISTITHNA_MA_MASDARIYYA.surface)continue;
+   if(frame.reading!==ISTITHNA_KHALA_READINGS.fil)continue;
+  }
+  const adaat=tokens[2+lead],noun=tokens[3+lead];
+  if(adaat?.word!==tool.surface||adaat.surfaceHint!==tool.surface)continue;
+  if(frame.reading===ISTITHNA_KHALA_READINGS.fil){
+   if(adaat.grammar?.type!=='verb'||adaat.tense!=='past')continue;
+   if(noun?.grammar?.type!=='noun'||noun.grammar.role!=='object')continue;
+   if(noun.word!==lexeme.acc||noun.surfaceHint!==lexeme.acc)continue;
+  }else{
+   if(adaat.grammar?.type!=='particle'||adaat.grammar.particleType!==tool.particleType)continue;
+   if(noun?.grammar?.type!=='noun'||noun.grammar.role!=='majrur')continue;
+   if(noun.word!==lexeme.gen||noun.surfaceHint!==lexeme.gen)continue;
+  }
+  return{key,frame,tool,entry,lexeme,verb,whole,adaat,noun,
+   masdariyya:lead?tokens[2]:null,adaatIndex:2+lead};
+ }
+ return null;
+}
+function deriveIstithnaKhalaAuthority(data,index){
+ const tokens=data?.tokens;
+ const found=istithnaKhalaFrameAt(data);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-khala-frame'});
+ if(index!==undefined&&index!==null&&tokens[index]!==found.noun){
+  return Object.freeze({authorized:false,reason:'not-the-noun-after-the-adaat'});
+ }
+ if(found.whole.state&&found.whole.state!=='raf'){
+  return Object.freeze({authorized:false,reason:'mustathna-minhu-not-marfu'});
+ }
+ /* These three stand in a مُوجَب frame — p. 165's own «قَامَ الْقَوْمُ خَلَا زَيْدًا» — and the choice
+    it grants belongs to that frame. A negation before them would be a different chapter's claim. */
+ const regime=deriveIstithnaRegime(tokens,found.adaatIndex,1);
+ if(regime!==ISTITHNA_REGIMES.tammMujab){
+  return Object.freeze({authorized:false,reason:'khala-frame-is-not-tamm-mujab'});
+ }
+ const expectedState=found.frame.reading===ISTITHNA_KHALA_READINGS.fil?'nasb':'jarr';
+ if(found.noun.state&&found.noun.state!==expectedState){
+  return Object.freeze({authorized:false,reason:'khala-noun-state-does-not-match-its-reading'});
+ }
+ return Object.freeze({authorized:true,reason:'',frameKey:found.key,toolKey:found.tool.key,
+  reading:found.frame.reading,masdariyya:Boolean(found.frame.masdariyya),regime,state:expectedState,
+  verbId:found.verb.id,verbWord:found.verb.word,
+  wholeId:found.whole.id,wholeWord:found.whole.word,
+  adaatId:found.adaat.id,adaatWord:found.adaat.word,
+  masdariyyaId:found.masdariyya?found.masdariyya.id:'',
+  nounId:found.noun.id,nounWord:found.noun.word});
+}
+/* One canonical translator for the whole chapter. Each lane's English is owned by the frozen record
+   that licensed the construction, so a lane can never compose a sentence out of loose glosses, and
+   an unauthorized exercise gets no English at all. */
 function canonicalMustathnaTranslation(data){
- const index=data?.tokens?.findIndex(token=>token.grammar?.role===MUSTATHNA_ROLE)??-1;
- const authority=deriveMustathnaAuthority(data,index);
- return authority.authorized?MUSTATHNA_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
+ const tokens=data?.tokens;
+ if(!Array.isArray(tokens))return null;
+ const nasbIndex=tokens.findIndex(token=>token.grammar?.role===MUSTATHNA_ROLE);
+ if(nasbIndex>=0){
+  const authority=deriveMustathnaAuthority(data,nasbIndex);
+  return authority.authorized?MUSTATHNA_PAIR_REGISTRY[authority.pairKey].sentenceEn:null;
+ }
+ const badalIndex=tokens.findIndex(token=>token.grammar?.role==='badal');
+ if(badalIndex>=0){
+  const authority=deriveIstithnaBadalAuthority(data,badalIndex);
+  if(authority.authorized)return MUSTATHNA_PAIR_REGISTRY[authority.pairKey].sentenceEn;
+ }
+ const naqis=deriveIstithnaNaqisAuthority(data,null);
+ if(naqis.authorized)return ISTITHNA_NAQIS_REGISTRY[naqis.frameKey].sentenceEn;
+ const khala=deriveIstithnaKhalaAuthority(data,null);
+ if(khala.authorized)return ISTITHNA_KHALA_REGISTRY[khala.frameKey].sentenceEn;
+ return null;
 }
 /* ---- «لا» النافية للجنس: the four conditions, proven structurally ---------------------------
    The authority checks each of the شرح's four conditions on the token graph rather than on Arabic
@@ -13049,7 +13921,15 @@ function inflectNoun(token,tokens,index,data){
   }
  }
  if(roleRule.state==='inherited'){
-  const followed=tokens[index-(token.grammar.role==='atf'?2:1)];
+  /* Wave 6 — the ONE follower in this app whose head is not the token beside it. p. 164's إتباع
+     على البدلية puts «إلا» between the مبدل منه and its badal («مَا قَامَ الْقَوْمُ إِلَّا زَيْدٌ»), so
+     the head is fetched from the proven exception instead of from index−1. The branch cannot fire
+     anywhere else: it demands a template carrying mustathnaPairKeys, and no follower template has
+     any. Everything else keeps the offsets it always had. */
+  const istithnaBadal=token.grammar.role==='badal'?deriveIstithnaBadalAuthority(data,index):null;
+  const followed=istithnaBadal&&istithnaBadal.authorized
+   ?tokens.find(item=>item.id===istithnaBadal.wholeId)
+   :tokens[index-(token.grammar.role==='atf'?2:1)];
   if(!followed?.state)throw new Error('A follower has no preceding inflected head.');
   token.state=followed.state;
   /* At build time the exact surfaces must already be authorized by this template. This prevents
@@ -13058,7 +13938,8 @@ function inflectNoun(token,tokens,index,data){
     ?Boolean(naatPairAt(data,index))||Boolean(sababiFrameAt(data,index))
    :token.grammar.role==='atf'?deriveAtfFollowerAuthority(data,index).authorized
    :token.grammar.role==='tawkid'?deriveTawkidFollowerAuthority(data,index).authorized
-   :token.grammar.role==='badal'?deriveBadalFollowerAuthority(data,index).authorized:false;
+   :token.grammar.role==='badal'?(deriveBadalFollowerAuthority(data,index).authorized
+     ||Boolean(istithnaBadal&&istithnaBadal.authorized)):false;
   if(!authorized)throw new Error('The follower structure is not canonically registered for this template.');
   /* The naʿt's own قسم decides which source rule it carries, and it is decided HERE, from the
      structure — not by the role table, which knows only the true naʿt. Nothing is written back
@@ -13073,6 +13954,19 @@ function inflectNoun(token,tokens,index,data){
  /* …except a naʿt, whose source rule is its قسم's, not the role table's single true-naʿt entry.
     The قسم is re-derived rather than read, so the rule cannot be chosen by a declaration. */
  if(token.grammar.role==='naat')token.ruleId=deriveNaatSubtypeAuthority(data,index).subtypeRuleId;
+ /* Wave 6 — and the exception badal cites the EXCEPTION's rule, not the badal chapter's agreement
+    rule. PHASE 17: what licenses this إتباع is p. 164, and the rule is re-chosen from the proven
+    structure here rather than accepted from the builder's declaration, exactly as the naʿt's قسم
+    is on the line above. A مستثنى in the same regime likewise leaves the وجوب rule behind. */
+ if(token.grammar.role==='badal'&&deriveIstithnaBadalAuthority(data,index).authorized){
+  token.ruleId='R_MUSTATHNA_BADAL_TAMM_MANFI';
+ }
+ if(token.grammar.role===MUSTATHNA_ROLE){
+  const istithna=deriveMustathnaAuthority(data,index);
+  if(istithna.authorized&&istithna.regime===ISTITHNA_REGIMES.tammManfi){
+   token.ruleId='R_MUSTATHNA_NASB_TAMM_MANFI';
+  }
+ }
  const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
  if(!signRule) throw new Error(`No noun rule for ${token.inflection}/${token.state}`);
  token.sign=canonicalSignCopy(signRule[0]);
@@ -13241,6 +14135,11 @@ function configureParticle(token){
   [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',maMasdariyyaZarfiyya:'R_MA_MASDARIYYA_ZARFIYYA',
   laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,[NIDA_PARTICLE_TYPE]:NIDA_PARTICLE.ruleId,
+  // Wave 6 — three more identities, each with a rule of its own. Two share «مَا»'s bytes with two
+  // particles already in this table, and no two of the four may ever share a rule.
+  [ISTITHNA_MA_NAFIYA.particleType]:ISTITHNA_MA_NAFIYA.ruleId,
+  [ISTITHNA_MA_MASDARIYYA.particleType]:ISTITHNA_MA_MASDARIYYA.ruleId,
+  istithnaKhalaHarf:'R_ISTITHNA_KHALA_HARF',
   ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(item=>[item.particleType,item.ruleId])),
   ...Object.fromEntries(Object.values(ATF_CONTEXT_PARTICLES).map(item=>[item.particleType,item.ruleId])),
   // Wave 1 — each khafḍ identity carries its own rule, so بِ التعدية and بَاءُ الْقَسَمِ never share one.
@@ -13257,6 +14156,15 @@ function configureParticle(token){
   ||ATF_CONJUNCTION_BY_TYPE[type]?.surface
   ||ATF_CONTEXT_PARTICLES[type]?.surface
   ||(type===ISTITHNA_ILLA_TYPE?ISTITHNA_TOOLS.illa.surface:null)
+  /* Wave 6 — canonical bytes for the three new identities, from their own records. The ḥarf
+     reading of خلا وأخواتها is the one case where the TYPE alone does not fix the surface, since
+     three أدوات share it; the builder's word is accepted only if it is one of those three. */
+  ||(type===ISTITHNA_MA_NAFIYA.particleType?ISTITHNA_MA_NAFIYA.surface:null)
+  ||(type===ISTITHNA_MA_MASDARIYYA.particleType?ISTITHNA_MA_MASDARIYYA.surface:null)
+  ||(type==='istithnaKhalaHarf'
+    ?(Object.values(ISTITHNA_TOOLS).find(item=>item.kind===ISTITHNA_TOOL_KINDS.dual
+      &&item.surface===token.grammar.particleWord)?.surface||null)
+    :null)
   ||(type===LA_JINS_PARTICLE_TYPE?LA_JINS_PARTICLE.surface:null)
   ||(type===WAW_MAIYYA_TYPE?WAW_MAIYYA.surface:null)
   ||(type===NIDA_PARTICLE_TYPE?NIDA_PARTICLE.surface:null)
@@ -13284,6 +14192,8 @@ const RELATIONSHIP_RULE_IDS=Object.freeze({condition:'RL_CONDITION_TWO_VERBS',
  haal:'RL_HAAL_OWNER',
  tamyiz:'RL_TAMYIZ_MUBAYYAN',
  istithna:'RL_ISTITHNA_EXCLUSION',
+ istithnaNaqis:'RL_ISTITHNA_NAQIS_AWAMIL',
+ istithnaKhala:'RL_ISTITHNA_KHALA_CHOICE',
  laJins:'RL_LA_JINS_NOUN_KHABAR',
  mafulAjl:'RL_VERB_MAFUL_AJL',
  mafulMaah:'RL_VERB_MAFUL_MAAH',
@@ -13491,20 +14401,67 @@ function resolveRelationships(data){
   item.relations.governorId=particle.id;item.relations.laJinsRelationshipId=relation.id;
   khabar.relations.governorId=particle.id;khabar.relations.laJinsRelationshipId=relation.id;
  });
+ /* الاستثناء. Both tāmm regimes and both readings of the second draw the SAME exclusion link — the
+    ʿāmil, the مستثنى منه, the أداة and the excepted word — because the link is what the exception
+    IS, and the reading only decides which case the excepted word ends up in. */
  tokens.forEach((item,index)=>{
-  if(item.grammar.role!==MUSTATHNA_ROLE)return;
-  const authority=deriveMustathnaAuthority(data,index);
-  if(!authority.authorized)return;
+  const isMustathna=item.grammar.role===MUSTATHNA_ROLE;
+  const authority=isMustathna?deriveMustathnaAuthority(data,index)
+   :item.grammar.role==='badal'?deriveIstithnaBadalAuthority(data,index):null;
+  if(!authority||!authority.authorized)return;
   const verb=tokens.find(candidate=>candidate.id===authority.verbId);
   const whole=tokens.find(candidate=>candidate.id===authority.wholeId);
+  const negation=authority.negationId?tokens.find(candidate=>candidate.id===authority.negationId):null;
   const relation=addRelationship(data,'istithna',{verbId:verb.id,wholeId:whole.id,
    mustathnaId:item.id,toolKey:authority.toolKey,toolKind:authority.toolKind,
-   toolId:authority.toolId,pairKey:authority.pairKey});
+   toolId:authority.toolId,pairKey:authority.pairKey,
+   regime:authority.regime,option:authority.option,
+   negationId:negation?negation.id:''});
   verb.relations.mustathnaId=item.id;verb.relations.istithnaRelationshipId=relation.id;
   whole.relations.mustathnaId=item.id;whole.relations.istithnaRelationshipId=relation.id;
   item.relations.amilId=verb.id;item.relations.wholeId=whole.id;
   item.relations.istithnaRelationshipId=relation.id;
+  if(negation){negation.relations.istithnaRelationshipId=relation.id;negation.relations.mustathnaId=item.id;}
  });
+ /* الحالة الثالثة draws a different link, because it has different participants: there is no
+    مستثنى منه to name, and what the learner has to see is that the ʿāمل before «إلا» reaches
+    across it and governs the noun exactly as it would have without it. */
+ (()=>{
+  const authority=deriveIstithnaNaqisAuthority(data,null);
+  if(!authority.authorized)return;
+  const verb=tokens.find(candidate=>candidate.id===authority.verbId);
+  const noun=tokens.find(candidate=>candidate.id===authority.nounId);
+  const illa=tokens.find(candidate=>candidate.id===authority.illaId);
+  const negation=tokens.find(candidate=>candidate.id===authority.negationId);
+  if(!verb||!noun||!illa||!negation)return;
+  const relation=addRelationship(data,'istithnaNaqis',{verbId:verb.id,nounId:noun.id,
+   illaId:illa.id,negationId:negation.id,frameKey:authority.frameKey,role:authority.role,
+   state:authority.state,prepId:authority.prepId});
+  verb.relations.istithnaNaqisRelationshipId=relation.id;
+  noun.relations.istithnaNaqisRelationshipId=relation.id;
+  illa.relations.istithnaNaqisRelationshipId=relation.id;
+  negation.relations.istithnaNaqisRelationshipId=relation.id;
+ })();
+ /* النوع الثالث. Its own link too: the participants are the ʿāمل, the مستثنى منه, the أداة and the
+    noun, and what the link records that no other one does is WHICH of the أداة's two identities is
+    on screen — because p. 165 makes that a choice rather than a fact about the word. */
+ (()=>{
+  const authority=deriveIstithnaKhalaAuthority(data,null);
+  if(!authority.authorized)return;
+  const verb=tokens.find(candidate=>candidate.id===authority.verbId);
+  const whole=tokens.find(candidate=>candidate.id===authority.wholeId);
+  const adaat=tokens.find(candidate=>candidate.id===authority.adaatId);
+  const noun=tokens.find(candidate=>candidate.id===authority.nounId);
+  if(!verb||!whole||!adaat||!noun)return;
+  const relation=addRelationship(data,'istithnaKhala',{verbId:verb.id,wholeId:whole.id,
+   adaatId:adaat.id,nounId:noun.id,frameKey:authority.frameKey,toolKey:authority.toolKey,
+   reading:authority.reading,masdariyya:authority.masdariyya,state:authority.state,
+   masdariyyaId:authority.masdariyyaId});
+  verb.relations.istithnaKhalaRelationshipId=relation.id;
+  whole.relations.istithnaKhalaRelationshipId=relation.id;
+  adaat.relations.istithnaKhalaRelationshipId=relation.id;
+  noun.relations.istithnaKhalaRelationshipId=relation.id;
+ })();
  tokens.forEach((item,index)=>{
   if(item.grammar.role!==TAMYIZ_ROLE)return;
   const authority=deriveTamyizAuthority(data,index);
@@ -13697,6 +14654,13 @@ function deriveIdafaMeaningAuthority(data,index){
  if(claimed&&claimed!==frame.key)return{authorized:false,reason:`claimed frame ${claimed} is not the pair's frame ${frame.key}`,claimed};
  return{authorized:true,frame,meaning:IDAFA_MEANING_REGISTRY[frame.meaning],claimed};
 }
+/* Wave 6 — «اسْمُ اسْتِثْنَاءٍ». p. 162's second نوع is «ما يكون اسماً دائماً», and that is a fact
+   about the WORD, distinct from the case its position gives it: the same غَيْر is منصوب in a
+   مُوجَب frame and مرفوع on the إتباع reading, and it is an اسم استثناء in both. The clause is
+   emitted only for the noun أدوات — «إِلَّا» is a حرف and carries its own identity on its own card. */
+function istithnaToolNameClauseAr(toolKind){
+ return toolKind===ISTITHNA_TOOL_KINDS.noun?ISTITHNA_TOOLS.ghayr.nameAr+'، ':'';
+}
 function nounRoleArabic(token){
  const role=token.grammar.role;
  /* Wave 4 — a demonstrative has no iʿrāb sign to name, so its line ends at its position, exactly
@@ -13762,7 +14726,20 @@ function nounRoleArabic(token){
   return`تَوْكِيدٌ ${subtype}${ordinal.ar} ${stateArabic(token.state)} تَابِعٌ لِمُؤَكَّدِهِ`;
  }
  if(role==='badal'){
-  const data=token._data,authority=deriveBadalFollowerAuthority(data,data?.tokens?.indexOf(token));
+  const data=token._data;
+  /* Wave 6 — the إتباع على البدلية of p. 164. Asked FIRST, and it can only answer inside a
+     registered exception template, so the badal chapter's own four kinds are untouched.
+
+     No kind label is printed, and that is a source finding rather than an omission: p. 164 says
+     only «جاز فيه الإتباعُ على البَدَلية … لأن المستثنى منه مرفوع، وبدل المرفوع مرفوع», naming no
+     قسم — and none of p. 136's four ḍوابط fits, since بدل الكل wants the badal to be عين المبدل
+     منه and بدل البعض and بدل الاشتمال each «يجب فيه أن يضاف إلى ضمير عائد» this word has not. So
+     the line names the مبدل منه, which is what the source's own reasoning turns on. */
+  const istithna=deriveIstithnaBadalAuthority(data,data?.tokens?.indexOf(token));
+  if(istithna.authorized){
+   return`${istithnaToolNameClauseAr(istithna.toolKind)}بَدَلٌ مِنَ الْمُسْتَثْنَى مِنْهُ «${istithna.wholeWord}» ${stateArabic(token.state)} عَلَى الْبَدَلِيَّةِ فِي كَلَامٍ ${ISTITHNA_REGIME_LABELS.tammManfi.ar}`;
+  }
+  const authority=deriveBadalFollowerAuthority(data,data?.tokens?.indexOf(token));
   if(!authority.authorized)throw new Error(`Cannot render unauthorized badal: ${authority.reason}`);
   return`${BADAL_KIND_LABELS[authority.subtype].ar} ${stateArabic(token.state)} تَابِعٌ لِلْمُبْدَلِ مِنْهُ`;
  }
@@ -13794,7 +14771,16 @@ function nounRoleArabic(token){
     the two accusatives are a mubtadaʾ and a khabar, and which is which. */
  if(role===ZANNA_FIRST_ROLE)return'مَفْعُولٌ أَوَّلُ مَنْصُوبٌ';
  if(role===ZANNA_SECOND_ROLE)return'مَفْعُولٌ ثَانٍ مَنْصُوبٌ';
- if(role===MUSTATHNA_ROLE)return'مُسْتَثْنًى مَنْصُوبٌ';
+ /* Wave 6 — the regime is now part of the label, because in this chapter the regime IS the answer.
+    p. 163 gives the noun after «إلا» three أحوال and the case follows from which one you are in, so
+    a bare «مُسْتَثْنًى مَنْصُوبٌ» would tell the learner that naṣb is simply what follows إلا. The
+    substring «مُسْتَثْنًى مَنْصُوبٌ» is deliberately kept intact at the head of the clause. */
+ if(role===MUSTATHNA_ROLE){
+  const data=token._data,authority=deriveMustathnaAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized mustathnā: ${authority.reason}`);
+  const label=ISTITHNA_REGIME_LABELS[authority.regime];
+  return`${istithnaToolNameClauseAr(authority.toolKind)}مُسْتَثْنًى مَنْصُوبٌ عَلَى الِاسْتِثْنَاءِ مِنْ كَلَامٍ ${label.ar}`;
+ }
  /* «اسْمُ لَا» rather than a bare «منصوب»: the naṣb here comes from لا working like إنّ, and the
     learner needs to see whose noun it is. The muḍāف clause is appended by the shared iḍāfah line. */
  if(role===ISM_LA_ROLE)return'اسْمُ «لَا» النَّافِيَةِ لِلْجِنْسِ مَنْصُوبٌ بِهَا';
@@ -13902,10 +14888,22 @@ function renderNounAnalysis(token){
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized mafʿūl lah: ${authority.reason}`);
   english=`A mafʿūl lah: an inward maṣdar giving the reason ${authority.verbWord} happened; accusative.`;
  }
+ /* Wave 6 — the إتباع of p. 164 gets its own English. The role table's generic badal line is true
+    but useless here: it would not say which word this follows, that «إلا» stands between them, or
+    that the source leaves the other reading open. */
+ if(token.grammar.role==='badal'){
+  const data=token._data,authority=deriveIstithnaBadalAuthority(data,data?.tokens?.indexOf(token));
+  if(authority.authorized){
+   english=`Following ${authority.wholeWord} as a badal across «${ISTITHNA_TOOLS.illa.surface}»: the speech is complete but negated, so the source leaves this reading and naṣb on istithnāʾ both open, and states this one first. The badal of a marfūʿ is marfūʿ.`;
+  }
+ }
  if(token.grammar.role===MUSTATHNA_ROLE){
   const data=token._data,authority=deriveMustathnaAuthority(data,data?.tokens?.indexOf(token));
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized mustathnā: ${authority.reason}`);
-  english=`A mustathnā excepted from ${authority.wholeWord} in complete affirmative speech; accusative.`;
+  const label=ISTITHNA_REGIME_LABELS[authority.regime];
+  english=authority.regime===ISTITHNA_REGIMES.tammMujab
+   ?`A mustathnā excepted from ${authority.wholeWord} in speech that is ${label.en}; accusative on istithnāʾ, and here that is obligatory.`
+   :`A mustathnā excepted from ${authority.wholeWord} in speech that is ${label.en}; accusative on istithnāʾ — the reading the source calls the lesser of the two, beside following ${authority.wholeWord} as a badal.`;
  }
  if(token.grammar.role===TAMYIZ_ROLE){
   const data=token._data,authority=deriveTamyizAuthority(data,data?.tokens?.indexOf(token));
@@ -13975,6 +14973,13 @@ function renderVerbAnalysis(token){
   }else if(binaaClass==='estimated-fath-incidental-sukun'){
    token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ عَلَى آخِرِهِ، مَنَعَ مِنْ ظُهُورِهِ اشْتِغَالُ الْمَحَلِّ بِالسُّكُونِ الْعَارِضِ لِدَفْعِ كَرَاهَةِ تَوَالِي أَرْبَعِ مُتَحَرِّكَاتٍ فِيمَا هُوَ كَالْكَلِمَةِ الْوَاحِدَةِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
    token.en='A past-tense verb built on an estimated fatḥ at its end; incidental sukūn prevents its appearance to avoid four successive vowels in what functions like one word. It has no syntactic position of its own.';
+  /* Wave 6 — خَلَا، عَدَا، حَاشَا on their verb reading. The three end in a permanent alif, so p. 21's
+     «تُقَدَّر عليه جميعُ الحركات للتعذر» applies to their bināʾ fatḥah exactly as it already does to
+     أَمْسَى and أَضْحَى among كان's sisters. This is the third member of an existing category rather
+     than a new claim, and the wording is the one those two already carry. */
+  }else if(binaaClass==='estimated-fath-taadhdhur'){
+   token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ عَلَى آخِرِهِ، مَنَعَ مِنْ ظُهُورِهِ التَّعَذُّرُ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
+   token.en='A past-tense verb built on an estimated fatḥ at its end, prevented from appearing by taʿadhdhur — a permanent alif cannot carry a vowel. It has no syntactic position of its own.';
   }else throw new Error(`Unknown past bināʾ class: ${binaaClass}`);
   return;
  }
@@ -14167,6 +15172,18 @@ function renderParticleAnalysis(token){
  if(type===LA_JINS_PARTICLE_TYPE){token.ar=`${token.word}: ${LA_JINS_PARTICLE.nameAr}، تَعْمَلُ عَمَلَ «إِنَّ»، مَبْنِيَّةٌ عَلَى السُّكُونِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.`;token.en='The لا that negates a whole class; it works like «إنّ».';return}
  if(type===ISTITHNA_ILLA_TYPE){token.ar=`${token.word}: ${ISTITHNA_TOOLS.illa.nameAr} مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of exception; it excludes what follows it from what precedes it.';return}
  if(type==='laNafiyaContext'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle; it does not govern this indicative verb.';return}
+ /* Wave 6. Three identities that share their bytes with particles this app already produces, and
+    each renders its OWN card: p. 115's parse of مَا النافية verbatim, p. 165's مَا المصدرية with the
+    reason it matters, and the ḥarf reading of خلا وأخواتها. */
+ if(type===ISTITHNA_MA_NAFIYA.particleType){token.ar=`${token.word}: ${ISTITHNA_MA_NAFIYA.nameAr} مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle, built on sukūn, with no syntactic position of its own; it is what makes the speech before the أداة negated rather than affirmative.';return}
+ if(type===ISTITHNA_MA_MASDARIYYA.particleType){token.ar=`${token.word}: ${ISTITHNA_MA_MASDARIYYA.nameAr}، حَرْفٌ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَا تَدْخُلُ إِلَّا عَلَى الْأَفْعَالِ.`;token.en='Mā al-maṣdariyyah, built on sukūn with no position in iʿrāb; it enters only upon verbs, which is why the أداة after it can only be read as a verb.';return}
+ if(type==='istithnaKhalaHarf'){
+  const tool=Object.values(ISTITHNA_TOOLS).find(item=>item.kind===ISTITHNA_TOOL_KINDS.dual&&item.surface===token.word);
+  if(!tool)throw new Error(`Unknown istithnāʾ ḥarf surface: ${token.word}`);
+  token.ar=`${token.word}: ${tool.harfNameAr} مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، يَخْفِضُ الِاسْمَ بَعْدَهُ.`;
+  token.en='Read here as a particle of khafḍ and exception, so the noun after it is makhfūḍ by it; it may equally be read as a past verb.';
+  return;
+ }
  throw new Error(`Unknown particle type: ${type}`);
 }
 /* ===== “Why this iʿrāb?” explanation engine (presentation only) =====================
@@ -14180,7 +15197,9 @@ const WHY_FORM=Object.freeze({
  dual:{ar:'مُثَنًّى',en:'dual'},
  smp:{ar:'جَمْعُ مُذَكَّرٍ سَالِمٌ',en:'a sound masculine plural'},
  sfp:{ar:'جَمْعُ مُؤَنَّثٍ سَالِمٌ',en:'a sound feminine plural'},
- fiveNouns:{ar:'مِنَ الْأَسْمَاءِ الْخَمْسَةِ',en:'one of الْأَسْمَاءُ الْخَمْسَةُ'}
+ fiveNouns:{ar:'مِنَ الْأَسْمَاءِ الْخَمْسَةِ',en:'one of الْأَسْمَاءُ الْخَمْسَةُ'},
+ // Wave 6 — p. 21: «ويسمى الاسمُ المنتهي بالألف مقصوراً».
+ maqsur:{ar:'اسْمٌ مَقْصُورٌ',en:'a maqṣūr noun — one ending in a permanent alif'}
 });
 /* English keeps the familiar transliterated state words (rafʿ/naṣb/khafḍ/jazm) but names the
    SIGN itself in Arabic, so the learner keeps meeting the real iʿrāb vocabulary. */
@@ -14190,7 +15209,10 @@ const WHY_SIGN_NAME=Object.freeze({
  alif:{ar:'الْأَلِفُ',en:'the أَلِفُ'},waw:{ar:'الْوَاوُ',en:'the وَاوُ'},ya:{ar:'الْيَاءُ',en:'the يَاءُ'},
  kasraSub:{ar:'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ',en:'the كَسْرَة in place of the فَتْحَة'},
  nunKept:{ar:'ثُبُوتُ النُّونِ',en:'ثُبُوتُ النُّونِ'},
- nunDropped:{ar:'حَذْفُ النُّونِ',en:'حَذْفُ النُّونِ'}
+ nunDropped:{ar:'حَذْفُ النُّونِ',en:'حَذْفُ النُّونِ'},
+ // Wave 6 — the estimated one. p. 21 names the preventer as well as the sign.
+ fathaMuqaddaraTaadhdhur:{ar:'فَتْحَةٌ مُقَدَّرَةٌ عَلَى الْأَلِفِ مَنَعَ مِنْ ظُهُورِهَا التَّعَذُّرُ',
+  en:'an estimated فَتْحَة that taʿadhdhur keeps from appearing'}
 });
 const WHY_STATE=Object.freeze({
  raf:{ar:'مَرْفُوعٌ',sign:'رَفْعِهِ',en:'nominative',signEn:'rafʿ'},
@@ -14297,9 +15319,48 @@ function mustathnaWhyAuthority(token,data){
    naṣb. Saying so is what stops a learner reading «منصوب» as always true after إلا. */
 function whyMustathnaConditions(token,data){
  const authority=mustathnaWhyAuthority(token,data);
- return{id:'WHY_MUSTATHNA_TAAM_MUJAB',
-  ar:`وَالْكَلَامُ قَبْلَهُ تَامٌّ؛ لِذِكْرِ الْمُسْتَثْنَى مِنْهُ ${wq(authority.wholeWord)} فِيهِ، وَمُوجَبٌ؛ لِأَنَّهُ لَمْ يَسْبِقْهُ نَفْيٌ وَلَا شِبْهُهُ، وَحِينَئِذٍ يَجِبُ النَّصْبُ عَلَى الِاسْتِثْنَاءِ.`,
-  en:`The speech before it is complete, because the group ${eq(authority.wholeWord)} it is excepted from is mentioned, and affirmative, because no negation or its likeness precedes it — and in that case naṣb on istithnāʾ is obligatory.`};
+ return whyIstithnaRegimeLine(authority);
+}
+/* Wave 6 — one function for both tāmm regimes and both readings, because the learner has to see
+   the SAME two questions answered every time: is the مستثنى منه mentioned, and is there a نفي.
+   Only the answers and the consequence change, and the consequence is the source's own. */
+function whyIstithnaRegimeLine(authority){
+ if(authority.regime===ISTITHNA_REGIMES.tammMujab){
+  return{id:'WHY_MUSTATHNA_TAAM_MUJAB',
+   ar:`وَالْكَلَامُ قَبْلَهُ تَامٌّ؛ لِذِكْرِ الْمُسْتَثْنَى مِنْهُ ${wq(authority.wholeWord)} فِيهِ، وَمُوجَبٌ؛ لِأَنَّهُ لَمْ يَسْبِقْهُ نَفْيٌ وَلَا شِبْهُهُ، وَحِينَئِذٍ يَجِبُ النَّصْبُ عَلَى الِاسْتِثْنَاءِ.`,
+   en:`The speech before it is complete, because the group ${eq(authority.wholeWord)} it is excepted from is mentioned, and affirmative, because no negation or its likeness precedes it — and in that case naṣb on istithnāʾ is obligatory.`};
+ }
+ const nasb=authority.option===ISTITHNA_OPTIONS.nasb;
+ return{id:nasb?'WHY_MUSTATHNA_TAAM_MANFI_NASB':'WHY_MUSTATHNA_TAAM_MANFI_BADAL',
+  ar:`وَالْكَلَامُ قَبْلَهُ تَامٌّ؛ لِذِكْرِ الْمُسْتَثْنَى مِنْهُ ${wq(authority.wholeWord)} فِيهِ، وَمَنْفِيٌّ؛ لِتَقَدُّمِ ${wq(authority.negationWord)} النَّافِيَةِ عَلَيْهِ، وَحِينَئِذٍ جَازَ فِيهِ الْأَمْرَانِ: الْإِتْبَاعُ عَلَى الْبَدَلِيَّةِ وَالنَّصْبُ عَلَى الِاسْتِثْنَاءِ${nasb?'، وَهَذَا هُوَ النَّصْبُ، وَهُوَ عَلَى قِلَّةٍ':'، وَهَذَا هُوَ الْإِتْبَاعُ، وَهُوَ الْوَجْهُ الْمُقَدَّمُ'}.`,
+  en:`The speech before it is complete, because the group ${eq(authority.wholeWord)} it is excepted from is mentioned, and it is negated, because ${eq(authority.negationWord)} precedes it — and in that case BOTH readings are open: following ${eq(authority.wholeWord)} as a badal, and naṣb on istithnāʾ. ${nasb?'This exercise shows the naṣb, which the source calls the lesser of the two.':'This exercise shows the إتباع, which the source states first.'}`};
+}
+/* الحالة الثالثة gets its own line, and it says the opposite thing: the مستثنى منه is ABSENT, and
+   that absence is why the noun is not a مستثنى at all. */
+function whyIstithnaNaqisLine(authority){
+ /* p. 164's own three phrasings: «يقتضي الرفع على الفاعلية»، «يقتضى النصب على المفعولية»، «يقتضي
+    الجر بحرف من حروف الجر» — the last with this app's standing خفض terminology in place of جر. */
+ const role={faail:'الرَّفْعَ عَلَى الْفَاعِلِيَّةِ',object:'النَّصْبَ عَلَى الْمَفْعُولِيَّةِ',
+  majrur:'الْخَفْضَ بِحَرْفٍ مِنْ حُرُوفِ الْخَفْضِ'}[authority.role];
+ const roleEn={faail:'raised as its fāʿil',object:'made accusative as its mafʿūl bihi',
+  majrur:'put in khafḍ by a particle of khafḍ'}[authority.role];
+ return{id:'WHY_ISTITHNA_NAQIS_'+authority.role.toUpperCase(),
+  ar:`وَالْكَلَامُ قَبْلَهُ نَاقِصٌ؛ لِأَنَّ الْمُسْتَثْنَى مِنْهُ لَمْ يُذْكَرْ فِيهِ، وَالنَّاقِصُ لَا يَكُونُ إِلَّا مَنْفِيًّا، وَقَدْ تَقَدَّمَتْهُ ${wq(authority.negationWord)} النَّافِيَةُ؛ فَجَرَى ${wq(authority.nounWord)} عَلَى حَسَبِ الْعَامِلِ ${wq(authority.verbWord)} قَبْلَ «${authority.illaWord}»، وَهُوَ يَقْتَضِي ${role}.`,
+  en:`The speech before it is INCOMPLETE, because the group it would be excepted from is never mentioned — and incomplete speech here is always negated, as ${eq(authority.negationWord)} before it shows. So ${eq(authority.nounWord)} simply runs on whatever the ʿāmil ${eq(authority.verbWord)} standing before ${eq(authority.illaWord)} demands, and it is ${roleEn}.`};
+}
+/* …and خلا وأخواتها get theirs, which is about the WORD rather than about the clause: the choice
+   the learner is being shown exists because the أداة itself has two identities (p. 165). */
+function whyIstithnaKhalaLine(authority){
+ const tool=ISTITHNA_TOOLS[authority.toolKey];
+ const isFil=authority.reading===ISTITHNA_KHALA_READINGS.fil;
+ if(authority.masdariyya){
+  return{id:'WHY_ISTITHNA_KHALA_MASDARIYYA',
+   ar:`وَقَدْ تَقَدَّمَتْ «${ISTITHNA_MA_MASDARIYYA.surface}» الْمَصْدَرِيَّةُ عَلَى ${wq(tool.surface)}، وَ«${ISTITHNA_MA_MASDARIYYA.surface}» الْمَصْدَرِيَّةُ لَا تَدْخُلُ إِلَّا عَلَى الْأَفْعَالِ؛ فَهِيَ فِعْلٌ الْبَتَّةَ، فَوَجَبَ نَصْبُ ${wq(authority.nounWord)} عَلَى الْمَفْعُولِيَّةِ، وَلَمْ يَجُزْ خَفْضُهُ.`,
+   en:`The maṣdar-forming ${eq(ISTITHNA_MA_MASDARIYYA.surface)} stands before ${eq(tool.surface)}, and it enters only upon VERBS — so ${eq(tool.surface)} is a verb and nothing else here, ${eq(authority.nounWord)} must be its accusative object, and the khafḍ reading is closed.`};
+ }
+ return{id:isFil?'WHY_ISTITHNA_KHALA_FIL':'WHY_ISTITHNA_KHALA_HARF',
+  ar:`وَ${wq(tool.surface)} تُسْتَعْمَلُ فِعْلًا تَارَةً وَحَرْفًا تَارَةً أُخْرَى؛ فَيَجُوزُ فِي ${wq(authority.nounWord)} النَّصْبُ وَالْخَفْضُ${isFil?`، وَهَذَا هُوَ النَّصْبُ: قُدِّرَتْ ${wq(tool.surface)} فِعْلًا مَاضِيًا فَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا، فَنَصَبَتْ مَا بَعْدَهَا عَلَى أَنَّهُ مَفْعُولٌ بِهِ`:`، وَهَذَا هُوَ الْخَفْضُ: قُدِّرَتْ ${wq(tool.surface)} حَرْفًا، فَخَفَضَتْ مَا بَعْدَهَا`}.`,
+  en:`${eq(tool.surface)} is used sometimes as a verb and sometimes as a particle, so ${eq(authority.nounWord)} may be either accusative or in khafḍ. ${isFil?`This exercise reckons it a past VERB whose fāʿil is a pronoun concealed obligatorily, so what follows is its mafʿūl bihi.`:`This exercise reckons it a PARTICLE, so what follows is makhfūḍ by it.`}`};
 }
 function tamyizWhyAuthority(token,data){
  const authority=deriveTamyizAuthority(data,data?.tokens?.indexOf(token));
@@ -14387,6 +15448,13 @@ function badalWhyAuthority(token,data){
  const authority=deriveBadalFollowerAuthority(data,data?.tokens?.indexOf(token));
  if(!authority.authorized)throw new Error(`WHY: badal is not authorized (${authority.reason}).`);
  return authority;
+}
+/* Wave 6 — returns the exception authority or null, never throwing: it is asked as a QUESTION
+   («is this the إتباع of p. 164?») at every badal Why site, and a plain badal must be able to
+   answer no and go on to the four kinds. */
+function istithnaBadalWhyAuthority(token,data){
+ const authority=deriveIstithnaBadalAuthority(data,data?.tokens?.indexOf(token));
+ return authority.authorized?authority:null;
 }
 /* The learner is told WHICH kind this is and WHY that kind is the right one — the part-whole
    relation for baʿḍ, the association for ishtimāl, sameness for muṭābiq, the correction for ghalaṭ
@@ -14595,10 +15663,20 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_TAWKID_INHERITED',
   stateAr:t=>`وَالتَّوْكِيدُ يَتْبَعُ مُؤَكَّدَهُ فِي الْإِعْرَابِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A tawkīd follows its muʾakkad in iʿrāb state, so this one is ${stateArabic(t.state)} like it.`},
+ /* Wave 6 — the exception badal is asked for FIRST throughout this entry. It cannot reach the four
+    kinds and they cannot reach it: its head is the مستثنى منه across «إلا», not the token beside
+    it, and it wears no قسم because p. 164 assigns it none. */
  badal:{
-  id:(t,data)=>`WHY_ROLE_BADAL_${badalWhyAuthority(t,data).subtype.toUpperCase()}`,
-  ar:(t,data)=>`${wq(t.word)} هُوَ الْمَقْصُودُ بِالْحُكْمِ بِلَا وَاسِطَةٍ بَعْدَ ${wq(data.tokens[data.tokens.indexOf(t)-1].word)}، فَهُوَ ${BADAL_KIND_LABELS[badalWhyAuthority(t,data).subtype].ar}.`,
-  en:(t,data)=>`${eq(t.word)} is what the ruling actually intends, with no intermediary, after ${eq(data.tokens[data.tokens.indexOf(t)-1].word)}, so it is ${BADAL_KIND_LABELS[badalWhyAuthority(t,data).subtype].en}.`,
+  id:(t,data)=>{const istithna=istithnaBadalWhyAuthority(t,data);
+   return istithna?'WHY_ROLE_BADAL_ISTITHNA':`WHY_ROLE_BADAL_${badalWhyAuthority(t,data).subtype.toUpperCase()}`},
+  ar:(t,data)=>{const istithna=istithnaBadalWhyAuthority(t,data);
+   return istithna
+    ?`${wq(t.word)} هُوَ الْمَقْصُودُ بِالْحُكْمِ مِنْ ${wq(istithna.wholeWord)}، فَأُتْبِعَ بِهِ عَلَى الْبَدَلِيَّةِ، وَبَدَلُ الْمَرْفُوعِ مَرْفُوعٌ.`
+    :`${wq(t.word)} هُوَ الْمَقْصُودُ بِالْحُكْمِ بِلَا وَاسِطَةٍ بَعْدَ ${wq(data.tokens[data.tokens.indexOf(t)-1].word)}، فَهُوَ ${BADAL_KIND_LABELS[badalWhyAuthority(t,data).subtype].ar}.`},
+  en:(t,data)=>{const istithna=istithnaBadalWhyAuthority(t,data);
+   return istithna
+    ?`${eq(t.word)} is the one out of ${eq(istithna.wholeWord)} that the ruling actually intends, so it follows ${eq(istithna.wholeWord)} as a badal — and the badal of a marfūʿ is marfūʿ.`
+    :`${eq(t.word)} is what the ruling actually intends, with no intermediary, after ${eq(data.tokens[data.tokens.indexOf(t)-1].word)}, so it is ${BADAL_KIND_LABELS[badalWhyAuthority(t,data).subtype].en}.`},
   stateId:()=>'WHY_STATE_BADAL_INHERITED',
   stateAr:t=>`وَالْبَدَلُ يَتْبَعُ الْمُبْدَلَ مِنْهُ فِي جَمِيعِ إِعْرَابِهِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A badal follows its mubdal minhu in all of its iʿrāb, so this one is ${stateArabic(t.state)} like it.`},
@@ -14953,6 +16031,30 @@ const WHY_PARTICLE=Object.freeze({
    en:`This is mā al-maṣdariyyah al-ẓarfiyyah; because it precedes, ${eq(governed)} governs exactly as kāna does.`};
  },
  laNafiyaContext:t=>({id:'WHY_PARTICLE_LA_NAFIYA_CONTEXT',ar:`${wq(t.word)} حَرْفُ نَفْيٍ لَا يَعْمَلُ الْجَزْمَ هُنَا.`,en:`${eq(t.word)} is a negating particle and does not govern jazm here.`}),
+ /* Wave 6. This «مَا» is asked to say what its presence DOES to the chapter — it is what turns a
+    مُوجَب exception into a منفي one, and therefore what opens the second reading. The verb it
+    negates is re-derived from the sentence, exactly as its two namesakes above do. */
+ [ISTITHNA_MA_NAFIYA.particleType]:(t,data)=>{
+  const tokens=data&&Array.isArray(data.tokens)?data.tokens:[];
+  const next=tokens[tokens.indexOf(t)+1];
+  const negated=next&&next.grammar?.type==='verb'?next.word:'';
+  if(!negated)throw new Error('WHY: مَا النافية of the istithnāʾ chapter does not precede a verb');
+  return{id:'WHY_PARTICLE_ISTITHNA_MA_NAFIYA',
+   ar:`${wq(t.word)} حَرْفُ نَفْيٍ نَفَى ${wq(negated)}، وَبِتَقَدُّمِهِ صَارَ الْكَلَامُ مَنْفِيًّا لَا مُوجَبًا.`,
+   en:`${eq(t.word)} negates ${eq(negated)}, and because it comes first the speech is NEGATED rather than affirmative — which is what decides the ruling on the noun after the أداة.`};
+ },
+ [ISTITHNA_MA_MASDARIYYA.particleType]:(t,data)=>{
+  const tokens=data&&Array.isArray(data.tokens)?data.tokens:[];
+  const next=tokens[tokens.indexOf(t)+1];
+  const governed=next&&next.grammar?.type==='verb'?next.word:'';
+  if(!governed)throw new Error('WHY: مَا المصدرية of the istithnāʾ chapter does not precede a verb');
+  return{id:'WHY_PARTICLE_ISTITHNA_MA_MASDARIYYA',
+   ar:`${ISTITHNA_MA_MASDARIYYA.nameAr} لَا تَدْخُلُ إِلَّا عَلَى الْأَفْعَالِ؛ فَتَعَيَّنَ أَنْ تَكُونَ ${wq(governed)} فِعْلًا، وَبِذَلِكَ وَجَبَ نَصْبُ مَا بَعْدَهَا وَامْتَنَعَ خَفْضُهُ.`,
+   en:`Mā al-maṣdariyyah enters only upon VERBS, so ${eq(governed)} can only be a verb here — and that is why what follows it must be accusative and can no longer be in khafḍ.`};
+ },
+ istithnaKhalaHarf:t=>({id:'WHY_PARTICLE_ISTITHNA_KHALA_HARF',
+  ar:`${wq(t.word)} تُسْتَعْمَلُ حَرْفًا تَارَةً وَفِعْلًا تَارَةً أُخْرَى، وَقَدْ قُدِّرَتْ هُنَا حَرْفًا مِنْ حُرُوفِ الْخَفْضِ، فَخَفَضَتِ الِاسْمَ بَعْدَهَا.`,
+  en:`${eq(t.word)} is used sometimes as a particle and sometimes as a verb; here it is reckoned a particle of khafḍ, so it puts the noun after it in khafḍ.`}),
  /* «إِلَّا» excludes; it does not govern. Saying so on the particle itself is what keeps a learner
     from reading the naṣb that follows as government by إِلَّا rather than naṣb على الاستثناء. */
  /* Naming the CLASS negation is the point: an ordinary لا denies one instance, this one denies
@@ -15049,7 +16151,9 @@ function buildTokenWhy(token,data){
   if(token.grammar.role==='tawkid'){
    push(whyTawkidCondition(token,data));
   }
-  if(token.grammar.role==='badal'){
+  /* An exception badal has no قسم condition to state — p. 164 gives it none — so it adds the
+     regime line pushed below instead of the badal chapter's ḍābiṭ line. */
+  if(token.grammar.role==='badal'&&!istithnaBadalWhyAuthority(token,data)){
    push(whyBadalCondition(token,data));
   }
   /* Wave 1 — the iḍāfah's own meaning, on the muḍāf ilayh where the learner is already looking.
@@ -15072,6 +16176,18 @@ function buildTokenWhy(token,data){
   }
   if(token.grammar.role===MUSTATHNA_ROLE){
    push(whyMustathnaConditions(token,data));
+  }
+  /* Wave 6 — the other two أحوال, and the badal reading of the second. Each is pushed on the token
+     the learner is actually looking at, and each states the regime in the source's own terms: no
+     line here is reachable without its authority having proven that regime from the tokens. */
+  {
+   const badalIstithna=token.grammar.role==='badal'
+    ?deriveIstithnaBadalAuthority(data,data.tokens.indexOf(token)):null;
+   if(badalIstithna&&badalIstithna.authorized)push(whyIstithnaRegimeLine(badalIstithna));
+   const naqis=deriveIstithnaNaqisAuthority(data,data.tokens.indexOf(token));
+   if(naqis.authorized)push(whyIstithnaNaqisLine(naqis));
+   const khala=deriveIstithnaKhalaAuthority(data,data.tokens.indexOf(token));
+   if(khala.authorized)push(whyIstithnaKhalaLine(khala));
   }
   if(token.grammar.role===MAFUL_MAAH_ROLE){
    push(whyMafulMaahExclusivity(token,data));
@@ -15106,6 +16222,8 @@ function buildTokenWhy(token,data){
    if(token.grammar.morphology?.binaaClass==='visible-fath')push({id:'WHY_PAST_FATH_VISIBLE',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ عَلَى الْفَتْحِ، وَالْفَتْحُ هُنَا ظَاهِرٌ عَلَى آخِرِهِ.',en:'The past verb is مَبْنِيٌّ on fatḥ, and here that fatḥ is visible at its end.'});
    else if(token.grammar.morphology?.binaaClass==='estimated-fath-munasabah')push({id:'WHY_PAST_FATH_EST_MUNASABAH',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ؛ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ لِوَاوِ الْجَمَاعَةِ.',en:'The past verb is مَبْنِيٌّ on an estimated fatḥ because the position is occupied by the vowel suitable for wāw al-jamāʿah.'});
    else if(token.grammar.morphology?.binaaClass==='estimated-fath-incidental-sukun')push({id:'WHY_PAST_FATH_EST_INCIDENTAL_SUKUN',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ؛ لِاشْتِغَالِ الْمَحَلِّ بِالسُّكُونِ الْعَارِضِ لِدَفْعِ كَرَاهَةِ تَوَالِي أَرْبَعِ مُتَحَرِّكَاتٍ فِيمَا هُوَ كَالْكَلِمَةِ الْوَاحِدَةِ.',en:'The past verb is مَبْنِيٌّ on an estimated fatḥ because incidental sukūn occupies the position, avoiding four successive vowels in what functions like one word.'});
+   /* Wave 6 — p. 21's preventer, for خَلَا، عَدَا، حَاشَا on their verb reading. */
+   else if(token.grammar.morphology?.binaaClass==='estimated-fath-taadhdhur')push({id:'WHY_PAST_FATH_EST_TAADHDHUR',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ؛ لِأَنَّ آخِرَهُ أَلِفٌ لَازِمَةٌ، وَالْأَلِفُ لَا تَقْبَلُ الْحَرَكَةَ، فَمَنَعَ مِنْ ظُهُورِهِ التَّعَذُّرُ.',en:'The past verb is مَبْنِيٌّ on an estimated fatḥ because its last letter is a permanent alif, and an alif cannot carry a vowel — taʿadhdhur prevents the fatḥ from appearing.'});
    else throw new Error(`WHY: unknown past bināʾ class “${token.grammar.morphology?.binaaClass}”`);
    if(token.grammar.voice!==PASSIVE_VOICE)push(whyVerbSubject(token));
    whyVerbObjectComponents(token).forEach(push);
@@ -15331,10 +16449,60 @@ function buildRelationshipWhy(rel,data){
   const mustathna=data.tokens.find(item=>item.id===rel.mustathnaId);
   const tool=ISTITHNA_TOOLS[rel.toolKey];
   if(!verb||!whole||!mustathna||!tool)return{ids,ar,en};
-  const toolWord=tool.kind===ISTITHNA_TOOL_KINDS.particle?tool.surface:tool.acc;
+  const isParticle=tool.kind===ISTITHNA_TOOL_KINDS.particle;
+  /* WHICH word was taken out, and BY WHAT. After «إِلَّا» those are two different words, but after an
+     اسم أداة the أداة is itself the word that carries the case, and the individual actually excepted
+     is its مضاف إليه — «قَامَ الْقَوْمُ غَيْرَ زَيْدٍ» excepts زيد, not «غير». Saying «وغَيْرَ أُخْرِجَ منه
+     بغَيْرَ» would name one word twice and hide the person the sentence is about. */
+  const excludedWord=isParticle
+   ?mustathna.word
+   :(data.tokens[data.tokens.indexOf(mustathna)+1]?.word||mustathna.word);
+  const toolWord=isParticle?tool.surface:mustathna.word;
+  /* The exclusion is the same relationship in both readings; what differs is the case it ends in,
+     and saying which is what stops «أُخْرِجَ مِنْهُ» reading as «فَنُصِبَ» in every frame. */
+  const outcomeAr=rel.option===ISTITHNA_OPTIONS.badal
+   ?`فَأُتْبِعَ ${wq(mustathna.word)} لِمَا قَبْلَهُ عَلَى الْبَدَلِيَّةِ`
+   :`فَنُصِبَ ${wq(mustathna.word)} عَلَى الِاسْتِثْنَاءِ`;
+  const outcomeEn=rel.option===ISTITHNA_OPTIONS.badal
+   ?`so ${eq(mustathna.word)} follows what precedes it as a badal`
+   :`so ${eq(mustathna.word)} is accusative on istithnāʾ`;
   push({id:'WHY_REL_ISTITHNA_EXCLUSION',
-   ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(whole.word)} هُوَ الْمُسْتَثْنَى مِنْهُ، وَ${wq(mustathna.word)} أُخْرِجَ مِنْهُ بِـ${wq(toolWord)}، فَنُصِبَ عَلَى الِاسْتِثْنَاءِ.`,
-   en:`${eq(verb.word)} is the ʿāmil, ${eq(whole.word)} is the group excepted from, and ${eq(mustathna.word)} is taken out of it by ${eq(toolWord)}, so it is accusative on istithnāʾ.`});
+   ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(whole.word)} هُوَ الْمُسْتَثْنَى مِنْهُ، وَ${wq(excludedWord)} أُخْرِجَ مِنْهُ بِـ${wq(toolWord)}، ${outcomeAr}.`,
+   en:`${eq(verb.word)} is the ʿāmil, ${eq(whole.word)} is the group excepted from, and ${eq(excludedWord)} is taken out of it by ${eq(toolWord)}, ${outcomeEn}.`});
+  return{ids,ar,en};
+ }
+ /* الحالة الثالثة — the link names the ʿāmil and says what it does ACROSS «إلا», which is the one
+    thing that makes this regime different from the two before it. */
+ if(rel.type==='istithnaNaqis'){
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const noun=data.tokens.find(item=>item.id===rel.nounId);
+  const illa=data.tokens.find(item=>item.id===rel.illaId);
+  if(!verb||!noun||!illa)return{ids,ar,en};
+  const roleAr={faail:'فَاعِلًا لَهُ',object:'مَفْعُولًا بِهِ لَهُ',
+   majrur:'مَخْفُوضًا بِحَرْفِ الْخَفْضِ الَّذِي اقْتَضَاهُ'}[rel.role];
+  const roleEn={faail:'its fāʿil',object:'its mafʿūl bihi',
+   majrur:'makhfūḍ by the particle of khafḍ it requires'}[rel.role];
+  push({id:'WHY_REL_ISTITHNA_NAQIS',
+   ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَلَا مُسْتَثْنَى مِنْهُ فِي الْكَلَامِ، فَتَخَطَّى الْعَامِلُ ${wq(illa.word)} وَعَمِلَ فِيمَا بَعْدَهَا، فَجَاءَ ${wq(noun.word)} ${roleAr}.`,
+   en:`${eq(verb.word)} is the ʿāmil, and there is no مستثنى منه in the sentence at all — so the ʿāmil reaches straight across ${eq(illa.word)} and governs what follows it, making ${eq(noun.word)} ${roleEn}.`});
+  return{ids,ar,en};
+ }
+ /* النوع الثالث — the link's Why is about the أداة's two identities, which is what the whole
+    section of p. 165 is about. */
+ if(rel.type==='istithnaKhala'){
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const whole=data.tokens.find(item=>item.id===rel.wholeId);
+  const adaat=data.tokens.find(item=>item.id===rel.adaatId);
+  const noun=data.tokens.find(item=>item.id===rel.nounId);
+  if(!verb||!whole||!adaat||!noun)return{ids,ar,en};
+  const isFil=rel.reading===ISTITHNA_KHALA_READINGS.fil;
+  push(rel.masdariyya
+   ?{id:'WHY_REL_ISTITHNA_KHALA_MASDARIYYA',
+     ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(whole.word)} هُوَ الْمُسْتَثْنَى مِنْهُ، وَقَدْ سَبَقَتْ ${wq(adaat.word)} «${ISTITHNA_MA_MASDARIYYA.surface}» الْمَصْدَرِيَّةُ؛ فَتَعَيَّنَتْ فِعْلًا، وَ${wq(noun.word)} مَفْعُولٌ بِهِ لَهَا، وَلَا يَجُوزُ خَفْضُهُ.`,
+     en:`${eq(verb.word)} is the ʿāmil and ${eq(whole.word)} is the group excepted from; the maṣdar-forming mā precedes ${eq(adaat.word)}, so it can only be a VERB, ${eq(noun.word)} is its object, and khafḍ is no longer available.`}
+   :{id:isFil?'WHY_REL_ISTITHNA_KHALA_FIL':'WHY_REL_ISTITHNA_KHALA_HARF',
+     ar:`${wq(verb.word)} هُوَ الْعَامِلُ، وَ${wq(whole.word)} هُوَ الْمُسْتَثْنَى مِنْهُ، وَ${wq(adaat.word)} تُقَدَّرُ فِعْلًا تَارَةً وَحَرْفًا تَارَةً؛ فَيَجُوزُ فِي ${wq(noun.word)} النَّصْبُ وَالْخَفْضُ، وَقَدْ قُدِّرَتْ هُنَا ${isFil?'فِعْلًا فَنَصَبَتْهُ عَلَى الْمَفْعُولِيَّةِ':'حَرْفًا فَخَفَضَتْهُ'}.`,
+     en:`${eq(verb.word)} is the ʿāmil and ${eq(whole.word)} is the group excepted from; ${eq(adaat.word)} is reckoned sometimes a verb and sometimes a particle, so ${eq(noun.word)} may take either naṣb or khafḍ — and here it is reckoned ${isFil?'a VERB, so the noun is its accusative object':'a PARTICLE, so the noun is makhfūḍ by it'}.`});
   return{ids,ar,en};
  }
  if(rel.type==='tamyiz'){
@@ -15529,6 +16697,11 @@ function attachWhyExplanations(data){
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
    return;
   }
+  if(rel.type==='istithnaNaqis'||rel.type==='istithnaKhala'){
+   const recipient=data.tokens.find(item=>item.id===rel.nounId);
+   if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
+   return;
+  }
   if(rel.type==='tamyiz'){
    const recipient=data.tokens.find(item=>item.id===rel.tamyizId);
    if(recipient&&recipient.phraseAr)recipient.phraseWhy=buildRelationshipWhy(rel,data);
@@ -15679,15 +16852,66 @@ function renderRelationshipAnalysis(data){
   const mustathna=data.tokens.find(item=>item.id===rel.mustathnaId);
   const tool=ISTITHNA_TOOLS[rel.toolKey];
   if(!verb||!whole||!mustathna||!tool)return;
-  /* The whole clause is quoted, because «تام موجب» is a claim about the clause: the مستثنى منه
-     has to be visible in it for the exception to be complete at all. */
+  /* The whole clause is quoted, because the REGIME is a claim about the clause: the مستثنى منه has
+     to be visible in it for the exception to be complete at all, and the نفي — where there is one
+     — has to be visible before the أداة. Wave 6 states which regime this is and, when the source
+     leaves both readings open, that the other one exists. */
+  const negation=rel.negationId?data.tokens.find(item=>item.id===rel.negationId):null;
   const complement=mustathna.grammar.isMudaf?data.tokens[data.tokens.indexOf(mustathna)+1]:null;
   const toolWord=tool.kind===ISTITHNA_TOOL_KINDS.particle?tool.surface:'';
-  const phrase=[verb.word,whole.word,toolWord,mustathna.word,complement?complement.word:''].filter(Boolean).join(' ');
-  mustathna.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: كَلَامٌ تَامٌّ مُوجَبٌ، ذُكِرَ فِيهِ الْمُسْتَثْنَى مِنْهُ ${wq(whole.word)}، فَوَجَبَ نَصْبُ الْمُسْتَثْنَى عَلَى الِاسْتِثْنَاءِ.`;
-  mustathna.phraseEn=`Together, “${phrase}” is complete affirmative speech in which the مستثنى منه “${whole.word}” is mentioned, so the excepted noun must be accusative on istithnāʾ.`;
+  const phrase=[negation?negation.word:'',verb.word,whole.word,toolWord,mustathna.word,
+   complement?complement.word:''].filter(Boolean).join(' ');
+  if(rel.regime===ISTITHNA_REGIMES.tammManfi){
+   /* The block names BOTH readings — the one on screen and the one that is equally open — because
+      that is what p. 164 says, and a learner shown only one would read a جواز as a وجوب. */
+   const shown=ISTITHNA_OPTION_LABELS[rel.option];
+   const other=ISTITHNA_OPTION_LABELS[rel.option===ISTITHNA_OPTIONS.badal?ISTITHNA_OPTIONS.nasb:ISTITHNA_OPTIONS.badal];
+   mustathna.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: كَلَامٌ ${ISTITHNA_REGIME_LABELS.tammManfi.bareAr}، ذُكِرَ فِيهِ الْمُسْتَثْنَى مِنْهُ ${wq(whole.word)} وَتَقَدَّمَتْهُ ${wq(negation?negation.word:'')} النَّافِيَةُ، ${ISTITHNA_BOTH_READINGS_AR}: هَذَا هُوَ ${shown.ar}، ${shown.rankAr}، وَيَجُوزُ فِيهِ ${other.ar}، ${other.rankAr}.`;
+   mustathna.phraseEn=`Together, “${phrase}” is complete but NEGATED speech: the مستثنى منه “${whole.word}” is mentioned and “${negation?negation.word:''}” precedes it, so BOTH readings are open. This exercise shows ${shown.en}, ${shown.rankEn}; ${other.en} is equally available, ${other.rankEn}.`;
+  }else{
+   mustathna.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: كَلَامٌ ${ISTITHNA_REGIME_LABELS.tammMujab.bareAr}، ذُكِرَ فِيهِ الْمُسْتَثْنَى مِنْهُ ${wq(whole.word)}، فَوَجَبَ نَصْبُ الْمُسْتَثْنَى عَلَى الِاسْتِثْنَاءِ.`;
+   mustathna.phraseEn=`Together, “${phrase}” is complete affirmative speech in which the مستثنى منه “${whole.word}” is mentioned, so the excepted noun must be accusative on istithnāʾ.`;
+  }
   mustathna.phraseLabel='Istithnāʾ construction';
  });
+ /* الحالة الثالثة — its combined block has to say what is MISSING, because that is the whole
+    reason the noun is not a مستثنى. */
+ data.relationships.filter(rel=>rel.type==='istithnaNaqis').forEach(rel=>{
+  const verb=data.tokens.find(item=>item.id===rel.verbId);
+  const noun=data.tokens.find(item=>item.id===rel.nounId);
+  const illa=data.tokens.find(item=>item.id===rel.illaId);
+  const negation=data.tokens.find(item=>item.id===rel.negationId);
+  if(!verb||!noun||!illa||!negation)return;
+  const roleAr={faail:'فَاعِلًا مَرْفُوعًا',object:'مَفْعُولًا بِهِ مَنْصُوبًا',
+   majrur:'مَخْفُوضًا بِحَرْفِ الْخَفْضِ'}[rel.role];
+  const roleEn={faail:'the fāʿil of “'+verb.word+'”, and so nominative',
+   object:'the mafʿūl bihi of “'+verb.word+'”, and so accusative',
+   majrur:'makhfūḍ by the particle of khafḍ that “'+verb.word+'” requires'}[rel.role];
+  const phrase=data.tokens.map(item=>item.word).join(' ');
+  noun.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: كَلَامٌ ${ISTITHNA_REGIME_LABELS.naqis.bareAr}؛ لِأَنَّ الْمُسْتَثْنَى مِنْهُ لَمْ يُذْكَرْ فِيهِ أَصْلًا، وَالنَّاقِصُ لَا يَكُونُ إِلَّا مَنْفِيًّا، وَحِينَئِذٍ يَجْرِي الِاسْمُ بَعْدَ ${wq(illa.word)} عَلَى حَسَبِ مَا قَبْلَهَا مِنَ الْعَوَامِلِ، فَجَاءَ ${wq(noun.word)} ${roleAr} لِـ${wq(verb.word)}، وَلَيْسَ مُسْتَثْنًى مَنْصُوبًا.`;
+  noun.phraseEn=`Together, “${phrase}” is INCOMPLETE speech: the group the exception would be taken from is never mentioned at all, and incomplete speech of this kind is always negated. So the noun after “${illa.word}” simply runs on the ʿāmil before it — “${noun.word}” is ${roleEn}, and NOT an accusative mustathnā.`;
+  noun.phraseLabel='Istithnāʾ construction';
+ });
+ /* النوع الثالث. Its combined block has to name the OTHER reading, because the choice is the
+    lesson — except where «ما» المصدرية has closed it, and then it has to say that instead. */
+ (()=>{
+  const authority=deriveIstithnaKhalaAuthority(data,null);
+  if(!authority.authorized)return;
+  const noun=data.tokens.find(item=>item.id===authority.nounId);
+  const adaat=data.tokens.find(item=>item.id===authority.adaatId);
+  const whole=data.tokens.find(item=>item.id===authority.wholeId);
+  if(!noun||!adaat||!whole)return;
+  const phrase=data.tokens.map(item=>item.word).join(' ');
+  if(authority.masdariyya){
+   noun.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: تَقَدَّمَتْ «${ISTITHNA_MA_MASDARIYYA.surface}» الْمَصْدَرِيَّةُ عَلَى ${wq(adaat.word)}، وَهِيَ لَا تَدْخُلُ إِلَّا عَلَى الْأَفْعَالِ؛ فَتَعَيَّنَ كَوْنُهَا فِعْلًا، وَوَجَبَ نَصْبُ ${wq(noun.word)} عَلَى الْمَفْعُولِيَّةِ، وَامْتَنَعَ خَفْضُهُ.`;
+   noun.phraseEn=`Together, “${phrase}”: the maṣdar-forming mā stands before “${adaat.word}”, and it enters only upon verbs — so “${adaat.word}” must be a verb here, “${noun.word}” must be its accusative object, and the khafḍ reading is no longer available.`;
+  }else{
+   const isFil=authority.reading===ISTITHNA_KHALA_READINGS.fil;
+   noun.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: ${wq(adaat.word)} مِمَّا يُسْتَعْمَلُ فِعْلًا تَارَةً وَحَرْفًا تَارَةً أُخْرَى، وَالْمُسْتَثْنَى مِنْهُ ${wq(whole.word)} مَذْكُورٌ؛ فَيَجُوزُ فِي ${wq(noun.word)} النَّصْبُ وَالْخَفْضُ جَمِيعًا، وَهَذَا هُوَ ${isFil?'وَجْهُ النَّصْبِ عَلَى تَقْدِيرِهَا فِعْلًا':'وَجْهُ الْخَفْضِ عَلَى تَقْدِيرِهَا حَرْفًا'}.`;
+   noun.phraseEn=`Together, “${phrase}”: “${adaat.word}” is one of the three words used sometimes as a verb and sometimes as a particle, and the مستثنى منه “${whole.word}” is mentioned — so “${noun.word}” may take EITHER naṣb or khafḍ. ${isFil?'This exercise takes the naṣb, reckoning it a verb.':'This exercise takes the khafḍ, reckoning it a particle.'}`;
+  }
+  noun.phraseLabel='Istithnāʾ construction';
+ })();
  data.relationships.filter(rel=>rel.type==='tamyiz').forEach(rel=>{
   const verb=data.tokens.find(item=>item.id===rel.verbId);
   const tamyiz=data.tokens.find(item=>item.id===rel.tamyizId);
@@ -16079,9 +17303,21 @@ function validateExercise(data){
     if(!authority.authorized)fail('E_TAWKID_AUTHORITY',`Tawkīd authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_TAWKID')fail('E_TAWKID_RULE','The tawkīd is not bound to its source rule.',token);
    }else if(token.grammar.role==='badal'){
-    const authority=deriveBadalFollowerAuthority(data,data.tokens.indexOf(token));
-    if(!authority.authorized)fail('E_BADAL_AUTHORITY',`Badal authority failed: ${authority.reason}.`,token);
-    else if(token.ruleId!=='R_BADAL')fail('E_BADAL_RULE','The badal is not bound to its source rule.',token);
+    /* Wave 6 — two badal authorities, and a token must satisfy exactly the one its structure
+       proves. The exception badal is checked first; an ordinary badal template cannot reach it and
+       an exception frame cannot fall back to the follower registry, so neither can be validated by
+       the other's proof, and the rule each is bound to differs with it. */
+    const istithna=deriveIstithnaBadalAuthority(data,data.tokens.indexOf(token));
+    if(istithna.authorized){
+     if(token.ruleId!=='R_MUSTATHNA_BADAL_TAMM_MANFI'){
+      fail('E_BADAL_RULE','The exception badal is not bound to its source rule.',token);
+     }
+     if(token.state!=='raf')fail('E_ROLE_CASE',`An إتباع on badaliyyah must follow its marfūʿ mubdal minhu, not take ${token.state}.`,token);
+    }else{
+     const authority=deriveBadalFollowerAuthority(data,data.tokens.indexOf(token));
+     if(!authority.authorized)fail('E_BADAL_AUTHORITY',`Badal authority failed: ${authority.reason}.`,token);
+     else if(token.ruleId!=='R_BADAL')fail('E_BADAL_RULE','The badal is not bound to its source rule.',token);
+    }
    }else if(token.grammar.role===MAFUL_FIH_ROLE){
     /* Like the absolute object, this role's state comes from the rule table rather than being
        inherited, so the state is checked here in addition to the lexical licence. */
@@ -16145,7 +17381,13 @@ function validateExercise(data){
    }else if(token.grammar.role===MUSTATHNA_ROLE){
     const authority=deriveMustathnaAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_MUSTATHNA_AUTHORITY',`Mustathnā authority failed: ${authority.reason}.`,token);
-    else if(token.ruleId!=='R_MUSTATHNA_NASB')fail('E_MUSTATHNA_RULE','The mustathnā is not bound to its source rule.',token);
+    /* Wave 6 — WHICH rule is decided by the regime the authority just proved, not by the token's
+       own claim. p. 163 makes the first ḥāl's naṣb obligatory and p. 164 makes the second's
+       permissible, so a منفي frame carrying the وجوب rule would be teaching the wrong thing. */
+    else if(token.ruleId!==(authority.regime===ISTITHNA_REGIMES.tammManfi
+      ?'R_MUSTATHNA_NASB_TAMM_MANFI':'R_MUSTATHNA_NASB')){
+     fail('E_MUSTATHNA_RULE','The mustathnā is not bound to the source rule its regime requires.',token);
+    }
     if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mustathna requires nasb, not ${token.state}.`,token);
    }else if(token.grammar.role===TAMYIZ_ROLE){
     const authority=deriveTamyizAuthority(data,data.tokens.indexOf(token));
@@ -16680,12 +17922,41 @@ function validateExercise(data){
   }
   if(rel.type==='istithna'){
    const mustathna=tokenById.get(rel.mustathnaId);
-   const authority=deriveMustathnaAuthority(data,data.tokens.indexOf(mustathna));
+   const index=data.tokens.indexOf(mustathna);
+   /* Wave 6 — the exclusion link is re-derived through whichever of the two readings this token
+      actually wears, and the reading recorded on the link must be that one. A link claiming the
+      badal reading over a منصوب token, or the naṣb reading over a مرفوع one, fails here. */
+   const authority=mustathna?.grammar?.role==='badal'
+    ?deriveIstithnaBadalAuthority(data,index)
+    :deriveMustathnaAuthority(data,index);
    if(!authority.authorized||rel.verbId!==authority.verbId||rel.wholeId!==authority.wholeId
      ||rel.mustathnaId!==authority.mustathnaId||rel.pairKey!==authority.pairKey
      ||rel.toolKey!==authority.toolKey||rel.toolKind!==authority.toolKind
-     ||rel.toolId!==authority.toolId){
+     ||rel.toolId!==authority.toolId||rel.regime!==authority.regime||rel.option!==authority.option
+     ||rel.negationId!==(authority.negationId||'')){
     fail('E_MUSTATHNA_RELATION','Istithnāʾ relationship is not the canonical exclusion proof.',mustathna);
+   }
+  }
+  /* الحالة الثالثة's link, proven the same way and against its own authority. */
+  if(rel.type==='istithnaNaqis'){
+   const noun=tokenById.get(rel.nounId);
+   const authority=deriveIstithnaNaqisAuthority(data,data.tokens.indexOf(noun));
+   if(!authority.authorized||rel.verbId!==authority.verbId||rel.nounId!==authority.nounId
+     ||rel.illaId!==authority.illaId||rel.negationId!==authority.negationId
+     ||rel.frameKey!==authority.frameKey||rel.role!==authority.role
+     ||rel.state!==authority.state||rel.prepId!==authority.prepId){
+    fail('E_ISTITHNA_NAQIS_RELATION','Incomplete-exception relationship is not the canonical proof.',noun);
+   }
+  }
+  if(rel.type==='istithnaKhala'){
+   const noun=tokenById.get(rel.nounId);
+   const authority=deriveIstithnaKhalaAuthority(data,data.tokens.indexOf(noun));
+   if(!authority.authorized||rel.verbId!==authority.verbId||rel.wholeId!==authority.wholeId
+     ||rel.adaatId!==authority.adaatId||rel.nounId!==authority.nounId
+     ||rel.frameKey!==authority.frameKey||rel.toolKey!==authority.toolKey
+     ||rel.reading!==authority.reading||Boolean(rel.masdariyya)!==Boolean(authority.masdariyya)
+     ||rel.state!==authority.state||rel.masdariyyaId!==authority.masdariyyaId){
+    fail('E_ISTITHNA_KHALA_RELATION','خلا-family relationship is not the canonical proof.',noun);
    }
   }
   if(rel.type==='haal'&&rel.mahall){
@@ -16760,6 +18031,24 @@ function validateExercise(data){
   }
  });
  data.tokens.filter(item=>item.grammar.role==='badal').forEach(item=>{
+  /* Wave 6 — an exception badal carries the ISTITHNĀʾ link instead of a follower link, and it must
+     carry it just as strictly: exactly one, reciprocal, naming this very token. Its head is the
+     مستثنى منه across «إلا», which is not a follower relationship at all. */
+  const istithna=deriveIstithnaBadalAuthority(data,data.tokens.indexOf(item));
+  if(istithna.authorized){
+   const link=relationships.find(candidate=>candidate.id===item.relations.istithnaRelationshipId
+     &&candidate.type==='istithna');
+   const head=tokenById.get(item.relations.wholeId);
+   if(!link||link.mustathnaId!==item.id||link.wholeId!==head?.id
+     ||link.option!==ISTITHNA_OPTIONS.badal||head?.relations.mustathnaId!==item.id
+     ||head?.relations.istithnaRelationshipId!==link.id){
+    fail('E_BADAL_RELATION','An exception badal must have exactly one reciprocal canonical link to its mustathnā minhu.',item);
+   }
+   if(relationships.filter(candidate=>candidate.type==='follower'&&candidate.followerId===item.id).length){
+    fail('E_BADAL_RELATION_COUNT','An exception badal must not also carry an ordinary follower relationship.',item);
+   }
+   return;
+  }
   const rel=relationships.find(candidate=>candidate.id===item.relations.followerRelationshipId&&candidate.type==='follower');
   const followed=tokenById.get(item.relations.followedId);
   if(!rel||rel.kind!==BADAL_KIND||rel.followerId!==item.id||rel.followedId!==followed?.id
@@ -17315,12 +18604,69 @@ function add(starts,form,state,sign,build,metadata={}){
   throw new Error(`Template ${stableId} names a duplicate or unregistered istithnāʾ pair.`);
  }
  if(mustathnaPairKeys.length){
-  const shapes=new Set(mustathnaPairKeys.map(key=>MUSTATHNA_PAIR_REGISTRY[key].toolKey));
-  if(shapes.size!==1)throw new Error(`Template ${stableId} mixes istithnāʾ أدوات.`);
+  /* Wave 6 — a template owns one أداة KIND, one regime and one reading. The kind decides the token
+     shape, the regime decides the frame's length (a منفي frame carries its نفي first) and the
+     reading decides the target's state, so a template mixing any of the three would be one stable
+     ID authorizing more than one structure. The four أدوات of p. 162's second نوع DO share a
+     template: they are the same shape, and rotating them is the point of that نوع. */
+  const kinds=new Set(mustathnaPairKeys.map(key=>ISTITHNA_TOOLS[MUSTATHNA_PAIR_REGISTRY[key].toolKey].kind));
+  if(kinds.size!==1)throw new Error(`Template ${stableId} mixes istithnāʾ أداة kinds.`);
+  const regimes=new Set(mustathnaPairKeys.map(key=>MUSTATHNA_PAIR_REGISTRY[key].regime));
+  if(regimes.size!==1)throw new Error(`Template ${stableId} mixes istithnāʾ regimes.`);
+  const options=new Set(mustathnaPairKeys.map(key=>MUSTATHNA_PAIR_REGISTRY[key].option));
+  if(options.size!==1)throw new Error(`Template ${stableId} mixes the two readings of the second ḥāl.`);
+  const [option]=[...options];
+  /* The declared state is the TARGET's. In every lane but one that is the excepted word itself; in
+     the مقصور lane the target is its مضاف إليه, because a word that shows no sign cannot be the
+     thing the learner is asked to sign. The declension must be uniform for the same reason. */
+  const inflections=new Set(mustathnaPairKeys.map(key=>ISTITHNA_TOOLS[MUSTATHNA_PAIR_REGISTRY[key].toolKey].inflection||'singular'));
+  if(inflections.size!==1)throw new Error(`Template ${stableId} mixes istithnāʾ أداة declensions.`);
+  const [toolInflection]=[...inflections];
+  const targetIsTool=!(kinds.has(ISTITHNA_TOOL_KINDS.noun)&&toolInflection==='maqsur');
+  if(state!==(targetIsTool?ISTITHNA_OPTION_STATES[option]:'jarr')){
+   throw new Error(`Template ${stableId} declares a state its istithnāʾ reading does not produce.`);
+  }
   if(form!=='singular')throw new Error(`Template ${stableId} declares a mustathnā of the wrong declension.`);
   if(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
    throw new Error(`Template ${stableId} produces a mustathnā without the explicit past ʿāmil its تام condition requires.`);
   }
+ }
+ /* الحالة الثالثة. Its own key list, because its frames have no مستثنى منه and no مستثنى role, so
+    they may never be reachable from a template that claims to produce one. */
+ const istithnaNaqisKeys=Object.freeze([...(metadata.istithnaNaqisKeys||[])]);
+ if(istithnaNaqisKeys.some((key,position)=>istithnaNaqisKeys.indexOf(key)!==position||!ISTITHNA_NAQIS_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered nāqiṣ istithnāʾ frame.`);
+ }
+ if(istithnaNaqisKeys.length){
+  if(mustathnaPairKeys.length){
+   throw new Error(`Template ${stableId} claims both a complete and an incomplete exception.`);
+  }
+  const roles=new Set(istithnaNaqisKeys.map(key=>ISTITHNA_NAQIS_REGISTRY[key].role));
+  if(roles.size!==1)throw new Error(`Template ${stableId} mixes the three ʿāmil readings of the third ḥāl.`);
+  const [role]=[...roles];
+  const expected={faail:'raf',object:'nasb',majrur:'jarr'}[role];
+  if(state!==expected)throw new Error(`Template ${stableId} declares a state its ʿāmil does not impose.`);
+  if(form!=='singular')throw new Error(`Template ${stableId} declares a nāqiṣ istithnāʾ noun of the wrong declension.`);
+ }
+ /* النوع الثالث. Likewise its own, and a template owns ONE reading: the whole lesson is that the
+    same three words take naṣb on one reading and khafḍ on the other. */
+ const istithnaKhalaKeys=Object.freeze([...(metadata.istithnaKhalaKeys||[])]);
+ if(istithnaKhalaKeys.some((key,position)=>istithnaKhalaKeys.indexOf(key)!==position||!ISTITHNA_KHALA_REGISTRY[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered خلا frame.`);
+ }
+ if(istithnaKhalaKeys.length){
+  if(mustathnaPairKeys.length||istithnaNaqisKeys.length){
+   throw new Error(`Template ${stableId} mixes the خلا family with another istithnāʾ lane.`);
+  }
+  const readings=new Set(istithnaKhalaKeys.map(key=>ISTITHNA_KHALA_REGISTRY[key].reading));
+  if(readings.size!==1)throw new Error(`Template ${stableId} mixes the verb and ḥarf readings of خلا.`);
+  const masdariyya=new Set(istithnaKhalaKeys.map(key=>Boolean(ISTITHNA_KHALA_REGISTRY[key].masdariyya)));
+  if(masdariyya.size!==1)throw new Error(`Template ${stableId} mixes frames with and without «ما» المصدرية.`);
+  const [reading]=[...readings];
+  if(state!==(reading===ISTITHNA_KHALA_READINGS.fil?'nasb':'jarr')){
+   throw new Error(`Template ${stableId} declares a state its خلا reading does not produce.`);
+  }
+  if(form!=='singular')throw new Error(`Template ${stableId} declares a خلا noun of the wrong declension.`);
  }
  /* التمييز. One template owns one division: a template mixing تمييز ذات and تمييز نسبة pairs would
     make a single ID authorize two different analyses of the same token shape. */
@@ -17403,6 +18749,8 @@ function add(starts,form,state,sign,build,metadata={}){
   haalPairKeys,
   tamyizPairKeys,
   mustathnaPairKeys,
+  istithnaNaqisKeys,
+  istithnaKhalaKeys,
   laJinsPairKeys,
   mafulAjlPairKeys,
   mafulMaahPairKeys,
@@ -18542,24 +19890,132 @@ function buildMustathnaExercise(pairKey){
  const verb=mustathnaVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
  if(registeredVerb?.form!=='past')throw new Error(`Istithnāʾ pair ${pairKey} names an unregistered ʿāmil.`);
  const whole=mustathnaWhole(pair.wholeEn);
- const tokens=[
-  token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),'A past-tense event with an explicit subject.'),
-  token(whole.nom,whole.en,AR.faail(whole.nom),'The group the exception is taken from; mentioning it is what makes the speech complete.')
- ];
+ const badal=pair.option===ISTITHNA_OPTIONS.badal;
+ const formKey=badal?'nom':'acc';
+ const tokens=[];
+ /* الحالة الثانية opens with the نفي, and it is a real token with its own card: p. 164 makes the
+    regime turn on «تقدُّم «ما» النافية», so the learner has to be able to parse the word that does
+    it. Nothing about the regime is declared on the exercise; it follows from this token being here. */
+ if(pair.regime===ISTITHNA_REGIMES.tammManfi){
+  tokens.push(token(ISTITHNA_MA_NAFIYA.surface,ISTITHNA_MA_NAFIYA.gloss,
+   AR.istithnaMaNafiya(),'The negation that makes the speech منفي rather than مُوجَب.'));
+ }
+ tokens.push(token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),'A past-tense event with an explicit subject.'));
+ tokens.push(token(whole.nom,whole.en,AR.faail(whole.nom),'The group the exception is taken from; mentioning it is what makes the speech complete.'));
  if(tool.kind===ISTITHNA_TOOL_KINDS.particle){
   tokens.push(token(tool.surface,tool.gloss,AR.istithnaParticle(tool),''));
-  tokens.push(token(lexeme.acc,lexeme.en,AR.mustathna(lexeme.acc),
-   'The individual excepted from the group; accusative on istithnāʾ.',true));
+  tokens.push(badal
+   ?token(lexeme.nom,lexeme.en,AR.badal(lexeme.nom),
+     'The individual the ruling really intends; it follows the مستثنى منه as a badal.',true)
+   :token(lexeme.acc,lexeme.en,AR.mustathna(lexeme.acc),
+     'The individual excepted from the group; accusative on istithnāʾ.',true));
  }else{
-  tokens.push(token(tool.acc,tool.en,AR.mustathnaMudaf(tool.acc),
-   'The excepting noun itself; it takes the ruling of the noun after إلا.',true));
-  tokens.push(token(lexeme.gen,lexeme.en,AR.mudafIlayh(lexeme.gen),EN.mudafIlayh));
+  /* Which token the exercise ASKS about. For غَيْر and سَوَاء it is the أداة, whose case is the
+     lesson. For the two مقصور أدوات the target moves to the مضاف إليه — «مجرور لا غير», also the
+     lesson — because a مقصور word shows no sign to answer with; its own estimated sign is still
+     rendered in full on its own card. */
+  const targetIsTool=tool.inflection!=='maqsur';
+  tokens.push(badal
+   ?token(tool.nom,tool.en,AR.istithnaBadalMudaf(tool.nom),
+     'The excepting noun itself, following the مستثنى منه as a badal.',targetIsTool)
+   :token(tool.acc,tool.en,AR.mustathnaMudaf(tool.acc),
+     'The excepting noun itself; it takes the ruling of the noun after إلا.',targetIsTool));
+  tokens.push(token(lexeme.gen,lexeme.en,AR.mudafIlayh(lexeme.gen),
+   targetIsTool?EN.mudafIlayh:'What the أداة is annexed to; p. 164 makes it makhfūḍ and nothing else.',!targetIsTool));
  }
  return{sentence:'',translation:pair.sentenceEn,tokens};
 }
-const mustathnaKeys=toolKey=>Object.freeze(MUSTATHNA_ALL_PAIR_KEYS.filter(key=>MUSTATHNA_PAIR_REGISTRY[key].toolKey===toolKey));
-const MUSTATHNA_ILLA_KEYS=mustathnaKeys('illa');
-const MUSTATHNA_GHAYR_KEYS=mustathnaKeys('ghayr');
+/* الحالة الثالثة. The builder's whole job is to put the ʿāmil, «إلا» and the noun in place and let
+   the noun wear the role that ʿāmil imposes — no مستثنى role is available to it at all. */
+function buildIstithnaNaqisExercise(frameKey){
+ const frame=ISTITHNA_NAQIS_REGISTRY[frameKey];
+ if(!frame)throw new Error(`Unknown productive nāqiṣ istithnāʾ frame: ${frameKey}`);
+ const verb=frame.verbEn?mustathnaTransitiveVerb(frame.verbEn,frame.objectEn):mustathnaVerb(frame.verb);
+ const registeredVerb=verbFormIndex.get(verb.past);
+ if(registeredVerb?.form!=='past')throw new Error(`Nāqiṣ istithnāʾ frame ${frameKey} names an unregistered ʿāmil.`);
+ const tokens=[
+  token(ISTITHNA_MA_NAFIYA.surface,ISTITHNA_MA_NAFIYA.gloss,AR.istithnaMaNafiya(),
+   'The negation without which incomplete speech of this kind does not occur.'),
+  token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),
+   'The ʿāmil standing before «إلا»; it is what decides the case of the noun after it.')
+ ];
+ if(frame.subjectEn){
+  const subject=frame.subjectEn==='the students'||frame.subjectEn==='the men'
+   ?mustathnaWhole(frame.subjectEn)
+   :singularPeople.find(item=>item.en===frame.subjectEn);
+  if(!subject)throw new Error(`Nāqiṣ istithnāʾ frame ${frameKey} names an unregistered subject.`);
+  tokens.push(token(subject.nom,subject.en,AR.faail(subject.nom),
+   'The doer. It is NOT the مستثنى منه: nothing in this sentence names the group the exception is taken from.'));
+ }
+ tokens.push(token(ISTITHNA_TOOLS.illa.surface,ISTITHNA_TOOLS.illa.gloss,
+  AR.istithnaParticle(ISTITHNA_TOOLS.illa),''));
+ if(frame.role==='majrur'){
+  const place=mustathnaPlace(frame.placeEn);
+  tokens.push(token(frame.prep,GLOSS_CLOSED_PARTICLES[frame.prep],AR.prep(frame.prep),EN.prep));
+  tokens.push(token(place.gen,place.en,AR.majrur(place.gen,frame.prep),
+   'What the ʿāmil actually governs, across «إلا»: makhfūḍ by the particle, not an accusative mustathnā.',true));
+ }else if(frame.role==='object'){
+  const object=verb.object;
+  tokens.push(token(object.acc,object.en,AR.object(object.acc),
+   'What the ʿāmil actually governs, across «إلا»: its object, not an accusative mustathnā.',true));
+ }else{
+  const noun=MUSTATHNA_LEXEMES[frame.nounKey].lexeme;
+  tokens.push(token(noun.nom,noun.en,AR.faail(noun.nom),
+   'What the ʿāmil actually governs, across «إلا»: its fāʿil, and so nominative rather than accusative.',true));
+ }
+ return{sentence:'',translation:frame.sentenceEn,tokens};
+}
+/* النوع الثالث. The reading the frame declares decides which identity the أداة token is BUILT with,
+   and the authority then re-derives that reading from the token actually present. */
+function buildIstithnaKhalaExercise(frameKey){
+ const frame=ISTITHNA_KHALA_REGISTRY[frameKey];
+ if(!frame)throw new Error(`Unknown productive خلا frame: ${frameKey}`);
+ const tool=ISTITHNA_TOOLS[frame.toolKey],lexeme=MUSTATHNA_LEXEMES[frame.mustathnaKey].lexeme;
+ const verb=mustathnaVerb(frame.verb),registeredVerb=verbFormIndex.get(verb.past);
+ if(registeredVerb?.form!=='past')throw new Error(`خلا frame ${frameKey} names an unregistered ʿāmil.`);
+ const whole=mustathnaWhole(frame.wholeEn);
+ const isFil=frame.reading===ISTITHNA_KHALA_READINGS.fil;
+ const tokens=[
+  token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),'A past-tense event with an explicit subject.'),
+  token(whole.nom,whole.en,AR.faail(whole.nom),'The group the exception is taken from.')
+ ];
+ if(frame.masdariyya){
+  tokens.push(token(ISTITHNA_MA_MASDARIYYA.surface,ISTITHNA_MA_MASDARIYYA.gloss,
+   AR.istithnaMaMasdariyya(),'The maṣdar-forming mā; it enters only upon verbs, and that closes the choice.'));
+ }
+ if(isFil){
+  tokens.push(token(tool.surface,tool.gloss,AR.past(tool.surface,{person:'3ms-alif-lazima'}),
+   'Read here as a past verb whose fāʿil is a pronoun concealed obligatorily.'));
+  tokens.push(token(lexeme.acc,lexeme.en,AR.object(lexeme.acc),
+   'Its object on that reading; accusative.',true));
+ }else{
+  tokens.push(token(tool.surface,tool.gloss,AR.istithnaKhalaHarf(tool),
+   'Read here as a particle of khafḍ and exception.'));
+  tokens.push(token(lexeme.gen,lexeme.en,AR.majrur(lexeme.gen,tool.surface),
+   'Makhfūḍ by the أداة on that reading.',true));
+ }
+ return{sentence:'',translation:frame.sentenceEn,tokens};
+}
+/* A lane's key set is now (regime, reading, أداة kind) — not the أداة alone. Two pairs that differ
+   in regime produce differently shaped frames, so a lane that mixed them would offer the picker a
+   choice its own structure cannot honour. */
+const mustathnaKeys=(regime,option,predicate)=>Object.freeze(MUSTATHNA_ALL_PAIR_KEYS.filter(key=>{
+ const pair=MUSTATHNA_PAIR_REGISTRY[key];
+ return pair.regime===regime&&pair.option===option&&predicate(pair,ISTITHNA_TOOLS[pair.toolKey]);
+}));
+const isIllaTool=(pair,tool)=>tool.kind===ISTITHNA_TOOL_KINDS.particle;
+const isNounTool=(pair,tool)=>tool.kind===ISTITHNA_TOOL_KINDS.noun;
+/* …and the اسم أدوات split once more, by DECLENSION. غَيْر and سَوَاء are ordinary singulars whose
+   fatḥah is visible; سِوَى and سُوَى are مقصور and cannot show one. They therefore cannot share a
+   template: a template declares one form and one sign for its target, and these two groups have
+   different ones. In the مقصور lane the target is the مضاف إليه — a plain singular in khafḍ — so
+   the أداة still renders its own estimated sign in full without the filter having to offer a
+   declension no other chapter uses. */
+const isSoundNounTool=(pair,tool)=>tool.kind===ISTITHNA_TOOL_KINDS.noun&&tool.inflection==='singular';
+const isMaqsurNounTool=(pair,tool)=>tool.kind===ISTITHNA_TOOL_KINDS.noun&&tool.inflection==='maqsur';
+const MUSTATHNA_ILLA_KEYS=mustathnaKeys(ISTITHNA_REGIMES.tammMujab,ISTITHNA_OPTIONS.nasb,isIllaTool);
+const MUSTATHNA_GHAYR_KEYS=mustathnaKeys(ISTITHNA_REGIMES.tammMujab,ISTITHNA_OPTIONS.nasb,isSoundNounTool);
+const MUSTATHNA_MAQSUR_KEYS=mustathnaKeys(ISTITHNA_REGIMES.tammMujab,ISTITHNA_OPTIONS.nasb,isMaqsurNounTool);
 const mustathnaMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),mustathnaPairKeys:keys});
 const pickedMustathna=(keys,label)=>buildMustathnaExercise(pickVaried(keys,label,String));
 add('verb','singular','nasb','fatha',()=>pickedMustathna(MUSTATHNA_ILLA_KEYS,'mustathna-illa'),mustathnaMetadata(MUSTATHNA_ILLA_KEYS));
@@ -19405,6 +20861,83 @@ for(const frameKey of TAWKID_CHAIN_FRAME_KEYS){
  add('particle','smp','jarr','ya',()=>buildTawkidChainExercise(frameKey,'jarr'),
   tawkidChainMetadata(frameKey));
 }
+
+/* ── Wave 6 — باب الاستثناء pp. 162–165, the two أحوال the app did not produce and the أدوات it
+   did not reach. Registered LAST, for the reason spelled out above the Wave-5 block: a stableId's
+   ordinal is its registration order within its (start, form, state, sign) family, and the
+   translation structure map pins those ids.
+
+   One template per (regime × reading × أداة kind), never one template offering a choice: two pairs
+   that differ in regime produce differently shaped frames, and a template that could build either
+   would be a template whose own structure key is not fixed. */
+const istithnaMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),mustathnaPairKeys:keys});
+const pickedIstithna=(keys,label)=>buildMustathnaExercise(pickVaried(keys,label,String));
+
+/* «سِوَى» و«سُوَى» on the first ḥāl. The template's declared target is the مضاف إليه, so it
+   registers under jarr/kasra; the أداة above it is the مقصور word carrying an estimated fatḥah,
+   which is what p. 21 and p. 164 together require and the one place in this app a NOUN's sign is
+   estimated. Registered here at the end with the rest of Wave 6, per the ordering rule above. */
+add('verb','singular','jarr','kasra',()=>pickedMustathna(MUSTATHNA_MAQSUR_KEYS,'w6-mustathna-maqsur'),
+ istithnaMetadata(MUSTATHNA_MAQSUR_KEYS));
+
+const MUSTATHNA_MANFI_ILLA_NASB_KEYS=mustathnaKeys(ISTITHNA_REGIMES.tammManfi,ISTITHNA_OPTIONS.nasb,isIllaTool);
+const MUSTATHNA_MANFI_ILLA_BADAL_KEYS=mustathnaKeys(ISTITHNA_REGIMES.tammManfi,ISTITHNA_OPTIONS.badal,isIllaTool);
+const MUSTATHNA_MANFI_NOUN_NASB_KEYS=mustathnaKeys(ISTITHNA_REGIMES.tammManfi,ISTITHNA_OPTIONS.nasb,isNounTool);
+const MUSTATHNA_MANFI_NOUN_BADAL_KEYS=mustathnaKeys(ISTITHNA_REGIMES.tammManfi,ISTITHNA_OPTIONS.badal,isNounTool);
+
+/* الحالة الثانية, النصب على الاستثناء — the target keeps naṣb and the fatḥah. */
+add('particle','singular','nasb','fatha',()=>pickedIstithna(MUSTATHNA_MANFI_ILLA_NASB_KEYS,'w6-manfi-illa-nasb'),
+ istithnaMetadata(MUSTATHNA_MANFI_ILLA_NASB_KEYS));
+add('particle','singular','nasb','fatha',()=>pickedIstithna(MUSTATHNA_MANFI_NOUN_NASB_KEYS,'w6-manfi-noun-nasb'),
+ istithnaMetadata(MUSTATHNA_MANFI_NOUN_NASB_KEYS));
+/* الحالة الثانية, الإتباع على البدلية — the target now takes RAFʿ, because «بدل المرفوع مرفوع».
+   That the same chapter, the same أداة and nearly the same sentence can put the target in two
+   different states is exactly what p. 164 is teaching. */
+add('particle','singular','raf','damma',()=>pickedIstithna(MUSTATHNA_MANFI_ILLA_BADAL_KEYS,'w6-manfi-illa-badal'),
+ istithnaMetadata(MUSTATHNA_MANFI_ILLA_BADAL_KEYS));
+add('particle','singular','raf','damma',()=>pickedIstithna(MUSTATHNA_MANFI_NOUN_BADAL_KEYS,'w6-manfi-noun-badal'),
+ istithnaMetadata(MUSTATHNA_MANFI_NOUN_BADAL_KEYS));
+
+/* الحالة الثالثة — one template per ʿāmil, because the ʿāmil is the whole point: the target is a
+   فاعل مرفوع in one, a مفعول به منصوب in the next and a مخفوض in the third, from the same أداة. */
+const istithnaNaqisKeysFor=role=>Object.freeze(ISTITHNA_NAQIS_ALL_KEYS
+ .filter(key=>ISTITHNA_NAQIS_REGISTRY[key].role===role));
+const istithnaNaqisMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),istithnaNaqisKeys:keys});
+const pickedIstithnaNaqis=(keys,label)=>buildIstithnaNaqisExercise(pickVaried(keys,label,String));
+add('particle','singular','raf','damma',()=>pickedIstithnaNaqis(istithnaNaqisKeysFor('faail'),'w6-naqis-faail'),
+ istithnaNaqisMetadata(istithnaNaqisKeysFor('faail')));
+add('particle','singular','nasb','fatha',()=>pickedIstithnaNaqis(istithnaNaqisKeysFor('object'),'w6-naqis-object'),
+ istithnaNaqisMetadata(istithnaNaqisKeysFor('object')));
+add('particle','singular','jarr','kasra',()=>pickedIstithnaNaqis(istithnaNaqisKeysFor('majrur'),'w6-naqis-majrur'),
+ istithnaNaqisMetadata(istithnaNaqisKeysFor('majrur')));
+
+/* النوع الثالث — three templates: the verb reading, the ḥarf reading, and the «ما» المصدرية case
+   that closes the choice. Each rotates through all three أدوات, so the learner meets خلا, عدا and
+   حاشا in every one of the readings p. 165 gives them. */
+const istithnaKhalaKeysFor=predicate=>Object.freeze(ISTITHNA_KHALA_ALL_KEYS
+ .filter(key=>predicate(ISTITHNA_KHALA_REGISTRY[key])));
+/* A خلا frame on the verb reading contains TWO past verbs — the ʿāmil, whose fāʿil is the explicit
+   مستثنى منه, and the أداة, whose fāʿil is concealed — so the template has to authorize both. The
+   ḥarf reading contains only the first; declaring both there anyway would let a ḥarf-reading
+   template accept a verb-reading token, so the capability list follows the reading. */
+const istithnaKhalaMetadata=keys=>{
+ const verbReading=keys.some(key=>ISTITHNA_KHALA_REGISTRY[key].reading===ISTITHNA_KHALA_READINGS.fil);
+ const base=pastTemplateMetadata('3ms','explicit');
+ return{...base,istithnaKhalaKeys:keys,
+  pastCapabilities:verbReading
+   ?[...base.pastCapabilities,{person:'3ms-alif-lazima',subjectMode:'implicit'}]
+   :base.pastCapabilities};
+};
+const pickedIstithnaKhala=(keys,label)=>buildIstithnaKhalaExercise(pickVaried(keys,label,String));
+const KHALA_FIL_KEYS=istithnaKhalaKeysFor(frame=>frame.reading===ISTITHNA_KHALA_READINGS.fil&&!frame.masdariyya);
+const KHALA_HARF_KEYS=istithnaKhalaKeysFor(frame=>frame.reading===ISTITHNA_KHALA_READINGS.harf);
+const KHALA_MASDARIYYA_KEYS=istithnaKhalaKeysFor(frame=>frame.masdariyya);
+add('verb','singular','nasb','fatha',()=>pickedIstithnaKhala(KHALA_FIL_KEYS,'w6-khala-fil'),
+ istithnaKhalaMetadata(KHALA_FIL_KEYS));
+add('verb','singular','jarr','kasra',()=>pickedIstithnaKhala(KHALA_HARF_KEYS,'w6-khala-harf'),
+ istithnaKhalaMetadata(KHALA_HARF_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedIstithnaKhala(KHALA_MASDARIYYA_KEYS,'w6-khala-masdariyya'),
+ istithnaKhalaMetadata(KHALA_MASDARIYYA_KEYS));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

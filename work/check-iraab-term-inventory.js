@@ -636,6 +636,134 @@ if (wave5.length !== WAVE5_KEYS.length) fail('the Wave-5 row set did not resolve
   if (!bySemantic.has('kull') || !bySemantic.get('kull')) fail('كُلّ is no longer registered to license أجمع');
 }
 
+/* ── Wave 6 — بَابُ الِاسْتِثْنَاءِ, pp. 162–165 ─────────────────────────────────────────────
+   The wave started with SIX non-FULL rows in this chapter. Five were implementable and are pinned
+   FULL here; one — الِاسْتِثْنَاءُ الْمُنْقَطِعُ — turned out not to be taught by this source at all and
+   moved to `sourceExcluded`, on the same standing rule Wave 5 established.
+
+   ONE of the five is pinned under a NEW key, and the rename is itself part of the proof. The row
+   authored as «الِاسْتِثْنَاءُ الْمُفَرَّغُ» named a regime this book teaches in full but a WORD it never
+   uses. Renaming it to the source's own «كَلَامٍ نَاقِصٍ» is a terminology correction, not a new
+   target, so both directions are pinned: the source's term must be a counted FULL row, and the
+   imported one must never come back as a row or as rendered iʿrāb.
+
+   Beyond status, the wave's content is pinned STRUCTURALLY, because five FULL rows can be produced
+   by an engine that has understood none of the chapter:
+     · all three of p. 163's أحوال must be reachable, and each must render a DIFFERENT regime label
+       — otherwise تام موجب and تام منفي have collapsed into one lesson;
+     · the second ḥāl must be reachable in BOTH readings p. 164 leaves open, and they must differ in
+       the state they give the excepted word (naṣb vs rafʿ), or the جواز has become a وجوب;
+     · the third ḥāl must NEVER give its noun the مستثنى role — that is the entire content of
+       p. 164's third case, and the easiest thing in this chapter to get wrong;
+     · all four of p. 162's اسم أدوات must be produced, and the two مقصور ones must carry an
+       estimated sign rather than a visible one;
+     · خلا/عدا/حاشا must be reachable in both of p. 165's readings AND after «ما» المصدرية. */
+const WAVE6_KEYS = ['B_GHAYR', 'B_ISTITHNA_TAMM_MANFI', 'B_ISTITHNA_NAQIS',
+  'B_ISTITHNA_SIWA', 'B_ISTITHNA_KHALA'];
+const WAVE6_SOURCE_EXCLUDED = ['الِاسْتِثْنَاءُ الْمُنْقَطِعُ'];
+/* The imported term and its bare head word: a later wave that started using it would write
+   «مُفَرَّغٌ» on its own, never the dictionary phrase, so watching only the phrase would let the
+   correction be quietly undone. «مُنْقَطِعٌ» is watched for the same reason. */
+const WAVE6_EXCLUDED_SURFACES = ['الْمُفَرَّغُ', 'مُفَرَّغٌ', 'الْمُنْقَطِعُ', 'مُنْقَطِعٌ'];
+const wave6 = WAVE6_KEYS.map(key => {
+  const row = observed.find(r => r.key === key);
+  if (!row) fail('Wave-6 row ' + key + ' is missing from the inventory');
+  return row;
+}).filter(Boolean);
+for (const row of wave6) {
+  if (!/^باب الاستثناء/.test(row.chapter)) {
+    fail('Wave-6 row ' + row.key + ' is not in the wave scope: ' + row.chapter);
+  }
+  if (row.status !== 'FULL') fail('Wave-6 row ' + row.key + ' is ' + row.status + ', not FULL');
+}
+if (wave6.length !== WAVE6_KEYS.length) fail('the Wave-6 row set did not resolve');
+{
+  const excludedTerms = new Set(sourceExcluded.map(item => skeleton(item.term)));
+  const rowTerms = new Set(rows.map(r => skeleton(r.term)));
+  for (const term of WAVE6_SOURCE_EXCLUDED) {
+    const t = skeleton(term);
+    if (!excludedTerms.has(t)) fail('«' + term + '» is not pinned in sourceExcluded');
+    if (rowTerms.has(t)) fail('«' + term + '» came back as a counted row after being source-excluded');
+  }
+  for (const surface of WAVE6_EXCLUDED_SURFACES) {
+    if (standalone(surface).size) {
+      fail('«' + surface + '» is not this source term but the app now renders it in the iʿrāb; ' +
+        'if the book does use it, the correction must be retired deliberately');
+    }
+  }
+  /* The whole chapter must be a counted, FULL block — no row of باب الاستثناء may be left behind. */
+  const chapterRows = rows.filter(r => /^باب الاستثناء/.test(r.chapter));
+  const chapterObserved = observed.filter(r => /^باب الاستثناء/.test(r.chapter));
+  if (chapterRows.length !== 7) fail('باب الاستثناء holds ' + chapterRows.length + ' rows, not the seven it should');
+  const notFull = chapterObserved.filter(r => r.status !== 'FULL');
+  if (notFull.length) fail('باب الاستثناء still has non-FULL rows: ' + notFull.map(r => r.key).join(', '));
+
+  /* ── Structure, read out of the app rather than out of this file ──────────────────────── */
+  const regimes = api.ISTITHNA_REGIMES || {};
+  const regimeLabels = api.ISTITHNA_REGIME_LABELS || {};
+  if (Object.keys(regimes).length !== 3) {
+    fail('p. 163 gives the noun after «إلا» three أحوال; the app models ' + Object.keys(regimes).length);
+  }
+  {
+    const seen = new Set(Object.keys(regimes).map(k => skeleton(regimeLabels[k] && regimeLabels[k].ar)));
+    if (seen.size !== 3) fail('two of the three أحوال render the same label, so a learner cannot tell them apart');
+  }
+  const pairs = Object.values(api.MUSTATHNA_PAIR_REGISTRY || {});
+  for (const [regime, option, page] of [['tammMujab', 'nasb', '163'], ['tammManfi', 'nasb', '164'], ['tammManfi', 'badal', '164']]) {
+    if (!pairs.some(pr => pr.regime === regime && pr.option === option)) {
+      fail('no istithnāʾ frame produces ' + regime + '/' + option + ', which p. ' + page + ' teaches');
+    }
+  }
+  /* The two readings of the second ḥāl must genuinely differ in the state they give the word. */
+  {
+    const states = new Set(pairs.filter(pr => pr.regime === 'tammManfi').map(pr => pr.option));
+    if (states.size !== 2) fail('p. 164 leaves two readings open; the app produces ' + states.size);
+    const optionLabels = api.ISTITHNA_OPTION_LABELS || {};
+    if (!optionLabels.nasb || !optionLabels.badal
+      || skeleton(optionLabels.nasb.ar) === skeleton(optionLabels.badal.ar)) {
+      fail('the two readings of p. 164 are not named apart');
+    }
+  }
+  /* The third ḥāl: all three ʿāmil readings present, and none of them a مستثنى. */
+  const naqis = Object.values(api.ISTITHNA_NAQIS_REGISTRY || {});
+  for (const role of (api.ISTITHNA_NAQIS_ROLES || [])) {
+    if (!naqis.some(f => f.role === role)) fail('the third ḥāl never produces its ' + role + ' reading');
+  }
+  if (!naqis.length) fail('the third ḥāl has no registered frames at all');
+  if (naqis.some(f => f.role === api.MUSTATHNA_ROLE)) {
+    fail('a nāqiṣ frame gives its noun the مستثنى role, which is exactly what p. 164 denies');
+  }
+  /* p. 162's second نوع, all four, and the two مقصور ones carrying an estimated sign. */
+  const nounTools = api.ISTITHNA_NOUN_TOOLS || [];
+  if (nounTools.length !== 4) fail('p. 162 makes four أدوات «اسماً دائماً»; the app registers ' + nounTools.length);
+  const maqsur = nounTools.filter(t => t.inflection === 'maqsur');
+  if (maqsur.length !== 2) fail('سِوَى and سُوَى are the two مقصور أدوات; the app marks ' + maqsur.length);
+  {
+    const cell = (api.GRAMMAR_RULES.nounInflection.maqsur || {}).nasb;
+    if (!cell || cell[0] !== 'fathaMuqaddaraTaadhdhur') fail('the مقصور أدوات no longer take p. 21 estimated sign');
+  }
+  for (const tool of nounTools) {
+    if (!pairs.some(pr => pr.toolKey === tool.key)) fail('the اسم أداة «' + tool.acc + '» is registered but never produced');
+  }
+  /* p. 162's third نوع, in both readings and after «ما» المصدرية. */
+  const dualTools = api.ISTITHNA_DUAL_TOOLS || [];
+  if (dualTools.length !== 3) fail('p. 162 makes three أدوات both حرف and فعل; the app registers ' + dualTools.length);
+  const khala = Object.values(api.ISTITHNA_KHALA_REGISTRY || {});
+  for (const tool of dualTools) {
+    for (const reading of Object.values(api.ISTITHNA_KHALA_READINGS || {})) {
+      if (!khala.some(f => f.toolKey === tool.key && f.reading === reading && !f.masdariyya)) {
+        fail('«' + tool.surface + '» is never produced in its ' + reading + ' reading, which p. 165 gives it');
+      }
+    }
+    if (!khala.some(f => f.toolKey === tool.key && f.masdariyya)) {
+      fail('«' + tool.surface + '» never appears after «ما» المصدرية, which p. 165 makes decisive');
+    }
+  }
+  if (khala.some(f => f.masdariyya && f.reading !== 'fil')) {
+    fail('a «ما» المصدرية frame keeps the ḥarf reading, which p. 165 closes');
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -670,6 +798,9 @@ console.log(JSON.stringify({
   wave4: { name: 'باب النعت', target: WAVE4_KEYS.length, full: wave4Full, trueBlocker: wave4Blocked },
   wave5: { name: 'باب التوكيد', target: WAVE5_KEYS.length, full: wave5Full,
     sourceExcluded: WAVE5_SOURCE_EXCLUDED.length },
+  wave6: { name: 'باب الاستثناء', target: WAVE6_KEYS.length + WAVE6_SOURCE_EXCLUDED.length,
+    full: wave6.filter(r => r.status === 'FULL').length,
+    sourceExcluded: WAVE6_SOURCE_EXCLUDED.length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

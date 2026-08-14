@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,laJinsPairKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseTarget,haalMahallFrameKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],laJinsPairKeys:[...laJinsPairKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,laJinsPairKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseTarget,haalMahallFrameKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],laJinsPairKeys:[...laJinsPairKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -425,6 +425,35 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   KANA_OPERATION_CLAUSE_AR,
   KANA_NO_MAHALL_AR,
   KANA_SISTERS_OF_AR,
+  /* Wave 4 — بَابُ النَّعْتِ. */
+  NAAT_SUBTYPE_LABELS,
+  NAAT_SABABI_KIND,
+  NAAT_SABABI_MARFU_ROLE,
+  NAAT_SABABI_MANUT_DIMENSIONS,
+  NAAT_SABABI_MARFU_DIMENSIONS,
+  SABABI_FRAME_REGISTRY,
+  SABABI_MARFU_LEXEMES,
+  SABABI_LEXEMES,
+  SABABI_ALL_FRAME_KEYS,
+  ALAM_LEXEMES,
+  ISHARA_LEXEMES,
+  ISHARA_BINAA_SIGNS,
+  ISHARA_MAHALL,
+  ATTACHED_DAMIR_REGISTRY,
+  AID_FOR_ANTECEDENT,
+  MARIFA_KINDS,
+  MARIFA_KIND_LABELS,
+  MARIFA_SURFACE_KINDS,
+  marifaClauseAr,
+  attachedDamirClauseAr,
+  deriveMarifaKind,
+  deriveMarifaKindAuthority,
+  deriveNaatSababiAuthority,
+  deriveNaatSubtypeAuthority,
+  deriveSababiMarfuAuthority,
+  deriveIsharaAuthority,
+  isBuiltIshara,
+  carriesAl,
   ROLE_RULE_VARIANTS,
   MA_DAMA_FRAMES,
   kanaSisterRecord,
@@ -4521,7 +4550,7 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 // G_LAMMA_JAZM, G_LAM_AMR_JAZM and G_LA_NAHIYA_JAZM are three new governors, and G_HAMZAT_TAQRIR
 // owns هَمْزَةُ التَّقْرِيرِ's identity WITHOUT any government — أَلَمْ and أَلَمَّا are governed by the
 // existing G_LAM_JAZM and by G_LAMMA_JAZM, so neither needs a governor rule of its own.
-assert(Object.keys(api.SOURCE_REGISTRY).length===186,`Expected 186 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===196,`Expected 196 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -9121,7 +9150,7 @@ for(const t of api.templates){
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
   // J1a appends exactly ten: five one-verb jawāzim × the two proven jazm regimes. All are appended,
   // so every pre-existing stableId is unchanged — pinned directly below by keeping لَمْ at _01.
-  assert(api.templates.length===226,`Expected 226 templates after Phase 2, found ${api.templates.length}`);
+  assert(api.templates.length===230,`Expected 230 templates after Phase 2, found ${api.templates.length}`);
   assert(api.templates.filter(t=>t.state==='jazm').map(t=>t.stableId).join(' | ')
     ==='T_NOUN_PRESENT_JAZM_SUKUN_01 | T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_01 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_02 | T_PARTICLE_PRESENT_JAZM_SUKUN_03 | T_PARTICLE_PRESENT_JAZM_SUKUN_04 | T_PARTICLE_PRESENT_JAZM_SUKUN_05 | T_PARTICLE_PRESENT_JAZM_SUKUN_06 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06 | T_PARTICLE_PRESENT_JAZM_SUKUN_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_08 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08 | T_PARTICLE_PRESENT_JAZM_SUKUN_09 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_10 | T_PARTICLE_PRESENT_JAZM_SUKUN_11 | T_PARTICLE_PRESENT_JAZM_SUKUN_12 | T_PARTICLE_PRESENT_JAZM_SUKUN_13 | T_PARTICLE_PRESENT_JAZM_SUKUN_14 | T_PARTICLE_PRESENT_JAZM_SUKUN_15 | T_PARTICLE_PRESENT_JAZM_SUKUN_16 | T_PARTICLE_PRESENT_JAZM_SUKUN_17 | T_PARTICLE_PRESENT_JAZM_SUKUN_18 | T_PARTICLE_PRESENT_JAZM_SUKUN_19 | T_PARTICLE_PRESENT_JAZM_SUKUN_20 | T_PARTICLE_PRESENT_JAZM_SUKUN_21',
     'the jazm template ordinals shifted: لَمْ must keep _01 in both families and J1a/J1b must append only');
@@ -9203,12 +9232,13 @@ for(const t of api.templates){
   /* Phase 3B1 opens إِذَنْ over the MUʿRAB lane only. The maḥall-rule set is what proves the mabnī
      lane is untouched: a nūn-al-niswah form under إِذَنْ would need a maḥall rule of its own, and
      none exists, so the verb side of this set must stay exactly the three Phase 2b-C/3A2 rules.
-     TWO nouns own a maḥall rule — the built munādā (p. 169) and the interrogative ḥāl (p. 155) —
-     because neither has an iʿrāb of its own, so each position has to be recorded the same way the
-     mabnī present verb's is. Both are named here explicitly so no other noun can acquire one
-     silently, and the verb side stays exactly the four it has always been. */
+     THREE nouns own a maḥall rule — the built munādā (p. 169), the interrogative ḥāl (p. 155) and
+     the demonstrative (p. 22 for its bināʾ, p. 24 for the position) — because none of the three has
+     an iʿrāb of its own, so each position has to be recorded the same way the mabnī present verb's
+     is. All three are named here explicitly so no OTHER noun can acquire one silently, and the verb
+     side stays exactly the four it has always been. */
   assert([...mahallRules].sort().join(',')
-    ===[P4_AN_MAHALL,P4_KAY_MAHALL,P4_LAN_MAHALL,'R_MUNADA_MAHALL_NASB','R_HAAL_MAHALL_NASB','R_PRESENT_NUUN_NISWAH_MAHALL_JAZM_LAM'].sort().join(','),
+    ===[P4_AN_MAHALL,P4_KAY_MAHALL,P4_LAN_MAHALL,'R_MUNADA_MAHALL_NASB','R_HAAL_MAHALL_NASB','R_ISM_ISHARA_MAHALL_RAF','R_PRESENT_NUUN_NISWAH_MAHALL_JAZM_LAM'].sort().join(','),
     `Production reached an unexpected maḥall-rule set: ${[...mahallRules]}`);
   // No مبني nūn-al-niswah form under لَمْ or سَوْفَ, and no muʿrab form under a Phase 3A2 template.
   for(const name of Object.keys(p4Templates))for(let i=0;i<60;i++){
@@ -11600,13 +11630,18 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===226,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===230,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
      true-naʿt templates are appended and excluded from the inherited manifest comparison. */
   const concealedTemplateIds=Object.values(api.CONCEALED_AN_CONSTRUCTIONS).flatMap(item=>[item.ordinaryTemplateId,item.fiveTemplateId]);
   const naatTemplateIds=api.templates.filter(item=>item.followerKind===api.NAAT_KIND).map(item=>item.stableId);
+  /* Wave 4 — the سببي lanes and the demonstrative lane are appended and excluded from the
+     inherited manifest for the same reason the true-naʿt lanes are: they are new production, not a
+     change to an inherited stable ID. */
+  const sababiTemplateIds=api.templates.filter(item=>item.followerKind===api.NAAT_SABABI_KIND).map(item=>item.stableId);
+  const isharaTemplateIds=api.templates.filter(item=>item.isharaLexemeKeys.length).map(item=>item.stableId);
   const atfTemplateIds=api.templates.filter(item=>item.followerKind===api.ATF_KIND).map(item=>item.stableId);
   const tawkidTemplateIds=api.templates.filter(item=>item.followerKind===api.TAWKID_KIND).map(item=>item.stableId);
   const badalTemplateIds=api.templates.filter(item=>item.followerKind===api.BADAL_KIND).map(item=>item.stableId);
@@ -11623,7 +11658,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
   const zannaTemplateIds=api.templates.filter(item=>item.zannaPairKeys.length).map(item=>item.stableId);
   const khabarClauseTemplateIds=api.templates.filter(item=>item.khabarClauseFrameKeys.length).map(item=>item.stableId);
   const haalMahallTemplateIds=api.templates.filter(item=>item.haalMahallFrameKeys.length).map(item=>item.stableId);
-  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!sababiTemplateIds.includes(id)&&!isharaTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
@@ -13022,7 +13057,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===226,'the repair block changed the production template count');
+  assert(api.templates.length===230,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -13143,8 +13178,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===233,'the structural map holds '+registeredKeys.length+' keys, not 233');
-    assert(registeredShapes.length===76,'the shape registry holds '+registeredShapes.length+' shapes, not 74');
+    assert(registeredKeys.length===237,'the structural map holds '+registeredKeys.length+' keys, not 237');
+    assert(registeredShapes.length===79,'the shape registry holds '+registeredShapes.length+' shapes, not 79');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
     /* The 87 inherited keys and 22 inherited shapes are untouched: later productive lanes append
@@ -13155,6 +13190,13 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       const concealedKeys=registeredKeys.filter(key=>concealedTemplateIds.some(id=>key.startsWith(id+'||')));
       const naatTemplateIds=api.templates.filter(item=>item.followerKind===api.NAAT_KIND).map(item=>item.stableId);
       const naatKeys=registeredKeys.filter(key=>naatTemplateIds.some(id=>key.startsWith(id+'||')));
+      /* Wave 4 — the سببي lanes and the demonstrative lane own their own keys. The demonstrative
+         reuses an INHERITED shape (its English really is «X are Y»), so only its key is excluded
+         here; excluding the shape too would have retired a shape eight older lanes still use. */
+      const sababiTemplateIds=api.templates.filter(item=>item.followerKind===api.NAAT_SABABI_KIND).map(item=>item.stableId);
+      const sababiKeys=registeredKeys.filter(key=>sababiTemplateIds.some(id=>key.startsWith(id+'||')));
+      const isharaTemplateIds=api.templates.filter(item=>item.isharaLexemeKeys.length).map(item=>item.stableId);
+      const isharaKeys=registeredKeys.filter(key=>isharaTemplateIds.some(id=>key.startsWith(id+'||')));
       const atfTemplateIds=api.templates.filter(item=>item.followerKind===api.ATF_KIND).map(item=>item.stableId);
       const atfKeys=registeredKeys.filter(key=>atfTemplateIds.some(id=>key.startsWith(id+'||')));
       const tawkidTemplateIds=api.templates.filter(item=>item.followerKind===api.TAWKID_KIND).map(item=>item.stableId);
@@ -13187,8 +13229,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       const khabarClauseKeys=registeredKeys.filter(key=>khabarClauseTemplateIds.some(id=>key.startsWith(id+'||')));
       const haalMahallTemplateIds=api.templates.filter(item=>item.haalMahallFrameKeys.length).map(item=>item.stableId);
       const haalMahallKeys=registeredKeys.filter(key=>haalMahallTemplateIds.some(id=>key.startsWith(id+'||')));
-      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35','TS36','TS37','TS38','TS39','TS40','TS41','TS42','TS43','TS44','TS45','TS46','TS47','TS48','TS67','TS68','TS69'];
-      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
+      const laneShapes=['TS23','TS24','TS25','TS26','TS27','TS28','TS29','TS30','TS31','TS32','TS33','TS34','TS35','TS36','TS37','TS38','TS39','TS40','TS41','TS42','TS43','TS44','TS45','TS46','TS47','TS48','TS67','TS68','TS69','TS77','TS78','TS79'];
+      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===148,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===47,'the inherited shape set changed: '+inheritedShapes.length);
@@ -13223,7 +13265,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===226,'the map covers '+mappedTemplates.size+' templates, not 226');
+    assert(mappedTemplates.size===230,'the map covers '+mappedTemplates.size+' templates, not 230');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -13285,8 +13327,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===233,'only '+keysSeen.size+' of the 233 structural keys were observed');
-    assert(shapesSeen.size===76,'only '+shapesSeen.size+' of the 74 composer shapes were observed');
+    assert(keysSeen.size===237,'only '+keysSeen.size+' of the 237 structural keys were observed');
+    assert(shapesSeen.size===79,'only '+shapesSeen.size+' of the 79 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -13620,7 +13662,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===233,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===237,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -13955,7 +13997,9 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Wave 2 adds four tokens: two two-token attached-object lanes (the verb that carries نون
        الوقاية and the object yāʾ inside it, plus the explicit fāʿil that follows). The object is
        word-internal, so it adds components rather than tokens. */
-    assert([751,752,753,754].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 751-754 across the registered ʿaṭf context rotation)');
+    /* Wave 4 adds seventeen: three five-token سببي lanes — manʿūt, naʿt, the noun it raises, and
+       the two the host contributes — and one two-token demonstrative lane. */
+    assert([768,769,770,771].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 768-771 across the registered ʿaṭf context rotation)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -14144,7 +14188,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===226,'the presentation repair changed the template count');
+    assert(api.templates.length===230,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -16062,7 +16106,7 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===186,'the source-rule count does not include the J1a jawāzim rules or the Wave-2 attached-object rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===196,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules or the Wave-4 naʿt/maʿrifah rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
@@ -16084,9 +16128,9 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   }
   assert(!Object.prototype.hasOwnProperty.call(api.GRAMMAR_RULES.governors,'hamzatTaqrir'),
     'هَمْزَةُ التَّقْرِيرِ entered the governor table and could now govern');
-  assert(api.templates.length===226,'the production template count does not include the J1a additions');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===233
-    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===76,
+  assert(api.templates.length===230,'the production template count does not include the J1a additions');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===237
+    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===79,
     'the composer authority does not include the J1a mappings');
   p7Cases+=8;
 }
@@ -16413,10 +16457,16 @@ let q1Cases=0,q1Attacks=0;
         f.tokens.unshift(t);
       },'an unconditional sister handed a مَا it does not need');
     }
-    /* and the role/rule binding is not kāna-only: prove the general invariant is live by naming the
-       two roles that are allowed a variant, so a third cannot be added without this failing */
-    assert(api.ROLE_RULE_VARIANTS&&Object.keys(api.ROLE_RULE_VARIANTS).sort().join(',')==='haal,munada',
+    /* and the role/rule binding is not kāna-only: prove the general invariant is live by naming
+       EVERY role allowed a variant, so a further one cannot be added without this failing. Wave 4
+       added two, each with its own source proof: the naʿt, because pp. 116–118 give the role a
+       second قسم with its own agreement matrix, and the mubtadaʾ, because p. 22 makes the
+       demonstrative built and therefore possessed of a position instead of an iʿrāb sign. */
+    assert(api.ROLE_RULE_VARIANTS&&Object.keys(api.ROLE_RULE_VARIANTS).sort().join(',')==='haal,mubtada,munada,naat',
       'the role/rule variant allow-list changed; a new exception needs its own source proof');
+    assert(api.ROLE_RULE_VARIANTS.naat.join(',')==='R_NAAT_SABABI'
+      &&api.ROLE_RULE_VARIANTS.mubtada.join(',')==='R_ISM_ISHARA_MABNI',
+      'a Wave-4 role/rule variant names a rule other than the one its source proof covers');
     q1Cases+=2;
   }
 }
@@ -17077,7 +17127,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===226,`Expected 226 production templates, found ${api.templates.length}`);
+assert(api.templates.length===230,`Expected 230 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -17379,7 +17429,7 @@ console.log(`Appearance-mode audit passed: ${appearanceCases} groups; system/lig
 // ===================================================================================
 let whyCases=0;
 const bareAr=s=>s.replace(/[ـً-ْٰ]/g,'').replace(/[أإآٱ]/g,'ا');
-const WHY_ROLE_STATE={mafulAwwal:'nasb',mafulThani:'nasb',munada:'nasb',mafulMaah:'nasb',mafulAjl:'nasb',ismLa:'nasb',khabarLa:'raf',mustathna:'nasb',mubtada:'raf',khabar:'raf',faail:'raf',naibFail:'raf',object:'nasb',majrur:'jarr',mudafIlayh:'jarr',ismInna:'nasb',khabarInna:'raf',ismKana:'raf',khabarKana:'nasb',mafulMutlaq:'nasb',adverb:'nasb',haal:'nasb',tamyiz:'nasb'};
+const WHY_ROLE_STATE={mafulAwwal:'nasb',mafulThani:'nasb',munada:'nasb',mafulMaah:'nasb',mafulAjl:'nasb',ismLa:'nasb',khabarLa:'raf',mustathna:'nasb',mubtada:'raf',khabar:'raf',faail:'raf',naibFail:'raf',object:'nasb',majrur:'jarr',mudafIlayh:'jarr',ismInna:'nasb',khabarInna:'raf',ismKana:'raf',khabarKana:'nasb',mafulMutlaq:'nasb',adverb:'nasb',haal:'nasb',tamyiz:'nasb',naatSababiMarfu:'raf'};
 const whyRuleIds=new Set();
 let whyTokens=0,whyRels=0,whyFallbacks=0;
 function auditWhy(why,label,{max=4}={}){
@@ -17442,7 +17492,13 @@ function auditTokenWhy(tok,label,owner=null){
      tāʾ is the fāʿil, the nūn line denies it any place in iʿrāb, and the yāʾ line is the only place
      the object is analysed at all. */
   const attachedObjectVerb=/nuun-wiqaya/.test(tok.grammar?.morphology?.endingClass||'');
-  auditWhy(tok.why,label,governedByIdhan?{max:7}:governedByConcealedAn?{max:5}:badalFollower?{max:5}:absoluteObject?{max:6}:mafulFih?{max:5}:tamyiz?{max:5}:mustathna?{max:5}:ismLa?{max:5}:mafulAjl?{max:5}:munada?{max:5}:attachedObjectVerb?{max:5}:{});
+  /* Wave 4. The noun a سببي naʿt raises carries role, state, sign, the ʿāʾid line — which is the
+     only place the pronoun pointing back at the manʿūt is analysed at all — and the maʿrifah
+     classification p. 118 makes that pronoun the first kind of. A manʿūt classified by its
+     maʿrifah kind carries role, state, sign and that one extra classification line. */
+  const sababiMarfu=tok.grammar?.role===api.NAAT_SABABI_MARFU_ROLE;
+  const marifaClassified=Boolean(tok.grammar?.marifaKind);
+  auditWhy(tok.why,label,governedByIdhan?{max:7}:governedByConcealedAn?{max:5}:badalFollower?{max:5}:absoluteObject?{max:6}:mafulFih?{max:5}:tamyiz?{max:5}:mustathna?{max:5}:ismLa?{max:5}:mafulAjl?{max:5}:munada?{max:5}:attachedObjectVerb?{max:5}:sababiMarfu?{max:5}:marifaClassified?{max:5}:{});
   if(governedByIdhan){
     assert(api.WHY_IDHAN_CONDITIONS.every(line=>tok.why.ids.includes(line.id)),
       `${label}: an إِذَنْ-governed verb omits one of the three conditions`);
@@ -17469,8 +17525,13 @@ function auditTokenWhy(tok,label,owner=null){
       assert(!tok.sign&&api.builtNounBinaaMarker(tok),`${label}: built noun lacks a canonical bināʾ marker`);
       /* It must state the bināʾ AND the position. It may well mention rafʿ — the line's whole job
          is to say «وليس مرفوعا، بل هو في محل نصب» — so absence of the word is not the test. */
-      assert(ar.includes('مبني')&&ar.includes('محل')&&ar.includes('نصب'),
-        `${label}: a built munādā's Why does not state its bināʾ and maḥall`);
+      /* Wave 4 — read the position from the TOKEN rather than assuming naṣb. The built munādā and
+         the interrogative ḥāl both hold naṣb; the demonstrative holds rafʿ, and hard-coding the
+         one word would have let its Why omit its position entirely. */
+      const mahallWord={raf:'رفع',nasb:'نصب',jarr:'خفض'}[tok.mahall];
+      assert(mahallWord,`${label}: a built noun holds a position this audit cannot name`);
+      assert(ar.includes('مبني')&&ar.includes('محل')&&ar.includes(mahallWord),
+        `${label}: a built noun's Why does not state its bināʾ and maḥall`);
       assert(!/^[^.]*مرفوع(?!ا)/.test(ar)||ar.includes('ليس مرفوعا'),
         `${label}: a built munādā's Why asserts rafʿ`);
     }else{
@@ -17488,7 +17549,11 @@ function auditTokenWhy(tok,label,owner=null){
     }else{
       /* Each built construction states its bināʾ in its OWN rule: the munādā in a dedicated
          ruling line, the interrogative ḥāl in its state line, which is where its position lives. */
-      const binaaWhyId={[api.MUNADA_ROLE]:'WHY_MUNADA_MABNI',[api.HAAL_ROLE]:'WHY_STATE_HAAL_MAHALL'}[tok.grammar.role];
+      /* Wave 4 — the demonstrative is keyed by its own construction rather than by its role: the
+         role it holds is mubtadaʾ, which every other time is muʿrab, so a role lookup would have
+         claimed no built mubtadaʾ can exist. */
+      const binaaWhyId=api.isBuiltIshara(tok)?'WHY_STATE_ISHARA_MAHALL'
+        :{[api.MUNADA_ROLE]:'WHY_MUNADA_MABNI',[api.HAAL_ROLE]:'WHY_STATE_HAAL_MAHALL'}[tok.grammar.role];
       assert(binaaWhyId&&tok.why.ids.includes(binaaWhyId),`${label}: built noun carries no bināʾ Why rule`);
     }
     if(tok.inflection==='sfp'&&tok.state==='nasb')assert(ar.includes('نيابة عن الفتحة'),`${label}: SFP naṣb misses kasrah substitution`);
@@ -18500,6 +18565,281 @@ if(auditOutput){
 
   console.log(`Wave 2 بَابُ الْفَاعِلِ focused tests: ${positives} registry checks, ${components} learner-facing `+
     `component cards, ${history} History round trips, ${negatives} adversarial/forgery boundaries — green`);
+}
+
+
+/* ═══ Wave 4 — بَابُ النَّعْتِ focused tests ═══════════════════════════════════════════════
+   Two source systems, tested for the property that makes each of them real rather than labelled:
+     · النعت السببي is a THREE-token structure with its own agreement matrix (p. 118's «اثنين من
+       خمسة»), so every check below is against the tokens, never against the word «سببي»; and the
+       two أقسام are proved unable to be exchanged in EITHER direction.
+     · أقسام المعرفة are classifications derived from a word's own registered identity, so a proper
+       name cannot be relabelled a demonstrative and a word the app never registered cannot be
+       classified at all.
+   Every Arabic string this suite compares is read back OUT of the app. Nothing is typed here. */
+{
+  let positives=0,history=0,negatives=0;
+  const sababiTemplates=api.templates.filter(item=>item.followerKind===api.NAAT_SABABI_KIND);
+  const haqiqiTemplates=api.templates.filter(item=>item.followerKind===api.NAAT_KIND);
+  const isharaTemplates=api.templates.filter(item=>item.isharaLexemeKeys.length);
+  assert(sababiTemplates.length===3,'Wave 4: the sababi hosts are not p. 117’s three states');
+  assert(haqiqiTemplates.length===7,'Wave 4: the true-naʿt lane count changed');
+  assert(isharaTemplates.length===1,'Wave 4: the demonstrative lane is not exactly one');
+  const SABABI_AR=api.NAAT_SUBTYPE_LABELS[api.NAAT_SABABI_KIND].ar;
+  const HAQIQI_AR=api.NAAT_SUBTYPE_LABELS[api.NAAT_KIND].ar;
+  const naatIndexOf=data=>data.tokens.findIndex(item=>item.grammar.role==='naat');
+
+  /* ── positives: every frame, every state, every noun class the source runs it through ── */
+  const frames=new Map(),states=new Set(),manutForms=new Set(),marfuForms=new Set(),kinds=new Set();
+  for(const template of sababiTemplates){
+    for(let round=0;round<80;round++){
+      const data=api.buildTemplate(template.id);
+      api.renderExercise(data);
+      assert(api.validateExercise(data).length===0,'Wave 4: a sababi build does not validate clean');
+      const index=naatIndexOf(data);
+      const authority=api.deriveNaatSababiAuthority(data,index);
+      assert(authority.authorized,'Wave 4: a produced sababi naʿt is unauthorized: '+authority.reason);
+      assert(authority.kind===api.NAAT_SABABI_KIND,'Wave 4: a sababi lane produced the other qism');
+      const manut=data.tokens[index-1],naat=data.tokens[index],marfu=data.tokens[index+1];
+      const frame=api.SABABI_FRAME_REGISTRY[authority.frameKey];
+      const marfuRecord=api.SABABI_MARFU_LEXEMES[frame.marfuKey];
+      /* p. 117 — the naʿt follows the manʿūt's iʿrāb; the raised noun does not follow it at all. */
+      assert(naat.state===manut.state,'Wave 4: the sababi naʿt did not follow its manʿūt in iʿrāb');
+      assert(marfu.state==='raf','Wave 4: the raised noun is not nominative');
+      assert(marfu.grammar.role===api.NAAT_SABABI_MARFU_ROLE,'Wave 4: the raised noun lost its role');
+      /* p. 118 — «بل يكون مفرداً دائماً وأبداً», whatever the manʿūt is. */
+      assert(naat.inflection==='singular','Wave 4: a sababi naʿt is not singular');
+      /* p. 118 — the gender comes from the raised noun, not from the manʿūt. */
+      assert(frame.naat.gender===marfuRecord.gender,'Wave 4: the naʿt gender left the raised noun');
+      /* the قسم is on the learner's card, and the OTHER قسم's name is not. */
+      assert(naat.ar.includes(SABABI_AR),'Wave 4: the sababi naʿt card does not name its qism');
+      assert(!naat.ar.includes(HAQIQI_AR),'Wave 4: a sababi naʿt card also claims to be the true one');
+      /* p. 117 names the governor rather than saying a bare «فاعل». */
+      assert(marfu.ar.includes(naat.word),'Wave 4: the raised noun does not name the naʿt that raises it');
+      /* the ʿāʾid is analysed on that same card, and classified as the first kind of maʿrifah. */
+      const aid=api.ATTACHED_DAMIR_REGISTRY[authority.aid];
+      assert(marfu.ar.includes(api.attachedDamirClauseAr(aid)),'Wave 4: the ʿāʾid is not analysed on the raised noun');
+      assert(marfu.word.endsWith(aid.surface),'Wave 4: the raised noun does not carry its own ʿāʾid');
+      if(frame.manutKind){
+        assert(manut.ar.includes(api.marifaClauseAr(frame.manutKind)),'Wave 4: the manʿūt is not classified');
+        kinds.add(frame.manutKind);
+      }else{
+        assert(!/مَعْرِفَةٌ/.test(manut.ar),'Wave 4: an indefinite manʿūt was classified as a maʿrifah');
+      }
+      kinds.add(api.MARIFA_KINDS.damir);
+      frames.set(authority.frameKey,data);
+      states.add(authority.state);
+      manutForms.add(manut.inflection);
+      marfuForms.add(marfu.inflection);
+      positives++;
+    }
+  }
+  assert(frames.size===Object.keys(api.SABABI_FRAME_REGISTRY).length,
+    'Wave 4: only '+frames.size+' of the registered sababi frames were produced');
+  assert([...states].sort().join(',')==='jarr,nasb,raf','Wave 4: the sababi lanes do not cover all three states');
+  for(const form of ['singular','dual','broken','sfp']){
+    assert(manutForms.has(form),'Wave 4: no sababi frame gives its manʿūt the '+form+' declension');
+  }
+  for(const form of ['fiveNouns','singular']){
+    assert(marfuForms.has(form),'Wave 4: the raised noun never appears as a '+form);
+  }
+  /* the true naʿt is unchanged and still names its own قسم, so the two cards stay distinguishable */
+  for(const template of haqiqiTemplates){
+    const data=api.buildTemplate(template.id);
+    api.renderExercise(data);
+    const naat=data.tokens[naatIndexOf(data)];
+    assert(naat.ar.includes(HAQIQI_AR),'Wave 4: a true naʿt card does not name its qism');
+    assert(!naat.ar.includes(SABABI_AR),'Wave 4: a true naʿt card claims to be the causal one');
+    positives++;
+  }
+  /* the demonstrative: built, with a position and no sign, and classified as its own kind */
+  let isharaBase=null;
+  for(let round=0;round<20;round++){
+    const data=api.buildTemplate(isharaTemplates[0].id);
+    api.renderExercise(data);
+    assert(api.validateExercise(data).length===0,'Wave 4: a demonstrative build does not validate clean');
+    const token=data.tokens.find(item=>api.isBuiltIshara(item));
+    const authority=api.deriveIsharaAuthority(data,data.tokens.indexOf(token));
+    assert(authority.authorized,'Wave 4: a produced demonstrative is unauthorized: '+authority.reason);
+    assert(!token.state&&!token.sign,'Wave 4: a built demonstrative carries an iʿrāb state or sign');
+    assert(token.mahall===api.ISHARA_MAHALL.state,'Wave 4: the demonstrative lost its position');
+    assert(api.builtNounBinaaMarker(token)===api.ISHARA_BINAA_SIGNS[authority.binaaSignId],
+      'Wave 4: the demonstrative has no canonical bināʾ marker');
+    assert(token.ar.includes(api.marifaClauseAr(api.MARIFA_KINDS.ishara)),'Wave 4: the demonstrative is not classified');
+    kinds.add(api.MARIFA_KINDS.ishara);
+    isharaBase=data;
+    positives++;
+  }
+  /* all four PRODUCED kinds of maʿrifah are reached by real lanes — the fifth is the blocker */
+  const producedKinds=Object.entries(api.MARIFA_KIND_LABELS).filter(([,v])=>v.produced).map(([k])=>k);
+  assert(producedKinds.length===4,'Wave 4: the produced maʿrifah kinds are not four');
+  for(const kind of producedKinds)assert(kinds.has(kind),'Wave 4: no lane produces the maʿrifah kind '+kind);
+  assert(!api.MARIFA_KIND_LABELS[api.MARIFA_KINDS.mawsul].produced,'Wave 4: the relative noun is no longer the blocker');
+  let mawsulReached=false;
+  for(const [surface,kind] of api.MARIFA_SURFACE_KINDS){
+    if(kind===api.MARIFA_KINDS.mawsul)mawsulReached=true;
+    assert(api.deriveMarifaKind(surface)===kind,'Wave 4: a registered surface no longer derives its own kind: '+surface);
+  }
+  assert(!mawsulReached,'Wave 4: a surface now claims the relative-noun kind the blocker proof says nothing can');
+
+  /* ── History: build → snapshot → restore → validate → identical render ────────────── */
+  const roundTrip=(label,data)=>{
+    const snapshot=api.createExerciseSnapshot(data);
+    const restored=api.restoreExerciseSnapshot(clone(snapshot));
+    assert(restored,'Wave 4: '+label+' does not round-trip through History');
+    api.renderExercise(restored);
+    assert(api.validateExercise(restored).length===0,'Wave 4: '+label+' does not validate after restore');
+    assert(restored.tokens.map(t=>t.ar).join('|')===data.tokens.map(t=>t.ar).join('|'),
+      'Wave 4: '+label+' renders differently after a History round trip');
+    assert(restored.translation===data.translation,'Wave 4: '+label+' lost its canonical English');
+    history++;
+  };
+  for(const [key,data] of frames)roundTrip('sababi frame '+key,data);
+  roundTrip('the demonstrative lane',isharaBase);
+
+  /* ── negatives ────────────────────────────────────────────────────────────────────── */
+  const mustReject=(label,base,mutate,expected)=>{
+    const data=clone(base);mutate(data);
+    const failures=api.validateExercise(data);
+    assert(failures.some(item=>item.code===expected),
+      'Wave 4: '+label+' was accepted (wanted '+expected+', got '+(failures.map(i=>i.code).join(',')||'nothing')+')');
+    negatives++;
+  };
+  /* The negatives run against NAMED frames, not against whichever one the rotation happened to
+     leave first: a suite whose boundary count wobbles between runs is not a pin. */
+  const frameNamed=key=>{const data=frames.get(key);assert(data,'Wave 4: frame '+key+' was never produced');return data};
+  const anySababi=frameNamed('alamHisFather');
+  const sababiOf=data=>{const i=naatIndexOf(data);return{i,manut:data.tokens[i-1],naat:data.tokens[i],marfu:data.tokens[i+1]}};
+  const retype=(token,word)=>{token.word=word;token.surfaceHint=word;token.expectedSurface=word};
+  const haqiqiBase=(()=>{const d=api.buildTemplate(haqiqiTemplates[0].id);api.renderExercise(d);return d})();
+
+  /* 1–2 — the two أقسام, in both directions. Neither is a label the token may choose. */
+  mustReject('a true naʿt relabelled causal',haqiqiBase,
+    data=>{sababiOf(data).naat.grammar.naatKind=api.NAAT_SABABI_KIND},'E_NAAT_AUTHORITY');
+  mustReject('a causal naʿt relabelled true',anySababi,
+    data=>{sababiOf(data).naat.grammar.naatKind='naatHaqiqi'},'E_NAAT_AUTHORITY');
+  mustReject('a causal naʿt whose raised noun is deleted',anySababi,
+    data=>{const {i}=sababiOf(data);data.tokens.splice(i+1,1)},'E_NAAT_AUTHORITY');
+  /* 3 — a different manʿūt, spelled correctly and belonging to another frame in the same state.
+     Both frames below are singular definite, so nothing but the WORD changes. */
+  mustReject('the manut exchanged for another frame own manut',anySababi,
+    data=>{retype(sababiOf(data).manut,api.SABABI_FRAME_REGISTRY.alamHisMother.manut.nom)},'E_NAAT_AUTHORITY');
+  /* 4–6 — the three agreements, each broken on its own. The frame is definite, masculine and
+     singular, so each replacement below breaks exactly one of them and nothing else. */
+  mustReject('the naat made indefinite under a definite manut',anySababi,
+    data=>{retype(sababiOf(data).naat,api.SABABI_LEXEMES.sensibleIndefM.nom)},'E_NAAT_AUTHORITY');
+  mustReject('the naat given a gender its raised noun does not have',anySababi,
+    data=>{retype(sababiOf(data).naat,api.SABABI_LEXEMES.sensibleDefF.nom)},'E_NAAT_AUTHORITY');
+  mustReject('the naat made dual',anySababi,
+    data=>{const {naat}=sababiOf(data);retype(naat,api.NAAT_LEXEMES.hardworkingDual.nom);naat.inflection='dual'},'E_NAAT_AUTHORITY');
+  /* 7–8 — state and sign, each moved while the other is left alone. */
+  mustReject('the naʿt state changed while its sign is kept',anySababi,
+    data=>{const {naat}=sababiOf(data);naat.state=naat.state==='raf'?'nasb':'raf'},'E_NAAT_AUTHORITY');
+  mustReject('the naʿt sign changed while its state is kept',anySababi,
+    data=>{const {naat}=sababiOf(data);naat.sign={...naat.sign,id:naat.sign.id==='damma'?'fatha':'damma'}},'E_SIGN_CANONICAL');
+  /* 9 — the source rule of the other قسم. */
+  mustReject('the causal naʿt wearing the true naʿt’s rule',anySababi,
+    data=>{sababiOf(data).naat.ruleId=api.NAAT_SUBTYPE_LABELS[api.NAAT_KIND].ruleId},'E_NAAT_RULE');
+  mustReject('the raised noun wearing the naʿt’s rule',anySababi,
+    data=>{sababiOf(data).marfu.ruleId=api.NAAT_SUBTYPE_LABELS[api.NAAT_SABABI_KIND].ruleId},'E_NAAT_SABABI_MARFU_RULE');
+  /* 10 — the raised noun's own iʿrāb, and its ʿāʾid. */
+  mustReject('the raised noun made accusative',anySababi,
+    data=>{sababiOf(data).marfu.state='nasb'},'E_NAAT_SABABI_MARFU_AUTHORITY');
+  {
+    const {aid}=api.deriveNaatSababiAuthority(anySababi,naatIndexOf(anySababi));
+    const otherAid=Object.keys(api.ATTACHED_DAMIR_REGISTRY).find(id=>id!==aid);
+    mustReject('the ʿāʾid pointed at someone other than the manʿūt',anySababi,
+      data=>{sababiOf(data).marfu.grammar.attachedDamir=otherAid},'E_NAAT_SABABI_MARFU_AUTHORITY');
+  }
+  /* 11 — the follower relationship itself. */
+  mustReject('the follower relationship deleted',anySababi,
+    data=>{data.relationships=data.relationships.filter(rel=>rel.type!=='follower')},'E_NAAT_RELATION');
+  mustReject('the follower relationship claiming the other qism',anySababi,
+    data=>{const rel=data.relationships.find(r=>r.type==='follower');rel.kind='naatHaqiqi'},'E_FOLLOWER_RELATION');
+  /* 12 — bytes. A ḥarakah is part of the word. */
+  mustReject('a combining mark stripped from the naʿt',anySababi,
+    data=>{const {naat}=sababiOf(data);retype(naat,naat.word.slice(0,-1))},'E_NAAT_AUTHORITY');
+  /* 13 — a noun that is not a naʿt at all may not take the role. */
+  mustReject('an unrelated noun given the naʿt role',anySababi,
+    data=>{const last=data.tokens[data.tokens.length-1];last.grammar={...last.grammar,role:'naat'}},'E_NAAT_AUTHORITY');
+  /* 14 — أقسام المعرفة: a classification is derived, never declared. */
+  {
+    const classified=frameNamed('alamHisFather');
+    {
+      mustReject('a proper name relabelled a demonstrative',classified,
+        data=>{sababiOf(data).manut.grammar.marifaKind=api.MARIFA_KINDS.ishara},'E_MARIFA_KIND_AUTHORITY');
+      mustReject('a proper name relabelled the noun carrying أل',classified,
+        data=>{sababiOf(data).manut.grammar.marifaKind=api.MARIFA_KINDS.al},'E_MARIFA_KIND_AUTHORITY');
+      mustReject('a proper name relabelled a relative noun',classified,
+        data=>{sababiOf(data).manut.grammar.marifaKind=api.MARIFA_KINDS.mawsul},'E_MARIFA_KIND_AUTHORITY');
+    }
+    const indefiniteFrame=frameNamed('indefFather');
+    {
+      mustReject('an indefinite noun classified as a maʿrifah',indefiniteFrame,
+        data=>{sababiOf(data).manut.grammar.marifaKind=api.MARIFA_KINDS.al},'E_MARIFA_KIND_AUTHORITY');
+    }
+  }
+  /* 15 — the demonstrative: built means built. */
+  mustReject('the demonstrative given an iʿrāb state',isharaBase,
+    data=>{data.tokens.find(t=>api.isBuiltIshara(t)).state='raf'},'E_ISHARA_AUTHORITY');
+  mustReject('the demonstrative given another position',isharaBase,
+    data=>{data.tokens.find(t=>api.isBuiltIshara(t)).mahall='nasb'},'E_ISHARA_AUTHORITY');
+  mustReject('the demonstrative given a bināʾ marker the source does not state',isharaBase,
+    data=>{data.tokens.find(t=>api.isBuiltIshara(t)).binaaSign='damma'},'E_ISHARA_AUTHORITY');
+  mustReject('the demonstrative surface exchanged',isharaBase,
+    data=>{retype(data.tokens.find(t=>api.isBuiltIshara(t)),api.NAAT_LEXEMES.hardworkingSmp.nom)},'E_ISHARA_AUTHORITY');
+  mustReject('the demonstrative stripped of its maʿrifah classification',isharaBase,
+    data=>{delete data.tokens.find(t=>api.isBuiltIshara(t)).grammar.marifaKind},'E_ISHARA_MARIFA');
+  mustReject('the demonstrative wearing another rule',isharaBase,
+    data=>{data.tokens.find(t=>api.isBuiltIshara(t)).ruleId='R_MUNADA_MABNI'},'E_ROLE_RULE_OWNER');
+
+  /* 16 — a role belongs to a token type. Found by trying it rather than by reading: a particle
+     handed this chapter’s new noun role was accepted, because the three roles a particle could
+     already borrow were each rejected by some OTHER structural invariant and this one had none. */
+  mustReject('a particle wearing the raised noun role',haqiqiBase,
+    data=>{const particle=data.tokens.find(item=>item.grammar.type==='particle');
+      particle.grammar={...particle.grammar,role:api.NAAT_SABABI_MARFU_ROLE}},'E_ROLE_TYPE');
+  mustReject('a particle wearing the naat role',haqiqiBase,
+    data=>{const particle=data.tokens.find(item=>item.grammar.type==='particle');
+      particle.grammar={...particle.grammar,role:'naat'}},'E_ROLE_TYPE');
+  /* 17 — order is structure: the raised noun stands AFTER the naʿt, never before it. */
+  mustReject('the raised noun placed before its naat',anySababi,
+    data=>{const i=naatIndexOf(data);const moved=data.tokens.splice(i+1,1)[0];data.tokens.splice(i,0,moved)},'E_NAAT_AUTHORITY');
+  mustReject('the sababi lane run under the other host template id',anySababi,
+    data=>{data.templateId=sababiTemplates.find(item=>item.stableId!==data.templateId).stableId},'E_TEMPLATE_METADATA');
+  mustReject('the sababi lane run under a true-naat template id',anySababi,
+    data=>{data.templateId=haqiqiTemplates[0].stableId},'E_NAAT_AUTHORITY');
+  /* ── History forgery: a snapshot may not carry either لقب across a restore ────────── */
+  {
+    const snapshot=api.createExerciseSnapshot(anySababi);
+    const flipped=clone(snapshot);
+    for(const token of flipped.tokens)if(token.grammar&&token.grammar.role==='naat')token.grammar.naatKind='naatHaqiqi';
+    assert(!api.restoreExerciseSnapshot(flipped),'Wave 4: a snapshot claiming the other qism restored anyway');
+    negatives++;
+    const reframed=clone(snapshot);
+    const otherFrame=Object.keys(api.SABABI_FRAME_REGISTRY).find(key=>
+      key!==api.deriveNaatSababiAuthority(anySababi,naatIndexOf(anySababi)).frameKey);
+    for(const token of reframed.tokens)if(token.grammar&&token.grammar.role==='naat')token.grammar.sababiFrameKey=otherFrame;
+    assert(!api.restoreExerciseSnapshot(reframed),'Wave 4: a snapshot claiming another frame restored anyway');
+    negatives++;
+    const declassified=clone(snapshot);
+    for(const token of declassified.tokens)if(token.grammar&&token.grammar.marifaKind){
+      token.grammar.marifaKind=api.MARIFA_KINDS.ishara;
+    }
+    const restored=api.restoreExerciseSnapshot(declassified);
+    assert(!restored,'Wave 4: a snapshot relabelling a maʿrifah kind restored anyway');
+    negatives++;
+    const isharaSnapshot=api.createExerciseSnapshot(isharaBase);
+    const inflected=clone(isharaSnapshot);
+    for(const token of inflected.tokens)if(token.grammar&&token.grammar.isharaKey){token.state='raf';token.mahall='';}
+    assert(!api.restoreExerciseSnapshot(inflected),'Wave 4: a snapshot inflecting the demonstrative restored anyway');
+    negatives++;
+  }
+
+  console.log('Wave 4 بَابُ النَّعْتِ focused tests: '+positives+' canonical builds across '
+    +frames.size+' sababi frames, 3 states and '+manutForms.size+' manʿūt declensions, '
+    +producedKinds.length+' of the source’s five maʿrifah kinds produced, '
+    +history+' History round trips, '+negatives+' negative/forgery boundaries — green');
 }
 
 console.log(JSON.stringify(finalResults,null,2));

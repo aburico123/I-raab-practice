@@ -161,16 +161,28 @@ const prepSet = new Set();
 for (const [head, bodies] of cardHeads) for (const b of bodies) if (b.includes(skeleton('حرف خفض'))) prepSet.add(head);
 
 /* ── the probe ──────────────────────────────────────────────────────────────────────── */
-function templatesFor(needle) {
+/* Wave 4 STRENGTHENS the plain `contains` probe with the same discriminator `card` mode already
+   had, and for the same reason: a short term can sit inside a line that is about something else.
+   «اسْمُ إِشَارَةٍ» is one — the demonstrative باب النعت now produces as a mubtadaʾ is NOT the
+   demonstrative standing as a rābiṭ between a mubtadaʾ and its sentence khabar, and without a
+   discriminator the first would have scored the second FULL. When a row declares `requires`, the
+   SAME rendered line must carry both strings; a row that declares none behaves exactly as before. */
+function templatesFor(needle, requires) {
   const s = skeleton(needle);
+  const need = requires ? skeleton(requires) : '';
   const tpl = new Set();
-  for (const [line, ids] of iraabLines) if (line.includes(s)) ids.forEach(id => tpl.add(id));
+  for (const [line, ids] of iraabLines) {
+    if (!line.includes(s)) continue;
+    if (need && !line.includes(need)) continue;
+    ids.forEach(id => tpl.add(id));
+  }
   return tpl;
 }
-function mentionedOnly(needle) {
+function mentionedOnly(needle, requires) {
   const s = skeleton(needle);
-  for (const line of whyText) if (line.includes(s)) return true;
-  for (const line of defText) if (line.includes(s)) return true;
+  const need = requires ? skeleton(requires) : '';
+  for (const line of whyText) if (line.includes(s) && (!need || line.includes(need))) return true;
+  for (const line of defText) if (line.includes(s) && (!need || line.includes(need))) return true;
   return false;
 }
 function standalone(needle) {
@@ -249,7 +261,7 @@ function observe(row) {
        real lanes. It is here so that the next one cannot slip through. */
     tpl = member ? templatesFor(row.probe) : new Set();
   } else {
-    tpl = templatesFor(row.probe);
+    tpl = templatesFor(row.probe, row.requires);
   }
 
   /* GENERIC_ONLY is for a CLASSIFICATION the learner never utters even though the thing it
@@ -266,6 +278,10 @@ function observe(row) {
        "the term appears in explanation text". The declaration must carry its written proof, and
        the assertions below reject a short or missing one. */
     status = row.trueBlocker ? 'TRUE_BLOCKER'
+      /* The discriminator is deliberately NOT applied here. It exists to stop one reading of a term
+         from crediting another with PRACTICE; being MENTIONED is a weaker claim, and the Why/defs
+         corpora word the same fact differently («مِنْ رَابِطٍ» rather than «الرَّابِطُ»), so applying
+         it here would only turn an honest GENERIC_ONLY into a misleading ABSENT. */
       : (!lexical && mentionedOnly(row.probe)) ? 'GENERIC_ONLY' : 'ABSENT';
   }
   else if (row.partial) status = 'PARTIAL';
@@ -296,6 +312,7 @@ const observed = rows.map(row => {
     randomization: o.randomization,
     probe: row.probe,
     probeMode: row.mode || 'contains',
+    probeRequires: row.requires || '',
     observedTemplateLanes: o.templates
   };
 });
@@ -491,6 +508,65 @@ if (wave3Full !== WAVE3_KEYS.length) fail('Wave-3 is not complete: ' + wave3Full
   }
 }
 
+/* ── Wave 4 completeness ─────────────────────────────────────────────────────────────
+   The six باب النعت rows that were non-FULL before Wave 4. Five are produced; the sixth is a
+   declared blocker and is pinned BOTH ways — it must still be unproduced (the declaration would be
+   stale otherwise, which the loop above already fails on) and it must still be exactly one, so a
+   later change cannot quietly retire a second row into the blocker column to keep a total looking
+   right. Three further properties are asserted, because they are what makes these rows honest:
+     · every row is in باب النعت, so an unrelated row cannot be moved into the pin;
+     · the app must still hold BOTH أقسام of naʿt, and the سببي one must still be a separate
+       structure with its own source rule rather than a second label on the true one;
+     · every produced maʿrifah kind must still be one the app can derive from a word's own bytes,
+       and the relative noun must still derive from nothing at all. */
+const WAVE4_KEYS = ['T_NAAT_SABABI', 'T_MARIFA_DAMIR', 'T_MARIFA_ALAM', 'T_MARIFA_ISHARA',
+  'T_MARIFA_MAWSUL', 'T_MARIFA_AL'];
+const wave4 = WAVE4_KEYS.map(key => {
+  const row = observed.find(r => r.key === key);
+  if (!row) fail('Wave-4 row ' + key + ' is missing from the inventory');
+  return row;
+}).filter(Boolean);
+for (const row of wave4) {
+  if (!/^باب النعت/.test(row.chapter)) {
+    fail('Wave-4 row ' + row.key + ' is not in the wave\'s scope: ' + row.chapter);
+  }
+  if (!['FULL', 'TRUE_BLOCKER'].includes(row.status)) {
+    fail('Wave-4 row ' + row.key + ' is ' + row.status + ', neither FULL nor a proved blocker');
+  }
+}
+const wave4Full = wave4.filter(r => r.status === 'FULL').length;
+const wave4Blocked = wave4.filter(r => r.status === 'TRUE_BLOCKER').length;
+if (wave4.length !== WAVE4_KEYS.length) fail('the Wave-4 row set did not resolve');
+if (wave4Full + wave4Blocked !== WAVE4_KEYS.length) fail('Wave-4 rows are not all either FULL or blocked');
+if (wave4Blocked !== 1) fail('Wave-4 holds ' + wave4Blocked + ' blockers, not the one that was proved');
+if (observed.find(r => r.key === 'T_MARIFA_MAWSUL').status !== 'TRUE_BLOCKER') {
+  fail('the relative noun is no longer the Wave-4 blocker; if it became producible the proof must be retired deliberately');
+}
+/* The two أقسام, read back out of the app rather than out of the rows table. A سببي naʿt that
+   could cite the true naʿt's rule, or a maʿrifah kind that could be claimed rather than derived,
+   would leave every row above FULL while making the distinction meaningless. */
+{
+  const labels = api.NAAT_SUBTYPE_LABELS || {};
+  const kinds = Object.keys(labels);
+  if (kinds.length !== 2) fail('the naʿt subtypes are ' + kinds.length + ', not the source\'s two');
+  const rules = new Set(kinds.map(k => labels[k].ruleId));
+  if (rules.size !== 2) fail('the two naʿt subtypes share one source rule');
+  const frames = api.SABABI_FRAME_REGISTRY || {};
+  if (!Object.keys(frames).length) fail('no sababi frame is registered');
+  for (const [key, frame] of Object.entries(frames)) {
+    const marfu = (api.SABABI_MARFU_LEXEMES || {})[frame.marfuKey];
+    if (!marfu) fail('sababi frame ' + key + ' names an unregistered raised noun');
+    else if (frame.naat.gender !== marfu.gender) {
+      fail('sababi frame ' + key + ' no longer takes its gender from the noun it raises');
+    }
+  }
+  const produced = Object.entries(api.MARIFA_KIND_LABELS || {}).filter(([, v]) => v.produced).map(([k]) => k);
+  if (produced.length !== 4) fail('the produced maʿrifah kinds are ' + produced.length + ', not four');
+  if (api.deriveMarifaKind && api.deriveMarifaKind('الَّذِي')) {
+    fail('a relative noun now derives a maʿrifah kind, which the blocker proof says it cannot');
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -522,6 +598,7 @@ console.log(JSON.stringify({
   wave1: { name: 'حروف الخفض ومعاني الإضافة', target: WAVE1_KEYS.length, full: wave1Full },
   wave2: { name: 'باب الفاعل والضمائر', target: WAVE2_KEYS.length, full: wave2Full, trueBlocker: wave2Blocked },
   wave3: { name: 'كان وأخواتها', target: WAVE3_KEYS.length, full: wave3Full },
+  wave4: { name: 'باب النعت', target: WAVE4_KEYS.length, full: wave4Full, trueBlocker: wave4Blocked },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

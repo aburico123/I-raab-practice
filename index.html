@@ -718,9 +718,20 @@ const EXERCISE_TOKEN_KEYS=Object.freeze(['ar','components','en','enHint','expect
  'governorId','grammar','id','inflection','lexeme','mahallRuleId','phraseAr','phraseEn','phraseLabel',
  'phraseWhy','relations','ruleId','sign','signRuleId','state','subjectRuleId','surfaceHint','target',
  'tense','voiceRuleId','why','word','binaaSign','mahall']);
-const EXERCISE_GRAMMAR_KEYS=Object.freeze(['attachedKaf','attachedHaa','builtHaal','conjugation','delayed','exactPresentRaf',
- 'governorWord','idafaFrameKey','inflection','isMudaf','kanaKhabar','morphology','particleIraab','particleType','particleWord',
- 'person','role','shartRole','type','voice']);
+const EXERCISE_GRAMMAR_KEYS=Object.freeze(['attachedDamir','attachedKaf','attachedHaa','builtHaal','conjugation','delayed','exactPresentRaf',
+ 'governorWord','idafaFrameKey','inflection','isMudaf','isharaKey','kanaKhabar','marifaKind','morphology','naatKind','particleIraab','particleType','particleWord',
+ 'person','role','sababiFrameKey','shartRole','type','voice']);
+/* Wave 4 — the five names above that this chapter adds are DECLARATIONS on exactly the same footing
+   as `idafaFrameKey`, and every one of them is checked rather than believed:
+     · `naatKind` says which قسم of naʿt a follower claims to be; deriveNaatSubtypeAuthority decides
+       from whether the third word actually stands there and refuses a token whose claim differs.
+     · `sababiFrameKey` names a frozen سببي structure; the frame is re-found from the three surfaces
+       and the declared key must equal what they yield.
+     · `marifaKind` says which of p. 118's five kinds a noun is; deriveMarifaKindAuthority derives it
+       from the word's own letters and registry membership, so a proper name cannot be relabelled a
+       demonstrative.
+     · `attachedDamir` names the pronoun a muḍāf ends in; the surface must actually end in it.
+     · `isharaKey` names a registered demonstrative; the surface must be that lexeme's own bytes. */
 /* Wave 1 — `idafaFrameKey` is a builder's DECLARATION that a muḍāf ilayh belongs to one of the
    frozen iḍāfah-meaning frames, and it is admitted to the schema for exactly that reason. It is
    never authority: deriveIdafaMeaningAuthority looks the frame up by the two words actually
@@ -973,6 +984,12 @@ function builtNounBinaaMarker(token){
    ?Object.freeze({ar:HAAL_ISTIFHAM.binaaAr,en:HAAL_ISTIFHAM.binaaEn,ruleId:HAAL_ISTIFHAM.ruleId})
    :null;
  }
+ /* Wave 4 — the third construction, on the same terms as the other two: a per-construction table
+    whose one entry is the kasrah p. 22 states for هَؤُلَاءِ, and a marker outside it is no marker. */
+ if(isBuiltIshara(token)){
+  const lexeme=ISHARA_LEXEMES[token.grammar.isharaKey];
+  return lexeme&&token.binaaSign===lexeme.binaaSignId?ISHARA_BINAA_SIGNS[token.binaaSign]||null:null;
+ }
  return null;
 }
 function isBuiltNoun(token){
@@ -987,6 +1004,12 @@ function mahallRuleOwnerFailure(token,data){
  }
  if(token.grammar?.type==='noun'&&token.grammar.role===HAAL_ROLE){
   return !deriveHaalMahallAuthority(data).authorized||token.mahallRuleId!==HAAL_ISTIFHAM.mahallRuleId;
+ }
+ /* A demonstrative mubtadaʾ owns a maḥall rule for the same reason the built munādā does: it has no
+    iʿrāb state of its own. Every OTHER mubtadaʾ that reaches here is muʿrab and owns none. */
+ if(token.grammar?.type==='noun'&&token.grammar.role==='mubtada'){
+  const authority=deriveIsharaAuthority(data,data?.tokens?.indexOf(token));
+  return !authority.authorized||token.mahallRuleId!==authority.mahallRuleId;
  }
  if(token.grammar?.type!=='verb'||token.tense!=='present')return true;
  return authoritativeVerbMorphology(token,data).formClass!=='mabniPresent';
@@ -1296,7 +1319,23 @@ function resolveCanonicalTokenGloss(data,token,index){
     prevents the follower vocabulary from repainting pre-existing exercises. */
   if(type==='noun'&&token.grammar.role==='naat'){
   const found=naatPairAt(data,index);
-  return found?.pair?.follower?.en||null;
+  if(found)return found.pair?.follower?.en||null;
+  /* Wave 4 — a سببي naʿt answers to its own frozen frame. It is asked SECOND, so a true naʿt can
+     never take a سببي frame's English, and a lane with no frame at all still resolves to nothing
+     rather than to a plausible adjective from the general pools. */
+  const sababi=sababiFrameAt(data,index);
+  return sababi?sababi.frame.naat.en||null:null;
+ }
+ /* 4c-bis — the noun a سببي naʿt raises, and the demonstrative. Both are curriculum-owned: the
+    first carries its ʿāʾid and is not free vocabulary, and the second belongs to no noun pool at
+    all, so without these History would rebuild them as «the noun» and refuse the snapshot. */
+ if(type==='noun'&&token.grammar.role===NAAT_SABABI_MARFU_ROLE){
+  const found=sababiFrameAt(data,index-1);
+  return found?found.marfuRecord.en||null:null;
+ }
+ if(type==='noun'&&isBuiltIshara(token)){
+  const authority=deriveIsharaAuthority(data,index);
+  return authority.authorized?authority.lexeme.en||null:null;
  }
  /* 4d — tawkīd words are curriculum-owned follower forms, not free vocabulary. Their gloss is
     available only after the exact template/pair/subtype authority has recognized the token. */
@@ -1474,6 +1513,11 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
     TS76 — مَا دَامَ, whose main clause is a nominal sentence and whose particle glosses «as long as». */
  TS75:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:2:cap"}),Object.freeze({"lit":" has "}),Object.freeze({"slot":"gloss:0"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:3"}),Object.freeze({"lit":"."})])}),
  TS76:Object.freeze({parts:Object.freeze([Object.freeze({"slot":"gloss:0:cap"}),Object.freeze({"lit":" is "}),Object.freeze({"slot":"gloss:1"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:2"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:4"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:3"}),Object.freeze({"lit":" "}),Object.freeze({"slot":"gloss:5"}),Object.freeze({"lit":"."})])}),
+ /* Wave 4 — the three سببي hosts. The phrase slot is resolved from the frame the tokens prove,
+    and the copula from that same frame, so neither can be borrowed from another exercise. */
+ TS77:Object.freeze({parts:Object.freeze([Object.freeze({slot:"sababiPhrase:0:cap"}),Object.freeze({lit:", "}),Object.freeze({slot:"sababiCopula:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:3"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:4"}),Object.freeze({lit:"."})])}),
+ TS78:Object.freeze({parts:Object.freeze([Object.freeze({slot:"innaLead:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"sababiPhrase:1"}),Object.freeze({lit:", "}),Object.freeze({slot:"sababiCopula:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:4"}),Object.freeze({lit:"."})])}),
+ TS79:Object.freeze({parts:Object.freeze([Object.freeze({lit:"There is "}),Object.freeze({slot:"gloss:4"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"sababiPhrase:1"}),Object.freeze({lit:"."})])}),
  TS16:Object.freeze({parts:Object.freeze([Object.freeze({lit:"There is "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
  TS17:Object.freeze({parts:Object.freeze([Object.freeze({lit:"There is "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:" for "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:"."})])}),
  TS18:Object.freeze({parts:Object.freeze([Object.freeze({lit:"He "}),Object.freeze({slot:"gloss:0"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:1"}),Object.freeze({lit:" "}),Object.freeze({slot:"gloss:2"}),Object.freeze({lit:"."})])}),
@@ -1753,6 +1797,14 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09||particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09",structure:"particle:particle,verb:present,noun:faail,particle:particle,verb:present,noun:object",shape:"TS28",copulaPlural:true}),
  "T_PARTICLE_PRESENT_NASB_FATHA_10||verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_PRESENT_NASB_FATHA_10",structure:"verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object",shape:"TS29",copulaPlural:false}),
  "T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10||verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10",structure:"verb:present,noun:faail,noun:object,particle:particle,verb:present,noun:object",shape:"TS30",copulaPlural:true}),
+
+ /* Wave 4 — the three سببي lanes and the demonstrative lane. The سببي structures differ from the
+    true-naʿt ones above by exactly one token, which is the whole grammatical difference, so a
+    forged key cannot address a lane whose slots this exercise does not have. */
+ "T_NOUN_SINGULAR_RAF_DAMMA_07||noun:mubtada,noun:naat,noun:naatSababiMarfu,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_07",structure:"noun:mubtada,noun:naat,noun:naatSababiMarfu,particle:particle,noun:majrur",shape:"TS77"}),
+ "T_PARTICLE_SINGULAR_NASB_FATHA_19||particle:particle,noun:ismInna,noun:naat,noun:naatSababiMarfu,noun:khabarInna":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_19",structure:"particle:particle,noun:ismInna,noun:naat,noun:naatSababiMarfu,noun:khabarInna",shape:"TS78"}),
+ "T_PARTICLE_SINGULAR_JARR_KASRA_10||particle:particle,noun:majrur,noun:naat,noun:naatSababiMarfu,noun:mubtada":Object.freeze({templateId:"T_PARTICLE_SINGULAR_JARR_KASRA_10",structure:"particle:particle,noun:majrur,noun:naat,noun:naatSababiMarfu,noun:mubtada",shape:"TS79"}),
+ "T_NOUN_SMP_RAF_WAW_03||noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SMP_RAF_WAW_03",structure:"noun:mubtada,noun:khabar",shape:"TS05"}),
  "T_NOUN_SINGULAR_RAF_DAMMA_03||noun:mubtada,noun:naat,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_03",structure:"noun:mubtada,noun:naat,particle:particle,noun:majrur",shape:"TS33",copulaPlural:false}),
  "T_NOUN_DUAL_RAF_ALIF_02||noun:mubtada,noun:naat,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_DUAL_RAF_ALIF_02",structure:"noun:mubtada,noun:naat,particle:particle,noun:majrur",shape:"TS33",copulaPlural:true}),
  "T_NOUN_SMP_RAF_WAW_02||noun:mubtada,noun:naat,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SMP_RAF_WAW_02",structure:"noun:mubtada,noun:naat,particle:particle,noun:majrur",shape:"TS33",copulaPlural:true}),
@@ -1922,6 +1974,20 @@ function resolveTranslationSlot(exercise,mapping,spec){
   const phrase=canonicalNaatPhraseEnglish(exercise,index);
   if(typeof phrase!=='string'||!phrase)return null;
   return bits[2]==='cap'?cap(phrase):phrase;
+ }
+ /* Wave 4 — the سببي phrase and its copula are read from the frozen frame the three words prove,
+    so a rebuilt exercise cannot borrow another frame's English by carrying its label. */
+ if(bits[0]==='sababiPhrase'){
+  const authority=deriveNaatSababiAuthority(exercise,index+1);
+  if(!authority.authorized)return null;
+  const phrase=SABABI_FRAME_REGISTRY[authority.frameKey].phraseEn;
+  if(typeof phrase!=='string'||!phrase)return null;
+  return bits[2]==='cap'?cap(phrase):phrase;
+ }
+ if(bits[0]==='sababiCopula'){
+  const authority=deriveNaatSababiAuthority(exercise,index+1);
+  if(!authority.authorized)return null;
+  return SABABI_FRAME_REGISTRY[authority.frameKey].plural?'are':'is';
  }
  if(bits[0]==='followerCopula'){
   const found=naatPairAt(exercise,index+1);
@@ -5583,6 +5649,250 @@ function munadaHeadEnglish(pair){
  if(pair.complement?.kind==='idafa')return LA_JINS_LEXEMES.seeker.en;
  return MUNADA_LEXEMES[pair.lexemeKey].en;
 }
+/* ══ Wave 4 — بَابُ النَّعْتِ, pp. 116–123 ═══════════════════════════════════════════════════
+   Two source systems live in this chapter and neither is a relabelling of anything already here.
+
+   (1) النَّعْتُ السَّبَبِيُّ (pp. 116–118). p. 116 splits النعت into حقيقي and سببي by WHAT THE
+   NAʿT RAISES: the true one «ما رَفَعَ ضميراً مستتراً يعود إلى المنعوت», the causal one «ما رَفَعَ
+   اسماً ظاهراً متصلاً بضمير يعود إلى المنعوت» — «جَاءَ مُحَمَّدٌ الْفَاضِلُ أَبُوهُ». So a سببي naʿt is
+   not an adjective with a different label: it is an adjective WITH A THIRD WORD after it, and that
+   word is its فاعل and carries a pronoun pointing back at the manʿūt. p. 117 parses that word in
+   full: «وأبوه: فاعل للفاضل، مرفوع بالواو نيابة عن الضمة لأنه من الأسماء الخمسة، وهو مضاف إلى
+   الهاء التي هي ضمير عائد إلى محمدٍ».
+
+   The two agreement matrices are DIFFERENT, and p. 118 states both as counts:
+     · حقيقي — «يتبع منعوته في أربعة من عشرة»: state, definiteness, gender, number.
+     · سببي  — «يتبع منعوته في اثنين من خمسة»: state and definiteness ONLY; it takes its
+       gender from «مرفوعه الذي بعده», and «لا يتبع شيئاً في الإفراد والتثنية والجمع، بل يكون
+       مفرداً دائماً وأبداً» — hence «رأيت الْبَنَاتِ الْعَاقِلَ أَبُوهُنَّ» and «رأيت الْأَوْلَادَ
+       الْعَاقِلَةَ أُمُّهُمْ». Applying the true naʿt's matrix here would be a grammatical error,
+       which is why the two subtypes are separate authorities rather than one label switch.
+
+   (2) الْمَعْرِفَةُ وَأَقْسَامُهَا (p. 118 matn, pp. 118–120 sharḥ). The chapter teaches the five
+   kinds because النعت follows its manʿūt «في تعريفه أو تنكيره»; so the kind is named on the word
+   whose definiteness is doing the work. Four kinds are produced. الِاسْمُ الْمَوْصُولُ is not, and
+   the reason is recorded with the other unproduced terms rather than papered over: this source
+   lists its alfāẓ (p. 120) and never parses one, and its own bināʾ catalogue at p. 22 — «كلزوم
+   «كَمْ» و«مَنْ» السكون، وكلزوم «هٰؤُلَاءِ» و«حَذَامِ» و«أَمْسِ» الكَسْرَ، وكلزوم «مُنْذُ» و«حَيْثُ»
+   الضمَّ، وكلزوم «أَيْنَ» و«كَيْفَ» الفَتْحَ» — contains no relative noun. A whole-word relative is
+   necessarily a built noun, and this engine admits a built noun only through a source-verified
+   bināʾ, so producing one would mean inventing the bināʾ. That same p. 22 sentence is what DOES
+   licence هٰؤُلَاءِ, and it is the only demonstrative produced for exactly that reason. */
+const MARIFA_KINDS=Object.freeze({damir:'damir',alam:'alam',ishara:'ishara',mawsul:'mawsul',al:'al'});
+const MARIFA_KIND_LABELS=Object.freeze(Object.assign(Object.create(null),{
+ damir:Object.freeze({ar:'الضَّمِيرُ',en:'the pronoun',ruleId:'R_MARIFA_DAMIR',produced:true}),
+ alam:Object.freeze({ar:'الْعَلَمُ',en:'the proper name',ruleId:'R_MARIFA_ALAM',produced:true}),
+ ishara:Object.freeze({ar:'اسْمُ الْإِشَارَةِ',en:'the demonstrative noun',ruleId:'R_MARIFA_ISHARA',produced:true}),
+ mawsul:Object.freeze({ar:'الِاسْمُ الْمَوْصُولُ',en:'the relative noun',ruleId:'R_MARIFA_MAWSUL',produced:false}),
+ al:Object.freeze({ar:'الْمُحَلَّى بِأَلْ',en:'the noun carrying أل',ruleId:'R_MARIFA_AL',produced:true})
+}));
+/* The learner-facing clause. It is APPENDED to the word's ordinary iʿrāb, never substituted for
+   it: p. 123's model answers still say «نعت للطالب، ونعت المرفوع مرفوع». */
+function marifaClauseAr(kind){
+ const label=MARIFA_KIND_LABELS[kind];
+ if(!label)throw new Error(`Unknown maʿrifah kind: ${kind}`);
+ if(!label.produced)throw new Error(`The maʿrifah kind ${kind} is not produced by this source.`);
+ return`، وَهُوَ مَعْرِفَةٌ، وَنَوْعُهَا ${label.ar}`;
+}
+/* p. 120: «كل اسم اقترنت به «أل» فأفادته التعريف». The test is the two letters themselves, so it
+   is done on the letters and not on a flag a token could carry. */
+const AL_DEFINITE_PREFIX='ال';
+const carriesAl=word=>String(word||'').startsWith(AL_DEFINITE_PREFIX);
+/* أَعْلَام. p. 118's matn gives «زَيْدٌ», p. 119's sharḥ «محمد»; both are منصرف, so the three
+   ordinary case endings are all this app has to spell. p. 119's feminine examples (فاطمة، زينب،
+   مكة) are ممنوع من الصرف, which is on the deliberatelyNotGenerated list, so none is registered. */
+const ALAM_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ muhammad:Object.freeze({nom:'مُحَمَّدٌ',acc:'مُحَمَّدًا',gen:'مُحَمَّدٍ',en:'Muhammad'}),
+ zayd:Object.freeze({nom:'زَيْدٌ',acc:'زَيْدًا',gen:'زَيْدٍ',en:'Zayd'})
+}));
+/* اسْمُ الْإِشَارَةِ. p. 120 gives «هٰؤُلَاءِ» للجمع مُطلقاً and p. 22 gives its bināʾ. Nothing else
+   from that list is registered: هٰذَا/هٰذِهِ have no stated bināʾ here, and هٰذَانِ/هٰذَيْنِ are given
+   as two alternating forms with no statement of which state takes which. */
+const ISHARA_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ haaulaa:Object.freeze({id:'haaulaa',surface:'هَؤُلَاءِ',en:'these',binaaSignId:'kasra',
+  gender:'masculine',number:'plural'})
+}));
+const ISHARA_BINAA_SIGNS=Object.freeze(Object.assign(Object.create(null),{
+ kasra:Object.freeze({id:'kasra',ar:'الْكَسْرِ',en:'a kasrah',ruleId:'R_ISM_ISHARA_MABNI'})
+}));
+const ISHARA_MAHALL=Object.freeze({ar:'رَفْعٍ',en:'rafʿ',state:'raf'});
+/* الضَّمِيرُ الْمُتَّصِلُ الْمُضَافُ إِلَيْهِ. p. 103 parses the singular one outright — «وأبو مضاف
+   والهاءُ مضاف إليه» — and p. 104 the kāf. The plural and dual members are the source's own naʿt
+   examples at p. 118 (أَبُوهُمَا، أَبُوهُنَّ، أُمُّهُمْ). The clause TAIL is sliced off the constant the
+   rest of the app already uses so the two can never drift apart; the load-time invariant below is
+   what makes that a guarantee rather than an intention. */
+const ATTACHED_DAMIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ haa:Object.freeze({id:'haa',surface:'هُ',nameAr:'الْهَاءُ',en:'his',gender:'masculine',number:'singular'}),
+ haaFem:Object.freeze({id:'haaFem',surface:'هَا',nameAr:'«هَا»',en:'her',gender:'feminine',number:'singular'}),
+ huma:Object.freeze({id:'huma',surface:'هُمَا',nameAr:'«هُمَا»',en:'their',gender:'any',number:'dual'}),
+ hum:Object.freeze({id:'hum',surface:'هُمْ',nameAr:'«هُمْ»',en:'their',gender:'masculine',number:'plural'}),
+ hunna:Object.freeze({id:'hunna',surface:'هُنَّ',nameAr:'«هُنَّ»',en:'their',gender:'feminine',number:'plural'})
+}));
+const ATTACHED_DAMIR_CLAUSE_TAIL=(()=>{
+ const first=HAA_MUDAF_ILAYH_CLAUSE_AR.indexOf(' ');
+ const second=first<0?-1:HAA_MUDAF_ILAYH_CLAUSE_AR.indexOf(' ',first+1);
+ if(second<0)throw new Error('The attached-pronoun clause has no separable name.');
+ return HAA_MUDAF_ILAYH_CLAUSE_AR.slice(second);
+})();
+function attachedDamirClauseAr(record){
+ if(!record||ATTACHED_DAMIR_REGISTRY[record.id]!==record)throw new Error('Unregistered attached pronoun.');
+ return`، ${record.nameAr}${ATTACHED_DAMIR_CLAUSE_TAIL}${marifaClauseAr(MARIFA_KINDS.damir)}`;
+}
+/* The ʿāʾid is not chosen: p. 116 requires a pronoun «يعود إلى المنعوت», so the manʿūt's own gender
+   and number DECIDE it, and a frame naming a different one cannot be authorized. */
+const AID_FOR_ANTECEDENT=Object.freeze(Object.assign(Object.create(null),{
+ 'masculine|singular':'haa','feminine|singular':'haaFem',
+ 'masculine|dual':'huma','feminine|dual':'huma',
+ 'masculine|plural':'hum','feminine|plural':'hunna'
+}));
+const NAAT_SABABI_KIND='naatSababi';
+const NAAT_SABABI_MARFU_ROLE='naatSababiMarfu';
+/* p. 118's two counts, as data. The true naʿt's four are NAAT_AGREEMENT_DIMENSIONS above. */
+const NAAT_SABABI_MANUT_DIMENSIONS=Object.freeze(['state','definiteness']);
+const NAAT_SABABI_MARFU_DIMENSIONS=Object.freeze(['gender']);
+const NAAT_SUBTYPE_LABELS=Object.freeze(Object.assign(Object.create(null),{
+ [NAAT_KIND]:Object.freeze({ar:'حَقِيقِيٌّ',en:'true',ruleId:'R_NAAT_HAQIQI'}),
+ [NAAT_SABABI_KIND]:Object.freeze({ar:'سَبَبِيٌّ',en:'causal',ruleId:'R_NAAT_SABABI'})
+}));
+/* The lexemes the سببي frames spell. The naʿt column is SINGULAR in every row — that is the
+   source's rule, not an economy — and the feminine member exists only because the marfūʿ can be
+   feminine while the manʿūt is not. */
+const SABABI_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ virtuousDefM:Object.freeze({nom:'الْفَاضِلُ',acc:'الْفَاضِلَ',gen:'الْفَاضِلِ',en:'virtuous',gender:'masculine'}),
+ sensibleDefM:Object.freeze({nom:'الْعَاقِلُ',acc:'الْعَاقِلَ',gen:'الْعَاقِلِ',en:'sensible',gender:'masculine'}),
+ sensibleDefF:Object.freeze({nom:'الْعَاقِلَةُ',acc:'الْعَاقِلَةَ',gen:'الْعَاقِلَةِ',en:'sensible',gender:'feminine'}),
+ sensibleIndefM:Object.freeze({nom:'عَاقِلٌ',acc:'عَاقِلًا',gen:'عَاقِلٍ',en:'sensible',gender:'masculine'})
+}));
+/* The مرفوع of the سببي naʿt: an explicit noun already carrying its ʿāʾid. Only the nominative is
+   registered, because p. 117 keeps it مرفوع while the manʿūt runs through all three states —
+   «رَأَيْتُ مُحَمَّداً الْفَاضِلَ أَبُوهُ» — and a form this app never produces has no business in a
+   frozen table. أَبُو is one of الأسماء الخمسة (p. 117 says so explicitly); أُمُّ is an ordinary
+   singular, which is what puts two different rafʿ signs in the learner's path. */
+const SABABI_MARFU_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ fatherHis:Object.freeze({key:'fatherHis',nom:'أَبُوهُ',en:'his father',inflection:'fiveNouns',gender:'masculine',aid:'haa'}),
+ fatherTheirTwo:Object.freeze({key:'fatherTheirTwo',nom:'أَبُوهُمَا',en:'their father',inflection:'fiveNouns',gender:'masculine',aid:'huma'}),
+ fatherTheirF:Object.freeze({key:'fatherTheirF',nom:'أَبُوهُنَّ',en:'their father',inflection:'fiveNouns',gender:'masculine',aid:'hunna'}),
+ motherHis:Object.freeze({key:'motherHis',nom:'أُمُّهُ',en:'his mother',inflection:'singular',gender:'feminine',aid:'haa'}),
+ motherTheir:Object.freeze({key:'motherTheir',nom:'أُمُّهُمْ',en:'their mother',inflection:'singular',gender:'feminine',aid:'hum'})
+}));
+/* The frozen سببي structures. `manutKind` is the maʿrifah classification the manʿūt's own word must
+   independently yield, never a label the frame may assert on its behalf. */
+const SABABI_FRAME_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
+ alamHisFather:Object.freeze({manut:ALAM_LEXEMES.muhammad,manutInflection:'singular',
+  manutKind:MARIFA_KINDS.alam,definiteness:'definite',manutGender:'masculine',manutNumber:'singular',
+  naat:SABABI_LEXEMES.virtuousDefM,marfuKey:'fatherHis',
+  phraseEn:'Muhammad, whose father is virtuous',plural:false}),
+ alamHisMother:Object.freeze({manut:ALAM_LEXEMES.zayd,manutInflection:'singular',
+  manutKind:MARIFA_KINDS.alam,definiteness:'definite',manutGender:'masculine',manutNumber:'singular',
+  naat:SABABI_LEXEMES.sensibleDefF,marfuKey:'motherHis',
+  phraseEn:'Zayd, whose mother is sensible',plural:false}),
+ alDualFather:Object.freeze({manut:duals[2],manutInflection:'dual',
+  manutKind:MARIFA_KINDS.al,definiteness:'definite',manutGender:'masculine',manutNumber:'dual',
+  naat:SABABI_LEXEMES.sensibleDefM,marfuKey:'fatherTheirTwo',
+  phraseEn:'the two men, whose father is sensible',plural:true}),
+ alBrokenMother:Object.freeze({manut:brokenHuman[2],manutInflection:'broken',
+  manutKind:MARIFA_KINDS.al,definiteness:'definite',manutGender:'masculine',manutNumber:'plural',
+  naat:SABABI_LEXEMES.sensibleDefF,marfuKey:'motherTheir',
+  phraseEn:'the children, whose mother is sensible',plural:true}),
+ alSfpFather:Object.freeze({manut:sfp[0],manutInflection:'sfp',
+  manutKind:MARIFA_KINDS.al,definiteness:'definite',manutGender:'feminine',manutNumber:'plural',
+  naat:SABABI_LEXEMES.sensibleDefM,marfuKey:'fatherTheirF',
+  phraseEn:'the female students, whose father is sensible',plural:true}),
+ indefFather:Object.freeze({manut:NAAT_LEXEMES.studentIndef,manutInflection:'singular',
+  manutKind:'',definiteness:'indefinite',manutGender:'masculine',manutNumber:'singular',
+  naat:SABABI_LEXEMES.sensibleIndefM,marfuKey:'fatherHis',
+  phraseEn:'a student, whose father is sensible',plural:false})
+}));
+const SABABI_ALL_FRAME_KEYS=Object.freeze(Object.keys(SABABI_FRAME_REGISTRY));
+/* Load-time byte and structure invariants for everything above. Every one of these has cost this
+   repo a silent failure before: a hand-typed Arabic copy that drifted by one combining mark, a
+   frame naming a pronoun that does not point at its own manʿūt, a naʿt that is not singular. */
+(()=>{
+ const expected=`${HAA_MUDAF_ILAYH_CLAUSE_AR}${marifaClauseAr(MARIFA_KINDS.damir)}`;
+ if(attachedDamirClauseAr(ATTACHED_DAMIR_REGISTRY.haa)!==expected){
+  throw new Error('The attached-pronoun clause no longer reproduces the existing hāʾ clause exactly.');
+ }
+ for(const [id,record] of Object.entries(ATTACHED_DAMIR_REGISTRY)){
+  if(record.id!==id)throw new Error(`Attached pronoun ${id} disagrees with its own key.`);
+ }
+ for(const [key,record] of Object.entries(SABABI_MARFU_LEXEMES)){
+  const aid=ATTACHED_DAMIR_REGISTRY[record.aid];
+  if(record.key!==key)throw new Error(`Sababi marfūʿ ${key} disagrees with its own key.`);
+  if(!aid)throw new Error(`Sababi marfūʿ ${key} names an unregistered ʿāʾid.`);
+  if(!record.nom.endsWith(aid.surface)){
+   throw new Error(`Sababi marfūʿ ${key} does not actually end in the pronoun it declares.`);
+  }
+  if(carriesAl(record.nom))throw new Error(`Sababi marfūʿ ${key} may not carry أل; its definiteness comes from the pronoun.`);
+ }
+ for(const [key,frame] of Object.entries(SABABI_FRAME_REGISTRY)){
+  const marfu=SABABI_MARFU_LEXEMES[frame.marfuKey];
+  if(!marfu)throw new Error(`Sababi frame ${key} names an unregistered marfūʿ.`);
+  const aid=AID_FOR_ANTECEDENT[`${frame.manutGender}|${frame.manutNumber}`];
+  if(!aid||marfu.aid!==aid){
+   throw new Error(`Sababi frame ${key} carries a pronoun that does not refer back to its own manʿūt.`);
+  }
+  if(frame.definiteness==='definite'&&!frame.manutKind
+    ||frame.definiteness==='indefinite'&&frame.manutKind){
+   throw new Error(`Sababi frame ${key} declares a maʿrifah kind inconsistent with its definiteness.`);
+  }
+  if(frame.manutKind&&!MARIFA_KIND_LABELS[frame.manutKind]?.produced){
+   throw new Error(`Sababi frame ${key} names a maʿrifah kind this source does not produce.`);
+  }
+  if(frame.manutKind===MARIFA_KINDS.al&&!carriesAl(frame.manut.nom)
+    ||frame.manutKind===MARIFA_KINDS.alam&&carriesAl(frame.manut.nom)){
+   throw new Error(`Sababi frame ${key} classifies its manʿūt as a kind its own letters contradict.`);
+  }
+  for(const form of ['nom','acc','gen']){
+   if(!frame.manut[form]||!frame.naat[form])throw new Error(`Sababi frame ${key} cannot spell ${form}.`);
+   const naatDefinite=carriesAl(frame.naat[form]);
+   if(naatDefinite!==(frame.definiteness==='definite')){
+    throw new Error(`Sababi frame ${key} breaks the definiteness agreement p. 117 requires.`);
+   }
+  }
+  /* «ويتبع النعتُ السببيُّ ما بعده في التذكير أو التأنيث» — the gender comes from the raised
+     noun, and this is the check that a frame cannot be written the other way round. */
+  if(frame.naat.gender!==marfu.gender){
+   throw new Error(`Sababi frame ${key} takes its naʿt's gender from the manʿūt instead of from the noun it raises.`);
+  }
+  /* «بل يكون مفرداً دائماً وأبداً» — the naʿt surface may never carry dual or sound-plural
+     morphology, whatever the manʿūt does. */
+  if(/[َُِ]?انِ$|يْنِ$|ُونَ$|ِينَ$|َاتُ$|َاتِ$/u.test(frame.naat.nom)){
+   throw new Error(`Sababi frame ${key} has a naʿt that is not singular.`);
+  }
+ }
+})();
+/* Which of p. 118's five kinds each canonical SURFACE is. Built from the frozen records rather than
+   typed, so a word can never be classified by anything but its own registered identity, and a
+   surface claimed by two kinds is a load-time failure rather than a rendering accident. */
+const MARIFA_SURFACE_KINDS=(()=>{
+ const map=new Map();
+ const put=(surface,kind)=>{
+  if(!surface)return;
+  const prior=map.get(surface);
+  if(prior&&prior!==kind)throw new Error(`The surface ${surface} is claimed by two maʿrifah kinds.`);
+  map.set(surface,kind);
+ };
+ for(const lexeme of Object.values(ALAM_LEXEMES)){
+  for(const form of ['nom','acc','gen'])put(lexeme[form],MARIFA_KINDS.alam);
+ }
+ for(const lexeme of Object.values(ISHARA_LEXEMES))put(lexeme.surface,MARIFA_KINDS.ishara);
+ for(const frame of Object.values(SABABI_FRAME_REGISTRY)){
+  if(frame.manutKind!==MARIFA_KINDS.al)continue;
+  for(const form of ['nom','acc','gen'])put(frame.manut[form],MARIFA_KINDS.al);
+ }
+ return map;
+})();
+/* The classification, derived from the word alone. The letters must agree with it: أل IS the fourth
+   kind's definition (p. 120), so a proper name beginning with أل would be that kind and not this
+   one, and neither may be asserted over the other. */
+function deriveMarifaKind(word){
+ const kind=MARIFA_SURFACE_KINDS.get(word)||'';
+ if(!kind)return'';
+ if(kind===MARIFA_KINDS.al&&!carriesAl(word))return'';
+ if(kind!==MARIFA_KINDS.al&&carriesAl(word))return'';
+ if(!MARIFA_KIND_LABELS[kind]?.produced)return'';
+ return kind;
+}
 const allCaseNouns=[...singularPeople,...singularThings,...places,...brokenHuman,...brokenThings,...duals,...smp,...sfp,...feminineHumanSingulars,...feminineHumanDuals,...fiveNouns];
 function nounEnglish(word,caseName='acc'){
  return allCaseNouns.find(item=>item[caseName]===word)?.en||'the noun';
@@ -8990,6 +9300,9 @@ const GRAMMAR_RULES=Object.freeze({
   ismKana:{state:'raf',ruleId:'R_ISM_KANA_RAF',en:'The noun of kāna; nominative.'},
   khabarKana:{state:'nasb',ruleId:'R_KHABAR_KANA_NASB',en:'The khabar of kāna; accusative.'},
   naat:{state:'inherited',ruleId:'R_NAAT_HAQIQI',en:'A true naʿt following its manʿūt.'},
+  /* p. 117. The naʿt's own fāʿil. It is NOT a follower: it does not inherit the manʿūt's state,
+     and the source keeps it nominative while the manʿūt runs through all three. */
+  [NAAT_SABABI_MARFU_ROLE]:{state:'raf',ruleId:'R_NAAT_SABABI_MARFU',en:'The explicit noun the sababi naʿt raises — its fāʿil; nominative.'},
   atf:{state:'inherited',ruleId:'R_ATF_NASAQ',en:'A maʿṭūf following its maʿṭūf ʿalayh.'},
   tawkid:{state:'inherited',ruleId:'R_TAWKID',en:'A tawkīd following its muʾakkad in iʿrāb.'},
   badal:{state:'inherited',ruleId:'R_BADAL',en:'A badal following its mubdal minhu in iʿrāb.'},
@@ -9196,19 +9509,28 @@ function composeSentence(tokens){
   return text+separator+token.word;
  },'');
 }
-/* The only two noun roles whose token may cite a rule other than the one GRAMMAR_RULES.roles binds
-   to them: both are the bināʾ reading of a role that is otherwise muʿrab, and both are source-owned
-   (munādā p. 169, interrogative ḥāl p. 155). Anything else is a role borrowing another's authority. */
+/* The only noun roles whose token may cite a rule other than the one GRAMMAR_RULES.roles binds to
+   them. Each is a SECOND source claim about the same role, never a role borrowing another's
+   authority, and every one of them is re-derived by validateExercise from the structure before the
+   variant is accepted — the list widens what is permitted, it does not decide anything.
+     · munādā p. 169 and interrogative ḥāl p. 155 — the bināʾ reading of a role otherwise muʿrab.
+     · naʿt pp. 116–118 — the source's own second قسم of the very same role. A سببي naʿt cites
+       R_NAAT_SABABI because it is not the true naʿt and does not obey its agreement matrix; which
+       of the two it is comes from whether the third word exists, never from the rule it names.
+     · mubtadaʾ p. 22 with pp. 118–120 — the demonstrative, which is built and therefore has a
+       position instead of an iʿrāb sign, exactly as the built munādā does. */
 const ROLE_RULE_VARIANTS=Object.freeze(Object.assign(Object.create(null),{
  munada:Object.freeze(['R_MUNADA_MABNI']),
- haal:Object.freeze(['R_HAAL_ISTIFHAM_MABNI'])
+ haal:Object.freeze(['R_HAAL_ISTIFHAM_MABNI']),
+ naat:Object.freeze(['R_NAAT_SABABI']),
+ mubtada:Object.freeze(['R_ISM_ISHARA_MABNI'])
 }));
 const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr']},
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],weakFinal:['jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
- roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','mafulAjl','mafulMaah','mafulAwwal','mafulThani','munada','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','atf','tawkid','badal'],
+ roles:['mubtada','khabar','faail','naibFail','object','mafulMutlaq','adverb','haal','tamyiz','mustathna','mafulAjl','mafulMaah','mafulAwwal','mafulThani','munada','ismLa','khabarLa','majrur','mudafIlayh','ismInna','khabarInna','ismKana','khabarKana','naat','naatSababiMarfu','atf','tawkid','badal'],
  relationships:['mubtadaKhabar','verbSubject','passiveDeputy','verbObject','absoluteObject','zarf','haal','tamyiz','istithna','laJins','mafulAjl','mafulMaah','zanna','nida','preposition','idafa','inna','kana','concealedAn','follower','condition'],
  deliberatelyNotGenerated:[
  /* «emphasis and substitute followers» came off this list as those chapters shipped: التوكيد is
@@ -9226,7 +9548,16 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  'the terms حال جملة, جملة في محل نصب حال and حال شبه جملة, which this source does not use',
  'the sentence-shaped hal of p. 154, which this source analyses as al-ism al-muʾawwal bi-l-sarih',
  'the wāw and pronoun that link a hal clause, which belong to those unbuilt terms',
- 'imperative','diptote','naat sababi','atf bayan','badal al-badaa and badal al-nisyan',
+ /* «naat sababi» left this list when pp. 116–118 shipped: it is productive, with its own source
+    rule, its own agreement matrix and its own raised noun. What باب النعت still does not produce is
+    named exactly, and it is one thing — the relative noun. This source teaches it (p. 118's matn,
+    p. 120's definition, ṣilah, ʿāʾid and six alfāẓ) and never once parses one; its own catalogue of
+    what is built and upon what, at p. 22, names كَمْ، مَنْ، هٰؤُلَاءِ، حَذَامِ، أَمْسِ، مُنْذُ، حَيْثُ،
+    أَيْنَ and كَيْفَ, and no relative among them. A whole-word relative must be a built noun, and this
+    engine grants a built noun a marker only from a per-construction source-verified table, so
+    producing one would mean inventing its bināʾ — the same wall ضمير منفصل stands at. */
+ 'الاسم الموصول as a maʿrifah kind, whose binaa this source never states and whose silah it never parses',
+ 'imperative','diptote','atf bayan','badal al-badaa and badal al-nisyan',
  'badal of a verb from a verb',
  /* المفعول المطلق ships with its three meanings (تأكيد، نوع، عدد) and both divisions
     (لفظي، معنوي). What is named here is everything p. 146–147 mentions that no productive lane
@@ -9552,7 +9883,22 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  /* p. 151 is the whole reason place cannot simply mirror time: «ولا يجوز أن يُنْصَبَ على أنه مفعول
     فيه من هذين القسمين إلا الثاني، وهو المُبْهَمُ؛ أما الأول ـ وهو المختصُّ ـ فيجب جرُّهُ بحرف جر». */
  R_ZARF_MAKAN:sourceRule('Ẓarf al-makān is the noun of place made accusative with the meaning of «fī»; only the mubham, which has no shape and no bounded limits, may be accusative as mafʿūl fīh, while a mukhtaṣṣ place must instead be khafḍ by a particle of khafḍ.',[151,152],'Only mubham place lexemes drawn from the thirteen the شرح lists at p. 152. The mabnī members of that list, ثَمَّ and هُنَا, are not produced because the noun sign matrix models no bināʾ. The source’s own mukhtaṣṣ places are registered as a refusal set and can never take the role.'),
- R_NAAT_HAQIQI:sourceRule('A true naʿt follows its manʿūt in iʿrāb state, definiteness, gender, and number.',[116,117,118,121,123],'Only the registered adjacent true-naʿt pairs. Sababi naʿt is explicitly excluded.'),
+ R_NAAT_HAQIQI:sourceRule('A true naʿt follows its manʿūt in iʿrāb state, definiteness, gender, and number; it is the naʿt that raises a concealed pronoun referring back to the manʿūt.',[116,117,118,121,123],'Only the registered adjacent true-naʿt pairs, which carry no explicit marfūʿ of their own. Sababi naʿt has its own rule and cannot borrow this one.'),
+ /* Wave 4. Two separate claims, because the source makes two: WHAT a سببي naʿt is (p. 116) and
+    WHAT IT FOLLOWS (pp. 117–118). Keeping them apart is what stops the true naʿt's four-way
+    agreement from being quietly asserted over a structure the source gives two-and-a-half. */
+ R_NAAT_SABABI:sourceRule('A sababi naʿt is the naʿt that raises an explicit noun after it, one joined to a pronoun referring back to the manʿūt; that raised noun is the naʿt’s own fāʿil.',[116,117],'Only the registered sababi frames, in which the third word is present, is nominative, and actually ends in the pronoun its manʿūt’s own gender and number require. A true naʿt can never cite this rule, because it has no such word.'),
+ R_NAAT_SABABI_AGREEMENT:sourceRule('A sababi naʿt follows its manʿūt in one of rafʿ, naṣb and khafḍ and in one of definiteness and indefiniteness; it takes its gender from the noun it raises after it, and follows nothing at all in singular, dual and plural — it is always singular.',[117,118],'Enforced structurally on each frame: state and definiteness are read off the manʿūt, gender off the registered marfūʿ, and every registered naʿt surface is singular. The true naʿt’s four-way matrix is a different rule and is never applied here.'),
+ R_NAAT_SABABI_MARFU:sourceRule('The explicit noun a sababi naʿt raises is its fāʿil and is nominative; it is a muḍāf, and the pronoun joined to it is the muḍāf ilayh referring back to the manʿūt.',[117],'Only the registered marfūʿ nouns of a licensed sababi frame. It stays nominative through all three states of the manʿūt, exactly as p. 117 keeps «أَبُوهُ» nominative in «رَأَيْتُ مُحَمَّداً الْفَاضِلَ أَبُوهُ».'),
+ /* أقسام المعرفة, p. 118's matn and pp. 118–120's شرح. One rule per produced kind: the categories
+    are separate source claims, so no noun may be classified by another kind's authority. */
+ R_MARIFA_DAMIR:sourceRule('The first kind of maʿrifah is the pronoun: the noun set down for a speaker, an addressee or an absent one.',[118,119],'Only the attached pronouns this app already parses, in the muḍāf-ilayh position p. 103 parses outright. The detached pronouns remain unproduced: this source lists them and never parses one.'),
+ R_MARIFA_ALAM:sourceRule('The second kind of maʿrifah is the proper name: what points at one definite thing with no need of a context of speech or address.',[118,119],'Only the registered munṣarif proper names. The source’s feminine examples are ممنوع من الصرف, which this engine does not model, so none is produced.'),
+ R_MARIFA_ISHARA:sourceRule('The third kind of maʿrifah is the demonstrative noun: what is set down to point at a definite thing by a physical or a mental indication.',[118,119,120],'Only هَؤُلَاءِ, which is the one demonstrative this source also gives a bināʾ for.'),
+ R_MARIFA_MAWSUL:sourceRule('The fourth kind of maʿrifah is the relative noun: what points at a definite thing by means of a clause stated after it, called its ṣilah, which must contain a pronoun matching it called the ʿāʾid.',[118,120],'Registered as a source category so that nothing else may be classified as one. It is deliberately NOT produced: this source never parses a relative noun and its own bināʾ catalogue at p. 22 gives none, so a whole-word relative would need an invented bināʾ.'),
+ R_MARIFA_AL:sourceRule('The fourth kind by the matn’s order is the noun carrying the alif and the lām: every noun أل is joined to, giving it definiteness.',[118,120],'Only nouns whose own letters begin with أل, checked on the surface rather than on any stored flag.'),
+ R_ISM_ISHARA_MABNI:sourceRule('A demonstrative noun is built: its ending keeps one state for no governing word and no weakness, so it is given a position rather than an iʿrāb sign. هَؤُلَاءِ keeps the kasrah.',[22,118,120],'Only هَؤُلَاءِ, whose kasrah p. 22 names in its own list of what is built and upon what. No other demonstrative is produced, because the source states no bināʾ for the rest.'),
+ R_ISM_ISHARA_MAHALL_RAF:sourceRule('A built noun standing where a nominative would stand is in the position of rafʿ.',[22,24],'Only the registered demonstrative frame, whose position is the mubtadaʾ. The word carries no rafʿ sign, and none is printed for it.'),
  R_ATF_NASAQ:sourceRule('A maʿṭūf connected by one of the ten registered conjunctions follows its maʿṭūf ʿalayh in iʿrāb state.',[124,125,126,127,128,129],'Only the exact registered noun pair, conjunction identity, source-valid context, and template-owned follower construction.'),
  R_ATF_WAW:sourceRule('Conjunctive wāw combines its two sides without itself asserting which came first.',[124,125],'Only the registered عطف النسق templates; it is distinct from wāw al-maʿiyyah and every attached wāw component.'),
  R_ATF_FA:sourceRule('Conjunctive fāʾ indicates order with immediate succession.',[124,126],'Only the registered noun-coordination frame; fāʾ al-sababiyyah is a distinct particle identity.'),
@@ -9983,6 +10329,16 @@ registerMissingFollowerForms([NAAT_LEXEMES.hardworkingDual],'dual');
 registerMissingFollowerForms([NAAT_LEXEMES.hardworkingSmp],'smp');
 registerMissingFollowerForms([NAAT_LEXEMES.hardworkingSfp],'sfp');
 registerMissingFollowerForms(Object.values(TAWKID_LEXEMES),'singular');
+/* Wave 4. The proper names and the سببي adjectives enter the surface index like any other noun, so
+   inflectNoun resolves their exact registered form rather than trusting a builder's spelling. The
+   مرفوع nouns are registered under their OWN inflection — أَبُوهُ as one of الأسماء الخمسة so that it
+   is raised by the wāw the source names at p. 117, أُمُّهُ as an ordinary singular — and only in the
+   nominative, which is the only state this construction ever puts them in. */
+registerMissingFollowerForms(Object.values(ALAM_LEXEMES),'singular');
+registerMissingFollowerForms(Object.values(SABABI_LEXEMES),'singular');
+for(const record of Object.values(SABABI_MARFU_LEXEMES)){
+ registerMissingFollowerForms([record],record.inflection);
+}
 /* J1b — the duʿāʾ verbs enter the surface index like any other, so authoritativeVerbMorphology
    resolves them as registered 3ms forms. They are deliberately NOT added to the general `verbs`
    pool: nothing outside a registered duʿāʾ frame may reach them. */
@@ -11105,6 +11461,15 @@ const AR={
  ismKana:(w,p)=>grammarSpec('noun','ismKana',{governorWord:p}),
  khabarKana:(w,p)=>grammarSpec('noun','khabarKana',{governorWord:p}),
  naat:w=>grammarSpec('noun','naat'),
+ /* Wave 4. The سببي naʿt carries its قسم and its frame as DECLARATIONS; both are re-derived from
+    the three words actually present before anything is rendered or validated. */
+ naatSababi:(w,frameKey)=>grammarSpec('noun','naat',{naatKind:NAAT_SABABI_KIND,sababiFrameKey:frameKey}),
+ sababiMarfu:record=>grammarSpec('noun',NAAT_SABABI_MARFU_ROLE,
+  {inflection:record.inflection,isMudaf:true,attachedDamir:record.aid}),
+ isharaMubtada:key=>grammarSpec('noun','mubtada',{isharaKey:key,marifaKind:MARIFA_KINDS.ishara}),
+ /* The maʿrifah classification rides on whatever role the manʿūt already has, because it is a fact
+    about the NOUN and not about its position. An empty kind adds nothing at all. */
+ marifa:(spec,kind)=>kind?Object.assign({},spec,{marifaKind:kind}):spec,
  atf:w=>grammarSpec('noun','atf'),
  tawkid:w=>grammarSpec('noun','tawkid'),
  badal:w=>grammarSpec('noun','badal'),
@@ -11184,7 +11549,161 @@ function deriveNaatFollowerAuthority(data,index){
  }
  return Object.freeze({authorized:true,reason:'',kind:NAAT_KIND,pairKey:key,state,
   followedId:followed.id,followerId:follower.id,definiteness:pair.definiteness,
-  gender:pair.gender,number:pair.number,agreementDimensions:NAAT_AGREEMENT_DIMENSIONS});
+  gender:pair.gender,number:pair.number,agreementDimensions:NAAT_AGREEMENT_DIMENSIONS,
+  subtypeRuleId:NAAT_SUBTYPE_LABELS[NAAT_KIND].ruleId});
+}
+/* ── Wave 4 — النَّعْتُ السَّبَبِيُّ ────────────────────────────────────────────────────────────
+   The سببي naʿt is a THREE-token structure, and that is the whole of the distinction: manʿūt, naʿt,
+   and the explicit noun the naʿt raises. Nothing here can be reached by relabelling a true naʿt,
+   because a true naʿt lane has no third token and its template declares the other followerKind. */
+const FOLLOWER_ROLE_NAMES=Object.freeze(['naat','atf','tawkid','badal']);
+function sababiTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.followerKind===NAAT_SABABI_KIND?template:null;
+}
+function sababiFrameAt(data,index){
+ const template=sababiTemplateRecord(data);
+ const tokens=data?.tokens||[];
+ const follower=tokens[index],manut=tokens[index-1],marfu=tokens[index+1];
+ if(!template||!follower||!manut||!marfu)return null;
+ if(follower.grammar?.type!=='noun'||follower.grammar?.role!=='naat')return null;
+ if(manut.grammar?.type!=='noun'||FOLLOWER_ROLE_NAMES.includes(manut.grammar?.role)
+   ||manut.grammar?.role===NAAT_SABABI_MARFU_ROLE)return null;
+ if(marfu.grammar?.type!=='noun'||marfu.grammar?.role!==NAAT_SABABI_MARFU_ROLE)return null;
+ const state=manut.state||follower.state;
+ const formKey={raf:'nom',nasb:'acc',jarr:'gen'}[state];
+ if(!formKey)return null;
+ for(const key of template.followerPairKeys){
+  const frame=SABABI_FRAME_REGISTRY[key];
+  const marfuRecord=frame&&SABABI_MARFU_LEXEMES[frame.marfuKey];
+  if(frame&&marfuRecord&&frame.manut[formKey]===manut.word&&frame.naat[formKey]===follower.word
+    &&marfuRecord.nom===marfu.word){
+   return{key,frame,marfuRecord,state,manut,follower,marfu};
+  }
+ }
+ return null;
+}
+/* p. 118's «اثنين من خمسة», enforced one clause at a time. The two the manʿūt gives, the one the
+   raised noun gives, and the two it gives nothing for. The relationship cache is never consulted,
+   so a restored snapshot has to re-earn every one of them. */
+function deriveNaatSababiAuthority(data,index){
+ const found=sababiFrameAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-sababi-frame-or-template'});
+ const {key,frame,marfuRecord,state,manut,follower,marfu}=found;
+ const refuse=reason=>Object.freeze({authorized:false,reason});
+ const claimed=follower.grammar?.sababiFrameKey||'';
+ if(claimed&&claimed!==key)return refuse(`claimed frame ${claimed} is not the frame these three words form`);
+ if(follower.state&&follower.state!==state)return refuse('state-mismatch');
+ if(manut.inflection&&manut.inflection!==frame.manutInflection)return refuse('manut-inflection-mismatch');
+ if(follower.inflection&&follower.inflection!=='singular')return refuse('a sababi naat is always singular');
+ if(marfu.state&&marfu.state!=='raf')return refuse('the raised noun is not nominative');
+ if(marfu.inflection&&marfu.inflection!==marfuRecord.inflection)return refuse('marfu-inflection-mismatch');
+ /* التعريف والتنكير — read off the words. A علم is definite without أل, which is exactly why the
+    classification and the letters are consulted together rather than either alone. */
+ const manutKind=deriveMarifaKind(manut.word);
+ const manutDefinite=manutKind===MARIFA_KINDS.alam||carriesAl(manut.word);
+ if(manutKind!==frame.manutKind)return refuse('the manut is not the maarifah kind its frame records');
+ if(manutDefinite!==(frame.definiteness==='definite'))return refuse('definiteness-record-disagreement');
+ if(carriesAl(follower.word)!==manutDefinite)return refuse('the naat does not follow its manut in definiteness');
+ /* التذكير والتأنيث — from the raised noun, never from the manʿūt. */
+ if(frame.naat.gender!==marfuRecord.gender)return refuse('the naat gender does not follow the noun it raises');
+ /* الضمير العائد — decided by the manʿūt itself, so a frame cannot point somewhere else. */
+ const expectedAid=AID_FOR_ANTECEDENT[`${frame.manutGender}|${frame.manutNumber}`];
+ const aidRecord=expectedAid?ATTACHED_DAMIR_REGISTRY[expectedAid]:null;
+ if(!aidRecord||marfuRecord.aid!==expectedAid)return refuse('the aid does not refer back to this manut');
+ if(marfu.grammar?.attachedDamir!==expectedAid)return refuse('the raised noun declares a different attached pronoun');
+ if(!marfu.word.endsWith(aidRecord.surface))return refuse('the raised noun does not actually carry its aid');
+ if(!marfu.grammar?.isMudaf)return refuse('the raised noun is not a mudaf');
+ return Object.freeze({authorized:true,reason:'',kind:NAAT_SABABI_KIND,frameKey:key,state,
+  followedId:manut.id,followerId:follower.id,marfuId:marfu.id,
+  definiteness:frame.definiteness,gender:marfuRecord.gender,number:'singular',
+  aid:expectedAid,manutKind:frame.manutKind,marfuKey:frame.marfuKey,
+  agreementDimensions:NAAT_SABABI_MANUT_DIMENSIONS,marfuDimensions:NAAT_SABABI_MARFU_DIMENSIONS,
+  subtypeRuleId:NAAT_SUBTYPE_LABELS[NAAT_SABABI_KIND].ruleId});
+}
+/* WHICH قسم a naʿt is, decided by the structure and only then compared with what the token claims.
+   This is the single seam every renderer, Why and validator goes through, so «حقيقي» and «سببي»
+   cannot be exchanged by editing a label: one of them requires a third token to exist and the other
+   requires it not to. */
+function deriveNaatSubtypeAuthority(data,index){
+ const token=data?.tokens?.[index];
+ const claimed=token?.grammar?.naatKind||'';
+ const sababi=deriveNaatSababiAuthority(data,index);
+ if(sababi.authorized){
+  return claimed&&claimed!==NAAT_SABABI_KIND
+   ?Object.freeze({authorized:false,reason:`this naat raises an explicit noun, so it is not ${claimed}`})
+   :sababi;
+ }
+ const haqiqi=deriveNaatFollowerAuthority(data,index);
+ if(haqiqi.authorized){
+  return claimed&&claimed!==NAAT_KIND
+   ?Object.freeze({authorized:false,reason:`this naat raises no explicit noun, so it is not ${claimed}`})
+   :haqiqi;
+ }
+ return Object.freeze({authorized:false,
+  reason:claimed===NAAT_SABABI_KIND?sababi.reason:haqiqi.reason});
+}
+function deriveSababiMarfuAuthority(data,index){
+ const token=data?.tokens?.[index];
+ if(!token||token.grammar?.role!==NAAT_SABABI_MARFU_ROLE){
+  return Object.freeze({authorized:false,reason:'not a sababi marfu'});
+ }
+ const naat=data?.tokens?.[index-1];
+ const authority=deriveNaatSababiAuthority(data,index-1);
+ if(!authority.authorized)return Object.freeze({authorized:false,reason:`its naat is not licensed: ${authority.reason}`});
+ if(token.id&&authority.marfuId&&authority.marfuId!==token.id){
+  return Object.freeze({authorized:false,reason:'the licensed naat raises a different word'});
+ }
+ return Object.freeze({authorized:true,reason:'',naatId:authority.followerId,naatWord:naat.word,
+  manutId:authority.followedId,aid:authority.aid,frameKey:authority.frameKey,marfuKey:authority.marfuKey});
+}
+/* أقسام المعرفة. Phase 11's rule verbatim: the classification comes from the canonical noun record
+   and the word's own letters, and a token's declaration is only ever CHECKED against it. */
+function deriveMarifaKindAuthority(data,index){
+ const token=data?.tokens?.[index];
+ const claimed=token?.grammar?.marifaKind||'';
+ if(!token||token.grammar?.type!=='noun'){
+  return Object.freeze({authorized:false,reason:'not a noun',claimed,kind:''});
+ }
+ const derived=deriveMarifaKind(token.word);
+ if(!derived)return Object.freeze({authorized:false,reason:'the word is not a registered maarifah of any produced kind',claimed,kind:''});
+ if(claimed&&claimed!==derived){
+  return Object.freeze({authorized:false,reason:`claimed kind ${claimed} is not the kind this word is`,claimed,kind:derived});
+ }
+ /* اسم الإشارة is a maʿrifah kind AND a built noun. Classifying it without proving the bināʾ would
+    let the label ride on a word this engine had silently inflected. */
+ if(derived===MARIFA_KINDS.ishara){
+  const ishara=deriveIsharaAuthority(data,index);
+  if(!ishara.authorized)return Object.freeze({authorized:false,reason:`demonstrative authority failed: ${ishara.reason}`,claimed,kind:derived});
+ }
+ return Object.freeze({authorized:true,reason:'',claimed,kind:derived});
+}
+/* اسم الإشارة. Built on the kasrah p. 22 names, holding the position p. 24 names, and nothing else:
+   the lexeme table is the only road in, and the surface must be its exact bytes. */
+function isBuiltIshara(token){
+ return token?.grammar?.type==='noun'&&Boolean(token.grammar.isharaKey);
+}
+function deriveIsharaAuthority(data,index){
+ const token=data?.tokens?.[index];
+ const refuse=reason=>Object.freeze({authorized:false,reason});
+ if(!token||token.grammar?.type!=='noun')return refuse('not a noun');
+ const key=token.grammar.isharaKey||'';
+ const lexeme=key?ISHARA_LEXEMES[key]:null;
+ if(!lexeme)return refuse('unregistered demonstrative');
+ if(token.word&&token.word!==lexeme.surface)return refuse('the surface is not the registered demonstrative');
+ if(token.surfaceHint&&token.surfaceHint!==lexeme.surface)return refuse('the surface hint is not the registered demonstrative');
+ if(token.grammar.role!=='mubtada')return refuse('only the mubtada position is produced for a demonstrative');
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ if(!template||!template.isharaLexemeKeys.includes(key))return refuse('this template does not host that demonstrative');
+ const marker=ISHARA_BINAA_SIGNS[lexeme.binaaSignId];
+ if(!marker)return refuse('no source-verified binaa marker');
+ if(token.state)return refuse('a built noun may not carry an irab state');
+ if(token.sign)return refuse('a built noun may not carry an irab sign');
+ if(token.binaaSign&&token.binaaSign!==lexeme.binaaSignId)return refuse('binaa marker mismatch');
+ if(token.mahall&&token.mahall!==ISHARA_MAHALL.state)return refuse('mahall mismatch');
+ if(token.mahallRuleId&&token.mahallRuleId!=='R_ISM_ISHARA_MAHALL_RAF')return refuse('mahall rule mismatch');
+ return Object.freeze({authorized:true,reason:'',key,lexeme,marker,binaaSignId:lexeme.binaaSignId,
+  mahall:ISHARA_MAHALL.state,mahallRuleId:'R_ISM_ISHARA_MAHALL_RAF',ruleId:'R_ISM_ISHARA_MABNI'});
 }
 function atfTemplateRecord(data){
  const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
@@ -12249,6 +12768,30 @@ function inflectNoun(token,tokens,index,data){
   token.word=token.expectedSurface;
   return;
  }
+ /* Wave 4 — the demonstrative never reaches the state/sign matrix either, and for the reason p. 22
+    gives: its ending keeps one state for no governing word, so it has a POSITION and no sign. */
+ if(isBuiltIshara(token)){
+  const authority=deriveIsharaAuthority(data,index);
+  if(!authority.authorized){
+   throw new Error(`The noun is not a canonically licensed demonstrative: ${authority.reason}.`);
+  }
+  token.state='';
+  token.sign=null;
+  token.signRuleId='';
+  token.ruleId=authority.ruleId;
+  token.binaaSign=authority.binaaSignId;
+  token.mahall=authority.mahall;
+  token.mahallRuleId=authority.mahallRuleId;
+  token.inflection='singular';
+  token.expectedSurface=authority.lexeme.surface;
+  token.word=token.expectedSurface;
+  return;
+ }
+ /* p. 117's «فاعل للفاضل». Structural at build time — the naʿt before it has just been inflected,
+    so the frame is already provable, while this token's own state is written below. */
+ if(token.grammar.role===NAAT_SABABI_MARFU_ROLE&&!deriveSababiMarfuAuthority(data,index).authorized){
+  throw new Error(`The noun is not a canonically licensed sababi marfūʿ: ${deriveSababiMarfuAuthority(data,index).reason}.`);
+ }
  if(token.grammar.role===HAAL_ROLE&&!deriveHaalAuthority(data,index).authorized){
   throw new Error(`The adjective is not a canonically licensed haal: ${deriveHaalAuthority(data,index).reason}.`);
  }
@@ -12302,15 +12845,25 @@ function inflectNoun(token,tokens,index,data){
   token.state=followed.state;
   /* At build time the exact surfaces must already be authorized by this template. This prevents
      AR.naat from promoting an arbitrary matching adjective into grammatical truth. */
-  const authorized=token.grammar.role==='naat'?Boolean(naatPairAt(data,index))
+  const authorized=token.grammar.role==='naat'
+    ?Boolean(naatPairAt(data,index))||Boolean(sababiFrameAt(data,index))
    :token.grammar.role==='atf'?deriveAtfFollowerAuthority(data,index).authorized
    :token.grammar.role==='tawkid'?deriveTawkidFollowerAuthority(data,index).authorized
    :token.grammar.role==='badal'?deriveBadalFollowerAuthority(data,index).authorized:false;
   if(!authorized)throw new Error('The follower structure is not canonically registered for this template.');
+  /* The naʿt's own قسم decides which source rule it carries, and it is decided HERE, from the
+     structure — not by the role table, which knows only the true naʿt. Nothing is written back
+     onto the token's declaration: a builder that named the wrong قسم is refused outright. */
+  if(token.grammar.role==='naat'&&!deriveNaatSubtypeAuthority(data,index).authorized){
+   throw new Error(`The naʿt subtype is not canonically licensed: ${deriveNaatSubtypeAuthority(data,index).reason}.`);
+  }
  /* The munādā sentinel resolves here: the built kind already returned above, so anything still
     carrying it is one of the three types the source makes «مَنْصُوبَةٌ لَا غَيْرُ». */
  }else token.state=roleRule.state==='munadaAuthority'?'nasb':roleRule.state;
  token.ruleId=roleRule.ruleId;
+ /* …except a naʿt, whose source rule is its قسم's, not the role table's single true-naʿt entry.
+    The قسم is re-derived rather than read, so the rule cannot be chosen by a declaration. */
+ if(token.grammar.role==='naat')token.ruleId=deriveNaatSubtypeAuthority(data,index).subtypeRuleId;
  const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
  if(!signRule) throw new Error(`No noun rule for ${token.inflection}/${token.state}`);
  token.sign=canonicalSignCopy(signRule[0]);
@@ -12320,7 +12873,11 @@ function inflectNoun(token,tokens,index,data){
  token.word=token.expectedSurface;
  if(token.inflection==='fiveNouns'){
   token.grammar.isMudaf=true;
-  token.grammar.attachedKaf=true;
+  /* One of الأسماء الخمسة is a muḍāf by definition, but WHICH pronoun it is joined to is not fixed:
+     every one the app had until now carried the kāf, and p. 117's «أَبُوهُ» carries the hāʾ. Writing
+     the kāf unconditionally would have printed «وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ» over a word with no kāf
+     in it, so the default now yields to a declared attached pronoun. */
+  if(!token.grammar.attachedDamir&&!token.grammar.attachedHaa)token.grammar.attachedKaf=true;
  }
 }
 function stripFinalHarakah(word){return word.replace(/[\u064B-\u0652]$/u,'')}
@@ -12857,7 +13414,7 @@ function resolveRelationships(data){
  }
  tokens.forEach((item,index)=>{
   if(!['naat','atf','tawkid','badal'].includes(item.grammar?.role))return;
-  const authority=item.grammar.role==='naat'?deriveNaatFollowerAuthority(data,index)
+  const authority=item.grammar.role==='naat'?deriveNaatSubtypeAuthority(data,index)
    :item.grammar.role==='atf'?deriveAtfFollowerAuthority(data,index)
    :item.grammar.role==='badal'?deriveBadalFollowerAuthority(data,index)
    :deriveTawkidFollowerAuthority(data,index);
@@ -12865,6 +13422,11 @@ function resolveRelationships(data){
   const fields={kind:authority.kind,followedId:authority.followedId,followerId:authority.followerId,state:authority.state};
   if(authority.kind===NAAT_KIND)Object.assign(fields,{definiteness:authority.definiteness,
    gender:authority.gender,number:authority.number});
+  /* Wave 4 — the سببي link records the raised noun and the ʿāʾid alongside the two agreements the
+     manʿūt gives, because those are what make it that قسم rather than the other. */
+  else if(authority.kind===NAAT_SABABI_KIND)Object.assign(fields,{definiteness:authority.definiteness,
+   gender:authority.gender,number:authority.number,frameKey:authority.frameKey,
+   marfuId:authority.marfuId,aid:authority.aid});
   else if(authority.kind===ATF_KIND)Object.assign(fields,{conjunctionId:authority.conjunctionId,conjunctionKey:authority.conjunctionKey});
   else Object.assign(fields,{pairKey:authority.pairKey,subtype:authority.subtype,semanticKey:authority.semanticKey,
    pronounKey:authority.pronounKey,antecedentGender:authority.antecedentGender,antecedentNumber:authority.antecedentNumber});
@@ -12880,6 +13442,13 @@ function resolveRelationships(data){
    conjunction.relations.followedId=followed.id;
    conjunction.relations.followerId=item.id;
    conjunction.relations.followerRelationshipId=relation.id;
+  }
+  if(authority.kind===NAAT_SABABI_KIND){
+   const marfu=tokens.find(token=>token.id===authority.marfuId);
+   item.relations.marfuId=marfu.id;
+   marfu.relations.naatId=item.id;
+   marfu.relations.followedId=followed.id;
+   marfu.relations.followerRelationshipId=relation.id;
   }
  });
  tokens.forEach((item,index)=>{
@@ -12912,6 +13481,13 @@ function deriveIdafaMeaningAuthority(data,index){
 }
 function nounRoleArabic(token){
  const role=token.grammar.role;
+ /* Wave 4 — a demonstrative has no iʿrāb sign to name, so its line ends at its position, exactly
+    as the built munādā's and the interrogative ḥāl's do. */
+ if(isBuiltIshara(token)){
+  const owner=token._data,authority=deriveIsharaAuthority(owner,owner?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized demonstrative: ${authority.reason}`);
+  return`اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى ${authority.marker.ar} فِي مَحَلِّ ${ISHARA_MAHALL.ar} مُبْتَدَأٌ`;
+ }
  if(role==='mubtada')return token.grammar.delayed?'مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ بِالِابْتِدَاءِ':'مُبْتَدَأٌ مَرْفُوعٌ بِالِابْتِدَاءِ';
  if(role==='khabar')return'خَبَرٌ مَرْفُوعٌ بِالْمُبْتَدَأِ';
  if(role==='faail')return'فَاعِلٌ مَرْفُوعٌ';
@@ -12941,7 +13517,19 @@ function nounRoleArabic(token){
     the kāna relationship by validateExercise, so a relabelled snapshot cannot survive restore. */
  if(role==='ismKana')return`اسْمُ «${token.grammar.governorWord}» مَرْفُوعٌ بِهِ`;
  if(role==='khabarKana')return`خَبَرُ «${token.grammar.governorWord}» مَنْصُوبٌ بِهِ`;
- if(role==='naat')return`نَعْتٌ ${stateArabic(token.state)} تَابِعٌ لِمَنْعُوتِهِ`;
+ /* Wave 4 — the قسم is named on the card, exactly as التوكيد names لفظي/معنوي on its own. The two
+    are decided by structure, so this label can never be the thing that makes a naʿt سببي. */
+ if(role==='naat'){
+  const owner=token._data,authority=deriveNaatSubtypeAuthority(owner,owner?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized naʿt: ${authority.reason}`);
+  return`نَعْتٌ ${NAAT_SUBTYPE_LABELS[authority.kind].ar} ${stateArabic(token.state)} تَابِعٌ لِمَنْعُوتِهِ`;
+ }
+ /* p. 117 names the governor rather than saying a bare «فاعل»: «وأبوه: فاعل للفاضل». */
+ if(role===NAAT_SABABI_MARFU_ROLE){
+  const owner=token._data,authority=deriveSababiMarfuAuthority(owner,owner?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized sababi marfūʿ: ${authority.reason}`);
+  return`فَاعِلٌ لِـ«${authority.naatWord}» مَرْفُوعٌ`;
+ }
  if(role==='atf')return`مَعْطُوفٌ ${stateArabic(token.state)} عَلَى مَعْطُوفٍ عَلَيْهِ`;
  if(role==='tawkid'){
   const data=token._data,authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
@@ -13007,7 +13595,39 @@ function renderNounAnalysis(token){
     word's own card, so that is stated in the combined block instead. */
  if(token.grammar.attachedHaa)arabic+=HAA_MUDAF_ILAYH_CLAUSE_AR;
  if(token.grammar.attachedKaf)arabic+='، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ';
+ /* Wave 4 — the ʿāʾid of a سببي naʿt's raised noun. p. 117 parses it as part of that word's own
+    iʿrāb («وهو مضاف إلى الهاء التي هي ضمير عائد إلى محمدٍ»), so it belongs on this card and not in
+    a separate explanation, and p. 118 makes the pronoun the first of the five kinds of maʿrifah. */
+ if(token.grammar.attachedDamir){
+  const owner=token._data,authority=deriveSababiMarfuAuthority(owner,owner?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized attached pronoun: ${authority.reason}`);
+  arabic+=attachedDamirClauseAr(ATTACHED_DAMIR_REGISTRY[authority.aid]);
+ }
+ /* …and the classification of the WORD itself, wherever this chapter's lanes prove it. It is
+    appended to the ordinary iʿrāb and never replaces it. */
+ if(token.grammar.marifaKind){
+  const owner=token._data,authority=deriveMarifaKindAuthority(owner,owner?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized maʿrifah classification: ${authority.reason}`);
+  arabic+=marifaClauseAr(authority.kind);
+ }
  let english=roleRule.en;
+ if(isBuiltIshara(token)){
+  const owner=token._data,authority=deriveIsharaAuthority(owner,owner?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized demonstrative: ${authority.reason}`);
+  english=`A demonstrative noun — the third kind of maʿrifah. It is built on ${authority.marker.en} and holds the position of ${ISHARA_MAHALL.en} as the mubtadaʾ.`;
+ }
+ if(token.grammar.role==='naat'){
+  const owner=token._data,authority=deriveNaatSubtypeAuthority(owner,owner?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized naʿt: ${authority.reason}`);
+  english=authority.kind===NAAT_SABABI_KIND
+   ?'A causal (sababi) naʿt: it raises the explicit noun after it, which carries a pronoun referring back to the manʿūt.'
+   :roleRule.en;
+ }
+ if(token.grammar.role===NAAT_SABABI_MARFU_ROLE){
+  const owner=token._data,authority=deriveSababiMarfuAuthority(owner,owner?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized sababi marfūʿ: ${authority.reason}`);
+  english=`The noun raised by ${authority.naatWord}; it is that naʿt's fāʿil, nominative, and a muḍāf to the pronoun pointing back at the manʿūt.`;
+ }
  /* The role table's English has to cover all three أنواع at once, which makes it a disjunction.
     The authorized exercise knows which one this is, so the learner is told that instead. */
  if(token.grammar.role==='mafulMutlaq'){
@@ -13568,6 +14188,56 @@ const BADAL_KIND_LABELS=Object.freeze({
  ishtimal:Object.freeze({ar:'بَدَلُ الِاشْتِمَالِ',en:'badal al-ishtimāl (badal of inclusion)'}),
  ghalat:Object.freeze({ar:'بَدَلُ الْغَلَطِ',en:'badal al-ghalaṭ (badal of the slip)'})
 });
+/* ── Wave 4 Why ───────────────────────────────────────────────────────────────────────────────
+   Each of these explains the STRUCTURE the learner is looking at, not the label on it. The naʿt
+   entry below is reached only when the derivation says سببي, so the explanation and the card can
+   never disagree about which قسم this is. */
+function naatSubtypeOf(token,data){
+ const authority=deriveNaatSubtypeAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`No Why for an unauthorized naʿt: ${authority.reason}`);
+ return authority.kind;
+}
+const WHY_ROLE_NAAT_SABABI=Object.freeze({
+ id:()=>'WHY_ROLE_NAAT_SABABI',
+ ar:t=>`${wq(t.word)} وَصَفَ الِاسْمَ الَّذِي قَبْلَهُ بِمَا بَعْدَهُ، فَرَفَعَ اسْمًا ظَاهِرًا مُتَّصِلًا بِضَمِيرٍ يَعُودُ عَلَى الْمَنْعُوتِ، فَهُوَ نَعْتٌ سَبَبِيٌّ لَهُ.`,
+ en:t=>`${eq(t.word)} describes the noun before it by way of what comes after it: it raises an explicit noun joined to a pronoun that refers back to the manʿūt, so it is that noun's causal نَعْتٌ.`,
+ stateId:()=>'WHY_STATE_NAAT_SABABI_INHERITED',
+ stateAr:t=>`وَالنَّعْتُ السَّبَبِيُّ يَتْبَعُ مَنْعُوتَهُ فِي وَاحِدٍ مِنَ الرَّفْعِ وَالنَّصْبِ وَالْخَفْضِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
+ stateEn:t=>`A causal نَعْتٌ follows its manʿūt in one of rafʿ, naṣb and khafḍ, so this one is ${stateArabic(t.state)} like it.`});
+/* Why each kind of maʿrifah IS that kind — the source's own definitions, one per produced kind. */
+const MARIFA_KIND_REASONS=Object.freeze(Object.assign(Object.create(null),{
+ damir:Object.freeze({ar:'ضَمِيرٌ يَدُلُّ عَلَى مُعَيَّنٍ',en:'it is a pronoun standing for one definite thing',pages:'118–119'}),
+ alam:Object.freeze({ar:'يَدُلُّ عَلَى مُعَيَّنٍ بِغَيْرِ حَاجَةٍ إِلَى قَرِينَةِ تَكَلُّمٍ أَوْ خِطَابٍ',en:'it points at one definite thing with no need of a context of speech or address',pages:'119'}),
+ ishara:Object.freeze({ar:'وُضِعَ لِيَدُلَّ عَلَى مُعَيَّنٍ بِوَاسِطَةِ إِشَارَةٍ',en:'it is set down to point at one definite thing by means of an indication',pages:'119–120'}),
+ al:Object.freeze({ar:'اقْتَرَنَتْ بِهِ «أَلْ» فَأَفَادَتْهُ التَّعْرِيفَ',en:'أل is joined to it and gives it definiteness',pages:'120'})
+}));
+function whyMarifaKind(token,data){
+ const authority=deriveMarifaKindAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`No Why for an unauthorized maʿrifah classification: ${authority.reason}`);
+ const label=MARIFA_KIND_LABELS[authority.kind],reason=MARIFA_KIND_REASONS[authority.kind];
+ return{id:`WHY_MARIFA_${authority.kind.toUpperCase()}`,
+  ar:`وَ${wq(token.word)} مَعْرِفَةٌ؛ لِأَنَّهُ ${reason.ar}، وَالْمَعْرِفَةُ خَمْسَةُ أَقْسَامٍ، وَهَذَا مِنْهَا ${label.ar}.`,
+  en:`${eq(token.word)} is a maʿrifah because ${reason.en}; maʿrifah has five kinds, and this one is ${label.en}.`};
+}
+function whyAttachedDamir(token,data){
+ const authority=deriveSababiMarfuAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`No Why for an unauthorized attached pronoun: ${authority.reason}`);
+ const record=ATTACHED_DAMIR_REGISTRY[authority.aid];
+ const manut=data.tokens.find(item=>item.id===authority.manutId);
+ return{id:'WHY_MARIFA_DAMIR_ATTACHED',
+  ar:`وَ${wq(record.surface)} ضَمِيرٌ مُتَّصِلٌ يَعُودُ عَلَى الْمَنْعُوتِ ${wq(manut.word)}، وَبِهِ صَارَ هَذَا الِاسْمُ مُتَّصِلًا بِالْمَنْعُوتِ، وَالضَّمِيرُ أَوَّلُ أَقْسَامِ الْمَعْرِفَةِ.`,
+  en:`${eq(record.surface)} is an attached pronoun referring back to the manʿūt ${eq(manut.word)} — that is what joins this noun to it — and the pronoun is the first of the five kinds of maʿrifah.`};
+}
+function whyIsharaBinaa(token,data){
+ const authority=deriveIsharaAuthority(data,data?.tokens?.indexOf(token));
+ if(!authority.authorized)throw new Error(`No Why for an unauthorized demonstrative: ${authority.reason}`);
+ return{id:'WHY_STATE_ISHARA_MAHALL',
+  /* «مَبْنِيٌّ عَلَى X» keeps the marker in the majrūr form the table stores it in. Saying «لَزِمَ
+     آخِرُهُ X» instead would put that same stored form where the sentence needs an accusative, so
+     the reason is worded around the marker rather than through it. */
+  ar:`وَ${wq(token.word)} مَبْنِيٌّ عَلَى ${authority.marker.ar}؛ لِأَنَّ آخِرَهُ لَزِمَ حَالَةً وَاحِدَةً لِغَيْرِ عَامِلٍ وَلَا اعْتِلَالٍ، فَلَا يَظْهَرُ فِيهِ إِعْرَابٌ، وَإِنَّمَا هُوَ فِي مَحَلِّ ${ISHARA_MAHALL.ar} مُبْتَدَأٌ.`,
+  en:`${eq(token.word)} keeps ${authority.marker.en} for no governing word and no weakness, so it is built and takes no iʿrāb sign; it holds the position of ${ISHARA_MAHALL.en} as the mubtadaʾ.`};
+}
 /* Role registry: why the word holds this role, and why that role fixes this state. */
 const WHY_ROLE=Object.freeze({
  mubtada:{
@@ -13645,6 +14315,13 @@ const WHY_ROLE=Object.freeze({
   stateId:()=>'WHY_STATE_NAAT_INHERITED',
   stateAr:t=>`وَالنَّعْتُ يَتْبَعُ مَنْعُوتَهُ فِي الْإِعْرَابِ، فَهُوَ ${stateArabic(t.state)} مِثْلَهُ.`,
   stateEn:t=>`A نَعْتٌ follows its manʿūt in iʿrāb state, so this one is ${stateArabic(t.state)} like it.`},
+ [NAAT_SABABI_MARFU_ROLE]:{
+  id:()=>'WHY_ROLE_NAAT_SABABI_MARFU',
+  ar:(t,d)=>`${wq(t.word)} هُوَ الِاسْمُ الظَّاهِرُ الَّذِي رَفَعَهُ النَّعْتُ ${wq(deriveSababiMarfuAuthority(d,d?.tokens?.indexOf(t)).naatWord)}، فَهُوَ فَاعِلٌ لَهُ.`,
+  en:(t,d)=>`${eq(t.word)} is the explicit noun raised by the naʿt ${eq(deriveSababiMarfuAuthority(d,d?.tokens?.indexOf(t)).naatWord)}, so it is that naʿt's فَاعِل.`,
+  stateId:()=>'WHY_STATE_NAAT_SABABI_MARFU',
+  stateAr:()=>'وَالْفَاعِلُ مَرْفُوعٌ، وَيَبْقَى مَرْفُوعًا وَإِنْ تَغَيَّرَ إِعْرَابُ الْمَنْعُوتِ.',
+  stateEn:()=>'A فَاعِل is مَرْفُوعٌ, and it stays nominative however the manʿūt’s own state changes.'},
  atf:{
   id:()=>'WHY_ROLE_ATF_NASAQ',
   ar:t=>`${wq(t.word)} جَاءَ بَعْدَ حَرْفِ عَطْفٍ، فَهُوَ مَعْطُوفٌ عَلَى الِاسْمِ الَّذِي قَبْلَ الْحَرْفِ.`,
@@ -14096,14 +14773,24 @@ function buildTokenWhy(token,data){
  const push=s=>{if(s){ids.push(s.id);ar.push(s.ar);en.push(s.en)}};
  const type=token.grammar.type;
  if(type==='noun'){
-  const role=WHY_ROLE[token.grammar.role];
+  /* Wave 4 — the قسم decides which explanation the learner reads, and it is derived, so the two
+     naʿt explanations cannot be swapped by editing a label on the token. */
+  const role=token.grammar.role==='naat'&&naatSubtypeOf(token,data)===NAAT_SABABI_KIND
+   ?WHY_ROLE_NAAT_SABABI:WHY_ROLE[token.grammar.role];
   if(!role)throw new Error(`WHY: no rule for noun role “${token.grammar.role}”`);
   push({id:role.id(token,data),ar:role.ar(token,data),en:role.en(token,data)});
-  push({id:role.stateId(token,data),ar:role.stateAr(token,data),en:role.stateEn(token,data)});
+  /* A built demonstrative has a POSITION, not a state, so the role table's «وَالْمُبْتَدَأُ مَرْفُوعٌ»
+     would be a false claim about it — the same reason the built ḥāl swaps its own state line. */
+  if(isBuiltIshara(token))push(whyIsharaBinaa(token,data));
+  else push({id:role.stateId(token,data),ar:role.stateAr(token,data),en:role.stateEn(token,data)});
   /* A built munada has no iʿrab sign, so there is no sign line to explain. Its bināʾ marker is
      explained by whyMunadaRuling instead, which is where it belongs — the marker is a fact about
      building, not about iʿrāb. */
   if(!isBuiltNoun(token))push(whySignNoun(token));
+  /* Wave 4 — p. 118's five kinds, explained on the word whose definiteness the chapter is about,
+     and the ʿāʾid that makes the raised noun belong to the manʿūt. Both are EXTRA lines. */
+  if(token.grammar.attachedDamir)push(whyAttachedDamir(token,data));
+  if(token.grammar.marifaKind)push(whyMarifaKind(token,data));
   if(token.grammar.role==='tawkid'){
    push(whyTawkidCondition(token,data));
   }
@@ -14453,6 +15140,21 @@ function buildRelationshipWhy(rel,data){
     en:`${eq(follower.word)} is ${label.en} for ${eq(followed.word)}, so it follows it in all of its iʿrāb and is ${stateArabic(follower.state)} like it.`});
    return{ids,ar,en};
   }
+  /* Wave 4 — p. 118's «اثنين من خمسة», said as the source says it: what it follows, what it takes
+     from the noun after it, and what it follows in nothing at all. */
+  if(rel.kind===NAAT_SABABI_KIND){
+   const marfu=data.tokens.find(item=>item.id===rel.marfuId);
+   push({id:'WHY_REL_NAAT_SABABI_AGREEMENT',
+    ar:`${wq(follower.word)} نَعْتٌ سَبَبِيٌّ لِـ${wq(followed.word)}، فَوَافَقَهُ فِي الْإِعْرَابِ وَفِي التَّعْرِيفِ أَوِ التَّنْكِيرِ فَقَطْ.`,
+    en:`${eq(follower.word)} is the causal naʿt of ${eq(followed.word)}, so it agrees with it in iʿrāb state and in definiteness only.`});
+   push({id:'WHY_REL_NAAT_SABABI_GENDER',
+    ar:`وَأَخَذَ تَذْكِيرَهُ أَوْ تَأْنِيثَهُ مِنْ مَرْفُوعِهِ الَّذِي بَعْدَهُ ${wq(marfu.word)}، لَا مِنْ مَنْعُوتِهِ.`,
+    en:`It takes its gender from ${eq(marfu.word)}, the noun it raises after it, and not from its manʿūt.`});
+   push({id:'WHY_REL_NAAT_SABABI_NUMBER',
+    ar:`وَلَا يَتْبَعُ مَنْعُوتَهُ فِي الْإِفْرَادِ وَالتَّثْنِيَةِ وَالْجَمْعِ، بَلْ يَكُونُ مُفْرَدًا دَائِمًا وَأَبَدًا.`,
+    en:`It follows its manʿūt in none of singular, dual and plural: a causal naʿt is always singular.`});
+   return{ids,ar,en};
+  }
   push({id:'WHY_REL_NAAT_AGREEMENT',
    ar:`${wq(follower.word)} نَعْتٌ حَقِيقِيٌّ لِـ${wq(followed.word)}، وَقَدْ وَافَقَهُ فِي الْإِعْرَابِ وَالتَّعْرِيفِ أَوِ التَّنْكِيرِ وَالتَّذْكِيرِ أَوِ التَّأْنِيثِ وَالْإِفْرَادِ أَوِ التَّثْنِيَةِ أَوِ الْجَمْعِ.`,
    en:`${eq(follower.word)} is the true naʿt of ${eq(followed.word)} and agrees with it in iʿrāb state, definiteness, gender, and number.`});
@@ -14781,6 +15483,16 @@ function renderRelationshipAnalysis(data){
    followed.phraseLabel='Follower';
    return;
   }
+  /* Wave 4 — the combined block for a سببي naʿt names all THREE words, because the structure is
+     three words. Reading only «منعوت ونعت» here would hide what makes it سببي. */
+  if(rel.kind===NAAT_SABABI_KIND){
+   const marfu=data.tokens.find(item=>item.id===rel.marfuId);
+   const phrase=`${followed.word} ${follower.word} ${marfu.word}`;
+   followed.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: مَنْعُوتٌ وَنَعْتٌ سَبَبِيٌّ تَابِعٌ لَهُ فِي الْإِعْرَابِ وَالتَّعْرِيفِ أَوِ التَّنْكِيرِ، وَفَاعِلٌ لِلنَّعْتِ مَرْفُوعٌ مُتَّصِلٌ بِضَمِيرٍ يَعُودُ عَلَى الْمَنْعُوتِ.`;
+   followed.phraseEn=`Together, “${phrase}” is a manʿūt, its causal naʿt agreeing with it in state and definiteness, and the naʿt's own nominative fāʿil carrying a pronoun that refers back to the manʿūt.`;
+   followed.phraseLabel='Follower';
+   return;
+  }
   if(rel.kind===BADAL_KIND){
    const label=BADAL_KIND_LABELS[rel.subtype];
    followed.phraseAr=`وَالتَّرْكِيبُ «${followed.word} ${follower.word}»: مُبْدَلٌ مِنْهُ وَ${label.ar} تَابِعٌ لَهُ فِي جَمِيعِ الْإِعْرَابِ.`;
@@ -15009,6 +15721,38 @@ function validateExercise(data){
     fail('E_ROLE_RULE_OWNER','A noun cites a source rule that belongs to a different role.',token);
    }
   }
+  /* Wave 4 — and a noun's ROLE belongs to a noun. Found by trying it: a particle handed a noun role
+     was rejected before only when some OTHER structural invariant happened to notice (an orphan
+     subject, a mubtadaʾ with no khabar, a naʿt with no reciprocal link), which is luck rather than a
+     rule — and the role this chapter adds had no such second catcher, so it was accepted outright.
+     A role-table entry worn by a particle or a verb is a category error, and is now refused as one. */
+  if(token.grammar&&token.grammar.type!=='noun'&&GRAMMAR_RULES.roles[token.grammar.role]){
+   fail('E_ROLE_TYPE','A noun role is carried by a token that is not a noun.',token);
+  }
+  /* Wave 4 — the three declarations this chapter adds, each checked against what the word IS.
+     None of them may be present without its own structural proof, and none may name something
+     other than what that proof yields, so no snapshot can relabel a proper name a demonstrative,
+     move a pronoun that refers back to the manʿūt, or classify a word the app never registered. */
+  if(token.grammar&&token.grammar.marifaKind){
+   const authority=deriveMarifaKindAuthority(data,data.tokens.indexOf(token));
+   if(!authority.authorized)fail('E_MARIFA_KIND_AUTHORITY',`Maʿrifah classification failed: ${authority.reason}.`,token);
+  }
+  if(token.grammar&&token.grammar.attachedDamir){
+   const authority=deriveSababiMarfuAuthority(data,data.tokens.indexOf(token));
+   const record=ATTACHED_DAMIR_REGISTRY[token.grammar.attachedDamir];
+   if(!authority.authorized)fail('E_ATTACHED_DAMIR_AUTHORITY',`Attached-pronoun authority failed: ${authority.reason}.`,token);
+   else if(!record||authority.aid!==token.grammar.attachedDamir||!token.word.endsWith(record.surface)){
+    fail('E_ATTACHED_DAMIR_SURFACE','The declared attached pronoun is not the one this word carries.',token);
+   }
+  }
+  if(token.grammar&&token.grammar.isharaKey){
+   const authority=deriveIsharaAuthority(data,data.tokens.indexOf(token));
+   if(!authority.authorized)fail('E_ISHARA_AUTHORITY',`Demonstrative authority failed: ${authority.reason}.`,token);
+   else if(token.ruleId!==authority.ruleId)fail('E_ISHARA_RULE','The demonstrative is not bound to its own binaa rule.',token);
+   else if(token.mahallRuleId!==authority.mahallRuleId)fail('E_ISHARA_MAHALL','The demonstrative does not carry the mahall rule of its position.',token);
+   else if(token.binaaSign!==authority.binaaSignId)fail('E_ISHARA_BINAA','The demonstrative does not carry its source-verified binaa marker.',token);
+   else if(token.grammar.marifaKind!==MARIFA_KINDS.ishara)fail('E_ISHARA_MARIFA','A produced demonstrative must be classified as its own kind of maarifah.',token);
+  }
   if(Object.prototype.hasOwnProperty.call(token.grammar||{},'voice')&&token.grammar.voice!==PASSIVE_VOICE){
    fail('E_VOICE_OWNER','A token may carry a voice field only for the canonical passive voice.',token);
   }
@@ -15042,9 +15786,19 @@ function validateExercise(data){
     if(!authority.authorized||authority.deputyId!==token.id)fail('E_NAIB_FAIL_AUTHORITY',`Deputy-subject authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_NAIB_FAIL_RAF')fail('E_NAIB_FAIL_RULE','The deputy subject is not bound to its source rule.',token);
    }else if(token.grammar.role==='naat'){
-    const authority=deriveNaatFollowerAuthority(data,data.tokens.indexOf(token));
-    if(!authority.authorized)fail('E_NAAT_AUTHORITY',`True naʿt authority failed: ${authority.reason}.`,token);
-    else if(token.ruleId!=='R_NAAT_HAQIQI')fail('E_NAAT_RULE','The true naʿt is not bound to its source rule.',token);
+    /* Wave 4 — WHICH قسم is re-derived here from the tokens, and the rule the naʿt carries must be
+       that قسم's. A snapshot that swaps «حقيقي» for «سببي», or that keeps a سببي token's rule while
+       deleting the word it raises, fails on one of these two lines rather than rendering. */
+    const authority=deriveNaatSubtypeAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_NAAT_AUTHORITY',`Naʿt authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!==NAAT_SUBTYPE_LABELS[authority.kind].ruleId){
+     fail('E_NAAT_RULE','The naʿt is not bound to the source rule of its own qism.',token);
+    }
+   }else if(token.grammar.role===NAAT_SABABI_MARFU_ROLE){
+    const authority=deriveSababiMarfuAuthority(data,data.tokens.indexOf(token));
+    if(!authority.authorized)fail('E_NAAT_SABABI_MARFU_AUTHORITY',`Sababi marfūʿ authority failed: ${authority.reason}.`,token);
+    else if(token.ruleId!=='R_NAAT_SABABI_MARFU')fail('E_NAAT_SABABI_MARFU_RULE','The raised noun is not bound to its source rule.',token);
+    else if(token.state!=='raf')fail('E_ROLE_CASE',`The raised noun of a sababi naʿt requires raf, not ${token.state}.`,token);
    }else if(token.grammar.role==='atf'){
     const authority=deriveAtfFollowerAuthority(data,data.tokens.indexOf(token));
     if(!authority.authorized)fail('E_ATF_AUTHORITY',`ʿAṭf authority failed: ${authority.reason}.`,token);
@@ -15155,6 +15909,13 @@ function validateExercise(data){
     if(!authority.authorized)fail('E_MUTLAQ_AUTHORITY',`Absolute-object authority failed: ${authority.reason}.`,token);
     else if(token.ruleId!=='R_MAFUL_MUTLAQ_NASB')fail('E_MUTLAQ_RULE','The absolute object is not bound to its source rule.',token);
     if(token.state!=='nasb')fail('E_ROLE_CASE',`Role mafulMutlaq requires nasb, not ${token.state}.`,token);
+   }else if(isBuiltIshara(token)){
+    /* Wave 4 — a built demonstrative has no state for the role table to be compared against; what
+       it must have is a position, and neither an iʿrāb state nor a sign. The demonstrative
+       authority above has already proved the bināʾ marker and the maḥall rule. */
+    if(token.state)fail('E_ISHARA_BINAA','A built demonstrative has no iʿrāb state.',token);
+    if(token.sign)fail('E_ISHARA_BINAA','A built demonstrative has no iʿrāb sign.',token);
+    if(token.mahall!==ISHARA_MAHALL.state)fail('E_ISHARA_MAHALL','The demonstrative does not hold the position of rafʿ.',token);
    }else if(token.state!==roleRule?.state)fail('E_ROLE_CASE',`Role ${token.grammar.role} requires ${roleRule?.state}, not ${token.state}.`,token);
    const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
    if(safeSignId(token.sign)!==signRule?.[0])fail('E_NOUN_SIGN','Noun sign disagrees with case and declension.',token);
@@ -15489,7 +16250,10 @@ function validateExercise(data){
    if(preposition&&token.grammar.governorWord!==preposition.word)fail('E_PREPOSITION_CAUSE','Named preposition does not match the actual governor.',token);
   }
   if(token.grammar.role==='mudafIlayh'&&(!token.relations.mudafId||!relationships.some(rel=>rel.type==='idafa'&&rel.mudafIlayhId===token.id&&rel.mudafId===token.relations.mudafId)))fail('E_ORPHAN_IDAFA','Muḍāf ilayh is not linked to a muḍāf.',token);
-  if(token.grammar.isMudaf&&!token.grammar.attachedKaf&&!token.grammar.attachedHaa&&!token.relations.mudafIlayhId)fail('E_MUDAF_NO_COMPLEMENT','Muḍāf has no immediately following muḍāf ilayh.',token);
+  if(token.grammar.isMudaf&&!token.grammar.attachedKaf&&!token.grammar.attachedHaa
+    &&!token.grammar.attachedDamir&&!token.relations.mudafIlayhId){
+   fail('E_MUDAF_NO_COMPLEMENT','Muḍāf has no immediately following muḍāf ilayh.',token);
+  }
   /* Phase 3A1 — the لِكَيْ structural contract. Al-Tuḥfah p. 76 makes كَيْ a direct nāṣib ONLY
      when لام التعليل precedes it لفظاً, so that lām is not decoration: it is the licensing
      condition, and كَيْ without it is a different construction (concealed أَنْ) that this phase
@@ -15669,10 +16433,15 @@ function validateExercise(data){
    const authority=rel.kind===ATF_KIND?deriveAtfFollowerAuthority(data,data.tokens.indexOf(follower))
     :rel.kind===TAWKID_KIND?deriveTawkidFollowerAuthority(data,data.tokens.indexOf(follower))
     :rel.kind===BADAL_KIND?deriveBadalFollowerAuthority(data,data.tokens.indexOf(follower))
-    :deriveNaatFollowerAuthority(data,data.tokens.indexOf(follower));
+    /* Wave 4 — the naʿt branch asks the SUBTYPE authority, so a stored relationship claiming the
+       other قسم is compared against what the tokens actually are and not against itself. */
+    :deriveNaatSubtypeAuthority(data,data.tokens.indexOf(follower));
    if(!authority.authorized||rel.kind!==authority.kind||rel.followedId!==authority.followedId
      ||rel.followerId!==authority.followerId||rel.state!==authority.state
      ||rel.kind===NAAT_KIND&&(rel.definiteness!==authority.definiteness||rel.gender!==authority.gender||rel.number!==authority.number)
+     ||rel.kind===NAAT_SABABI_KIND&&(rel.definiteness!==authority.definiteness||rel.gender!==authority.gender
+       ||rel.number!==authority.number||rel.frameKey!==authority.frameKey
+       ||rel.marfuId!==authority.marfuId||rel.aid!==authority.aid)
      ||rel.kind===ATF_KIND&&(rel.conjunctionId!==authority.conjunctionId||rel.conjunctionKey!==authority.conjunctionKey)
      ||(rel.kind===TAWKID_KIND||rel.kind===BADAL_KIND)&&(rel.pairKey!==authority.pairKey||rel.subtype!==authority.subtype
        ||rel.semanticKey!==authority.semanticKey||rel.pronounKey!==authority.pronounKey
@@ -16073,14 +16842,21 @@ function add(starts,form,state,sign,build,metadata={}){
  const followerPairKeys=Object.freeze([...(metadata.followerPairKeys||[])]);
  const followerConjunctionKeys=Object.freeze([...(metadata.followerConjunctionKeys||[])]);
  if(Boolean(followerKind)!==Boolean(followerPairKeys.length)
-   ||followerKind&&![NAAT_KIND,ATF_KIND,TAWKID_KIND,BADAL_KIND].includes(followerKind)
+   ||followerKind&&![NAAT_KIND,NAAT_SABABI_KIND,ATF_KIND,TAWKID_KIND,BADAL_KIND].includes(followerKind)
    ||followerKind!==ATF_KIND&&followerConjunctionKeys.length
    ||followerKind===ATF_KIND&&!followerConjunctionKeys.length){
   throw new Error(`Template ${stableId} has an invalid follower declaration.`);
  }
  const followerRegistry=followerKind===ATF_KIND?ATF_PAIR_REGISTRY
   :followerKind===TAWKID_KIND?TAWKID_PAIR_REGISTRY
-  :followerKind===BADAL_KIND?BADAL_PAIR_REGISTRY:NAAT_PAIR_REGISTRY;
+  :followerKind===BADAL_KIND?BADAL_PAIR_REGISTRY
+  :followerKind===NAAT_SABABI_KIND?SABABI_FRAME_REGISTRY:NAAT_PAIR_REGISTRY;
+ /* Wave 4 — the ONLY road into the demonstrative lane. deriveIsharaAuthority reads the token, and
+    this reads the template; a template that names no demonstrative can never host one. */
+ const isharaLexemeKeys=Object.freeze([...(metadata.isharaLexemeKeys||[])]);
+ if(isharaLexemeKeys.some((key,position)=>isharaLexemeKeys.indexOf(key)!==position||!ISHARA_LEXEMES[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered demonstrative.`);
+ }
  if(followerPairKeys.some((key,position)=>followerPairKeys.indexOf(key)!==position||!followerRegistry[key])){
   throw new Error(`Template ${stableId} names a duplicate or unregistered follower pair.`);
  }
@@ -16330,6 +17106,7 @@ function add(starts,form,state,sign,build,metadata={}){
   followerKind,
   followerPairKeys,
   followerConjunctionKeys,
+  isharaLexemeKeys,
   mutlaqPairKeys,
   mafulFihPairKeys,
   haalPairKeys,
@@ -16783,6 +17560,24 @@ for(const constructionId of Object.keys(CONCEALED_AN_CONSTRUCTIONS)){
 /* One small builder over three existing hosts. The chosen pair supplies every variable Arabic
    surface; the host supplies only the manʿūt's role/state. This keeps rafʿ, naṣb and khafḍ on the
    ordinary noun matrix and gives later follower types a single relation seam to reuse. */
+/* Wave 4 — the three host surfaces the true-naʿt and the سببي lanes share. ONE copy each: two
+   independently typed copies of the same Arabic is exactly how combining-mark order has drifted
+   invisibly in this repo before — «إِنَّ» was typed with its fatḥah before its shaddah while the
+   app's own copy has them the other way round — and the invariant below asserts each of these
+   against the app's own registries rather than against a second hand-typed literal. */
+const NAAT_HOST_PLACE_NOM='الْفَصْلُ';
+const NAAT_HOST_PREP='فِي';
+const NAAT_HOST_QUESTION='سُؤَالٌ';
+(()=>{
+ if(!places.some(item=>item.nom===NAAT_HOST_PLACE_NOM))throw new Error('The naʿt host place is not a registered place noun.');
+ /* This one is a bare literal in the app rather than a registry member, so the invariant worth
+    asserting about it is the one that matters: there is exactly ONE copy of it, and it is
+    fully-vowelled Arabic. Both lanes now read that copy instead of typing a second. */
+ if(!/^[ء-يً-ْ]+$/u.test(NAAT_HOST_QUESTION)){
+  throw new Error('The naʿt host delayed mubtadaʾ is not vowelled Arabic.');
+ }
+ if(!Object.prototype.hasOwnProperty.call(GLOSS_CLOSED_PARTICLES,NAAT_HOST_PREP))throw new Error('The naʿt host preposition is not a registered closed particle.');
+})();
 const NAAT_SINGULAR_PAIR_KEYS=Object.freeze(['singularDefM','singularIndefM','singularDefF','singularIndefF']);
 function buildNaatExercise(pairKey,host){
  const pair=NAAT_PAIR_REGISTRY[pairKey];
@@ -18134,6 +18929,83 @@ add('noun','singular','nasb','fatha',()=>{
    token(khabarKana.acc,khabarKana.en,AR.khabarKana(khabarKana.acc,sister.verbAr),'The khabar of the deficient verb; accusative.',true)]};
 });
 
+
+/* ══ Wave 4 lanes ═══════════════════════════════════════════════════════════════════════════
+   Three سببي hosts over the SAME three states p. 117 runs its own examples through, and one
+   demonstrative lane. The hosts are deliberately the ones the true-naʿt lanes already use, so the
+   only difference a learner meets between the two أقسام is the difference the source draws: the
+   third word, and what the naʿt then agrees with. These are registered after every other template
+   because `add()` numbers a template by call order within its family. */
+function sababiPredicate(frame){
+ const pool=frame.manutNumber==='singular'?singularPredicates
+  :frame.manutNumber==='dual'?dualPredicates
+  :frame.manutGender==='feminine'?femininePluralPredicates:masculinePluralPredicates;
+ const found=pool.find(item=>item.en==='present');
+ if(!found)throw new Error(`No agreeing khabar for sababi frame with ${frame.manutGender}/${frame.manutNumber}.`);
+ return found;
+}
+function buildSababiExercise(frameKey,host){
+ const frame=SABABI_FRAME_REGISTRY[frameKey];
+ if(!frame)throw new Error(`Unknown productive sababi frame: ${frameKey}`);
+ const formKey={raf:'nom',nasb:'acc',jarr:'gen'}[host];
+ if(!formKey)throw new Error(`Unknown productive sababi host: ${host}`);
+ const marfuRecord=SABABI_MARFU_LEXEMES[frame.marfuKey];
+ /* The copula is read off the frame, not off the manʿūt's surface: p. 118 makes the naʿt singular
+    however plural the manʿūt is, so the English must follow the manʿūt and not the naʿt. */
+ const copula=frame.plural?'are':'is';
+ const manutWord=frame.manut[formKey],naatWord=frame.naat[formKey];
+ const naatToken=()=>token(naatWord,frame.naat.en,AR.naatSababi(naatWord,frameKey),
+  'A causal naʿt: it raises the explicit noun after it.',true);
+ /* p. 117 keeps this word nominative in all three examples, which is why every host builds it from
+    the same single registered form. */
+ const marfuToken=()=>token(marfuRecord.nom,marfuRecord.en,AR.sababiMarfu(marfuRecord),
+  'The explicit noun the naʿt raises; its fāʿil, nominative.');
+ if(host==='raf'){
+  const place=places.find(item=>item.nom===NAAT_HOST_PLACE_NOM);
+  return{sentence:'',translation:`${cap(frame.phraseEn)}, ${copula} in ${place.en}.`,tokens:[
+   token(manutWord,frame.manut.en,AR.marifa(AR.mubtada(manutWord),frame.manutKind),'The manʿūt; nominative.'),
+   naatToken(),marfuToken(),
+   token(NAAT_HOST_PREP,'in',AR.prep(NAAT_HOST_PREP),EN.prep),token(place.gen,place.en,AR.majrur(place.gen,NAAT_HOST_PREP),EN.majrur)
+  ]};
+ }
+ if(host==='nasb'){
+  const particle=innaSisters.find(item=>item.ar==='إِنَّ');
+  const predicate=sababiPredicate(frame);
+  return{sentence:'',translation:`${particle.meaning} ${frame.phraseEn}, ${copula} ${predicate.en}.`,tokens:[
+   token(particle.ar,particle.gloss,AR.particle(particle),'A particle that makes its noun accusative.'),
+   token(manutWord,frame.manut.en,AR.marifa(AR.ismInna(manutWord,particle.ar),frame.manutKind),'The manʿūt and noun of inna; accusative.'),
+   naatToken(),marfuToken(),
+   token(predicate.nom,predicate.en,AR.khabarInna(predicate.nom,particle.ar),'The khabar of inna; nominative.')
+  ]};
+ }
+ return{sentence:'',translation:`There is a question in ${frame.phraseEn}.`,tokens:[
+  token(NAAT_HOST_PREP,'in',AR.prep(NAAT_HOST_PREP),EN.prep),
+  token(manutWord,frame.manut.en,AR.marifa(AR.majrur(manutWord,NAAT_HOST_PREP),frame.manutKind),'The manʿūt governed by the preposition.'),
+  naatToken(),marfuToken(),
+  token(NAAT_HOST_QUESTION,'a question',AR.delayedMubtada(NAAT_HOST_QUESTION),'A delayed mubtadaʾ; nominative.')
+ ]};
+}
+const sababiMetadata=keys=>({followerKind:NAAT_SABABI_KIND,followerPairKeys:keys});
+const pickedSababi=(keys,label,host)=>buildSababiExercise(pickVaried(keys,label,String),host);
+/* p. 118's demonstrative. One lane, because there is one word this source gives a bināʾ for. The
+   khabar is the target: it carries a real iʿrāb sign, and the demonstrative — which has none —
+   renders its position and its classification on its own card beside it. */
+const ISHARA_KHABARS=Object.freeze(['present','hardworking','truthful']);
+function buildIsharaExercise(lexemeKey){
+ const lexeme=ISHARA_LEXEMES[lexemeKey];
+ if(!lexeme)throw new Error(`Unknown productive demonstrative: ${lexemeKey}`);
+ const wanted=pickVaried(ISHARA_KHABARS,'w4-ishara-khabar',String);
+ const predicate=masculinePluralPredicates.find(item=>item.en===wanted);
+ if(!predicate)throw new Error(`No registered khabar for the demonstrative lane: ${wanted}`);
+ return{sentence:'',translation:`${cap(lexeme.en)} are ${predicate.en}.`,tokens:[
+  token(lexeme.surface,lexeme.en,AR.isharaMubtada(lexemeKey),'A demonstrative noun; built, and in the position of the mubtadaʾ.'),
+  token(predicate.nom,predicate.en,AR.khabar(predicate.nom),EN.khabar,true)
+ ]};
+}
+add('noun','singular','raf','damma',()=>pickedSababi(SABABI_ALL_FRAME_KEYS,'w4-sababi-raf','raf'),sababiMetadata(SABABI_ALL_FRAME_KEYS));
+add('particle','singular','nasb','fatha',()=>pickedSababi(SABABI_ALL_FRAME_KEYS,'w4-sababi-nasb','nasb'),sababiMetadata(SABABI_ALL_FRAME_KEYS));
+add('particle','singular','jarr','kasra',()=>pickedSababi(SABABI_ALL_FRAME_KEYS,'w4-sababi-jarr','jarr'),sababiMetadata(SABABI_ALL_FRAME_KEYS));
+add('noun','smp','raf','waw',()=>buildIsharaExercise('haaulaa'),{isharaLexemeKeys:['haaulaa']});
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

@@ -9,24 +9,24 @@
  },
  "method": {
   "rounds": 200,
-  "templates": 226,
-  "buildsObserved": 45200,
+  "templates": 230,
+  "buildsObserved": 46000,
   "rule": "A row is FULL only when its canonical Arabic is observed in the rendered iʿrāb (token.ar / token.phraseAr). Appearing only in a Why explanation or in the definitions panel yields GENERIC_ONLY, never FULL."
  },
  "totals": {
   "TOTAL": 287,
-  "FULL": 225,
+  "FULL": 230,
   "GENERIC_ONLY": 8,
   "PARTIAL": 1,
-  "ABSENT": 52,
-  "TRUE_BLOCKER": 1,
+  "ABSENT": 46,
+  "TRUE_BLOCKER": 2,
   "reconciles": true,
-  "percentFull": 78.4
+  "percentFull": 80.1
  },
  "randomizationTotals": {
   "GOOD": 146,
-  "LIMITED": 80,
-  "NONE": 61
+  "LIMITED": 85,
+  "NONE": 56
  },
  "marathon": {
   "target": 56,
@@ -91,12 +91,13 @@
    "pages": "9–13",
    "parent": "أقسام الكلام",
    "status": "FULL",
-   "proof": "built 200× per template; «اسْمٌ» observed in the rendered iʿrāb across 65 template lane(s) [mode=standalone]",
+   "proof": "built 200× per template; «اسْمٌ» observed in the rendered iʿrāb across 69 template lane(s) [mode=standalone]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "اسْمٌ",
    "probeMode": "standalone",
-   "observedTemplateLanes": 65
+   "probeRequires": "",
+   "observedTemplateLanes": 69
   },
   {
    "key": "F_FIL",
@@ -110,6 +111,7 @@
    "randomization": "GOOD",
    "probe": "فِعْلٌ مَاضٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 66
   },
   {
@@ -119,12 +121,13 @@
    "pages": "9,17–18",
    "parent": "أقسام الكلام",
    "status": "FULL",
-   "proof": "built 200× per template; «حَرْفُ خَفْضٍ» observed in the rendered iʿrāb across 38 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «حَرْفُ خَفْضٍ» observed in the rendered iʿrāb across 40 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "حَرْفُ خَفْضٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 38
+   "probeRequires": "",
+   "observedTemplateLanes": 40
   },
   {
    "key": "F_MUARAB",
@@ -138,6 +141,7 @@
    "randomization": "NONE",
    "probe": "مُعْرَبٌ",
    "probeMode": "standalone",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -147,12 +151,13 @@
    "pages": "21–24",
    "parent": "الإعراب والبناء",
    "status": "FULL",
-   "proof": "built 200× per template; «مَبْنِيٌّ عَلَى» observed in the rendered iʿrāb across 141 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مَبْنِيٌّ عَلَى» observed in the rendered iʿrāb across 143 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مَبْنِيٌّ عَلَى",
    "probeMode": "contains",
-   "observedTemplateLanes": 141
+   "probeRequires": "",
+   "observedTemplateLanes": 143
   },
   {
    "key": "F_LA_MAHALL",
@@ -161,12 +166,13 @@
    "pages": "21–24",
    "parent": "البناء",
    "status": "FULL",
-   "proof": "built 200× per template; «لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ» observed in the rendered iʿrāb across 171 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ» observed in the rendered iʿrāb across 174 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 171
+   "probeRequires": "",
+   "observedTemplateLanes": 174
   },
   {
    "key": "S_RAF",
@@ -175,12 +181,13 @@
    "pages": "25",
    "parent": "أقسام الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مَرْفُوعٌ» observed in the rendered iʿrāb across 159 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مَرْفُوعٌ» observed in the rendered iʿrāb across 163 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مَرْفُوعٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 159
+   "probeRequires": "",
+   "observedTemplateLanes": 163
   },
   {
    "key": "S_NASB",
@@ -189,12 +196,13 @@
    "pages": "40",
    "parent": "أقسام الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مَنْصُوبٌ» observed in the rendered iʿrāb across 148 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مَنْصُوبٌ» observed in the rendered iʿrāb across 149 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مَنْصُوبٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 148
+   "probeRequires": "",
+   "observedTemplateLanes": 149
   },
   {
    "key": "S_KHAFD",
@@ -203,12 +211,13 @@
    "pages": "48",
    "parent": "أقسام الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مَخْفُوضٌ» observed in the rendered iʿrāb across 49 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مَخْفُوضٌ» observed in the rendered iʿrāb across 51 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مَخْفُوضٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 49
+   "probeRequires": "",
+   "observedTemplateLanes": 51
   },
   {
    "key": "S_JAZM",
@@ -222,6 +231,7 @@
    "randomization": "GOOD",
    "probe": "مَجْزُومٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 39
   },
   {
@@ -231,12 +241,13 @@
    "pages": "25–39",
    "parent": "علامات الرفع",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ» observed in the rendered iʿrāb across 138 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ» observed in the rendered iʿrāb across 141 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 138
+   "probeRequires": "",
+   "observedTemplateLanes": 141
   },
   {
    "key": "G_WAW_RAF",
@@ -245,12 +256,13 @@
    "pages": "31–35,64–67",
    "parent": "علامات الرفع",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ رَفْعِهِ الْوَاوُ» observed in the rendered iʿrāb across 15 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ رَفْعِهِ الْوَاوُ» observed in the rendered iʿrāb across 19 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ رَفْعِهِ الْوَاوُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 15
+   "probeRequires": "",
+   "observedTemplateLanes": 19
   },
   {
    "key": "G_ALIF_RAF",
@@ -259,12 +271,13 @@
    "pages": "35,64–65",
    "parent": "علامات الرفع",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ رَفْعِهِ الْأَلِفُ» observed in the rendered iʿrāb across 8 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ رَفْعِهِ الْأَلِفُ» observed in the rendered iʿrāb across 10 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ رَفْعِهِ الْأَلِفُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 8
+   "probeRequires": "",
+   "observedTemplateLanes": 10
   },
   {
    "key": "G_NUN_RAF",
@@ -278,6 +291,7 @@
    "randomization": "GOOD",
    "probe": "ثُبُوتُ النُّونِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 7
   },
   {
@@ -287,12 +301,13 @@
    "pages": "40–41,48",
    "parent": "علامات النصب",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ» observed in the rendered iʿrāb across 131 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ» observed in the rendered iʿrāb across 132 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 131
+   "probeRequires": "",
+   "observedTemplateLanes": 132
   },
   {
    "key": "G_ALIF_NASB",
@@ -306,6 +321,7 @@
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ نَصْبِهِ الْأَلِفُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 7
   },
   {
@@ -315,12 +331,13 @@
    "pages": "45,50,64–65",
    "parent": "علامات النصب",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ نَصْبِهِ الْيَاءُ» observed in the rendered iʿrāb across 12 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ نَصْبِهِ الْيَاءُ» observed in the rendered iʿrāb across 13 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ نَصْبِهِ الْيَاءُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 12
+   "probeRequires": "",
+   "observedTemplateLanes": 13
   },
   {
    "key": "G_KASRA_SUB",
@@ -329,12 +346,13 @@
    "pages": "44,49,69",
    "parent": "علامات النصب",
    "status": "FULL",
-   "proof": "built 200× per template; «الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ» observed in the rendered iʿrāb across 5 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ» observed in the rendered iʿrāb across 6 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 5
+   "probeRequires": "",
+   "observedTemplateLanes": 6
   },
   {
    "key": "G_HADHF_NUN_NASB",
@@ -348,6 +366,7 @@
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ نَصْبِهِ حَذْفُ النُّونِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 11
   },
   {
@@ -357,12 +376,13 @@
    "pages": "48,62",
    "parent": "علامات الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ» observed in the rendered iʿrāb across 40 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ» observed in the rendered iʿrāb across 42 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 40
+   "probeRequires": "",
+   "observedTemplateLanes": 42
   },
   {
    "key": "G_YA_KHAFD",
@@ -371,12 +391,13 @@
    "pages": "50,66–67",
    "parent": "علامات الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «وَعَلَامَةُ خَفْضِهِ الْيَاءُ» observed in the rendered iʿrāb across 10 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَعَلَامَةُ خَفْضِهِ الْيَاءُ» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ خَفْضِهِ الْيَاءُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 10
+   "probeRequires": "",
+   "observedTemplateLanes": 11
   },
   {
    "key": "G_DIPTOTE",
@@ -390,6 +411,7 @@
    "randomization": "NONE",
    "probe": "نِيَابَةً عَنِ الْكَسْرَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -404,6 +426,7 @@
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ جَزْمِهِ السُّكُونُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 23
   },
   {
@@ -418,6 +441,7 @@
    "randomization": "GOOD",
    "probe": "وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 8
   },
   {
@@ -432,6 +456,7 @@
    "randomization": "GOOD",
    "probe": "حَذْفُ حَرْفِ الْعِلَّةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 10
   },
   {
@@ -446,6 +471,7 @@
    "randomization": "GOOD",
    "probe": "وَهُوَ الْأَلِفُ، وَالْفَتْحَةُ قَبْلَهَا دَلِيلٌ عَلَيْهَا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -460,6 +486,7 @@
    "randomization": "GOOD",
    "probe": "وَهُوَ الْوَاوُ، وَالضَّمَّةُ قَبْلَهَا دَلِيلٌ عَلَيْهَا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 10
   },
   {
@@ -474,6 +501,7 @@
    "randomization": "GOOD",
    "probe": "وَهُوَ الْيَاءُ، وَالْكَسْرَةُ قَبْلَهَا دَلِيلٌ عَلَيْهَا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -483,12 +511,13 @@
    "pages": "35,45,64–65",
    "parent": "مواضع علامات الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مُثَنًّى» observed in the rendered iʿrāb across 17 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُثَنًّى» observed in the rendered iʿrāb across 20 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُثَنًّى",
    "probeMode": "contains",
-   "observedTemplateLanes": 17
+   "probeRequires": "",
+   "observedTemplateLanes": 20
   },
   {
    "key": "L_SMP",
@@ -497,12 +526,13 @@
    "pages": "31,50,65",
    "parent": "مواضع علامات الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «جَمْعُ مُذَكَّرٍ سَالِمٌ» observed in the rendered iʿrāb across 16 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «جَمْعُ مُذَكَّرٍ سَالِمٌ» observed in the rendered iʿrāb across 18 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "جَمْعُ مُذَكَّرٍ سَالِمٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 16
+   "probeRequires": "",
+   "observedTemplateLanes": 18
   },
   {
    "key": "L_SFP",
@@ -511,12 +541,13 @@
    "pages": "30,44,49",
    "parent": "مواضع علامات الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «جَمْعُ مُؤَنَّثٍ سَالِمٌ» observed in the rendered iʿrāb across 13 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «جَمْعُ مُؤَنَّثٍ سَالِمٌ» observed in the rendered iʿrāb across 16 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "جَمْعُ مُؤَنَّثٍ سَالِمٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 13
+   "probeRequires": "",
+   "observedTemplateLanes": 16
   },
   {
    "key": "L_BROKEN",
@@ -530,6 +561,7 @@
    "randomization": "NONE",
    "probe": "جَمْعُ تَكْسِيرٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -539,12 +571,13 @@
    "pages": "32,44,50,66–67",
    "parent": "مواضع علامات الإعراب",
    "status": "FULL",
-   "proof": "built 200× per template; «مِنَ الْأَسْمَاءِ الْخَمْسَةِ» observed in the rendered iʿrāb across 17 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مِنَ الْأَسْمَاءِ الْخَمْسَةِ» observed in the rendered iʿrāb across 20 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مِنَ الْأَسْمَاءِ الْخَمْسَةِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 17
+   "probeRequires": "",
+   "observedTemplateLanes": 20
   },
   {
    "key": "L_5VERBS",
@@ -558,6 +591,7 @@
    "randomization": "GOOD",
    "probe": "الْأَفْعَالِ الْخَمْسَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 26
   },
   {
@@ -572,6 +606,7 @@
    "randomization": "NONE",
    "probe": "الصَّحِيحِ الْآخِرِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -586,6 +621,7 @@
    "randomization": "GOOD",
    "probe": "مُعْتَلُّ الْآخِرِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 10
   },
   {
@@ -600,6 +636,7 @@
    "randomization": "NONE",
    "probe": "مَنَعَ مِنْ ظُهُورِهَا التَّعَذُّرُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -614,6 +651,7 @@
    "randomization": "NONE",
    "probe": "مَنَعَ مِنْ ظُهُورِهَا الثِّقَلُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -628,6 +666,7 @@
    "randomization": "LIMITED",
    "probe": "الْمُنَاسَبَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -642,6 +681,7 @@
    "randomization": "GOOD",
    "probe": "اشْتِغَالُ الْمَحَلِّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 16
   },
   {
@@ -656,6 +696,7 @@
    "randomization": "GOOD",
    "probe": "فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 39
   },
   {
@@ -670,6 +711,7 @@
    "randomization": "GOOD",
    "probe": "فِعْلٌ مُضَارِعٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 104
   },
   {
@@ -684,6 +726,7 @@
    "randomization": "NONE",
    "probe": "فِعْلُ أَمْرٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -698,6 +741,7 @@
    "randomization": "NONE",
    "probe": "لِتَجَرُّدِهِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -712,6 +756,7 @@
    "randomization": "GOOD",
    "probe": "نُونِ النِّسْوَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 11
   },
   {
@@ -721,12 +766,13 @@
    "pages": "73",
    "parent": "محل المبني",
    "status": "FULL",
-   "proof": "built 200× per template; «فِي مَحَلِّ رَفْعٍ» observed in the rendered iʿrāb across 72 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «فِي مَحَلِّ رَفْعٍ» observed in the rendered iʿrāb across 73 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "فِي مَحَلِّ رَفْعٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 72
+   "probeRequires": "",
+   "observedTemplateLanes": 73
   },
   {
    "key": "V_MAHALL_NASB",
@@ -740,6 +786,7 @@
    "randomization": "GOOD",
    "probe": "فِي مَحَلِّ نَصْبٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 11
   },
   {
@@ -754,6 +801,7 @@
    "randomization": "LIMITED",
    "probe": "فِي مَحَلِّ جَزْمٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -768,6 +816,7 @@
    "randomization": "GOOD",
    "probe": "مَبْنِيٌّ لِلْمَجْهُولِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 10
   },
   {
@@ -782,6 +831,7 @@
    "randomization": "GOOD",
    "probe": "مُضَارِعٌ مَبْنِيٌّ لِلْمَجْهُولِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -796,6 +846,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -810,6 +861,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 6
   },
   {
@@ -824,6 +876,7 @@
    "randomization": "LIMITED",
    "probe": "حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -838,6 +891,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ مَصْدَرٍ وَنَصْبٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 8
   },
   {
@@ -852,6 +906,7 @@
    "randomization": "GOOD",
    "probe": "لَامُ التَّعْلِيلِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 6
   },
   {
@@ -866,6 +921,7 @@
    "randomization": "LIMITED",
    "probe": "لَامُ الْجُحُودِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -880,6 +936,7 @@
    "randomization": "GOOD",
    "probe": "حَتَّى",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -894,6 +951,7 @@
    "randomization": "LIMITED",
    "probe": "فَاءُ السَّبَبِيَّةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -908,6 +966,7 @@
    "randomization": "LIMITED",
    "probe": "وَاوُ الْمَعِيَّةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -917,12 +976,13 @@
    "pages": "78",
    "parent": "نواصب المضارع",
    "status": "FULL",
-   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 92 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 97 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَوْ",
    "probeMode": "contains",
-   "observedTemplateLanes": 92
+   "probeRequires": "",
+   "observedTemplateLanes": 97
   },
   {
    "key": "N_AN_MUDMARA_JAWAZ",
@@ -936,6 +996,7 @@
    "randomization": "LIMITED",
    "probe": "مُضْمَرَةٌ جَوَازًا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -950,6 +1011,7 @@
    "randomization": "GOOD",
    "probe": "مُضْمَرَةٌ وُجُوبًا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 10
   },
   {
@@ -964,6 +1026,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 16
   },
   {
@@ -978,6 +1041,7 @@
    "randomization": "GOOD",
    "probe": "لَمَّا",
    "probeMode": "card",
+   "probeRequires": "وَجَزْمٍ",
    "observedTemplateLanes": 21
   },
   {
@@ -987,12 +1051,13 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمْ» observed in the rendered iʿrāb across 174 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمْ» observed in the rendered iʿrāb across 178 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمْ",
    "probeMode": "sentence",
-   "observedTemplateLanes": 174
+   "probeRequires": "",
+   "observedTemplateLanes": 178
   },
   {
    "key": "J_ALAMMA",
@@ -1001,12 +1066,13 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 37 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 38 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمَّا",
    "probeMode": "sentence",
-   "observedTemplateLanes": 37
+   "probeRequires": "",
+   "observedTemplateLanes": 38
   },
   {
    "key": "J_HAMZAT_TAQRIR",
@@ -1020,6 +1086,7 @@
    "randomization": "GOOD",
    "probe": "هَمْزَةُ التَّقْرِيرِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -1034,6 +1101,7 @@
    "randomization": "GOOD",
    "probe": "لَامُ الْأَمْرِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -1048,6 +1116,7 @@
    "randomization": "LIMITED",
    "probe": "لَامُ الدُّعَاءِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1062,6 +1131,7 @@
    "randomization": "GOOD",
    "probe": "لَا النَّاهِيَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -1076,6 +1146,7 @@
    "randomization": "LIMITED",
    "probe": "لَا الدُّعَائِيَّةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1090,6 +1161,7 @@
    "randomization": "GOOD",
    "probe": "إِنْ",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1104,6 +1176,7 @@
    "randomization": "GOOD",
    "probe": "مَنْ",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1118,6 +1191,7 @@
    "randomization": "GOOD",
    "probe": "مَا",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1132,6 +1206,7 @@
    "randomization": "GOOD",
    "probe": "مَهْمَا",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1146,6 +1221,7 @@
    "randomization": "LIMITED",
    "probe": "إِذْ مَا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1160,6 +1236,7 @@
    "randomization": "GOOD",
    "probe": "أَيَّ",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1174,6 +1251,7 @@
    "randomization": "GOOD",
    "probe": "مَتَى",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1188,6 +1266,7 @@
    "randomization": "GOOD",
    "probe": "أَيَّانَ",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1202,6 +1281,7 @@
    "randomization": "GOOD",
    "probe": "أَيْنَمَا",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1216,6 +1296,7 @@
    "randomization": "GOOD",
    "probe": "أَنَّى",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1230,6 +1311,7 @@
    "randomization": "GOOD",
    "probe": "حَيْثُمَا",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1244,6 +1326,7 @@
    "randomization": "GOOD",
    "probe": "كَيْفَمَا",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1258,6 +1341,7 @@
    "randomization": "GOOD",
    "probe": "إِذَا",
    "probeMode": "card",
+   "probeRequires": "شَرْطٍ جَازِمٌ",
    "observedTemplateLanes": 15
   },
   {
@@ -1272,6 +1356,7 @@
    "randomization": "GOOD",
    "probe": "أَدَاةُ الشَّرْطِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 15
   },
   {
@@ -1286,6 +1371,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ شَرْطٍ جَازِمٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -1300,6 +1386,7 @@
    "randomization": "GOOD",
    "probe": "اسْمُ شَرْطٍ جَازِمٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 11
   },
   {
@@ -1314,6 +1401,7 @@
    "randomization": "GOOD",
    "probe": "فِعْلُ الشَّرْطِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 15
   },
   {
@@ -1328,6 +1416,7 @@
    "randomization": "GOOD",
    "probe": "جَوَابُ الشَّرْطِ وَجَزَاؤُهُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 15
   },
   {
@@ -1337,12 +1426,13 @@
    "pages": "87–90",
    "parent": "المرفوعات",
    "status": "FULL",
-   "proof": "built 200× per template; «فَاعِلٌ» observed in the rendered iʿrāb across 164 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «فَاعِلٌ» observed in the rendered iʿrāb across 167 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "فَاعِلٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 164
+   "probeRequires": "",
+   "observedTemplateLanes": 167
   },
   {
    "key": "M_FAIL_ZAHIR",
@@ -1356,6 +1446,7 @@
    "randomization": "GOOD",
    "probe": "فَاعِلٌ مَرْفُوعٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 72
   },
   {
@@ -1365,12 +1456,13 @@
    "pages": "91–93",
    "parent": "أقسام المضمر",
    "status": "FULL",
-   "proof": "built 200× per template; «ضَمِيرٌ مُتَّصِلٌ» observed in the rendered iʿrāb across 74 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «ضَمِيرٌ مُتَّصِلٌ» observed in the rendered iʿrāb across 77 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "ضَمِيرٌ مُتَّصِلٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 74
+   "probeRequires": "",
+   "observedTemplateLanes": 77
   },
   {
    "key": "M_DAMIR_MUNFASIL",
@@ -1384,6 +1476,7 @@
    "randomization": "NONE",
    "probe": "ضَمِيرٌ مُنْفَصِلٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -1398,6 +1491,7 @@
    "randomization": "GOOD",
    "probe": "مُسْتَتِرٌ وُجُوبًا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 15
   },
   {
@@ -1412,6 +1506,7 @@
    "randomization": "GOOD",
    "probe": "مُسْتَتِرٌ جَوَازًا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 34
   },
   {
@@ -1426,6 +1521,7 @@
    "randomization": "GOOD",
    "probe": "وَاوُ الْجَمَاعَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 24
   },
   {
@@ -1440,6 +1536,7 @@
    "randomization": "LIMITED",
    "probe": "أَلِفُ الِاثْنَيْنِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -1454,6 +1551,7 @@
    "randomization": "GOOD",
    "probe": "نُونُ النِّسْوَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 11
   },
   {
@@ -1468,6 +1566,7 @@
    "randomization": "GOOD",
    "probe": "تَاءُ الْمُتَكَلِّمِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 11
   },
   {
@@ -1482,6 +1581,7 @@
    "randomization": "LIMITED",
    "probe": "تَاءُ الْمُخَاطَبِ",
    "probeMode": "standalone",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1496,6 +1596,7 @@
    "randomization": "LIMITED",
    "probe": "تَاءُ الْمُخَاطَبَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1510,6 +1611,7 @@
    "randomization": "LIMITED",
    "probe": "نَا الْفَاعِلِينَ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1524,6 +1626,7 @@
    "randomization": "LIMITED",
    "probe": "يَاءُ الْمُخَاطَبَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1538,6 +1641,7 @@
    "randomization": "LIMITED",
    "probe": "تَاءُ التَّأْنِيثِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -1552,6 +1656,7 @@
    "randomization": "LIMITED",
    "probe": "نُونُ الْوِقَايَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -1566,6 +1671,7 @@
    "randomization": "GOOD",
    "probe": "الْأَلِفُ الْفَارِقَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 20
   },
   {
@@ -1580,6 +1686,7 @@
    "randomization": "GOOD",
    "probe": "نَائِبُ فَاعِلٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 10
   },
   {
@@ -1594,6 +1701,7 @@
    "randomization": "NONE",
    "probe": "نَائِبُ فَاعِلٍ مُضْمَرٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -1603,12 +1711,13 @@
    "pages": "99–100",
    "parent": "المرفوعات",
    "status": "FULL",
-   "proof": "built 200× per template; «مُبْتَدَأٌ» observed in the rendered iʿrāb across 72 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُبْتَدَأٌ» observed in the rendered iʿrāb across 75 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُبْتَدَأٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 72
+   "probeRequires": "",
+   "observedTemplateLanes": 75
   },
   {
    "key": "M_MUBTADA_MUDMAR",
@@ -1622,6 +1731,7 @@
    "randomization": "NONE",
    "probe": "مُبْتَدَأٌ مُضْمَرٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -1631,12 +1741,13 @@
    "pages": "103–104",
    "parent": "المبتدأ",
    "status": "FULL",
-   "proof": "built 200× per template; «مُبْتَدَأٌ مُؤَخَّرٌ» observed in the rendered iʿrāb across 12 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُبْتَدَأٌ مُؤَخَّرٌ» observed in the rendered iʿrāb across 13 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُبْتَدَأٌ مُؤَخَّرٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 12
+   "probeRequires": "",
+   "observedTemplateLanes": 13
   },
   {
    "key": "M_KHABAR",
@@ -1645,12 +1756,13 @@
    "pages": "99–101",
    "parent": "المرفوعات",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 119 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 122 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 119
+   "probeRequires": "",
+   "observedTemplateLanes": 122
   },
   {
    "key": "M_KHABAR_MUFRAD",
@@ -1659,12 +1771,13 @@
    "pages": "101",
    "parent": "أقسام الخبر",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ مَرْفُوعٌ» observed in the rendered iʿrāb across 14 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ مَرْفُوعٌ» observed in the rendered iʿrāb across 15 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ مَرْفُوعٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 14
+   "probeRequires": "",
+   "observedTemplateLanes": 15
   },
   {
    "key": "M_KHABAR_MUQADDAM",
@@ -1673,12 +1786,13 @@
    "pages": "103–104",
    "parent": "أقسام الخبر",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٍ مُقَدَّمٍ» observed in the rendered iʿrāb across 12 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٍ مُقَدَّمٍ» observed in the rendered iʿrāb across 13 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٍ مُقَدَّمٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 12
+   "probeRequires": "",
+   "observedTemplateLanes": 13
   },
   {
    "key": "M_KHABAR_JUMLA_ISMIYYA",
@@ -1692,6 +1806,7 @@
    "randomization": "LIMITED",
    "probe": "خَبَرٌ جُمْلَةٌ اسْمِيَّةٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -1706,6 +1821,7 @@
    "randomization": "GOOD",
    "probe": "خَبَرٌ جُمْلَةٌ فِعْلِيَّةٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 20
   },
   {
@@ -1720,6 +1836,7 @@
    "randomization": "GOOD",
    "probe": "فِي مَحَلِّ رَفْعٍ خَبَرٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 23
   },
   {
@@ -1734,6 +1851,7 @@
    "randomization": "GOOD",
    "probe": "الرَّابِطُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 23
   },
   {
@@ -1743,12 +1861,13 @@
    "pages": "102",
    "parent": "الرابط",
    "status": "FULL",
-   "proof": "built 200× per template; «يَعُودُ عَلَى» observed in the rendered iʿrāb across 19 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «يَعُودُ عَلَى» observed in the rendered iʿrāb across 22 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "يَعُودُ عَلَى",
    "probeMode": "contains",
-   "observedTemplateLanes": 19
+   "probeRequires": "",
+   "observedTemplateLanes": 22
   },
   {
    "key": "M_RABIT_ISHARA",
@@ -1758,10 +1877,11 @@
    "parent": "الرابط",
    "status": "GENERIC_ONLY",
    "proof": "built 200× per template; «اسْمُ إِشَارَةٍ» observed in the rendered Why/definitions text only across 0 template lane(s) [mode=contains]",
-   "missingReason": "RABIT_KINDS.ismIshara is declared with produced:false; the demonstrative link is never generated.",
+   "missingReason": "RABIT_KINDS.ismIshara is declared with produced:false; the demonstrative link is never generated. باب النعت does now produce a demonstrative — as a mubtadaʾ, not as a link — which is why this row carries a `requires` discriminator: the two readings share a term and are not the same practice.",
    "randomization": "NONE",
    "probe": "اسْمُ إِشَارَةٍ",
    "probeMode": "contains",
+   "probeRequires": "الرَّابِطُ",
    "observedTemplateLanes": 0
   },
   {
@@ -1771,12 +1891,13 @@
    "pages": "101–102",
    "parent": "أقسام الخبر",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ شِبْهُ جُمْلَةٍ» observed in the rendered iʿrāb across 28 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ شِبْهُ جُمْلَةٍ» observed in the rendered iʿrāb across 30 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ شِبْهُ جُمْلَةٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 28
+   "probeRequires": "",
+   "observedTemplateLanes": 30
   },
   {
    "key": "M_JARR_MUTAALLIQ",
@@ -1785,12 +1906,13 @@
    "pages": "103–104",
    "parent": "شبه الجملة",
    "status": "FULL",
-   "proof": "built 200× per template; «مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ» observed in the rendered iʿrāb across 28 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ» observed in the rendered iʿrāb across 30 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 28
+   "probeRequires": "",
+   "observedTemplateLanes": 30
   },
   {
    "key": "M_ZARF_MUTAALLIQ",
@@ -1804,6 +1926,7 @@
    "randomization": "NONE",
    "probe": "ظَرْفٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -1818,6 +1941,7 @@
    "randomization": "GOOD",
    "probe": "اسْمُ «كَانَ»",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 9
   },
   {
@@ -1832,6 +1956,7 @@
    "randomization": "GOOD",
    "probe": "خَبَرُ «كَانَ»",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 7
   },
   {
@@ -1846,6 +1971,7 @@
    "randomization": "GOOD",
    "probe": "كَانَ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 18
   },
   {
@@ -1860,6 +1986,7 @@
    "randomization": "LIMITED",
    "probe": "أَمْسَى",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1874,6 +2001,7 @@
    "randomization": "LIMITED",
    "probe": "أَصْبَحَ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1888,6 +2016,7 @@
    "randomization": "LIMITED",
    "probe": "أَضْحَى",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -1902,6 +2031,7 @@
    "randomization": "LIMITED",
    "probe": "ظَلَّ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -1911,12 +2041,13 @@
    "pages": "106–107",
    "parent": "كان وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «بَاتَ» observed in the rendered iʿrāb across 14 template lane(s) [mode=kana]",
+   "proof": "built 200× per template; «بَاتَ» observed in the rendered iʿrāb across 17 template lane(s) [mode=kana]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "بَاتَ",
    "probeMode": "kana",
-   "observedTemplateLanes": 14
+   "probeRequires": "",
+   "observedTemplateLanes": 17
   },
   {
    "key": "K_SARA",
@@ -1930,6 +2061,7 @@
    "randomization": "GOOD",
    "probe": "صَارَ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 11
   },
   {
@@ -1944,6 +2076,7 @@
    "randomization": "GOOD",
    "probe": "لَيْسَ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 9
   },
   {
@@ -1958,6 +2091,7 @@
    "randomization": "LIMITED",
    "probe": "مَا زَالَ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -1972,6 +2106,7 @@
    "randomization": "LIMITED",
    "probe": "مَا انْفَكَّ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -1986,6 +2121,7 @@
    "randomization": "LIMITED",
    "probe": "مَا فَتِئَ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -2000,6 +2136,7 @@
    "randomization": "LIMITED",
    "probe": "مَا بَرِحَ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -2014,6 +2151,7 @@
    "randomization": "LIMITED",
    "probe": "مَا دَامَ",
    "probeMode": "kana",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2023,12 +2161,13 @@
    "pages": "109–110",
    "parent": "إن وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «اسْمُ «إِنَّ»» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «اسْمُ «إِنَّ»» observed in the rendered iʿrāb across 12 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "اسْمُ «إِنَّ»",
    "probeMode": "contains",
-   "observedTemplateLanes": 11
+   "probeRequires": "",
+   "observedTemplateLanes": 12
   },
   {
    "key": "I_KHABAR_INNA",
@@ -2037,12 +2176,13 @@
    "pages": "109–110",
    "parent": "إن وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرُ «إِنَّ»» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرُ «إِنَّ»» observed in the rendered iʿrāb across 12 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرُ «إِنَّ»",
    "probeMode": "contains",
-   "observedTemplateLanes": 11
+   "probeRequires": "",
+   "observedTemplateLanes": 12
   },
   {
    "key": "I_INNA",
@@ -2051,12 +2191,13 @@
    "pages": "109",
    "parent": "إن وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «حَرْفُ تَوْكِيدٍ وَنَصْبٍ» observed in the rendered iʿrāb across 11 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «حَرْفُ تَوْكِيدٍ وَنَصْبٍ» observed in the rendered iʿrāb across 12 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "حَرْفُ تَوْكِيدٍ وَنَصْبٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 11
+   "probeRequires": "",
+   "observedTemplateLanes": 12
   },
   {
    "key": "I_ANNA",
@@ -2065,12 +2206,13 @@
    "pages": "109",
    "parent": "إن وأخواتها",
    "status": "FULL",
-   "proof": "built 200× per template; «أَنَّ» observed in the rendered iʿrāb across 171 template lane(s) [mode=inna]",
+   "proof": "built 200× per template; «أَنَّ» observed in the rendered iʿrāb across 175 template lane(s) [mode=inna]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَنَّ",
    "probeMode": "inna",
-   "observedTemplateLanes": 171
+   "probeRequires": "",
+   "observedTemplateLanes": 175
   },
   {
    "key": "I_LAKINNA",
@@ -2084,6 +2226,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ اسْتِدْرَاكٍ وَنَصْبٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 6
   },
   {
@@ -2098,6 +2241,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ تَشْبِيهٍ وَنَصْبٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 6
   },
   {
@@ -2112,6 +2256,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ تَمَنٍّ وَنَصْبٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 6
   },
   {
@@ -2126,6 +2271,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ تَرَجٍّ وَتَوَقُّعٍ وَنَصْبٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 6
   },
   {
@@ -2140,6 +2286,7 @@
    "randomization": "GOOD",
    "probe": "مَفْعُولٌ أَوَّلُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 10
   },
   {
@@ -2154,6 +2301,7 @@
    "randomization": "GOOD",
    "probe": "مَفْعُولٌ ثَانٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 10
   },
   {
@@ -2168,6 +2316,7 @@
    "randomization": "GOOD",
    "probe": "ظَنَنْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -2182,6 +2331,7 @@
    "randomization": "GOOD",
    "probe": "حَسِبْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -2196,6 +2346,7 @@
    "randomization": "GOOD",
    "probe": "خِلْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -2210,6 +2361,7 @@
    "randomization": "GOOD",
    "probe": "زَعَمْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -2224,6 +2376,7 @@
    "randomization": "LIMITED",
    "probe": "رَأَيْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -2238,6 +2391,7 @@
    "randomization": "GOOD",
    "probe": "عَلِمْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -2252,6 +2406,7 @@
    "randomization": "GOOD",
    "probe": "وَجَدْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -2266,6 +2421,7 @@
    "randomization": "LIMITED",
    "probe": "اتَّخَذْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -2280,6 +2436,7 @@
    "randomization": "LIMITED",
    "probe": "جَعَلْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -2294,6 +2451,7 @@
    "randomization": "LIMITED",
    "probe": "سَمِعْتُ",
    "probeMode": "sentence",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -2303,12 +2461,13 @@
    "pages": "116–118",
    "parent": "التوابع",
    "status": "FULL",
-   "proof": "built 200× per template; «نَعْتٌ» observed in the rendered iʿrāb across 7 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «نَعْتٌ» observed in the rendered iʿrāb across 10 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "نَعْتٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 7
+   "probeRequires": "",
+   "observedTemplateLanes": 10
   },
   {
    "key": "T_NAAT_HAQIQI",
@@ -2322,6 +2481,7 @@
    "randomization": "GOOD",
    "probe": "نَعْتٌ حَقِيقِيٌّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 7
   },
   {
@@ -2330,13 +2490,14 @@
    "chapter": "باب النعت (pp. 116–123)",
    "pages": "116–118",
    "parent": "أقسام النعت",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Named in deliberatelyNotGenerated as \"naat sababi\"; no lane agrees a naʿt with what follows it.",
-   "randomization": "NONE",
-   "probe": "النَّعْتُ السَّبَبِيُّ",
+   "status": "FULL",
+   "proof": "built 200× per template; «نَعْتٌ سَبَبِيٌّ» observed in the rendered iʿrāb across 3 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
+   "probe": "نَعْتٌ سَبَبِيٌّ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "probeRequires": "",
+   "observedTemplateLanes": 3
   },
   {
    "key": "T_MARIFA_DAMIR",
@@ -2344,13 +2505,14 @@
    "chapter": "باب النعت (pp. 116–123)",
    "pages": "118–120",
    "parent": "أقسام المعرفة",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "p. 118 makes the pronoun the first of the five maʿrifah kinds; the app never classifies a noun as a maʿrifah kind in the iʿrāb.",
-   "randomization": "NONE",
-   "probe": "مَعْرِفَةٌ ضَمِيرٌ",
+   "status": "FULL",
+   "proof": "built 200× per template; «مَعْرِفَةٌ، وَنَوْعُهَا الضَّمِيرُ» observed in the rendered iʿrāb across 3 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
+   "probe": "مَعْرِفَةٌ، وَنَوْعُهَا الضَّمِيرُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "probeRequires": "",
+   "observedTemplateLanes": 3
   },
   {
    "key": "T_MARIFA_ALAM",
@@ -2358,13 +2520,14 @@
    "chapter": "باب النعت (pp. 116–123)",
    "pages": "118–120",
    "parent": "أقسام المعرفة",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "The five kinds of maʿrifah (p. 118) are never named as classifications in the learner's iʿrāb; no proper-name lane exists either.",
-   "randomization": "NONE",
-   "probe": "مَعْرِفَةٌ عَلَمٌ",
+   "status": "FULL",
+   "proof": "built 200× per template; «مَعْرِفَةٌ، وَنَوْعُهَا الْعَلَمُ» observed in the rendered iʿrāb across 3 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
+   "probe": "مَعْرِفَةٌ، وَنَوْعُهَا الْعَلَمُ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "probeRequires": "",
+   "observedTemplateLanes": 3
   },
   {
    "key": "T_MARIFA_ISHARA",
@@ -2372,13 +2535,14 @@
    "chapter": "باب النعت (pp. 116–123)",
    "pages": "118–120",
    "parent": "أقسام المعرفة",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "No demonstrative lane exists.",
-   "randomization": "NONE",
-   "probe": "مَعْرِفَةٌ اسْمُ إِشَارَةٍ",
+   "status": "FULL",
+   "proof": "built 200× per template; «مَعْرِفَةٌ، وَنَوْعُهَا اسْمُ الْإِشَارَةِ» observed in the rendered iʿrāb across 1 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
+   "probe": "مَعْرِفَةٌ، وَنَوْعُهَا اسْمُ الْإِشَارَةِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "probeRequires": "",
+   "observedTemplateLanes": 1
   },
   {
    "key": "T_MARIFA_MAWSUL",
@@ -2386,12 +2550,13 @@
    "chapter": "باب النعت (pp. 116–123)",
    "pages": "118–120",
    "parent": "أقسام المعرفة",
-   "status": "ABSENT",
+   "status": "TRUE_BLOCKER",
    "proof": "",
-   "missingReason": "No relative-noun lane exists.",
+   "missingReason": "TRUE BLOCKER under the approved source, and the obstacle is the bināʾ. (1) Al-Tuḥfah TEACHES this kind: p. 118's matn makes الاسم المبهم the third of the five maʿrifahs and names اسم الإشارة and الاسم الموصول as its two types, and p. 120 defines the relative noun in full — «ما يدل على معين بواسطة جملة أو شبهها تذكر بعده البتة وتسمى صِلةً، وتكون مشتملة على ضمير يطابق الموصول ويسمى عائداً» — and lists its six alfāẓ (الَّذي، الَّتي، اللَّذانِ/اللَّذَيْنِ، اللَّتانِ/اللَّتَيْنِ، الَّذين، اللَّاتي/اللَّائي). So it is a curriculum row, not an out-of-source term. (2) It is never PARSED. The relative noun appears in this book only as a listed lafẓ (p. 120) and inside an unparsed example of the fifth kind, «وغلامُ الَّذي زارنا أمسِ» (p. 120), and inside student exercises the book does not answer (pp. 104, 122). Every model iʿrāb in the book — pp. 94–95, 103–104, 115, 123, 145, 157 — parses ẓāhir nouns and attached pronouns and no relative. (3) A whole-word relative is necessarily a BUILT noun in this engine — isBuiltNoun(): a noun carrying a maḥall and no state — and builtNounBinaaMarker() admits a built noun only through a per-construction, source-verified bināʾ table. This source's own catalogue of what is built and upon what, at p. 22, is «وذلك كلزوم «كَمْ» و«مَنْ» السكون، وكلزوم «هٰؤُلَاءِ» و«حَذَامِ» و«أَمْسِ» الكَسْرَ، وكلزوم «مُنْذُ» و«حَيْثُ» الضمَّ، وكلزوم «أَيْنَ» و«كَيْفَ» الفَتْحَ» — and no relative noun stands in it. That same sentence is exactly what licensed هَؤُلَاءِ in this wave, which is why اسم الإشارة shipped and the relative did not: the asymmetry is the source's, not the engine's. (4) Even with a bināʾ, the ṣilah would have to be parsed, and this source never says what position a ṣilah clause holds. Producing «الَّذِي: اسْمٌ مَوْصُولٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ» would therefore mean INVENTING the bināʾ — the same gate that keeps ضَمِيرٌ مُنْفَصِلٌ out — or weakening the harness invariant that exists to catch an invented bināʾ. Both were refused. UNBLOCK: one reviewed secondary source for the bināʾ of the relative nouns and for the ṣilah's position, registered through the mechanism this codebase already has — secondarySupportedRule + REVIEWED_SOURCE_AUTHORITIES — exactly as أَلِفُ الِاثْنَيْنِ is handled today. That citation must be read and verified by a human against the secondary text; it is deliberately NOT invented here.",
    "randomization": "NONE",
-   "probe": "مَعْرِفَةٌ اسْمٌ مَوْصُولٌ",
+   "probe": "مَعْرِفَةٌ، وَنَوْعُهَا الِاسْمُ الْمَوْصُولُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2400,13 +2565,14 @@
    "chapter": "باب النعت (pp. 116–123)",
    "pages": "118–120",
    "parent": "أقسام المعرفة",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Definiteness by أل is used in almost every sentence but never named as a maʿrifah classification.",
-   "randomization": "NONE",
-   "probe": "الْمُحَلَّى بِأَلْ",
+   "status": "FULL",
+   "proof": "built 200× per template; «مَعْرِفَةٌ، وَنَوْعُهَا الْمُحَلَّى بِأَلْ» observed in the rendered iʿrāb across 3 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
+   "probe": "مَعْرِفَةٌ، وَنَوْعُهَا الْمُحَلَّى بِأَلْ",
    "probeMode": "contains",
-   "observedTemplateLanes": 0
+   "probeRequires": "",
+   "observedTemplateLanes": 3
   },
   {
    "key": "T_NAKIRA",
@@ -2420,6 +2586,7 @@
    "randomization": "GOOD",
    "probe": "نَكِرَةٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 7
   },
   {
@@ -2434,6 +2601,7 @@
    "randomization": "GOOD",
    "probe": "مَعْطُوفٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 7
   },
   {
@@ -2448,6 +2616,7 @@
    "randomization": "NONE",
    "probe": "الْوَاوُ الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2462,6 +2631,7 @@
    "randomization": "NONE",
    "probe": "الْفَاءُ الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2476,6 +2646,7 @@
    "randomization": "LIMITED",
    "probe": "ثُمَّ الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2490,6 +2661,7 @@
    "randomization": "LIMITED",
    "probe": "أَوْ الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2504,6 +2676,7 @@
    "randomization": "LIMITED",
    "probe": "أَمْ الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2518,6 +2691,7 @@
    "randomization": "LIMITED",
    "probe": "إِمَّا الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2532,6 +2706,7 @@
    "randomization": "LIMITED",
    "probe": "بَلْ الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2546,6 +2721,7 @@
    "randomization": "LIMITED",
    "probe": "لَا الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2560,6 +2736,7 @@
    "randomization": "LIMITED",
    "probe": "لَكِنْ الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2574,6 +2751,7 @@
    "randomization": "LIMITED",
    "probe": "حَتَّى الْعَاطِفَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2588,6 +2766,7 @@
    "randomization": "NONE",
    "probe": "عَطْفُ الْبَيَانِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2597,12 +2776,13 @@
    "pages": "131–134",
    "parent": "التوابع",
    "status": "FULL",
-   "proof": "built 200× per template; «تَوْكِيدٌ» observed in the rendered iʿrāb across 14 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «تَوْكِيدٌ» observed in the rendered iʿrāb across 15 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "تَوْكِيدٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 14
+   "probeRequires": "",
+   "observedTemplateLanes": 15
   },
   {
    "key": "T_TAWKID_LAFZI",
@@ -2616,6 +2796,7 @@
    "randomization": "LIMITED",
    "probe": "تَوْكِيدٌ لَفْظِيٌّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -2630,6 +2811,7 @@
    "randomization": "LIMITED",
    "probe": "تَوْكِيدٌ مَعْنَوِيٌّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -2644,6 +2826,7 @@
    "randomization": "LIMITED",
    "probe": "نَفْسُهُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -2658,6 +2841,7 @@
    "randomization": "LIMITED",
    "probe": "عَيْنُهُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -2672,6 +2856,7 @@
    "randomization": "LIMITED",
    "probe": "كُلَّهُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -2686,6 +2871,7 @@
    "randomization": "NONE",
    "probe": "كِلَا",
    "probeMode": "standalone",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2700,6 +2886,7 @@
    "randomization": "NONE",
    "probe": "أَجْمَع",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2714,6 +2901,7 @@
    "randomization": "NONE",
    "probe": "أَكْتَع",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2728,6 +2916,7 @@
    "randomization": "NONE",
    "probe": "أَبْتَع",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2742,6 +2931,7 @@
    "randomization": "NONE",
    "probe": "أَبْصَع",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2756,6 +2946,7 @@
    "randomization": "LIMITED",
    "probe": "جَمِيعُهُمْ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -2770,6 +2961,7 @@
    "randomization": "NONE",
    "probe": "عَامَّتُهُمْ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2784,6 +2976,7 @@
    "randomization": "GOOD",
    "probe": "تَابِعٌ لِلْمُبْدَلِ مِنْهُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -2798,6 +2991,7 @@
    "randomization": "LIMITED",
    "probe": "بَدَلُ الْكُلِّ مِنَ الْكُلِّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -2812,6 +3006,7 @@
    "randomization": "LIMITED",
    "probe": "بَدَلُ الْبَعْضِ مِنَ الْكُلِّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -2826,6 +3021,7 @@
    "randomization": "LIMITED",
    "probe": "بَدَلُ الِاشْتِمَالِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -2840,6 +3036,7 @@
    "randomization": "LIMITED",
    "probe": "بَدَلُ الْغَلَطِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -2854,6 +3051,7 @@
    "randomization": "GOOD",
    "probe": "مَفْعُولٌ بِهِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 105
   },
   {
@@ -2868,6 +3066,7 @@
    "randomization": "NONE",
    "probe": "مَفْعُولٌ بِهِ مُتَّصِلٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2882,6 +3081,7 @@
    "randomization": "NONE",
    "probe": "إِيَّاكَ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -2896,6 +3096,7 @@
    "randomization": "GOOD",
    "probe": "مَفْعُولٌ مُطْلَقٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -2910,6 +3111,7 @@
    "randomization": "LIMITED",
    "probe": "الْمُؤَكِّدُ لِعَامِلِهِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -2924,6 +3126,7 @@
    "randomization": "LIMITED",
    "probe": "الْمُبَيِّنُ لِلنَّوْعِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -2938,6 +3141,7 @@
    "randomization": "LIMITED",
    "probe": "الْمُبَيِّنُ لِلْعَدَدِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -2952,6 +3156,7 @@
    "randomization": "GOOD",
    "probe": "لَفْظِيٌّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 8
   },
   {
@@ -2966,6 +3171,7 @@
    "randomization": "GOOD",
    "probe": "مَعْنَوِيٌّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -2980,6 +3186,7 @@
    "randomization": "GOOD",
    "probe": "عَلَى الظَّرْفِيَّةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 8
   },
   {
@@ -2994,6 +3201,7 @@
    "randomization": "LIMITED",
    "probe": "ظَرْفُ زَمَانٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -3008,6 +3216,7 @@
    "randomization": "GOOD",
    "probe": "ظَرْفُ مَكَانٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 6
   },
   {
@@ -3022,6 +3231,7 @@
    "randomization": "GOOD",
    "probe": "ثَمَّ",
    "probeMode": "card",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -3036,6 +3246,7 @@
    "randomization": "NONE",
    "probe": "هُنَا",
    "probeMode": "card",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3050,6 +3261,7 @@
    "randomization": "LIMITED",
    "probe": "حَالٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -3064,6 +3276,7 @@
    "randomization": "NONE",
    "probe": "مُبَيِّنٌ لِهَيْئَةِ الْفَاعِلِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3078,6 +3291,7 @@
    "randomization": "NONE",
    "probe": "مُبَيِّنٌ لِهَيْئَةِ الْمَفْعُولِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3092,6 +3306,7 @@
    "randomization": "LIMITED",
    "probe": "فِي مَحَلِّ نَصْبٍ حَالٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3106,6 +3321,7 @@
    "randomization": "NONE",
    "probe": "الْمُؤَوَّلُ بِالصَّرِيحِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3120,6 +3336,7 @@
    "randomization": "NONE",
    "probe": "الْفَضْلَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3134,6 +3351,7 @@
    "randomization": "LIMITED",
    "probe": "تَمْيِيزٌ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -3148,6 +3366,7 @@
    "randomization": "LIMITED",
    "probe": "تَمْيِيزُ ذَاتٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3162,6 +3381,7 @@
    "randomization": "LIMITED",
    "probe": "تَمْيِيزُ نِسْبَةٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3176,6 +3396,7 @@
    "randomization": "NONE",
    "probe": "تَمْيِيزُ الْعَدَدِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3190,6 +3411,7 @@
    "randomization": "NONE",
    "probe": "الْمِسَاحَاتِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3204,6 +3426,7 @@
    "randomization": "NONE",
    "probe": "الْمُحَوَّلُ عَنِ الْفَاعِلِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3218,6 +3441,7 @@
    "randomization": "NONE",
    "probe": "الْمُحَوَّلُ عَنِ الْمَفْعُولِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3232,6 +3456,7 @@
    "randomization": "NONE",
    "probe": "الْمُحَوَّلُ عَنِ الْمُبْتَدَأِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3246,6 +3471,7 @@
    "randomization": "LIMITED",
    "probe": "مُسْتَثْنًى",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -3260,6 +3486,7 @@
    "randomization": "LIMITED",
    "probe": "حَرْفُ اسْتِثْنَاءٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3274,6 +3501,7 @@
    "randomization": "NONE",
    "probe": "اسْمُ اسْتِثْنَاءٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3288,6 +3516,7 @@
    "randomization": "NONE",
    "probe": "تَامٍّ مَنْفِيٍّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3302,6 +3531,7 @@
    "randomization": "NONE",
    "probe": "الْمُفَرَّغُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3316,6 +3546,7 @@
    "randomization": "NONE",
    "probe": "الْمُنْقَطِعُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3330,6 +3561,7 @@
    "randomization": "NONE",
    "probe": "سِوَى",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3344,6 +3576,7 @@
    "randomization": "NONE",
    "probe": "حَاشَا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3358,6 +3591,7 @@
    "randomization": "LIMITED",
    "probe": "لَا النَّافِيَةُ لِلْجِنْسِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3372,6 +3606,7 @@
    "randomization": "LIMITED",
    "probe": "اسْمُ «لَا»",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3386,6 +3621,7 @@
    "randomization": "LIMITED",
    "probe": "خَبَرُ «لَا»",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3400,6 +3636,7 @@
    "randomization": "NONE",
    "probe": "مَبْنِيٌّ عَلَى مَا يُنْصَبُ بِهِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3414,6 +3651,7 @@
    "randomization": "NONE",
    "probe": "الشَّبِيهُ بِالْمُضَافِ لِـ«لَا»",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3428,6 +3666,7 @@
    "randomization": "NONE",
    "probe": "تَكْرَارُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3442,6 +3681,7 @@
    "randomization": "NONE",
    "probe": "إِلْغَاءُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3456,6 +3696,7 @@
    "randomization": "GOOD",
    "probe": "مُنَادًى",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -3470,6 +3711,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ نِدَاءٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 5
   },
   {
@@ -3484,6 +3726,7 @@
    "randomization": "LIMITED",
    "probe": "الْمُفْرَدُ الْعَلَمُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3498,6 +3741,7 @@
    "randomization": "LIMITED",
    "probe": "النَّكِرَةُ الْمَقْصُودَةُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3512,6 +3756,7 @@
    "randomization": "LIMITED",
    "probe": "النَّكِرَةُ غَيْرُ الْمَقْصُودَةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3526,6 +3771,7 @@
    "randomization": "LIMITED",
    "probe": "وَنَوْعُهُ الْمُضَافُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3540,6 +3786,7 @@
    "randomization": "LIMITED",
    "probe": "الشَّبِيهُ بِالْمُضَافِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3554,6 +3801,7 @@
    "randomization": "GOOD",
    "probe": "مَبْنِيٌّ عَلَى الضَّمِّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 15
   },
   {
@@ -3568,6 +3816,7 @@
    "randomization": "NONE",
    "probe": "مَبْنِيٌّ عَلَى الْأَلِفِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3582,6 +3831,7 @@
    "randomization": "NONE",
    "probe": "مَبْنِيٌّ عَلَى الْوَاوِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3596,6 +3846,7 @@
    "randomization": "NONE",
    "probe": "الْهَمْزَةُ لِلنِّدَاءِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3610,6 +3861,7 @@
    "randomization": "NONE",
    "probe": "أَيْ لِلنِّدَاءِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3624,6 +3876,7 @@
    "randomization": "NONE",
    "probe": "أَيَا",
    "probeMode": "standalone",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3638,6 +3891,7 @@
    "randomization": "NONE",
    "probe": "هَيَا",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3652,6 +3906,7 @@
    "randomization": "LIMITED",
    "probe": "مَفْعُولٌ لِأَجْلِهِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -3666,6 +3921,7 @@
    "randomization": "NONE",
    "probe": "الْمُقْتَرِنُ بِأَلْ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3680,6 +3936,7 @@
    "randomization": "NONE",
    "probe": "الْمَفْعُولُ لَهُ الْمُضَافُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3694,6 +3951,7 @@
    "randomization": "LIMITED",
    "probe": "مَفْعُولٌ مَعَهُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3708,6 +3966,7 @@
    "randomization": "LIMITED",
    "probe": "وَاوُ الْمَعِيَّةِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 3
   },
   {
@@ -3722,6 +3981,7 @@
    "randomization": "NONE",
    "probe": "الْعَطْفُ عَلَى مَا قَبْلَهُ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3736,6 +3996,7 @@
    "randomization": "NONE",
    "probe": "عَامِلُهُ اسْمُ فَاعِلٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -3745,12 +4006,13 @@
    "pages": "174–177",
    "parent": "المخفوضات",
    "status": "FULL",
-   "proof": "built 200× per template; «حَرْفُ خَفْضٍ» observed in the rendered iʿrāb across 38 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «حَرْفُ خَفْضٍ» observed in the rendered iʿrāb across 40 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "حَرْفُ خَفْضٍ",
    "probeMode": "contains",
-   "observedTemplateLanes": 38
+   "probeRequires": "",
+   "observedTemplateLanes": 40
   },
   {
    "key": "X_MAKHFUD_IDAFA",
@@ -3759,12 +4021,13 @@
    "pages": "174–178",
    "parent": "المخفوضات",
    "status": "FULL",
-   "proof": "built 200× per template; «مُضَافٌ إِلَيْهِ» observed in the rendered iʿrāb across 38 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «مُضَافٌ إِلَيْهِ» observed in the rendered iʿrāb across 41 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُضَافٌ إِلَيْهِ",
    "probeMode": "contains",
-   "observedTemplateLanes": 38
+   "probeRequires": "",
+   "observedTemplateLanes": 41
   },
   {
    "key": "X_MUDAF",
@@ -3773,12 +4036,13 @@
    "pages": "177–178",
    "parent": "الإضافة",
    "status": "FULL",
-   "proof": "built 200× per template; «وَهُوَ مُضَافٌ» observed in the rendered iʿrāb across 37 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «وَهُوَ مُضَافٌ» observed in the rendered iʿrāb across 40 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "وَهُوَ مُضَافٌ",
    "probeMode": "contains",
-   "observedTemplateLanes": 37
+   "probeRequires": "",
+   "observedTemplateLanes": 40
   },
   {
    "key": "X_PREP_MIN",
@@ -3787,12 +4051,13 @@
    "pages": "13,175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «مِنْ» observed in the rendered iʿrāb across 201 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «مِنْ» observed in the rendered iʿrāb across 204 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مِنْ",
    "probeMode": "prep",
-   "observedTemplateLanes": 201
+   "probeRequires": "",
+   "observedTemplateLanes": 204
   },
   {
    "key": "X_PREP_ILA",
@@ -3801,12 +4066,13 @@
    "pages": "175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «إِلَى» observed in the rendered iʿrāb across 72 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «إِلَى» observed in the rendered iʿrāb across 75 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "إِلَى",
    "probeMode": "prep",
-   "observedTemplateLanes": 72
+   "probeRequires": "",
+   "observedTemplateLanes": 75
   },
   {
    "key": "X_PREP_AN",
@@ -3815,12 +4081,13 @@
    "pages": "175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «عَنْ» observed in the rendered iʿrāb across 41 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «عَنْ» observed in the rendered iʿrāb across 42 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "عَنْ",
    "probeMode": "prep",
-   "observedTemplateLanes": 41
+   "probeRequires": "",
+   "observedTemplateLanes": 42
   },
   {
    "key": "X_PREP_ALA",
@@ -3829,12 +4096,13 @@
    "pages": "175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «عَلَى» observed in the rendered iʿrāb across 224 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «عَلَى» observed in the rendered iʿrāb across 228 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "عَلَى",
    "probeMode": "prep",
-   "observedTemplateLanes": 224
+   "probeRequires": "",
+   "observedTemplateLanes": 228
   },
   {
    "key": "X_PREP_FI",
@@ -3843,12 +4111,13 @@
    "pages": "175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «فِي» observed in the rendered iʿrāb across 137 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «فِي» observed in the rendered iʿrāb across 141 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "فِي",
    "probeMode": "prep",
-   "observedTemplateLanes": 137
+   "probeRequires": "",
+   "observedTemplateLanes": 141
   },
   {
    "key": "X_PREP_RUBBA",
@@ -3862,6 +4131,7 @@
    "randomization": "GOOD",
    "probe": "رُبَّ",
    "probeMode": "prep",
+   "probeRequires": "",
    "observedTemplateLanes": 93
   },
   {
@@ -3871,12 +4141,13 @@
    "pages": "13,175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «بِ» observed in the rendered iʿrāb across 226 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «بِ» observed in the rendered iʿrāb across 230 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "بِ",
    "probeMode": "prep",
-   "observedTemplateLanes": 226
+   "probeRequires": "",
+   "observedTemplateLanes": 230
   },
   {
    "key": "X_PREP_KAF",
@@ -3885,12 +4156,13 @@
    "pages": "13,175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «كَ» observed in the rendered iʿrāb across 224 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «كَ» observed in the rendered iʿrāb across 228 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "كَ",
    "probeMode": "prep",
-   "observedTemplateLanes": 224
+   "probeRequires": "",
+   "observedTemplateLanes": 228
   },
   {
    "key": "X_PREP_LAM",
@@ -3899,12 +4171,13 @@
    "pages": "13,175–176",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «لِ» observed in the rendered iʿrāb across 226 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «لِ» observed in the rendered iʿrāb across 230 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "لِ",
    "probeMode": "prep",
-   "observedTemplateLanes": 226
+   "probeRequires": "",
+   "observedTemplateLanes": 230
   },
   {
    "key": "X_PREP_WAW_QASAM",
@@ -3918,6 +4191,7 @@
    "randomization": "LIMITED",
    "probe": "وَاوُ الْقَسَمِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3932,6 +4206,7 @@
    "randomization": "LIMITED",
    "probe": "بَاءُ الْقَسَمِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3946,6 +4221,7 @@
    "randomization": "LIMITED",
    "probe": "تَاءُ الْقَسَمِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3955,12 +4231,13 @@
    "pages": "176–177",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 22 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 26 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُذْ",
    "probeMode": "prep",
-   "observedTemplateLanes": 22
+   "probeRequires": "",
+   "observedTemplateLanes": 26
   },
   {
    "key": "X_PREP_MUNDHU",
@@ -3974,6 +4251,7 @@
    "randomization": "LIMITED",
    "probe": "مُنْذُ",
    "probeMode": "prep",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -3988,6 +4266,7 @@
    "randomization": "GOOD",
    "probe": "حَتَّى",
    "probeMode": "prep",
+   "probeRequires": "",
    "observedTemplateLanes": 4
   },
   {
@@ -4002,6 +4281,7 @@
    "randomization": "LIMITED",
    "probe": "عَلَى مَعْنَى اللَّامِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -4016,6 +4296,7 @@
    "randomization": "LIMITED",
    "probe": "عَلَى مَعْنَى مِنْ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -4030,6 +4311,7 @@
    "randomization": "LIMITED",
    "probe": "عَلَى مَعْنَى فِي",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -4044,6 +4326,7 @@
    "randomization": "LIMITED",
    "probe": "حَرْفُ اسْتِقْبَالٍ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 2
   },
   {
@@ -4058,6 +4341,7 @@
    "randomization": "NONE",
    "probe": "التَّنْفِيسِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 0
   },
   {
@@ -4072,6 +4356,7 @@
    "randomization": "LIMITED",
    "probe": "هَمْزَةُ الِاسْتِفْهَامِ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 1
   },
   {
@@ -4086,6 +4371,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ نَفْيٍ مَبْنِيٌّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 8
   },
   {
@@ -4100,6 +4386,7 @@
    "randomization": "GOOD",
    "probe": "حَرْفُ نَفْيٍ مَبْنِيٌّ",
    "probeMode": "contains",
+   "probeRequires": "",
    "observedTemplateLanes": 8
   }
  ]

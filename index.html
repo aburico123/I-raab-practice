@@ -1893,6 +1893,11 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
     not the structure, is what tells the two divisions apart. */
  ,"T_VERB_SINGULAR_NASB_FATHA_28||verb:past,noun:faail,noun:object,noun:tamyiz":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_28",structure:"verb:past,noun:faail,noun:object,noun:tamyiz",shape:"TS43",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_29||verb:past,noun:faail,noun:object,noun:tamyiz":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_29",structure:"verb:past,noun:faail,noun:object,noun:tamyiz",shape:"TS43",copulaPlural:false})
+ /* Wave 8 — the three transformed lanes of p. 159. All three compose through TS43: the frozen
+    pair owns the whole English sentence, so a new frame never earns a shape of its own. */
+ ,"T_VERB_SINGULAR_NASB_FATHA_39||verb:past,noun:faail,noun:tamyiz":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_39",structure:"verb:past,noun:faail,noun:tamyiz",shape:"TS43",copulaPlural:false})
+ ,"T_VERB_SINGULAR_NASB_FATHA_40||verb:past,noun:faail,noun:object,noun:tamyiz":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_40",structure:"verb:past,noun:faail,noun:object,noun:tamyiz",shape:"TS43",copulaPlural:false})
+ ,"T_NOUN_SINGULAR_NASB_FATHA_06||noun:mubtada,noun:khabar,particle:particle,noun:majrur,noun:tamyiz":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_06",structure:"noun:mubtada,noun:khabar,particle:particle,noun:majrur,noun:tamyiz",shape:"TS43",copulaPlural:false})
  /* الاستثناء: the particle lane and the غَيْر iḍāfah lane are genuinely different structures. */
  ,"T_VERB_SINGULAR_NASB_FATHA_30||verb:past,noun:faail,particle:particle,noun:mustathna":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_30",structure:"verb:past,noun:faail,particle:particle,noun:mustathna",shape:"TS44",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_31||verb:past,noun:faail,noun:mustathna,noun:mudafIlayh":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_31",structure:"verb:past,noun:faail,noun:mustathna,noun:mudafIlayh",shape:"TS44",copulaPlural:false})
@@ -5122,11 +5127,37 @@ const TAMYIZ_SUBTYPE_LABELS=Object.freeze({
   clauseAr:'رَفَعَ إِبْهَامَ نِسْبَةٍ فِي الْجُمْلَةِ السَّابِقَةِ عَلَيْهِ',
   clauseEn:'lifts the vagueness off a relation stated in the clause before it'})
 });
-/* المقادير, p. 158. Only the two categories with a productive lane are registered; المساحات is
-   named in the coverage matrix as unproduced rather than declared here and left empty. */
+/* ── Wave 8 — تمييز النسبة, p. 158: «وهو ضربان؛ الأول مُحَوَّلٌ، والثاني غير محوَّل». p. 159 then
+   divides المحوَّل into three, and states the SAME derivation for each: an iḍāfah whose muḍāf is
+   deleted, whose muḍāf ilayh is promoted into the vacated place «فارتفعَ ارتفاعَهُ», and whose
+   deleted muḍāf is then brought back «فانتصب على التمييز». So the three types are not three
+   labels: they are one operation over three different host roles, and WHICH type a tamyīz is
+   follows from the role the promoted word actually carries — fāʿil, mafʿūl bihi or mubtadaʾ.
+   `hostRole` is therefore the whole authority: the frozen pair's declared transform has to agree
+   with the role read off the produced token, and neither can be edited into the other alone. */
+const TAMYIZ_TRANSFORMS=Object.freeze({fail:'fail',maful:'maful',mubtada:'mubtada'});
+const TAMYIZ_TRANSFORM_LABELS=Object.freeze({
+ fail:Object.freeze({id:'fail',ar:'الْمُحَوَّلُ عَنِ الْفَاعِلِ',en:'transformed from an original fāʿil',
+  hostRole:'faail',hostAr:'الْفَاعِلِ',hostEn:'the fāʿil'}),
+ maful:Object.freeze({id:'maful',ar:'الْمُحَوَّلُ عَنِ الْمَفْعُولِ',en:'transformed from an original mafʿūl',
+  hostRole:'object',hostAr:'الْمَفْعُولِ',hostEn:'the mafʿūl bihi'}),
+ mubtada:Object.freeze({id:'mubtada',ar:'الْمُحَوَّلُ عَنِ الْمُبْتَدَأِ',en:'transformed from an original mubtadaʾ',
+  hostRole:'mubtada',hostAr:'الْمُبْتَدَأِ',hostEn:'the mubtadaʾ'})
+});
+const TAMYIZ_GHAYR_MUHAWWAL=Object.freeze({ar:'غَيْرُ الْمُحَوَّلِ',en:'not transformed at all'});
+/* The reverse map is what makes the derivation independent of the label: the transform is looked
+   up FROM the host token's own role, never from the pair. */
+const TAMYIZ_TRANSFORM_BY_ROLE=Object.freeze(Object.assign(Object.create(null),
+ Object.fromEntries(Object.values(TAMYIZ_TRANSFORM_LABELS).map(label=>[label.hostRole,label.id]))));
+/* المقادير, p. 158 — all three the source names: «من الموزونات ... أو المَكِيلَاتِ ... أو المساحات».
+   Wave 8 added المساحات on the source's own «اشْتَرَيْتُ فَدَانًا أَرْضًا», so the enumeration is now
+   complete. These are categories of what a تمييز ذات may FOLLOW, and the source never utters one
+   in an iʿrāb — its own model answer at p. 161 says «تمييز لعشرين», naming the mumayyaz — so they
+   are taught in the Why and never printed on the iʿrāb card. */
 const TAMYIZ_MEASURE_KINDS=Object.freeze({
  mawzunat:Object.freeze({ar:'الْمَوْزُونَاتِ',en:'things weighed'}),
- makilat:Object.freeze({ar:'الْمَكِيلَاتِ',en:'things measured by volume'})
+ makilat:Object.freeze({ar:'الْمَكِيلَاتِ',en:'things measured by volume'}),
+ masahat:Object.freeze({ar:'الْمِسَاحَاتِ',en:'things measured by area'})
 });
 /* New curriculum vocabulary: the indefinite accusatives the chapter needs and the lexicon does not
    carry. They are accusative-only on purpose — a tamyīz and a مقدار مفعول به are both manṣūb in
@@ -5135,11 +5166,37 @@ const TAMYIZ_MEASURE_KINDS=Object.freeze({
 const tamyizLexeme=(acc,en,extra={})=>Object.freeze({acc,en,inflection:'singular',...extra});
 const TAMYIZ_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
  water:tamyizLexeme('مَاءً','water'),
- oil:tamyizLexeme('زَيْتًا','oil')
+ oil:tamyizLexeme('زَيْتًا','oil'),
+ /* p. 158's own مساحة example, «اشْتَرَيْتُ فَدَانًا أَرْضًا». */
+ land:tamyizLexeme('أَرْضًا','land'),
+ /* ── Wave 8: the three محوَّل tamyīzes. `originHead` is the word's form as the MUḌĀF of the
+    original iḍāfah p. 159 says was undone, and `originGen` its form when that same word has to
+    appear a second time in khafḍ (the شرح's own «مَالِي أَكْثَرُ مِنْ مَالِكَ»). Neither is registered
+    in the noun index: they are the ORIGINAL's surfaces, spoken only inside the explanation, so a
+    forged rafʿ tamyīz still finds no surface and is refused by E_ROLE_CASE. */
+ khuluq:tamyizLexeme('خُلُقًا','character',{originHead:'خُلُقُ',originGen:'خُلُقِ'}),
+ uyun:tamyizLexeme('عُيُونًا','springs',{originHead:'عُيُونَ'}),
+ nafs:tamyizLexeme('نَفْسًا','soul',{originHead:'نَفْسُ',originGen:'نَفْسِ'})
 }));
 const TAMYIZ_MEASURE_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
  cup:tamyizLexeme('كُوبًا','a cup',{measureKind:'makilat'}),
- pound:tamyizLexeme('رِطْلًا','a pound',{measureKind:'mawzunat'})
+ pound:tamyizLexeme('رِطْلًا','a pound',{measureKind:'mawzunat'}),
+ feddan:tamyizLexeme('فَدَانًا','a feddan',{measureKind:'masahat'})
+}));
+/* Hosts and ʿāmils this chapter needs and the lexicon does not carry. الْأَرْض is the source's own
+   word in ﴿وَفَجَّرْنَا الْأَرْضَ عُيُونًا﴾; أَكْرَمُ is the very word p. 161 parses as «خبر المبتدأ، مرفوع
+   بالمبتدأ، وعلامة رفعه الضمة الظاهرة» in «محمد أكرم من خالد نفساً», so it needs no تفضيل
+   morphology — only a nominative surface. */
+const TAMYIZ_HOST_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
+ earth:Object.freeze({nom:'الْأَرْضُ',acc:'الْأَرْضَ',gen:'الْأَرْضِ',en:'the earth',inflection:'singular'}),
+ akram:Object.freeze({nom:'أَكْرَمُ',en:'nobler',inflection:'singular'})
+}));
+/* Two past ʿāmils, chapter-local for the same reason the ẓanna sisters are: adding them to the
+   general verb pools would put them into every unrelated template and move the vocabulary audit's
+   pinned family counts. */
+const TAMYIZ_VERBS=Object.freeze(Object.assign(Object.create(null),{
+ hasuna:Object.freeze({key:'hasuna',past:'حَسُنَ',pastEn:'was good',en:'was good'}),
+ fajjara:Object.freeze({key:'fajjara',past:'فَجَّرَ',pastEn:'made gush',en:'made gush'})
 }));
 /* Resolvers, not literals — the same discipline the ẓarf and ḥāl registries use. A pair names its
    host in English and the canonical record supplies the Arabic, so a combining-mark typo in a host
@@ -5152,32 +5209,167 @@ function tamyizNoun(poolName,en){
  return matches[0];
 }
 function tamyizVerb(spec){
+ /* Wave 8 — a pair names its ʿāmil either by the lexicon gloss it shares with every other
+    chapter, or by a key into this chapter's own two verbs. Never by an Arabic string. */
+ if(spec.verbKey){
+  const record=TAMYIZ_VERBS[spec.verbKey];
+  if(!record)throw new Error(`The tamyīz registry names an unregistered ʿāmil: ${spec.verbKey}`);
+  return record;
+ }
  const matches=generalVerbActions.filter(item=>item.en===spec.verbEn);
  if(matches.length!==1)throw new Error(`The tamyīz registry matched ${matches.length} verb records for “${spec.verbEn}”.`);
  return matches[0];
 }
+function tamyizHost(key){
+ const record=TAMYIZ_HOST_LEXEMES[key];
+ if(!record)throw new Error(`The tamyīz registry names an unregistered host lexeme: ${key}`);
+ return record;
+}
+/* The FRAME decides the token layout and which token carries the promoted word; the pair only
+   names the frame. `amilAt` is the index of the word that makes the tamyīz accusative — the verb
+   in every verbal frame, and the اسم التفضيل in the nominal one, which is what p. 161 means by
+   «من خالد: جار ومجرور متعلق بأكرم». `hostAt` is the promoted muḍāf ilayh, or -1. */
+const TAMYIZ_FRAMES=Object.freeze({
+ measure:Object.freeze({id:'measure',length:4,tamyizAt:3,amilAt:0,amilKind:'verb',hostAt:-1,
+  structure:Object.freeze(['verb','faail','object','tamyiz'])}),
+ definiteObject:Object.freeze({id:'definiteObject',length:4,tamyizAt:3,amilAt:0,amilKind:'verb',hostAt:-1,
+  structure:Object.freeze(['verb','faail','object','tamyiz'])}),
+ promotedFail:Object.freeze({id:'promotedFail',length:3,tamyizAt:2,amilAt:0,amilKind:'verb',hostAt:1,
+  structure:Object.freeze(['verb','faail','tamyiz'])}),
+ promotedMaful:Object.freeze({id:'promotedMaful',length:4,tamyizAt:3,amilAt:0,amilKind:'verb',hostAt:2,
+  structure:Object.freeze(['verb','faail','object','tamyiz'])}),
+ promotedMubtada:Object.freeze({id:'promotedMubtada',length:5,tamyizAt:4,amilAt:1,amilKind:'khabar',hostAt:0,
+  structure:Object.freeze(['mubtada','khabar','khafd','majrur','tamyiz'])})
+});
 /* Every productive construction, and nothing may pair outside it. A تمييز ذات pair names the
    مقدار whose reality is vague; a تمييز نسبة pair names an ordinary definite object and leaves the
    vagueness with the relation, which is why it carries no measure at all. */
 const TAMYIZ_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
  /* تمييز الذات بعد المقادير. «شَرِبْتُ كُوبًا مَاءً» is the source's own exercise sentence at p. 160,
     and the rule licensing it is p. 158's «أو بعد المقادير... من المَكِيلات». */
- cupOfWater:Object.freeze({subtype:TAMYIZ_SUBTYPES.dhat,verb:Object.freeze({verbEn:'drink'}),
+ cupOfWater:Object.freeze({subtype:TAMYIZ_SUBTYPES.dhat,frame:'measure',transform:'',verb:Object.freeze({verbEn:'drink'}),
   subjectEn:'the student',measureKey:'cup',objectEn:'',tamyizKey:'water',
   sentenceEn:'The student drank a cup of water.'}),
  /* «اشْتَرَيْتُ رِطْلًا زَيْتًا» (p. 158, الموزونات). The source's ʿāmil اشترى is weak-final, which this
     engine models no morphology for, so the registered sound-final بَاعَ carries the same frame. */
- poundOfOil:Object.freeze({subtype:TAMYIZ_SUBTYPES.dhat,verb:Object.freeze({verbEn:'sell'}),
+ poundOfOil:Object.freeze({subtype:TAMYIZ_SUBTYPES.dhat,frame:'measure',transform:'',verb:Object.freeze({verbEn:'sell'}),
   subjectEn:'the merchant',measureKey:'pound',objectEn:'',tamyizKey:'oil',
   sentenceEn:'The merchant sold a pound of oil.'}),
+ /* Wave 8 — «اشْتَرَيْتُ فَدَانًا أَرْضًا» (p. 158, المساحات), on the same registered ʿāmil poundOfOil
+    uses for the same reason: the source's اشترى is weak-final and this engine models no
+    morphology for it. With this the three مقادير of p. 158 are all productive. */
+ feddanOfLand:Object.freeze({subtype:TAMYIZ_SUBTYPES.dhat,frame:'measure',transform:'',verb:Object.freeze({verbEn:'sell'}),
+  subjectEn:'the merchant',measureKey:'feddan',objectEn:'',tamyizKey:'land',
+  sentenceEn:'The merchant sold a feddan of land.'}),
  /* تمييز النسبة غير المحوَّل, the شرح's «امْتَلَأَ الْإِنَاءُ مَاءً» (p. 159) on the transitive frame the
     lexicon already licenses. Nothing here is محوَّل: there is no «مَاء الْكُوبِ» original to undo. */
- filledCup:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,verb:Object.freeze({verbEn:'fill'}),
+ filledCup:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'definiteObject',transform:'',verb:Object.freeze({verbEn:'fill'}),
   subjectEn:'the student',measureKey:'',objectEn:'the cup',tamyizKey:'water',
   sentenceEn:'The student filled the cup with water.'}),
- filledBottle:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,verb:Object.freeze({verbEn:'fill'}),
+ filledBottle:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'definiteObject',transform:'',verb:Object.freeze({verbEn:'fill'}),
   subjectEn:'the student',measureKey:'',objectEn:'the bottle',tamyizKey:'water',
-  sentenceEn:'The student filled the bottle with water.'})
+  sentenceEn:'The student filled the bottle with water.'}),
+ /* ══ Wave 8 — الضَّرْبُ الْمُحَوَّلُ, p. 159, one pair per نوع. Each names the frame that PRODUCES
+    the promotion, and the نوع itself is then read back off the role the promoted word carries;
+    the declared `transform` only has to agree. */
+ /* النوع الأول, المحوَّل عن الفاعل — the شرح's «تَفَقَّأَ زَيْدٌ شَحْمًا»، أصله «تفقأ شَحْمُ زَيْدٍ»:
+    the muḍāf is deleted, the muḍāf ilayh rises into its place, and the muḍāf returns as tamyīz.
+    Built on the source's own tamyīz noun خُلُقاً (p. 160) over a lexicon host. */
+ goodCharacter:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedFail',
+  transform:TAMYIZ_TRANSFORMS.fail,verb:Object.freeze({verbKey:'hasuna'}),
+  hostEn:'the student',measureKey:'',objectEn:'',tamyizKey:'khuluq',
+  sentenceEn:'The student was good in character.',
+  originEn:'the character of the student was good'}),
+ goodCharacterTeacher:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedFail',
+  transform:TAMYIZ_TRANSFORMS.fail,verb:Object.freeze({verbKey:'hasuna'}),
+  hostEn:'the teacher',measureKey:'',objectEn:'',tamyizKey:'khuluq',
+  sentenceEn:'The teacher was good in character.',
+  originEn:'the character of the teacher was good'}),
+ goodCharacterNeighbor:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedFail',
+  transform:TAMYIZ_TRANSFORMS.fail,verb:Object.freeze({verbKey:'hasuna'}),
+  hostEn:'the neighbor',measureKey:'',objectEn:'',tamyizKey:'nafs',
+  sentenceEn:'The neighbor was good in soul.',
+  originEn:'the soul of the neighbor was good'}),
+ goodCharacterGuest:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedFail',
+  transform:TAMYIZ_TRANSFORMS.fail,verb:Object.freeze({verbKey:'hasuna'}),
+  hostEn:'the guest',measureKey:'',objectEn:'',tamyizKey:'khuluq',
+  sentenceEn:'The guest was good in character.',
+  originEn:'the character of the guest was good'}),
+ goodCharacterFriend:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedFail',
+  transform:TAMYIZ_TRANSFORMS.fail,verb:Object.freeze({verbKey:'hasuna'}),
+  hostEn:'the friend',measureKey:'',objectEn:'',tamyizKey:'nafs',
+  sentenceEn:'The friend was good in soul.',
+  originEn:'the soul of the friend was good'}),
+ goodCharacterScholar:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedFail',
+  transform:TAMYIZ_TRANSFORMS.fail,verb:Object.freeze({verbKey:'hasuna'}),
+  hostEn:'the scholar',measureKey:'',objectEn:'',tamyizKey:'khuluq',
+  sentenceEn:'The scholar was good in character.',
+  originEn:'the character of the scholar was good'}),
+ /* النوع الثاني, المحوَّل عن المفعول — ﴿وَفَجَّرْنَا الْأَرْضَ عُيُونًا﴾، أصله «وفجرنا عيونَ الأرضِ».
+    The verse's own words are kept, on this app's own sentence rather than on the verse itself. */
+ gushingEarth:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMaful',
+  transform:TAMYIZ_TRANSFORMS.maful,verb:Object.freeze({verbKey:'fajjara'}),
+  subjectEn:'the worker',hostKey:'earth',measureKey:'',objectEn:'',tamyizKey:'uyun',
+  sentenceEn:'The worker made the earth gush with springs.',
+  originEn:'the worker made the springs of the earth gush'}),
+ gushingEarthFarmer:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMaful',
+  transform:TAMYIZ_TRANSFORMS.maful,verb:Object.freeze({verbKey:'fajjara'}),
+  subjectEn:'the farmer',hostKey:'earth',measureKey:'',objectEn:'',tamyizKey:'uyun',
+  sentenceEn:'The farmer made the earth gush with springs.',
+  originEn:'the farmer made the springs of the earth gush'}),
+ gushingEarthEngineer:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMaful',
+  transform:TAMYIZ_TRANSFORMS.maful,verb:Object.freeze({verbKey:'fajjara'}),
+  subjectEn:'the engineer',hostKey:'earth',measureKey:'',objectEn:'',tamyizKey:'uyun',
+  sentenceEn:'The engineer made the earth gush with springs.',
+  originEn:'the engineer made the springs of the earth gush'}),
+ gushingEarthCraftsman:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMaful',
+  transform:TAMYIZ_TRANSFORMS.maful,verb:Object.freeze({verbKey:'fajjara'}),
+  subjectEn:'the craftsman',hostKey:'earth',measureKey:'',objectEn:'',tamyizKey:'uyun',
+  sentenceEn:'The craftsman made the earth gush with springs.',
+  originEn:'the craftsman made the springs of the earth gush'}),
+ gushingEarthGardener:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMaful',
+  transform:TAMYIZ_TRANSFORMS.maful,verb:Object.freeze({verbKey:'fajjara'}),
+  subjectEn:'the gardener',hostKey:'earth',measureKey:'',objectEn:'',tamyizKey:'uyun',
+  sentenceEn:'The gardener made the earth gush with springs.',
+  originEn:'the gardener made the springs of the earth gush'}),
+ gushingEarthDriver:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMaful',
+  transform:TAMYIZ_TRANSFORMS.maful,verb:Object.freeze({verbKey:'fajjara'}),
+  subjectEn:'the driver',hostKey:'earth',measureKey:'',objectEn:'',tamyizKey:'uyun',
+  sentenceEn:'The driver made the earth gush with springs.',
+  originEn:'the driver made the springs of the earth gush'}),
+ /* النوع الثالث, المحوَّل عن المبتدأ — the شرح's ﴿أَنَا أَكْثَرُ مِنْكَ مَالًا﴾، أصله «مالي أكثر من
+    مالك», and p. 161's own drill «محمد أكرم من خالد نفساً» whose model iʿrāb reads «نفساً: تمييز
+    نسبة محوَّل عن المبتدأ منصوب وعلامة نصبه الفتحة الظاهرة». */
+ nobleSoul:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMubtada',
+  transform:TAMYIZ_TRANSFORMS.mubtada,verb:null,
+  hostEn:'the guest',comparedEn:'the traveler',khabarKey:'akram',measureKey:'',objectEn:'',tamyizKey:'nafs',
+  sentenceEn:'The guest is nobler in soul than the traveler.',
+  originEn:'the soul of the guest is nobler than the soul of the traveler'}),
+ nobleCharacter:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMubtada',
+  transform:TAMYIZ_TRANSFORMS.mubtada,verb:null,
+  hostEn:'the friend',comparedEn:'the neighbor',khabarKey:'akram',measureKey:'',objectEn:'',tamyizKey:'khuluq',
+  sentenceEn:'The friend is nobler in character than the neighbor.',
+  originEn:'the character of the friend is nobler than the character of the neighbor'}),
+ nobleSoulScholar:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMubtada',
+  transform:TAMYIZ_TRANSFORMS.mubtada,verb:null,
+  hostEn:'the scholar',comparedEn:'the writer',khabarKey:'akram',measureKey:'',objectEn:'',tamyizKey:'nafs',
+  sentenceEn:'The scholar is nobler in soul than the writer.',
+  originEn:'the soul of the scholar is nobler than the soul of the writer'}),
+ nobleSoulDoctor:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMubtada',
+  transform:TAMYIZ_TRANSFORMS.mubtada,verb:null,
+  hostEn:'the doctor',comparedEn:'the merchant',khabarKey:'akram',measureKey:'',objectEn:'',tamyizKey:'khuluq',
+  sentenceEn:'The doctor is nobler in character than the merchant.',
+  originEn:'the character of the doctor is nobler than the character of the merchant'}),
+ nobleSoulImam:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMubtada',
+  transform:TAMYIZ_TRANSFORMS.mubtada,verb:null,
+  hostEn:'the imam',comparedEn:'the engineer',khabarKey:'akram',measureKey:'',objectEn:'',tamyizKey:'nafs',
+  sentenceEn:'The imam is nobler in soul than the engineer.',
+  originEn:'the soul of the imam is nobler than the soul of the engineer'}),
+ nobleSoulTraveler:Object.freeze({subtype:TAMYIZ_SUBTYPES.nisbah,frame:'promotedMubtada',
+  transform:TAMYIZ_TRANSFORMS.mubtada,verb:null,
+  hostEn:'the traveler',comparedEn:'the guard',khabarKey:'akram',measureKey:'',objectEn:'',tamyizKey:'khuluq',
+  sentenceEn:'The traveler is nobler in character than the guard.',
+  originEn:'the character of the traveler is nobler than the character of the guard'})
 }));
 const TAMYIZ_ALL_PAIR_KEYS=Object.freeze(Object.keys(TAMYIZ_PAIR_REGISTRY));
 /* Productive الاستثناء — Al-Tuḥfah pp. 162–165 (باب الاستثناء; شروط إعمال «لا» عمل «إنّ» begins
@@ -10489,8 +10681,11 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_ISTITHNA_KHALA_HARF:sourceRule('خلا, عدا and حاشا may instead be reckoned particles of khafḍ, and then what follows them is makhfūḍ by them.',[162,165],'Only the ḥarf reading of a registered خلا/عدا/حاشا frame, and never where «ما» المصدرية precedes: p. 165 makes that reading impossible there. «وإن قدَّرتهن حروفاً خفضت ما بعدها».'),
  R_MAQSUR_NASB_FATHA_MUQADDARA:sourceRule('A noun ending in a permanent alif is called maqṣūr, and every vowel is estimated on it because taʿadhdhur prevents it from appearing.',[21],'Only the two registered maqṣūr أدوات of this chapter, سِوَى and سُوَى, and only in naṣb — the one state p. 164 gives them in a frame this app produces. It authorizes the SIGN alone: the state is the role’s, and no other noun may cite it.'),
  R_TAMYIZ_NASB:sourceRule('A tamyīz is the plain accusative noun that interprets what was left vague, whether the vagueness is in an entity or in a relation.',[157,158],'Only a registered indefinite accusative named by a frozen productive pair, standing last after an ʿāmil that already has its explicit fāʿil. Being indefinite and accusative never makes a noun a tamyīz on its own.'),
- R_TAMYIZ_DHAT:sourceRule('Tamyīz al-dhāt, also called tamyīz al-mufrad, lifts the vagueness off a noun named before it whose reality is left unstated; it follows a number or a measure of weight, volume or area.',[158],'Only the measures of weight and volume registered here, each clarified by the exact noun its frozen pair names. Numbers and areas are not produced: the counting frame needs number morphology this engine does not model.'),
- R_TAMYIZ_NISBAH:sourceRule('Tamyīz al-nisbah, also called tamyīz al-jumlah, lifts the vagueness off a relation stated in the clause before it; it is either transformed from an original fāʿil, mafʿūl or mubtadaʾ, or not transformed at all.',[158,159],'Only the untransformed (غير محوَّل) kind, on frozen pairs whose ʿāmil already governs a definite object, so no omitted-muḍāf original has to be claimed. All three transformed kinds remain deferred.'),
+ R_TAMYIZ_DHAT:sourceRule('Tamyīz al-dhāt, also called tamyīz al-mufrad, lifts the vagueness off a noun named before it whose reality is left unstated; it follows a number or a measure of weight, volume or area.',[158],'All three مقادير of p. 158 — weight, volume and area — are produced, each clarified by the exact noun its frozen pair names. The number position is not produced: 11–99 need the bināʾ of أحد عشر or the ملحق-by-SMP signs of عشرين, morphology this engine does not model. The four categories themselves are never uttered on an iʿrāb card; p. 161 parses this construction as «تمييز لعشرين», naming the mumayyaz.'),
+ R_TAMYIZ_NISBAH:sourceRule('Tamyīz al-nisbah, also called tamyīz al-jumlah, lifts the vagueness off a relation stated in the clause before it; it is either transformed from an original fāʿil, mafʿūl or mubtadaʾ, or not transformed at all.',[158,159],'Both ضربان are produced: the untransformed kind on pairs whose ʿāmil already governs a definite object, and all three transformed kinds on frames that actually perform the promotion p. 159 describes.'),
+ /* Wave 8 — p. 159 states ONE operation and then counts three types of it by what the promoted
+    word became. The rule is stated once, because the app derives the type from that role. */
+ R_TAMYIZ_MUHAWWAL:sourceRule('A transformed tamyīz al-nisbah comes from an idafa whose mudaf was deleted and whose mudaf ilayh was promoted into the vacated place, taking its rafʿ or nasb; the deleted mudaf is then restored as the accusative tamyīz. It is named after what the promoted word became: an original faʿil, an original mafʿul, or an original mubtadaʾ.',[159],'Only frames that genuinely perform the promotion. The type is read off the role the promoted token carries, never off a label, and the original idafa is rebuilt from canonical records rather than asserted.'),
  /* p. 159 matn, spelled out by the شرح at p. 160: the tamyīz may not precede its ʿāmil, and comes
     only «بعد استيفاء الفعل فاعله، والمبتدأ خبره». */
  R_TAMYIZ_CONDITIONS:sourceRule('A tamyīz is never definite, and never comes before its ʿāmil: it appears only after the speech is complete, once the verb has taken its subject and the mubtadaʾ its khabar.',[159,160],'Enforced structurally: every registered tamyīz surface is an indefinite accusative, and every productive pair places it last, after a past ʿāmil with its explicit fāʿil already present.'),
@@ -11386,6 +11581,26 @@ function registerTamyizNounForms(){
   }
   nounFormIndex.set(lexeme.acc,{lexeme,inflection:lexeme.inflection});
  });
+ /* Wave 8 — the chapter's own hosts and ʿāmils. Only the case forms a frame actually produces are
+    registered, so no frame can reach a surface this chapter never puts on the screen. */
+ Object.entries(TAMYIZ_HOST_LEXEMES).forEach(([key,lexeme])=>{
+  ['nom','acc','gen'].forEach(form=>{
+   const surface=lexeme[form];
+   if(!surface)return;
+   const existing=nounFormIndex.get(surface);
+   if(existing&&existing.lexeme!==lexeme){
+    throw new Error(`Tamyīz host ${key} collides with an existing noun surface: ${surface}`);
+   }
+   nounFormIndex.set(surface,{lexeme,inflection:lexeme.inflection});
+  });
+ });
+ Object.values(TAMYIZ_VERBS).forEach(verb=>{
+  if(verbFormIndex.has(verb.past)){
+   throw new Error(`Tamyīz ʿāmil ${verb.key} reuses an existing verb surface: ${verb.past}`);
+  }
+  verbFormIndex.set(verb.past,{lexeme:verb,form:'past',surface:verb.past,
+   morphology:Object.freeze({pastPerson:'3ms'})});
+ });
 }
 registerTamyizNounForms();
 /* Narrow byte/coherence gate for التمييز, in the spirit of verifyMutlaqPairRegistry and
@@ -11410,6 +11625,13 @@ function verifyTamyizRegistry(){
   indefiniteAccusative(lexeme.acc,`Tamyīz lexeme ${key}`);
   if(lexeme.inflection!=='singular')throw new Error(`Tamyīz lexeme ${key} falls outside the declared singular lane.`);
   if(lexeme.measureKind)throw new Error(`Tamyīz lexeme ${key} must not declare a measure category.`);
+  /* Wave 8 — the ORIGINAL's surfaces are never registered as noun forms, so they can never be
+     reached by a forged token; they exist only to be spoken inside the explanation. */
+  for(const form of ['originHead','originGen']){
+   if(lexeme[form]&&nounFormIndex.has(lexeme[form])){
+    throw new Error(`Tamyīz lexeme ${key} put its ${form} into the noun index: ${lexeme[form]}`);
+   }
+  }
  });
  Object.entries(TAMYIZ_MEASURE_LEXEMES).forEach(([key,lexeme])=>{
   indefiniteAccusative(lexeme.acc,`Tamyīz measure ${key}`);
@@ -11419,16 +11641,51 @@ function verifyTamyizRegistry(){
  });
  Object.entries(TAMYIZ_PAIR_REGISTRY).forEach(([key,pair])=>{
   if(!TAMYIZ_SUBTYPE_LABELS[pair.subtype])throw new Error(`Tamyīz pair ${key} names an unregistered subtype.`);
-  const verb=tamyizVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
-  if(registeredVerb?.form!=='past'||registeredVerb.surface!==verb.past){
-   throw new Error(`Tamyīz pair ${key} names an unregistered past ʿāmil.`);
+  const frame=TAMYIZ_FRAMES[pair.frame];
+  if(!frame)throw new Error(`Tamyīz pair ${key} names an unregistered frame.`);
+  if(frame.amilKind==='verb'){
+   const verb=tamyizVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
+   if(registeredVerb?.form!=='past'||registeredVerb.surface!==verb.past){
+    throw new Error(`Tamyīz pair ${key} names an unregistered past ʿāmil.`);
+   }
+  }else if(pair.verb)throw new Error(`Tamyīz pair ${key} names a verbal ʿāmil in a nominal frame.`);
+  /* Wave 8 — the ONE structural fact the three محوَّل types turn on: the frame must actually
+     promote a word, and the role that word will carry must be the very role the declared نوع
+     names. A pair claiming «المحوَّل عن المفعول» over a frame whose promoted word is a fāʿil is
+     refused here, before any exercise can be built from it. */
+  const transformLabel=pair.transform?TAMYIZ_TRANSFORM_LABELS[pair.transform]:null;
+  if(pair.transform&&!transformLabel)throw new Error(`Tamyīz pair ${key} names an unregistered transform.`);
+  if(Boolean(transformLabel)!==(frame.hostAt>=0)){
+   throw new Error(`Tamyīz pair ${key} disagrees with its frame about whether a word was promoted.`);
   }
-  const subject=tamyizNoun('singularPeople',pair.subjectEn);
-  if(nounFormIndex.get(subject.nom)?.lexeme!==subject){
+  if(transformLabel&&frame.structure[frame.hostAt]!==transformLabel.hostRole){
+   throw new Error(`Tamyīz pair ${key} names ${pair.transform} over a frame that promotes a ${frame.structure[frame.hostAt]}.`);
+  }
+  if(transformLabel&&pair.subtype!==TAMYIZ_SUBTYPES.nisbah){
+   throw new Error(`Tamyīz pair ${key} makes a تمييز ذات transformed; p. 158 divides only تمييز النسبة.`);
+  }
+  const subject=pair.subjectEn?tamyizNoun('singularPeople',pair.subjectEn):null;
+  if(subject&&nounFormIndex.get(subject.nom)?.lexeme!==subject){
    throw new Error(`Tamyīz pair ${key} names a subject outside the noun index.`);
   }
   const tamyiz=TAMYIZ_LEXEMES[pair.tamyizKey];
   if(!tamyiz)throw new Error(`Tamyīz pair ${key} names an unregistered tamyīz lexeme.`);
+  /* The original's muḍāf has to exist, and to carry the case the promoted word vacated: a fāʿil
+     and a mubtadaʾ vacate a rafʿ, a mafʿūl bihi vacates a naṣb. */
+  if(transformLabel){
+   const head=tamyiz.originHead;
+   if(!head)throw new Error(`Transformed tamyīz pair ${key} has no original muḍāf to restore.`);
+   const wanted=transformLabel.id===TAMYIZ_TRANSFORMS.maful?'\u064E':'\u064F';
+   if(head[head.length-1]!==wanted){
+    throw new Error(`Transformed tamyīz pair ${key} restores an original that does not carry the case its host vacated: ${head}`);
+   }
+   if(transformLabel.id===TAMYIZ_TRANSFORMS.mubtada&&(!tamyiz.originGen||tamyiz.originGen[tamyiz.originGen.length-1]!=='\u0650')){
+    throw new Error(`Transformed tamyīz pair ${key} cannot restate its original in khafḍ.`);
+   }
+   if(typeof pair.originEn!=='string'||!pair.originEn.trim()){
+    throw new Error(`Transformed tamyīz pair ${key} carries no English for its original.`);
+   }
+  }else if(pair.originEn)throw new Error(`Untransformed tamyīz pair ${key} claims an original.`);
   /* The two subtypes are structurally exclusive. A تمييز ذات clarifies a measure and therefore
      has one; a تمييز نسبة leaves the vagueness with the relation and therefore has none. A pair
      carrying both, or neither, would be able to claim either subtype. */
@@ -11437,13 +11694,39 @@ function verifyTamyizRegistry(){
    if(!measure)throw new Error(`Tamyīz-al-dhāt pair ${key} names no registered مقدار.`);
    if(pair.objectEn)throw new Error(`Tamyīz-al-dhāt pair ${key} names both a مقدار and a lexicon object.`);
    if(measure.acc===tamyiz.acc)throw new Error(`Tamyīz-al-dhāt pair ${key} clarifies a مقدار with itself.`);
-  }else{
+  }else if(pair.frame==='definiteObject'){
    if(pair.measureKey)throw new Error(`Tamyīz-al-nisbah pair ${key} names a مقدار, which belongs to تمييز الذات.`);
+   const verb=tamyizVerb(pair.verb);
    const object=tamyizNoun('singularThings',pair.objectEn);
    if(!/^ال/u.test(object.acc))throw new Error(`Tamyīz-al-nisbah pair ${key} does not name a definite object.`);
    const licensed=Array.isArray(verb.obj)?verb.obj.includes(object.acc)
     :Array.isArray(objectGroups[verb.group])&&objectGroups[verb.group].some(item=>item===object);
    if(!licensed)throw new Error(`Tamyīz pair ${key} names an object its ʿāmil does not license.`);
+  }else{
+   if(pair.measureKey||pair.objectEn)throw new Error(`Transformed tamyīz pair ${key} names a مقدار or a plain object.`);
+   /* Every host a محوَّل frame promotes must round-trip through the index in the case the frame
+      gives it AND in the khafḍ the original iḍāfah needs it in. */
+   if(pair.frame==='promotedFail'){
+    const host=tamyizNoun('singularPeople',pair.hostEn);
+    if(nounFormIndex.get(host.nom)?.lexeme!==host||nounFormIndex.get(host.gen)?.lexeme!==host){
+     throw new Error(`Tamyīz pair ${key} names a promoted fāʿil outside the noun index.`);
+    }
+   }else if(pair.frame==='promotedMaful'){
+    const host=tamyizHost(pair.hostKey);
+    if(nounFormIndex.get(host.acc)?.lexeme!==host||nounFormIndex.get(host.gen)?.lexeme!==host){
+     throw new Error(`Tamyīz pair ${key} names a promoted mafʿūl outside the noun index.`);
+    }
+   }else{
+    const host=tamyizNoun('singularPeople',pair.hostEn);
+    const compared=tamyizNoun('singularPeople',pair.comparedEn);
+    const khabar=tamyizHost(pair.khabarKey);
+    if(host===compared)throw new Error(`Tamyīz pair ${key} compares a noun with itself.`);
+    if(nounFormIndex.get(host.nom)?.lexeme!==host||nounFormIndex.get(host.gen)?.lexeme!==host
+      ||nounFormIndex.get(compared.gen)?.lexeme!==compared||nounFormIndex.get(khabar.nom)?.lexeme!==khabar){
+     throw new Error(`Tamyīz pair ${key} names a nominal-frame word outside the noun index.`);
+    }
+    if(khabar.acc||khabar.gen)throw new Error(`Tamyīz pair ${key} registers cases for اسم التفضيل that this chapter never produces.`);
+   }
   }
   if(typeof pair.sentenceEn!=='string'||!pair.sentenceEn.trim()){
    throw new Error(`Tamyīz pair ${key} carries no canonical English.`);
@@ -13192,32 +13475,80 @@ function tamyizTemplateRecord(data){
  const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
  return template?.tamyizPairKeys?.length?template:null;
 }
+/* A registered noun token: the exact role the frame declares AND the exact canonical bytes. */
+function tamyizTokenIs(token,role,surface){
+ return tamyizTokenSurfaceIs(token,surface)&&token.grammar.role===role;
+}
+/* The PROMOTED word is matched by its bytes alone, deliberately. Its role is what p. 159 uses to
+   NAME the نوع, so checking it here as well would make the classification and the shape one check
+   wearing two hats: a forged role would be refused for having the wrong shape and never for
+   misnaming the نوع, and deleting either would change nothing. The role is read once, in
+   deriveTamyizAuthority, and that is the only place the division is decided. */
+function tamyizTokenSurfaceIs(token,surface){
+ return Boolean(token)&&token.grammar?.type==='noun'&&token.word===surface&&token.surfaceHint===surface;
+}
+/* Wave 8 — one matcher per frame. Each returns the tokens the authority needs, plus the ORIGINAL
+   sentence p. 159 says the transformed kinds were made from, rebuilt from canonical records so
+   the learner is shown the actual iḍāfah rather than a claim that one existed. */
+function tamyizFrameMatch(pair,frame,tokens){
+ const lexeme=TAMYIZ_LEXEMES[pair.tamyizKey];
+ if(frame.amilKind==='verb'){
+  const registeredVerb=tamyizVerb(pair.verb),verb=tokens[0];
+  if(verb?.grammar?.type!=='verb'||verb.tense!=='past')return null;
+  if(verb.word!==registeredVerb.past||verb.surfaceHint!==registeredVerb.past)return null;
+  if(frame.id==='promotedFail'){
+   const record=tamyizNoun('singularPeople',pair.hostEn),host=tokens[1];
+   if(!tamyizTokenSurfaceIs(host,record.nom))return null;
+   return{amil:verb,marfu:host,host,middle:null,measure:null,
+    originAr:`${verb.word} ${lexeme.originHead} ${record.gen}`};
+  }
+  const registeredSubject=tamyizNoun('singularPeople',pair.subjectEn),subject=tokens[1];
+  if(!tamyizTokenIs(subject,'faail',registeredSubject.nom))return null;
+  if(frame.id==='promotedMaful'){
+   const record=tamyizHost(pair.hostKey),host=tokens[2];
+   if(!tamyizTokenSurfaceIs(host,record.acc))return null;
+   return{amil:verb,marfu:subject,host,middle:host,measure:null,
+    originAr:`${verb.word} ${subject.word} ${lexeme.originHead} ${record.gen}`};
+  }
+  const registeredMiddle=pair.subtype===TAMYIZ_SUBTYPES.dhat
+   ?TAMYIZ_MEASURE_LEXEMES[pair.measureKey]
+   :tamyizNoun('singularThings',pair.objectEn);
+  const middle=tokens[2];
+  if(!registeredMiddle||!tamyizTokenIs(middle,'object',registeredMiddle.acc))return null;
+  return{amil:verb,marfu:subject,host:null,middle,
+   measure:pair.subtype===TAMYIZ_SUBTYPES.dhat?registeredMiddle:null,originAr:''};
+ }
+ /* The nominal frame of p. 161, «محمد أكرم من خالد نفساً»: the ʿāmil is اسم التفضيل, which is why
+    the شرح attaches the جار والمجرور to it rather than to any verb. */
+ const hostRecord=tamyizNoun('singularPeople',pair.hostEn);
+ const comparedRecord=tamyizNoun('singularPeople',pair.comparedEn);
+ const khabarRecord=tamyizHost(pair.khabarKey);
+ const host=tokens[0],khabar=tokens[1],particle=tokens[2],compared=tokens[3];
+ if(!tamyizTokenSurfaceIs(host,hostRecord.nom))return null;
+ if(!tamyizTokenIs(khabar,'khabar',khabarRecord.nom))return null;
+ if(particle?.grammar?.type!=='particle'
+   ||particle.grammar.particleType!==KHAFD_PARTICLE_REGISTRY.min.particleType
+   ||particle.word!==KHAFD_PARTICLE_REGISTRY.min.connectiveSurface)return null;
+ if(!tamyizTokenIs(compared,'majrur',comparedRecord.gen))return null;
+ return{amil:khabar,marfu:host,host,middle:null,measure:null,
+  originAr:`${lexeme.originHead} ${hostRecord.gen} ${khabar.word} `
+   +`${KHAFD_PARTICLE_REGISTRY.min.surface} ${lexeme.originGen} ${comparedRecord.gen}`};
+}
 function tamyizPairAt(data,index){
  const template=tamyizTemplateRecord(data),tokens=data?.tokens;
  const tamyiz=Array.isArray(tokens)?tokens[index]:null;
  if(!template||!tamyiz||tamyiz.grammar?.type!=='noun'||tamyiz.grammar.role!==TAMYIZ_ROLE)return null;
  for(const key of template.tamyizPairKeys){
   const pair=TAMYIZ_PAIR_REGISTRY[key],lexeme=pair&&TAMYIZ_LEXEMES[pair.tamyizKey];
-  if(!pair||!lexeme)continue;
-  /* p. 160 — «لا يجيء إلا بعد تمام الكلام». Structurally: the ʿāmil opens the clause, its explicit
-     fāʿil follows, the clarified noun comes next, and the tamyīz is last. */
-  if(tokens.length!==4||index!==3)continue;
-  const verb=tokens[0],subject=tokens[1],middle=tokens[2];
-  const registeredVerb=tamyizVerb(pair.verb);
-  const registeredSubject=tamyizNoun('singularPeople',pair.subjectEn);
-  const registeredMiddle=pair.subtype===TAMYIZ_SUBTYPES.dhat
-   ?TAMYIZ_MEASURE_LEXEMES[pair.measureKey]
-   :tamyizNoun('singularThings',pair.objectEn);
-  if(!registeredMiddle)continue;
-  if(verb.grammar?.type!=='verb'||verb.tense!=='past')continue;
-  if(verb.word!==registeredVerb.past||verb.surfaceHint!==registeredVerb.past)continue;
-  if(subject.grammar?.role!=='faail')continue;
-  if(subject.word!==registeredSubject.nom||subject.surfaceHint!==registeredSubject.nom)continue;
-  if(middle.grammar?.role!=='object')continue;
-  if(middle.word!==registeredMiddle.acc||middle.surfaceHint!==registeredMiddle.acc)continue;
+  const frame=pair&&TAMYIZ_FRAMES[pair.frame];
+  if(!pair||!lexeme||!frame)continue;
+  /* p. 160 — «لا يجيء إلا بعد تمام الكلام»: every frame puts the tamyīz last, after the verb has
+     taken its fāʿil or the mubtadaʾ its khabar. */
+  if(tokens.length!==frame.length||index!==frame.tamyizAt)continue;
   if(tamyiz.word!==lexeme.acc||tamyiz.surfaceHint!==lexeme.acc)continue;
-  return{key,pair,lexeme,verb,subject,middle,tamyiz,
-   measure:pair.subtype===TAMYIZ_SUBTYPES.dhat?registeredMiddle:null};
+  const found=tamyizFrameMatch(pair,frame,tokens);
+  if(!found)continue;
+  return{key,pair,lexeme,frame,tamyiz,...found};
  }
  return null;
 }
@@ -13232,15 +13563,32 @@ function deriveTamyizAuthority(data,index){
  if(token.inflection&&token.inflection!==found.lexeme.inflection){
   return Object.freeze({authorized:false,reason:'tamyiz-inflection-mismatch'});
  }
- // The clarified noun is the ʿāmil's own accusative object in both subtypes.
- if(found.middle.state&&found.middle.state!=='nasb'){
+ // The clarified noun is the ʿāmil's own accusative object wherever a frame has one.
+ if(found.middle?.state&&found.middle.state!=='nasb'){
   return Object.freeze({authorized:false,reason:'clarified-noun-not-nasb'});
  }
- if(found.subject.state&&found.subject.state!=='raf'){
+ /* «بعد تمام الكلام» — the verb has its marfūʿ fāʿil, or the mubtadaʾ stands marfūʿ with a khabar. */
+ if(found.marfu?.state&&found.marfu.state!=='raf'){
   return Object.freeze({authorized:false,reason:'amil-has-no-marfu-fail'});
  }
+ /* ── PHASE 4/6: the نوع is READ OFF the promoted word, never off the pair. p. 159 makes the three
+    transformed kinds one operation over three host roles, so the role the promoted token actually
+    carries IS the classification; the pair's declaration only has to agree with it. Editing the
+    label alone leaves the host's role unchanged and is refused here. */
+ const declared=found.pair.transform||'';
+ const derived=found.host?(TAMYIZ_TRANSFORM_BY_ROLE[found.host.grammar?.role]||''):'';
+ if(declared!==derived){
+  return Object.freeze({authorized:false,reason:'tamyiz-transform-disagrees-with-the-promoted-word'});
+ }
+ if(derived&&found.pair.subtype!==TAMYIZ_SUBTYPES.nisbah){
+  return Object.freeze({authorized:false,reason:'only-tamyiz-al-nisbah-is-transformed'});
+ }
  return Object.freeze({authorized:true,reason:'',pairKey:found.key,subtype:found.pair.subtype,
-  verbId:found.verb.id,verbWord:found.verb.word,tamyizId:token.id,tamyizWord:token.word,
+  verbId:found.amil.id,verbWord:found.amil.word,tamyizId:token.id,tamyizWord:token.word,
+  amilKind:found.frame.amilKind,frameId:found.frame.id,
+  transform:derived,
+  hostId:found.host?found.host.id:'',hostWord:found.host?found.host.word:'',
+  originAr:found.originAr||'',originEn:found.pair.originEn||'',
   mubayyanKind:found.pair.subtype===TAMYIZ_SUBTYPES.dhat?'noun':'nisbah',
   mubayyanId:found.measure?found.middle.id:'',
   mubayyanWord:found.measure?found.middle.word:'',
@@ -14692,7 +15040,10 @@ function resolveRelationships(data){
   const mubayyan=authority.mubayyanId?tokens.find(candidate=>candidate.id===authority.mubayyanId):null;
   const relation=addRelationship(data,'tamyiz',{verbId:verb.id,tamyizId:item.id,
    subtype:authority.subtype,mubayyanKind:authority.mubayyanKind,
-   mubayyanId:mubayyan?mubayyan.id:'',measureKind:authority.measureKind});
+   mubayyanId:mubayyan?mubayyan.id:'',measureKind:authority.measureKind,
+   /* Wave 8 — the نوع and the very word it was transformed from travel on the link, so a restored
+      exercise whose transform was rewritten no longer re-derives. */
+   transform:authority.transform,hostId:authority.hostId});
   verb.relations.tamyizId=item.id;verb.relations.tamyizRelationshipId=relation.id;
   item.relations.amilId=verb.id;item.relations.tamyizRelationshipId=relation.id;
   if(mubayyan){
@@ -14976,7 +15327,17 @@ function nounRoleArabic(token){
  /* The subtype is deliberately NOT folded into this label. Al-Tuḥfah's own iʿrāb drills at p. 161
     say «تمييز لعشرين، منصوب» and «تمييز نسبة محوَّل عن المبتدأ منصوب» — the division belongs to the
     analysis, not to the core case label, so it is carried by the Why and the combined block. */
- if(role===TAMYIZ_ROLE)return'تَمْيِيزٌ مَنْصُوبٌ';
+ /* Wave 8 — the transformed kinds DO carry their classification on the card, because that is how
+    p. 161's own model answer parses one: «نفساً: تمييز نسبة محوَّل عن المبتدأ منصوب وعلامة نصبه
+    الفتحة الظاهرة». The untransformed kinds keep the bare label, which is equally the source's
+    own: «ذراعاً: تمييز لعشرين، منصوب بالفتحة الظاهرة» names the mumayyaz, not a category. */
+ if(role===TAMYIZ_ROLE){
+  const data=token._data,authority=deriveTamyizAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized tamyīz: ${authority.reason}`);
+  if(!authority.transform)return'تَمْيِيزٌ مَنْصُوبٌ';
+  const label=TAMYIZ_TRANSFORM_LABELS[authority.transform];
+  return`${TAMYIZ_SUBTYPE_LABELS[TAMYIZ_SUBTYPES.nisbah].ar} مُحَوَّلٌ عَنِ ${label.hostAr} مَنْصُوبٌ`;
+ }
  if(role===MAFUL_AJL_ROLE)return'مَفْعُولٌ لِأَجْلِهِ مَنْصُوبٌ';
  if(role===MAFUL_MAAH_ROLE)return'مَفْعُولٌ مَعَهُ مَنْصُوبٌ';
  /* The two regimes produce two different learner lines, and the difference is the point of the
@@ -15131,7 +15492,8 @@ function renderNounAnalysis(token){
   const label=TAMYIZ_SUBTYPE_LABELS[authority.subtype];
   english=authority.mubayyanKind==='noun'
    ?`A ${label.en}: an indefinite noun interpreting ${authority.mubayyanWord}; accusative.`
-   :`A ${label.en}: an indefinite noun interpreting the relation stated by ${authority.verbWord}; accusative.`;
+   :`A ${label.en}${authority.transform?', '+TAMYIZ_TRANSFORM_LABELS[authority.transform].en+',':''}`
+    +` an indefinite noun interpreting the relation stated by ${authority.verbWord}; accusative.`;
  }
  if(token.grammar.role==='tawkid'){
   const data=token._data,authority=deriveTawkidFollowerAuthority(data,data?.tokens?.indexOf(token));
@@ -15610,16 +15972,38 @@ function whyTamyizSubtype(token,data){
    ar:`وَهُوَ ${label.ar}، وَيُسَمَّى ${label.altAr}؛ لِأَنَّهُ ${label.clauseAr}، وَقَعَ بَعْدَ مِقْدَارٍ مِنَ ${measure.ar}.`,
    en:`It is a ${label.en}, also called ${label.altEn}, because it ${label.clauseEn}; it comes after a measure of ${measure.en}.`};
  }
+ /* p. 158 makes تمييز النسبة «ضربان», and p. 159 divides the first of the two into three by what
+    the original iḍāfah's muḍāf ilayh was promoted INTO. So the line names the ضرب, and for the
+    transformed kinds it also shows the original sentence, which is the whole content of the
+    ruling: «فحذف المضاف وأُقيم المضاف إليه مُقَامَهُ، فارتفعَ ارتفاعَهُ، ثم أتى بالمضاف المحذوف
+    فانتصب على التمييز». */
+ if(!authority.transform){
+  return{id:'WHY_TAMYIZ_NISBAH',
+   ar:`وَهُوَ ${label.ar}، وَيُسَمَّى ${label.altAr}؛ لِأَنَّهُ ${label.clauseAr}، وَهُوَ مِنَ الضَّرْبِ ${TAMYIZ_GHAYR_MUHAWWAL.ar}.`,
+   en:`It is a ${label.en}, also called ${label.altEn}, because it ${label.clauseEn}; it is of the kind that is ${TAMYIZ_GHAYR_MUHAWWAL.en}.`};
+ }
+ const transform=TAMYIZ_TRANSFORM_LABELS[authority.transform];
  return{id:'WHY_TAMYIZ_NISBAH',
-  ar:`وَهُوَ ${label.ar}، وَيُسَمَّى ${label.altAr}؛ لِأَنَّهُ ${label.clauseAr}، وَهُوَ مِنَ الضَّرْبِ غَيْرِ الْمُحَوَّلِ.`,
-  en:`It is a ${label.en}, also called ${label.altEn}, because it ${label.clauseEn}; it is of the untransformed kind.`};
+  ar:`وَهُوَ ${label.ar}، وَيُسَمَّى ${label.altAr}؛ لِأَنَّهُ ${label.clauseAr}، وَهُوَ ${transform.ar}؛`
+   +` وَالْأَصْلُ ${wq(authority.originAr)}، فَحُذِفَ الْمُضَافُ وَأُقِيمَ الْمُضَافُ إِلَيْهِ ${wq(authority.hostWord)} مُقَامَهُ،`
+   +` ثُمَّ أُتِيَ بِالْمُضَافِ الْمَحْذُوفِ فَانْتَصَبَ عَلَى التَّمْيِيزِ.`,
+  en:`It is a ${label.en}, also called ${label.altEn}, because it ${label.clauseEn}; it is ${transform.en}.`
+   +` The original was ${eq(authority.originAr)} — “${authority.originEn}” — and when the muḍāf was dropped,`
+   +` ${eq(authority.hostWord)} rose into its place as ${transform.hostEn}, and the dropped muḍāf came back as the tamyīz.`};
 }
 /* The matn's two conditions, p. 159, as the شرح spells the second one out at p. 160. */
 function whyTamyizConditions(token,data){
  const authority=tamyizWhyAuthority(token,data);
+ /* p. 160 spells «تمام الكلام» out in two halves — «بعد استيفاء الفعل فاعله، والمبتدأ خبره» — and
+    the nominal frame of p. 161 is the second half, so the line has to say which one it is. */
+ const nominal=authority.amilKind==='khabar';
  return{id:'WHY_TAMYIZ_CONDITIONS',
-  ar:`وَلَا يَكُونُ التَّمْيِيزُ إِلَّا نَكِرَةً، وَلَا يَجِيءُ إِلَّا بَعْدَ تَمَامِ الْكَلَامِ؛ فَ${wq(token.word)} نَكِرَةٌ جَاءَتْ بَعْدَ اسْتِيفَاءِ ${wq(authority.verbWord)} فَاعِلَهُ.`,
-  en:`A tamyīz is only ever indefinite, and only ever comes after the speech is complete: ${eq(token.word)} is indefinite and follows ${eq(authority.verbWord)} once it already has its subject.`};
+  ar:`وَلَا يَكُونُ التَّمْيِيزُ إِلَّا نَكِرَةً، وَلَا يَجِيءُ إِلَّا بَعْدَ تَمَامِ الْكَلَامِ؛ فَ${wq(token.word)} نَكِرَةٌ جَاءَتْ`
+   +(nominal?` بَعْدَ اسْتِيفَاءِ الْمُبْتَدَإِ خَبَرَهُ ${wq(authority.verbWord)}.`
+     :` بَعْدَ اسْتِيفَاءِ ${wq(authority.verbWord)} فَاعِلَهُ.`),
+  en:`A tamyīz is only ever indefinite, and only ever comes after the speech is complete: ${eq(token.word)} is indefinite and follows`
+   +(nominal?` the mubtadaʾ once it already has its khabar ${eq(authority.verbWord)}.`
+     :` ${eq(authority.verbWord)} once it already has its subject.`)};
 }
 function whyHaalConditions(token,data){
  const authority=haalWhyAuthority(token,data);
@@ -18110,6 +18494,21 @@ function validateExercise(data){
     fail('E_MAFUL_FIH_RELATION','Ẓarf relationship is not the canonical proof.',zarf);
    }
   }
+  /* Wave 8 — the tamyīz link had no canonical re-derivation at all, so a forged subtype or a
+     forged transformed-origin survived every other check in this file. Every field the link
+     records is now re-derived from the tokens and required to match. */
+  if(rel.type==='tamyiz'){
+   const recipient=tokenById.get(rel.tamyizId);
+   const authority=deriveTamyizAuthority(data,data.tokens.indexOf(recipient));
+   if(!authority.authorized||rel.verbId!==authority.verbId||rel.tamyizId!==authority.tamyizId
+     ||rel.subtype!==authority.subtype||rel.mubayyanKind!==authority.mubayyanKind
+     ||(rel.mubayyanId||'')!==(authority.mubayyanId||'')
+     ||(rel.measureKind||'')!==(authority.measureKind||'')
+     ||(rel.transform||'')!==(authority.transform||'')
+     ||(rel.hostId||'')!==(authority.hostId||'')){
+    fail('E_TAMYIZ_RELATION','Tamyīz relationship is not the canonical proof.',recipient);
+   }
+  }
   if(rel.type==='absoluteObject'){
    const masdar=tokenById.get(rel.masdarId);
    const authority=deriveMutlaqAuthority(data,data.tokens.indexOf(masdar));
@@ -18919,12 +19318,19 @@ function add(starts,form,state,sign,build,metadata={}){
  if(tamyizPairKeys.length){
   const shapes=new Set(tamyizPairKeys.map(key=>{
    const pair=TAMYIZ_PAIR_REGISTRY[key];
-   return `${pair.subtype}|${TAMYIZ_LEXEMES[pair.tamyizKey].inflection}`;
+   return `${pair.subtype}|${pair.frame}|${pair.transform||''}|${TAMYIZ_LEXEMES[pair.tamyizKey].inflection}`;
   }));
-  if(shapes.size!==1)throw new Error(`Template ${stableId} mixes tamyīz divisions or declension lanes.`);
+  if(shapes.size!==1)throw new Error(`Template ${stableId} mixes tamyīz divisions, frames or declension lanes.`);
   if(![...shapes][0].endsWith(`|${form}`))throw new Error(`Template ${stableId} declares a tamyīz of the wrong declension.`);
-  if(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
-   throw new Error(`Template ${stableId} produces a tamyīz without the explicit past ʿāmil its conditions require.`);
+  /* p. 160's «تمام الكلام» has two halves. A verbal lane must carry the explicit past ʿāmil; the
+     nominal lane of p. 161 must carry none, or it would be claiming a verb it does not produce. */
+  const frame=TAMYIZ_FRAMES[TAMYIZ_PAIR_REGISTRY[tamyizPairKeys[0]].frame];
+  if(frame.amilKind==='verb'){
+   if(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='explicit')){
+    throw new Error(`Template ${stableId} produces a tamyīz without the explicit past ʿāmil its conditions require.`);
+   }
+  }else if(pastCapabilities.length){
+   throw new Error(`Template ${stableId} declares a past ʿāmil for a nominal tamyīz frame.`);
   }
  }
  const conditionalGovernor=isConditionalGovernor(GRAMMAR_RULES.governors[presentGovernor]);
@@ -20098,26 +20504,59 @@ add('verb','singular','nasb','fatha',()=>pickedHaal(HAAL_OBJECT_KEYS,'haal-objec
    them. The tamyīz is always last, satisfying «لا يجيء إلا بعد تمام الكلام» structurally. */
 function buildTamyizExercise(pairKey){
  const pair=TAMYIZ_PAIR_REGISTRY[pairKey],lexeme=pair&&TAMYIZ_LEXEMES[pair.tamyizKey];
- if(!pair||!lexeme)throw new Error(`Unknown productive tamyīz pair: ${pairKey}`);
+ const frame=pair&&TAMYIZ_FRAMES[pair.frame];
+ if(!pair||!lexeme||!frame)throw new Error(`Unknown productive tamyīz pair: ${pairKey}`);
+ const tamyizToken=()=>token(lexeme.acc,lexeme.en,AR.tamyiz(lexeme.acc),
+  'An indefinite noun lifting the vagueness, after the clause is already complete.',true);
+ /* Wave 8 — the nominal frame of p. 161. Its ʿāmil is اسم التفضيل and its «تمام الكلام» is the
+    mubtadaʾ taking its khabar, which is the second half of the condition p. 160 states. */
+ if(frame.amilKind==='khabar'){
+  const host=tamyizNoun('singularPeople',pair.hostEn);
+  const compared=tamyizNoun('singularPeople',pair.comparedEn);
+  const khabar=tamyizHost(pair.khabarKey);
+  const min=KHAFD_PARTICLE_REGISTRY.min.connectiveSurface;
+  return{sentence:'',translation:pair.sentenceEn,tokens:[
+   token(host.nom,host.en,AR.mubtada(host.nom),EN.mubtada),
+   token(khabar.nom,khabar.en,AR.khabar(khabar.nom),EN.khabar),
+   khafdToken('min',min),
+   token(compared.gen,compared.en,AR.majrur(compared.gen,min),EN.majrur),
+   tamyizToken()
+  ]};
+ }
  const verb=tamyizVerb(pair.verb),registeredVerb=verbFormIndex.get(verb.past);
  if(registeredVerb?.form!=='past')throw new Error(`Tamyīz pair ${pairKey} names an unregistered ʿāmil.`);
+ const verbToken=token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),
+  'A past-tense event with an explicit subject.');
+ if(frame.id==='promotedFail'){
+  const host=tamyizNoun('singularPeople',pair.hostEn);
+  return{sentence:'',translation:pair.sentenceEn,tokens:[verbToken,
+   token(host.nom,host.en,AR.faail(host.nom),
+    'The explicit subject — the word promoted out of the original iḍāfah.'),
+   tamyizToken()]};
+ }
  const subject=tamyizNoun('singularPeople',pair.subjectEn);
+ const subjectToken=token(subject.nom,subject.en,AR.faail(subject.nom),'The explicit subject of the event.');
+ if(frame.id==='promotedMaful'){
+  const host=tamyizHost(pair.hostKey);
+  return{sentence:'',translation:pair.sentenceEn,tokens:[verbToken,subjectToken,
+   token(host.acc,host.en,AR.object(host.acc),
+    'The object — the word promoted out of the original iḍāfah.'),
+   tamyizToken()]};
+ }
  const middle=pair.subtype===TAMYIZ_SUBTYPES.dhat
   ?TAMYIZ_MEASURE_LEXEMES[pair.measureKey]
   :tamyizNoun('singularThings',pair.objectEn);
- const tokens=[
-  token(verb.past,registeredVerb.lexeme.pastEn,AR.past(verb.past),'A past-tense event with an explicit subject.'),
-  token(subject.nom,subject.en,AR.faail(subject.nom),'The explicit subject of the event.'),
+ return{sentence:'',translation:pair.sentenceEn,tokens:[verbToken,subjectToken,
   token(middle.acc,middle.en,AR.object(middle.acc),
    pair.subtype===TAMYIZ_SUBTYPES.dhat?'A measure whose reality is left unstated.':EN.object),
-  token(lexeme.acc,lexeme.en,AR.tamyiz(lexeme.acc),
-   'An indefinite noun lifting the vagueness, after the clause is already complete.',true)
- ];
- return{sentence:'',translation:pair.sentenceEn,tokens};
+  tamyizToken()]};
 }
-const tamyizKeys=subtype=>Object.freeze(TAMYIZ_ALL_PAIR_KEYS.filter(key=>TAMYIZ_PAIR_REGISTRY[key].subtype===subtype));
-const TAMYIZ_DHAT_KEYS=tamyizKeys(TAMYIZ_SUBTYPES.dhat);
-const TAMYIZ_NISBAH_KEYS=tamyizKeys(TAMYIZ_SUBTYPES.nisbah);
+/* A lane is (division, frame): the five frames produce five different token layouts, so one ID
+   could otherwise authorize two of them over the same declension. */
+const tamyizKeys=(subtype,frame)=>Object.freeze(TAMYIZ_ALL_PAIR_KEYS.filter(key=>
+ TAMYIZ_PAIR_REGISTRY[key].subtype===subtype&&TAMYIZ_PAIR_REGISTRY[key].frame===frame));
+const TAMYIZ_DHAT_KEYS=tamyizKeys(TAMYIZ_SUBTYPES.dhat,'measure');
+const TAMYIZ_NISBAH_KEYS=tamyizKeys(TAMYIZ_SUBTYPES.nisbah,'definiteObject');
 const tamyizMetadata=keys=>({...pastTemplateMetadata('3ms','explicit'),tamyizPairKeys:keys});
 const pickedTamyiz=(keys,label)=>buildTamyizExercise(pickVaried(keys,label,String));
 add('verb','singular','nasb','fatha',()=>pickedTamyiz(TAMYIZ_DHAT_KEYS,'tamyiz-dhat'),tamyizMetadata(TAMYIZ_DHAT_KEYS));
@@ -21206,6 +21645,33 @@ add('verb','singular','jarr','kasra',()=>pickedIstithnaKhala(KHALA_HARF_KEYS,'w6
  istithnaKhalaMetadata(KHALA_HARF_KEYS));
 add('verb','singular','nasb','fatha',()=>pickedIstithnaKhala(KHALA_MASDARIYYA_KEYS,'w6-khala-masdariyya'),
  istithnaKhalaMetadata(KHALA_MASDARIYYA_KEYS));
+
+/* ===== Wave 8 — الضَّرْبُ الْمُحَوَّلُ of تمييز النسبة, Al-Tuḥfah p. 159 =========================
+   Three lanes, one per نوع, because the three are three different PROMOTIONS and therefore three
+   different token layouts — a fāʿil rising into the vacated place, a mafʿūl bihi rising into it,
+   and a mubtadaʾ rising into it. Sharing one lane would let a single stable ID authorize a نوع
+   over a frame that never performed its promotion. Registered here, at the end of the file,
+   because `add()` numbers a template by call order WITHIN ITS FAMILY: appending moves nothing. */
+const TAMYIZ_MUHAWWAL_FAIL_KEYS=tamyizKeys(TAMYIZ_SUBTYPES.nisbah,'promotedFail');
+const TAMYIZ_MUHAWWAL_MAFUL_KEYS=tamyizKeys(TAMYIZ_SUBTYPES.nisbah,'promotedMaful');
+const TAMYIZ_MUHAWWAL_MUBTADA_KEYS=tamyizKeys(TAMYIZ_SUBTYPES.nisbah,'promotedMubtada');
+/* The nominal lane declares NO past capability: its ʿāmil is اسم التفضيل, and p. 161 parses the
+   جار والمجرور as متعلق بأكرم rather than by any verb. */
+const tamyizNominalMetadata=keys=>({tamyizPairKeys:keys});
+add('verb','singular','nasb','fatha',()=>pickedTamyiz(TAMYIZ_MUHAWWAL_FAIL_KEYS,'w8-tamyiz-muhawwal-fail'),
+ tamyizMetadata(TAMYIZ_MUHAWWAL_FAIL_KEYS));
+add('verb','singular','nasb','fatha',()=>pickedTamyiz(TAMYIZ_MUHAWWAL_MAFUL_KEYS,'w8-tamyiz-muhawwal-maful'),
+ tamyizMetadata(TAMYIZ_MUHAWWAL_MAFUL_KEYS));
+add('noun','singular','nasb','fatha',()=>pickedTamyiz(TAMYIZ_MUHAWWAL_MUBTADA_KEYS,'w8-tamyiz-muhawwal-mubtada'),
+ tamyizNominalMetadata(TAMYIZ_MUHAWWAL_MUBTADA_KEYS));
+/* Every registered pair must be reachable through exactly one lane. */
+(()=>{
+ const reached=[TAMYIZ_DHAT_KEYS,TAMYIZ_NISBAH_KEYS,TAMYIZ_MUHAWWAL_FAIL_KEYS,
+  TAMYIZ_MUHAWWAL_MAFUL_KEYS,TAMYIZ_MUHAWWAL_MUBTADA_KEYS].flatMap(keys=>[...keys]);
+ if(new Set(reached).size!==reached.length||reached.length!==TAMYIZ_ALL_PAIR_KEYS.length){
+  throw new Error('The tamyīz lanes do not cover every registered pair exactly once.');
+ }
+})();
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

@@ -343,16 +343,16 @@ const rows = [
   R('B_TAMYIZ', 'تَمْيِيزٌ مَنْصُوبٌ', CH.tamyiz, '157–161', 'المنصوبات', 'تَمْيِيزٌ'),
   R('B_TAMYIZ_DHAT', 'تَمْيِيزُ ذَاتٍ', CH.tamyiz, '158', 'أقسام التمييز', 'تَمْيِيزُ ذَاتٍ'),
   R('B_TAMYIZ_NISBAH', 'تَمْيِيزُ نِسْبَةٍ', CH.tamyiz, '158–159', 'أقسام التمييز', 'تَمْيِيزُ نِسْبَةٍ'),
-  R('B_TAMYIZ_ADAD', 'تَمْيِيزُ الْعَدَدِ', CH.tamyiz, '158', 'تمييز الذات', 'تَمْيِيزُ الْعَدَدِ',
-    { missingReason: 'deliberatelyNotGenerated: needs the counting morphology of عشرين and أحد عشر.' }),
-  R('B_TAMYIZ_MISAHA', 'تَمْيِيزُ الْمِسَاحَاتِ', CH.tamyiz, '158', 'تمييز الذات', 'الْمِسَاحَاتِ',
-    { missingReason: 'deliberatelyNotGenerated: registered by the source with no productive host here.' }),
-  R('B_TAMYIZ_MUHAWWAL_FAIL', 'الْمُحَوَّلُ عَنِ الْفَاعِلِ', CH.tamyiz, '158–159', 'تمييز النسبة', 'الْمُحَوَّلُ عَنِ الْفَاعِلِ',
-    { missingReason: 'deliberatelyNotGenerated: the three transformed kinds of tamyīz al-nisbah.' }),
-  R('B_TAMYIZ_MUHAWWAL_MAFUL', 'الْمُحَوَّلُ عَنِ الْمَفْعُولِ', CH.tamyiz, '158–159', 'تمييز النسبة', 'الْمُحَوَّلُ عَنِ الْمَفْعُولِ',
-    { missingReason: 'Same deferral.' }),
-  R('B_TAMYIZ_MUHAWWAL_MUBTADA', 'الْمُحَوَّلُ عَنِ الْمُبْتَدَأِ', CH.tamyiz, '158–159', 'تمييز النسبة', 'الْمُحَوَّلُ عَنِ الْمُبْتَدَأِ',
-    { missingReason: 'Same deferral; also needs أفعل التفضيل.' }),
+  /* Wave 8 — implemented. p. 159 names the three أنواع of المحوَّل and gives each its own
+     derivation. The probe is the clause the CARD actually prints, which is how p. 161's own
+     model answer parses one: «نفساً: تمييز نسبة محوَّل عن المبتدأ منصوب وعلامة نصبه الفتحة
+     الظاهرة» — indefinite «محوَّلٌ», not the dictionary form «المحوَّلُ» the term is named by. */
+  R('B_TAMYIZ_MUHAWWAL_FAIL', 'الْمُحَوَّلُ عَنِ الْفَاعِلِ', CH.tamyiz, '159', 'تمييز النسبة', "مُحَوَّلٌ عَنِ الْفَاعِلِ",
+    { requires: 'تَمْيِيزُ نِسْبَةٍ' }),
+  R('B_TAMYIZ_MUHAWWAL_MAFUL', 'الْمُحَوَّلُ عَنِ الْمَفْعُولِ', CH.tamyiz, '159', 'تمييز النسبة', "مُحَوَّلٌ عَنِ الْمَفْعُولِ",
+    { requires: 'تَمْيِيزُ نِسْبَةٍ' }),
+  R('B_TAMYIZ_MUHAWWAL_MUBTADA', 'الْمُحَوَّلُ عَنِ الْمُبْتَدَأِ', CH.tamyiz, '159,161', 'تمييز النسبة', "مُحَوَّلٌ عَنِ الْمُبْتَدَأِ",
+    { requires: 'تَمْيِيزُ نِسْبَةٍ' }),
   R('B_MUSTATHNA', 'مُسْتَثْنًى مَنْصُوبٌ', CH.istithna, '162–165', 'المنصوبات', 'مُسْتَثْنًى'),
   R('B_ILLA', 'إِلَّا — حَرْفُ اسْتِثْنَاءٍ', CH.istithna, '162–163', 'أدوات الاستثناء', 'حَرْفُ اسْتِثْنَاءٍ'),
   R('B_GHAYR', 'غَيْرَ — اسْمُ اسْتِثْنَاءٍ', CH.istithna, '164–165', 'أدوات الاستثناء', 'اسْمُ اسْتِثْنَاءٍ'),
@@ -490,7 +490,15 @@ const notCounted = [
   { term: 'أقسام ظنّ الأربعة: التَّرْجِيح / الْيَقِين / التَّصْيِير / النِّسْبَة فِي السَّمْع', pages: '111', reason: 'A semantic classification OF the ten sisters. A learner parsing «ظننت زيدًا قائمًا» says مفعول أول / مفعول ثانٍ, never «الترجيح». Confirmed: these labels appear in the Why corpus and never in the iʿrāb corpus.' },
   { term: 'أقسام كان من جهة العمل والتصرف (3+3)', pages: '108', reason: 'Facts about which sisters work under which condition; not uttered in an iʿrāb.' },
   { term: 'مُخْتَصٌّ / مُبْهَمٌ', pages: '148–152', reason: 'A rule about WHICH nouns may be ẓarfs. The iʿrāb says «ظرف زمان منصوب», not «مختص».' },
-  { term: 'الْمَكِيلَات / الْمَوْزُونَات', pages: '158', reason: 'Categories of what a tamyīz al-dhāt may follow; not iʿrāb terms.' },
+  /* Wave 8 CORRECTION. p. 158 states this as ONE enumeration — «ويكون بعد العَدَد … أو بعد
+     المقادير، من الموزونات … أو المَكِيلَاتِ … أو المساحات» — and all four members have the same
+     status: they name what a tamyīz al-dhāt FOLLOWS, not what the learner calls the tamyīz.
+     The book's own model iʿrāb of exactly these constructions (p. 161) reads «ذراعاً: تمييز
+     لعشرين، منصوب بالفتحة الظاهرة» and «حريراً: تمييز لذراع» — it names the mumayyaz, never the
+     category. Contrast p. 161's other model answer, «نفساً: تمييز نسبة محوَّل عن المبتدأ
+     منصوب», which utters its classification verbatim and therefore IS a row. المكيلات and
+     الموزونات were already here; العدد and المساحات had rows, which split one list in two. */
+  { term: 'الْعَدَدُ / الْمَوْزُونَات / الْمَكِيلَات / الْمِسَاحَات', pages: '158', reason: 'The four positions p. 158 says a tamyīz al-dhāt may follow. Not iʿrāb terms: the source’s own model answers at p. 161 parse these very constructions as «تمييز لعشرين» and «تمييز لذراع», naming the mumayyaz. All four are taught in the Why corpus; the three مقادير are additionally productive, and the number position is not — 11–99 need the bināʾ of أحد عشر or the ملحق-by-SMP signs of عشرين, morphology this engine does not model.' },
   { term: 'تَمْيِيزُ الْمُفْرَدِ / تَمْيِيزُ الْجُمْلَةِ', pages: '158', reason: 'Alternative NAMES for تمييز ذات / تمييز نسبة, which already have rows. Counting both would double-count one target.' }
 ];
 

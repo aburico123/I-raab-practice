@@ -869,6 +869,104 @@ const WAVE7_KEYS = ['B_MUNADA_MABNI_ALIF', 'B_MUNADA_MABNI_WAW',
   }
 }
 
+/* ── WAVE 8 — بَابُ التَّمْيِيزِ, pp. 157–161 ─────────────────────────────────────────────────
+   The wave started with FIVE non-FULL rows and split three-to-two.
+
+   THREE were implementable outright. p. 159 divides تمييز النسبة into «ضربان؛ الأول مُحَوَّلٌ،
+   والثاني غير محوَّل» and then divides the first into three أنواع, giving each its own worked
+   derivation; p. 161's own model iʿrāb utters one of them verbatim — «نفساً: تمييز نسبة محوَّل عن
+   المبتدأ منصوب وعلامة نصبه الفتحة الظاهرة». They are pinned FULL.
+
+   TWO left the denominator, and the reason is the COUNTING RULE, not the source. تَمْيِيزُ الْعَدَدِ
+   and تَمْيِيزُ الْمِسَاحَاتِ are two members of the single enumeration p. 158 gives for what a تمييز
+   ذات may FOLLOW — «ويكون بعد العَدَد … أو بعد المقادير، من الموزونات … أو المَكِيلَاتِ … أو
+   المساحات» — and the other two members were already in `notCounted` for exactly that reason.
+   The decisive evidence is on p. 161, where the book parses these very constructions as «ذراعاً:
+   تمييز لعشرين» and «حريراً: تمييز لذراع»: it names the MUMAYYAZ, never the category. This is
+   therefore a `notCounted` correction and NOT a `sourceExclude`: the source does teach all four.
+
+   Both halves are pinned in both directions. The three أنواع must be produced AND must each be
+   derived from a different promoted role; the four positional categories must be taught in the
+   Why corpus and must never reach the iʿrāb corpus, which is the whole basis for removing them. */
+const WAVE8_KEYS = ['B_TAMYIZ_MUHAWWAL_FAIL', 'B_TAMYIZ_MUHAWWAL_MAFUL', 'B_TAMYIZ_MUHAWWAL_MUBTADA'];
+const WAVE8_NOT_COUNTED = ['تَمْيِيزُ الْعَدَدِ', 'تَمْيِيزُ الْمِسَاحَاتِ'];
+{
+  for (const key of WAVE8_KEYS) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('Wave-8 row ' + key + ' is missing from the inventory'); continue; }
+    if (!/^باب التمييز/.test(row.chapter)) fail('Wave-8 row ' + key + ' is not in the wave scope: ' + row.chapter);
+    if (row.status !== 'FULL') fail('Wave-8 row ' + key + ' is ' + row.status + ', not FULL');
+  }
+  const chapterRows = rows.filter(r => /^باب التمييز/.test(r.chapter));
+  const chapterObserved = observed.filter(r => /^باب التمييز/.test(r.chapter));
+  if (chapterRows.length !== 6) fail('باب التمييز holds ' + chapterRows.length + ' rows, not the six it should');
+  const notFull = chapterObserved.filter(r => r.status !== 'FULL');
+  if (notFull.length) fail('باب التمييز still has non-FULL rows: ' + notFull.map(r => r.key).join(', '));
+
+  /* The removal, both ways. The two terms must be recorded as not-counted, must not have come
+     back as rows, and must never be uttered on an iʿrāb card — the claim that justified it. */
+  {
+    const notCountedText = notCounted.map(item => skeleton(item.term)).join(' | ');
+    const rowTerms = new Set(rows.map(r => skeleton(r.term)));
+    for (const term of WAVE8_NOT_COUNTED) {
+      const t = skeleton(term);
+      if (!notCountedText.includes(skeleton(term.replace(/^تَمْيِيزُ /, '')))) {
+        fail('«' + term + '» is not recorded in notCounted');
+      }
+      if (rowTerms.has(t)) fail('«' + term + '» came back as a counted row after the counting-rule correction');
+      if (templatesFor(term).size) {
+        fail('«' + term + '» is not an iʿrāb term but the app now prints it on a card; ' +
+          'if the book does parse one that way, the correction must be retired deliberately');
+      }
+    }
+  }
+  /* …and the categories themselves stay TAUGHT. Removing a row must not remove a lesson: every
+     مقدار p. 158 names is still explained in the Why corpus, and none of them on a card. */
+  for (const kind of Object.values(api.TAMYIZ_MEASURE_KINDS || {})) {
+    if (!mentionedOnly(kind.ar)) fail('the مقدار «' + kind.ar + '» is no longer taught anywhere');
+    if (templatesFor(kind.ar).size) fail('the مقدار «' + kind.ar + '» reached the iʿrāb corpus');
+  }
+
+  /* ── Structure, read out of the app ─────────────────────────────────────────────────────── */
+  const pairs = Object.values(api.TAMYIZ_PAIR_REGISTRY || {});
+  if (Object.keys(api.TAMYIZ_MEASURE_KINDS || {}).length !== 3) {
+    fail('p. 158 names three مقادير; the app registers ' + Object.keys(api.TAMYIZ_MEASURE_KINDS || {}).length);
+  }
+  for (const kind of Object.keys(api.TAMYIZ_MEASURE_KINDS || {})) {
+    if (!pairs.some(p => (api.TAMYIZ_MEASURE_LEXEMES[p.measureKey] || {}).measureKind === kind)) {
+      fail('the مقدار ' + kind + ' is registered but never produced');
+    }
+  }
+  if (Object.keys(api.TAMYIZ_TRANSFORMS || {}).length !== 3) {
+    fail('p. 159 divides المحوَّل into three; the app models ' + Object.keys(api.TAMYIZ_TRANSFORMS || {}).length);
+  }
+  for (const transform of Object.keys(api.TAMYIZ_TRANSFORMS || {})) {
+    if (!pairs.some(p => p.transform === transform)) fail('the نوع ' + transform + ' is registered but never produced');
+    const label = api.TAMYIZ_TRANSFORM_LABELS[transform];
+    /* Each نوع must actually be rendered, and rendered as a تمييز نسبة — the division it belongs
+       to. A clause without that discriminator would be a label floating free of its ضرب. */
+    if (!templatesFor('مُحَوَّلٌ عَنِ ' + label.hostAr, api.TAMYIZ_SUBTYPE_LABELS.nisbah.ar).size) {
+      fail('the نوع «' + label.ar + '» never reaches a rendered تمييز نسبة card');
+    }
+  }
+  {
+    /* The three أنواع are three different PROMOTED ROLES; two sharing one would collapse p. 159's
+       division into a naming convention. */
+    const roles = new Set(Object.values(api.TAMYIZ_TRANSFORM_LABELS || {}).map(l => l.hostRole));
+    if (roles.size !== 3) fail('two of the three أنواع of p. 159 claim the same promoted role');
+    const framed = new Set(pairs.filter(p => p.transform).map(p => api.TAMYIZ_FRAMES[p.frame].hostAt));
+    if (!framed.size) fail('no transformed frame promotes a word at all');
+  }
+  /* «وهو ضربان» — the untransformed kind has to survive alongside the transformed ones, or the
+     division p. 158 states has quietly become a single kind. */
+  if (!pairs.some(p => p.subtype === api.TAMYIZ_SUBTYPES.nisbah && !p.transform)) {
+    fail('the ضرب غير المحوَّل of p. 159 is no longer produced');
+  }
+  if (!templatesFor(api.TAMYIZ_SUBTYPE_LABELS.nisbah.ar + ' مُحَوَّلٌ').size) {
+    fail('no card carries the transformed division in the source’s own wording');
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -908,6 +1006,9 @@ console.log(JSON.stringify({
     sourceExcluded: WAVE6_SOURCE_EXCLUDED.length },
   wave7: { name: 'باب المنادى', target: WAVE7_KEYS.length,
     full: WAVE7_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length },
+  wave8: { name: 'باب التمييز', target: WAVE8_KEYS.length + WAVE8_NOT_COUNTED.length,
+    full: WAVE8_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
+    notCounted: WAVE8_NOT_COUNTED.length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

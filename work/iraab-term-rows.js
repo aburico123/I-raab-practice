@@ -270,10 +270,27 @@ const rows = [
   R('T_MARIFA_AL', 'الْمَعْرِفَةُ: الْمُحَلَّى بِأَلْ', CH.naat, '118–120', 'أقسام المعرفة', 'مَعْرِفَةٌ، وَنَوْعُهَا الْمُحَلَّى بِأَلْ'),
   R('T_NAKIRA', 'النَّكِرَةُ', CH.naat, '120–123', 'النعت', 'نَكِرَةٌ'),
   R('T_ATF_NASAQ', 'مَعْطُوفٌ تَابِعٌ لِلْمَعْطُوفِ عَلَيْهِ', CH.atf, '124–130', 'التوابع', 'مَعْطُوفٌ'),
-  R('T_ATF_WAW', 'الْوَاوُ — حَرْفُ عَطْفٍ', CH.atf, '124–125', 'حروف عطف النسق', 'الْوَاوُ الْعَاطِفَةُ',
-    { missingReason: 'The maʿṭūf is fully practised with the wāw, but the wāw itself is written attached to the next word and never receives an iʿrāb card, unlike the other eight conjunctions.' }),
-  R('T_ATF_FA', 'الْفَاءُ — حَرْفُ عَطْفٍ', CH.atf, '124,126', 'حروف عطف النسق', 'الْفَاءُ الْعَاطِفَةُ',
-    { missingReason: 'Same as the wāw: attached to the next word, so it never receives its own iʿrāb card.' }),
+  /* Wave 11 — these two rows were ABSENT for a reason that was never true. Their old missingReason
+     said the wāw and the fāʾ "never receive an iʿrāb card, unlike the other eight conjunctions";
+     the app has in fact always given all TEN their own card, and the wāw's reaches eight template
+     lanes — more than any other conjunction. What was actually wrong was the PROBE: it asked for
+     «الْوَاوُ الْعَاطِفَةُ» / «الْفَاءُ الْعَاطِفَةُ», wording that occurs neither in the app nor in
+     Al-Tuḥfah. The book names these two inside «وَحُرُوفُ الْعَطْفِ عَشَرَةٌ، وَهِيَ: الْوَاوُ، وَالْفَاءُ»
+     (p. 124) and then PARSES the wāw twice, in its own model iʿrāb, as «وَالْوَاوُ حَرْفُ عَطْفٍ»
+     (pp. 129–130) — which is exactly what this row's `term` column already said and exactly what the
+     card renders. The adjectival «عَاطِفَةٌ» the old probe reached for is this source's word too
+     («وَتَأْتِي «حتى» ابْتِدَائِيَّةً غَيْرَ عَاطِفَةٍ», p. 127), which is why the other eight rows use
+     it legitimately — but it is not what the source or the app calls THESE two. The probe is
+     therefore corrected; no second, redundant name was added to a card that already exists.
+     `mode:'card'` is stronger than the plain `contains` the other eight use, and deliberately so:
+     «وَ» heads FOUR different cards in this app (عطف، معية of المفعول معه، معية of the concealed
+     أن، and قسم) and «فَ» heads two (عطف، سببية), so a head alone would prove nothing. `requires`
+     must be found in that same card's BODY. Both literals are rewritten from the app's own frozen
+     registry by work/w11-probes.js and are never typed here. */
+  R('T_ATF_WAW', 'الْوَاوُ — حَرْفُ عَطْفٍ', CH.atf, '124–125', 'حروف عطف النسق', 'وَ',
+    { mode: 'card', requires: 'وَاوُ الْعَطْفِ' }),
+  R('T_ATF_FA', 'الْفَاءُ — حَرْفُ عَطْفٍ', CH.atf, '124,126', 'حروف عطف النسق', 'فَ',
+    { mode: 'card', requires: 'فَاءُ الْعَطْفِ' }),
   R('T_ATF_THUMMA', 'ثُمَّ — حَرْفُ عَطْفٍ', CH.atf, '124,126', 'حروف عطف النسق', 'ثُمَّ الْعَاطِفَةُ'),
   R('T_ATF_AW', 'أَوْ — حَرْفُ عَطْفٍ', CH.atf, '124,126', 'حروف عطف النسق', 'أَوْ الْعَاطِفَةُ'),
   R('T_ATF_AM', 'أَمْ — حَرْفُ عَطْفٍ', CH.atf, '124,126', 'حروف عطف النسق', 'أَمْ الْعَاطِفَةُ'),
@@ -282,8 +299,8 @@ const rows = [
   R('T_ATF_LA', 'لَا — حَرْفُ عَطْفٍ', CH.atf, '124,127', 'حروف عطف النسق', 'لَا الْعَاطِفَةُ'),
   R('T_ATF_LAKIN', 'لَكِنْ — حَرْفُ عَطْفٍ', CH.atf, '124,127', 'حروف عطف النسق', 'لَكِنْ الْعَاطِفَةُ'),
   R('T_ATF_HATTA', 'حَتَّى — حَرْفُ عَطْفٍ', CH.atf, '124,127', 'حروف عطف النسق', 'حَتَّى الْعَاطِفَةُ'),
-  R('T_ATF_BAYAN', 'عَطْفُ الْبَيَانِ', CH.atf, '124', 'أقسام العطف', 'عَطْفُ الْبَيَانِ',
-    { missingReason: 'p. 124 divides ʿaṭf into بيان and نسق; only نسق is built (deliberatelyNotGenerated: "atf bayan").' }),
+  R('T_ATF_BAYAN', 'عَطْفُ الْبَيَانِ', CH.atf, '125,130', 'أقسام العطف', 'عَطْفُ الْبَيَانِ',
+    { trueBlocker: "TRUE BLOCKER under the approved source, and the obstacle is the missing حُكْم. (1) Al-Tuḥfah TEACHES this term, and the old row understated how much: p. 125 makes عطف البيان the FIRST of the two أقسام of العطف, defines it — «التَّابِعُ الْجَامِدُ الْمُوَضِّحُ لِمَتْبُوعِهِ فِي الْمَعَارِفِ الْمُخَصِّصُ لَهُ فِي النَّكِرَاتِ» — gives one maʿrifah example «جَاءَنِي مُحَمَّدٌ أَبُوكَ» and one nakirah example ﴿مِنْ مَاءٍ صَدِيدٍ﴾, and p. 130's أسئلة drills it («ما هو عطف البيان؟ مَثِّلْ لعطف البيان بمثالين»). It is emphatically NOT sourceExcluded. (2) It is also NOT notCounted: the book utters it as a direct analysis, «فَأَبُوكَ: عَطْفُ بَيَانٍ عَلَى مُحَمَّدٍ» and «فَصَدِيدٌ: عَطْفُ بَيَانٍ عَلَى مَاءٍ», which is the same shape as the maʿṭūf analysis it performs at p. 129 («وَكِيلٌ: مَعْطُوفٌ عَلَى مُحَمَّدٍ»). A learner may legitimately say it, so the row stays counted. (3) What the source WITHHOLDS is the حُكْم, and this book states a حكم for every OTHER تابع it teaches: النعت at p. 116 («تَابِعٌ لِلْمَنْعُوتِ فِي رَفْعِهِ وَنَصْبِهِ وَخَفْضِهِ، وَتَعْرِيفِهِ وَتَنْكِيرِهِ»), عطف النسق under its own heading «حكم حروف العطف» at p. 127 («فَإِنْ عَطَفْتَ عَلَى مَرْفُوعٍ رَفَعْتَ...»), and البدل at p. 135 («تَبِعَهُ فِي جَمِيعِ إِعْرَابِهِ»). For عطف البيان it states NONE — its whole treatment is the one definitional paragraph on p. 125, and its own two analyses stop at «عَطْفُ بَيَانٍ عَلَى مُحَمَّدٍ، وَكِلَاهُمَا مَعْرِفَةٌ» with no state and no sign, whereas the maʿṭūf analysis it models continues «وَالْمَعْطُوفُ عَلَى الْمَرْفُوعِ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ». The app's full-iʿrāb standard needs that continuation. (4) The one rule that would supply it cannot be borrowed. p. 127's شرح scopes itself explicitly to the particle — «هَذِهِ الْأَحْرُفُ الْعَشَرَةُ تَجْعَلُ مَا بَعْدَهَا تَابِعاً لِمَا قَبْلَهَا فِي حُكْمِهِ الْإِعْرَابِيِّ» — and عطف البيان has no particle at all, so citing R_ATF_* for it would be exactly the source-rule theft PARTICLE_RULE_OWNERS and ROLE_RULE_VARIANTS exist to refuse; citing البدل's p. 135 rule would be worse, since the source keeps the two in different bābs. Producing «أَبُوكَ: عَطْفُ بَيَانٍ مَرْفُوعٌ وَعَلَامَةُ رَفْعِهِ الْوَاوُ» therefore means INVENTING the following-rule, which is the same wall الِاسْمُ الْمَوْصُولُ and ضَمِيرٌ مُنْفَصِلٌ stand at. (5) Note the source's own deliberate near-miss: p. 125's definition of عطف البيان and p. 116's definition of النعت are word-for-word identical except جَامِد against مُشْتَقّ — the book draws the contrast and still declines to give the second one a حكم. That asymmetry is the source's, not the engine's. UNBLOCK: one reviewed secondary source for the iʿrāb-following rule of عطف البيان, registered through secondarySupportedRule + REVIEWED_SOURCE_AUTHORITIES exactly as أَلِفُ الِاثْنَيْنِ is handled today, read and verified by a human against that text. It is deliberately NOT invented here." }),
   R('T_TAWKID', 'تَوْكِيدٌ تَابِعٌ لِلْمُؤَكَّدِ', CH.tawkid, '131–134', 'التوابع', 'تَوْكِيدٌ'),
   R('T_TAWKID_LAFZI', 'تَوْكِيدٌ لَفْظِيٌّ', CH.tawkid, '131', 'أقسام التوكيد', 'تَوْكِيدٌ لَفْظِيٌّ'),
   R('T_TAWKID_MANAWI', 'تَوْكِيدٌ مَعْنَوِيٌّ', CH.tawkid, '131–134', 'أقسام التوكيد', 'تَوْكِيدٌ مَعْنَوِيٌّ'),

@@ -15,18 +15,18 @@
  },
  "totals": {
   "TOTAL": 279,
-  "FULL": 254,
+  "FULL": 256,
   "GENERIC_ONLY": 5,
   "PARTIAL": 1,
-  "ABSENT": 17,
-  "TRUE_BLOCKER": 2,
+  "ABSENT": 14,
+  "TRUE_BLOCKER": 3,
   "reconciles": true,
-  "percentFull": 91
+  "percentFull": 91.8
  },
  "randomizationTotals": {
-  "GOOD": 158,
-  "LIMITED": 97,
-  "NONE": 24
+  "GOOD": 159,
+  "LIMITED": 98,
+  "NONE": 22
  },
  "marathon": {
   "target": 56,
@@ -1003,13 +1003,13 @@
    "pages": "78",
    "parent": "نواصب المضارع",
    "status": "FULL",
-   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 103 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 102 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَوْ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 103
+   "observedTemplateLanes": 102
   },
   {
    "key": "N_AN_MUDMARA_JAWAZ",
@@ -2637,14 +2637,14 @@
    "chapter": "باب العطف (pp. 124–130)",
    "pages": "124–125",
    "parent": "حروف عطف النسق",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "The maʿṭūf is fully practised with the wāw, but the wāw itself is written attached to the next word and never receives an iʿrāb card, unlike the other eight conjunctions.",
-   "randomization": "NONE",
-   "probe": "الْوَاوُ الْعَاطِفَةُ",
-   "probeMode": "contains",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
+   "status": "FULL",
+   "proof": "built 200× per template; «وَ» observed in the rendered iʿrāb across 8 template lane(s) [mode=card]",
+   "missingReason": "",
+   "randomization": "GOOD",
+   "probe": "وَ",
+   "probeMode": "card",
+   "probeRequires": "وَاوُ الْعَطْفِ",
+   "observedTemplateLanes": 8
   },
   {
    "key": "T_ATF_FA",
@@ -2652,14 +2652,14 @@
    "chapter": "باب العطف (pp. 124–130)",
    "pages": "124,126",
    "parent": "حروف عطف النسق",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "Same as the wāw: attached to the next word, so it never receives its own iʿrāb card.",
-   "randomization": "NONE",
-   "probe": "الْفَاءُ الْعَاطِفَةُ",
-   "probeMode": "contains",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
+   "status": "FULL",
+   "proof": "built 200× per template; «فَ» observed in the rendered iʿrāb across 1 template lane(s) [mode=card]",
+   "missingReason": "",
+   "randomization": "LIMITED",
+   "probe": "فَ",
+   "probeMode": "card",
+   "probeRequires": "فَاءُ الْعَطْفِ",
+   "observedTemplateLanes": 1
   },
   {
    "key": "T_ATF_THUMMA",
@@ -2785,11 +2785,11 @@
    "key": "T_ATF_BAYAN",
    "term": "عَطْفُ الْبَيَانِ",
    "chapter": "باب العطف (pp. 124–130)",
-   "pages": "124",
+   "pages": "125,130",
    "parent": "أقسام العطف",
-   "status": "ABSENT",
+   "status": "TRUE_BLOCKER",
    "proof": "",
-   "missingReason": "p. 124 divides ʿaṭf into بيان and نسق; only نسق is built (deliberatelyNotGenerated: \"atf bayan\").",
+   "missingReason": "TRUE BLOCKER under the approved source, and the obstacle is the missing حُكْم. (1) Al-Tuḥfah TEACHES this term, and the old row understated how much: p. 125 makes عطف البيان the FIRST of the two أقسام of العطف, defines it — «التَّابِعُ الْجَامِدُ الْمُوَضِّحُ لِمَتْبُوعِهِ فِي الْمَعَارِفِ الْمُخَصِّصُ لَهُ فِي النَّكِرَاتِ» — gives one maʿrifah example «جَاءَنِي مُحَمَّدٌ أَبُوكَ» and one nakirah example ﴿مِنْ مَاءٍ صَدِيدٍ﴾, and p. 130's أسئلة drills it («ما هو عطف البيان؟ مَثِّلْ لعطف البيان بمثالين»). It is emphatically NOT sourceExcluded. (2) It is also NOT notCounted: the book utters it as a direct analysis, «فَأَبُوكَ: عَطْفُ بَيَانٍ عَلَى مُحَمَّدٍ» and «فَصَدِيدٌ: عَطْفُ بَيَانٍ عَلَى مَاءٍ», which is the same shape as the maʿṭūf analysis it performs at p. 129 («وَكِيلٌ: مَعْطُوفٌ عَلَى مُحَمَّدٍ»). A learner may legitimately say it, so the row stays counted. (3) What the source WITHHOLDS is the حُكْم, and this book states a حكم for every OTHER تابع it teaches: النعت at p. 116 («تَابِعٌ لِلْمَنْعُوتِ فِي رَفْعِهِ وَنَصْبِهِ وَخَفْضِهِ، وَتَعْرِيفِهِ وَتَنْكِيرِهِ»), عطف النسق under its own heading «حكم حروف العطف» at p. 127 («فَإِنْ عَطَفْتَ عَلَى مَرْفُوعٍ رَفَعْتَ...»), and البدل at p. 135 («تَبِعَهُ فِي جَمِيعِ إِعْرَابِهِ»). For عطف البيان it states NONE — its whole treatment is the one definitional paragraph on p. 125, and its own two analyses stop at «عَطْفُ بَيَانٍ عَلَى مُحَمَّدٍ، وَكِلَاهُمَا مَعْرِفَةٌ» with no state and no sign, whereas the maʿṭūf analysis it models continues «وَالْمَعْطُوفُ عَلَى الْمَرْفُوعِ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ». The app's full-iʿrāb standard needs that continuation. (4) The one rule that would supply it cannot be borrowed. p. 127's شرح scopes itself explicitly to the particle — «هَذِهِ الْأَحْرُفُ الْعَشَرَةُ تَجْعَلُ مَا بَعْدَهَا تَابِعاً لِمَا قَبْلَهَا فِي حُكْمِهِ الْإِعْرَابِيِّ» — and عطف البيان has no particle at all, so citing R_ATF_* for it would be exactly the source-rule theft PARTICLE_RULE_OWNERS and ROLE_RULE_VARIANTS exist to refuse; citing البدل's p. 135 rule would be worse, since the source keeps the two in different bābs. Producing «أَبُوكَ: عَطْفُ بَيَانٍ مَرْفُوعٌ وَعَلَامَةُ رَفْعِهِ الْوَاوُ» therefore means INVENTING the following-rule, which is the same wall الِاسْمُ الْمَوْصُولُ and ضَمِيرٌ مُنْفَصِلٌ stand at. (5) Note the source's own deliberate near-miss: p. 125's definition of عطف البيان and p. 116's definition of النعت are word-for-word identical except جَامِد against مُشْتَقّ — the book draws the contrast and still declines to give the second one a حكم. That asymmetry is the source's, not the engine's. UNBLOCK: one reviewed secondary source for the iʿrāb-following rule of عطف البيان, registered through secondarySupportedRule + REVIEWED_SOURCE_AUTHORITIES exactly as أَلِفُ الِاثْنَيْنِ is handled today, read and verified by a human against that text. It is deliberately NOT invented here.",
    "randomization": "NONE",
    "probe": "عَطْفُ الْبَيَانِ",
    "probeMode": "contains",
@@ -4138,13 +4138,13 @@
    "pages": "176–177",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 37 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 36 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُذْ",
    "probeMode": "prep",
    "probeRequires": "",
-   "observedTemplateLanes": 37
+   "observedTemplateLanes": 36
   },
   {
    "key": "X_PREP_MUNDHU",

@@ -901,6 +901,160 @@ function runAtfFocusedTests(){
   console.log('Atf focused tests: 16 canonical builds, 10 History round trips, 7 negative/collision boundaries — green');
 }
 runAtfFocusedTests();
+/* ── Wave 11 — بَابُ الْعَطْفِ, the wāw and the fāʾ ────────────────────────────────────────────
+   The block above proves the ten conjunctions as a FAMILY. This one proves the two the inventory
+   was wrong about, individually, and closes the gap that made the old error survivable: the
+   collision assertion above names ḥattā, aw, lā and lākin — and NOT the wāw or the fāʾ, which are
+   the two ʿaṭf particles that actually share their bytes with other live identities in this app.
+   «وَ» is also wāw al-maʿiyyah of المفعول معه, the wāw al-maʿiyyah that conceals أن, and wāw
+   al-qasam; «فَ» is also fāʾ al-sababiyyah. Each of those is a different particle type citing a
+   different source rule, and none of them is a conjunction. */
+function runWave11AtfParticleTests(){
+ const clone=value=>JSON.parse(JSON.stringify(value));
+ const nasbTemplate=api.templates.find(item=>item.followerKind===api.ATF_KIND&&item.state==='nasb');
+ const analyzed=(template,built)=>api.completeNominalAnalysis({...built,templateId:template.stableId,
+   templateStarts:template.starts,templateForm:template.form,templateState:template.state,templateSign:template.sign});
+ let positives=0,negatives=0,roundTrips=0;
+
+ /* ── positives: each of the two has its OWN card, and that card is the source's own iʿrāb ── */
+ const cards={};
+ for(const key of ['waw','fa']){
+  const record=api.ATF_CONJUNCTION_REGISTRY[key];
+  const data=analyzed(nasbTemplate,api.buildAtfExercise(key,'singularPeople','nasb'));
+  const followerIndex=data.tokens.findIndex(token=>token.grammar.role==='atf');
+  const particle=data.tokens[followerIndex-1],follower=data.tokens[followerIndex],followed=data.tokens[followerIndex-2];
+  api.renderExercise(data);
+  assert(particle.grammar.particleType===record.particleType&&particle.word===record.surface,
+    key+' did not produce its own registered particle identity');
+  /* The card a learner actually reads: «وَ: وَاوُ الْعَطْفِ، حَرْفُ عَطْفٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ...».
+     This is the exact claim the old inventory row denied when it said the wāw and the fāʾ
+     "never receive an iʿrāb card". Head, identity, ḥarf ʿaṭf and no-maḥall are all required. */
+  const head=/^(\S+):\s*([\s\S]+)$/.exec(particle.ar);
+  assert(head&&head[1]===record.surface,key+' has no iʿrāb card headed by its own surface');
+  assert(head[2].includes(record.nameAr),key+' card does not name its own identity «'+record.nameAr+'»');
+  assert(head[2].includes('حَرْفُ عَطْفٍ'),key+' card lost the source\'s own «حَرْفُ عَطْفٍ» (pp. 129–130)');
+  assert(head[2].includes('لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ'),key+' card lost its no-maḥall clause');
+  /* …and the identity is NOT the adjectival wording the corrected probe replaced. */
+  assert(!particle.ar.includes('الْوَاوُ الْعَاطِفَةُ')&&!particle.ar.includes('الْفَاءُ الْعَاطِفَةُ'),
+    key+' card prints wording neither Al-Tuḥfah nor this app uses for these two particles');
+  /* Directional authority, on the rendered text (Phase 9): follower = معطوف, head = معطوف عليه. */
+  assert(follower.ar.includes('مَعْطُوفٌ')&&follower.ar.includes('عَلَى مَعْطُوفٍ عَلَيْهِ'),
+    key+' maʿṭūf card does not name its head as المعطوف عليه');
+  assert(!followed.ar.includes('مَعْطُوفٌ مَنْصُوبٌ'),key+' called the maʿṭūf ʿalayh a maʿṭūf');
+  assert(followed.phraseAr.includes('مَعْطُوفٌ عَلَيْهِ، وَحَرْفُ عَطْفٍ، وَمَعْطُوفٌ'),
+    key+' combined card lost the head → particle → follower order');
+  /* Particle source ownership (Phase 11), both directions. */
+  assert(particle.ruleId===record.ruleId&&api.isSourceAuthorized(particle.ruleId),
+    key+' particle does not cite its own source rule');
+  const snapshot=api.createExerciseSnapshot(data),restored=snapshot&&api.restoreExerciseSnapshot(snapshot);
+  assert(restored&&api.validateExercise(JSON.parse(JSON.stringify(restored))).length===0,
+    key+' failed its History round trip');
+  api.renderExercise(restored);
+  assert(restored.tokens[followerIndex-1].ar===particle.ar&&restored.tokens[followerIndex].ar===follower.ar,
+    key+' did not render identically after History restore');
+  roundTrips++;positives+=9;
+  cards[key]=data;
+ }
+
+ /* ── the two surfaces really are shared, and the identities really are distinct ── */
+ {
+  const waw=api.ATF_CONJUNCTION_REGISTRY.waw,fa=api.ATF_CONJUNCTION_REGISTRY.fa;
+  const rivals=[api.CONCEALED_AN_CONSTRUCTIONS.waw,api.CONCEALED_AN_CONSTRUCTIONS.fa]
+    .filter(Boolean).map(item=>item.particleType);
+  const others=['wawMaiyya','wawMafulMaah','qasamWaw','faSababiyya',...rivals];
+  for(const type of others){
+   assert(type!==waw.particleType&&type!==fa.particleType,
+     'a same-surface non-conjunction shares the ʿaṭf particle type: '+type);
+   negatives++;
+  }
+ }
+
+ /* ── negatives: same-surface particle theft, both directions ────────────────────────────
+    A wāw that is really the conjunction may not be re-labelled as any other wāw identity and
+    stay authorized, and the ʿaṭf rule may not be carried by a particle that is not the ʿaṭf
+    particle. `mustReject` asserts the validator produces the named code. */
+ const mustReject=(label,source,mutate,code)=>{
+  const data=clone(source);mutate(data);
+  const failures=api.validateExercise(data);
+  assert(failures.some(item=>item.code===code),
+    label+' was accepted: '+(failures.map(item=>item.code).join(',')||'no failures at all'));
+  negatives++;
+ };
+ const atfParticleOf=data=>{
+  const i=data.tokens.findIndex(token=>token.grammar.role==='atf');
+  return data.tokens[i-1];
+ };
+ /* identity theft — the conjunction wāw wearing another wāw's type */
+ for(const stolen of ['wawMafulMaah','qasamWaw']){
+  mustReject('the ʿaṭf wāw relabelled as '+stolen,cards.waw,data=>{
+   atfParticleOf(data).grammar.particleType=stolen;
+  },'E_ATF_AUTHORITY');
+ }
+ mustReject('the ʿaṭf fāʾ relabelled as fāʾ al-sababiyyah',cards.fa,data=>{
+  atfParticleOf(data).grammar.particleType='faSababiyya';
+ },'E_ATF_AUTHORITY');
+ /* source-rule theft — the ʿaṭf particle citing another identity's rule */
+ for(const [key,stolenRule] of [['waw','R_WAW_MAIYYA'],['waw','R_KHAFD_QASAM_WAW'],
+   ['fa','G_FA_SABABIYYA_CONCEALED_AN']]){
+  mustReject(key+' citing '+stolenRule,cards[key],data=>{
+   atfParticleOf(data).ruleId=stolenRule;
+  },'E_PARTICLE_RULE_OWNER');
+ }
+ /* و ↔ ف forgery: each conjunction wearing the other's surface, and the other's type */
+ mustReject('the wāw wearing the fāʾ surface',cards.waw,data=>{
+  atfParticleOf(data).word=api.ATF_CONJUNCTION_REGISTRY.fa.surface;
+ },'E_ATF_AUTHORITY');
+ mustReject('the fāʾ wearing the wāw identity',cards.fa,data=>{
+  atfParticleOf(data).grammar.particleType=api.ATF_CONJUNCTION_REGISTRY.waw.particleType;
+ },'E_ATF_AUTHORITY');
+ /* missing particle — delete the conjunction outright */
+ mustReject('the wāw deleted from between head and follower',cards.waw,data=>{
+  const i=data.tokens.findIndex(token=>token.grammar.role==='atf');
+  data.tokens.splice(i-1,1);
+ },'E_ATF_AUTHORITY');
+ /* swapped maʿṭūf / maʿṭūf ʿalayh (Phase 9) — the pair registry keys on BOTH words, in order */
+ mustReject('maʿṭūf and maʿṭūf ʿalayh swapped',cards.waw,data=>{
+  const i=data.tokens.findIndex(token=>token.grammar.role==='atf');
+  const head=data.tokens[i-2],follower=data.tokens[i];
+  const word=head.word;head.word=follower.word;follower.word=word;
+ },'E_ATF_AUTHORITY');
+ /* wrong state and wrong sign on the follower */
+ mustReject('the fāʾ maʿṭūf given a state its head does not have',cards.fa,data=>{
+  data.tokens.find(token=>token.grammar.role==='atf').state='jarr';
+ },'E_ATF_AUTHORITY');
+ mustReject('the wāw maʿṭūf given a sign outside the noun matrix',cards.waw,data=>{
+  data.tokens.find(token=>token.grammar.role==='atf').sign='kasra';
+ },'E_TARGET_SIGN');
+ /* History forgery — the restored relationship must be rebuilt canonically, not trusted */
+ {
+  const forged=api.createExerciseSnapshot(cards.fa);
+  forged.relationships.find(item=>item.kind===api.ATF_KIND).conjunctionKey='waw';
+  const rebuilt=api.restoreExerciseSnapshot(forged);
+  assert(rebuilt&&rebuilt.relationships.some(item=>item.kind===api.ATF_KIND&&item.conjunctionKey==='fa')
+    &&!rebuilt.relationships.some(item=>item.conjunctionKey==='waw'),
+    'History accepted a forged fāʾ→wāw conjunction cache');
+  negatives++;
+ }
+ /* byte mutation — a single combining mark moved inside the identity must not still match */
+ {
+  const record=api.ATF_CONJUNCTION_REGISTRY.waw;
+  assert(record.nameAr==='وَاوُ الْعَطْفِ'&&record.surface==='وَ',
+    'the wāw identity bytes drifted from what the Wave-11 probe was derived against');
+  assert(api.ATF_CONJUNCTION_REGISTRY.fa.nameAr==='فَاءُ الْعَطْفِ'&&api.ATF_CONJUNCTION_REGISTRY.fa.surface==='فَ',
+    'the fāʾ identity bytes drifted from what the Wave-11 probe was derived against');
+  negatives+=2;
+ }
+ /* عطف البيان stays unproduced: no role, no relationship kind, no template claims it. */
+ {
+  assert(!api.templates.some(item=>/bayan/i.test(String(item.followerKind||''))),
+    'a template now claims عطف البيان, which this source gives no iʿrāb-following rule');
+  negatives++;
+ }
+ console.log('Wave 11 بَابُ الْعَطْفِ (الواو والفاء) focused tests: '+positives+
+   ' canonical assertions across 2 identities, '+roundTrips+' History round trips, '+negatives+
+   ' same-surface/forgery/byte boundaries — green');
+}
+runWave11AtfParticleTests();
 if(process.env.NAHW_FOCUSED_ATF==='1')process.exit(0);
 function runTawkidFocusedTests(){
   /* Wave 5 — the one-follower templates are the ones with NO chain frame. The registry now also
@@ -5625,9 +5779,14 @@ assert(tokensWithoutEnHint(reviewed.tokens)===tokensWithoutEnHint(originalExerci
    be misreported as a presentation failure. */
 const reviewedFocus=reviewed.tokens.find(token=>token.target);
 const savedFocus=originalExerciseSnapshot.tokens.find(token=>token.target);
+/* Null-safe for the same reason as the click-restore focus check below: this exercise is drawn at
+   random, so its focus token may be a BUILT word, which carries a مَحَلّ and no sign. The مَحَلّ is
+   compared too, so the built case is checked rather than skipped. */
+const reviewSignId=token=>token.sign?token.sign.id:null;
 assert(reviewedFocus.word===savedFocus.word&&reviewedFocus.inflection===savedFocus.inflection
-  &&reviewedFocus.state===savedFocus.state&&reviewedFocus.sign.id===savedFocus.sign.id,
-  'History review did not restore the saved focus word, form, state, and sign');
+  &&reviewedFocus.state===savedFocus.state&&reviewSignId(reviewedFocus)===reviewSignId(savedFocus)
+  &&(reviewedFocus.mahall||null)===(savedFocus.mahall||null),
+  'History review did not restore the saved focus word, form, state, sign, and maḥall');
 assert(JSON.stringify([
   elements.startFilter.value,elements.formFilter.value,elements.stateFilter.value,elements.signFilter.value
 ])===filtersBeforeReview,'Reviewing history changed the active filters');
@@ -5698,7 +5857,19 @@ function genUntil(pred,tries=4000){
   const restored=api.currentExercise();
   assert(restored.sentence===aSnap.sentence&&restored.templateId===aSnap.templateId,'Click-restore did not restore the exact exercise');
   const rf=restored.tokens.find(t=>t.target),sf=aSnap.tokens.find(t=>t.target);
-  assert(rf.word===sf.word&&rf.inflection===sf.inflection&&rf.state===sf.state&&rf.sign.id===sf.sign.id,'Click-restore lost the focus word / form / state / sign');
+  /* The focus token is drawn from a RANDOM exercise, and since the built lanes shipped (mabnī
+     munādā, the bināʾ regime of اسم لا, the interrogative ḥāl, the mabnī present) it may legitimately
+     be a BUILT word — which carries a مَحَلّ and no sign at all, so `sign` is null. Dereferencing
+     `.id` on it threw a TypeError and made this whole audit fail intermittently, on a schedule set
+     by the RNG rather than by anything a change did; it reproduces on the unmodified file too.
+     Comparing the sign ids null-safely fixes the crash, and the مَحَلّ is compared alongside so the
+     built case is still checked rather than merely skipped — a built token's مَحَلّ is exactly the
+     analysis it carries INSTEAD of a sign, so this is a stronger assertion than the one it replaces,
+     not a weaker one. */
+  const focusSignId=t=>t.sign?t.sign.id:null;
+  assert(rf.word===sf.word&&rf.inflection===sf.inflection&&rf.state===sf.state
+    &&focusSignId(rf)===focusSignId(sf)&&(rf.mahall||null)===(sf.mahall||null),
+    'Click-restore lost the focus word / form / state / sign / maḥall');
   restored.tokens.forEach((t,i)=>whyTokenOk(t,`click-restored token ${i}`));
   assert([elements.startFilter.value,elements.formFilter.value,elements.stateFilter.value,elements.signFilter.value].join('|')===filtersBefore,'Restore changed the active filters');
   assert(storage.get('nahw-sentence-history-v1')===historyBefore&&elements.historyToggle.textContent==='Sentence history (2)','Restore duplicated or rewrote history');

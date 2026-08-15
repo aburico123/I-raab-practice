@@ -1140,6 +1140,99 @@ const WAVE10_NOT_COUNTED = ['تَكْرَارُ «لَا»'];
   }
 }
 
+/* ── Wave 11 — بَابُ الْعَطْفِ (pp. 124–130) ─────────────────────────────────────────────
+   Two of this wave's three rows were resolved by correcting the INVENTORY, not the app, so the
+   pin has to hold the corrections down from both ends: the terms must stay produced, and the
+   wrong wording must stay out. The third is a blocker, and a blocker is only honest while the
+   thing really is unproduced — so that is asserted too, not assumed. */
+const WAVE11_FULL_KEYS = ['T_ATF_WAW', 'T_ATF_FA'];
+const WAVE11_BLOCKED_KEYS = ['T_ATF_BAYAN'];
+{
+  for (const key of [...WAVE11_FULL_KEYS, ...WAVE11_BLOCKED_KEYS]) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('Wave-11 row ' + key + ' is missing from the inventory'); continue; }
+    if (!/^باب العطف/.test(row.chapter)) fail('Wave-11 row ' + key + ' is not in the wave scope: ' + row.chapter);
+  }
+  for (const key of WAVE11_FULL_KEYS) {
+    const row = observed.find(r => r.key === key);
+    if (row && row.status !== 'FULL') fail('Wave-11 row ' + key + ' is ' + row.status + ', not FULL');
+  }
+  for (const key of WAVE11_BLOCKED_KEYS) {
+    const row = observed.find(r => r.key === key);
+    if (row && row.status !== 'TRUE_BLOCKER') fail('Wave-11 row ' + key + ' is ' + row.status + ', not TRUE_BLOCKER');
+  }
+
+  /* بَابُ الْعَطْفِ holds thirteen rows: the maʿṭūf itself, the ten ḥurūf of p. 124, عطف البيان, and
+     هَمْزَةُ الِاسْتِفْهَامِ — which is filed here, not with the particles, because p. 126 introduces it
+     only as the context «أَمْ» requires. Twelve are FULL and exactly one — the blocker — is not. */
+  const chapterRows = rows.filter(r => /^باب العطف/.test(r.chapter));
+  const chapterObserved = observed.filter(r => /^باب العطف/.test(r.chapter));
+  if (chapterRows.length !== 13) fail('باب العطف holds ' + chapterRows.length + ' rows, not the thirteen it should');
+  const notResolved = chapterObserved.filter(r => !['FULL', 'TRUE_BLOCKER'].includes(r.status));
+  if (notResolved.length) fail('باب العطف still has unresolved rows: ' + notResolved.map(r => r.key).join(', '));
+
+  /* All TEN conjunctions of p. 124 get their own card — the claim the two corrected rows'
+     old missingReason denied. The registry is the source of the list, so a conjunction cannot be
+     dropped from the app and quietly keep its row. */
+  {
+    const registry = api.ATF_CONJUNCTION_REGISTRY || {};
+    if (Object.keys(registry).length !== 10) {
+      fail('p. 124 names ten ḥurūf ʿaṭf; the app registers ' + Object.keys(registry).length);
+    }
+    for (const [key, record] of Object.entries(registry)) {
+      const bodies = cardHeads.get(skeleton(record.surface));
+      const named = bodies && [...bodies].some(b => b.includes(skeleton(record.nameAr)));
+      if (!named) { fail('the conjunction «' + key + '» has no iʿrāb card of its own headed by its surface'); continue; }
+      const withHarf = [...bodies].some(b =>
+        b.includes(skeleton(record.nameAr)) && b.includes(skeleton('حَرْفُ عَطْفٍ')));
+      if (!withHarf) fail('the card of «' + key + '» does not carry the source\'s own «حَرْفُ عَطْفٍ» (pp. 129–130)');
+      /* p. 124 lists them as ḥurūf, and a ḥarf is mabnī with no place in iʿrāb. */
+      const noMahall = [...bodies].some(b =>
+        b.includes(skeleton(record.nameAr)) && b.includes(skeleton('لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ')));
+      if (!noMahall) fail('the card of «' + key + '» does not state its bināʾ / lack of maḥall');
+    }
+  }
+
+  /* The wording the corrected probes REPLACED must not come back. Neither the source nor the app
+     calls these two «الْوَاوُ الْعَاطِفَةُ» / «الْفَاءُ الْعَاطِفَةُ»; if a future change starts printing
+     them, that is a second name for a card that already exists and this wave's decision is void. */
+  for (const wrong of ['الْوَاوُ الْعَاطِفَةُ', 'الْفَاءُ الْعَاطِفَةُ']) {
+    if (templatesFor(wrong).size) {
+      fail('«' + wrong + '» is now printed on a card; Wave 11 corrected the probe precisely because ' +
+        'neither Al-Tuḥfah nor the app uses that wording for these two particles');
+    }
+  }
+  /* …while «عَاطِفَةٌ» itself stays legitimate for the other eight, on p. 127's authority. */
+  if (!templatesFor('الْعَاطِفَةُ').size) {
+    fail('no conjunction card uses «الْعَاطِفَةُ» any more; p. 127 licenses it and eight rows probe it');
+  }
+
+  /* The blocker, held honest from the other side: عطف البيان must remain genuinely unproduced.
+     The moment any card says it, the TRUE_BLOCKER declaration is a lie and must be retired. */
+  for (const key of WAVE11_BLOCKED_KEYS) {
+    const authored = rows.find(r => r.key === key);
+    if (authored && templatesFor(authored.probe).size) {
+      fail('«' + authored.term + '» now reaches a rendered card; its TRUE_BLOCKER declaration must be ' +
+        'retired deliberately rather than left standing');
+    }
+  }
+  /* NOT asserted here: that عطف البيان is TAUGHT somewhere. It currently is not — it reaches
+     neither the Why corpus nor the definitions panel, so the app produces عطف النسق without ever
+     telling the learner it is only ONE of the two أقسام p. 125 divides العطف into. That is a real
+     gap, but it is a CONTENT gap and not an inventory one: this row is TRUE_BLOCKER because the
+     term cannot be PARSED from this source, which is a separate claim from whether it is
+     mentioned. Requiring the mention here would force new learner-facing prose through a wave
+     whose mandate was inventory truth; asserting its ABSENCE would freeze the gap in place. So
+     neither is pinned, and the gap is carried in the row's own blocker text instead. */
+
+  /* Directional authority, asserted on the rendered text rather than on the engine: the FOLLOWER
+     is المعطوف and the HEAD is المعطوف عليه. Wave 10 found a follower chapter that had these
+     backwards on a learner-facing card, so this is checked here and not only in the focused suite. */
+  if (!templatesFor('مَعْطُوفٌ', 'عَلَى مَعْطُوفٍ عَلَيْهِ').size) {
+    fail('no maʿṭūf card names its head as المعطوف عليه');
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -1188,6 +1281,10 @@ console.log(JSON.stringify({
   wave10: { name: 'باب «لا» النافية للجنس', target: WAVE10_KEYS.length + WAVE10_NOT_COUNTED.length,
     full: WAVE10_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
     notCounted: WAVE10_NOT_COUNTED.length },
+  wave11: { name: 'باب العطف', target: WAVE11_FULL_KEYS.length + WAVE11_BLOCKED_KEYS.length,
+    full: WAVE11_FULL_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
+    trueBlocker: WAVE11_BLOCKED_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'TRUE_BLOCKER').length,
+    probeCorrections: WAVE11_FULL_KEYS.length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

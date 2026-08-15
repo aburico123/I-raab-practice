@@ -979,6 +979,12 @@ function presentCapabilityFailure(template,morphology,governorMode='none'){
 function builtNounBinaaMarker(token){
  if(!isBuiltNoun(token))return null;
  if(token.grammar.role===MUNADA_ROLE)return MUNADA_BINAA_SIGNS[token.binaaSign]||null;
+ /* Wave 10 — the fourth built-noun construction, on the same terms as the other three: the marker
+    must be the one p. 167 gives this word's declension, not merely a registered marker. */
+ if(token.grammar.role===ISM_LA_ROLE){
+  const marker=LA_JINS_MUFRAD_BINAA[token.inflection];
+  return marker&&token.binaaSign===marker.binaaSignId?LA_JINS_BINAA_SIGNS[token.binaaSign]||null:null;
+ }
  if(token.grammar.role===HAAL_ROLE&&token.grammar.builtHaal){
   return token.binaaSign==='fatha'
    ?Object.freeze({ar:HAAL_ISTIFHAM.binaaAr,en:HAAL_ISTIFHAM.binaaEn,ruleId:HAAL_ISTIFHAM.ruleId})
@@ -1004,6 +1010,13 @@ function mahallRuleOwnerFailure(token,data){
  }
  if(token.grammar?.type==='noun'&&token.grammar.role===HAAL_ROLE){
   return !deriveHaalMahallAuthority(data).authorized||token.mahallRuleId!==HAAL_ISTIFHAM.mahallRuleId;
+ }
+ /* The built اسم لا owns one for the same reason: p. 167 gives it a بناء and no iʿrāb ending, so
+    its position is a separate claim. The المضاف and الشبيه بالمضاف أنواع own none — they are
+    manṣūb, and a maḥall rule on either would be claiming a بناء they do not have. */
+ if(token.grammar?.type==='noun'&&token.grammar.role===ISM_LA_ROLE){
+  const authority=deriveLaJinsAuthority(data,data?.tokens?.indexOf(token));
+  return !authority.authorized||!authority.binaa||token.mahallRuleId!==authority.mahallRuleId;
  }
  /* A demonstrative mubtadaʾ owns a maḥall rule for the same reason the built munādā does: it has no
     iʿrāb state of its own. Every OTHER mubtadaʾ that reaches here is muʿrab and owns none. */
@@ -1240,6 +1253,9 @@ function resolveCanonicalTokenGloss(data,token,index){
  /* «لَا» is one surface with two different English readings, so the closed-particle table — which
     is keyed by surface — cannot decide it. The class-negating لا means "no", the ordinary negating
     one means "does not", and only the particle's own identity separates them. */
+ if(type==='particle'&&token.grammar?.particleType===LA_MUHMALA_PARTICLE_TYPE){
+  return LA_MUHMALA_PARTICLE.gloss;
+ }
  if(type==='particle'&&token.grammar?.particleType===LA_JINS_PARTICLE_TYPE){
   return LA_JINS_PARTICLE.gloss;
  }
@@ -1597,6 +1613,7 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  ,TS43:Object.freeze({parts:Object.freeze([Object.freeze({slot:'tamyizSentence'})])})
  ,TS44:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mustathnaSentence'})])})
  ,TS45:Object.freeze({parts:Object.freeze([Object.freeze({slot:'laJinsSentence'})])})
+ ,TS81:Object.freeze({parts:Object.freeze([Object.freeze({slot:'laIlghaSentence'})])})
  ,TS46:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulAjlSentence'})])})
  ,TS47:Object.freeze({parts:Object.freeze([Object.freeze({slot:'mafulMaahSentence'})])})
  ,TS48:Object.freeze({parts:Object.freeze([Object.freeze({slot:'munadaSentence'})])})
@@ -1935,6 +1952,13 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  ,"T_VERB_SINGULAR_NASB_FATHA_32||verb:past,noun:faail,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_32",structure:"verb:past,noun:faail,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_33||verb:past,noun:faail,noun:object,noun:mafulAjl":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_33",structure:"verb:past,noun:faail,noun:object,noun:mafulAjl",shape:"TS46",copulaPlural:false})
  ,"T_PARTICLE_SINGULAR_NASB_FATHA_14||particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_14",structure:"particle:particle,noun:ismLa,noun:mudafIlayh,noun:khabarLa",shape:"TS45",copulaPlural:false})
+ ,"T_PARTICLE_SINGULAR_NASB_FATHA_23||particle:particle,noun:ismLa,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_23",structure:"particle:particle,noun:ismLa,noun:khabarLa",shape:"TS45",copulaPlural:false})
+ ,"T_PARTICLE_BROKEN_NASB_FATHA_02||particle:particle,noun:ismLa,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_BROKEN_NASB_FATHA_02",structure:"particle:particle,noun:ismLa,noun:khabarLa",shape:"TS45",copulaPlural:true})
+ ,"T_PARTICLE_DUAL_NASB_YA_03||particle:particle,noun:ismLa,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_DUAL_NASB_YA_03",structure:"particle:particle,noun:ismLa,noun:khabarLa",shape:"TS45",copulaPlural:true})
+ ,"T_PARTICLE_SMP_NASB_YA_03||particle:particle,noun:ismLa,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_SMP_NASB_YA_03",structure:"particle:particle,noun:ismLa,noun:khabarLa",shape:"TS45",copulaPlural:true})
+ ,"T_PARTICLE_SFP_NASB_KASRA_01||particle:particle,noun:ismLa,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_SFP_NASB_KASRA_01",structure:"particle:particle,noun:ismLa,noun:khabarLa",shape:"TS45",copulaPlural:true})
+ ,"T_PARTICLE_SINGULAR_NASB_FATHA_24||particle:particle,noun:ismLa,particle:particle,noun:majrur,noun:khabarLa":Object.freeze({templateId:"T_PARTICLE_SINGULAR_NASB_FATHA_24",structure:"particle:particle,noun:ismLa,particle:particle,noun:majrur,noun:khabarLa",shape:"TS45",copulaPlural:false})
+ ,"T_PARTICLE_SINGULAR_RAF_DAMMA_04||particle:particle,noun:mubtada,particle:particle,particle:particle,noun:atf,noun:khabar":Object.freeze({templateId:"T_PARTICLE_SINGULAR_RAF_DAMMA_04",structure:"particle:particle,noun:mubtada,particle:particle,particle:particle,noun:atf,noun:khabar",shape:"TS81",copulaPlural:true})
  /* الحال في محل نصب — the interrogative heads the sentence, so the shape is its own. */
  ,"T_NOUN_SINGULAR_NASB_FATHA_04||noun:haal,verb:past,noun:faail":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_04",structure:"noun:haal,verb:past,noun:faail",shape:"TS69",copulaPlural:false})
  /* خبر جملة اسمية — one structure, three lanes: which of the three words is asked about. */
@@ -2014,6 +2038,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='tamyizSentence')return canonicalTamyizTranslation(exercise);
  if(bits[0]==='mustathnaSentence')return canonicalMustathnaTranslation(exercise);
  if(bits[0]==='laJinsSentence')return canonicalLaJinsTranslation(exercise);
+ if(bits[0]==='laIlghaSentence')return canonicalLaIlghaTranslation(exercise);
  if(bits[0]==='mafulAjlSentence')return canonicalMafulAjlTranslation(exercise);
  if(bits[0]==='mafulMaahSentence')return canonicalMafulMaahTranslation(exercise);
  if(bits[0]==='zannaSentence')return canonicalZannaTranslation(exercise);
@@ -5771,13 +5796,29 @@ const MUSTATHNA_ALL_PAIR_KEYS=Object.freeze(Object.keys(MUSTATHNA_PAIR_REGISTRY)
      • الشبيه بالمضاف — «ما اتَّصَلَ به شيءٌ من تمام معناه» — «فمثل المضاف في الحكم: أي يُنصب
        بالفتحة، نحو: لَا مُسْتَقِيمًا حَالُهُ بَيْنَ النَّاسِ».
 
-   Only المضاف is produced. That is the honest choice rather than the convenient one: المضاف is
-   genuinely مُعْرَب مَنْصُوب, so it belongs in the canonical noun naṣb matrix and nothing has to be
-   bent to fit it. المفرد is **مبني**, and this engine models no bināʾ for nouns — forcing it
-   through the naṣb matrix would print «منصوب» where the source says «مبني على الفتح في محل نصب»,
-   which is precisely the error the chapter exists to teach against. It is deferred by name
-   instead. الشبيه بالمضاف is also منصوب, but its example needs a noun carrying an attached pronoun
-   as its own subject, which no productive lane builds. */
+   ══ Wave 10 ══ All three أنواع are now produced, and the division above is what the three lanes
+   are: the نوع decides the regime, not the meaning. المضاف and الشبيه بالمضاف are مُعْرَب مَنْصُوب and
+   run through the canonical naṣb matrix; المفرد is مبني and never reaches it, exactly as the built
+   munādā of p. 169 never reaches it. The two earlier deferrals were both retired by reading the
+   page again rather than by relaxing anything:
+
+     • "this engine models no bināʾ for nouns" stopped being true three waves ago — the built
+       munādā, the built demonstrative and the built ḥāl all carry بناء + محل today, and this lane
+       reuses that same path: no state, no sign, a bināʾ marker and a maḥall.
+     • الشبيه بالمضاف was deferred because the شرح's own EXAMPLE («لَا مُسْتَقِيمًا حَالُهُ») needs a noun
+       carrying an attached pronoun as its own subject. But the شرح's DEFINITION is wider than its
+       example — «ما اتَّصَلَ به شيءٌ من تمام معناه» — and p. 166 ties this باب's المفرد to the
+       المنادى's by name («أما المفرد في هذا الباب وفي باب المنادى»), where the same نوع is
+       exemplified by a جار ومجرور («يَا حَرِيصًا عَلَى الْخَيْرِ», p. 170). So the dependency this lane
+       builds is a جار ومجرور, and it is STRUCTURAL: no preposition and مجرور in the frame, no
+       شبيه بالمضاف. The نوع can never be reached by relabelling.
+
+   Two byte notes. The built surfaces are not hand-typed: «تَنْصِبُ النَّكِرَاتِ بِغَيْرِ تَنْوِينٍ» is
+   itself the composition rule, so each one is derived at load from a form the app already owns —
+   the indefinite accusative with its tanwīn dropped, or the definite accusative with its «الْ»
+   dropped, which for the dual, the two sound plurals and the broken plural is the very same
+   string. And the نوع labels are pinned byte-for-byte against the المنادى chapter's, because p. 166
+   says outright that the two bābs share them. */
 const ISM_LA_ROLE='ismLa';
 const KHABAR_LA_ROLE='khabarLa';
 const LA_JINS_PARTICLE_TYPE='laNafiyaJins';
@@ -5787,9 +5828,114 @@ const LA_JINS_PARTICLE=Object.freeze({surface:'لَا',particleType:LA_JINS_PART
 /* The three participants, all indefinite, all new curriculum vocabulary. The اسم لا is stored in
    its muḍāf accusative — without tanwīn, exactly as the matn's «تَنْصِبُ النَّكِرَاتِ بِغَيْرِ
    تَنْوِينٍ» requires — because that is the only form this lane ever produces. */
+/* The three أنواع of اسم لا (p. 166), and the one fact that decides everything downstream: whether
+   the نوع is built. The labels and the two definitions are the المنادى chapter's own bytes; the pin
+   in verifyLaJinsRegistry proves they have not drifted apart. */
+const LA_JINS_SUBTYPES=Object.freeze({mufrad:'mufrad',mudaf:'mudaf',shabih:'shabih'});
+const LA_JINS_SUBTYPE_LABELS=Object.freeze({
+ mufrad:Object.freeze({ar:'الْمُفْرَدُ',en:'the standalone kind',binaa:true,
+  senseAr:'مَا لَيْسَ مُضَافًا وَلَا شَبِيهًا بِالْمُضَافِ',
+  senseEn:'one that is neither a muḍāf nor like one'}),
+ mudaf:Object.freeze({ar:'الْمُضَافُ',en:'the muḍāf',binaa:false,
+  senseAr:'مَا أُضِيفَ إِلَى نَكِرَةٍ',senseEn:'one joined to an indefinite noun'}),
+ shabih:Object.freeze({ar:'الشَّبِيهُ بِالْمُضَافِ',en:'the one resembling a muḍāf',binaa:false,
+  senseAr:'مَا اتَّصَلَ بِهِ شَيْءٌ مِنْ تَمَامِ مَعْنَاهُ',
+  senseEn:'one to which something completing its meaning is attached'})
+});
+/* p. 166–167: «وحكمه أنه يُبْنى على ما يُنْصَبُ به». The marker is therefore never a fact of its own —
+   it is read off the naṣb sign the word would otherwise carry, which is why each entry states the
+   naṣb first and the bināʾ second. Note the yāʾ serves TWO declensions here, so the reason lives on
+   the declension and not on the marker: that is the one place this table differs in shape from the
+   munādā's, where each marker had exactly one owner. */
+const LA_JINS_BINAA_SIGNS=Object.freeze(Object.assign(Object.create(null),{
+ fath:Object.freeze({id:'fath',ar:'الْفَتْحِ',en:'a fatḥah'}),
+ yaa:Object.freeze({id:'yaa',ar:'الْيَاءِ',en:'the yāʾ'}),
+ kasr:Object.freeze({id:'kasr',ar:'الْكَسْرَةِ',en:'a kasrah'})
+}));
+const LA_JINS_MUFRAD_BINAA=Object.freeze(Object.assign(Object.create(null),{
+ singular:Object.freeze({binaaSignId:'fath',nasbSignId:'fatha',
+  nasbAr:'يُنْصَبُ بِالْفَتْحَةِ',nasbEn:'is made accusative by a fatḥah'}),
+ broken:Object.freeze({binaaSignId:'fath',nasbSignId:'fatha',
+  nasbAr:'يُنْصَبُ بِالْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ تَكْسِيرٍ',
+  nasbEn:'is made accusative by a fatḥah, because it is a broken plural'}),
+ dual:Object.freeze({binaaSignId:'yaa',nasbSignId:'ya',
+  nasbAr:'يُنْصَبُ بِالْيَاءِ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ مُثَنًّى',
+  nasbEn:'is made accusative by the yāʾ standing in for the fatḥah, because it is a dual'}),
+ smp:Object.freeze({binaaSignId:'yaa',nasbSignId:'ya',
+  nasbAr:'يُنْصَبُ بِالْيَاءِ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ',
+  nasbEn:'is made accusative by the yāʾ standing in for the fatḥah, because it is a sound masculine plural'}),
+ sfp:Object.freeze({binaaSignId:'kasr',nasbSignId:'kasra',
+  nasbAr:'يُنْصَبُ بِالْكَسْرَةِ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ',
+  nasbEn:'is made accusative by the kasrah standing in for the fatḥah, because it is a sound feminine plural'})
+}));
+const LA_JINS_MAHALL=Object.freeze({ar:'نَصْبٍ',en:'naṣb',state:'nasb'});
+/* «تَنْصِبُ النَّكِرَاتِ بِغَيْرِ تَنْوِينٍ» as a function. Two shapes, because the app stores its nouns in
+   two shapes; both are pure derivations of bytes already in the file, and both refuse anything they
+   were not given. */
+const LA_JINS_TANWIN_FATH='\u064B',LA_JINS_FATHA='\u064E',LA_JINS_ALIF='\u0627';
+const LA_JINS_DEFINITE_PREFIX='\u0627\u0644\u0652';
+function laJinsBuiltFromIndefinite(acc,label){
+ if(typeof acc!=='string'||!acc.endsWith(LA_JINS_TANWIN_FATH+LA_JINS_ALIF)){
+  throw new Error(`«لا» al-jins built surface ${label} was not given an indefinite accusative: ${acc}`);
+ }
+ return acc.slice(0,-2)+LA_JINS_FATHA;
+}
+function laJinsBuiltFromDefinite(acc,label){
+ if(typeof acc!=='string'||!acc.startsWith(LA_JINS_DEFINITE_PREFIX)){
+  throw new Error(`«لا» al-jins built surface ${label} was not given a «الْ» accusative: ${acc}`);
+ }
+ const bare=acc.slice(LA_JINS_DEFINITE_PREFIX.length);
+ if(/[\u064B\u064C\u064D]$/u.test(bare)||/^ال/u.test(bare)){
+  throw new Error(`«لا» al-jins built surface ${label} did not come out indefinite and tanwīn-free: ${bare}`);
+ }
+ return bare;
+}
+function laJinsPoolAccusative(pool,poolName,en){
+ const matches=pool.filter(item=>item.en===en);
+ if(matches.length!==1)throw new Error(`The «لا» al-jins registry matched ${matches.length} ${poolName} records for “${en}”.`);
+ return matches[0].acc;
+}
+/* ══ Wave 10, إلغاء عمل «لا» ══ p. 167. «لا» stops governing when one of the four conditions
+   fails, and the شرح gives the failure two triggers and one shared consequence:
+
+     «وبيانُ ذلك أنه إذا وقع بعد «لا» معرفة وجب إلغاءُ «لا» وتكرارها، نحو: لا مُحَمَّدٌ زارَني وَلا
+      بَكْرٌ. وإذا فَصل بين لا واسمها فاصلٌ ما وجب كذلك إلغاؤها وتكرارها.»
+
+   Two things follow, and the lane is built on both. First, the repetition is not optional decoration
+   — «وجب … وتكرارها» — so the frame carries two «لا»s or it is not this construction at all.
+   Second, the sentence goes back to being an ordinary nominal sentence, and the شرح says so by
+   PARSING one: «فـ«غَوْلٌ»: مبتدأٌ مؤخَّرٌ، وفيها: متعلق بمحذوف خبر مقدّم، و«لا» نافية مهملة». That
+   last clause is the learner-facing term this lane exists to produce, in the source's own words.
+
+   The «لا» that does not govern is its OWN identity, not the governing one with a flag: this app
+   already produces four particles spelled «لَا» (النافية للجنس، الناهية، العاطفة، النافية غير
+   العاملة في سياق الفاء), and the frame is authorized by identity plus structure, never by surface. */
+/* Both «لا»s of this chapter are built on sukūn and have no position, and the clause saying so now
+   has exactly ONE home instead of being written out beside each identity. */
+const LA_PARTICLE_SUKUN_AR='مَبْنِيَّةٌ عَلَى السُّكُونِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.';
+const LA_MUHMALA_PARTICLE_TYPE='laNafiyaMuhmala';
+const LA_MUHMALA_PARTICLE=Object.freeze({surface:LA_JINS_PARTICLE.surface,particleType:LA_MUHMALA_PARTICLE_TYPE,
+ ruleId:'R_LA_MUHMALA',gloss:'not',nameAr:'نَافِيَةٌ مُهْمَلَةٌ',noAmalAr:'لَا عَمَلَ لَهَا',
+ nameEn:'a negating لا that has been cancelled and governs nothing'});
 const LA_JINS_LEXEMES=Object.freeze(Object.assign(Object.create(null),{
  seeker:Object.freeze({acc:'طَالِبَ',en:'a seeker of',inflection:'singular'}),
- possessor:Object.freeze({acc:'صَاحِبَ',en:'a person of',inflection:'singular'})
+ possessor:Object.freeze({acc:'صَاحِبَ',en:'a person of',inflection:'singular'}),
+ /* ══ Wave 10 ══ The five المفرد heads, one per declension the شرح names. «رَجُلَ» is the matn's own
+    ruling example and is derived from the الاستثناء chapter's «رَجُلًا»; the other four are derived
+    from the app's own pools, where the definite accusative already IS the built form. */
+ manMufrad:Object.freeze({binaaSurface:laJinsBuiltFromIndefinite(MUSTATHNA_NEW_LEXEMES.manIndef.acc,'manMufrad'),
+  en:'a man',inflection:'singular'}),
+ workersMufrad:Object.freeze({binaaSurface:laJinsBuiltFromDefinite(laJinsPoolAccusative(brokenHuman,'brokenHuman','the workers'),'workersMufrad'),
+  en:'workers',inflection:'broken'}),
+ teachersDualMufrad:Object.freeze({binaaSurface:laJinsBuiltFromDefinite(laJinsPoolAccusative(duals,'duals','the two teachers'),'teachersDualMufrad'),
+  en:'two teachers',inflection:'dual'}),
+ teachersMufrad:Object.freeze({binaaSurface:laJinsBuiltFromDefinite(laJinsPoolAccusative(smp,'smp','the teachers'),'teachersMufrad'),
+  en:'teachers',inflection:'smp'}),
+ teachersFemMufrad:Object.freeze({binaaSurface:laJinsBuiltFromDefinite(laJinsPoolAccusative(sfp,'sfp','the female teachers'),'teachersFemMufrad'),
+  en:'female teachers',inflection:'sfp'}),
+ /* The شبيه بالمضاف head. It KEEPS its tanwīn — «بغير تنوين» is the ruling for the built نوع, and
+    the شرح writes its own example of this نوع «لَا مُسْتَقِيمًا حَالُهُ» with one. */
+ approaching:Object.freeze({acc:'مُقْبِلًا',en:'one turning toward',inflection:'singular'})
 }));
 const LA_JINS_COMPLEMENTS=Object.freeze(Object.assign(Object.create(null),{
  knowledge:Object.freeze({gen:'عِلْمٍ',en:'knowledge',inflection:'singular'}),
@@ -5801,12 +5947,67 @@ const LA_JINS_KHABARS=Object.freeze(Object.assign(Object.create(null),{
 }));
 const LA_JINS_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
  /* The شرح's own example at p. 167. */
- seekerOfKnowledge:Object.freeze({ismKey:'seeker',complementKey:'knowledge',khabarKey:'despised',
-  sentenceEn:'No seeker of knowledge is despised.'}),
- personOfGood:Object.freeze({ismKey:'possessor',complementKey:'good',khabarKey:'blamed',
-  sentenceEn:'No person of good is blameworthy.'})
+ seekerOfKnowledge:Object.freeze({subtype:LA_JINS_SUBTYPES.mudaf,ismKey:'seeker',complementKey:'knowledge',
+  khabarKey:'despised',sentenceEn:'No seeker of knowledge is despised.'}),
+ personOfGood:Object.freeze({subtype:LA_JINS_SUBTYPES.mudaf,ismKey:'possessor',complementKey:'good',
+  khabarKey:'blamed',sentenceEn:'No person of good is blameworthy.'}),
+ /* ══ Wave 10, المفرد ══ One pair per declension, each with a khabar that agrees with it, so the
+    naṣb sign the bināʾ is read off differs across the five and the khabar's own rafʿ sign differs
+    with it. The khabar is resolved from the app's predicate pools rather than restated here. */
+ noManPresent:Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,ismKey:'manMufrad',
+  khabarPool:'singularPredicates',khabarEn:'present',sentenceEn:'No man is present.'}),
+ noWorkersPresent:Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,ismKey:'workersMufrad',
+  khabarPool:'masculinePluralPredicates',khabarEn:'present',sentenceEn:'No workers are present.'}),
+ noTwoTeachersPresent:Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,ismKey:'teachersDualMufrad',
+  khabarPool:'dualPredicates',khabarEn:'present',sentenceEn:'No two teachers are present.'}),
+ noTeachersPresent:Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,ismKey:'teachersMufrad',
+  khabarPool:'masculinePluralPredicates',khabarEn:'present',sentenceEn:'No teachers are present.'}),
+ noWomenTeachersPresent:Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,ismKey:'teachersFemMufrad',
+  khabarPool:'femininePluralPredicates',khabarEn:'present',sentenceEn:'No female teachers are present.'}),
+ /* ══ Wave 10, الشبيه بالمضاف ══ «خَيْرٍ» is this chapter's own record, reused as the مجرور; the
+    preposition is the app's own. The dependency is what makes the نوع, so it is a real token pair
+    in the frame and not a field on the pair. */
+ noneTurningToGood:Object.freeze({subtype:LA_JINS_SUBTYPES.shabih,ismKey:'approaching',
+  dependency:Object.freeze({prep:'عَلَى',complementKey:'good'}),khabarKey:'blamed',
+  sentenceEn:'No one who turns toward good is blameworthy.'})
 }));
 const LA_JINS_ALL_PAIR_KEYS=Object.freeze(Object.keys(LA_JINS_PAIR_REGISTRY));
+/* The khabar of «لا» must be نكرة (condition 3) AND must agree with an اسم that may now be a dual
+   or either sound plural, so the مفرد lanes read it from the app's own predicate pools instead of
+   restating six adjectives here. A pair names either a chapter-owned khabar or a pool one, never
+   both. */
+/* One frozen frame. The معرفة after «لا» is the trigger p. 167 names first, and it is the SAME
+   registered ʿaṭf pair the ʿaṭf chapter already owns, so the maʿṭūf here is a real maʿṭūf built by
+   the real follower engine rather than a noun with a label. The khabar is dual because a mubtadaʾ
+   and its maʿṭūf are two. */
+const LA_ILGHA_FRAMES=Object.freeze(Object.assign(Object.create(null),{
+ teacherAndDoctor:Object.freeze({atfPairKey:'singularPeople',conjunctionKey:'waw',
+  khabarPool:'dualPredicates',khabarEn:'present',
+  sentenceEn:'Neither the teacher nor the doctor is present.'})
+}));
+const LA_ILGHA_ALL_FRAME_KEYS=Object.freeze(Object.keys(LA_ILGHA_FRAMES));
+const LA_JINS_KHABAR_POOLS=Object.freeze({singularPredicates:()=>singularPredicates,
+ dualPredicates:()=>dualPredicates,masculinePluralPredicates:()=>masculinePluralPredicates,
+ femininePluralPredicates:()=>femininePluralPredicates});
+function laJinsKhabarRecord(pair){
+ if(pair.khabarKey)return LA_JINS_KHABARS[pair.khabarKey]||null;
+ const pool=LA_JINS_KHABAR_POOLS[pair.khabarPool];
+ if(!pool)return null;
+ const matches=pool().filter(item=>item.en===pair.khabarEn);
+ return matches.length===1?matches[0]:null;
+}
+function laIlghaKhabarRecord(frame){
+ const pool=LA_JINS_KHABAR_POOLS[frame.khabarPool];
+ if(!pool)return null;
+ const matches=pool().filter(item=>item.en===frame.khabarEn);
+ return matches.length===1?matches[0]:null;
+}
+/* One reader for the اسم's surface whichever regime it is in, so nothing downstream has to know. */
+function laJinsHeadSurface(pair){
+ const lexeme=LA_JINS_LEXEMES[pair.ismKey];
+ return lexeme?(lexeme.binaaSurface||lexeme.acc):'';
+}
+const laJinsHeadInflection=pair=>LA_JINS_LEXEMES[pair.ismKey]?.inflection||'';
 /* Productive المفعول له — Al-Tuḥfah pp. 170–172 (باب المفعول من أجله; المفعول معه begins p. 172).
 
    Matn p. 170: «هُوَ الاسْمُ، الْمَنْصُوبُ، الَّذِي يُذْكَرُ بَيَانًا لِسَبَبِ وُقُوعِ الْفِعْلِ، نَحْوُ:
@@ -10336,6 +10537,13 @@ const PARTICLE_RULE_OWNERS=Object.freeze({preposition:'R_HARF_JARR',inna:'R_INNA
  [ISTITHNA_MA_NAFIYA.particleType]:ISTITHNA_MA_NAFIYA.ruleId,
  [ISTITHNA_MA_MASDARIYYA.particleType]:ISTITHNA_MA_MASDARIYYA.ruleId,
  istithnaKhalaHarf:'R_ISTITHNA_KHALA_HARF',
+ /* Wave 10 — «لَا» is the other particle family this app produces under one surface with several
+    identities, and like أدوات النداء before Wave 7 it had NO owner entry at all: the class-negating
+    لا could cite any rule in the registry and nothing refused it. Found by trying it on the
+    cancelled لا. Both of this chapter's identities are bound now, which is what makes «عاملة ⇄
+    ملغاة» a source-rule boundary as well as a structural one. */
+ [LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,
+ [LA_MUHMALA_PARTICLE_TYPE]:LA_MUHMALA_PARTICLE.ruleId,
  /* Wave 7 — أدوات النداء were the one particle family with NO owner entry at all, so any of them
     could cite any rule and nothing refused it. Each of the five now owns exactly one rule, which
     is what keeps «أَيَا» from being explained by «يا»'s authority. */
@@ -10396,7 +10604,11 @@ const ROLE_RULE_VARIANTS=Object.freeze(Object.assign(Object.create(null),{
         licensed by the EXCEPTION, and which of the two a token carries is re-derived from whether
         the frame proves an exception, never from the rule it happens to name. */
  mustathna:Object.freeze(['R_MUSTATHNA_NASB_TAMM_MANFI']),
- badal:Object.freeze(['R_MUSTATHNA_BADAL_TAMM_MANFI'])
+ badal:Object.freeze(['R_MUSTATHNA_BADAL_TAMM_MANFI']),
+ /* Wave 10 — اسم لا holds ONE role across three أنواع and two regimes, so the role table's rule
+    (المضاف's) cannot be the only one it may cite. Which of the three a token carries is re-derived
+    from the frame every time, never from the rule it happens to name. */
+ ismLa:Object.freeze(['R_ISM_LA_MABNI','R_ISM_LA_SHABIH_NASB'])
 }));
 const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr'],
@@ -10709,7 +10921,13 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_MAFUL_AJL_CONDITIONS:sourceRule('A noun is a mafʿūl lah only when it is a maṣdar, an inward (qalbī) one rather than an act of the limbs, a cause for what precedes it, and united with its ʿāmil in both time and doer.',[171],'The two lexical conditions are checked on the registry — every motive is an inward maṣdar and none is one of the act-maṣdars the mafʿūl-muṭlaq chapter registered — and the three construction conditions on the built graph: one past clause, one explicit marfūʿ fāʿil, and a frozen pair naming the motive for that exact act.'),
  R_MAFUL_AJL_STATE:sourceRule('Any noun meeting the conditions may be accusative, or khafḍ by a particle of causation such as the lām; when it is stripped of أل and of iḍāfah the accusative is the more frequent of the two.',[171,172],'Only the stripped ḥāl is produced. The Why states «الأكثر», never «يجب», because the source itself keeps the khafḍ reading permissible here; the أل and muḍāf ḥāls, where khafḍ is preferred or equal, are not produced at all.'),
  R_LA_NAFIYA_JINS:sourceRule('«لا» that negates a whole class works like «إنّ»: it makes its noun accusative and its khabar nominative.',[166],'Only the registered muḍāf frame. This لا carries its own particle identity, so the non-governing negating لا this app already produces can never authorize the frame.'),
- R_ISM_LA_NASB:sourceRule('When the noun of «لا» is a muḍāf it is accusative by the visible fatḥah or by what stands in for it.',[166,167],'Only المضاف, which the source states is muʿrab and manṣūb. المفرد is deliberately not produced: the source makes it مبني على ما ينصب به, and this engine models no bināʾ for nouns, so producing it would print «منصوب» where the source says «مبني في محل نصب».'),
+ R_ISM_LA_NASB:sourceRule('When the noun of «لا» is a muḍāf it is accusative by the visible fatḥah or by what stands in for it.',[166,167],'Only المضاف, which the source states is muʿrab and manṣūb; the other two أنواع carry their own rules, so a مضاف can never be reached from either of them.'),
+ /* p. 166–167. Three rules, because the شرح gives اسم لا three أنواع and two regimes, and the whole
+    point of the chapter is that they are not interchangeable. */
+ R_ISM_LA_MABNI:sourceRule('When the noun of «لا» is المفرد — neither a muḍāf nor like one — it is BUILT on whatever would make it accusative, without tanwīn: on fatḥ, or on the yāʾ for the dual and the sound masculine plural, or on kasr for the sound feminine plural.',[166,167],'Only a registered مفرد pair whose declension p. 167 gives a marker. It never reaches the state/sign matrix, so this lane can never print «منصوب وعلامة نصبه».'),
+ R_ISM_LA_MAHALL_NASB:sourceRule('A built noun of «لا» has no iʿrāb ending of its own, so its position is stated separately: it is in the place of naṣb as the noun of «لا».',[166,167],'Only the built مفرد, which carries no state and no sign of its own.'),
+ R_LA_MUHMALA:sourceRule('When a definite word falls after «لا», or something separates «لا» from its noun, «لا» is cancelled and must be repeated; it then governs nothing and the sentence keeps its ordinary mubtadaʾ and khabar.',[167],'Only the registered إلغاء frame: a definite noun straight after «لا», a real repetition of «لا», and a mubtadaʾ/khabar analysis produced by the ordinary nominal engine. It is not the governing «لا», not لا الناهية, not لا العاطفة.'),
+ R_ISM_LA_SHABIH_NASB:sourceRule('The noun of «لا» that resembles a muḍāf — one to which something completing its meaning is attached — takes the muḍāf’s own ruling: it is accusative by the fatḥah.',[167],'Only a frame in which a real dependency stands after the noun. The نوع is read off the tokens, never off a declared label.'),
  R_KHABAR_LA_RAF:sourceRule('The khabar of «لا» that negates a whole class is nominative, and it must itself be indefinite.',[166],'Only the registered indefinite khabars of the productive frame.'),
  R_LA_JINS_CONDITIONS:sourceRule('«لا» governs obligatorily on four conditions: its noun is indefinite, its noun is joined to it with no separator, its khabar is indefinite too, and «لا» is not repeated.',[166,167],'All four are proven structurally on the token graph: definiteness by surface, adjacency by position, and repetition by counting the particle. Losing any one refuses the exercise rather than re-analysing it.'),
  R_MUSTATHNA_NASB:sourceRule('A noun excepted by إلا is accusative on istithnāʾ when the preceding speech is complete and affirmative; the excepting noun غير takes that same ruling, and what follows غير is khafḍ by its iḍāfah.',[162,163,164],'Only the first of the three أحوال — the one the source makes obligatory. Registered pairs name the ʿāmil, the mustathnā minhu, the أداة and the excluded individual, and الاتصال is checked so nothing is excepted from a group it does not belong to.'),
@@ -12082,7 +12300,7 @@ verifyMustathnaRegistry();
 function registerLaJinsNounForms(){
  const records=[...Object.values(LA_JINS_LEXEMES),...Object.values(LA_JINS_COMPLEMENTS),
   ...Object.values(LA_JINS_KHABARS)];
- records.forEach(lexeme=>['nom','acc','gen'].forEach(form=>{
+ records.forEach(lexeme=>['nom','acc','gen','binaaSurface'].forEach(form=>{
   const surface=lexeme[form];
   if(!surface)return;
   const existing=nounFormIndex.get(surface);
@@ -12106,11 +12324,48 @@ function verifyLaJinsRegistry(){
   if(/^ال/u.test(surface))throw new Error(`${label} is definite, which «لا» al-jins forbids: ${surface}`);
  };
  Object.entries(LA_JINS_LEXEMES).forEach(([key,lexeme])=>{
-  indefinite(lexeme,'acc',`«لا» al-jins noun ${key}`);
-  // «تنصب النكرات بغير تنوين» — the muḍāf form carries no tanwīn at all.
-  if(/(?:ً|ٌ|ٍ)$/u.test(lexeme.acc)||/ًا$/u.test(lexeme.acc)){
-   throw new Error(`«لا» al-jins noun ${key} carries tanwīn, which the matn excludes: ${lexeme.acc}`);
+  indefinite(lexeme,lexeme.binaaSurface?'binaaSurface':'acc',`«لا» al-jins noun ${key}`);
+  /* «تَنْصِبُ النَّكِرَاتِ بِغَيْرِ تَنْوِينٍ» applies where the source applies it. The built نوع and the
+     مضاف both carry no tanwīn — one because it is built, the other because the iḍāfah strips it.
+     The شبيه بالمضاف KEEPS its tanwīn, and the شرح's own example of that نوع is written with one
+     («لَا مُسْتَقِيمًا حَالُهُ»), so requiring its absence everywhere would contradict the page. */
+  const surface=lexeme.binaaSurface||lexeme.acc;
+  const tanwin=/(?:ً|ٌ|ٍ)$/u.test(surface)||/ًا$/u.test(surface);
+  if(lexeme.binaaSurface&&tanwin){
+   throw new Error(`«لا» al-jins built noun ${key} carries tanwīn, which the matn excludes: ${surface}`);
   }
+  if(lexeme.binaaSurface&&lexeme.acc){
+   throw new Error(`«لا» al-jins noun ${key} declares both a built surface and an iʿrāb accusative.`);
+  }
+ });
+ /* The نوع labels are the المنادى chapter's, byte for byte, because p. 166 says the two bābs share
+    them: «أما المفرد في هذا الباب وفي باب المنادى فهو ...». A drift here would mean the app had
+    grown two spellings of one term, which is the failure this pin exists to catch. */
+ const sharedLabels=[
+  [LA_JINS_SUBTYPE_LABELS.mufrad.ar,MUNADA_SUBTYPE_LABELS.mufradAlam.ar.split(' ')[0],'المفرد'],
+  [LA_JINS_SUBTYPE_LABELS.mudaf.ar,MUNADA_SUBTYPE_LABELS.mudaf.ar,'المضاف'],
+  [LA_JINS_SUBTYPE_LABELS.shabih.ar,MUNADA_SUBTYPE_LABELS.shabih.ar,'الشبيه بالمضاف'],
+  [LA_JINS_SUBTYPE_LABELS.shabih.senseAr,MUNADA_SUBTYPE_LABELS.shabih.senseAr,'تعريف الشبيه بالمضاف'],
+  [LA_JINS_MAHALL.ar,MUNADA_MAHALL.ar,'محل النصب']
+ ];
+ sharedLabels.forEach(([mine,theirs,label])=>{
+  if(mine!==theirs)throw new Error(`The «لا» al-jins label for ${label} has drifted from the المنادى chapter's bytes.`);
+ });
+ /* The one word this chapter adds that the app has never held. A codepoint pin, because a
+    combining-mark order that drifted would render identically and compare unequal. */
+ const headPin=[1605,1615,1602,1618,1576,1616,1604,1611,1575];
+ const headActual=[...LA_JINS_LEXEMES.approaching.acc].map(ch=>ch.codePointAt(0));
+ if(headActual.length!==headPin.length||headActual.some((code,i)=>code!==headPin[i])){
+  throw new Error('The «لا» al-jins شبيه بالمضاف head has drifted from its pinned codepoints.');
+ }
+ /* Every declension the شرح lets المفرد take must have a bināʾ marker, and every marker must be a
+    registered one. p. 166–167 names five: the singular, جمع التكسير, المثنى, جمع المذكر السالم and
+    جمع المؤنث السالم. */
+ Object.entries(LA_JINS_MUFRAD_BINAA).forEach(([inflection,record])=>{
+  if(!LA_JINS_BINAA_SIGNS[record.binaaSignId]){
+   throw new Error(`The «لا» al-jins bināʾ table gives ${inflection} an unregistered marker.`);
+  }
+  if(!GRAMMAR_SIGNS[record.nasbSignId])throw new Error(`The «لا» al-jins bināʾ table gives ${inflection} an unregistered naṣb sign.`);
  });
  Object.entries(LA_JINS_COMPLEMENTS).forEach(([key,lexeme])=>indefinite(lexeme,'gen',`«لا» al-jins complement ${key}`));
  Object.entries(LA_JINS_KHABARS).forEach(([key,lexeme])=>indefinite(lexeme,'nom',`«لا» al-jins khabar ${key}`));
@@ -12120,10 +12375,75 @@ function verifyLaJinsRegistry(){
  if(LA_JINS_PARTICLE.particleType==='laNafiyaContext'){
   throw new Error('«لا» النافية للجنس reused the non-governing لا identity.');
  }
+ /* The two «لا»s of this chapter share one surface and must share nothing else. A cancelled «لا»
+    that had crept into the verb governor table, or that had taken any other لا's identity, would be
+    able to borrow authority it has none of. */
+ if(LA_MUHMALA_PARTICLE_TYPE===LA_JINS_PARTICLE_TYPE){
+  throw new Error('The cancelled «لا» reused the governing «لا» identity.');
+ }
+ if(GRAMMAR_RULES.governors[LA_MUHMALA_PARTICLE_TYPE]){
+  throw new Error('The cancelled «لا» entered the verb governor table; it governs nothing at all.');
+ }
+ [ATF_CONJUNCTION_REGISTRY.la.particleType,'laNafiyaContext','laNahiya'].forEach(type=>{
+  if(LA_MUHMALA_PARTICLE_TYPE===type)throw new Error(`The cancelled «لا» reused the identity ${type}.`);
+ });
+ if(LA_MUHMALA_PARTICLE.surface!==LA_JINS_PARTICLE.surface){
+  throw new Error('The two «لا» identities of this chapter no longer share one surface.');
+ }
+ const muhmalaPin=[1605,1615,1607,1618,1605,1614,1604,1614,1577,1612],noAmalPin=[1604,1614,1575,32,1593,1614,1605,1614,1604,1614,32,1604,1614,1607,1614,1575];
+ const pinned=(str,expected,label)=>{
+  const actual=[...str].map(ch=>ch.codePointAt(0));
+  if(actual.length!==expected.length||actual.some((code,i)=>code!==expected[i])){
+   throw new Error(`The «لا» al-jins chapter's ${label} has drifted from its pinned codepoints.`);
+  }
+ };
+ pinned(LA_MUHMALA_PARTICLE.nameAr.split(' ')[1],muhmalaPin,'«مهملة»');
+ pinned(LA_MUHMALA_PARTICLE.noAmalAr,noAmalPin,'«لا عمل لها»');
+ Object.entries(LA_ILGHA_FRAMES).forEach(([key,frame])=>{
+  const pair=ATF_PAIR_REGISTRY[frame.atfPairKey];
+  if(!pair)throw new Error(`The إلغاء frame ${key} names an unregistered ʿaṭf pair.`);
+  if(!ATF_CONJUNCTION_REGISTRY[frame.conjunctionKey])throw new Error(`The إلغاء frame ${key} names an unregistered conjunction.`);
+  if(!laIlghaKhabarRecord(frame))throw new Error(`The إلغاء frame ${key} resolves no خبر.`);
+  /* p. 167's trigger is «إذا وقع بعد «لا» معرفة». A frame whose noun is indefinite would be a frame
+     in which «لا» still governs, so the registry refuses to hold it. */
+  if(!/^ال/u.test(pair.followed.nom)||!/^ال/u.test(pair.follower.nom)){
+   throw new Error(`The إلغاء frame ${key} is not built on the definite noun p. 167 requires.`);
+  }
+ });
  Object.entries(LA_JINS_PAIR_REGISTRY).forEach(([key,pair])=>{
-  if(!LA_JINS_LEXEMES[pair.ismKey])throw new Error(`«لا» al-jins pair ${key} names an unregistered اسم.`);
-  if(!LA_JINS_COMPLEMENTS[pair.complementKey])throw new Error(`«لا» al-jins pair ${key} names an unregistered مضاف إليه.`);
-  if(!LA_JINS_KHABARS[pair.khabarKey])throw new Error(`«لا» al-jins pair ${key} names an unregistered خبر.`);
+  const label=LA_JINS_SUBTYPE_LABELS[pair.subtype];
+  if(!label)throw new Error(`«لا» al-jins pair ${key} names an unregistered نوع.`);
+  const lexeme=LA_JINS_LEXEMES[pair.ismKey];
+  if(!lexeme)throw new Error(`«لا» al-jins pair ${key} names an unregistered اسم.`);
+  /* The نوع and the STORED SHAPE have to agree, which is what stops a pair from being moved
+     between أنواع by editing one field: a built نوع must hold a built surface and no accusative,
+     and an inflected نوع must hold an accusative and no built surface. */
+  if(label.binaa!==Boolean(lexeme.binaaSurface)){
+   throw new Error(`«لا» al-jins pair ${key} declares ${pair.subtype} but stores the other regime's surface.`);
+  }
+  if(pair.subtype===LA_JINS_SUBTYPES.mufrad){
+   if(!LA_JINS_MUFRAD_BINAA[lexeme.inflection]){
+    throw new Error(`«لا» al-jins pair ${key} is a مفرد of a declension p. 167 gives no bināʾ marker.`);
+   }
+   if(pair.complementKey||pair.dependency)throw new Error(`«لا» al-jins pair ${key} is a مفرد carrying a dependency.`);
+  }
+  if(pair.subtype===LA_JINS_SUBTYPES.mudaf){
+   if(!LA_JINS_COMPLEMENTS[pair.complementKey])throw new Error(`«لا» al-jins pair ${key} names an unregistered مضاف إليه.`);
+   if(pair.dependency)throw new Error(`«لا» al-jins pair ${key} is a مضاف carrying a شبيه dependency.`);
+  }
+  /* «ما اتَّصَلَ به شيءٌ من تمام معناه» — the نوع IS the dependency, so a شبيه بالمضاف with nothing
+     attached to it is a contradiction the registry refuses to hold. */
+  if(pair.subtype===LA_JINS_SUBTYPES.shabih){
+   if(!pair.dependency||!LA_JINS_COMPLEMENTS[pair.dependency.complementKey]){
+    throw new Error(`«لا» al-jins pair ${key} is a شبيه بالمضاف with no registered dependency.`);
+   }
+   if(!humanPrepActions.some(item=>item.prep===pair.dependency.prep)){
+    throw new Error(`«لا» al-jins pair ${key} names an unregistered preposition.`);
+   }
+   if(pair.complementKey)throw new Error(`«لا» al-jins pair ${key} is a شبيه بالمضاف carrying an iḍāfah.`);
+  }
+  if(pair.khabarKey&&!LA_JINS_KHABARS[pair.khabarKey])throw new Error(`«لا» al-jins pair ${key} names an unregistered خبر.`);
+  if(!pair.khabarKey&&!laJinsKhabarRecord(pair))throw new Error(`«لا» al-jins pair ${key} resolves no خبر.`);
   if(typeof pair.sentenceEn!=='string'||!pair.sentenceEn.trim()){
    throw new Error(`«لا» al-jins pair ${key} carries no canonical English.`);
   }
@@ -12763,8 +13083,12 @@ const AR={
  haal:w=>grammarSpec('noun',HAAL_ROLE),
  tamyiz:w=>grammarSpec('noun',TAMYIZ_ROLE),
  ismLaMudaf:w=>grammarSpec('noun',ISM_LA_ROLE,{isMudaf:true}),
+ /* المفرد and الشبيه بالمضاف are both NOT muḍāf, and the flag is what the frame matcher reads, so
+    they share one spec and are told apart by the tokens that follow them. */
+ ismLa:w=>grammarSpec('noun',ISM_LA_ROLE),
  khabarLa:w=>grammarSpec('noun',KHABAR_LA_ROLE),
  laJinsParticle:()=>grammarSpec('particle','particle',{particleType:LA_JINS_PARTICLE_TYPE,particleWord:LA_JINS_PARTICLE.surface}),
+ laMuhmalaParticle:()=>grammarSpec('particle','particle',{particleType:LA_MUHMALA_PARTICLE_TYPE,particleWord:LA_MUHMALA_PARTICLE.surface}),
  mafulAjl:w=>grammarSpec('noun',MAFUL_AJL_ROLE),
  mafulMaah:w=>grammarSpec('noun',MAFUL_MAAH_ROLE),
  mafulAwwal:w=>grammarSpec('noun',ZANNA_FIRST_ROLE),
@@ -13010,9 +13334,17 @@ function atfTemplateRecord(data){
  const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
  return template?.followerKind===ATF_KIND?template:null;
 }
+/* p. 167 makes the repetition of a cancelled «لا» obligatory, so in that ONE construction the
+   conjunction cannot stand beside the noun it joins: «الْمُعَلِّمُ وَلَا الطَّبِيبُ». The anchor steps over
+   exactly one such particle and nothing else — no other lane in this app puts any token between a
+   conjunction and its maʿṭūf, and this particle type is produced by the إلغاء lane alone. */
+function atfMuhmalaSkip(data,index){
+ return data?.tokens?.[index-1]?.grammar?.particleType===LA_MUHMALA_PARTICLE_TYPE?1:0;
+}
 function atfPairAt(data,index){
  const template=atfTemplateRecord(data);
- const follower=data?.tokens?.[index],conjunction=data?.tokens?.[index-1],followed=data?.tokens?.[index-2];
+ const skip=atfMuhmalaSkip(data,index);
+ const follower=data?.tokens?.[index],conjunction=data?.tokens?.[index-1-skip],followed=data?.tokens?.[index-2-skip];
  if(!template||!follower||!conjunction||!followed||follower.grammar?.role!=='atf'
    ||conjunction.grammar?.type!=='particle'||followed.grammar?.type!=='noun'
    ||['naat','atf'].includes(followed.grammar?.role))return null;
@@ -14044,6 +14376,10 @@ function laJinsTemplateRecord(data){
  const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
  return template?.laJinsPairKeys?.length?template:null;
 }
+/* Each نوع has its own token shape, and the shape is what proves the نوع. Nothing here reads a
+   label: المفرد is three tokens with nothing between the اسم and its خبر, المضاف is four with a
+   مضاف إليه, and الشبيه بالمضاف is five with a real جار ومجرور. Change only the declared subtype and
+   the frame stops matching, because the token count and the intervening roles no longer fit. */
 function laJinsPairAt(data,index){
  const template=laJinsTemplateRecord(data),tokens=data?.tokens;
  const ism=Array.isArray(tokens)?tokens[index]:null;
@@ -14051,21 +14387,129 @@ function laJinsPairAt(data,index){
  for(const key of template.laJinsPairKeys){
   const pair=LA_JINS_PAIR_REGISTRY[key];
   const lexeme=pair&&LA_JINS_LEXEMES[pair.ismKey];
-  const complementLexeme=pair&&LA_JINS_COMPLEMENTS[pair.complementKey];
-  const khabarLexeme=pair&&LA_JINS_KHABARS[pair.khabarKey];
-  if(!pair||!lexeme||!complementLexeme||!khabarLexeme)continue;
-  if(tokens.length!==4||index!==1)continue;
-  const particle=tokens[0],complement=tokens[2],khabar=tokens[3];
+  const label=pair&&LA_JINS_SUBTYPE_LABELS[pair.subtype];
+  const khabarLexeme=pair&&laJinsKhabarRecord(pair);
+  if(!pair||!lexeme||!label||!khabarLexeme)continue;
+  if(index!==1)continue;
+  const particle=tokens[0];
   if(particle?.grammar?.type!=='particle'||particle.grammar.particleType!==LA_JINS_PARTICLE_TYPE)continue;
   if(particle.word!==LA_JINS_PARTICLE.surface)continue;
-  if(ism.word!==lexeme.acc||ism.surfaceHint!==lexeme.acc||!ism.grammar.isMudaf)continue;
-  if(complement?.grammar?.role!=='mudafIlayh')continue;
-  if(complement.word!==complementLexeme.gen||complement.surfaceHint!==complementLexeme.gen)continue;
+  const head=laJinsHeadSurface(pair);
+  if(ism.word!==head||ism.surfaceHint!==head)continue;
+  let complementTokens=[],complement=null;
+  if(pair.subtype===LA_JINS_SUBTYPES.mudaf){
+   const complementLexeme=LA_JINS_COMPLEMENTS[pair.complementKey];
+   if(tokens.length!==4||!complementLexeme||!ism.grammar.isMudaf)continue;
+   complement=tokens[2];
+   if(complement?.grammar?.role!=='mudafIlayh')continue;
+   if(complement.word!==complementLexeme.gen||complement.surfaceHint!==complementLexeme.gen)continue;
+   complementTokens=[complement];
+  }else if(pair.subtype===LA_JINS_SUBTYPES.shabih){
+   const complementLexeme=LA_JINS_COMPLEMENTS[pair.dependency.complementKey];
+   if(tokens.length!==5||!complementLexeme||ism.grammar.isMudaf)continue;
+   const prep=tokens[2];complement=tokens[3];
+   if(prep?.grammar?.type!=='particle'||prep.grammar.particleType!=='preposition')continue;
+   if(prep.word!==pair.dependency.prep)continue;
+   if(complement?.grammar?.role!=='majrur')continue;
+   if(complement.word!==complementLexeme.gen||complement.surfaceHint!==complementLexeme.gen)continue;
+   complementTokens=[prep,complement];
+  }else{
+   if(tokens.length!==3||ism.grammar.isMudaf)continue;
+  }
+  const khabar=tokens[tokens.length-1];
   if(khabar?.grammar?.role!==KHABAR_LA_ROLE)continue;
   if(khabar.word!==khabarLexeme.nom||khabar.surfaceHint!==khabarLexeme.nom)continue;
-  return{key,pair,lexeme,complementLexeme,khabarLexeme,particle,ism,complement,khabar};
+  return{key,pair,label,lexeme,complementLexeme:complement?LA_JINS_COMPLEMENTS[pair.complementKey||pair.dependency.complementKey]:null,
+   khabarLexeme,particle,ism,complement,complementTokens,khabar};
  }
  return null;
+}
+/* ---- إلغاء عمل «لا»: exact frame proof --------------------------------------------------------
+   Nothing here reads a flag. The cancellation is proved by the three things p. 167 makes it out of:
+   the word straight after «لا» is DEFINITE (so «لا» — which makes only indefinites accusative — has
+   nothing to work on), «لا» is REPEATED (which the page makes obligatory in the same breath), and
+   the sentence is analysed by the ordinary nominal engine, so the noun is a real mubtadaʾ with a
+   real khabar and the second noun is a real maʿṭūف through a registered conjunction. Delete the
+   repetition, make the noun indefinite, or swap the particle identity, and the frame is gone. */
+function laIlghaTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.laIlghaFrameKeys?.length?template:null;
+}
+function laIlghaFrameAt(data,index){
+ const template=laIlghaTemplateRecord(data),tokens=data?.tokens;
+ const mubtada=Array.isArray(tokens)?tokens[index]:null;
+ if(!template||!mubtada||mubtada.grammar?.type!=='noun'||mubtada.grammar.role!=='mubtada')return null;
+ if(index!==1||tokens.length!==6)return null;
+ for(const key of template.laIlghaFrameKeys){
+  const frame=LA_ILGHA_FRAMES[key];
+  const pair=frame&&ATF_PAIR_REGISTRY[frame.atfPairKey];
+  const conjunction=frame&&ATF_CONJUNCTION_REGISTRY[frame.conjunctionKey];
+  const khabarLexeme=frame&&laIlghaKhabarRecord(frame);
+  if(!frame||!pair||!conjunction||!khabarLexeme)continue;
+  const first=tokens[0],waw=tokens[2],second=tokens[3],follower=tokens[4],khabar=tokens[5];
+  /* Both «لا»s, by identity and by surface. */
+  if(first?.grammar?.particleType!==LA_MUHMALA_PARTICLE_TYPE||first.word!==LA_MUHMALA_PARTICLE.surface)continue;
+  if(second?.grammar?.particleType!==LA_MUHMALA_PARTICLE_TYPE||second.word!==LA_MUHMALA_PARTICLE.surface)continue;
+  if(mubtada.word!==pair.followed.nom||mubtada.surfaceHint!==pair.followed.nom)continue;
+  if(waw?.grammar?.type!=='particle'||waw.grammar.particleType!==conjunction.particleType||waw.word!==conjunction.surface)continue;
+  if(follower?.grammar?.role!=='atf'||follower.word!==pair.follower.nom||follower.surfaceHint!==pair.follower.nom)continue;
+  if(khabar?.grammar?.role!=='khabar'||khabar.word!==khabarLexeme.nom||khabar.surfaceHint!==khabarLexeme.nom)continue;
+  return{key,frame,pair,conjunction,khabarLexeme,first,mubtada,waw,second,follower,khabar};
+ }
+ return null;
+}
+function deriveLaIlghaAuthority(data,index){
+ const tokens=data?.tokens;
+ const token=Array.isArray(tokens)?tokens[index]:null;
+ if(!token||token.grammar?.type!=='noun'||token.grammar.role!=='mubtada'){
+  return Object.freeze({authorized:false,reason:'not-an-ilgha-mubtada-token'});
+ }
+ const found=laIlghaFrameAt(data,index);
+ if(!found)return Object.freeze({authorized:false,reason:'unregistered-frame-or-template'});
+ /* p. 167's own trigger: «إذا وقع بعد «لا» معرفة وجب إلغاؤها». An indefinite here would be a
+    sentence in which «لا» still governs, which is the OTHER half of this chapter. */
+ if(!/^ال/u.test(found.mubtada.word))return Object.freeze({authorized:false,reason:'noun-after-la-is-indefinite'});
+ if(!/^ال/u.test(found.follower.word))return Object.freeze({authorized:false,reason:'maatuf-after-la-is-indefinite'});
+ // «وَجَبَ إِلْغَاؤُهَا وَتَكْرَارُهَا» — the repetition is counted, never assumed.
+ const repeats=tokens.filter(item=>item?.grammar?.particleType===LA_MUHMALA_PARTICLE_TYPE);
+ if(repeats.length!==2)return Object.freeze({authorized:false,reason:'cancelled-la-is-not-repeated'});
+ /* A cancelled «لا» in the same breath as a governing one would be two chapters in one sentence. */
+ if(tokens.some(item=>item?.grammar?.particleType===LA_JINS_PARTICLE_TYPE)){
+  return Object.freeze({authorized:false,reason:'a-governing-la-is-present'});
+ }
+ // The ordinary roles must be REAL: a mubtadaʾ with its khabar, and a maʿṭūف the follower engine owns.
+ if(found.mubtada.state&&found.mubtada.state!=='raf')return Object.freeze({authorized:false,reason:'mubtada-not-marfu'});
+ if(found.khabar.state&&found.khabar.state!=='raf')return Object.freeze({authorized:false,reason:'khabar-not-marfu'});
+ if(found.mubtada.grammar.role!=='mubtada'||found.mubtada.mahall){
+  return Object.freeze({authorized:false,reason:'mubtada-is-not-an-ordinary-mubtada'});
+ }
+ if(!deriveAtfFollowerAuthority(data,tokens.indexOf(found.follower)).authorized){
+  return Object.freeze({authorized:false,reason:'maatuf-is-not-canonically-registered'});
+ }
+ return Object.freeze({authorized:true,reason:'',frameKey:found.key,
+  firstParticleId:found.first.id,firstParticleWord:found.first.word,
+  secondParticleId:found.second.id,secondParticleWord:found.second.word,
+  mubtadaId:found.mubtada.id,mubtadaWord:found.mubtada.word,
+  followerId:found.follower.id,followerWord:found.follower.word,
+  khabarId:found.khabar.id,khabarWord:found.khabar.word,
+  conjunctionId:found.waw.id,conjunctionWord:found.waw.word});
+}
+/* The cancelled «لا» token's own authority: it is authorized only as part of a proven frame, so a
+   token carrying the identity anywhere else can never render. */
+function laIlghaParticleAuthority(data,index){
+ const tokens=data?.tokens;
+ const token=Array.isArray(tokens)?tokens[index]:null;
+ if(token?.grammar?.particleType!==LA_MUHMALA_PARTICLE_TYPE){
+  return Object.freeze({authorized:false,reason:'not-a-cancelled-la'});
+ }
+ const authority=deriveLaIlghaAuthority(data,1);
+ if(!authority.authorized)return authority;
+ return token.id===authority.firstParticleId||token.id===authority.secondParticleId
+  ?authority:Object.freeze({authorized:false,reason:'cancelled-la-outside-its-frame'});
+}
+function canonicalLaIlghaTranslation(data){
+ const authority=deriveLaIlghaAuthority(data,1);
+ return authority.authorized?LA_ILGHA_FRAMES[authority.frameKey].sentenceEn:null;
 }
 function deriveLaJinsAuthority(data,index){
  const tokens=data?.tokens;
@@ -14075,7 +14519,26 @@ function deriveLaJinsAuthority(data,index){
  }
  const found=laJinsPairAt(data,index);
  if(!found)return Object.freeze({authorized:false,reason:'unregistered-pair-or-template'});
- if(token.state&&token.state!=='nasb')return Object.freeze({authorized:false,reason:'ism-la-not-nasb'});
+ /* The two regimes, each refusing the other's marks — the same separation the built munādā keeps.
+    A مفرد that has picked up an iʿrāb state is claiming iʿrāb the source denies it; a مضاف or
+    شبيه بالمضاف carrying a bināʾ marker is claiming bināʾ the source denies it. */
+ const binaa=found.label.binaa===true;
+ if(binaa){
+  if(token.state)return Object.freeze({authorized:false,reason:'built-ism-la-carries-an-irab-state'});
+  if(token.sign)return Object.freeze({authorized:false,reason:'built-ism-la-carries-an-irab-sign'});
+  const marker=LA_JINS_MUFRAD_BINAA[found.lexeme.inflection];
+  if(!marker)return Object.freeze({authorized:false,reason:'built-ism-la-has-no-source-binaa-marker'});
+  if(token.binaaSign&&token.binaaSign!==marker.binaaSignId){
+   return Object.freeze({authorized:false,reason:'built-ism-la-has-the-wrong-binaa-marker'});
+  }
+  if(token.mahall&&token.mahall!==LA_JINS_MAHALL.state){
+   return Object.freeze({authorized:false,reason:'built-ism-la-has-the-wrong-mahall'});
+  }
+ }else{
+  if(token.state&&token.state!=='nasb')return Object.freeze({authorized:false,reason:'ism-la-not-nasb'});
+  if(token.binaaSign)return Object.freeze({authorized:false,reason:'inflected-ism-la-carries-a-binaa-marker'});
+  if(token.mahall)return Object.freeze({authorized:false,reason:'inflected-ism-la-carries-a-mahall'});
+ }
  if(found.khabar.state&&found.khabar.state!=='raf'){
   return Object.freeze({authorized:false,reason:'khabar-la-not-marfu'});
  }
@@ -14093,15 +14556,19 @@ function deriveLaJinsAuthority(data,index){
   return Object.freeze({authorized:false,reason:'la-is-repeated'});
  }
  // The شرح's type is «المضاف إلى نكرة», so an definite complement leaves the registered type.
- if(/^ال/u.test(found.complement.word)){
+ if(found.complement&&/^ال/u.test(found.complement.word)){
   return Object.freeze({authorized:false,reason:'mudaf-ilayh-is-definite'});
  }
  return Object.freeze({authorized:true,reason:'',pairKey:found.key,
+  subtype:found.pair.subtype,binaa,
+  binaaSignId:binaa?LA_JINS_MUFRAD_BINAA[found.lexeme.inflection].binaaSignId:'',
+  mahall:binaa?LA_JINS_MAHALL.state:'',mahallRuleId:binaa?'R_ISM_LA_MAHALL_NASB':'',
+  inflection:found.lexeme.inflection,
+  dependencyWords:Object.freeze(found.complementTokens.map(item=>item.word)),
   particleId:found.particle.id,particleWord:found.particle.word,
   ismId:found.ism.id,ismWord:found.ism.word,
-  complementId:found.complement.id,complementWord:found.complement.word,
-  khabarId:found.khabar.id,khabarWord:found.khabar.word,
-  inflection:found.lexeme.inflection});
+  complementId:found.complement?found.complement.id:'',complementWord:found.complement?found.complement.word:'',
+  khabarId:found.khabar.id,khabarWord:found.khabar.word});
 }
 function canonicalLaJinsTranslation(data){
  const index=data?.tokens?.findIndex(token=>token.grammar?.role===ISM_LA_ROLE)??-1;
@@ -14520,6 +14987,24 @@ function inflectNoun(token,tokens,index,data){
   if(!authority.authorized){
    throw new Error(`The noun is not a canonically licensed «لا» al-jins participant: ${authority.reason}.`);
   }
+  /* Wave 10 — the built مفرد returns HERE, before the matrix, exactly as the built munādā does.
+     It has no state and no sign to assign; it has a marker and a position. The other two أنواع
+     fall through and are inflected normally, and the شبيه بالمضاف takes its own source rule. */
+  if(token.grammar.role===ISM_LA_ROLE){
+   if(authority.binaa){
+    token.state='';
+    token.sign=null;
+    token.signRuleId='';
+    token.ruleId='R_ISM_LA_MABNI';
+    token.binaaSign=authority.binaaSignId;
+    token.mahall=authority.mahall;
+    token.mahallRuleId=authority.mahallRuleId;
+    token.inflection=authority.inflection;
+    token.expectedSurface=laJinsHeadSurface(LA_JINS_PAIR_REGISTRY[authority.pairKey]);
+    token.word=token.expectedSurface;
+    return;
+   }
+  }
  }
  if(token.grammar.role===MAFUL_MAAH_ROLE&&!deriveMafulMaahAuthority(data,index).authorized){
   throw new Error(`The noun is not a canonically licensed mafʿūl maʿah: ${deriveMafulMaahAuthority(data,index).reason}.`);
@@ -14564,7 +15049,7 @@ function inflectNoun(token,tokens,index,data){
   const istithnaBadal=token.grammar.role==='badal'?deriveIstithnaBadalAuthority(data,index):null;
   const followed=istithnaBadal&&istithnaBadal.authorized
    ?tokens.find(item=>item.id===istithnaBadal.wholeId)
-   :tokens[index-(token.grammar.role==='atf'?2:1)];
+   :tokens[index-(token.grammar.role==='atf'?2+atfMuhmalaSkip(data,index):1)];
   if(!followed?.state)throw new Error('A follower has no preceding inflected head.');
   token.state=followed.state;
   /* At build time the exact surfaces must already be authorized by this template. This prevents
@@ -14589,6 +15074,12 @@ function inflectNoun(token,tokens,index,data){
  /* …except a naʿt, whose source rule is its قسم's, not the role table's single true-naʿt entry.
     The قسم is re-derived rather than read, so the rule cannot be chosen by a declaration. */
  if(token.grammar.role==='naat')token.ruleId=deriveNaatSubtypeAuthority(data,index).subtypeRuleId;
+ /* Wave 10 — and الشبيه بالمضاف cites p. 167's own ruling for that نوع, not المضاف's. It is chosen
+    from the proven frame here, after the role table has spoken, for the same reason the naʿt's is:
+    a builder must not be able to pick its noun's source rule by declaring a subtype. */
+ if(token.grammar.role===ISM_LA_ROLE&&deriveLaJinsAuthority(data,index).subtype===LA_JINS_SUBTYPES.shabih){
+  token.ruleId='R_ISM_LA_SHABIH_NASB';
+ }
  /* Wave 6 — and the exception badal cites the EXCEPTION's rule, not the badal chapter's agreement
     rule. PHASE 17: what licenses this إتباع is p. 164, and the rule is re-chosen from the proven
     structure here rather than accepted from the builder's declaration, exactly as the naʿt's قسم
@@ -14769,7 +15260,7 @@ function configureParticle(token){
   ...Object.fromEntries(Object.values(CONDITION_GOVERNORS).map(item=>[item.particleType,item.ruleId])),
   [HAMZAT_TAQRIR.particleType]:HAMZAT_TAQRIR.ruleId,
  [KAY_TALIL_LAM.particleType]:KAY_TALIL_LAM.ruleId,maNafiyaKana:'R_MA_NAFIYA_KANA',maMasdariyyaZarfiyya:'R_MA_MASDARIYYA_ZARFIYYA',
-  laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,
+  laNafiyaContext:'R_LA_NAFIYA_CONTEXT',[ISTITHNA_ILLA_TYPE]:ISTITHNA_TOOLS.illa.ruleId,[LA_JINS_PARTICLE_TYPE]:LA_JINS_PARTICLE.ruleId,[LA_MUHMALA_PARTICLE_TYPE]:LA_MUHMALA_PARTICLE.ruleId,[WAW_MAIYYA_TYPE]:WAW_MAIYYA.ruleId,
   // Wave 7 — each أداة نداء owns its own source rule; none of the four sisters cites «يا»'s.
   ...Object.fromEntries(Object.values(NIDA_PARTICLES).map(item=>[item.particleType,item.ruleId])),
   // Wave 6 — three more identities, each with a rule of its own. Two share «مَا»'s bytes with two
@@ -14803,6 +15294,7 @@ function configureParticle(token){
       &&item.surface===token.grammar.particleWord)?.surface||null)
     :null)
   ||(type===LA_JINS_PARTICLE_TYPE?LA_JINS_PARTICLE.surface:null)
+  ||(type===LA_MUHMALA_PARTICLE_TYPE?LA_MUHMALA_PARTICLE.surface:null)
   ||(type===WAW_MAIYYA_TYPE?WAW_MAIYYA.surface:null)
   ||(NIDA_PARTICLE_BY_TYPE[type]?NIDA_PARTICLE_BY_TYPE[type].surface:null)
   /* Wave 1 — a khafḍ particle's bytes come from its own registry record, never from the builder's
@@ -15443,7 +15935,16 @@ function nounRoleArabic(token){
  }
  /* «اسْمُ لَا» rather than a bare «منصوب»: the naṣb here comes from لا working like إنّ, and the
     learner needs to see whose noun it is. The muḍāف clause is appended by the shared iḍāfah line. */
- if(role===ISM_LA_ROLE)return'اسْمُ «لَا» النَّافِيَةِ لِلْجِنْسِ مَنْصُوبٌ بِهَا';
+ /* Wave 10 — the two regimes produce two different lines, and that difference is the chapter:
+    «مبني على الفتح في محل نصب» is not «منصوب»، and printing the second for the first is exactly the
+    mistake p. 167 exists to prevent. The manṣūb line keeps its original bytes intact. */
+ if(role===ISM_LA_ROLE){
+  const data=token._data,authority=deriveLaJinsAuthority(data,data?.tokens?.indexOf(token));
+  if(!authority.authorized)throw new Error(`Cannot render an unauthorized «لا» al-jins noun: ${authority.reason}`);
+  if(!authority.binaa)return'اسْمُ «لَا» النَّافِيَةِ لِلْجِنْسِ مَنْصُوبٌ بِهَا';
+  return'اسْمُ «لَا» النَّافِيَةِ لِلْجِنْسِ مَبْنِيٌّ عَلَى '+LA_JINS_BINAA_SIGNS[authority.binaaSignId].ar
+   +' فِي مَحَلِّ '+LA_JINS_MAHALL.ar;
+ }
  if(role===KHABAR_LA_ROLE)return'خَبَرُ «لَا» النَّافِيَةِ لِلْجِنْسِ مَرْفُوعٌ بِهَا';
  throw new Error(`Unknown noun role: ${role}`);
 }
@@ -15526,9 +16027,13 @@ function renderNounAnalysis(token){
   const ismIndex=data?.tokens?.findIndex(item=>item?.grammar?.role===ISM_LA_ROLE);
   const authority=deriveLaJinsAuthority(data,ismIndex);
   if(!authority.authorized)throw new Error(`Cannot render an unauthorized «لا» al-jins frame: ${authority.reason}`);
-  english=token.grammar.role===ISM_LA_ROLE
-   ?'The noun of the لا that negates a whole class; accusative, because that لا works like «إنّ».'
-   :'The khabar of the لا that negates a whole class; nominative, and indefinite as its condition requires.';
+  english=token.grammar.role!==ISM_LA_ROLE
+   ?'The khabar of the لا that negates a whole class; nominative, and indefinite as its condition requires.'
+   :authority.binaa
+   ?'The noun of the لا that negates a whole class ('+LA_JINS_SUBTYPE_LABELS[authority.subtype].en
+     +'), built on '+LA_JINS_BINAA_SIGNS[authority.binaaSignId].en+' and holding the position of nasb.'
+   :'The noun of the لا that negates a whole class ('+LA_JINS_SUBTYPE_LABELS[authority.subtype].en
+     +'); accusative, because that لا works like «إنّ».';
  }
  if(token.grammar.role===MUNADA_ROLE){
   const data=token._data,authority=deriveMunadaAuthority(data,data?.tokens?.indexOf(token));
@@ -15830,7 +16335,14 @@ function renderParticleAnalysis(token){
  if(type==='maMasdariyyaZarfiyya'){token.ar=`${token.word}: ${KANA_CONDITION_PARTICLES.maMasdariyyaZarfiyya.nameAr}، ${KANA_NO_MAHALL_AR}.`;token.en='Mā al-maṣdariyyah al-ẓarfiyyah, the particle whose presence lets dāma govern.';return}
  if(isNidaParticleType(type)){const record=NIDA_PARTICLE_BY_TYPE[type];token.ar=`${token.word}: ${record.iraabAr}`;token.en=record.iraabEn;return}
  if(type===WAW_MAIYYA_TYPE){token.ar=`${token.word}: ${WAW_MAIYYA.nameAr}، حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='The wāw of accompaniment; it is not a conjunction here.';return}
- if(type===LA_JINS_PARTICLE_TYPE){token.ar=`${token.word}: ${LA_JINS_PARTICLE.nameAr}، تَعْمَلُ عَمَلَ «إِنَّ»، مَبْنِيَّةٌ عَلَى السُّكُونِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.`;token.en='The لا that negates a whole class; it works like «إنّ».';return}
+ /* The source's own iʿrāb of it, verbatim: «و«لا»: نافية مهملة». «لا عمل لها» is added because that
+    is the entire content of «مهملة», and a learner meeting the word here meets it for the first time. */
+ if(type===LA_MUHMALA_PARTICLE_TYPE){
+  token.ar=`${token.word}: ${LA_MUHMALA_PARTICLE.nameAr}، ${LA_MUHMALA_PARTICLE.noAmalAr}، ${LA_PARTICLE_SUKUN_AR}`;
+  token.en='A negating لا whose government has been cancelled; it works on nothing at all.';
+  return;
+ }
+ if(type===LA_JINS_PARTICLE_TYPE){token.ar=`${token.word}: ${LA_JINS_PARTICLE.nameAr}، تَعْمَلُ عَمَلَ «إِنَّ»، ${LA_PARTICLE_SUKUN_AR}`;token.en='The لا that negates a whole class; it works like «إنّ».';return}
  if(type===ISTITHNA_ILLA_TYPE){token.ar=`${token.word}: ${ISTITHNA_TOOLS.illa.nameAr} مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A particle of exception; it excludes what follows it from what precedes it.';return}
  if(type==='laNafiyaContext'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle; it does not govern this indicative verb.';return}
  /* Wave 6. Three identities that share their bytes with particles this app already produces, and
@@ -15913,6 +16425,30 @@ function whyLaJinsConditions(token,data){
  return{id:'WHY_LA_JINS_CONDITIONS',
   ar:`وَشَرْطُ عَمَلِهَا أَنْ يَكُونَ اسْمُهَا وَخَبَرُهَا نَكِرَتَيْنِ، وَقَدْ تَحَقَّقَ ذَلِكَ فِي ${wq(token.word)} وَ${wq(authority.khabarWord)}.`,
   en:`Its government requires that both its noun and its khabar be indefinite, and ${eq(token.word)} and ${eq(authority.khabarWord)} both are.`};
+}
+/* p. 166–167 divides اسم لا into three أنواع and then rules on each one separately, so this line
+   states the نوع, states what makes this word that نوع, and only then states the regime that
+   follows from it. For المفرد the ruling is derived, not asserted: the source says «يُبْنى على ما
+   يُنْصَبُ به», so the line gives the naṣb first and the bināʾ second, and ends by denying the naṣb
+   ending outright — which is the one thing a learner is most likely to write here. */
+function whyLaJinsRuling(token,data){
+ const authority=laJinsWhyAuthority(token,data);
+ const label=LA_JINS_SUBTYPE_LABELS[authority.subtype];
+ const attached=authority.dependencyWords.join(' ');
+ if(authority.binaa){
+  const marker=LA_JINS_MUFRAD_BINAA[authority.inflection],sign=LA_JINS_BINAA_SIGNS[marker.binaaSignId];
+  return{id:'WHY_LA_JINS_MUFRAD',
+   ar:`وَنَوْعُهُ ${label.ar}، وَهُوَ ${label.senseAr}، وَهَذَا النَّوْعُ يُبْنَى عَلَى مَا يُنْصَبُ بِهِ مِنْ غَيْرِ تَنْوِينٍ، وَهُوَ ${marker.nasbAr}، فَهُوَ مَبْنِيٌّ عَلَى ${sign.ar}؛ فَلَيْسَ مَنْصُوبًا بِعَلَامَةٍ ظَاهِرَةٍ، بَلْ هُوَ فِي مَحَلِّ ${LA_JINS_MAHALL.ar}.`,
+   en:`It is ${label.en} — ${label.senseEn} — and this kind is built on whatever would make it accusative, without tanwin: it ${marker.nasbEn}, so it is built on ${sign.en}. It carries no visible case ending at all; it holds the position of ${LA_JINS_MAHALL.en}.`};
+ }
+ if(authority.subtype===LA_JINS_SUBTYPES.shabih){
+  return{id:'WHY_LA_JINS_SHABIH',
+   ar:`وَنَوْعُهُ ${label.ar}، وَهُوَ ${label.senseAr}، وَقَدِ اتَّصَلَ بِهِ ${wq(attached)} مِمَّا يَتِمُّ بِهِ مَعْنَاهُ، فَحُكْمُهُ حُكْمُ الْمُضَافِ: يُنْصَبُ بِالْفَتْحَةِ.`,
+   en:`It is ${label.en} — ${label.senseEn} — and here that something is ${eq(attached)}, so it takes the muḍāf's own ruling: accusative by the fatḥah.`};
+ }
+ return{id:'WHY_LA_JINS_MUDAF',
+  ar:`وَنَوْعُهُ ${label.ar}، وَقَدْ أُضِيفَ إِلَى ${wq(attached)}، وَهَذَا النَّوْعُ يُنْصَبُ بِالْفَتْحَةِ الظَّاهِرَةِ أَوْ بِمَا نَابَ عَنْهَا.`,
+  en:`It is ${label.en}, and here the noun it is joined to is ${eq(attached)}; this kind is accusative by the visible fatḥah or by what stands in for it.`};
 }
 function munadaWhyAuthority(token,data){
  const authority=deriveMunadaAuthority(data,data?.tokens?.indexOf(token));
@@ -16384,9 +16920,17 @@ const WHY_ROLE=Object.freeze({
   id:()=>'WHY_ROLE_ISM_LA',
   ar:(t,data)=>`${wq(t.word)} هُوَ الِاسْمُ الَّذِي دَخَلَتْ عَلَيْهِ ${wq(laJinsWhyAuthority(t,data).particleWord)} النَّافِيَةُ لِلْجِنْسِ، فَهُوَ اسْمُهَا.`,
   en:(t,data)=>`${eq(t.word)} is the noun that ${eq(laJinsWhyAuthority(t,data).particleWord)} — the لا negating a whole class — entered upon, so it is its اسْم.`,
-  stateId:()=>'WHY_STATE_ISM_LA',
-  stateAr:()=>'وَاسْمُ «لَا» مَنْصُوبٌ بِهَا؛ لِأَنَّهَا تَعْمَلُ عَمَلَ «إِنَّ».',
-  stateEn:()=>'The اسْم of «لا» is مَنْصُوبٌ by it, because it works like «إنّ».'},
+  /* p. 166's own words are «فَتَنْصِبُ الِاسْمَ لَفْظًا أَوْ مَحَلًّا», and the split is not decoration: the
+     two muʿrab أنواع take the naṣb in their ENDING, while المفرد is built and takes it in its
+     POSITION. A flat «منصوب» here would teach the exact mistake p. 167 exists to prevent, so the
+     line follows the شرح and says which of the two this word is. */
+  stateId:(t,data)=>laJinsWhyAuthority(t,data).binaa?'WHY_STATE_ISM_LA_MAHALL':'WHY_STATE_ISM_LA_LAFZ',
+  stateAr:(t,data)=>laJinsWhyAuthority(t,data).binaa
+   ?'وَاسْمُ «لَا» مَنْصُوبٌ بِهَا مَحَلًّا؛ لِأَنَّهَا تَعْمَلُ عَمَلَ «إِنَّ».'
+   :'وَاسْمُ «لَا» مَنْصُوبٌ بِهَا لَفْظًا؛ لِأَنَّهَا تَعْمَلُ عَمَلَ «إِنَّ».',
+  stateEn:(t,data)=>laJinsWhyAuthority(t,data).binaa
+   ?'The اسْم of «لا» is مَنْصُوبٌ by it in its POSITION, not in its ending, because it works like «إنّ».'
+   :'The اسْم of «لا» is مَنْصُوبٌ by it in its ending, because it works like «إنّ».'},
  khabarLa:{
   id:()=>'WHY_ROLE_KHABAR_LA',
   ar:(t,data)=>`${wq(t.word)} أَخْبَرَ عَنِ اسْمِ ${wq(laJinsWhyAuthority(t,data).particleWord)}، فَهُوَ خَبَرُهَا.`,
@@ -16778,6 +17322,11 @@ const WHY_PARTICLE=Object.freeze({
   id:record.id==='ya'?'WHY_PARTICLE_NIDA':`WHY_PARTICLE_NIDA_${record.id.toUpperCase()}`,
   ar:`${wq(t.word)} ${record.whyAr}`,en:`${eq(t.word)} ${record.whyEn}`})])),
  [WAW_MAIYYA_TYPE]:t=>({id:'WHY_PARTICLE_WAW_MAIYYA',ar:`${wq(t.word)} وَاوُ الْمَعِيَّةِ، نَصٌّ فِي الدَّلَالَةِ عَلَى الْمُصَاحَبَةِ، وَلَيْسَتْ عَاطِفَةً؛ فَمَا بَعْدَهَا مَنْصُوبٌ لَا تَابِعٌ.`,en:`${eq(t.word)} is the wāw of accompaniment — express, not merely possible — and it is not a conjunction, so what follows it is accusative rather than a follower.`}),
+ /* Why this «لا» does NOT operate — the two triggers p. 167 gives, and the repetition it forces.
+    The line is written from the proven frame, so it can only be printed where both are true. */
+ [LA_MUHMALA_PARTICLE_TYPE]:(t,data)=>({id:'WHY_PARTICLE_LA_MUHMALA',
+  ar:`${wq(t.word)} نَافِيَةٌ، وَلَكِنَّهَا لَمْ تَعْمَلْ؛ لِأَنَّ الَّذِي بَعْدَهَا مَعْرِفَةٌ وَهِيَ لَا تَنْصِبُ إِلَّا النَّكِرَاتِ، وَإِذَا وَقَعَ بَعْدَهَا مَعْرِفَةٌ وَجَبَ إِلْغَاؤُهَا وَتَكْرَارُهَا، فَهِيَ ${LA_MUHMALA_PARTICLE.nameAr}.`,
+  en:`${eq(t.word)} negates, but it does not govern: what follows it is definite, and this لا makes only indefinites accusative. When a definite word follows it, cancelling it AND repeating it are both obligatory — so it is a cancelled لا.`}),
  [LA_JINS_PARTICLE_TYPE]:t=>({id:'WHY_PARTICLE_LA_NAFIYA_JINS',ar:`${wq(t.word)} نَافِيَةٌ لِلْجِنْسِ، تَنْفِي الْحُكْمَ عَنِ الْجِنْسِ كُلِّهِ، وَتَعْمَلُ عَمَلَ «إِنَّ» فَتَنْصِبُ الِاسْمَ وَتَرْفَعُ الْخَبَرَ.`,en:`${eq(t.word)} negates the whole class, not one instance, and it works like «إنّ»: accusative for its noun, nominative for its khabar.`}),
  [ISTITHNA_ILLA_TYPE]:t=>({id:'WHY_PARTICLE_ISTITHNA_ILLA',ar:`${wq(t.word)} حَرْفُ اسْتِثْنَاءٍ، يُخْرِجُ مَا بَعْدَهُ مِنْ حُكْمِ مَا قَبْلَهُ.`,en:`${eq(t.word)} is a particle of exception: it takes what follows it out of the ruling given to what precedes it.`}),
  ...Object.fromEntries(Object.values(ATF_CONJUNCTION_REGISTRY).map(record=>[record.particleType,t=>({
@@ -16915,6 +17464,7 @@ function buildTokenWhy(token,data){
    push(whyMafulAjlState(token,data));
   }
   if(token.grammar.role===ISM_LA_ROLE){
+   push(whyLaJinsRuling(token,data));
    push(whyLaJinsConditions(token,data));
   }
   if(token.grammar.role===TAMYIZ_ROLE){
@@ -16923,7 +17473,10 @@ function buildTokenWhy(token,data){
   }
   // The five nouns carry their muḍāf ilayh as an attached kāf, so the generic “joined to what
   // follows it” wording would be wrong for them; the engine already flags this via attachedKaf.
-  if(token.grammar.isMudaf)push(token.grammar.attachedHaa
+  /* Wave 10 — an اسم لا of the مضاف نوع gets no generic iḍāfah line: whyLaJinsRuling already names
+     the نوع AND the very noun it is joined to, so the generic line would say the same thing twice —
+     and it was the sixth statement on a card whose ceiling is five. */
+  if(token.grammar.isMudaf&&token.grammar.role!==ISM_LA_ROLE)push(token.grammar.attachedHaa
    ?{id:'WHY_MUDAF_ATTACHED_HAA',ar:'وَهُوَ مُضَافٌ، وَالْهَاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ.',en:'It is a مُضَافٌ, and the attached هَاء is its مُضَافٌ إِلَيْهِ.'}
    :token.grammar.attachedKaf
    ?{id:'WHY_MUDAF_ATTACHED_KAF',ar:'وَهُوَ مُضَافٌ، وَالْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ خَفْضٍ مُضَافٌ إِلَيْهِ.',en:'It is a مُضَافٌ, and the attached كَاف is its مُضَافٌ إِلَيْهِ.'}
@@ -17550,15 +18103,50 @@ function renderRelationshipAnalysis(data){
   motive.phraseEn=`Together, “${phrase}”: “${motive.word}” is an inward maṣdar giving the reason for “${verb.word}”, sharing its time and its doer “${subject.word}”, so it is accusative as a mafʿūl lah.`;
   motive.phraseLabel='Mafʿūl lah construction';
  });
+ /* إلغاء عمل «لا» — the construction has no relationship of its own to hang off, because its
+    relationships ARE the ordinary ones (mubtadaʾ–khabar and the follower link). So the combined
+    block is written from the proven frame instead, and it says the two things p. 167 says: why the
+    government lapsed, and that the repetition it forces is not optional. */
+ (()=>{
+  const authority=deriveLaIlghaAuthority(data,1);
+  if(!authority.authorized)return;
+  const khabar=data.tokens.find(item=>item.id===authority.khabarId);
+  if(!khabar)return;
+  const phrase=data.tokens.map(item=>item.word).join(' ');
+  khabar.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: وَقَعَ بَعْدَ «لَا» مَعْرِفَةٌ وَهِيَ ${wq(authority.mubtadaWord)}، وَ«لَا» النَّافِيَةُ لِلْجِنْسِ لَا تَنْصِبُ إِلَّا النَّكِرَاتِ، فَوَجَبَ إِلْغَاءُ عَمَلِهَا وَوَجَبَ تَكْرَارُهَا؛ فَهِيَ ${LA_MUHMALA_PARTICLE.nameAr}، وَبَقِيَتِ الْجُمْلَةُ عَلَى أَصْلِهَا: ${wq(authority.mubtadaWord)} مُبْتَدَأٌ، وَ${wq(authority.followerWord)} مَعْطُوفٌ عَلَى ${wq(authority.mubtadaWord)}، وَ${wq(authority.khabarWord)} خَبَرٌ.`;
+  khabar.phraseEn=`Together, “${phrase}”: a definite word, “${authority.mubtadaWord}”, fell after «لا», and this «لا» makes only indefinites accusative — so cancelling it AND repeating it both became obligatory. It is a cancelled لا, and the sentence stays what it was: “${authority.mubtadaWord}” is the mubtadaʾ, “${authority.followerWord}” is joined to it, and “${authority.khabarWord}” is the khabar.`;
+  khabar.phraseLabel='cancelled «لا» construction';
+  /* Every combined block owes a Why. This one has no relationship to build it from, so it is
+     written here in the same {ids,ar,en} shape, and it carries the half of p. 167 the card cannot:
+     that the repetition is obligatory rather than stylistic, and what would have happened had the
+     word after «لا» been indefinite. */
+  khabar.phraseWhy={
+   ids:['WHY_REL_LA_ILGHA'],
+   ar:[`لَوْ كَانَ الْوَاقِعُ بَعْدَ «لَا» نَكِرَةً مُبَاشِرَةً لَنَصَبَتْهُ عَلَى أَنَّهُ اسْمُهَا؛ فَلَمَّا كَانَ ${wq(authority.mubtadaWord)} مَعْرِفَةً بَطَلَ عَمَلُهَا، وَوَجَبَ مَعَ الْإِلْغَاءِ تَكْرَارُهَا، فَتَكَرَّرَتْ فِي ${wq(authority.followerWord)}.`],
+   en:[`Had an indefinite word come straight after «لا», it would have made it accusative as its noun; because “${authority.mubtadaWord}” is definite its government lapsed, and the page makes repetition obligatory alongside the cancellation — which is the second «لا», before “${authority.followerWord}”.`]
+  };
+ })();
  data.relationships.filter(rel=>rel.type==='laJins').forEach(rel=>{
   const particle=data.tokens.find(item=>item.id===rel.particleId);
   const ism=data.tokens.find(item=>item.id===rel.ismId);
   const khabar=data.tokens.find(item=>item.id===rel.khabarId);
   if(!particle||!ism||!khabar)return;
-  const complement=ism.grammar.isMudaf?data.tokens[data.tokens.indexOf(ism)+1]:null;
-  const phrase=[particle.word,ism.word,complement?complement.word:'',khabar.word].filter(Boolean).join(' ');
-  khabar.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: «لَا» نَافِيَةٌ لِلْجِنْسِ عَمِلَتْ عَمَلَ «إِنَّ»، فَنَصَبَتِ اسْمَهَا ${wq(ism.word)} وَرَفَعَتْ خَبَرَهَا ${wq(khabar.word)}، وَكِلَاهُمَا نَكِرَةٌ.`;
-  khabar.phraseEn=`Together, “${phrase}” is «لا» negating a whole class and working like «إنّ»: its noun “${ism.word}” is accusative and its khabar “${khabar.word}” nominative, and both are indefinite.`;
+  /* Wave 10 — the phrase is read off the tokens rather than assembled from a fixed four, because
+     the three أنواع build three different shapes. The combined block also NAMES the نوع and states
+     which of p. 166's two naṣbs this one is («فتنصب الاسم لفظًا أو محلًّا»), because that is the
+     division the whole bāb turns on and the learner has to be able to say it. */
+  const authority=deriveLaJinsAuthority(data,data.tokens.indexOf(ism));
+  if(!authority.authorized)return;
+  const label=LA_JINS_SUBTYPE_LABELS[authority.subtype];
+  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const rulingAr=authority.binaa
+   ?`مَحَلًّا، فَهُوَ مَبْنِيٌّ عَلَى ${LA_JINS_BINAA_SIGNS[authority.binaaSignId].ar} فِي مَحَلِّ ${LA_JINS_MAHALL.ar}،`
+   :'لَفْظًا،';
+  const rulingEn=authority.binaa
+   ?` in POSITION — it is built on ${LA_JINS_BINAA_SIGNS[authority.binaaSignId].en} and holds the place of naṣb —`
+   :' in its ending';
+  khabar.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: «لَا» نَافِيَةٌ لِلْجِنْسِ عَمِلَتْ عَمَلَ «إِنَّ»، فَنَصَبَتِ اسْمَهَا ${wq(ism.word)} ${rulingAr} وَرَفَعَتْ خَبَرَهَا ${wq(khabar.word)}، وَكِلَاهُمَا نَكِرَةٌ. وَنَوْعُ اسْمِهَا ${label.ar}.`;
+  khabar.phraseEn=`Together, “${phrase}” is «لا» negating a whole class and working like «إنّ»: its noun “${ism.word}” is accusative${rulingEn} and its khabar “${khabar.word}” nominative, and both are indefinite. Its noun is ${label.en}.`;
   khabar.phraseLabel='«لا» al-jins construction';
  });
  data.relationships.filter(rel=>rel.type==='istithna').forEach(rel=>{
@@ -17675,8 +18263,14 @@ function renderRelationshipAnalysis(data){
   if(rel.kind===ATF_KIND){
    const conjunction=data.tokens.find(item=>item.id===rel.conjunctionId);
    if(!conjunction)return;
-   followed.phraseAr=`وَالتَّرْكِيبُ «${followed.word} ${conjunction.word} ${follower.word}»: مَعْطُوفٌ عَلَيْهِ، وَحَرْفُ عَطْفٍ، وَمَعْطُوفٌ تَابِعٌ لَهُ فِي الْإِعْرَابِ.`;
-   followed.phraseEn=`Together, “${followed.word} ${conjunction.word} ${follower.word}” is a maʿṭūf ʿalayh, a conjunction, and a maʿṭūf inheriting its state.`;
+   /* Wave 10 — the phrase is read off the token SPAN rather than glued from three words, because
+      the إلغاء construction of p. 167 puts a repeated «لا» between the conjunction and its maʿṭūf,
+      and a combined block that quoted «الْمُعَلِّمُ وَ الطَّبِيبُ» would be quoting a sentence the
+      learner is not looking at. Every other lane has nothing in between, so nothing else moves. */
+   const span=data.tokens.slice(data.tokens.indexOf(followed),data.tokens.indexOf(follower)+1)
+    .map(item=>item.word).join(' ');
+   followed.phraseAr=`وَالتَّرْكِيبُ «${span}»: مَعْطُوفٌ عَلَيْهِ، وَحَرْفُ عَطْفٍ، وَمَعْطُوفٌ تَابِعٌ لَهُ فِي الْإِعْرَابِ.`;
+   followed.phraseEn=`Together, “${span}” is a maʿṭūf ʿalayh, a conjunction, and a maʿṭūf inheriting its state.`;
    followed.phraseLabel='Follower';
    return;
   }
@@ -18044,11 +18638,24 @@ function validateExercise(data){
     const ismIndex=data.tokens.findIndex(item=>item?.grammar?.role===ISM_LA_ROLE);
     const authority=deriveLaJinsAuthority(data,ismIndex);
     const isIsm=token.grammar.role===ISM_LA_ROLE;
+    /* Wave 10 — the اسم's source rule is its نوع's, and it is re-derived HERE from the frame rather
+       than trusted from the token: المفرد is built and cites the bināʾ rule, الشبيه بالمضاف cites
+       its own naṣb rule, and only المضاف keeps R_ISM_LA_NASB. The khabar is one rule in all three. */
+    const expectedLaJinsRule=!isIsm?'R_KHABAR_LA_RAF'
+     :authority.binaa?'R_ISM_LA_MABNI'
+     :authority.subtype===LA_JINS_SUBTYPES.shabih?'R_ISM_LA_SHABIH_NASB':'R_ISM_LA_NASB';
     if(!authority.authorized)fail('E_LA_JINS_AUTHORITY',`«لا» al-jins authority failed: ${authority.reason}.`,token);
-    else if(token.ruleId!==(isIsm?'R_ISM_LA_NASB':'R_KHABAR_LA_RAF')){
+    else if(token.ruleId!==expectedLaJinsRule){
      fail('E_LA_JINS_RULE','The «لا» al-jins participant is not bound to its source rule.',token);
     }
-    if(token.state!==(isIsm?'nasb':'raf')){
+    /* A built اسم لا has no state to compare — it has a maḥall. Demanding naṣb of it here would be
+       demanding the very iʿrāb ending p. 167 denies it, so the two regimes are checked apart. */
+    if(isIsm&&authority.authorized&&authority.binaa){
+     if(token.state)fail('E_ROLE_CASE','A built اسم لا may not carry an iʿrāb state.',token);
+     if(token.mahall!==LA_JINS_MAHALL.state){
+      fail('E_LA_JINS_MAHALL','A built اسم لا must hold the position of naṣb.',token);
+     }
+    }else if(token.state!==(isIsm?'nasb':'raf')){
      fail('E_ROLE_CASE',`Role ${token.grammar.role} requires ${isIsm?'nasb':'raf'}, not ${token.state}.`,token);
     }
     // The matn's own words: «تَنْصِبُ النَّكِرَاتِ». A definite participant is a different chapter.
@@ -19326,13 +19933,38 @@ function add(starts,form,state,sign,build,metadata={}){
    throw new Error(`Template ${stableId} produces a mafʿūl lah without the explicit past ʿāmil its conditions require.`);
   }
  }
+ /* إلغاء عمل «لا». One template owns one frame, for the same reason every other frozen frame does. */
+ const laIlghaFrameKeys=Object.freeze([...(metadata.laIlghaFrameKeys||[])]);
+ if(laIlghaFrameKeys.some((key,position)=>laIlghaFrameKeys.indexOf(key)!==position||!LA_ILGHA_FRAMES[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered إلغاء frame.`);
+ }
+ if(laIlghaFrameKeys.length){
+  if(laJinsPairKeysDeclared(metadata)){
+   throw new Error(`Template ${stableId} declares both a governing and a cancelled «لا» frame.`);
+  }
+  /* The maʿṭūf is a REAL maʿṭūف built by the follower engine, so the template must declare the ʿaṭf
+     it uses exactly as every other ʿaṭf lane does. Without this the follower would be unauthorized. */
+  if(followerKind!==ATF_KIND)throw new Error(`Template ${stableId} produces an إلغاء frame without its ʿaṭf declaration.`);
+ }
  /* «لا» النافية للجنس. */
  const laJinsPairKeys=Object.freeze([...(metadata.laJinsPairKeys||[])]);
  if(laJinsPairKeys.some((key,position)=>laJinsPairKeys.indexOf(key)!==position||!LA_JINS_PAIR_REGISTRY[key])){
   throw new Error(`Template ${stableId} names a duplicate or unregistered «لا» al-jins pair.`);
  }
- if(laJinsPairKeys.length&&form!=='singular'){
-  throw new Error(`Template ${stableId} declares a «لا» al-jins noun of the wrong declension.`);
+ if(laJinsPairKeys.length){
+  /* One template owns one نوع and one declension. Mixing أنواع would let a single stable ID
+     authorize two token shapes, which is how a مفرد frame could later be restored as a مضاف. */
+  const subtypes=new Set(laJinsPairKeys.map(key=>LA_JINS_PAIR_REGISTRY[key].subtype));
+  const inflections=new Set(laJinsPairKeys.map(key=>laJinsHeadInflection(LA_JINS_PAIR_REGISTRY[key])));
+  if(subtypes.size!==1)throw new Error(`Template ${stableId} mixes «لا» al-jins أنواع.`);
+  if(inflections.size!==1||!inflections.has(form)){
+   throw new Error(`Template ${stableId} declares a «لا» al-jins noun of the wrong declension.`);
+  }
+  /* Only المفرد varies by declension: p. 167 rules on المضاف and الشبيه بالمضاف with the fatḥah and
+     no declensional variation, so a non-singular lane for either would be inventing morphology. */
+  if(!subtypes.has(LA_JINS_SUBTYPES.mufrad)&&form!=='singular'){
+   throw new Error(`Template ${stableId} inflects a «لا» al-jins نوع the source does not inflect.`);
+  }
  }
  /* الاستثناء. One template owns one أداة: «إِلَّا» and «غَيْر» build different token shapes, so a
     template mixing them would let one stable ID authorize two structures. */
@@ -19496,6 +20128,7 @@ function add(starts,form,state,sign,build,metadata={}){
   istithnaNaqisKeys,
   istithnaKhalaKeys,
   laJinsPairKeys,
+  laIlghaFrameKeys,
   mafulAjlPairKeys,
   mafulMaahPairKeys,
   zannaPairKeys,
@@ -20802,14 +21435,27 @@ add('verb','singular','nasb','fatha',()=>pickedMustathna(MUSTATHNA_GHAYR_KEYS,'m
 function buildLaJinsExercise(pairKey){
  const pair=LA_JINS_PAIR_REGISTRY[pairKey];
  if(!pair)throw new Error(`Unknown productive «لا» al-jins pair: ${pairKey}`);
- const ism=LA_JINS_LEXEMES[pair.ismKey],complement=LA_JINS_COMPLEMENTS[pair.complementKey];
- const khabar=LA_JINS_KHABARS[pair.khabarKey];
+ const label=LA_JINS_SUBTYPE_LABELS[pair.subtype];
+ const ism=LA_JINS_LEXEMES[pair.ismKey],head=laJinsHeadSurface(pair);
+ const khabar=laJinsKhabarRecord(pair);
  const tokens=[
   token(LA_JINS_PARTICLE.surface,LA_JINS_PARTICLE.gloss,AR.laJinsParticle(),''),
-  token(ism.acc,ism.en,AR.ismLaMudaf(ism.acc),'The noun of «لا»; indefinite, joined to it, and accusative.',true),
-  token(complement.gen,complement.en,AR.mudafIlayh(complement.gen),EN.mudafIlayh),
-  token(khabar.nom,khabar.en,AR.khabarLa(khabar.nom),'The khabar of «لا»; indefinite and nominative.')
+  token(head,ism.en,pair.subtype===LA_JINS_SUBTYPES.mudaf?AR.ismLaMudaf(head):AR.ismLa(head),
+   label.binaa
+    ?'The noun of «لا»; indefinite, joined to it, built without tanwin and holding the position of nasb.'
+    :'The noun of «لا»; indefinite, joined to it, and accusative.',true)
  ];
+ if(pair.subtype===LA_JINS_SUBTYPES.mudaf){
+  const complement=LA_JINS_COMPLEMENTS[pair.complementKey];
+  tokens.push(token(complement.gen,complement.en,AR.mudafIlayh(complement.gen),EN.mudafIlayh));
+ }else if(pair.subtype===LA_JINS_SUBTYPES.shabih){
+  /* The dependency is built as REAL tokens — a preposition the app already owns and its مجرور —
+     because «ما اتَّصَلَ به شيءٌ من تمام معناه» is a fact about the sentence, not a field. */
+  const complement=LA_JINS_COMPLEMENTS[pair.dependency.complementKey],prep=pair.dependency.prep;
+  tokens.push(token(prep,GLOSS_CLOSED_PARTICLES[prep],AR.prep(prep),EN.prep));
+  tokens.push(token(complement.gen,complement.en,AR.majrur(complement.gen,prep),EN.majrur));
+ }
+ tokens.push(token(khabar.nom,khabar.en,AR.khabarLa(khabar.nom),'The khabar of «لا»; indefinite and nominative.'));
  return{sentence:'',translation:pair.sentenceEn,tokens};
 }
 /* المفعول له — the pair names the act, the doer and the motive; the builder resolves them. */
@@ -20918,9 +21564,30 @@ MUNADA_TEMPLATE_LANES.forEach(lane=>{
   throw new Error('The munādā lanes do not cover every registered pair exactly once.');
  }
 })();
+function buildLaIlghaExercise(frameKey){
+ const frame=LA_ILGHA_FRAMES[frameKey];
+ if(!frame)throw new Error(`Unknown productive إلغاء frame: ${frameKey}`);
+ const pair=ATF_PAIR_REGISTRY[frame.atfPairKey],conjunction=ATF_CONJUNCTION_REGISTRY[frame.conjunctionKey];
+ const khabar=laIlghaKhabarRecord(frame);
+ const la=()=>token(LA_MUHMALA_PARTICLE.surface,LA_MUHMALA_PARTICLE.gloss,AR.laMuhmalaParticle(),
+  'A negating لا that governs nothing here.');
+ return{sentence:'',translation:frame.sentenceEn,tokens:[
+  la(),
+  token(pair.followed.nom,pair.followed.en,AR.mubtada(pair.followed.nom),
+   'The definite noun after «لا»; it is what cancels «لا», and it stays an ordinary mubtadaʾ.',true),
+  atfConjunctionToken(conjunction),
+  la(),
+  token(pair.follower.nom,pair.follower.en,AR.atf(pair.follower.nom),'A maʿṭūf inheriting rafʿ.'),
+  token(khabar.nom,khabar.en,AR.khabar(khabar.nom),EN.khabar)
+ ]};
+}
+const laJinsKeysFor=(subtype,inflection)=>Object.freeze(LA_JINS_ALL_PAIR_KEYS.filter(key=>
+ LA_JINS_PAIR_REGISTRY[key].subtype===subtype&&laJinsHeadInflection(LA_JINS_PAIR_REGISTRY[key])===inflection));
 const laJinsMetadata=keys=>({laJinsPairKeys:keys});
-const pickedLaJins=()=>buildLaJinsExercise(pickVaried(LA_JINS_ALL_PAIR_KEYS,'la-jins',String));
-add('particle','singular','nasb','fatha',()=>pickedLaJins(),laJinsMetadata(LA_JINS_ALL_PAIR_KEYS));
+const laJinsPairKeysDeclared=metadata=>Boolean((metadata.laJinsPairKeys||[]).length);
+const pickedLaJins=keys=>buildLaJinsExercise(pickVaried(keys,'la-jins-'+keys[0],String));
+const LA_JINS_MUDAF_KEYS=laJinsKeysFor(LA_JINS_SUBTYPES.mudaf,'singular');
+add('particle','singular','nasb','fatha',()=>pickedLaJins(LA_JINS_MUDAF_KEYS),laJinsMetadata(LA_JINS_MUDAF_KEYS));
 
 /* ===== J1a — the five remaining one-verb jawāzim, over both proven jazm regimes ==================
    One builder serves every construction, because the grammar genuinely is the same: a jāzim stands
@@ -21768,6 +22435,40 @@ add('noun','singular','nasb','fatha',()=>pickedTamyiz(TAMYIZ_MUHAWWAL_MUBTADA_KE
   throw new Error('The tamyīz lanes do not cover every registered pair exactly once.');
  }
 })();
+
+/* ══ Wave 10 ══ One lane per (نوع، declension), for the same reason the المنادى chapter has one:
+   the أنواع build different token shapes over two different regimes, and p. 167 gives المفرد a
+   different bināʾ marker for each declension. The SIGN each lane declares is the ordinary naṣb sign
+   of that declension — which is precisely what «يُبْنى على ما يُنْصَبُ به» makes it — and a built
+   focus is exempt from the sign comparison, exactly as the built munādā lanes are. */
+const LA_JINS_TEMPLATE_LANES=Object.freeze([
+ Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,inflection:'singular',sign:'fatha'}),
+ Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,inflection:'broken',sign:'fatha'}),
+ Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,inflection:'dual',sign:'ya'}),
+ Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,inflection:'smp',sign:'ya'}),
+ Object.freeze({subtype:LA_JINS_SUBTYPES.mufrad,inflection:'sfp',sign:'kasra'}),
+ Object.freeze({subtype:LA_JINS_SUBTYPES.shabih,inflection:'singular',sign:'fatha'})
+]);
+LA_JINS_TEMPLATE_LANES.forEach(lane=>{
+ const keys=laJinsKeysFor(lane.subtype,lane.inflection);
+ if(!keys.length)throw new Error(`The «لا» al-jins lane ${lane.subtype}/${lane.inflection} registers no pair.`);
+ add('particle',lane.inflection,'nasb',lane.sign,()=>pickedLaJins(keys),laJinsMetadata(keys));
+});
+/* Every registered pair must be reachable through exactly one lane, or a pair would exist that no
+   learner can ever be shown and no test can ever build. */
+(()=>{
+ const reached=[LA_JINS_MUDAF_KEYS,...LA_JINS_TEMPLATE_LANES.map(lane=>laJinsKeysFor(lane.subtype,lane.inflection))]
+  .flatMap(keys=>[...keys]);
+ if(new Set(reached).size!==reached.length||reached.length!==LA_JINS_ALL_PAIR_KEYS.length){
+  throw new Error('The «لا» al-jins lanes do not cover every registered pair exactly once.');
+ }
+})();
+/* إلغاء عمل «لا» — registered after the governing lanes, and deliberately in the rafʿ family: what
+   the learner is asked for is the ordinary «مبتدأ مرفوع» this sentence has gone back to, while the
+   two «لا» cards carry «نافية مهملة» beside it. */
+add('particle','singular','raf','damma',
+ ()=>buildLaIlghaExercise(pickVaried(LA_ILGHA_ALL_FRAME_KEYS,'la-ilgha',String)),
+ {...atfMetadata(['singularPeople'],['waw']),laIlghaFrameKeys:LA_ILGHA_ALL_FRAME_KEYS});
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

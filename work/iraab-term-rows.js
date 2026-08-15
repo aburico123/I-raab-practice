@@ -371,14 +371,24 @@ const rows = [
   R('B_LA_JINS', 'لَا النَّافِيَةُ لِلْجِنْسِ', CH.laJins, '166–167', 'المنصوبات', 'لَا النَّافِيَةُ لِلْجِنْسِ'),
   R('B_ISM_LA_MUDAF', 'اسْمُ لَا مَنْصُوبٌ (الْمُضَافُ)', CH.laJins, '166–167', 'اسم لا', 'اسْمُ «لَا»'),
   R('B_KHABAR_LA', 'خَبَرُ لَا مَرْفُوعٌ', CH.laJins, '166', 'خبر لا', 'خَبَرُ «لَا»'),
-  R('B_ISM_LA_MUFRAD', 'اسْمُ لَا الْمُفْرَدُ مَبْنِيٌّ عَلَى مَا يُنْصَبُ بِهِ', CH.laJins, '167', 'اسم لا', 'مَبْنِيٌّ عَلَى مَا يُنْصَبُ بِهِ',
-    { missingReason: 'deliberatelyNotGenerated: this engine models no noun bināʾ for it.' }),
-  R('B_ISM_LA_SHABIH', 'اسْمُ لَا الشَّبِيهُ بِالْمُضَافِ', CH.laJins, '167', 'اسم لا', 'الشَّبِيهُ بِالْمُضَافِ لِـ«لَا»',
-    { missingReason: 'deliberatelyNotGenerated: needs a noun carrying its own attached-pronoun subject.' }),
-  R('B_LA_MUKARRARA', 'تَكْرَارُ «لَا»', CH.laJins, '167', 'شروط إعمال لا', 'تَكْرَارُ',
-    { missingReason: 'deliberatelyNotGenerated: p. 167 permits both إعمال and إلغاء.' }),
-  R('B_LA_ILGHA', 'إِلْغَاءُ عَمَلِ «لَا»', CH.laJins, '166–167', 'شروط إعمال لا', 'إِلْغَاءُ',
-    { missingReason: 'deliberatelyNotGenerated: a definite noun after «لا», or a separator.' }),
+  /* WAVE 10. Both of the old missingReasons here said "deliberatelyNotGenerated", which — as
+     Wave 7 established — is a SCOPE decision, not a source finding, and both turned out to be
+     stale. The bināʾ one had been true when it was written and stopped being true three waves
+     later; the شبيه one mistook the sharḥ's EXAMPLE for its definition. Read the page, not the
+     note. The نوع is now printed in the combined block, exactly as the المنادى chapter's is, so
+     each of these is a term the learner actually sees. */
+  R('B_ISM_LA_MUFRAD', 'اسْمُ لَا الْمُفْرَدُ مَبْنِيٌّ عَلَى مَا يُنْصَبُ بِهِ', CH.laJins, '166–167', 'اسم لا', 'الْمُفْرَدُ',
+    { requires: 'لِلْجِنْسِ' }),
+  R('B_ISM_LA_SHABIH', 'اسْمُ لَا الشَّبِيهُ بِالْمُضَافِ', CH.laJins, '167', 'اسم لا', 'الشَّبِيهُ بِالْمُضَافِ',
+    { requires: 'لِلْجِنْسِ' }),
+  /* WAVE 10 COUNTING CORRECTION — see `notCounted`. تكرار «لا» is the FOURTH of the four شروط
+     p. 166 lists («والرابع: ألّا تتكرر لا»), i.e. a condition on the government, and no learner
+     ever utters it while parsing. Both of the readings repetition permits are already rows. */
+  /* WAVE 10 RENAME, on the Wave-6 precedent: the row is real and the source teaches it in full,
+     but «إلغاء» is the name of the RULE, and what p. 167 actually puts in an iʿrāb is «و«لا»:
+     نافية مهملة». Renamed to the source's own uttered wording; the key is kept, because the row
+     was never fiction — only its name came from the rule rather than from the parse. */
+  R('B_LA_ILGHA', 'لَا النَّافِيَةُ الْمُهْمَلَةُ', CH.laJins, '167', 'إلغاء عمل لا', 'مُهْمَلَةٌ'),
   R('B_MUNADA', 'مُنَادًى', CH.munada, '168–170', 'المنصوبات', 'مُنَادًى'),
   R('B_NIDA', 'يَا — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', 'حَرْفُ نِدَاءٍ'),
   R('B_MUNADA_MUFRAD_ALAM', 'الْمُفْرَدُ الْعَلَمُ', CH.munada, '168–169', 'أقسام المنادى', 'الْمُفْرَدُ الْعَلَمُ'),
@@ -508,6 +518,16 @@ const notCounted = [
      verbatim and which therefore keeps its rows. Note the qayd «المنصوب» is not a third deletion:
      the state IS uttered, and B_HAAL already carries it. */
   { term: 'الْفَضْلَةُ', pages: '153–154', reason: 'One of the four qayds of the sharḥ’s definition (p. 153), glossed at p. 154 as «ليس جزءاً من الكلام؛ فخرج به الخبر» — a statement of what the definition excludes, not a word the learner utters. p. 157’s own model answers parse a ḥāl as «حال مبين لهيئة الفاعل منصوب بالفتحة الظاهرة» with no فضلة in the line. The idea is enforced structurally (a ḥāl frame already has its fāʿil) and explained in the Why; it is not a separate direct target.' },
+  /* Wave 10 CORRECTION. تكرار «لا» was carried as a row of باب «لا». It is genuinely in the source
+     — p. 166 makes it the fourth of the four شروط of obligatory government, «والرابع: ألّا تتكرر
+     "لا"», and p. 167 rules on it twice more — but it is a CONDITION on the government, not a term
+     anyone says while parsing. The Wave-8 test settles it: the only iʿrāb this bāb performs is
+     p. 167's «فـ«غَوْلٌ»: مبتدأٌ مؤخَّرٌ، وفيها: متعلق بمحذوف خبر مقدّم، و«لا» نافية مهملة» — «مهملة»
+     is uttered and is a row; «تكرار» is not uttered anywhere. And repetition adds no third analysis:
+     p. 167–168's own minimal pair «لَا رَجُلَ في الدار ولا امْرَأَةَ» / «لا رَجُلٌ في الدار ولا
+     امْرَأَةٌ» resolves into the two readings this inventory ALREADY counts — the built اسم لا on the
+     إعمال side, the نافية المهملة on the إلغاء side. */
+  { term: 'تَكْرَارُ «لَا»', pages: '166–167', reason: 'The fourth of the four شروط of obligatory government (p. 166), and the thing p. 167 makes obligatory alongside الإلغاء. A condition, never a sayable iʿrāb term: the bāb’s own model parse utters «نافية مهملة» and no form of «تكرار». It stays TAUGHT — the cancelled-لا Why and combined block both state that repetition is obligatory, and the frame proves it structurally by carrying two «لا»s — and its two permitted readings are already counted as B_ISM_LA_MUFRAD and B_LA_ILGHA.' },
   { term: 'الِاسْمُ الْمُؤَوَّلُ بِالصَّرِيحِ', pages: '154', reason: 'Appears only inside the gloss of the qayd «الاسم»: «يشمل الصريح مثل ضاحكاً … ويشمل المؤول بالصريح مثل يَضْحَكُ … فإنه في تأويل ضاحكاً». It names how a sentence-shaped ḥāl is UNDERSTOOD, and the chapter never parses يضحك with it — nor with any modern حال جملة label, which is separately source-excluded. p. 158 confirms the direction of the contrast from the tamyīz side: «وقولنا الصريح لإخراج الاسم المؤول … بخلاف الحال كما سبق». Explanatory analysis, not a sayable iʿrāb term.' }
 ];
 

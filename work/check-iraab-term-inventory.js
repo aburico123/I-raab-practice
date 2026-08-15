@@ -1038,6 +1038,108 @@ const WAVE9_NOT_COUNTED = ['الْفَضْلَةُ', 'الِاسْمُ الْم�
   }
 }
 
+/* ── WAVE 10 — باب «لا» النافية للجنس, pp. 166–167 ────────────────────────────────────────────
+   Four rows opened the wave. Three are produced and one was a counting error, and the pin covers
+   all four in both directions.
+
+   The chapter's whole content is a DIVISION with two regimes: p. 166 splits اسم لا into المفرد,
+   المضاف and الشبيه بالمضاف, and then p. 166–167 makes the first مبني «على ما يُنصب به» while the
+   other two stay مُعرب منصوب. So the pin's centre of gravity is that the two regimes never print
+   each other's analysis — «مبني على الفتح في محل نصب» is not «منصوب وعلامة نصبه الفتحة», and
+   printing the second where the source says the first is exactly the error this bāb exists to
+   prevent. Both directions are checked on real rendered cards.
+
+   The counting correction is تكرار «لا» — the fourth of p. 166's four شروط. It follows the rule
+   Wave 8 introduced and Wave 9 sharpened: the book teaches it, and never utters it in a parse. But
+   like الفضلة before it, a notCounted term can still owe a lesson, so the pin also requires that
+   it stays TAUGHT. */
+const WAVE10_KEYS = ['B_ISM_LA_MUFRAD', 'B_ISM_LA_SHABIH', 'B_LA_ILGHA'];
+const WAVE10_NOT_COUNTED = ['تَكْرَارُ «لَا»'];
+{
+  for (const key of WAVE10_KEYS) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('Wave-10 row ' + key + ' is missing from the inventory'); continue; }
+    if (!/^باب «لا»/.test(row.chapter)) fail('Wave-10 row ' + key + ' is not in the wave scope: ' + row.chapter);
+    if (row.status !== 'FULL') fail('Wave-10 row ' + key + ' is ' + row.status + ', not FULL');
+  }
+  const chapterRows = rows.filter(r => /^باب «لا»/.test(r.chapter));
+  const chapterObserved = observed.filter(r => /^باب «لا»/.test(r.chapter));
+  if (chapterRows.length !== 6) fail('باب «لا» holds ' + chapterRows.length + ' rows, not the six it should');
+  const notFull = chapterObserved.filter(r => r.status !== 'FULL');
+  if (notFull.length) fail('باب «لا» still has non-FULL rows: ' + notFull.map(r => r.key).join(', '));
+
+  /* The rename, not a deletion — the Wave-6 shape. The row keeps its key and its regime; only its
+     NAME moved from the rule («إلغاء») to what p. 167 actually puts in an iʿrāb («نافية مهملة»). */
+  {
+    const ilgha = observed.find(r => r.key === 'B_LA_ILGHA');
+    if (ilgha && /إلغاء/.test(skeleton(ilgha.term))) {
+      fail('B_LA_ILGHA is still named after the rule rather than after the parse');
+    }
+    if (!templatesFor('مُهْمَلَةٌ').size) fail('«نافية مهملة» never reaches a rendered card');
+  }
+
+  /* The three أنواع of p. 166, each on a card, and the two regimes kept strictly apart. */
+  {
+    const labels = api.LA_JINS_SUBTYPE_LABELS || {};
+    if (Object.keys(labels).length !== 3) {
+      fail('p. 166 divides اسم لا in three; the app registers ' + Object.keys(labels).length);
+    }
+    for (const [key, label] of Object.entries(labels)) {
+      if (!templatesFor(label.ar, 'لِلْجِنْسِ').size) {
+        fail('the نوع «' + label.ar + '» never reaches a rendered card inside this bāb');
+      }
+      if (!key) fail('a نوع of اسم لا has no key');
+    }
+    /* Built vs muʿrab, checked on the LINE that states the regime — the اسم's own card — because
+       the نوع label lives in the combined block and the sign lives on the card, and a two-needle
+       search is per line. Both regimes must be produced, and neither line may carry the other's
+       analysis: «مبني على الفتح في محل نصب» must never acquire a naṣb sign, and «منصوب وعلامة
+       نصبه» must never acquire a maḥall. That confusion is the one p. 167 is written to stop. */
+    {
+      const builtLine = 'لِلْجِنْسِ مَبْنِيٌّ', nasbLine = 'لِلْجِنْسِ مَنْصُوبٌ';
+      if (!templatesFor(builtLine, 'فِي مَحَلِّ').size) {
+        fail('no اسم لا card carries p. 167’s bināʾ + maḥall analysis');
+      }
+      if (!templatesFor(nasbLine, 'وَعَلَامَةُ نَصْبِهِ').size) {
+        fail('no اسم لا card carries the muʿrab naṣb analysis');
+      }
+      if (templatesFor(builtLine, 'وَعَلَامَةُ نَصْبِهِ').size) {
+        fail('a built اسم لا card prints a naṣb sign the source denies it');
+      }
+      if (templatesFor(nasbLine, 'فِي مَحَلِّ').size) {
+        fail('a muʿrab اسم لا card prints a maḥall the source denies it');
+      }
+    }
+    /* «يُبْنى على ما يُنصب به» is a DERIVATION, so every marker p. 167 names must actually be
+       produced — otherwise a declension is being taught by rule and never shown. */
+    for (const marker of Object.values(api.LA_JINS_BINAA_SIGNS || {})) {
+      if (!templatesFor(marker.ar, 'لِلْجِنْسِ').size) {
+        fail('the bināʾ marker «' + marker.ar + '» of p. 167 never reaches a card');
+      }
+    }
+  }
+
+  /* The counting correction, both ways — and the lesson it still owes. */
+  {
+    const notCountedText = notCounted.map(item => skeleton(item.term)).join(' | ');
+    const rowTerms = new Set(rows.map(r => skeleton(r.term)));
+    for (const term of WAVE10_NOT_COUNTED) {
+      const t = skeleton(term);
+      if (!notCountedText.includes(t)) fail('«' + term + '» is not recorded in notCounted');
+      if (rowTerms.has(t)) fail('«' + term + '» came back as a counted row after the counting-rule correction');
+      if (templatesFor(term).size) {
+        fail('«' + term + '» is not an iʿrāb term but the app now prints it on a card; ' +
+          'if the book does parse one that way, the correction must be retired deliberately');
+      }
+    }
+    /* It stays taught: p. 167 makes the repetition obligatory in the same breath as the
+       cancellation, so a learner who never meets the word has not been told the rule. */
+    if (!mentionedOnly('تَكْرَارُهَا') && !mentionedOnly('تَكْرَارُ')) {
+      fail('«تكرار لا» is a شرط of p. 166 and is no longer taught anywhere');
+    }
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -1083,6 +1185,9 @@ console.log(JSON.stringify({
   wave9: { name: 'باب الحال', target: WAVE9_KEYS.length + WAVE9_NOT_COUNTED.length,
     full: WAVE9_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
     notCounted: WAVE9_NOT_COUNTED.length },
+  wave10: { name: 'باب «لا» النافية للجنس', target: WAVE10_KEYS.length + WAVE10_NOT_COUNTED.length,
+    full: WAVE10_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
+    notCounted: WAVE10_NOT_COUNTED.length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,tawkidChainFrame,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,istithnaNaqisKeys,istithnaKhalaKeys,laJinsPairKeys,laIlghaFrameKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseTarget,haalMahallFrameKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],tawkidChainFrame,isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],istithnaNaqisKeys:[...istithnaNaqisKeys],istithnaKhalaKeys:[...istithnaKhalaKeys],laJinsPairKeys:[...laJinsPairKeys],laIlghaFrameKeys:[...laIlghaFrameKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,tawkidChainFrame,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,istithnaNaqisKeys,istithnaKhalaKeys,laJinsPairKeys,laIlghaFrameKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseTarget,haalMahallFrameKeys,estimatedSignNounKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],tawkidChainFrame,isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],istithnaNaqisKeys:[...istithnaNaqisKeys],istithnaKhalaKeys:[...istithnaKhalaKeys],laJinsPairKeys:[...laJinsPairKeys],laIlghaFrameKeys:[...laIlghaFrameKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],estimatedSignNounKeys:[...estimatedSignNounKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -33,6 +33,19 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   GRAMMAR_RULES,
   GRAMMAR_COVERAGE_MATRIX,
   GRAMMAR_SIGNS,
+  /* Wave 12 — بَابُ الْمُعْرَبَاتِ. Exported so the focused suite compares cards against the app's OWN
+     bytes: the class names, the class connectives, the clause builder, and the frozen two-word
+     registry the estimated signs are produced from. Nothing Arabic is retyped in this file. */
+  SAHIH_FINAL_CLASS_AR,
+  SAHIH_FINAL_EXCLUDED_GLYPHS,
+  NOUN_CLASS_BECAUSE_AR,
+  NOUN_CLASS_AND_AR,
+  WHY_FORM,
+  inflectionReasonArabic,
+  ESTIMATED_SIGN_NOUNS,
+  ESTIMATED_SIGN_NOUN_KEYS,
+  ESTIMATED_DAMMA_SIGNS_AR,
+  nounFormIndex,
   canonicalSign,
   canonicalSignCopy,
   canonicalSignFailure,
@@ -4357,8 +4370,16 @@ function runJawazimOneVerbFocusedTests(){
          stateArabic, the sign label from the frozen GRAMMAR_SIGNS entry the matrix named, and the
          cause clause must carry the jāzim's canonical bytes — so a verb printing the right sign
          under the wrong governor would still fail. */
-      assert(verb.ar.startsWith(verb.word+': '+api.PRESENT_VERB_LABEL_AR+' '+api.stateArabic('jazm')),
+      /* Wave 12 — the ordinary lane's card now names its CLASS between the word class and the
+         state, because that is where p. 56 puts it («وكل واحد من هذه الأفعال فِعلٌ مضارع صحيح
+         الآخر»). The five-verb lane must NOT gain it: p. 57 gives ḥadhf al-nūn its own موضع, and a
+         class label that drifted onto it would be one موضع borrowing another's reason. Both
+         directions are asserted, and the run comes from the app's own const. */
+      const classAr=regime==='five'?'':' '+api.SAHIH_FINAL_CLASS_AR;
+      assert(verb.ar.startsWith(verb.word+': '+api.PRESENT_VERB_LABEL_AR+classAr+' '+api.stateArabic('jazm')),
         construction+'/'+regime+' verb iʿrāb is not the canonical jussive wording');
+      assert(verb.ar.includes(api.SAHIH_FINAL_CLASS_AR)===(regime!=='five'),
+        construction+'/'+regime+' carries the wrong موضع’s class label');
       assert(verb.ar.includes(api.GRAMMAR_SIGNS[expected[0]].ar),
         construction+'/'+regime+' verb does not print its canonical jazm sign label');
       // The signs of the other two states must be nowhere in the analysis.
@@ -4541,7 +4562,9 @@ function runDuaaJawazimFocusedTests(){
         constructionId+' verb is not canonically governed in jazm');
       assert(api.safeSignId(verb.sign)===expected[0]&&expected[0]==='sukun'&&verb.ruleId===expected[1],
         constructionId+' bypassed the canonical sukūn jazm matrix');
-      assert(verb.ar.startsWith(verb.word+': '+api.PRESENT_VERB_LABEL_AR+' '+api.stateArabic('jazm'))
+      /* Wave 12 — this lane is the sukūn lane by construction (asserted just above), so p. 56's
+         class label belongs on it and the wording pin now includes it. */
+      assert(verb.ar.startsWith(verb.word+': '+api.PRESENT_VERB_LABEL_AR+' '+api.SAHIH_FINAL_CLASS_AR+' '+api.stateArabic('jazm'))
         &&verb.ar.includes(api.PRESENT_GOVERNOR_CAUSE_AR[constructionId])
         &&verb.ar.includes(api.GRAMMAR_SIGNS[expected[0]].ar),
         constructionId+' verb iʿrāb is not the canonical jussive wording for its own governor');
@@ -6225,9 +6248,16 @@ assert(api.templates.every(template=>/^T_[A-Z0-9_]+_\d{2}$/.test(template.stable
 /* Six full declensions, plus Wave 6's مقصور — which is deliberately PARTIAL: p. 21's rule covers
    all three states («تُقَدَّر عليه جميعُ الحركات»), but only the naṣb cell is registered because only
    the naṣb is produced, and asking for a state the app never renders must throw rather than answer. */
-assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===7,'The noun declension matrix is incomplete');
-assert(Object.keys(api.GRAMMAR_RULES.nounInflection.maqsur).join(',')==='nasb',
+assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===8,'The noun declension matrix is incomplete');
+/* Wave 12 — المقصور gains the rafʿ cell p. 95 parses, and المنقوص joins it. Both stay deliberately
+   PARTIAL, each for its own reason: p. 21 estimates all three vowels on المقصور, and estimates two
+   of three on المنقوص («تُقَدَّر عليه الضمة والكسرة للثقل، وتظهر عليه الفتحة لخفتها»). Only the cells
+   a lane renders are registered, so any other still throws rather than answering with a sign
+   nobody sees. */
+assert(Object.keys(api.GRAMMAR_RULES.nounInflection.maqsur).join(',')==='nasb,raf',
   'The مقصور declension claims a state this app does not produce');
+assert(Object.keys(api.GRAMMAR_RULES.nounInflection.manqus).join(',')==='raf',
+  'The منقوص declension claims a state this app does not produce');
 for(const declension of ['singular','broken','dual','smp','sfp','fiveNouns']){
   assert(Object.keys(api.GRAMMAR_RULES.nounInflection[declension]).join(',')==='raf,nasb,jarr',
     'Declension '+declension+' is no longer complete');
@@ -6245,7 +6275,11 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 // G_LAMMA_JAZM, G_LAM_AMR_JAZM and G_LA_NAHIYA_JAZM are three new governors, and G_HAMZAT_TAQRIR
 // owns هَمْزَةُ التَّقْرِيرِ's identity WITHOUT any government — أَلَمْ and أَلَمَّا are governed by the
 // existing G_LAM_JAZM and by G_LAMMA_JAZM, so neither needs a governor rule of its own.
-assert(Object.keys(api.SOURCE_REGISTRY).length===219,`Expected 219 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+// Wave 12 adds exactly two (Al-Tuḥfah pp. 20–21 and 95, بَابُ الْمُعْرَبَاتِ's own الإعراب التقديري):
+// R_MAQSUR_RAF_DAMMA_MUQADDARA and R_MANQUS_RAF_DAMMA_MUQADDARA. They are two rules and not one
+// because they are two claims about two classes of word; sharing one would let either borrow the
+// other's authority merely because both estimate a ḍammah.
+assert(Object.keys(api.SOURCE_REGISTRY).length===221,`Expected 221 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -6984,7 +7018,12 @@ const expectedPastTemplateCapabilities={
   // Wave 8 — the two VERBAL transformed-tamyīz lanes of p. 159. The nominal one declares no past
   // capability at all: its ʿāmil is اسم التفضيل, so it must not appear in this table.
   T_VERB_SINGULAR_NASB_FATHA_39:'3ms/explicit',
-  T_VERB_SINGULAR_NASB_FATHA_40:'3ms/explicit'
+  T_VERB_SINGULAR_NASB_FATHA_40:'3ms/explicit',
+  // Wave 12 — the two الإعراب التقديري lanes of pp. 20–21/95. Both are ordinary explicit-fāʿil past
+  // frames; what is new is the fāʿil's CLASS, not the verb, so their past capability is the usual
+  // one. They are APPENDED to the family, so no inherited stable ID in this table moved.
+  T_VERB_SINGULAR_NASB_FATHA_41:'3ms/explicit',
+  T_VERB_SINGULAR_NASB_FATHA_42:'3ms/explicit'
 };
 const declaredPastTemplates=api.templates.filter(template=>template.pastCapabilities.length);
 assert(declaredPastTemplates.length===Object.keys(expectedPastTemplateCapabilities).length,
@@ -10882,7 +10921,7 @@ for(const t of api.templates){
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
   // J1a appends exactly ten: five one-verb jawāzim × the two proven jazm regimes. All are appended,
   // so every pre-existing stableId is unchanged — pinned directly below by keeping لَمْ at _01.
-  assert(api.templates.length===259,`Expected 259 templates after Phase 2, found ${api.templates.length}`);
+  assert(api.templates.length===261,`Expected 261 templates after Phase 2, found ${api.templates.length}`);
   assert(api.templates.filter(t=>t.state==='jazm').map(t=>t.stableId).join(' | ')
     ==='T_NOUN_PRESENT_JAZM_SUKUN_01 | T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_01 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_02 | T_PARTICLE_PRESENT_JAZM_SUKUN_03 | T_PARTICLE_PRESENT_JAZM_SUKUN_04 | T_PARTICLE_PRESENT_JAZM_SUKUN_05 | T_PARTICLE_PRESENT_JAZM_SUKUN_06 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06 | T_PARTICLE_PRESENT_JAZM_SUKUN_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_08 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08 | T_PARTICLE_PRESENT_JAZM_SUKUN_09 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_10 | T_PARTICLE_PRESENT_JAZM_SUKUN_11 | T_PARTICLE_PRESENT_JAZM_SUKUN_12 | T_PARTICLE_PRESENT_JAZM_SUKUN_13 | T_PARTICLE_PRESENT_JAZM_SUKUN_14 | T_PARTICLE_PRESENT_JAZM_SUKUN_15 | T_PARTICLE_PRESENT_JAZM_SUKUN_16 | T_PARTICLE_PRESENT_JAZM_SUKUN_17 | T_PARTICLE_PRESENT_JAZM_SUKUN_18 | T_PARTICLE_PRESENT_JAZM_SUKUN_19 | T_PARTICLE_PRESENT_JAZM_SUKUN_20 | T_PARTICLE_PRESENT_JAZM_SUKUN_21',
     'the jazm template ordinals shifted: لَمْ must keep _01 in both families and J1a/J1b must append only');
@@ -13362,7 +13401,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===259,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===261,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
@@ -13394,7 +13433,13 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
      here exactly as every other curriculum lane is; the inherited ID set below is unchanged. */
   const istithnaNaqisTemplateIds=api.templates.filter(item=>item.istithnaNaqisKeys.length).map(item=>item.stableId);
   const istithnaKhalaTemplateIds=api.templates.filter(item=>item.istithnaKhalaKeys.length).map(item=>item.stableId);
-  assert([...ids].filter(id=>!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!sababiTemplateIds.includes(id)&&!isharaTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!istithnaNaqisTemplateIds.includes(id)&&!istithnaKhalaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  /* Wave 12 — the two الإعراب التقديري lanes carry their own key list, so they are excluded here
+     exactly as every curriculum lane since Wave 6 is, and the inherited ID set below is unchanged.
+     They were also APPENDED to their family, so no inherited stable ID moved either — which is a
+     separate obligation, and one this wave broke once before fixing it. */
+  const estimatedSignTemplateIds=api.templates.filter(item=>item.estimatedSignNounKeys.length).map(item=>item.stableId);
+  assert(estimatedSignTemplateIds.length===2,'the two estimated-sign lanes are not both registered');
+  assert([...ids].filter(id=>!estimatedSignTemplateIds.includes(id)&&!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!sababiTemplateIds.includes(id)&&!isharaTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!istithnaNaqisTemplateIds.includes(id)&&!istithnaKhalaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
@@ -14793,7 +14838,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===259,'the repair block changed the production template count');
+  assert(api.templates.length===261,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -14914,7 +14959,12 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     /* Phase 3B1 adds exactly one key and one shape: the productive إِذَنْ answer is the first
        two-token particle+verb structure this app has ever produced, so no existing shape addresses
        it and none may be stretched to. */
-    assert(registeredKeys.length===266,'the structural map holds '+registeredKeys.length+' keys, not 266');
+    /* Wave 12 adds exactly two keys and NO shape: both الإعراب التقديري lanes compose the ordinary
+       verb + fāʿil + object English that TS11 already owns, so stretching an existing shape is not
+       what happens here — the shape genuinely fits, and what is new is only which template may use
+       it. A lane with no key at all composes to null, and History then refuses to restore a valid
+       exercise, which is how this pair first failed. */
+    assert(registeredKeys.length===268,'the structural map holds '+registeredKeys.length+' keys, not 268');
     assert(registeredShapes.length===81,'the shape registry holds '+registeredShapes.length+' shapes, not 81');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
@@ -14977,7 +15027,13 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         'TS80',
         /* Wave 10 — إلغاء عمل «لا». Its own productive lane shape, fenced off like the rest. */
         'TS81'];
-      const inheritedKeys=registeredKeys.filter(k=>!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!istithnaNaqisKeys.includes(k)&&!istithnaKhalaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
+      /* Wave 12 — the two الإعراب التقديري lanes are productive lanes like every other one above,
+         so their keys are fenced off from the inherited set rather than counted in it. They add no
+         shape, so the inherited SHAPE count is untouched. */
+      const estimatedSignKeyOwners=api.templates.filter(item=>item.estimatedSignNounKeys.length).map(item=>item.stableId);
+      const estimatedSignKeys=registeredKeys.filter(key=>estimatedSignKeyOwners.some(id=>key.startsWith(id+'||')));
+      assert(estimatedSignKeys.length===2,'the estimated-sign lanes do not own exactly two structural keys');
+      const inheritedKeys=registeredKeys.filter(k=>!estimatedSignKeys.includes(k)&&!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!istithnaNaqisKeys.includes(k)&&!istithnaKhalaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===148,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===47,'the inherited shape set changed: '+inheritedShapes.length);
@@ -15012,7 +15068,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===259,'the map covers '+mappedTemplates.size+' templates, not 259');
+    assert(mappedTemplates.size===261,'the map covers '+mappedTemplates.size+' templates, not 261');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -15074,7 +15130,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===266,'only '+keysSeen.size+' of the 266 structural keys were observed');
+    assert(keysSeen.size===268,'only '+keysSeen.size+' of the 268 structural keys were observed');
     assert(shapesSeen.size===81,'only '+shapesSeen.size+' of the 81 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
@@ -15409,7 +15465,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===266,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===268,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -15758,7 +15814,11 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
        two of them), and one إلغاء frame of six (two لاs, the mubtadaʾ, the wāw, the maʿṭūf and the
        khabar). All seven are fixed-length, so the RANGE keeps the width the ʿaṭf context rotation
        gave it and simply shifts: 872-875 becomes 898-901. Observed 898/899/899/899 over four runs. */
-    assert([898,899,900,901].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 898-901 across the registered ʿaṭf context rotation)');
+    /* Wave 12 adds six across two lanes of بَابُ الْمُعْرَبَاتِ pp. 20–21/95: each is a fixed
+       three-token past frame (the ʿāmil, the estimated-sign fāʿil, the accusative object). Both are
+       fixed-length, so the RANGE keeps the width the ʿaṭf context rotation gave it and simply
+       shifts again: 898-901 becomes 904-907. */
+    assert([904,905,906,907].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 904-907 across the registered ʿaṭf context rotation)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -15947,7 +16007,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===259,'the presentation repair changed the template count');
+    assert(api.templates.length===261,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -17865,7 +17925,7 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===219,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules, the Wave-4 naʿt/maʿrifah rules or the Wave-7 munādā rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===221,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules, the Wave-4 naʿt/maʿrifah rules or the Wave-7 munādā rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
@@ -17887,8 +17947,8 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   }
   assert(!Object.prototype.hasOwnProperty.call(api.GRAMMAR_RULES.governors,'hamzatTaqrir'),
     'هَمْزَةُ التَّقْرِيرِ entered the governor table and could now govern');
-  assert(api.templates.length===259,'the production template count does not include the J1a additions');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===266
+  assert(api.templates.length===261,'the production template count does not include the J1a additions');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===268
     &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===81,
     'the composer authority does not include the J1a mappings');
   p7Cases+=8;
@@ -18914,7 +18974,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===259,`Expected 259 production templates, found ${api.templates.length}`);
+assert(api.templates.length===261,`Expected 261 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -19790,6 +19850,306 @@ while(Date.now()-started<durationMs){
     console.log(`PROGRESS elapsed=${Math.round((Date.now()-started)/1000)}s sentences=${stats.sentences} passes=${stressPasses}`);
     nextProgress+=30000;
   }
+}
+
+
+/* ==========================================================================
+   WAVE 12 — بَابُ الْمُعْرَبَاتِ (Al-Tuḥfah pp. 59–69, with pp. 20–21, 56–57 and 95)
+
+   Three targets, each proved on the LEARNER-FACING card and then attacked:
+
+     L_BROKEN       «وَهُوَ جَمْعُ تَكْسِيرٍ» on a broken plural's own iʿrāb (p. 60, p. 62)
+     G_SAHIH_AKHIR  «صَحِيحُ الْآخِرِ» on the sukūn-jazm present verb (p. 56)
+     G_EST_THIQL    «ضَمَّةٌ مُقَدَّرَةٌ عَلَى الْيَاءِ مَنَعَ مِنْ ظُهُورِهَا الثِّقَلُ» (pp. 20–21, 95)
+
+   plus G_EST_TAADHDHUR, whose estimated ḍammah this wave produced for the first time — the row had
+   been FULL on Wave 6's estimated FATḤAH because its probe named only the preventer.
+
+   Every Arabic string here is READ FROM THE APP. Nothing is retyped: this wave met invisible
+   combining-mark drift twice, once inside index.html's own five «لأنه» clauses (four spell the nūn
+   shaddah-then-fatḥah, the fifth the other way) and once in a codepoint pin written from memory.
+   ========================================================================== */
+{
+  let w12Cases=0,w12Attacks=0;
+  const w12Codes={};
+  const strip=text=>String(text||'')
+    .replace(new RegExp('[\\u0610-\\u061A\\u064B-\\u065F\\u0670\\u06D6-\\u06ED\\u0640]','g'),'')
+    .replace(new RegExp('[\\u0622\\u0623\\u0625\\u0671]','g'),String.fromCodePoint(0x0627))
+    .replace(/\s+/g,' ').trim();
+  assert(strip(String.fromCodePoint(0x0645,0x064E,0x0646,0x064E,0x0651))===String.fromCodePoint(0x0645,0x0646),
+    'the Wave-12 skeleton helper is over-stripping');
+
+  const analyzed=(template,built)=>api.completeNominalAnalysis({...built,templateId:template.stableId,
+    templateStarts:template.starts,templateForm:template.form,templateState:template.state,templateSign:template.sign});
+  const estimatedTemplates=api.templates.filter(t=>t.estimatedSignNounKeys.length);
+  assert(estimatedTemplates.length===2,'the two الإعراب التقديري lanes are not both registered');
+
+  /* ── A. THE THREE CARDS, each read off a real build ───────────────────────────────────────── */
+
+  /* A1 — the broken plural names its class beside its sign, in every state the matrix gives it. */
+  {
+    const clause=api.inflectionReasonArabic('broken');
+    assert(clause===api.NOUN_CLASS_AND_AR+' '+api.WHY_FORM.broken.ar,
+      'the broken-plural clause is not composed from its canonical class name');
+    /* p. 60/62's connective is «وهو», not the «لأنه» the four substitute-sign classes use. */
+    assert(clause.startsWith(api.NOUN_CLASS_AND_AR)&&!clause.startsWith(api.NOUN_CLASS_BECAUSE_AR),
+      'the broken-plural clause borrowed the substitute-sign connective');
+    for(const inflection of ['dual','smp','sfp','fiveNouns','maqsur','manqus']){
+      assert(api.inflectionReasonArabic(inflection).normalize('NFC')
+        .startsWith(api.NOUN_CLASS_BECAUSE_AR.normalize('NFC')+' '),
+        'the '+inflection+' clause stopped using the «لأنه» connective');
+    }
+    assert(api.inflectionReasonArabic('singular')==='',
+      'المفرد gained a class clause; Wave 12 left it alone on purpose and no row authorizes one');
+    /* BOTH directions, and the second is the built-vs-muʿrab boundary: a broken plural standing as
+       the built اسم «لا» (p. 167) is «مبني على الفتح في محل نصب» and has no iʿrāb SIGN at all, so
+       it must not carry a clause that exists to explain one. The clause belongs to the sign, not to
+       the word — which is exactly the contamination Phase 10 asks this wave to rule out. */
+    const states=new Set();let builtSeen=0;
+    for(const template of api.templates){
+      for(let i=0;i<8;i++){
+        const data=api.buildTemplate(template.id);
+        for(const token of data.tokens.filter(t=>t.inflection==='broken')){
+          const muarab=Boolean(token.state)&&Boolean(api.safeSignId(token.sign));
+          if(!muarab){
+            assert(!token.ar.includes(clause),'a BUILT broken plural was given the class clause: '+token.ar);
+            assert(token.mahall&&!token.state,'a built broken plural kept an iʿrāb state');
+            builtSeen++;
+            continue;
+          }
+          assert(token.ar.includes(clause),'a broken plural card omits its class clause: '+token.ar);
+          assert(token.ar.includes(api.GRAMMAR_SIGNS[api.safeSignId(token.sign)].ar),
+            'a broken plural card lost its sign label');
+          states.add(token.state);
+        }
+      }
+    }
+    assert(states.size>=2,'the broken-plural class clause was only seen in '+states.size+' state');
+    assert(builtSeen>0,'no BUILT broken plural was produced, so the boundary above proved nothing');
+    w12Cases+=5;
+  }
+
+  /* A2 — the sound-final present verb, in p. 56's one موضع and nowhere else. */
+  {
+    let seen=0;
+    for(const template of api.templates){
+      for(let i=0;i<6;i++){
+        const data=api.buildTemplate(template.id);
+        for(const token of data.tokens.filter(t=>t.grammar.type==='verb'&&t.tense==='present')){
+          const carries=token.ar.includes(api.SAHIH_FINAL_CLASS_AR);
+          const owed=token.inflection==='regular'&&token.state==='jazm'&&api.safeSignId(token.sign)==='sukun';
+          assert(carries===owed,'the sound-final class is on the wrong card: '+token.ar);
+          if(!carries)continue;
+          seen++;
+          /* p. 56 puts the class immediately after the word class, exactly where J2 already puts
+             «معتل الآخر». A conditional lane legitimately names فِعْلُ الشَّرْطِ between the class
+             and the state, so the state is required to FOLLOW the class rather than to abut it. */
+          const head=token.word+': '+api.PRESENT_VERB_LABEL_AR+' '+api.SAHIH_FINAL_CLASS_AR;
+          assert(token.ar.startsWith(head),
+            'the class is not where p. 56 puts it, immediately after the word class: '+token.ar);
+          assert(token.ar.indexOf(api.stateArabic('jazm'))>=head.length,
+            'the class was printed after the state instead of before it: '+token.ar);
+          assert(!api.SAHIH_FINAL_EXCLUDED_GLYPHS.some(glyph=>token.word.endsWith(glyph)),
+            'a verb ending in one of p. 56\'s three weak letters was called صحيح الآخر: '+token.word);
+        }
+      }
+    }
+    assert(seen>0,'no sound-final jazm card was produced at all');
+    w12Cases+=3;
+  }
+
+  /* A3 — the two estimated-rafʿ cards, and their Why. */
+  for(const template of estimatedTemplates){
+    const key=template.estimatedSignNounKeys[0];
+    const record=api.ESTIMATED_SIGN_NOUNS[key];
+    const data=api.buildTemplate(template.id);
+    const noun=data.tokens.find(t=>t.word===record.nom);
+    assert(noun,key+': the estimated-sign noun was not produced');
+    const sign=api.GRAMMAR_RULES.nounInflection[record.inflection].raf;
+    assert(noun.inflection===record.inflection&&noun.state==='raf'&&api.safeSignId(noun.sign)===sign[0]&&noun.signRuleId===sign[1],
+      key+': the noun did not take its own class, state, sign and sign rule');
+    /* STATE IS EXPLICIT, SIGN IS SEPARATE — the estimated sign never stands in for the state. */
+    assert(noun.ar.includes(api.stateArabic('raf'))&&noun.ar.includes(api.GRAMMAR_SIGNS[sign[0]].ar)
+      &&noun.ar.includes(api.inflectionReasonArabic(record.inflection)),
+      key+': the card does not carry state, sign and class as three separate statements');
+    assert(!noun.mahall,key+': a muʿrab noun was given a maḥall');
+    assert(api.isSourceAuthorized(noun.signRuleId),key+': the sign rule is not source-authorized');
+    assert(api.SOURCE_REGISTRY[noun.signRuleId].primarySource.pdfPages.includes(95),
+      key+': the sign rule does not cite p. 95, where the source says the whole clause in a parse');
+    /* Why explains the class AND names the same sign the card does — not a second wording. */
+    const why=api.whySignNoun(noun);
+    assert(why.ar.includes(api.WHY_FORM[record.inflection].ar)&&why.ar.includes(api.GRAMMAR_SIGNS[sign[0]].ar),
+      key+': the Why does not name the same class and sign the card does');
+    w12Cases+=6;
+  }
+
+  /* ── B. HISTORY — build → snapshot → restore → validate → identical render ─────────────────── */
+  for(const template of estimatedTemplates){
+    const data=api.buildTemplate(template.id);
+    const snapshot=api.createExerciseSnapshot(data);
+    assert(snapshot,template.stableId+': the estimated-sign exercise refused to snapshot');
+    const restored=api.restoreExerciseSnapshot(snapshot);
+    assert(restored,template.stableId+': the estimated-sign snapshot did not restore');
+    assert(api.validateExercise(clone(restored)).length===0,template.stableId+': the restored exercise does not validate');
+    assert(restored.sentence===data.sentence&&restored.translation===data.translation,
+      template.stableId+': History changed the sentence or its English');
+    assert(restored.tokens.map(t=>t.ar).join('|')===data.tokens.map(t=>t.ar).join('|'),
+      template.stableId+': History did not re-render an identical card');
+    w12Cases+=5;
+  }
+
+  /* ── C. ADVERSARIAL. Each attack must be REFUSED, and the code it is refused with is recorded. */
+  const w12Refuse=(name,base,mutate,expected)=>{
+    const data=clone(base);
+    const before=JSON.stringify(data);
+    mutate(data);
+    if(JSON.stringify(data)===before)throw new Error('Wave-12 attack "'+name+'" changed nothing');
+    let codes;
+    try{ codes=api.validateExercise(data).map(f=>f.code); }
+    catch(error){ throw new Error('Wave-12 attack "'+name+'" threw instead of failing: '+error.message); }
+    assert(codes.length>0,'Wave-12 attack "'+name+'" was ACCEPTED');
+    codes.forEach(code=>{w12Codes[code]=(w12Codes[code]||0)+1});
+    if(expected)assert(codes.includes(expected),'Wave-12 attack "'+name+'" was refused as '+JSON.stringify(codes)+', wanted '+expected);
+    w12Attacks++;
+  };
+
+  {
+    const manqusTemplate=estimatedTemplates.find(t=>t.estimatedSignNounKeys[0]==='qadi');
+    const maqsurTemplate=estimatedTemplates.find(t=>t.estimatedSignNounKeys[0]==='fata');
+    const manqus=api.buildTemplate(manqusTemplate.id);
+    const maqsur=api.buildTemplate(maqsurTemplate.id);
+    const nounAt=data=>data.tokens.findIndex(t=>t.grammar.type==='noun'&&t.grammar.role==='faail');
+    const brokenTemplate=api.templates.find(t=>t.form==='broken'&&t.state==='raf');
+    const broken=api.buildTemplate(brokenTemplate.id);
+    const jazmTemplate=api.templates.find(t=>t.form==='present'&&t.state==='jazm');
+    const jazm=api.buildTemplate(jazmTemplate.id);
+
+    // 1/8 — WRONG CATEGORY, both directions. The signs of المفرد and جمع التكسير are identical, so
+    // only the registry can tell them apart; this is the attack E_NOUN_SIGN cannot see.
+    w12Refuse('broken plural relabelled singular',broken,d=>{
+      const i=d.tokens.findIndex(t=>t.inflection==='broken');d.tokens[i].inflection='singular';
+    },'E_NOUN_FORM_CLASS');
+    w12Refuse('singular relabelled a broken plural',maqsur,d=>{
+      const i=d.tokens.findIndex(t=>t.inflection==='singular');d.tokens[i].inflection='broken';
+    },'E_NOUN_FORM_CLASS');
+    w12Refuse('manqūṣ relabelled maqṣūr',manqus,d=>{d.tokens[nounAt(d)].inflection='maqsur'},'E_NOUN_FORM_CLASS');
+    w12Refuse('maqṣūr relabelled manqūṣ',maqsur,d=>{d.tokens[nounAt(d)].inflection='manqus'},'E_NOUN_FORM_CLASS');
+
+    // 3/4 — VISIBLE ↔ ESTIMATED, both directions.
+    w12Refuse('estimated ḍammah replaced by the visible one',manqus,d=>{
+      d.tokens[nounAt(d)].sign=api.canonicalSignCopy('damma');
+    },'E_NOUN_SIGN');
+    w12Refuse('visible ḍammah replaced by an estimated one',broken,d=>{
+      const i=d.tokens.findIndex(t=>t.inflection==='broken'&&t.state==='raf');
+      d.tokens[i].sign=api.canonicalSignCopy('dammaMuqaddaraThiql');
+    },'E_NOUN_SIGN');
+
+    // 5 — WRONG ESTIMATED REASON: thiql where the source says taʿadhdhur.
+    w12Refuse('taʿadhdhur sign swapped for the thiql one',maqsur,d=>{
+      d.tokens[nounAt(d)].sign=api.canonicalSignCopy('dammaMuqaddaraThiql');
+    },'E_NOUN_SIGN');
+
+    // 6/7 — WRONG STATE and WRONG SIGN on the estimated card.
+    w12Refuse('estimated fāʿil forced into naṣb',manqus,d=>{d.tokens[nounAt(d)].state='nasb'},'E_ROLE_CASE');
+    w12Refuse('estimated fāʿil given the fatḥah',manqus,d=>{d.tokens[nounAt(d)].sign=api.canonicalSignCopy('fatha')},'E_NOUN_SIGN');
+
+    // 9 — WRONG SOURCE RULE: the two estimated rules are two claims and may not be interchanged.
+    w12Refuse('manqūṣ citing the maqṣūr rule',manqus,d=>{d.tokens[nounAt(d)].signRuleId='R_MAQSUR_RAF_DAMMA_MUQADDARA'},'E_NOUN_SIGN_RULE');
+    w12Refuse('manqūṣ citing the visible-ḍammah rule',manqus,d=>{d.tokens[nounAt(d)].signRuleId='R_SINGULAR_RAF_DAMMA'},'E_NOUN_SIGN_RULE');
+    /* The same hole, on a declension that has nothing to do with this wave: it was a NOUN-matrix
+       hole, not an estimated-sign one, and it must stay closed for every class. */
+    w12Refuse('broken plural citing the singular rule',broken,d=>{
+      const i=d.tokens.findIndex(t=>t.inflection==='broken');d.tokens[i].signRuleId='R_SINGULAR_RAF_DAMMA';
+    },'E_NOUN_SIGN_RULE');
+
+    // 2/10/11 — MUʿRAB ↔ BUILT. An estimated sign is still iʿrāb, so the noun must never acquire a
+    // maḥall, and never lose its state to one.
+    w12Refuse('maḥall added to the muʿrab estimated noun',manqus,d=>{d.tokens[nounAt(d)].mahall='raf'},'E_NOUN_MAHALL');
+    w12Refuse('maḥall added to an ordinary muʿrab noun',broken,d=>{
+      const i=d.tokens.findIndex(t=>t.inflection==='broken'&&t.state);d.tokens[i].mahall='raf';
+    },'E_NOUN_MAHALL');
+    w12Refuse('estimated noun rebuilt as a built one',manqus,d=>{
+      const i=nounAt(d);d.tokens[i].state='';d.tokens[i].sign=null;d.tokens[i].mahall='raf';
+    });
+    w12Refuse('state added to a built munādā',
+      api.buildTemplate(api.templates.find(t=>t.munadaPairKeys.length).id),d=>{
+        const i=d.tokens.findIndex(t=>t.grammar.type==='noun'&&t.mahall&&!t.state);
+        d.tokens[i].state='raf';d.tokens[i].sign=api.canonicalSignCopy('damma');
+      });
+    // …and a built token must not acquire the new class clause's declension either.
+    w12Refuse('built munādā relabelled a manqūṣ',
+      api.buildTemplate(api.templates.find(t=>t.munadaPairKeys.length).id),d=>{
+        const i=d.tokens.findIndex(t=>t.grammar.type==='noun'&&t.mahall&&!t.state);
+        d.tokens[i].inflection='manqus';
+      });
+
+    // 7-bis — the sound-final class must not be forgeable onto the wrong lane.
+    w12Refuse('five-verb jazm relabelled an ordinary one',
+      api.buildTemplate(api.templates.find(t=>t.form==='fiveVerbs'&&t.state==='jazm').id),
+      d=>{const i=d.tokens.findIndex(t=>t.inflection==='afalKhamsa');d.tokens[i].inflection='regular'},
+      'E_PRESENT_FORM_CLASS');
+    w12Refuse('sukūn-jazm verb relabelled weak-final',jazm,d=>{
+      const i=d.tokens.findIndex(t=>t.inflection==='regular'&&t.state==='jazm');d.tokens[i].inflection='weakFinal';
+    },'E_PRESENT_FORM_CLASS');
+
+    // 12 — FORGED HISTORY. A snapshot whose class was rewritten must not restore.
+    for(const [name,base,mutate] of [
+      ['manqūṣ snapshot reclassified',manqus,t=>{t.inflection='maqsur'}],
+      ['estimated sign downgraded in a snapshot',manqus,t=>{t.sign=api.canonicalSignCopy('damma')}]
+    ]){
+      const snapshot=clone(api.createExerciseSnapshot(base));
+      mutate(snapshot.tokens[nounAt(base)]);
+      const restored=api.restoreExerciseSnapshot(snapshot);
+      assert(!restored||api.validateExercise(clone(restored)).length>0,
+        'forged History survived: '+name);
+      w12Attacks++;
+    }
+
+    // 13 — BYTE MUTATION. One invisible combining mark moved inside the sign label must not pass.
+    {
+      const forged=clone(manqus);
+      const i=nounAt(forged);
+      const label=forged.tokens[i].sign.ar;
+      const at=[...label].findIndex(character=>character.codePointAt(0)===0x064E);
+      assert(at>0,'the estimated sign label carries no fatḥah to move');
+      const characters=[...label];
+      characters.splice(at,1);characters.splice(at-1,0,String.fromCodePoint(0x064E));
+      forged.tokens[i].sign={...forged.tokens[i].sign,ar:characters.join('')};
+      assert(forged.tokens[i].sign.ar!==label,'the byte mutation changed nothing');
+      assert(strip(forged.tokens[i].sign.ar)===strip(label),'the mutation was not mark-only');
+      const codes=api.validateExercise(forged).map(f=>f.code);
+      assert(codes.includes('E_SIGN_CANONICAL'),
+        'a combining-mark-only forgery of an estimated sign was accepted: '+JSON.stringify(codes));
+      codes.forEach(code=>{w12Codes[code]=(w12Codes[code]||0)+1});
+      w12Attacks++;
+    }
+  }
+
+  /* ── D. BYTE SAFETY of the strings this wave introduced ───────────────────────────────────── */
+  {
+    /* The two estimated ḍammahs are COMPOSED from the maqṣūr fatḥah, so the six words they share
+       exist once. Proved here on the app's own exports, not on a retyped copy. */
+    const fatha=api.GRAMMAR_SIGNS.fathaMuqaddaraTaadhdhur.ar.split(' ');
+    for(const [id,changed] of [['dammaMuqaddaraTaadhdhur',[0]],['dammaMuqaddaraThiql',[0,3,7]]]){
+      const words=api.GRAMMAR_SIGNS[id].ar.split(' ');
+      assert(words.length===fatha.length,id+' is not the eight-word shape');
+      words.forEach((word,index)=>assert(changed.includes(index)!==(word===fatha[index]),
+        id+' word '+index+' drifted from the canonical fatḥah sign'));
+    }
+    const estimated=['fathaMuqaddaraTaadhdhur','dammaMuqaddaraTaadhdhur','dammaMuqaddaraThiql'].map(id=>api.GRAMMAR_SIGNS[id].ar);
+    assert(new Set(estimated).size===3,'two estimated signs collapsed onto one string');
+    /* The class name the card prints and the one the Why prints are the SAME object's bytes. */
+    assert(api.inflectionReasonArabic('manqus').endsWith(api.WHY_FORM.manqus.ar),
+      'the منقوص card clause and its Why name the class in two different strings');
+    /* The sound-final class the card prints is the one the Why has printed since J2. */
+    assert(api.whySignVerb({inflection:'regular',state:'jazm',sign:api.canonicalSignCopy('sukun'),word:'x'})
+      .ar.includes(api.SAHIH_FINAL_CLASS_AR),
+      'the sound-final Why no longer uses the same class run as the card');
+    w12Cases+=4;
+  }
+
+  console.log('Wave-12 بَابُ الْمُعْرَبَاتِ audit passed: '+w12Cases+' canonical checks and '+w12Attacks+' adversarial checks.');
+  console.log('  wave-12 refusal codes: '+JSON.stringify(w12Codes));
 }
 
 const untestedTemplateIds=api.templates.filter(template=>!api.grammarDiagnostics.validByTemplate[template.stableId]).map(template=>template.stableId);

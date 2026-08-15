@@ -1714,6 +1714,13 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  "T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01||noun:mubtada,particle:particle,verb:present,noun:object":Object.freeze({templateId:"T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01",structure:"noun:mubtada,particle:particle,verb:present,noun:object",shape:"TS10",copulaPlural:false}),
  "T_VERB_SINGULAR_RAF_DAMMA_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_RAF_DAMMA_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:false}),
  "T_VERB_SINGULAR_NASB_FATHA_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:false}),
+ /* Wave 12 — the two الإعراب التقديري lanes. Their English structure is the ordinary
+    verb + fāʿil + object one the two entries above already compose, and both fāʿils are singular,
+    so they reuse TS11 with copulaPlural false. A composer entry is REQUIRED, not optional: a stable
+    ID with no mapping composes to null, and History then refuses to restore a perfectly valid
+    exercise — which is exactly how this pair first failed. */
+ "T_VERB_SINGULAR_NASB_FATHA_41||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_41",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:false}),
+ "T_VERB_SINGULAR_NASB_FATHA_42||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_42",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:false}),
  "T_VERB_BROKEN_RAF_DAMMA_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_BROKEN_RAF_DAMMA_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
  "T_VERB_BROKEN_NASB_FATHA_01||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_BROKEN_NASB_FATHA_01",structure:"verb:present,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
  "T_VERB_DUAL_RAF_ALIF_01||verb:past,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_DUAL_RAF_ALIF_01",structure:"verb:past,noun:faail,noun:object",shape:"TS11",copulaPlural:true}),
@@ -6972,6 +6979,33 @@ function pickHumanPrepAction(){return pickVaried(humanPrepActions,'human-prep-ac
 function pickThingAction(){return pickVaried(thingActions,'thing-actions',a=>a.pres)}
 function pickThingPrepAction(){return pickVaried(thingPrepActions,'thing-prep-actions',a=>`${a.pres}:${a.prep}`)}
 function isHumanNoun(noun){return /\b(student|teacher|men|man|doctor|friend|traveler|child|engineer|worker|researcher|driver|women|woman|nurse|Muslim|present)\b/i.test(noun.en)}
+const ESTIMATED_FATHA_ALIF_TAADHDHUR_AR='فَتْحَةٌ مُقَدَّرَةٌ عَلَى الْأَلِفِ مَنَعَ مِنْ ظُهُورِهَا التَّعَذُّرُ';
+/* ── Wave 12 — الإعراب التقديري on the NOUN, exactly as Al-Tuḥfah utters it ───────────────────
+   p. 20 gives the doctrine («وأما التقديري فهو: ما يمنع من التلفظ به مانع من تَعَذُّر، أو استِثقال،
+   أو مناسَبة») and p. 21 names both classes and their rules — «فما كان آخره ألفاً لازمة تُقَدَّر عليه
+   جميعُ الحركات للتعذر، ويسمى الاسمُ المنتهي بالألف مقصوراً» and «وما كان آخره ياء لازمَة تُقَدَّر عليه
+   الضمة والكسرة للثقل، وتظهر عليه الفتحة لخفتها، ويسمى الاسمُ المنتهي بالياء منقوصاً». p. 95's
+   تدريب على الإعراب then SAYS the two rafʿ signs inside a model parse, which is what makes them
+   direct iʿrāb rather than doctrine about it:
+     «المرتضى: فاعل مرفوع، وعلامة رفعه ضمة مقدرة على الألف منع من ظهورها التعذر»
+     «والقاضي: فاعل مرفوع، وعلامة رفعه ضَمَّةٌ مقدَّرة على الياء منع من ظهورها الثقل»
+
+   BYTE SAFETY. The three estimated signs share six words. The two ḍammahs are COMPOSED from the one
+   maqṣūr fatḥah Wave 6 already shipped rather than retyped, so those six words exist in exactly one
+   place and a combining-mark ORDER that drifts cannot drift in only one copy. Exactly three words
+   are new, and each is pinned by codepoint at load. */
+const ESTIMATED_SIGN_NEW_WORDS_AR=Object.freeze({damma:'ضَمَّةٌ',ya:'الْيَاءِ',thiql:'الثِّقَلُ'});
+const ESTIMATED_DAMMA_SIGNS_AR=(()=>{
+ const words=ESTIMATED_FATHA_ALIF_TAADHDHUR_AR.split(' ');
+ /* Eight words, and the three the ḍammah forms replace sit at fixed positions. Asserting the shape
+    here is what stops a later edit to the fatḥah string from silently composing nonsense. */
+ if(words.length!==8)throw new Error('The maqṣūr fatḥah sign no longer has the eight words Wave 12 composes from.');
+ const taadhdhur=[...words];taadhdhur[0]=ESTIMATED_SIGN_NEW_WORDS_AR.damma;
+ const thiql=[...taadhdhur];
+ thiql[3]=ESTIMATED_SIGN_NEW_WORDS_AR.ya;
+ thiql[7]=ESTIMATED_SIGN_NEW_WORDS_AR.thiql;
+ return Object.freeze({taadhdhur:taadhdhur.join(' '),thiql:thiql.join(' ')});
+})();
 const GRAMMAR_SIGN_SOURCE=Object.freeze({
  damma:{id:'damma',ar:'الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ',en:'the visible ḍammah'},
  fatha:{id:'fatha',ar:'الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ',en:'the visible fatḥah'},
@@ -6994,8 +7028,17 @@ const GRAMMAR_SIGN_SOURCE=Object.freeze({
     naṣb is registered because only naṣb is produced; p. 21's «جميع الحركات» would license the
     other two, and neither is claimed until a lane actually renders it. */
  fathaMuqaddaraTaadhdhur:{id:'fathaMuqaddaraTaadhdhur',
-  ar:'فَتْحَةٌ مُقَدَّرَةٌ عَلَى الْأَلِفِ مَنَعَ مِنْ ظُهُورِهَا التَّعَذُّرُ',
-  en:'an estimated fatḥah at the end, prevented from appearing by taʿadhdhur'}
+  ar:ESTIMATED_FATHA_ALIF_TAADHDHUR_AR,
+  en:'an estimated fatḥah at the end, prevented from appearing by taʿadhdhur'},
+ /* Wave 12 — the two ESTIMATED RAFʿ signs of p. 95. Neither is a new engine: both are ordinary
+    entries in this one table, reached through GRAMMAR_RULES.nounInflection exactly as every
+    visible sign is, and each is registered only for the ONE state a lane actually renders. */
+ dammaMuqaddaraTaadhdhur:{id:'dammaMuqaddaraTaadhdhur',
+  ar:ESTIMATED_DAMMA_SIGNS_AR.taadhdhur,
+  en:'an estimated ḍammah on the alif, prevented from appearing by taʿadhdhur'},
+ dammaMuqaddaraThiql:{id:'dammaMuqaddaraThiql',
+  ar:ESTIMATED_DAMMA_SIGNS_AR.thiql,
+  en:'an estimated ḍammah on the yāʾ, prevented from appearing by thiql'}
 });
 /* Phase 3B0-pre hardening — the registry is rebuilt as a NULL-PROTOTYPE store of DEEPLY FROZEN
    records. Two separate defects made the previous shape unsafe:
@@ -7038,6 +7081,44 @@ const GRAMMAR_SIGNS=(()=>{
   }
   if(entry.id!==id)throw new Error(`Sign entry ${id} is not bound to its own key.`);
  }
+})();
+/* ── Wave 12 byte pin ────────────────────────────────────────────────────────────────────────
+   Combining-mark ORDER is invisible on screen and has silently broken comparisons in this repo
+   before, so the three words Wave 12 actually typed are pinned by CODEPOINT, and the composed
+   signs are pinned against the fatḥah they were built from. Nothing here is a second copy of the
+   Arabic: the expected sequences are numbers, and the shared six words are compared to the ONE
+   canonical string rather than to a retyped twin. */
+(()=>{
+ const points=text=>[...text].map(character=>character.codePointAt(0));
+ const same=(actual,expected)=>actual.length===expected.length&&actual.every((value,index)=>value===expected[index]);
+ const PINS={
+  /* ضَمَّةٌ — vowel BEFORE shaddah, which is this file's order throughout («مُقَدَّرَةٌ»,
+     «التَّعَذُّرُ»). The two orders render identically and compare unequal, which is the whole
+     reason this pin exists. */
+  damma:[0x0636,0x064E,0x0645,0x064E,0x0651,0x0629,0x064C],
+  /* الْيَاءِ */ ya:[0x0627,0x0644,0x0652,0x064A,0x064E,0x0627,0x0621,0x0650],
+  /* الثِّقَلُ */ thiql:[0x0627,0x0644,0x062B,0x0650,0x0651,0x0642,0x064E,0x0644,0x064F]
+ };
+ for(const key of Object.keys(PINS)){
+  if(!same(points(ESTIMATED_SIGN_NEW_WORDS_AR[key]),PINS[key])){
+   throw new Error(`Wave-12 estimated-sign word «${key}» does not match its pinned codepoints.`);
+  }
+ }
+ const fatha=ESTIMATED_FATHA_ALIF_TAADHDHUR_AR.split(' ');
+ for(const [id,changed] of [['dammaMuqaddaraTaadhdhur',[0]],['dammaMuqaddaraThiql',[0,3,7]]]){
+  const words=GRAMMAR_SIGNS[id].ar.split(' ');
+  if(words.length!==fatha.length)throw new Error(`Estimated sign ${id} is not the eight-word shape.`);
+  words.forEach((word,index)=>{
+   const mustDiffer=changed.includes(index);
+   if(mustDiffer===(word===fatha[index])){
+    throw new Error(`Estimated sign ${id} word ${index} ${mustDiffer?'was not replaced':'drifted from'} the canonical fatḥah sign.`);
+   }
+  });
+ }
+ /* And the three estimated signs stay three DISTINCT strings: a composition bug that collapsed two
+    of them would otherwise print the wrong preventer to a learner and pass every check above. */
+ const estimated=['fathaMuqaddaraTaadhdhur','dammaMuqaddaraTaadhdhur','dammaMuqaddaraThiql'].map(id=>GRAMMAR_SIGNS[id].ar);
+ if(new Set(estimated).size!==estimated.length)throw new Error('Two estimated signs collapsed onto one string.');
 })();
 /* Phase 3B0-pre, Model B — PROTOTYPE IS NOT AUTHORITY.
 
@@ -10370,7 +10451,15 @@ const GRAMMAR_RULES=Object.freeze({
      in exactly one state, the naṣb على الاستثناء of p. 164, and a rafʿ or khafḍ cell here would
      be a claim about signs no lane renders. Asking for one throws in inflectNoun, which is the
      intended answer rather than a gap. */
-  maqsur:{nasb:['fathaMuqaddaraTaadhdhur','R_MAQSUR_NASB_FATHA_MUQADDARA']}
+  /* Wave 12 adds the RAFʿ cell p. 95 parses («المرتضى: فاعل مرفوع، وعلامة رفعه ضمة مقدرة على الألف
+     منع من ظهورها التعذر»). Still not all three: p. 21's «جميع الحركات» would license the khafḍ too,
+     and no lane renders one, so asking for it still throws. */
+  maqsur:{nasb:['fathaMuqaddaraTaadhdhur','R_MAQSUR_NASB_FATHA_MUQADDARA'],
+   raf:['dammaMuqaddaraTaadhdhur','R_MAQSUR_RAF_DAMMA_MUQADDARA']},
+  /* Wave 12 — الاسم المنقوص (p. 21). RAFʿ ONLY, on exactly the Wave-6 principle: p. 21 estimates
+     the ḍammah AND the kasrah on it للثقل and lets the fatḥah appear لخفتها, but p. 95 gives the
+     rafʿ, and a cell for a state no lane renders would be a claim about signs nobody sees. */
+  manqus:{raf:['dammaMuqaddaraThiql','R_MANQUS_RAF_DAMMA_MUQADDARA']}
  },
  presentVerb:{
   regular:{raf:['damma','R_MUDARI_RAF_DAMMA'],nasb:['fatha','R_MUDARI_NASB_FATHA'],jazm:['sukun','R_MUDARI_JAZM_SUKUN']},
@@ -10612,8 +10701,9 @@ const ROLE_RULE_VARIANTS=Object.freeze(Object.assign(Object.create(null),{
 }));
 const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr'],
-  // p. 21's مقصور reaches production in one state only; see GRAMMAR_RULES.nounInflection.maqsur.
-  maqsur:['nasb']},
+  // p. 21's مقصور and منقوص each reach production in the states GRAMMAR_RULES.nounInflection
+  // registers for them, and in no others.
+  maqsur:['nasb','raf'],manqus:['raf']},
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  verb:{regularPresent:['raf','nasb','jazm'],afalKhamsa:['raf','nasb','jazm'],weakFinal:['jazm'],mabniPresent:['builtOnSukun'],past:['builtOnFatha']},
@@ -10947,6 +11037,14 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_ISTITHNA_KHALA_FIL:sourceRule('خلا, عدا and حاشا may be reckoned verbs, and then what follows them is a mafʿūl bihi accusative, their fāʿil being a pronoun concealed obligatorily.',[162,165],'Only the verb reading of a registered خلا/عدا/حاشا frame. p. 162 puts the three in a نوع of their own — «ما يكون حرفاً تارة ويكون فعلاً تارة أخرى» — and p. 165 draws the consequence: «فإن قدَّرتَهُنَّ أفعالاً نَصَبْتَ ما بعدها على أنه مفعول به، والفاعل ضمير مستتر وجوباً».'),
  R_ISTITHNA_KHALA_HARF:sourceRule('خلا, عدا and حاشا may instead be reckoned particles of khafḍ, and then what follows them is makhfūḍ by them.',[162,165],'Only the ḥarf reading of a registered خلا/عدا/حاشا frame, and never where «ما» المصدرية precedes: p. 165 makes that reading impossible there. «وإن قدَّرتهن حروفاً خفضت ما بعدها».'),
  R_MAQSUR_NASB_FATHA_MUQADDARA:sourceRule('A noun ending in a permanent alif is called maqṣūr, and every vowel is estimated on it because taʿadhdhur prevents it from appearing.',[21],'Only the two registered maqṣūr أدوات of this chapter, سِوَى and سُوَى, and only in naṣb — the one state p. 164 gives them in a frame this app produces. It authorizes the SIGN alone: the state is the role’s, and no other noun may cite it.'),
+ /* ── Wave 12 — the two ESTIMATED RAFʿ signs of بَابُ الْمُعْرَبَاتِ's own doctrine ────────────
+    Each is its OWN rule, because each is a different claim about a different class of word, and
+    neither may borrow the other's authority merely because both estimate a ḍammah. p. 20 supplies
+    the doctrine, p. 21 the class name and the preventer, p. 95 the model parse that says the whole
+    clause aloud. Both authorize the SIGN alone — the state is the role's, exactly as
+    R_MAQSUR_NASB_FATHA_MUQADDARA already words it. */
+ R_MAQSUR_RAF_DAMMA_MUQADDARA:sourceRule('A noun ending in a permanent alif is called maqṣūr, and its ḍammah of rafʿ is estimated because taʿadhdhur prevents it from appearing.',[20,21,95],'Only a registered maqṣūr noun, and only in rafʿ — the state p. 95 parses («المرتضى: فاعل مرفوع، وعلامة رفعه ضمة مقدرة على الألف منع من ظهورها التعذر»). It authorizes the SIGN alone: the state is the role’s, and the khafḍ p. 21’s «جميع الحركات» would also license is not claimed because no lane renders it.'),
+ R_MANQUS_RAF_DAMMA_MUQADDARA:sourceRule('A noun ending in a permanent yāʾ is called manqūṣ; the ḍammah and the kasrah are estimated on it because of thiql, while the fatḥah appears because it is light.',[20,21,95],'Only a registered manqūṣ noun, and only in rafʿ — the state p. 95 parses («والقاضي: فاعل مرفوع، وعلامة رفعه ضمةٌ مقدَّرة على الياء منع من ظهورها الثقل»). It authorizes the SIGN alone: the state is the role’s, and neither the estimated kasrah nor the visible fatḥah p. 21 also states is claimed, because no lane renders either.'),
  R_TAMYIZ_NASB:sourceRule('A tamyīz is the plain accusative noun that interprets what was left vague, whether the vagueness is in an entity or in a relation.',[157,158],'Only a registered indefinite accusative named by a frozen productive pair, standing last after an ʿāmil that already has its explicit fāʿil. Being indefinite and accusative never makes a noun a tamyīz on its own.'),
  R_TAMYIZ_DHAT:sourceRule('Tamyīz al-dhāt, also called tamyīz al-mufrad, lifts the vagueness off a noun named before it whose reality is left unstated; it follows a number or a measure of weight, volume or area.',[158],'All three مقادير of p. 158 — weight, volume and area — are produced, each clarified by the exact noun its frozen pair names. The number position is not produced: 11–99 need the bināʾ of أحد عشر or the ملحق-by-SMP signs of عشرين, morphology this engine does not model. The four categories themselves are never uttered on an iʿrāb card; p. 161 parses this construction as «تمييز لعشرين», naming the mumayyaz.'),
  R_TAMYIZ_NISBAH:sourceRule('Tamyīz al-nisbah, also called tamyīz al-jumlah, lifts the vagueness off a relation stated in the clause before it; it is either transformed from an original fāʿil, mafʿūl or mubtadaʾ, or not transformed at all.',[158,159],'Both ضربان are produced: the untransformed kind on pairs whose ʿāmil already governs a definite object, and all three transformed kinds on frames that actually perform the promotion p. 159 describes.'),
@@ -11451,6 +11549,64 @@ registerNounSet(feminineThingPredicates,'singular');
 registerNounSet(feminineHumanSingulars,'singular');
 registerNounSet(feminineHumanDuals,'dual');
 registerNounSet(fiveNouns,'fiveNouns');
+/* ── Wave 12 — the two nouns الإعراب التقديري needs, and nothing else ─────────────────────────
+   p. 21 lists both classes with its own examples — «مثل: الفتى، والعَصَا، والحِجَى، والرَّحَى،
+   والرِّضَا» for المقصور, «نحو: القَاضِي، والدَّاعِي، والغَازِي، والسَّاعِي، والآتِي، والرَّامِي» for
+   المنقوص — and p. 95 parses الْقَاضِي itself as a fāʿil («فاعل مرفوع، وعلامة رفعه ضَمَّةٌ مقدَّرة على
+   الياء منع من ظهورها الثقل»). One word per class, both taken from those lists, each carrying only
+   the ONE case form its lane renders: a case form the app cannot build has no business in the noun
+   index — the rule Wave 6 set for سِوَى.
+
+   They sit in their own registry rather than in singularPeople, because the general pools are drawn
+   on by every noun slot in the app and these two may only ever stand in rafʿ. Registering them in
+   nounFormIndex is what makes the class PROVABLE: `inflection` is read off the registry, and
+   E_NOUN_FORM_CLASS refuses a token that claims a class its own surface is not registered for. */
+const ESTIMATED_SIGN_NOUNS=Object.freeze(Object.assign(Object.create(null),{
+ qadi:Object.freeze({key:'qadi',nom:'الْقَاضِي',en:'the judge',inflection:'manqus',
+  finalGlyph:String.fromCodePoint(0x064A),ruleId:'R_MANQUS_RAF_DAMMA_MUQADDARA'}),
+ fata:Object.freeze({key:'fata',nom:'الْفَتَى',en:'the young man',inflection:'maqsur',
+  finalGlyph:String.fromCodePoint(0x0649),ruleId:'R_MAQSUR_RAF_DAMMA_MUQADDARA'})
+}));
+const ESTIMATED_SIGN_NOUN_KEYS=Object.freeze(Object.keys(ESTIMATED_SIGN_NOUNS));
+for(const key of ESTIMATED_SIGN_NOUN_KEYS)registerNounSet([ESTIMATED_SIGN_NOUNS[key]],ESTIMATED_SIGN_NOUNS[key].inflection);
+/* Startup invariant. The class is the whole claim these two words exist to make, so it is PROVED
+   from the surface here rather than trusted: the last letter must be the one p. 21 names for that
+   class, the rafʿ cell of that class must exist and must be owned by this record's own rule, and
+   both surfaces are pinned by codepoint — a hidden combining mark, or an alif maqṣūrah written as a
+   yāʾ, would otherwise put a false class name on a learner's card and render identically. */
+(()=>{
+ const PINS={
+  /* الْقَاضِي */ qadi:[0x0627,0x0644,0x0652,0x0642,0x064E,0x0627,0x0636,0x0650,0x064A],
+  /* الْفَتَى  */ fata:[0x0627,0x0644,0x0652,0x0641,0x064E,0x062A,0x064E,0x0649]
+ };
+ for(const key of ESTIMATED_SIGN_NOUN_KEYS){
+  const record=ESTIMATED_SIGN_NOUNS[key];
+  if(!Object.isFrozen(record)||record.key!==key)throw new Error('Estimated-sign noun '+key+' is not frozen or not bound to its key.');
+  for(const name of ['nom','en','inflection','finalGlyph','ruleId']){
+   if(typeof record[name]!=='string'||!record[name])throw new Error('Estimated-sign noun '+key+'.'+name+' is not a non-empty string.');
+  }
+  if(record.acc||record.gen)throw new Error('Estimated-sign noun '+key+' registers a case form no lane renders.');
+  if(!record.nom.endsWith(record.finalGlyph)){
+   throw new Error('Estimated-sign noun '+key+' does not end in the letter its class requires: '+record.nom);
+  }
+  const lane=GRAMMAR_RULES.nounInflection[record.inflection];
+  if(!lane||!lane.raf)throw new Error('Estimated-sign noun '+key+' claims a class with no rafʿ cell.');
+  if(lane.raf[1]!==record.ruleId)throw new Error('Estimated-sign noun '+key+' is not bound to its own source rule.');
+  if(!GRAMMAR_SIGNS[lane.raf[0]])throw new Error('Estimated-sign noun '+key+' names an unregistered sign.');
+  if(nounFormIndex.get(record.nom)?.inflection!==record.inflection){
+   throw new Error('Estimated-sign noun '+key+' is not the noun index’s owner of its own surface.');
+  }
+  const points=[...record.nom].map(character=>character.codePointAt(0));
+  if(points.length!==PINS[key].length||points.some((value,index)=>value!==PINS[key][index])){
+   throw new Error('Estimated-sign noun '+key+' does not match its pinned codepoints.');
+  }
+ }
+ /* One word per class, and the two classes are the two p. 21 names. A third record, or two records
+    of one class, would mean a lane quietly changed what it teaches. */
+ if(ESTIMATED_SIGN_NOUN_KEYS.map(key=>ESTIMATED_SIGN_NOUNS[key].inflection).join(',')!=='manqus,maqsur'){
+  throw new Error('The estimated-sign noun registry no longer holds exactly one منقوص and one مقصور.');
+ }
+})();
 /* Add only surfaces the existing vocabulary does not already own. Shared adjective surfaces keep
    their historic lexeme/gloss authority; the naʿt-specific English is resolved through the pair
    registry, not by overwriting an older noun-form entry. */
@@ -13128,6 +13284,17 @@ function objectEnglish(word){return nounEnglish(word,'acc')}
 function stateArabic(state){return{raf:'مَرْفُوعٌ',nasb:'مَنْصُوبٌ',jarr:'مَخْفُوضٌ',jazm:'مَجْزُومٌ'}[state]}
 function signActionArabic(state){return{raf:'رَفْعِهِ',nasb:'نَصْبِهِ',jarr:'خَفْضِهِ',jazm:'جَزْمِهِ'}[state]}
 function inflectionReasonArabic(inflection){
+ /* ── Wave 12 — the two classes بَابُ الْمُعْرَبَاتِ adds, each with the connective the SOURCE uses
+    for it. The four in the table below say «لأنه» because that is how pp. 62–66 justify a
+    SUBSTITUTE sign («وعلامة نصبه الكسرة نيابةً عن الفتحة؛ لأنه جمعُ مؤنثٍ سالمٌ»). The broken plural
+    takes the ORIGINAL signs, and for it p. 60 and p. 62 write «وهو جمع تكسير» — «وكل من «التلاميذ»
+    و«الدروس» جمعُ تكسير» and «وعلامة رفعه الضمة الظاهرة، وهو جمع تكسير» — so that is what it says
+    here, which is also word for word how the definitions panel's own worked example on this class
+    already reads. المنقوص keeps «لأنه»: like المقصور beside it, the class IS the reason its sign is
+    estimated rather than visible (p. 21). Neither class name is retyped — both are read from the
+    ONE canonical copy in WHY_FORM, which is what the Why already prints. */
+ if(inflection==='broken')return `${NOUN_CLASS_AND_AR} ${WHY_FORM.broken.ar}`;
+ if(inflection==='manqus')return `${NOUN_CLASS_BECAUSE_AR} ${WHY_FORM.manqus.ar}`;
  /* Wave 6 — p. 21 names the class as well as the rule («ويسمى الاسمُ المنتهي بالألف مقصوراً»), and
     the learner needs the name beside the estimated sign or the sign looks arbitrary. Written as its
     own branch rather than added to the table below so that not one byte of the existing four
@@ -13135,6 +13302,18 @@ function inflectionReasonArabic(inflection){
  if(inflection==='maqsur')return '؛ لِأَنَّهُ اسْمٌ مَقْصُورٌ';
  return{dual:'؛ لِأَنَّهُ مُثَنًّى',smp:'؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ',sfp:'؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ',fiveNouns:'؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ'}[inflection]||'';
 }
+/* ── Wave 12 — the two connectives that attach a word's CLASS to its iʿrāb ────────────────────
+   «؛ لِأَنَّهُ» is DERIVED from the مقصور clause above rather than typed a sixth time. Typing it was
+   tried first and the load-time pin below caught why that is unsafe: the five clauses already in
+   this function carry those same two words in TWO different combining-mark orders — dual/smp/sfp/
+   fiveNouns write the nūn as shaddah-then-fatḥah, مقصور as fatḥah-then-shaddah. They render
+   identically and compare unequal. That mixture is file-wide and long-standing, so this wave does
+   NOT rewrite anyone's bytes to settle it; it simply refuses to add a sixth hand-typed copy, takes
+   the connective from the sibling estimated class it is modelled on, and asserts below that all six
+   clauses are the same WORDS. «؛ وَهُوَ» carries no shaddah, so it has only one spelling; it is new,
+   and it is pinned by codepoint. */
+const NOUN_CLASS_BECAUSE_AR=inflectionReasonArabic('maqsur').split(' ').slice(0,2).join(' ');
+const NOUN_CLASS_AND_AR='؛ وَهُوَ';
 function inferNounInflection(word){
  const registered=nounFormIndex.get(word);
  if(registered) return registered.inflection;
@@ -16112,6 +16291,16 @@ const PRESENT_GOVERNOR_CAUSE_AR=Object.freeze(Object.assign(Object.create(null),
 /* J2 — the class term itself, so the learner practises «مُعْتَلُّ الْآخِرِ» rather than only its
    consequence. Named once, and asserted by the focused tests from this same constant. */
 const WEAK_FINAL_CLASS_AR='مُعْتَلُّ الْآخِرِ';
+/* Wave 12 — its contrasting class, and the SAME discipline. Al-Tuḥfah p. 56 defines the sukūn's
+   one موضع by it — «فَأَمَّا السُّكُونُ فَيَكُونُ عَلَامَةً لِلْجَزْمِ فِي الْفِعْلِ الْمُضَارِعِ الصَّحِيحِ
+   الْآخِرِ» — explains it («ومعنى كونه صحيح الآخر أن آخره ليس حرفاً من حروف العلة الثلاثة التي هي
+   الألف والواو والياء») and then SAYS it in the parse itself: «فكلٌّ من هذه الأفعال مجزومٌ … وعلامة
+   جزمه السكون، وكل واحد من هذه الأفعال فِعلٌ مضارع صحيح الآخر». The run is lifted out of the Why
+   that already printed it rather than typed a second time, so the card and the Why cannot drift.
+   The three letters are p. 56's own list, built from codepoints so no combining mark can hide in
+   them; the alif maqṣūrah is included because it is that alif as it is written. */
+const SAHIH_FINAL_CLASS_AR='صَحِيحُ الْآخِرِ';
+const SAHIH_FINAL_EXCLUDED_GLYPHS=Object.freeze([0x0627,0x0649,0x0648,0x064A].map(point=>String.fromCodePoint(point)));
 /* 1G — the maḥall state words, in the genitive form «فِي مَحَلِّ …» takes. Separate from
    stateArabic, which gives the muʿrab word («مَجْزُومٌ»); a built verb never receives that. */
 const MAHALL_STATE_AR=Object.freeze(Object.assign(Object.create(null),{
@@ -16213,7 +16402,18 @@ function renderVerbAnalysis(token){
      than left as metadata, because it is the reason the sign is what it is. */
  const weakFinal=token.inflection==='weakFinal'?WEAK_FINAL_VERBS[WEAK_FINAL_BY_JUSS[token.word]]:null;
  if(token.inflection==='weakFinal'&&!weakFinal)throw new Error(`Unregistered weak-final surface: ${token.word}`);
- const classAr=weakFinal?` ${WEAK_FINAL_CLASS_AR}`:'';
+ /* Wave 12 — and the other side of p. 56/57's contrast. The weak-final card has named its class
+    since J2; the sound-final one never did, so «صحيح الآخر» reached the learner only as an
+    explanation ABOUT the verb. It is stated here in exactly the one lane p. 56 owns — the jazm
+    whose sign is the sukūn — and never on the rafʿ or naṣb, which p. 61 parses without it, nor on
+    the five verbs, whose jazm belongs to p. 57's OTHER موضع. The class is re-derived from the
+    surface, not read off a label: a token claiming this lane while ending in one of p. 56's three
+    weak letters is a build error, exactly as an unregistered weak-final surface is. */
+ const soundFinalJazm=token.inflection==='regular'&&token.state==='jazm'&&safeSignId(token.sign)==='sukun';
+ if(soundFinalJazm&&SAHIH_FINAL_EXCLUDED_GLYPHS.some(glyph=>token.word.endsWith(glyph))){
+  throw new Error(`A verb ending in a weak letter was about to be called صحيح الآخر: ${token.word}`);
+ }
+ const classAr=weakFinal?` ${WEAK_FINAL_CLASS_AR}`:soundFinalJazm?` ${SAHIH_FINAL_CLASS_AR}`:'';
  /* Phase 1 — the conditional role is named where the source names it, between the word class and
     the state, and ONLY when the authority has actually proven the role. */
  const conditionRole=token.grammar.shartRole&&deriveConditionAuthority(token._data||{tokens:token._tokens||[]},
@@ -16372,7 +16572,9 @@ const WHY_FORM=Object.freeze({
  sfp:{ar:'جَمْعُ مُؤَنَّثٍ سَالِمٌ',en:'a sound feminine plural'},
  fiveNouns:{ar:'مِنَ الْأَسْمَاءِ الْخَمْسَةِ',en:'one of الْأَسْمَاءُ الْخَمْسَةُ'},
  // Wave 6 — p. 21: «ويسمى الاسمُ المنتهي بالألف مقصوراً».
- maqsur:{ar:'اسْمٌ مَقْصُورٌ',en:'a maqṣūr noun — one ending in a permanent alif'}
+ maqsur:{ar:'اسْمٌ مَقْصُورٌ',en:'a maqṣūr noun — one ending in a permanent alif'},
+ // Wave 12 — p. 21's other named class: «ويسمى الاسمُ المنتهي بالياء منقوصاً».
+ manqus:{ar:'اسْمٌ مَنْقُوصٌ',en:'a manqūṣ noun — one ending in a permanent yāʾ'}
 });
 /* English keeps the familiar transliterated state words (rafʿ/naṣb/khafḍ/jazm) but names the
    SIGN itself in Arabic, so the learner keeps meeting the real iʿrāb vocabulary. */
@@ -16384,8 +16586,14 @@ const WHY_SIGN_NAME=Object.freeze({
  nunKept:{ar:'ثُبُوتُ النُّونِ',en:'ثُبُوتُ النُّونِ'},
  nunDropped:{ar:'حَذْفُ النُّونِ',en:'حَذْفُ النُّونِ'},
  // Wave 6 — the estimated one. p. 21 names the preventer as well as the sign.
- fathaMuqaddaraTaadhdhur:{ar:'فَتْحَةٌ مُقَدَّرَةٌ عَلَى الْأَلِفِ مَنَعَ مِنْ ظُهُورِهَا التَّعَذُّرُ',
-  en:'an estimated فَتْحَة that taʿadhdhur keeps from appearing'}
+ fathaMuqaddaraTaadhdhur:{ar:ESTIMATED_FATHA_ALIF_TAADHDHUR_AR,
+  en:'an estimated فَتْحَة that taʿadhdhur keeps from appearing'},
+ /* Wave 12 — the two estimated rafʿ signs, read from the SAME composed strings the iʿrāb card
+    prints, so the Why can never name a sign in words the card does not use. */
+ dammaMuqaddaraTaadhdhur:{ar:ESTIMATED_DAMMA_SIGNS_AR.taadhdhur,
+  en:'an estimated ضَمَّة that taʿadhdhur keeps from appearing'},
+ dammaMuqaddaraThiql:{ar:ESTIMATED_DAMMA_SIGNS_AR.thiql,
+  en:'an estimated ضَمَّة that thiql keeps from appearing'}
 });
 const WHY_STATE=Object.freeze({
  raf:{ar:'مَرْفُوعٌ',sign:'رَفْعِهِ',en:'nominative',signEn:'rafʿ'},
@@ -16393,6 +16601,65 @@ const WHY_STATE=Object.freeze({
  jarr:{ar:'مَخْفُوضٌ',sign:'خَفْضِهِ',en:'genitive',signEn:'khafḍ'},
  jazm:{ar:'مَجْزُومٌ',sign:'جَزْمِهِ',en:'jussive',signEn:'jazm'}
 });
+/* ── Wave 12 byte pin, part 2 ────────────────────────────────────────────────────────────────
+   The class names and the two connectives, pinned by CODEPOINT, and the composed clauses proved
+   against the ONE canonical copy of each class name. Nothing Arabic is retyped here: the expected
+   sequences are numbers, and every comparison is against a string the app itself renders.
+
+   NOT claimed, and named so the omission is a fact rather than a silence: p. 60 and p. 62 also
+   append «وهو اسم مفرد» to a singular's parse. The inventory carries no row for it, adding it would
+   rewrite the clause on every ordinary noun card in the app, and neither belongs in this wave — so
+   المفرد keeps its bare sign clause and only the class this wave was called for is added. */
+(()=>{
+ const points=text=>[...text].map(character=>character.codePointAt(0));
+ const same=(text,expected)=>{
+  const actual=points(text);
+  return actual.length===expected.length&&actual.every((value,index)=>value===expected[index]);
+ };
+ const PINS={
+  /* ؛ وَهُوَ — the one connective this wave introduces. No shaddah, so one spelling only. */
+  and:[0x061B,0x0020,0x0648,0x064E,0x0647,0x064F,0x0648,0x064E],
+  /* اسْمٌ مَنْقُوصٌ */ manqus:[0x0627,0x0633,0x0652,0x0645,0x064C,0x0020,0x0645,0x064E,0x0646,0x0652,0x0642,0x064F,0x0648,0x0635,0x064C],
+  /* صَحِيحُ الْآخِرِ */ sahih:[0x0635,0x064E,0x062D,0x0650,0x064A,0x062D,0x064F,0x0020,0x0627,0x0644,0x0652,0x0622,0x062E,0x0650,0x0631,0x0650]
+ };
+ if(!same(NOUN_CLASS_AND_AR,PINS.and))throw new Error('The «وهو» class connective does not match its pinned codepoints.');
+ if(!same(WHY_FORM.manqus.ar,PINS.manqus))throw new Error('«اسْمٌ مَنْقُوصٌ» does not match its pinned codepoints.');
+ if(!same(SAHIH_FINAL_CLASS_AR,PINS.sahih))throw new Error('«صَحِيحُ الْآخِرِ» does not match its pinned codepoints.');
+ /* Every clause that opens with «لأنه» must open with the SAME WORDS. The comparison is made on a
+    canonically reordered copy and NOTHING is normalized on the way to a learner: reordering here is
+    a diagnostic that answers «are these the same words?», never an authority over what is rendered.
+    That distinction matters, because four of these clauses and the fifth genuinely differ in
+    combining-mark order today, and this assertion is what keeps that a known, bounded fact instead
+    of letting a sixth spelling in behind it. */
+ const words=text=>text.normalize('NFC');
+ for(const inflection of ['dual','smp','sfp','fiveNouns','maqsur','manqus']){
+  if(!words(inflectionReasonArabic(inflection)).startsWith(words(NOUN_CLASS_BECAUSE_AR)+' ')){
+   throw new Error(`The ${inflection} class clause no longer opens with the canonical «لأنه».`);
+  }
+ }
+ /* …and the derivation really did take the connective and nothing else. */
+ if(NOUN_CLASS_BECAUSE_AR.split(' ').length!==2||!inflectionReasonArabic('maqsur').startsWith(NOUN_CLASS_BECAUSE_AR+' ')){
+  throw new Error('The «لأنه» connective was not derived cleanly from the مقصور clause.');
+ }
+ if(inflectionReasonArabic('broken')!==NOUN_CLASS_AND_AR+' '+WHY_FORM.broken.ar){
+  throw new Error('The جمع التكسير clause is not composed from its canonical class name.');
+ }
+ if(inflectionReasonArabic('manqus')!==NOUN_CLASS_BECAUSE_AR+' '+WHY_FORM.manqus.ar){
+  throw new Error('The منقوص clause is not composed from its canonical class name.');
+ }
+ if(inflectionReasonArabic('singular')!=='')throw new Error('The singular noun gained a class clause this wave did not authorize.');
+ /* Every class the sign matrix can inflect must have a Why form, or whySignNoun throws mid-render
+    on a word a learner is already looking at. */
+ for(const inflection of Object.keys(GRAMMAR_RULES.nounInflection)){
+  if(!WHY_FORM[inflection])throw new Error(`Noun class ${inflection} has no canonical Why form.`);
+ }
+ for(const inflection of Object.keys(GRAMMAR_RULES.nounInflection)){
+  for(const state of Object.keys(GRAMMAR_RULES.nounInflection[inflection])){
+   const signId=GRAMMAR_RULES.nounInflection[inflection][state][0];
+   if(!WHY_SIGN_NAME[signId])throw new Error(`Noun sign ${signId} has no canonical Why name.`);
+  }
+ }
+})();
 const wq=w=>`«${w}»`,eq=w=>`“${w}”`;
 function mafulFihWhyAuthority(token,data){
  const authority=deriveMafulFihAuthority(data,data?.tokens?.indexOf(token));
@@ -17139,7 +17406,7 @@ function whySignVerb(t){
    en:`It is a weak-ended present verb: its last letter is ${letter.en}, and a weak-ended verb is made jussive by deleting that weak letter. The ${letter.en} of «${record.pres}» is dropped, and ${letter.evidenceEn} before it is the evidence that it was there.`};
  }
  return{id:`WHY_SIGN_MUDARI_${t.state.toUpperCase()}`,
-  ar:`وَهُوَ مُضَارِعٌ صَحِيحُ الْآخِرِ لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ، فَعَلَامَةُ ${st.sign} ${sign.ar}.`,
+  ar:`وَهُوَ مُضَارِعٌ ${SAHIH_FINAL_CLASS_AR} لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ، فَعَلَامَةُ ${st.sign} ${sign.ar}.`,
   en:`It is a sound-ended present verb with nothing attached to its end, so its sign of ${st.signEn} is ${sign.en}.`};
 }
 /* Why for an attached rafʿ pronoun. One builder for every such component in both tenses, so a
@@ -18754,6 +19021,39 @@ function validateExercise(data){
    }else if(token.state!==roleRule?.state)fail('E_ROLE_CASE',`Role ${token.grammar.role} requires ${roleRule?.state}, not ${token.state}.`,token);
    const signRule=GRAMMAR_RULES.nounInflection[token.inflection]?.[token.state];
    if(safeSignId(token.sign)!==signRule?.[0])fail('E_NOUN_SIGN','Noun sign disagrees with case and declension.',token);
+   /* Wave 12 — and the RULE the sign cites, which was never checked. The present verb has had
+      E_VERB_RULE since it shipped; the noun matrix carries a rule id in exactly the same second
+      slot and nothing compared it, so any noun could cite any other declension's source rule and
+      validate. Harmless while every declension's rule said much the same thing; not harmless once
+      المقصور and المنقوص are two DIFFERENT claims about two different classes of word, which is
+      how the Wave-12 adversarial pass found it.
+
+      A BUILT noun reaches here with no state, so its lane is undefined and its rule id is the empty
+      string the builder wrote; both sides normalize to '' and the check is inert for it, exactly as
+      the sign check above already is. */
+   if((token.signRuleId||'')!==(signRule?.[1]||''))fail('E_NOUN_SIGN_RULE','Noun sign rule disagrees with case and declension.',token);
+   /* Wave 12 — the CLASS is now SPOKEN on the card («وهو جمع تكسير», «لأنه اسم منقوص»), so it has
+      to be proven rather than declared. E_NOUN_SIGN above cannot do it: المفرد and جمع التكسير take
+      the same three signs, so a singular relabelled a broken plural agrees with its sign matrix
+      perfectly and would simply tell the learner something false. The class is therefore compared
+      to the registry that owns the surface, in BOTH directions — a broken plural forced to
+      'singular' loses a clause the source gives it, which is the same defect the other way round.
+      Only a REGISTERED surface is judged; an unregistered one has no registry claim to disagree
+      with, and inferNounInflection already answers for it. */
+   /* Wave 12 — and the two regimes stay mutually exclusive for EVERY noun, not only for the three
+      that had their own rule. A muʿrab noun is in a STATE; a built one holds a POSITION. Each
+      built lane already refuses the other's marks (E_HAAL_BINAA, E_ISHARA_BINAA, the munādā's own
+      checks), but an ORDINARY marfūʿ noun could be handed a maḥall and nothing objected: with no
+      mahallRuleId to own, mahallRuleOwnerFailure had nothing to test. The adversarial pass of this
+      wave found it on a fāʿil whose ḍammah is estimated, where the confusion is easiest to make —
+      an estimated sign is still an iʿrāb sign, and «في محل رفع» beside it would be two answers. */
+   if(token.state&&token.mahall){
+    fail('E_NOUN_MAHALL','A muʿrab noun has an iʿrāb state, so it may not also hold a maḥall.',token);
+   }
+   const registeredClass=nounFormIndex.get(token.word)?.inflection;
+   if(registeredClass&&token.inflection!==registeredClass){
+    fail('E_NOUN_FORM_CLASS','Noun declension disagrees with the registered lexical class of its own surface.',token);
+   }
   }
   if(token.grammar.type==='verb'&&token.tense==='present'){
    const governor=token.governorId?data.tokens.find(item=>item.id===token.governorId):null;
@@ -20061,6 +20361,23 @@ function add(starts,form,state,sign,build,metadata={}){
    throw new Error(`Template ${stableId} declares a past ʿāmil for a nominal tamyīz frame.`);
   }
  }
+ /* Wave 12 — the ONLY road into the الإعراب التقديري lanes, declared the way every curriculum lane
+    before it declares its own: a frozen key list on the template rather than a name a token could
+    carry. One template owns ONE class, because the class is exactly what its fāʿil's card states,
+    and a lane mixing المقصور with المنقوص would be one stable ID authorizing two different
+    sentences about two different rules. The learner's target must stay the accusative object: these
+    lanes deliberately advertise no filter tuple of their own, and a lane that made the estimated
+    noun the target would be offering a «Word form» and a sign the filters do not model. */
+ const estimatedSignNounKeys=Object.freeze([...(metadata.estimatedSignNounKeys||[])]);
+ if(estimatedSignNounKeys.some((key,position)=>estimatedSignNounKeys.indexOf(key)!==position||!ESTIMATED_SIGN_NOUNS[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered estimated-sign noun.`);
+ }
+ if(estimatedSignNounKeys.length){
+  if(estimatedSignNounKeys.length!==1)throw new Error(`Template ${stableId} mixes estimated-sign noun classes.`);
+  if(form!=='singular'||state!=='nasb'||sign!=='fatha'){
+   throw new Error(`Template ${stableId} moved the estimated-sign lane off the accusative-object target.`);
+  }
+ }
  const conditionalGovernor=isConditionalGovernor(GRAMMAR_RULES.governors[presentGovernor]);
  if(conditionalGovernor!==Boolean(responsePairIds.length)){
   throw new Error(`Template ${stableId} must declare response pairs exactly when its governor is conditional.`);
@@ -20138,6 +20455,7 @@ function add(starts,form,state,sign,build,metadata={}){
   haalMahallFrameKeys,
   munadaPairKeys,
   presentCapabilities,
+  estimatedSignNounKeys,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
 }
@@ -22469,6 +22787,27 @@ LA_JINS_TEMPLATE_LANES.forEach(lane=>{
 add('particle','singular','raf','damma',
  ()=>buildLaIlghaExercise(pickVaried(LA_ILGHA_ALL_FRAME_KEYS,'la-ilgha',String)),
  {...atfMetadata(['singularPeople'],['waw']),laIlghaFrameKeys:LA_ILGHA_ALL_FRAME_KEYS});
+
+/* ── Wave 12 — الإعراب التقديري reaches a card ─────────────────────────────────────────────────
+   One lane per class, in the shape p. 95 parses these very words in: a past verb, an explicit
+   marfūʿ fāʿil whose ḍammah is estimated, and its object. Both REUSE the existing
+   verb/singular/naṣb/fatḥah filter tuple — the learner's target stays the accusative object, which
+   is a singular with a visible fatḥah exactly as in the lane above — so no new filter tuple, no new
+   «Word form» option, and no new sign option are advertised for a class the filters do not model.
+   That is the same registration Wave 6 used for the maqṣūr سِوَى, and for the same reason: the
+   estimated sign is something the learner READS in a full iʿrāb, not something they filter for. */
+for(const key of ESTIMATED_SIGN_NOUN_KEYS){
+ const subject=ESTIMATED_SIGN_NOUNS[key];
+ add('verb','singular','nasb','fatha',()=>{
+  const v=pickGeneralVerb(),o=pickGeneralObject(v,subject);
+  return{sentence:`${v.past} ${subject.nom} ${o.acc}`,translation:`${cap(subject.en)} ${v.pastEn} ${o.en}.`,
+   tokens:[
+    token(v.past,v.pastEn,AR.past(v.past),'A past-tense verb built on fatḥah.'),
+    token(subject.nom,subject.en,AR.faail(subject.nom),'The subject of the verb; nominative, and its ḍammah is estimated rather than visible.'),
+    token(o.acc,o.en,AR.object(o.acc),EN.object,true)
+   ]};
+ },{...pastTemplateMetadata('3ms','explicit'),estimatedSignNounKeys:[key]});
+}
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

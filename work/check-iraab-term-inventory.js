@@ -1233,6 +1233,126 @@ const WAVE11_BLOCKED_KEYS = ['T_ATF_BAYAN'];
   }
 }
 
+/* ── Wave 12 — بَابُ الْمُعْرَبَاتِ (pp. 59–69) ────────────────────────────────────────────────
+   Three rows, resolved three different ways, and the pin has to hold each down by its own kind of
+   evidence:
+
+     L_BROKEN       was GENERIC_ONLY because the Why said «جمع تكسير» and the CARD did not. p. 60
+                    and p. 62 append it to the parse itself («وكل من «التلاميذ» و«الدروس» جمعُ
+                    تكسير» / «وعلامة رفعه الضمة الظاهرة، وهو جمع تكسير»), so the card now does too.
+     G_SAHIH_AKHIR  the same shape, and the same fix, on p. 56's own parse: «وكل واحد من هذه
+                    الأفعال فِعلٌ مضارع صحيح الآخر». Its probe was also wrong — the definite matn
+                    form «الصحيح الآخر», which no parse uses.
+     G_EST_THIQL    a genuine production gap: المنقوص did not exist. pp. 20–21 name the class and
+                    its preventer, p. 95 says the whole sign in a model parse.
+
+   And one row NOT in the wave's three is corrected here, because leaving it would have left a
+   false positive standing beside three new true ones: G_EST_TAADHDHUR's canonical term is a
+   ḌAMMAH, its probe named the PREVENTER alone, and the only line carrying that preventer was Wave
+   6's estimated FATḤAH on سِوَى. The row was FULL on a sign no learner had ever seen. Both
+   estimated rows now probe their whole sign, and the assertions below prove the discrimination
+   rather than assuming it. */
+const WAVE12_FULL_KEYS = ['L_BROKEN', 'G_SAHIH_AKHIR', 'G_EST_THIQL'];
+const WAVE12_PROBE_CORRECTIONS = ['G_SAHIH_AKHIR', 'G_EST_TAADHDHUR'];
+{
+  for (const key of [...WAVE12_FULL_KEYS, 'G_EST_TAADHDHUR']) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('Wave-12 row ' + key + ' is missing from the inventory'); continue; }
+    if (!/^باب المعربات/.test(row.chapter)) fail('Wave-12 row ' + key + ' is not in the wave scope: ' + row.chapter);
+    if (row.status !== 'FULL') fail('Wave-12 row ' + key + ' is ' + row.status + ', not FULL');
+  }
+
+  /* بَابُ الْمُعْرَبَاتِ holds thirteen rows: the six locus clauses, the two final-letter classes, the
+     three estimated signs of pp. 20–21, and المفرد's two neighbours already counted elsewhere. All
+     of them must now be FULL — this chapter has no blocker and no excluded row. */
+  const chapterObserved = observed.filter(r => /^باب المعربات/.test(r.chapter));
+  const unresolved = chapterObserved.filter(r => r.status !== 'FULL');
+  if (unresolved.length) fail('باب المعربات still has unresolved rows: ' + unresolved.map(r => r.key + '=' + r.status).join(', '));
+
+  /* THE DISCRIMINATION, proved from the rendered corpus rather than trusted. The old probe still
+     matches BOTH estimated taʿadhdhur signs — that is exactly why it was not good enough — while
+     each row's new probe matches its own and nothing else. If a future change ever let one line
+     carry both, the two rows would be indistinguishable again and this fails loudly. */
+  {
+    const preventerOnly = 'مَنَعَ مِنْ ظُهُورِهَا التَّعَذُّرُ';
+    const withPreventer = [...iraabLines.keys()].filter(line => line.includes(skeleton(preventerOnly)));
+    if (withPreventer.length < 2) {
+      fail('the preventer clause «' + preventerOnly + '» no longer reaches two different signs, so the ' +
+        'Wave-12 probe correction can no longer be demonstrated from the corpus');
+    }
+    const damma = rows.find(r => r.key === 'G_EST_TAADHDHUR').probe;
+    const fatha = withPreventer.filter(line => !line.includes(skeleton(damma)));
+    if (!fatha.length) fail('Wave 6\'s estimated FATḤAH disappeared; the taʿadhdhur rows are no longer two claims');
+    for (const key of ['G_EST_TAADHDHUR', 'G_EST_THIQL']) {
+      const probe = rows.find(r => r.key === key).probe;
+      const other = rows.find(r => r.key === (key === 'G_EST_THIQL' ? 'G_EST_TAADHDHUR' : 'G_EST_THIQL')).probe;
+      const hits = [...iraabLines.keys()].filter(line => line.includes(skeleton(probe)));
+      if (!hits.length) fail(key + ' names a sign no card carries');
+      if (hits.some(line => line.includes(skeleton(other)))) {
+        fail(key + ' and its sibling estimated sign share a card, so neither probe discriminates');
+      }
+      /* An estimated sign must never be printed as a VISIBLE one, in either direction. */
+      if (hits.some(line => line.includes(skeleton('الضَّمَّةُ الظَّاهِرَةُ')))) {
+        fail(key + ' prints an estimated ḍammah and a visible one on the same card');
+      }
+    }
+  }
+
+  /* SOURCE-RULE OWNERSHIP, on the rendered text. p. 56 gives «صحيح الآخر» exactly ONE موضع — the
+     jazm whose sign is the sukūn. p. 57 gives ḥadhf al-nūn and ḥadhf ḥarf al-ʿillah their own, so
+     the class must never appear beside either, and never beside its own opposite. */
+  {
+    const sahih = rows.find(r => r.key === 'G_SAHIH_AKHIR').probe;
+    const hits = [...iraabLines.keys()].filter(line => line.includes(skeleton(sahih)));
+    if (!hits.length) fail('«' + sahih + '» reaches no rendered card');
+    for (const line of hits) {
+      if (!line.includes(skeleton('السُّكُونُ'))) fail('«' + sahih + '» reached a card whose sign is not the sukūn: ' + line);
+      for (const wrong of ['حَذْفُ النُّونِ', 'حَذْفُ حَرْفِ الْعِلَّةِ', 'مُعْتَلُّ الْآخِرِ']) {
+        if (line.includes(skeleton(wrong))) fail('«' + sahih + '» shares a card with «' + wrong + '», which belongs to p. 57\'s other موضع');
+      }
+    }
+    /* …and its opposite must still be produced, or the contrast this row exists for is gone. */
+    if (!templatesFor(rows.find(r => r.key === 'G_MUTALL_AKHIR').probe).size) {
+      fail('«معتل الآخر» stopped being produced, so the sound-final class no longer contrasts with anything');
+    }
+  }
+
+  /* THE CLASS CLAUSE, and the boundary this wave deliberately did NOT cross. p. 60 and p. 62 append
+     a class to the parse of a singular as readily as to a broken plural («وهو اسم مفرد»), and the
+     inventory carries no row for that one. Adding it would have rewritten the clause on every
+     ordinary noun card in the app on no row's authority, so it is deliberately absent — and pinned
+     absent, so a later change has to make that decision again on purpose. */
+  {
+    const broken = rows.find(r => r.key === 'L_BROKEN');
+    if (!templatesFor(broken.probe).size) fail('the broken-plural class clause reaches no card');
+    if (templatesFor('وَهُوَ اسْمٌ مُفْرَدٌ').size || templatesFor('لِأَنَّهُ اسْمٌ مُفْرَدٌ').size) {
+      fail('a singular noun card gained a class clause; Wave 12 left المفرد alone on purpose, and ' +
+        'the inventory has no row that authorizes it');
+    }
+    /* The clause must be on the NOUN's own card, beside its sign — not floating in a phrase block. */
+    const onSignCards = [...iraabLines.keys()].filter(line =>
+      line.includes(skeleton(broken.probe)) && line.includes(skeleton('وَعَلَامَةُ')));
+    if (!onSignCards.length) fail('«' + broken.probe + '» never appears beside a sign clause');
+  }
+
+  /* The two words the estimated lanes exist to produce must really be the classes they claim. The
+     app proves this at load time from its own registry; asserted here too, because the inventory is
+     what a reader trusts and a registry that quietly changed class would move a row silently. */
+  {
+    const registry = api.ESTIMATED_SIGN_NOUNS || {};
+    const keys = Object.keys(registry);
+    if (keys.length !== 2) fail('the estimated-sign noun registry holds ' + keys.length + ' words, not two');
+    for (const key of keys) {
+      const record = registry[key];
+      const card = [...iraabLines.keys()].find(line => line.startsWith(skeleton(record.nom) + ':'));
+      if (!card) fail('the estimated-sign noun «' + record.nom + '» never reaches a card of its own');
+      else if (!card.includes(skeleton('فَاعِلٌ مَرْفُوعٌ'))) {
+        fail('«' + record.nom + '» is not parsed as the marfūʿ fāʿil p. 95 makes it');
+      }
+    }
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -1285,6 +1405,9 @@ console.log(JSON.stringify({
     full: WAVE11_FULL_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
     trueBlocker: WAVE11_BLOCKED_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'TRUE_BLOCKER').length,
     probeCorrections: WAVE11_FULL_KEYS.length },
+  wave12: { name: 'باب المعربات', target: WAVE12_FULL_KEYS.length,
+    full: WAVE12_FULL_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
+    probeCorrections: WAVE12_PROBE_CORRECTIONS.length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

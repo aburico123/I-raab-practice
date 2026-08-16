@@ -1601,6 +1601,63 @@ const WAVE14_FULL_KEYS = ['V_AMR', 'V_MUJARRAD'];
   }
 }
 
+/* ===== FINAL MARATHON — every row that entered this run non-FULL ================================
+   Sixteen rows were non-FULL when the marathon began. Four were already pinned TRUE_BLOCKERs; the
+   other twelve were worked one coherent source chapter at a time. This block is the machine pin on
+   the RESULT: each key is listed with the verdict the source actually supports, so that a later
+   change cannot silently move a row back into the implementable queue — or, worse, quietly promote
+   a blocker without the secondary citation those blockers name.
+
+   The four verdicts mean exactly what the marathon brief defined them to mean:
+     FULL          the exact direct term reaches a rendered iʿrāb line, re-proved from the corpus.
+     TRUE_BLOCKER  the source teaches the term but withholds the fact this app's contract needs.
+     notCounted    the source teaches it, but it is not a distinct direct utterance (see below).
+     sourceExcluded the approved source does not teach it as part of this curriculum.
+   notCounted and sourceExcluded rows are DELETED from `rows` and recorded in the JSON's own
+   `notCounted` / `sourceExcluded` tables, so they cannot appear here; the assertions below check
+   that they are absent from the row table AND present in those tables. */
+const MARATHON15 = {
+  /* ── became FULL ───────────────────────────────────────────────────────────────────────── */
+  full: [
+    'B_MAFUL_MUDMAR_MUTTASIL'
+  ],
+  /* ── proved TRUE_BLOCKER (the detached-pronoun bināʾ, one missing fact across three bābs) ── */
+  blocked: [
+    'B_MAFUL_MUDMAR_MUNFASIL'
+  ],
+  /* ── removed from the denominator, with the table each must now live in ───────────────────── */
+  retired: {}
+};
+{
+  for (const key of MARATHON15.full) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('marathon row ' + key + ' is missing from the inventory'); continue; }
+    if (row.status !== 'FULL') fail('marathon row ' + key + ' is ' + row.status + ', not FULL');
+    if (row.missingReason) fail('marathon row ' + key + ' is FULL but still carries a missingReason');
+    /* Re-proved from the corpus, never from the derived status: the probe (with its discriminator,
+       when it has one) must reach a real rendered iʿrāb line. */
+    const authored = rows.find(r => r.key === key);
+    const probe = skeleton(authored.probe);
+    const need = authored.requires ? skeleton(authored.requires) : '';
+    const hits = [...iraabLines.keys()].filter(line => line.includes(probe) && (!need || line.includes(need)));
+    if (!hits.length) fail('marathon row ' + key + ' reaches no rendered iʿrāb line');
+  }
+  for (const key of MARATHON15.blocked) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('marathon blocker ' + key + ' is missing from the inventory'); continue; }
+    if (row.status !== 'TRUE_BLOCKER') {
+      fail('marathon blocker ' + key + ' is ' + row.status + '; a blocker may only be lifted by a reviewed secondary citation');
+    }
+  }
+  for (const [key, table] of Object.entries(MARATHON15.retired)) {
+    if (rows.some(r => r.key === key)) fail('retired row ' + key + ' is still in the denominator');
+    const list = table === 'notCounted' ? inventory.notCounted : inventory.sourceExcluded;
+    if (!list || !list.some(entry => entry.key === key)) {
+      fail('retired row ' + key + ' is not recorded in the ' + table + ' table');
+    }
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 

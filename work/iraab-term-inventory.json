@@ -15,18 +15,18 @@
  },
  "totals": {
   "TOTAL": 279,
-  "FULL": 263,
+  "FULL": 264,
   "GENERIC_ONLY": 2,
   "PARTIAL": 1,
-  "ABSENT": 9,
-  "TRUE_BLOCKER": 4,
+  "ABSENT": 7,
+  "TRUE_BLOCKER": 5,
   "reconciles": true,
-  "percentFull": 94.3
+  "percentFull": 94.6
  },
  "randomizationTotals": {
   "GOOD": 163,
-  "LIMITED": 101,
-  "NONE": 15
+  "LIMITED": 102,
+  "NONE": 14
  },
  "marathon": {
   "target": 56,
@@ -1003,13 +1003,13 @@
    "pages": "78",
    "parent": "نواصب المضارع",
    "status": "FULL",
-   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 109 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 110 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَوْ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 109
+   "observedTemplateLanes": 110
   },
   {
    "key": "N_AN_MUDMARA_JAWAZ",
@@ -3057,14 +3057,14 @@
    "chapter": "باب المفعول به (pp. 140–145)",
    "pages": "142–145,157",
    "parent": "أقسام المفعول به",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "p. 157's model parse makes the yāʾ «مفعول به مبني على السكون في محل نصب»; no lane attaches an object pronoun.",
-   "randomization": "NONE",
-   "probe": "مَفْعُولٌ بِهِ مُتَّصِلٌ",
+   "status": "FULL",
+   "proof": "built 200× per template; «مَفْعُولٌ بِهِ» observed in the rendered iʿrāb across 3 template lane(s) [mode=contains]",
+   "missingReason": "",
+   "randomization": "LIMITED",
+   "probe": "مَفْعُولٌ بِهِ",
    "probeMode": "contains",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
+   "probeRequires": "ضَمِيرٌ مُتَّصِلٌ",
+   "observedTemplateLanes": 3
   },
   {
    "key": "B_MAFUL_MUDMAR_MUNFASIL",
@@ -3072,9 +3072,9 @@
    "chapter": "باب المفعول به (pp. 140–145)",
    "pages": "142–145",
    "parent": "أقسام المفعول به",
-   "status": "ABSENT",
+   "status": "TRUE_BLOCKER",
    "proof": "",
-   "missingReason": "The إيّاي/إيّاك series of p. 143 is not produced. Probe tightened from the bare stem «إِيَّا», whose skeleton hid inside «أَيَّانَ» and read FULL while nothing was produced; it now names p.143’s own surface.",
+   "missingReason": "TRUE BLOCKER under the approved source, and it is the SAME missing fact as ضَمِيرٌ مُنْفَصِلٌ and مُبْتَدَأٌ مُضْمَرٌ — the bināʾ of the detached pronouns — reached from a third bāb. (1) Al-Tuḥfah teaches the row in full: p. 142 divides المفعول به into ظاهر and مضمر and the مضمر into متصل and منفصل, and p. 143 enumerates the twelve منفصل forms — «وَلِلْمُنْفَصِلِ اثْنَا عَشَرَ لَفْظاً أَيْضاً: «إِيَّا» مُرْدَفَةً بِالْيَاءِ لِلْمُتَكَلِّمِ وَحْدَهُ، أَوْ «نَا» لِلْمُعَظِّمِ نَفْسَهُ، أَوْ مَعَ غَيْرِهِ، أَوْ بِالْكَافِ مَفْتُوحَةً لِلْمُخَاطَبِ الْمُفْرَدِ الْمُذَكَّرِ …» — settles the disputed analysis in its own voice («وَالصَّحِيحُ أَنَّ الضَّمِيرَ هُوَ «إِيَّا» وَأَنَّ مَا بَعْدَهُ لَوَاحِقُ تَدُلُّ عَلَى التَّكَلُّمِ أَوِ الْخِطَابِ أَوِ الْغَيْبَةِ»), supplies complete host sentences («إِيَّايَ أَطَاعَ التَّلَامِيذُ», «مَا أَطَاعَ التَّلَامِيذَ إِلَّا إِيَّايَ») and cites ﴿إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ﴾. It is emphatically NOT sourceExcluded, and «مفعول به» is a direct analysis, so the row stays counted. (2) It is never PARSED. p. 143 gives the list and stops; p. 144's تمرينات set it as unanswered student work (ex. 1 «ضع ضميراً منفصلاً … ليكون مفعولاً به», ex. 3 «إياهما، إياكم، إيّاي …», ex. 6); p. 145's أسئلة likewise asks the learner to supply the examples («مَثِّلْ بِثَلَاثَةِ أَمْثِلَةٍ لِلْمُضْمَرِ الْمُنْفَصِلِ الْوَاقِعِ مَفْعُولاً بِهِ») and its أعرب exercise carries no answer key. Every object pronoun this book DOES parse is attached: the yāʾ of «لَقِيَتْنِي» at p. 157 («وَالْيَاءُ ضَمِيرُ الْمُتَكَلِّمِ مَفْعُولٌ بِهِ، مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ») and the نا of «سَيَزُورُنَا» at p. 95 («وَنَا: مَفْعُولٌ بِهِ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ») — and this app produces both. (3) إِيَّاكَ is a standalone word, so it is necessarily a BUILT noun here — isBuiltNoun(): a noun carrying a maḥall and no state — and builtNounBinaaMarker() admits a built noun only through a per-construction, source-verified bināʾ table. p. 22 is this book's own catalogue of what is built and upon what («وَذَلِكَ كَلُزُومِ «كَمْ» وَ«مَنْ» السُّكُونَ، وَكَلُزُومِ «هٰؤُلَاءِ» وَ«حَذَامِ» وَ«أَمْسِ» الْكَسْرَ، وَكَلُزُومِ «مُنْذُ» وَ«حَيْثُ» الضَّمَّ، وَكَلُزُومِ «أَيْنَ» وَ«كَيْفَ» الْفَتْحَ») and no pronoun stands in it. Rendering «إِيَّاكَ: ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ» would therefore mean INVENTING the bināʾ sign, which is refused here for the same reason it is refused for the other two rows. NOT the obstacle: the host, which p. 143 supplies whole. UNBLOCK: one reviewed secondary source for the bināʾ of the detached pronouns, registered through secondarySupportedRule + REVIEWED_SOURCE_AUTHORITIES exactly as أَلِفُ الِاثْنَيْنِ is handled today. ONE such citation unblocks this row, ضَمِيرٌ مُنْفَصِلٌ and مُبْتَدَأٌ مُضْمَرٌ together, because it is one missing fact serving three bābs. It must be read and verified by a human against the secondary text; it is deliberately NOT invented here.",
    "randomization": "NONE",
    "probe": "إِيَّاكَ",
    "probeMode": "contains",
@@ -4138,13 +4138,13 @@
    "pages": "176–177",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 38 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 40 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُذْ",
    "probeMode": "prep",
    "probeRequires": "",
-   "observedTemplateLanes": 38
+   "observedTemplateLanes": 40
   },
   {
    "key": "X_PREP_MUNDHU",

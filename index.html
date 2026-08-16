@@ -9065,6 +9065,11 @@ const COMPONENT_CATEGORIES=Object.freeze({pronoun:1,particle:1,orthographic:1});
    rafʿ wording. */
 const COMPONENT_ROLE_AR=Object.freeze({fail:'فَاعِلٌ',maful:'مَفْعُولٌ بِهِ'});
 const COMPONENT_ROLE_EN=Object.freeze({fail:'fāʿil',maful:'mafʿūl bihi'});
+/* The class every pronoun component belongs to, named once. It is what distinguishes an
+   attached-pronoun card from the whole-word card of the SAME role: «الدَّرْسَ: مَفْعُولٌ بِهِ
+   مَنْصُوبٌ …» and «الْيَاءُ …: ضَمِيرٌ مُتَّصِلٌ … مَفْعُولٌ بِهِ» are two different claims, and
+   the inventory needs to be able to tell them apart without retyping either. */
+const COMPONENT_ATTACHED_PRONOUN_AR='ضَمِيرٌ مُتَّصِلٌ';
 const COMPONENT_MAHALL_AR=Object.freeze({raf:'رَفْعٍ',nasb:'نَصْبٍ',jarr:'خَفْضٍ'});
 const COMPONENT_MAHALL_EN=Object.freeze({raf:'rafʿ',nasb:'naṣb',jarr:'khafḍ'});
 const COMPONENT_BINAA_AR=Object.freeze({sukun:'السُّكُونِ',fatha:'الْفَتْحِ',damma:'الضَّمِّ',kasra:'الْكَسْرِ'});
@@ -9085,7 +9090,7 @@ function componentRegistryError(reg){
 Object.entries(COMPONENT_REGISTRY).forEach(([kind,reg])=>{const e=componentRegistryError(reg);if(e)throw new Error(`COMPONENT_REGISTRY[${kind}] is invalid: ${e}`)});
 function renderComponentAnalysis(c){
  if(c.category==='pronoun'){
-  c.ar=`«${c.letterAr}» ${c.nameAr}: ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى ${COMPONENT_BINAA_AR[c.binaaSign]} فِي مَحَلِّ ${COMPONENT_MAHALL_AR[c.mahall]} ${COMPONENT_ROLE_AR[c.syntacticRole]}.`;
+  c.ar=`«${c.letterAr}» ${c.nameAr}: ${COMPONENT_ATTACHED_PRONOUN_AR} مَبْنِيٌّ عَلَى ${COMPONENT_BINAA_AR[c.binaaSign]} فِي مَحَلِّ ${COMPONENT_MAHALL_AR[c.mahall]} ${COMPONENT_ROLE_AR[c.syntacticRole]}.`;
   c.en=`${cap(c.nameEn)} is a connected pronoun, built on ${COMPONENT_BINAA_EN[c.binaaSign]}, in the position of ${COMPONENT_MAHALL_EN[c.mahall]} as the ${COMPONENT_ROLE_EN[c.syntacticRole]}.`;
  }else if(c.category==='particle'){
   /* Two shapes, because the source gives two. A particle whose bināʾ IS stated says it; one

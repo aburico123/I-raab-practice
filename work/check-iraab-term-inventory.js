@@ -1507,6 +1507,100 @@ const WAVE13_PROBE_CORRECTIONS = ['M_ZARF_MUTAALLIQ', 'M_JARR_MUTAALLIQ'];
   }
 }
 
+/* ===== WAVE 14 — بَابُ الْأَفْعَالِ pp. 70–73, with p. 95's model parse ==========================
+   Two rows, and they are the two halves of one chapter's verb ruling: what a COMMAND is, and why
+   an ungoverned PRESENT is marfūʿ. Both must be FULL, and FULL here means what it means everywhere
+   in this file — the canonical Arabic reaches a rendered iʿrāb line (token.ar / token.phraseAr /
+   a component card), not a Why and not the definitions panel. Each assertion below re-proves that
+   from the corpus rather than trusting the derived status. */
+const WAVE14_FULL_KEYS = ['V_AMR', 'V_MUJARRAD'];
+{
+  for (const key of WAVE14_FULL_KEYS) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('Wave-14 row ' + key + ' is missing from the inventory'); continue; }
+    if (!/^باب الأفعال/.test(row.chapter)) fail('Wave-14 row ' + key + ' is not in the wave scope: ' + row.chapter);
+    if (row.status !== 'FULL') fail('Wave-14 row ' + key + ' is ' + row.status + ', not FULL');
+    if (row.missingReason) fail('Wave-14 row ' + key + ' is FULL but still carries a missingReason');
+  }
+
+  /* The chapter is now resolved with no blocker at all — the only baab in the curriculum that can
+     say so about its verbs. Anything non-FULL here is a regression this wave declared impossible. */
+  {
+    const chapterObserved = observed.filter(r => /^باب الأفعال/.test(r.chapter));
+    const unresolved = chapterObserved.filter(r => r.status !== 'FULL');
+    if (unresolved.length) {
+      fail('باب الأفعال has unresolved rows, and this wave left it with none: ' +
+        unresolved.map(r => r.key + '=' + r.status).join(', '));
+    }
+  }
+
+  /* REAL PRODUCTION, not Why-only and not registry-only. Each probe must be in the iʿrāb corpus,
+     and — the trap this file exists for — must NOT be creditable from the Why or definitions text
+     alone. A row whose term appears only where the learner is TOLD it, never where the learner
+     PERFORMS it, is GENERIC_ONLY by this file's own rule. */
+  for (const key of WAVE14_FULL_KEYS) {
+    const probe = skeleton(rows.find(r => r.key === key).probe);
+    const inIraab = [...iraabLines.keys()].filter(line => line.includes(probe));
+    if (!inIraab.length) fail('Wave-14 row ' + key + ' reaches no rendered iʿrāb line');
+    const lanes = new Set();
+    for (const line of inIraab) for (const id of iraabLines.get(line)) lanes.add(id);
+    if (!lanes.size) fail('Wave-14 row ' + key + ' reaches no template lane');
+  }
+
+  /* THE SUKŪN COLLISION, proved from the rendered corpus in BOTH directions. This is the whole
+     structural reason فِعْلُ الْأَمْرِ could not simply reuse the present's jazm lane: the same visible
+     sukūn is a BINĀʾ marker on a command and an IʿRĀB SIGN on an ordinary present verb, and a
+     learner who cannot see the difference has not learnt p. 72. */
+  {
+    const amrProbe = skeleton(rows.find(r => r.key === 'V_AMR').probe);
+    const amrLines = [...iraabLines.keys()].filter(line => line.includes(amrProbe));
+    if (!amrLines.length) fail('no imperative card is produced at all');
+    /* 1 — an imperative card may never claim an iʿrāb state. «مجزوم» on one would mean the app had
+       adopted the matn's «الأمر مجزوم أبدا» over the sharḥ's own correction at p. 72. */
+    for (const line of amrLines) {
+      for (const state of ['مرفوع', 'منصوب', 'مجزوم']) {
+        if (line.includes(skeleton(state))) fail('an imperative card claims the iʿrāb state «' + state + '»: ' + line);
+      }
+      if (line.includes(skeleton('وعلامة'))) fail('an imperative card names an iʿrāb sign: ' + line);
+      if (line.includes(skeleton('في محل'))) fail('an imperative card claims a maḥall: ' + line);
+      if (line.includes(skeleton('فعل مضارع'))) fail('an imperative card also calls itself a present verb: ' + line);
+    }
+    /* 2 — and the contrast must still exist: a genuine majzūm present, with the sukūn as its SIGN,
+       must go on being produced, or the imperative's bināʾ contrasts with nothing. */
+    const majzumPresent = [...iraabLines.keys()].filter(line =>
+      line.includes(skeleton('فعل مضارع')) && line.includes(skeleton('مجزوم')) && line.includes(skeleton('السكون')));
+    if (!majzumPresent.length) fail('no majzūm present verb with a sukūn sign is produced, so the imperative bināʾ contrasts with nothing');
+    for (const line of majzumPresent) {
+      if (line.includes(amrProbe)) fail('a majzūm present card also makes the imperative bināʾ claim: ' + line);
+    }
+  }
+
+  /* THE MUJARRAD DISCRIMINATION, likewise from the corpus. The cause is a claim about GOVERNMENT,
+     so it must never appear on a verb that something governs. */
+  {
+    const mujarradProbe = skeleton(rows.find(r => r.key === 'V_MUJARRAD').probe);
+    const mujarradLines = [...iraabLines.keys()].filter(line => line.includes(mujarradProbe));
+    if (!mujarradLines.length) fail('the mujarrad rafʿ cause reaches no card');
+    for (const line of mujarradLines) {
+      if (!line.includes(skeleton('مرفوع'))) fail('a mujarrad card is not مرفوع: ' + line);
+      for (const state of ['منصوب', 'مجزوم']) {
+        if (line.includes(skeleton(state))) fail('a mujarrad card also claims «' + state + '»: ' + line);
+      }
+      if (!line.includes(skeleton('فعل مضارع'))) fail('the mujarrad cause is on a card that is not a present verb: ' + line);
+    }
+    /* And the governed lanes must still be produced, stating their OWN cause, so that the learner
+       meets the contrast the source draws at p. 73 between «مرفوع لتجرده» and «منصوب بلن». */
+    for (const governed of ['منصوب', 'مجزوم']) {
+      const lines = [...iraabLines.keys()].filter(line =>
+        line.includes(skeleton('فعل مضارع')) && line.includes(skeleton(governed)));
+      if (!lines.length) fail('no ' + governed + ' present verb is produced, so the mujarrad cause contrasts with nothing');
+      for (const line of lines) {
+        if (line.includes(mujarradProbe)) fail('a governed present card also claims to be free of a governor: ' + line);
+      }
+    }
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -1566,6 +1660,8 @@ console.log(JSON.stringify({
     full: WAVE13_FULL_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
     trueBlocker: WAVE13_BLOCKED_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'TRUE_BLOCKER').length,
     probeCorrections: WAVE13_PROBE_CORRECTIONS.length },
+  wave14: { name: 'باب الأفعال', target: WAVE14_FULL_KEYS.length,
+    full: WAVE14_FULL_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

@@ -16,17 +16,17 @@
  "totals": {
   "TOTAL": 275,
   "FULL": 264,
-  "GENERIC_ONLY": 2,
-  "PARTIAL": 1,
+  "GENERIC_ONLY": 1,
+  "PARTIAL": 0,
   "ABSENT": 3,
-  "TRUE_BLOCKER": 5,
+  "TRUE_BLOCKER": 7,
   "reconciles": true,
   "percentFull": 96
  },
  "randomizationTotals": {
-  "GOOD": 163,
+  "GOOD": 162,
   "LIMITED": 102,
-  "NONE": 10
+  "NONE": 11
  },
  "marathon": {
   "target": 56,
@@ -1027,13 +1027,13 @@
    "pages": "78",
    "parent": "نواصب المضارع",
    "status": "FULL",
-   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 110 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 109 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَوْ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 110
+   "observedTemplateLanes": 109
   },
   {
    "key": "N_AN_MUDMARA_JAWAZ",
@@ -1117,13 +1117,13 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 39 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 40 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمَّا",
    "probeMode": "sentence",
    "probeRequires": "",
-   "observedTemplateLanes": 39
+   "observedTemplateLanes": 40
   },
   {
    "key": "J_HAMZAT_TAQRIR",
@@ -3216,9 +3216,9 @@
    "chapter": "باب ظرف الزمان وظرف المكان (pp. 148–152)",
    "pages": "148–150",
    "parent": "أقسام الظرف",
-   "status": "PARTIAL",
+   "status": "FULL",
    "proof": "built 200× per template; «ظَرْفُ زَمَانٍ» observed in the rendered iʿrāb across 2 template lane(s) [mode=contains]",
-   "missingReason": "deliberatelyNotGenerated withholds غدًا/أبدًا/أمدًا (no truthful past-tense host) and غدوة/بكرة/عتمة (no productive host).",
+   "missingReason": "",
    "randomization": "LIMITED",
    "probe": "ظَرْفُ زَمَانٍ",
    "probeMode": "contains",
@@ -3246,14 +3246,14 @@
    "chapter": "باب ظرف الزمان وظرف المكان (pp. 148–152)",
    "pages": "151–152",
    "parent": "ظرف المكان المبني",
-   "status": "FULL",
-   "proof": "built 200× per template; «ثَمَّ» observed in the rendered iʿrāb across 8 template lane(s) [mode=card]",
-   "missingReason": "",
-   "randomization": "GOOD",
+   "status": "TRUE_BLOCKER",
+   "proof": "",
+   "missingReason": "TRUE BLOCKER under the approved source, and the obstacle is the bināʾ — the same wall as the detached pronouns, reached from باب ظرف الزمان وظرف المكان. (1) Al-Tuḥfah TEACHES the word. p. 151's matn puts it in the closed list of place ẓarfs — «وَظَرْفُ الْمَكَانِ هُوَ: اسْمُ الْمَكَانِ الْمَنْصُوبُ بِتَقْدِيرِ «فِي»، نَحْوَ: أَمَامَ، وَخَلْفَ، وَقُدَّامَ، وَوَرَاءَ، وَفَوْقَ، وَتَحْتَ، وَعِنْدَ، وَإِزَاءَ، وَحِذَاءَ، وَتِلْقَاءَ، وَثَمَّ، وَهُنَا، وَمَا أَشْبَهَ ذَلِكَ» — and p. 152's شرح gives it its own numbered entry with a Qurʾānic shāhid: «وَالثَّانِي عَشَرَ: «ثَمَّ» نَحْوَ قَوْلِ اللهِ تَعَالَى: ﴿وَأَزْلَفْنَا ثَمَّ الْآخَرِينَ﴾». So it is neither sourceExcluded nor notCounted: a learner meeting that verse must parse the word, and the analysis is a real utterance in the shape «ثَمَّ: مَفْعُولٌ فِيهِ ظَرْفُ مَكَانٍ …». (2) What the source WITHHOLDS is what the word does at its end. ثَمَّ is indeclinable, so in this engine it is necessarily a BUILT noun — isBuiltNoun(): a noun carrying a maḥall and no state — and builtNounBinaaMarker() admits a built noun only through a per-construction, source-verified bināʾ table. p. 22 is this book's own catalogue of what is built and upon what: «وَذَلِكَ كَلُزُومِ «كَمْ» وَ«مَنْ» السُّكُونَ، وَكَلُزُومِ «هٰؤُلَاءِ» وَ«حَذَامِ» وَ«أَمْسِ» الْكَسْرَ، وَكَلُزُومِ «مُنْذُ» وَ«حَيْثُ» الضَّمَّ، وَكَلُزُومِ «أَيْنَ» وَ«كَيْفَ» الْفَتْحَ». ثَمَّ is not in it, and the bāb itself never says the word is مبني or gives it a marker. (3) The one clause that looks like an escape is not one. p. 151's matn calls the WHOLE list «الْمَنْصُوبُ», with no exception for ثَمَّ and هُنَا, so a literal reading would license «ثَمَّ: مَفْعُولٌ فِيهِ ظَرْفُ مَكَانٍ مَنْصُوبٌ وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ». That was refused: it asserts an iʿrāb SIGN on a word whose final fatḥah is a bināʾ marker, which is the built-vs-muʿrab contract Wave 12 strengthened globally and which p. 22's own definition forbids («وَالْمَبْنِيُّ: مَا لَزِمَ آخِرُهُ حَالَةً وَاحِدَةً لِغَيْرِ عَامِلٍ وَلَا اعْتِلَالٍ»). Inventing «مَبْنِيٌّ عَلَى الْفَتْحِ» instead is the other refused move. GRAMMAR_COVERAGE_MATRIX has recorded the same finding all along — «the mabnī place ẓarfs ثَمَّ and هُنَا, which the noun sign matrix does not model» — but recorded it as a scope decision; it is a source limit. UNBLOCK: one reviewed secondary source for the bināʾ of ثَمَّ, registered through secondarySupportedRule + REVIEWED_SOURCE_AUTHORITIES exactly as أَلِفُ الِاثْنَيْنِ is handled today, read and verified by a human against that text. It is deliberately NOT invented here.",
+   "randomization": "NONE",
    "probe": "ثَمَّ",
    "probeMode": "card",
-   "probeRequires": "",
-   "observedTemplateLanes": 8
+   "probeRequires": "ظَرْفُ مَكَانٍ",
+   "observedTemplateLanes": 0
   },
   {
    "key": "B_ZARF_HUNA",
@@ -3261,13 +3261,13 @@
    "chapter": "باب ظرف الزمان وظرف المكان (pp. 148–152)",
    "pages": "151–152",
    "parent": "ظرف المكان المبني",
-   "status": "GENERIC_ONLY",
-   "proof": "built 200× per template; «هُنَا» observed in the rendered Why/definitions text only across 0 template lane(s) [mode=card]",
-   "missingReason": "Same deferral as ثَمَّ.",
+   "status": "TRUE_BLOCKER",
+   "proof": "",
+   "missingReason": "TRUE BLOCKER under the approved source, on exactly the evidence that blocks its neighbour ثَمَّ, and its old missingReason («Same deferral as ثَمَّ») was pointing at a row that was itself falsely scored FULL. (1) Al-Tuḥfah TEACHES the word: p. 151's matn lists it among the place ẓarfs — «… وَتِلْقَاءَ، وَثَمَّ، وَهُنَا، وَمَا أَشْبَهَ ذَلِكَ» — and p. 152's شرح closes its thirteen ألفاظ with it, supplying a complete host sentence of its own: «وَالثَّالِثَ عَشَرَ: «هُنَا» نَحْوَ قَوْلِكَ: «جَلَسَ مُحَمَّدٌ هُنَا لَحْظَةً»». That is a two-ẓarf sentence this engine builds in every other respect — a past ʿāmil, an explicit fāʿil, and a time ẓarf (لَحْظَةً) beside the place one — so the HOST is not the obstacle. (2) The obstacle is the bināʾ. هُنَا is indeclinable, so it is necessarily a BUILT noun here, and builtNounBinaaMarker() admits a built noun only through a per-construction, source-verified bināʾ table. p. 22's catalogue of what is built and upon what names كَمْ، مَنْ، هٰؤُلَاءِ، حَذَامِ، أَمْسِ، مُنْذُ، حَيْثُ، أَيْنَ، كَيْفَ — and not هُنَا. Note how close the book comes and still stops: it licenses هٰؤُلَاءِ, the demonstrative of persons, which is what let اسم الإشارة ship in Wave 4 and again in Wave 13's rābiṭ lane; هُنَا, the demonstrative of PLACE, it never mentions. That asymmetry is the source's, not the engine's. (3) p. 151's blanket «الْمَنْصُوبُ» over the whole list cannot be borrowed for it, for the same reason it cannot be borrowed for ثَمَّ: it would assert an iʿrāb sign on a word p. 22's own definition of المبني excludes from having one. Both available moves — claiming a sign, or inventing «مَبْنِيٌّ عَلَى السُّكُونِ» — were refused. UNBLOCK: one reviewed secondary source for the bināʾ of هُنَا, registered through secondarySupportedRule + REVIEWED_SOURCE_AUTHORITIES exactly as أَلِفُ الِاثْنَيْنِ is handled today. One citation covering the built place ẓarfs lifts this row and ثَمَّ together. It must be read and verified by a human against that text; it is deliberately NOT invented here.",
    "randomization": "NONE",
    "probe": "هُنَا",
    "probeMode": "card",
-   "probeRequires": "",
+   "probeRequires": "ظَرْفُ مَكَانٍ",
    "observedTemplateLanes": 0
   },
   {

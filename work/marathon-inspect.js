@@ -39,6 +39,18 @@ if (mode === 'api') {
   console.log(Object.keys(api).sort().join('\n'));
   process.exit(0);
 }
+if (mode === 'zarf') {
+  const L = api.MAFUL_FIH_LEXEMES;
+  const byKind = {};
+  for (const [k, v] of Object.entries(L)) {
+    const kind = v.kind || '(none)';
+    (byKind[kind] = byKind[kind] || []).push((v.acc || v.surface || k) + (v.class ? ' [' + v.class + ']' : ''));
+  }
+  for (const [kind, list] of Object.entries(byKind)) console.log(kind + ' (' + list.length + '): ' + list.join(' ، '));
+  console.log('KIND LABELS  : ' + JSON.stringify(api.MAFUL_FIH_KIND_LABELS));
+  console.log('CLASS LABELS : ' + JSON.stringify(api.MAFUL_FIH_CLASS_LABELS));
+  process.exit(0);
+}
 if (mode === 'grepconst') {
   for (const k of Object.keys(api).sort()) {
     if (!k.toLowerCase().includes(String(arg).toLowerCase())) continue;

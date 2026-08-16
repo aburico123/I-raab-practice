@@ -92,6 +92,7 @@ const api = loadApi();
 /* ── observe: build and render every template many times ────────────────────────────── */
 const iraabLines = new Map();      // line -> Set(stableId)
 const cardHeads = new Map();       // head word skeleton -> Set(card body skeleton)
+const rawCardHeads = new Map();    // head word skeleton -> Set(head word AS RENDERED, unfolded)
 const whyText = new Set();
 const defText = new Set();
 const sentences = new Set();
@@ -137,6 +138,12 @@ for (let i = 0; i < api.templates.length; i++) {
           const h = skeleton(head[1]);
           if (!cardHeads.has(h)) cardHeads.set(h, new Set());
           cardHeads.get(h).add(skeleton(head[2]));
+          /* The UNFOLDED head, kept beside the folded one. Everything else in this file matches on
+             the skeleton on purpose; this one map exists so the card-probe integrity check below
+             can ask the one question the skeleton cannot answer — whether any card actually SPELLS
+             the word a card row claims to be about. */
+          if (!rawCardHeads.has(h)) rawCardHeads.set(h, new Set());
+          rawCardHeads.get(h).add(head[1]);
         }
       }
       const sink = [];
@@ -411,6 +418,39 @@ for (const r of observed) {
     fail(`row ${r.key} is ${r.status} but «${r.probe}» never occurs as a standalone term: every match ` +
       `is letters inside a longer word (e.g. «${occurrence.swallowedBy}»), so the status is a false ` +
       `positive. Give the row an explicit mode rather than loosening what FULL means.`);
+}
+
+/* ── card-mode probe integrity ─────────────────────────────────────────────────────────────
+   The substring check above deliberately skips `card` mode, because a card probe is already
+   whole-word: it must equal a card's HEAD, not merely occur inside a line. That is a real
+   protection, and it is not the one this class of bug needed.
+
+   What it misses is the other direction. Heads are compared on the SKELETON, which is what makes
+   the whole checker immune to combining-mark order drift — and which also folds two genuinely
+   different words together. B_ZARF_THAMMA, the built place ẓarf «ثَمَّ» of p. 152, was scored FULL
+   for the whole life of this file by «ثُمَّ» the ḥarf ʿaṭf: one skeleton, "ثم", two words, and no
+   `requires` to tell them apart. The word the row is about was never produced at all.
+
+   The invariant that catches it is the weakest one that would have: a card-mode row credited with
+   practice must have SOME rendered card whose head spells the probe in exact bytes. This does not
+   re-introduce brittleness — skeleton matching still decides WHICH cards are candidates, and a row
+   whose ḥarakāt were typed in another order than the app's still matches for status purposes. It
+   only refuses the case where no card anywhere spells the word, which cannot be mark-order drift
+   and can only be a collision. Auditing all 17 card rows found exactly one failure: this one.
+   J_IN, J_MAN and J_AYY fold together with إِنَّ/أَنْ, مِنْ/مِنَ and أَيْ respectively, and all three
+   pass, because each declares a `requires` AND is really produced. */
+for (const r of observed) {
+  if (r.probeMode !== 'card' || !['FULL', 'PARTIAL'].includes(r.status)) continue;
+  const probe = rows.find(x => x.key === r.key).probe;
+  const h = skeleton(probe);
+  const foldedHeads = rawCardHeads.get(h) || new Set();
+  const spelled = [...foldedHeads].some(head => head.includes(probe));
+  if (!spelled) {
+    fail(`row ${r.key} is ${r.status} on a card whose head only matches «${probe}» after ḥarakāt are ` +
+      `folded away: no rendered card spells it. The heads that fold to it are ` +
+      `${[...foldedHeads].map(x => '«' + x + '»').join(', ') || '(none)'} — a different word answering ` +
+      `for this row. Give the row a «requires» discriminator, or stop crediting it.`);
+  }
 }
 /* ── Wave 1 completeness ─────────────────────────────────────────────────────────────
    The fourteen حروف الخفض / معاني الإضافة rows that were non-FULL before Wave 1, named
@@ -1619,11 +1659,22 @@ const WAVE14_FULL_KEYS = ['V_AMR', 'V_MUJARRAD'];
 const MARATHON15 = {
   /* ── became FULL ───────────────────────────────────────────────────────────────────────── */
   full: [
-    'B_MAFUL_MUDMAR_MUTTASIL'
+    'B_MAFUL_MUDMAR_MUTTASIL',
+    /* Was PARTIAL on a flag that measured LEXICAL coverage — something this inventory counts for
+       no ẓarf, and did not count for this row's own sibling B_ZARF_MAKAN, which registers six of
+       p. 152's thirteen ألفاظ and is FULL. The term itself is uttered in full. */
+    'B_ZARF_ZAMAN'
   ],
-  /* ── proved TRUE_BLOCKER (the detached-pronoun bināʾ, one missing fact across three bābs) ── */
+  /* ── proved TRUE_BLOCKER ─────────────────────────────────────────────────────────────────
+     Two distinct missing facts, not one. B_MAFUL_MUDMAR_MUNFASIL joins ضَمِيرٌ مُنْفَصِلٌ and
+     مُبْتَدَأٌ مُضْمَرٌ at the detached-pronoun bināʾ; ثَمَّ and هُنَا stand at the bināʾ of the
+     built place ẓarfs. p. 22's catalogue omits all of them, and each group needs its own citation. */
   blocked: [
-    'B_MAFUL_MUDMAR_MUNFASIL'
+    'B_MAFUL_MUDMAR_MUNFASIL',
+    /* B_ZARF_THAMMA was a FALSE FULL — «ثَمَّ» folds to skeleton "ثم" and was answered for by
+       «ثُمَّ» the ḥarf ʿaṭf. Both rows now carry the place-ẓarf discriminator. */
+    'B_ZARF_THAMMA',
+    'B_ZARF_HUNA'
   ],
   /* ── removed from the denominator, with the table each must now live in ───────────────────── */
   retired: {

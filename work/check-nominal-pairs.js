@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,tawkidChainFrame,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,istithnaNaqisKeys,istithnaKhalaKeys,laJinsPairKeys,laIlghaFrameKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseIsharaFrameKeys,zarfKhabarFrameKeys,khabarClauseTarget,haalMahallFrameKeys,estimatedSignNounKeys,diptoteNounKeys,siinTanfisVerbKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],tawkidChainFrame,isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],istithnaNaqisKeys:[...istithnaNaqisKeys],istithnaKhalaKeys:[...istithnaKhalaKeys],laJinsPairKeys:[...laJinsPairKeys],laIlghaFrameKeys:[...laIlghaFrameKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseIsharaFrameKeys:[...khabarClauseIsharaFrameKeys],zarfKhabarFrameKeys:[...zarfKhabarFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],estimatedSignNounKeys:[...estimatedSignNounKeys],diptoteNounKeys:[...diptoteNounKeys],siinTanfisVerbKeys:[...siinTanfisVerbKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,naibMudmarVerbKeys,componentFocusKind,followerKind,followerPairKeys,followerConjunctionKeys,tawkidChainFrame,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,istithnaNaqisKeys,istithnaKhalaKeys,laJinsPairKeys,laIlghaFrameKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseIsharaFrameKeys,zarfKhabarFrameKeys,khabarClauseTarget,haalMahallFrameKeys,estimatedSignNounKeys,diptoteNounKeys,siinTanfisVerbKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],naibMudmarVerbKeys:[...naibMudmarVerbKeys],componentFocusKind,followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],tawkidChainFrame,isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],istithnaNaqisKeys:[...istithnaNaqisKeys],istithnaKhalaKeys:[...istithnaKhalaKeys],laJinsPairKeys:[...laJinsPairKeys],laIlghaFrameKeys:[...laIlghaFrameKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseIsharaFrameKeys:[...khabarClauseIsharaFrameKeys],zarfKhabarFrameKeys:[...zarfKhabarFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],estimatedSignNounKeys:[...estimatedSignNounKeys],diptoteNounKeys:[...diptoteNounKeys],siinTanfisVerbKeys:[...siinTanfisVerbKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -64,6 +64,7 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   readSignShape,
   readSignIdForRepair,
   COMPONENT_REGISTRY,
+  makeComponent,
   /* Wave 2 — the label tables, so the focused tests compare a card against the app's OWN
      bināʾ / maḥall / role wording instead of a retyped copy of it. */
   COMPONENT_BINAA_AR,
@@ -188,6 +189,19 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   derivePassiveConstructionAuthority,
   canonicalPassiveTranslation,
   buildPassiveExercise,
+  /* نَائِبُ فَاعِلٍ مُضْمَرٌ — Al-Tuḥfah p. 97. */
+  NAIB_MUDMAR_VERBS,
+  NAIB_MUDMAR_VERB_KEYS,
+  deriveNaibMudmarAuthority,
+  canonicalNaibMudmarTranslation,
+  buildNaibMudmarExercise,
+  COMPONENT_FOCUS_FORM,
+  focusComponentOf,
+  focusDescriptor,
+  PAST_BINAA_CLAUSE_AR,
+  PAST_BINAA_CLAUSE_EN,
+  PAST_VERB_LEAD_AR,
+  PAST_PASSIVE_LABEL_AR,
   /* المفعول المطلق — Al-Tuḥfah pp. 146–147. */
   MUTLAQ_PURPOSES,
   MUTLAQ_AGREEMENTS,
@@ -339,6 +353,7 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   canonicalHaalMahallTranslation,
   isBuiltNoun,
   builtNounBinaaMarker,
+  carriesSignValue,
   KHABAR_CLAUSE_KINDS,
   SHIBH_JUMLA_KHABAR_AR,
   RABIT_NAME_AR,
@@ -682,7 +697,7 @@ function element(id,value=''){
 
 const optionValues={
   startFilter:['any','noun','verb','particle'],
-  formFilter:['any','singular','broken','dual','smp','sfp','fiveNouns','present','fiveVerbs','weakFinal'],
+  formFilter:['any','singular','broken','dual','smp','sfp','fiveNouns','present','fiveVerbs','weakFinal','attachedPronoun'],
   stateFilter:['any','raf','nasb','jarr','jazm'],
   signFilter:['any','damma','fatha','kasra','sukun','alif','waw','ya','kasraSub','nunKept','nunDropped','hadhfIllah']
 };
@@ -7078,7 +7093,7 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.noun.mamnu.join(',')==='jarr',
 //   · R_AMR_BINAA_SUKUN (pp. 70–72) owns فِعْلُ الْأَمْرِ's bināʾ. It is separate from
 //     R_MUDARI_JAZM_SUKUN for the same reason in the opposite direction: both end in a sukūn, and
 //     one is a bināʾ while the other is an iʿrāb sign.
-assert(Object.keys(api.SOURCE_REGISTRY).length===225,`Expected 225 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===227,`Expected 227 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -7822,7 +7837,13 @@ const expectedPastTemplateCapabilities={
   // frames; what is new is the fāʿil's CLASS, not the verb, so their past capability is the usual
   // one. They are APPENDED to the family, so no inherited stable ID in this table moved.
   T_VERB_SINGULAR_NASB_FATHA_41:'3ms/explicit',
-  T_VERB_SINGULAR_NASB_FATHA_42:'3ms/explicit'
+  T_VERB_SINGULAR_NASB_FATHA_42:'3ms/explicit',
+  /* نَائِبُ فَاعِلٍ مُضْمَرٌ — p. 97. The only two DEPUTY past capabilities that are not 3ms: the
+     deputy is the pronoun written inside the verb, so the person is the pronoun’s and the ending
+     class and bināʾ follow it. Their subject mode is deputy for the same reason every passive
+     lane’s is — the agent is deleted — and nothing here is a fāʿil. */
+  T_VERB_ATTACHEDPRONOUN_RAF__01:'1s-naib/deputy',
+  T_VERB_ATTACHEDPRONOUN_RAF__02:'1p-naib/deputy'
 };
 const declaredPastTemplates=api.templates.filter(template=>template.pastCapabilities.length);
 assert(declaredPastTemplates.length===Object.keys(expectedPastTemplateCapabilities).length,
@@ -9668,8 +9689,13 @@ assert(api.verbFormIndex.size===604+2*Object.keys(api.PASSIVE_VERB_CAPABILITIES)
      s-prefixed forms p. 15 restricts to the mudari and p. 95 parses. They are owned by
      SIIN_TANFIS_VERBS alone, derived from a base that must already be a registered ordinary
      present, and reachable only inside the two lanes that render the sin component. */
-  +api.SIIN_TANFIS_VERB_KEYS.length,
-  `Phase-2b-C must reuse its existing surfaces; only the named registries — passive pairs, muṭlaq ʿāmils, duʿāʾ, weak-final, conditional, the ten ẓanna sisters, the Wave-1 bāʾ verbs, the Wave-6 exceptive أدوات and the Wave-8 tamyīz ʿāmils — may extend the verb index, found ${api.verbFormIndex.size}`);
+  +api.SIIN_TANFIS_VERB_KEYS.length
+  /* نَائِبُ فَاعِلٍ مُضْمَرٌ adds exactly one PAST surface per entry of the muḍmar-deputy registry —
+     the p. 97 forms whose deputy is written inside the verb. They are owned by NAIB_MUDMAR_VERBS
+     alone, each one registered on top of a capability that must already own a passive past, and
+     reachable only inside the two lanes whose focus is the pronoun itself. */
+  +api.NAIB_MUDMAR_VERB_KEYS.length,
+  `Phase-2b-C must reuse its existing surfaces; only the named registries — passive pairs, muṭlaq ʿāmils, duʿāʾ, weak-final, conditional, the ten ẓanna sisters, the Wave-1 bāʾ verbs, the Wave-6 exceptive أدوات, the Wave-8 tamyīz ʿāmils and the muḍmar-deputy passives — may extend the verb index, found ${api.verbFormIndex.size}`);
 c2Cases+=2;
 
 for(const surface of Object.keys(c2Golden)){
@@ -11725,7 +11751,7 @@ for(const t of api.templates){
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
   // J1a appends exactly ten: five one-verb jawāzim × the two proven jazm regimes. All are appended,
   // so every pre-existing stableId is unchanged — pinned directly below by keeping لَمْ at _01.
-  assert(api.templates.length===272,`Expected 272 templates after Phase 2, found ${api.templates.length}`);
+  assert(api.templates.length===274,`Expected 274 templates after Phase 2, found ${api.templates.length}`);
   assert(api.templates.filter(t=>t.state==='jazm').map(t=>t.stableId).join(' | ')
     ==='T_NOUN_PRESENT_JAZM_SUKUN_01 | T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_01 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_02 | T_PARTICLE_PRESENT_JAZM_SUKUN_03 | T_PARTICLE_PRESENT_JAZM_SUKUN_04 | T_PARTICLE_PRESENT_JAZM_SUKUN_05 | T_PARTICLE_PRESENT_JAZM_SUKUN_06 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06 | T_PARTICLE_PRESENT_JAZM_SUKUN_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_08 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08 | T_PARTICLE_PRESENT_JAZM_SUKUN_09 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_10 | T_PARTICLE_PRESENT_JAZM_SUKUN_11 | T_PARTICLE_PRESENT_JAZM_SUKUN_12 | T_PARTICLE_PRESENT_JAZM_SUKUN_13 | T_PARTICLE_PRESENT_JAZM_SUKUN_14 | T_PARTICLE_PRESENT_JAZM_SUKUN_15 | T_PARTICLE_PRESENT_JAZM_SUKUN_16 | T_PARTICLE_PRESENT_JAZM_SUKUN_17 | T_PARTICLE_PRESENT_JAZM_SUKUN_18 | T_PARTICLE_PRESENT_JAZM_SUKUN_19 | T_PARTICLE_PRESENT_JAZM_SUKUN_20 | T_PARTICLE_PRESENT_JAZM_SUKUN_21',
     'the jazm template ordinals shifted: لَمْ must keep _01 in both families and J1a/J1b must append only');
@@ -14205,7 +14231,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===272,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===274,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
@@ -14265,12 +14291,23 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
   assert(diptoteTemplateIds.length===2,'the two ممنوع من الصرف lanes are not both registered');
   assert(diptoteTemplateIds.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
     'a ممنوع من الصرف lane reused an inherited stable ID');
+  /* نَائِبُ فَاعِلٍ مُضْمَرٌ — the two p. 97 lanes, appended after every existing add() call and so
+     excluded here for the same reason every curriculum lane since Wave 6 is. They are also the
+     first templates whose focus is a COMPONENT rather than a token, so the check below pins that:
+     each must name the component its focus descends into, and no other lane may name one. */
+  const naibMudmarTemplateIds=api.templates.filter(item=>item.naibMudmarVerbKeys.length).map(item=>item.stableId);
+  assert(naibMudmarTemplateIds.length===2,'the two نائب فاعل مضمر lanes are not both registered');
+  assert(naibMudmarTemplateIds.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
+    'a نائب فاعل مضمر lane reused an inherited stable ID');
+  assert(api.templates.filter(item=>item.componentFocusKind).map(item=>item.stableId).sort().join(',')
+    ===naibMudmarTemplateIds.slice().sort().join(','),
+    'the set of templates declaring a component focus is not exactly the نائب فاعل مضمر lanes');
   /* Wave 15 - the two SIN al-tanfis lanes, appended after those, on the same footing. */
   const siinTemplateIds=api.templates.filter(item=>item.siinTanfisVerbKeys.length).map(item=>item.stableId);
   assert(siinTemplateIds.length===2,'the two sin-tanfis lanes are not both registered');
   assert(siinTemplateIds.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
     'a sin-tanfis lane reused an inherited stable ID');
-  assert([...ids].filter(id=>!amrTemplateIds.includes(id)&&!estimatedSignTemplateIds.includes(id)&&!diptoteTemplateIds.includes(id)&&!siinTemplateIds.includes(id)&&!zarfKhabarTemplateIds.includes(id)&&!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!sababiTemplateIds.includes(id)&&!isharaTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!istithnaNaqisTemplateIds.includes(id)&&!istithnaKhalaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  assert([...ids].filter(id=>!amrTemplateIds.includes(id)&&!estimatedSignTemplateIds.includes(id)&&!diptoteTemplateIds.includes(id)&&!siinTemplateIds.includes(id)&&!naibMudmarTemplateIds.includes(id)&&!zarfKhabarTemplateIds.includes(id)&&!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!sababiTemplateIds.includes(id)&&!isharaTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!istithnaNaqisTemplateIds.includes(id)&&!istithnaKhalaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
@@ -15669,7 +15706,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===272,'the repair block changed the production template count');
+  assert(api.templates.length===274,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -15803,8 +15840,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
        and both reuse TS13, whose parts are already «gloss 0 capitalised, gloss 1, full stop» —
        exactly an English imperative and its object. A TS83 with identical parts would be a second
        name for one thing, and shape ids are what History restores a translation through. */
-    assert(registeredKeys.length===279,'the structural map holds '+registeredKeys.length+' keys, not 279');
-    assert(registeredShapes.length===82,'the shape registry holds '+registeredShapes.length+' shapes, not 82');
+    assert(registeredKeys.length===281,'the structural map holds '+registeredKeys.length+' keys, not 281');
+    assert(registeredShapes.length===83,'the shape registry holds '+registeredShapes.length+' shapes, not 83');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
     /* The 87 inherited keys and 22 inherited shapes are untouched: later productive lanes append
@@ -15868,7 +15905,11 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         'TS81',
         /* Wave 13 — الظرف خبرًا. Its own productive lane shape; the demonstrative-link lanes add
            none, because they reuse the pronoun-link construction's TS68. */
-        'TS82'];
+        'TS82',
+        /* نَائِبُ فَاعِلٍ مُضْمَرٌ — its own productive lane shape. It could not reuse the ẓāhir
+           deputy's TS39: that shape's translator reads a deputy NOUN token, and this construction
+           has none. */
+        'TS83'];
       /* Wave 12 — the two الإعراب التقديري lanes are productive lanes like every other one above,
          so their keys are fenced off from the inherited set rather than counted in it. They add no
          shape, so the inherited SHAPE count is untouched. */
@@ -15900,7 +15941,14 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       const siinKeyOwners=api.templates.filter(item=>item.siinTanfisVerbKeys.length).map(item=>item.stableId);
       const siinKeys=registeredKeys.filter(key=>siinKeyOwners.some(id=>key.startsWith(id+'||')));
       assert(siinKeys.length===2,'the sin-tanfis lanes do not own exactly two structural keys');
-      const inheritedKeys=registeredKeys.filter(k=>!siinKeys.includes(k)&&!diptoteKeys.includes(k)&&!amrKeys.includes(k)&&!estimatedSignKeys.includes(k)&&!zarfKhabarKeys.includes(k)&&!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!istithnaNaqisKeys.includes(k)&&!istithnaKhalaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
+      /* نَائِبُ فَاعِلٍ مُضْمَرٌ — fenced off like every productive lane above. Unlike the four
+         waves before it, this one DOES add a shape (TS83), so the inherited shape count is
+         untouched only because TS83 is listed among the lane shapes above. */
+      const naibMudmarKeyOwners=api.templates.filter(item=>item.naibMudmarVerbKeys.length).map(item=>item.stableId);
+      const naibMudmarKeys=registeredKeys.filter(key=>naibMudmarKeyOwners.some(id=>key.startsWith(id+'||')));
+      assert(naibMudmarKeys.length===2,'the نائب فاعل مضمر lanes do not own exactly two structural keys');
+      assert(naibMudmarKeys.every(k=>MAP[k].shape==='TS83'),'a نائب فاعل مضمر lane does not compose through TS83');
+      const inheritedKeys=registeredKeys.filter(k=>!siinKeys.includes(k)&&!naibMudmarKeys.includes(k)&&!diptoteKeys.includes(k)&&!amrKeys.includes(k)&&!estimatedSignKeys.includes(k)&&!zarfKhabarKeys.includes(k)&&!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!istithnaNaqisKeys.includes(k)&&!istithnaKhalaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===148,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===47,'the inherited shape set changed: '+inheritedShapes.length);
@@ -15935,7 +15983,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===272,'the map covers '+mappedTemplates.size+' templates, not 272');
+    assert(mappedTemplates.size===274,'the map covers '+mappedTemplates.size+' templates, not 274');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -15997,8 +16045,8 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===279,'only '+keysSeen.size+' of the 279 structural keys were observed');
-    assert(shapesSeen.size===82,'only '+shapesSeen.size+' of the 82 composer shapes were observed');
+    assert(keysSeen.size===281,'only '+keysSeen.size+' of the 281 structural keys were observed');
+    assert(shapesSeen.size===83,'only '+shapesSeen.size+' of the 83 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
        translation reads the token's canonical gloss, which already is the verb's pastEn. */
@@ -16332,7 +16380,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===279,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===281,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -16349,7 +16397,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
           for(const part of SHAPES[m.shape].parts){
             if(typeof part.slot!=='string'||part.slot==='copula'
               ||part.slot==='atfSentence'||part.slot==='tawkidSentence'||part.slot==='tawkidChainSentence'||part.slot==='badalSentence'
-              ||part.slot==='passiveSentence'||part.slot==='mutlaqSentence'||part.slot==='mafulFihSentence'
+              ||part.slot==='passiveSentence'||part.slot==='naibMudmarSentence'||part.slot==='mutlaqSentence'||part.slot==='mafulFihSentence'
               ||part.slot==='haalSentence'||part.slot==='tamyizSentence'||part.slot==='mustathnaSentence'||part.slot==='laJinsSentence'||part.slot==='laIlghaSentence'||part.slot==='mafulAjlSentence'||part.slot==='mafulMaahSentence'||part.slot==='munadaSentence'||part.slot==='conditionSentence'||part.slot==='zannaSentence'||part.slot==='khabarClauseSentence'||part.slot==='zarfKhabarSentence'||part.slot==='haalMahallSentence')continue;
             const index=Number(part.slot.split(':')[1]);
             assert(Number.isInteger(index)&&index>=0&&index<segments.length,
@@ -16890,7 +16938,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===272,'the presentation repair changed the template count');
+    assert(api.templates.length===274,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -18808,7 +18856,7 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===225,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules, the Wave-4 naʿt/maʿrifah rules, the Wave-7 munādā rules or the two Wave-14 بَابُ الْأَفْعَالِ rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===227,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules, the Wave-4 naʿt/maʿrifah rules, the Wave-7 munādā rules or the two Wave-14 بَابُ الْأَفْعَالِ rules, or the two نَائِبُ فَاعِلٍ مُضْمَرٌ component rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
@@ -18830,9 +18878,9 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   }
   assert(!Object.prototype.hasOwnProperty.call(api.GRAMMAR_RULES.governors,'hamzatTaqrir'),
     'هَمْزَةُ التَّقْرِيرِ entered the governor table and could now govern');
-  assert(api.templates.length===272,'the production template count does not include the J1a additions or the two Wave-14 imperative lanes');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===279
-    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===82,
+  assert(api.templates.length===274,'the production template count does not include the J1a additions or the two Wave-14 imperative lanes or the two نَائِبُ فَاعِلٍ مُضْمَرٌ lanes');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===281
+    &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===83,
     'the composer authority does not include the J1a mappings or the two Wave-14 imperative keys');
   p7Cases+=8;
 }
@@ -19384,7 +19432,12 @@ for(const start of starts){
         assert(elements.startFilter.value===start&&elements.formFilter.value===form&&elements.stateFilter.value===state&&elements.signFilter.value===sign,
           `Valid filters were reset: ${start}/${form}/${state}/${sign}`);
         assert(elements.sentence.textContent,`No rendered sentence for ${start}/${form}/${state}/${sign}`);
-        assert((elements.answers.innerHTML.match(/class="word-card/g)||[]).length>=2,
+        /* «At least two cards» was a stand-in for «a card per token», and it stopped being true
+           when نَائِبُ فَاعِلٍ مُضْمَرٌ arrived: «نُصِحْتُ» is a complete one-word sentence, so it
+           renders exactly one card. Comparing against the exercise the app actually generated is
+           both stricter than the old floor and correct for a one-word lane — a missing card now
+           fails even in a three-token sentence, which the old «>=2» would have let through. */
+        assert((elements.answers.innerHTML.match(/class="word-card/g)||[]).length===api.currentExercise().tokens.length,
           `Incomplete rendered analysis for ${start}/${form}/${state}/${sign}`);
         for(const candidate of starts){
           assert(isDisabled('startFilter',candidate)===(api.poolFor(candidate,form,state,sign).length===0),
@@ -19819,7 +19872,11 @@ console.log(`Book-verb semantic lock passed: 20 verbs pinned to reviewed groups/
 // the token's real grammatical structure and is never inferred from the sign.
 // ===================================================================================
 // J2 — the weak-ended present verb is its own filterable form, mirroring validateExercise.
-function focusFormOf(tk){return tk.grammar&&tk.grammar.type==='verb'?(tk.inflection==='afalKhamsa'?'fiveVerbs':tk.inflection==='weakFinal'?'weakFinal':'present'):tk.inflection}
+/* Read from the app, not reimplemented here. focusDescriptor is the ONE description of where an
+   exercise's focus is and what tuple it has; نَائِبُ فَاعِلٍ مُضْمَرٌ made that necessary, because
+   its focus is a component inside the verb rather than a whole token, and a second copy of the
+   derivation living here could not have known that. */
+function focusFormOf(tk){return api.focusDescriptor(tk).form}
 function setFilters(start,form,state,sign){
   elements.startFilter.value=start;elements.formFilter.value=form;
   elements.stateFilter.value=state;elements.signFilter.value=sign;
@@ -19857,7 +19914,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===272,`Expected 272 production templates, found ${api.templates.length}`);
+assert(api.templates.length===274,`Expected 274 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -19871,14 +19928,24 @@ for(const t of api.templates){
        position its template declares, and it still has to carry a canonical bināʾ marker. */
     /* Read from the app: a noun with a maḥall and no state is a built noun, whichever chapter it
        belongs to. Naming a role here would have missed the interrogative ḥāl of p. 155. */
-    const builtFocus=api.isBuiltNoun(tk);
-    if(builtFocus){
-      assert(tk.mahall===t.state,`Template ${t.stableId}: target maḥall ${tk.mahall} != metadata ${t.state}`);
+    const descriptor=api.focusDescriptor(tk);
+    if(descriptor.component){
+      /* A COMPONENT focus: the term this lane teaches is written inside the word. Its tuple is
+         the component's own — the attached-pronoun class, its maḥall, and no sign, because an
+         attached pronoun is built. The host token must itself be a built past verb with no state
+         and no sign of its own, or the lane would be advertising a focus it does not have. */
+      assert(descriptor.state===t.state,`Template ${t.stableId}: focus component maḥall ${descriptor.state} != metadata ${t.state}`);
+      assert(descriptor.sign===null&&t.sign==='',`Template ${t.stableId}: a component focus may not carry or declare an iʿrāb sign`);
+      assert(!tk.state&&!api.carriesSignValue(tk),`Template ${t.stableId}: the host of a component focus carries an iʿrāb state or sign`);
+      assert(api.COMPONENT_REGISTRY[descriptor.component.kind].focusable===true,
+        `Template ${t.stableId}: the focus component is not registered as focusable`);
+    }else if(api.isBuiltNoun(tk)){
+      assert(descriptor.state===t.state,`Template ${t.stableId}: target maḥall ${descriptor.state} != metadata ${t.state}`);
       assert(!tk.sign&&api.builtNounBinaaMarker(tk),
         `Template ${t.stableId}: built target carries an iʿrāb sign or no canonical bināʾ marker`);
     }else{
-      assert(tk.state===t.state,`Template ${t.stableId}: target state ${tk.state} != metadata ${t.state}`);
-      assert(tk.sign.id===t.sign,`Template ${t.stableId}: target sign ${tk.sign.id} != metadata ${t.sign}`);
+      assert(descriptor.state===t.state,`Template ${t.stableId}: target state ${descriptor.state} != metadata ${t.state}`);
+      assert(descriptor.sign===t.sign,`Template ${t.stableId}: target sign ${descriptor.sign} != metadata ${t.sign}`);
     }
     stateFilterCases++;
   }
@@ -20007,10 +20074,14 @@ for(let iteration=0;iteration<400;iteration++){
        filtered on — filtering it there would be the very conflation this chapter forbids. */
     /* Read from the app: a noun with a maḥall and no state is a built noun, whichever chapter it
        belongs to. Naming a role here would have missed the interrogative ḥāl of p. 155. */
-    const builtFocus=api.isBuiltNoun(tk);
-    assert(form==='any'||focusFormOf(tk)===form,`Target form violates filter for ${t.stableId}`);
-    assert(state==='any'||(builtFocus?tk.mahall:tk.state)===state,`Target state violates filter for ${t.stableId}`);
-    assert(sign==='any'||builtFocus||tk.sign.id===sign,`Target sign violates filter for ${t.stableId}`);
+    /* One descriptor, the app's own, so the filter conformance test and validateExercise agree
+       about where the focus is. A COMPONENT focus reports built:true for the same reason a built
+       noun does — an attached pronoun has a maḥall and no sign — so it is matched on its maḥall
+       and exempt from the sign filter through the same branch. */
+    const descriptor=api.focusDescriptor(tk);
+    assert(form==='any'||descriptor.form===form,`Target form violates filter for ${t.stableId}`);
+    assert(state==='any'||descriptor.state===state,`Target state violates filter for ${t.stableId}`);
+    assert(sign==='any'||descriptor.built||descriptor.sign===sign,`Target sign violates filter for ${t.stableId}`);
   }
   stateFilterCases++;
 }
@@ -20428,12 +20499,18 @@ const goldens=[
  ['khabar kāna',t=>t.grammar.role==='khabarKana',['WHY_ROLE_KHABAR_KANA','WHY_STATE_KHABAR_KANA']],
  ['muḍāf ilayh',t=>t.grammar.role==='mudafIlayh',['WHY_ROLE_MUDAF_ILAYH','WHY_STATE_MUDAF_ILAYH']],
  ['preposition + governed noun',t=>t.grammar.role==='majrur',['WHY_ROLE_MAJRUR','WHY_STATE_MAJRUR']],
- ['past verb / visible fatḥ',t=>t.tense==='past'&&t.grammar.morphology?.binaaClass==='visible-fath',['WHY_PAST_VERB','WHY_PAST_FATH_VISIBLE']],
- ['passive past verb',t=>t.tense==='past'&&t.grammar.voice===api.PASSIVE_VOICE,['WHY_PAST_VERB_PASSIVE','WHY_PASSIVE_PAST_FORM','WHY_PAST_FATH_VISIBLE']],
+ ['past verb / visible fatḥ',t=>t.tense==='past'&&t.grammar.voice!==api.PASSIVE_VOICE&&t.grammar.morphology?.binaaClass==='visible-fath',['WHY_PAST_VERB','WHY_PAST_FATH_VISIBLE']],
+/* A passive past now comes in two shapes, and the predicate has to say WHICH: the ẓāhir-deputy
+   lane ends in a fatḥah and the muḍmar-deputy lane ends in a moving rafʿ pronoun, so their bināʾ
+   Why lines differ. The old predicate said only «passive past» and started matching both, which
+   is the tell that a golden has stopped naming a single case. */
+ ['passive past verb / visible deputy',t=>t.tense==='past'&&t.grammar.voice===api.PASSIVE_VOICE&&t.grammar.morphology?.binaaClass==='visible-fath',['WHY_PAST_VERB_PASSIVE','WHY_PASSIVE_PAST_FORM','WHY_PAST_FATH_VISIBLE']],
+ ['passive past verb / concealed deputy',t=>t.tense==='past'&&t.grammar.voice===api.PASSIVE_VOICE&&(t.components||[]).some(c=>c.syntacticRole==='naib'),
+  ['WHY_PAST_VERB_PASSIVE','WHY_PASSIVE_PAST_FORM','WHY_PAST_FATH_EST_INCIDENTAL_SUKUN','WHY_NAIB_MUDMAR']],
  ['passive present verb',t=>t.tense==='present'&&t.grammar.voice===api.PASSIVE_VOICE,['WHY_PRESENT_VERB_PASSIVE','WHY_PASSIVE_PRESENT_FORM','WHY_STATE_VERB_FREE','WHY_SIGN_MUDARI_RAF']],
  ['deputy subject',t=>t.grammar.role==='naibFail',['WHY_ROLE_NAIB_FAIL','WHY_STATE_NAIB_FAIL']],
- ['past verb / estimated fatḥ for munāsabah',t=>t.tense==='past'&&t.grammar.morphology?.binaaClass==='estimated-fath-munasabah',['WHY_PAST_VERB','WHY_PAST_FATH_EST_MUNASABAH','WHY_SUBJECT_WAW_JAMAAH']],
- ['past verb / estimated fatḥ with incidental sukūn',t=>t.tense==='past'&&t.grammar.morphology?.binaaClass==='estimated-fath-incidental-sukun',['WHY_PAST_VERB','WHY_PAST_FATH_EST_INCIDENTAL_SUKUN']],
+ ['past verb / estimated fatḥ for munāsabah',t=>t.tense==='past'&&t.grammar.voice!==api.PASSIVE_VOICE&&t.grammar.morphology?.binaaClass==='estimated-fath-munasabah',['WHY_PAST_VERB','WHY_PAST_FATH_EST_MUNASABAH','WHY_SUBJECT_WAW_JAMAAH']],
+ ['past verb / estimated fatḥ with incidental sukūn',t=>t.tense==='past'&&t.grammar.voice!==api.PASSIVE_VOICE&&t.grammar.morphology?.binaaClass==='estimated-fath-incidental-sukun',['WHY_PAST_VERB','WHY_PAST_FATH_EST_INCIDENTAL_SUKUN']],
  ['kāna (mabnī)',t=>t.tense==='kana',['WHY_KANA','WHY_MABNI_KANA']],
  ['mabnī particle',t=>t.grammar.type==='particle',['WHY_MABNI_PARTICLE']],
  // Each present concealment person carries its own rule, so the Why can state both the
@@ -22176,6 +22253,212 @@ if(auditOutput){
     +frames.size+' sababi frames, 3 states and '+manutForms.size+' manʿūt declensions, '
     +producedKinds.length+' of the source’s five maʿrifah kinds produced, '
     +history+' History round trips, '+negatives+' negative/forgery boundaries — green');
+}
+
+
+/* ═══ نَائِبُ فَاعِلٍ مُضْمَرٌ — focused tests (Al-Tuḥfah p. 97) ══════════════════════════════
+   The chapter's second half: «وَنَائِبُ الْفَاعِلِ يَكُونُ ظَاهِرًا وَيَكُونُ مُضْمَرًا». One property
+   makes this lane different from every other in the app and is what these tests are about — the
+   term it teaches has NO TOKEN. «نُصِحْتُ» is a complete one-word sentence and the deputy is the
+   pronoun written inside the verb, so the exercise's focus descends into a component.
+
+   The positives prove the whole life cycle the row needs (build → snapshot → restore → validate →
+   identical render, with the component still the focus afterwards). The negatives are the seven
+   ways this construction can be counterfeited: deputy→fāʿil, deputy→mafʿūl, passive→active, the
+   wrong pronoun, the wrong host, the wrong maḥall and the wrong source rule. */
+{
+  let positives=0,history=0,negatives=0;
+  const lanes=api.templates.filter(t=>t.naibMudmarVerbKeys.length);
+  assert(lanes.length===api.NAIB_MUDMAR_VERB_KEYS.length,
+    'نائب فاعل مضمر: one lane per registered surface is not registered');
+
+  const built=new Map();
+  for(const lane of lanes){
+    const key=lane.naibMudmarVerbKeys[0];
+    const record=api.NAIB_MUDMAR_VERBS[key];
+    const data=api.buildTemplate(lane.id);
+    api.renderExercise(data);
+    built.set(key,data);
+    assert(api.validateExercise(clone(data)).length===0,key+': the built exercise does not validate clean');
+    /* ONE WORD. The whole design rests on this: a second host token was never invented. */
+    assert(data.tokens.length===1,key+': the muḍmar-deputy exercise is not one word');
+    assert(data.sentence===record.surface,key+': the rendered sentence is not the registered surface');
+    /* The focus is the COMPONENT, not the verb, and the descriptor says so structurally. */
+    const focus=data.tokens[0];
+    assert(focus.target===true,key+': the single token is not the focus token');
+    const descriptor=api.focusDescriptor(focus);
+    assert(descriptor.component&&descriptor.component.kind===record.componentKind,
+      key+': the focus did not descend into the deputy component');
+    assert(descriptor.form===api.COMPONENT_FOCUS_FORM&&descriptor.state==='raf'
+      &&descriptor.sign===null&&descriptor.built===true,
+      key+': the component focus does not report attachedPronoun / rafʿ / no sign / built');
+    /* And the template ADVERTISES that same tuple, so the filters cannot promise another. */
+    assert(lane.form===descriptor.form&&lane.state===descriptor.state&&lane.sign==='',
+      key+': the template tuple is not the focus component’s own');
+    /* The host is a built past verb: no state, no sign, and — the defect this wave fixed — the
+       ESTIMATED fatḥ, because a moving rafʿ pronoun is attached to it. */
+    assert(!focus.state&&!api.carriesSignValue(focus),key+': the host verb carries an iʿrāb state or sign');
+    assert(focus.grammar.morphology.binaaClass==='estimated-fath-incidental-sukun',
+      key+': the host verb does not take the estimated fatḥ p. 72 gives a verb with a moving rafʿ pronoun');
+    assert(focus.ar.includes(api.PAST_BINAA_CLAUSE_AR['estimated-fath-incidental-sukun'])
+      &&focus.ar.includes(api.PAST_PASSIVE_LABEL_AR.trim()),
+      key+': the card does not say both «مبني للمجهول» and the estimated-fatḥ clause');
+    assert(!focus.ar.includes(api.PAST_BINAA_CLAUSE_AR['visible-fath']),
+      key+': the card still claims the visible fatḥ the old renderer hard-coded for every passive past');
+    /* The component card is the row's actual learner-facing claim. Read from the app, never typed. */
+    const component=focus.components[0];
+    assert(focus.components.length===1&&component.kind===record.componentKind,
+      key+': the verb does not carry exactly its own deputy component');
+    assert(component.ar.includes(api.COMPONENT_ROLE_AR.naib)&&component.ar.includes(api.COMPONENT_ATTACHED_PRONOUN_AR)
+      &&component.ar.includes(api.COMPONENT_MAHALL_AR.raf)
+      &&component.ar.includes(api.COMPONENT_BINAA_AR[api.COMPONENT_REGISTRY[record.componentKind].binaaSign]),
+      key+': the deputy card does not state متصل + بناء + محل رفع + نائب فاعل');
+    assert(!component.ar.includes(api.COMPONENT_ROLE_AR.fail+'.'),key+': the deputy card ends by calling it a fāʿil');
+    /* p. 96's premise: the agent is GONE. Nothing may be a fāʿil, and no subject link may exist. */
+    assert(!data.relationships.some(rel=>rel.type==='verbSubject'||rel.type==='passiveDeputy'),
+      key+': a concealed-deputy exercise carries a subject or visible-deputy relationship');
+    /* The Why must state the ruling as a maṣdar; a past verb's Why may never say «مرفوع». */
+    const whyLines=(focus.why.ar||[]).join(' ');
+    assert(focus.why.ids.includes('WHY_NAIB_MUDMAR'),key+': the Why never explains the deputy');
+    assert(!/مَرْفُوع|مَنْصُوب|مَجْزُوم/.test(whyLines),key+': a past verb’s Why claims an iʿrāb state');
+    positives++;
+  }
+
+  /* ── the round trip this row exists to prove ──────────────────────────────────────
+     A lane that builds and validates but cannot be reopened from History is not shipped. The
+     gate that used to swallow this one is the canonical translation: composeCanonicalTranslation
+     rejects a template ID it has no structural-key entry for, and restoreExerciseSnapshot turns
+     that into a silent null. So the key is asserted here directly as well as through the trip. */
+  for(const [key,data] of built){
+    const structuralKey=api.translationStructureKey(data);
+    assert(Object.prototype.hasOwnProperty.call(api.TRANSLATION_STRUCTURE_MAP,structuralKey),
+      key+': the lane has no TRANSLATION_STRUCTURE_MAP entry, so History cannot restore it');
+    const snapshot=api.createExerciseSnapshot(data);
+    assert(snapshot,key+': the built exercise produced no snapshot');
+    const restored=api.restoreExerciseSnapshot(clone(snapshot));
+    assert(restored,key+': a clean snapshot failed to restore');
+    assert(api.validateExercise(clone(restored)).length===0,key+': the restored exercise does not validate');
+    assert(restored.sentence===data.sentence&&restored.translation===data.translation,
+      key+': the restored sentence or translation differs');
+    assert(restored.tokens.length===data.tokens.length
+      &&restored.tokens.every((tok,i)=>tok.ar===data.tokens[i].ar&&tok.en===data.tokens[i].en
+        &&tok.gloss===data.tokens[i].gloss),
+      key+': the restored cards do not render identically');
+    assert(JSON.stringify(restored.tokens.map(t=>(t.components||[]).map(c=>c.ar)))
+      ===JSON.stringify(data.tokens.map(t=>(t.components||[]).map(c=>c.ar))),
+      key+': the component analysis did not render identically after restore');
+    /* The point of the whole lane: the focus is still the pronoun INSIDE the word. */
+    const restoredFocus=restored.tokens.find(t=>t.target);
+    const restoredDescriptor=api.focusDescriptor(restoredFocus);
+    assert(restoredDescriptor.component&&restoredDescriptor.component.kind===api.NAIB_MUDMAR_VERBS[key].componentKind,
+      key+': the deputy component is no longer the exercise focus after restore');
+    history++;
+  }
+
+  /* ── the seven counterfeits ───────────────────────────────────────────────────── */
+  const base=built.get(api.NAIB_MUDMAR_VERB_KEYS[0]);
+  const other=built.get(api.NAIB_MUDMAR_VERB_KEYS[1]);
+  const REG=api.COMPONENT_REGISTRY;
+  const mustReject=(label,source,mutate,expected)=>{
+    const data=clone(source);mutate(data);
+    const failures=api.validateExercise(data);
+    assert(failures.some(item=>item.code===expected),
+      `نائب فاعل مضمر: ${label} was accepted (wanted ${expected}, got ${failures.map(i=>i.code).join(',')||'nothing'})`);
+    negatives++;
+  };
+  const deputy=data=>data.tokens[0].components[0];
+
+  // 1 — نائب فاعل → فاعل. The role is registry data; relabelling it is not a reading, it is a forgery.
+  mustReject('the deputy relabelled a fāʿil',base,d=>{deputy(d).syntacticRole='fail'},'E_COMPONENT_INVARIANT');
+  // 2 — نائب فاعل → مفعول به.
+  mustReject('the deputy relabelled a mafʿūl bihi',base,
+    d=>{const c=deputy(d);c.syntacticRole='maful';c.mahall='nasb'},'E_COMPONENT_INVARIANT');
+  // 3 — passive → active. Dropping the voice must not leave a verb quietly carrying a deputy.
+  mustReject('the passive voice dropped from the host verb',base,
+    d=>{delete d.tokens[0].grammar.voice},'E_NAIB_MUDMAR_AUTHORITY');
+  // 4 — the wrong pronoun: one lane's component under the other lane's surface.
+  mustReject('the other lane’s pronoun attached to this verb',base,
+    d=>{d.tokens[0].components=[api.makeComponent(api.NAIB_MUDMAR_VERBS[api.NAIB_MUDMAR_VERB_KEYS[1]].componentKind,d.tokens[0].id,1)]},
+    'E_COMPONENT_SET');
+  // 5 — the wrong host: this exercise filed under the other lane's template.
+  mustReject('the exercise filed under the other muḍmar lane',base,
+    d=>{const t=lanes[1];d.templateId=t.stableId},'E_NAIB_MUDMAR_AUTHORITY');
+  // 6 — the wrong maḥall: rafʿ is the deputy's ruling, and نصب is not available to it.
+  mustReject('the deputy moved out of rafʿ',base,d=>{deputy(d).mahall='nasb'},'E_COMPONENT_INVARIANT');
+  // 7 — the wrong source rule: the deputy tāʾ wearing the fāʿil tāʾ's authority.
+  mustReject('the deputy citing the fāʿil pronoun’s rule',base,
+    d=>{deputy(d).ruleId=REG['taa-fail-1s'].ruleId},'E_COMPONENT_INVARIANT');
+
+  /* The focus may not be moved off the term the lane exists to teach. */
+  mustReject('the focus taken off the deputy',base,d=>{d.tokens[0].target=false},'E_FOCUS_COUNT');
+  /* And the deputy component may not appear under a lane that does not declare it. */
+  {
+    const host=api.buildTemplate(api.templates.find(t=>t.passiveTense==='past').id);
+    api.renderExercise(host);
+    const data=clone(host);
+    data.tokens[0].components=[api.makeComponent('taa-naib-1s',data.tokens[0].id,1)];
+    const failures=api.validateExercise(data);
+    assert(failures.some(i=>i.code==='E_NAIB_MUDMAR_UNOWNED'),
+      'نائب فاعل مضمر: a deputy component under an undeclared template was accepted');
+    negatives++;
+  }
+
+  /* ── History adversarials ─────────────────────────────────────────────────────── */
+  {
+    const snapshot=api.createExerciseSnapshot(base);
+    /* Components are a derived cache: a forged one must be DISCARDED and rebuilt from the
+       registered surface, never trusted. This is also what makes the focus untamperable. */
+    const emptied=clone(snapshot);
+    emptied.tokens[0].components=[];
+    const rebuilt=api.restoreExerciseSnapshot(emptied);
+    assert(rebuilt,'نائب فاعل مضمر: a snapshot whose component cache was emptied failed to restore');
+    assert(api.focusDescriptor(rebuilt.tokens[0]).component,
+      'نائب فاعل مضمر: restore trusted an emptied component cache instead of rebuilding the deputy');
+    negatives++;
+    /* A snapshot moved onto the OTHER muḍmar lane must not restore: the surfaces differ, so the
+       identity seal and the template authorization both have to catch it. */
+    const swapped=clone(snapshot);
+    swapped.templateId=lanes[1].stableId;
+    assert(!api.restoreExerciseSnapshot(swapped),
+      'نائب فاعل مضمر: a snapshot refiled under the other muḍmar lane restored anyway');
+    negatives++;
+    /* A snapshot whose verb person is forged to the ẓāhir-deputy 3ms may not be BELIEVED. Past
+       morphology is a documented repairable cache — canonicalHistoryIdentityInput re-derives it
+       from the registered surface before the identity is even computed — so the honest outcomes
+       are «refused» or «restored under the real person», and never «restored as 3ms». Asserting
+       an outright refusal here would have been asserting the wrong contract. */
+    const forged=clone(snapshot);
+    forged.tokens[0].grammar.morphology.pastPerson='3ms';
+    forged.tokens[0].grammar.person='3ms';
+    const forgedRestore=api.restoreExerciseSnapshot(forged);
+    assert(!forgedRestore||forgedRestore.tokens[0].grammar.morphology.person===api.NAIB_MUDMAR_VERBS[api.NAIB_MUDMAR_VERB_KEYS[0]].pastPerson,
+      'نائب فاعل مضمر: a snapshot forging the deputy person restored under that forged person');
+    assert(!forgedRestore||api.focusDescriptor(forgedRestore.tokens[0]).component,
+      'نائب فاعل مضمر: a forged-person restore lost the deputy component focus');
+    negatives++;
+    /* The other lane round-trips independently — this is not one snapshot proving two rows. */
+    const otherSnapshot=api.createExerciseSnapshot(other);
+    assert(api.restoreExerciseSnapshot(clone(otherSnapshot)),'نائب فاعل مضمر: the second lane failed to restore');
+    negatives++;
+  }
+
+  /* The learner-facing term must actually REACH the iʿrāb corpus, in exact bytes. This is the
+     guard Wave 15 added after a card-mode row was credited to a word the app never rendered. */
+  {
+    let rendered=false;
+    for(const lane of lanes){
+      const data=api.buildTemplate(lane.id);
+      api.renderExercise(data);
+      for(const tok of data.tokens)for(const c of tok.components||[]){
+        if(c.ar.includes(api.COMPONENT_ROLE_AR.naib))rendered=true;
+      }
+    }
+    assert(rendered,'نائب فاعل مضمر: «نَائِبُ فَاعِلٍ» never reaches a rendered component card');
+    positives++;
+  }
+
+  console.log('نَائِبُ فَاعِلٍ مُضْمَرٌ focused tests: '+positives+' canonical builds across '
+    +lanes.length+' lanes, '+history+' History round trips, '+negatives+' negative/forgery boundaries — green');
 }
 
 console.log(JSON.stringify(finalResults,null,2));

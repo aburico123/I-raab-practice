@@ -334,6 +334,10 @@ body.lang-arabic .icon-popover{direction:rtl}
         <option value="present">الْمُضَارِعُ الَّذِي لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ</option>
         <option value="weakFinal">الْمُضَارِعُ الْمُعْتَلُّ الْآخِرِ</option>
         <option value="fiveVerbs">الْأَفْعَالُ الْخَمْسَةُ</option>
+        <!-- نَائِبُ فَاعِلٍ مُضْمَرٌ (p. 97). The only focus in this app that is not a whole word:
+             the deputy pronoun is written inside its verb, so the class the filter names is the
+             class that pronoun belongs to. Listed last, so no existing option's position moves. -->
+        <option value="attachedPronoun">الضَّمِيرُ الْمُتَّصِلُ</option>
       </select>
     </div>
     <div class="control">
@@ -1001,6 +1005,38 @@ function builtNounBinaaMarker(token){
 function isBuiltNoun(token){
  return token?.grammar?.type==='noun'&&!token.state&&Boolean(token.mahall);
 }
+/* ===== Where the exercise's focus actually IS ==============================================
+   For every lane but one, the focus is a whole token: the learner is asked about a word, and the
+   template's (form, state, sign) tuple describes that word. نَائِبُ فَاعِلٍ مُضْمَرٌ has no such
+   word. p. 97's deputy pronoun is written INSIDE the verb — «نُصِحْتُ» is a one-word sentence —
+   and the verb hosting it is a built past that can never be a target. So the focus DESCENDS into
+   the component, and these two functions are the only place that fact is expressed.
+
+   Deliberately structural and token-local. It reads the MATERIALIZED components, which are
+   discarded and rebuilt from COMPONENT_REGISTRY on every restore, so nothing a snapshot could
+   carry decides where the focus is; and it needs no exercise, because the answer is a property of
+   the focus token alone. `focusable` is opt-in per registry entry, and more than one focusable
+   component on a single token is refused rather than resolved by position. */
+const COMPONENT_FOCUS_FORM='attachedPronoun';
+function focusComponentOf(token){
+ if(!token||token.target!==true||token.grammar?.type!=='verb')return null;
+ const focusable=(token.components||[]).filter(component=>component&&component.focusable===true);
+ return focusable.length===1?focusable[0]:null;
+}
+/* The one description of a focus that app validation and the harness both read, so neither can
+   invent its own idea of what the template's tuple is being compared against. A component focus
+   reports the class it belongs to as its FORM, its maḥall as its STATE and no sign at all: an
+   attached pronoun is built, and a built word has no iʿrāb sign — the same convention the built
+   munādā and the mabnī present verb already follow with their own maḥall. */
+function focusDescriptor(token){
+ const component=focusComponentOf(token);
+ if(component)return{form:COMPONENT_FOCUS_FORM,state:component.mahall,sign:null,built:true,component};
+ const built=isBuiltNoun(token);
+ const form=token?.grammar?.type==='verb'
+  ?(token.inflection==='afalKhamsa'?'fiveVerbs':token.inflection==='weakFinal'?'weakFinal':'present')
+  :token?.inflection;
+ return{form,state:built?token.mahall:token?.state,sign:built?null:safeSignId(token?.sign),built,component:null};
+}
 function mahallRuleOwnerFailure(token,data){
  if(!token?.mahallRuleId)return false;
  /* A built munādā is the only NOUN that owns a maḥall rule: it has no iʿrāb state of its own, so
@@ -1031,10 +1067,15 @@ function mahallRuleOwnerFailure(token,data){
    canonical passive construction may own the tense-matching rule. */
 function voiceRuleOwnerFailure(token,data){
  if(!token?.voiceRuleId)return false;
- const authority=derivePassiveConstructionAuthority(data);
  const expected=token.tense==='past'?'R_PASSIVE_PAST_FORM':token.tense==='present'?'R_PASSIVE_PRESENT_FORM':'';
- return !authority.authorized||authority.verbId!==token.id||token.grammar?.voice!==PASSIVE_VOICE
-  ||token.voiceRuleId!==expected;
+ if(token.grammar?.voice!==PASSIVE_VOICE||token.voiceRuleId!==expected)return true;
+ /* Two constructions may own the passive-form rule, and a verb must be the authorized verb of one
+    of them: the ẓāhir deputy of pp. 96–98 and the muḍmar deputy of p. 97. The form rule itself is
+    the same fact in both — «ضُمَّ أوَّلُه وكُسِر ما قبل آخره» — so neither gets a rule of its own. */
+ const visible=derivePassiveConstructionAuthority(data);
+ if(visible.authorized&&visible.verbId===token.id)return false;
+ const mudmar=deriveNaibMudmarAuthority(data);
+ return !(mudmar.authorized&&mudmar.verbId===token.id);
 }
 /* ---- Phase 3B0A-G — canonical token-gloss authority --------------------------------------
    A stored `gloss` used to ride out of raw History into the answer cards: 169 token cases across
@@ -1464,6 +1505,14 @@ function resolveCanonicalTokenGloss(data,token,index){
  }
  /* 7 — a passive verb is glossed from the exact capability authorized by the construction. */
  if(type==='verb'&&token.grammar.voice===PASSIVE_VOICE){
+  /* 7-bis — the muḍmar-deputy lane is asked FIRST, because its verb carries the whole sentence:
+     its English subject is the pronoun written inside it, so the copula follows that pronoun's
+     number and comes from the frozen record, never from a deputy noun that does not exist. */
+  const mudmar=deriveNaibMudmarAuthority(data);
+  if(mudmar.authorized&&mudmar.verbId===token.id){
+   const record=NAIB_MUDMAR_VERBS[mudmar.verbKey];
+   return`${record.copulaEn} ${PASSIVE_VERB_CAPABILITIES[record.capabilityKey].participleEn}`;
+  }
  const authority=derivePassiveConstructionAuthority(data);
   const capability=authority.authorized&&authority.verbId===token.id?PASSIVE_VERB_CAPABILITIES[authority.capabilityKey]:null;
   if(!capability)return null;
@@ -1670,6 +1719,12 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
     silent, the later definition wins, and the only symptom was one unrelated template quietly
     failing its History round trip. Check the whole range before assigning an ordinal here. */
  ,TS82:Object.freeze({parts:Object.freeze([Object.freeze({slot:'zarfKhabarSentence'})])})
+ /* نَائِبُ فَاعِلٍ مُضْمَرٌ — one whole-sentence slot, as TS39 already is for the ẓāhir deputy. It
+    cannot reuse TS39: that shape's translator reads a deputy NOUN token, and this construction has
+    none — its subject is the pronoun inside the verb, so the English subject and copula come from
+    the authorized muḍmar record instead. TS83 is the next free ordinal (TS01–TS82 are all taken;
+    the only earlier mention of TS83 is a Wave-14 comment explaining why that wave did NOT mint it). */
+ ,TS83:Object.freeze({parts:Object.freeze([Object.freeze({slot:'naibMudmarSentence'})])})
  ,TS65:Object.freeze({parts:Object.freeze([Object.freeze({slot:'conditionSentence'})])})
  ,TS59:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
  ,TS60:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
@@ -2032,6 +2087,18 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
    assembles the sentence does not change and no composer shape is added. */
 ,"T_VERB_SINGULAR_NASB_FATHA_45||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_45",structure:"verb:present,noun:faail,noun:object",shape:"TS11",copulaPlural:false})
 ,"T_VERB_SINGULAR_NASB_FATHA_46||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_46",structure:"verb:present,noun:faail,noun:object",shape:"TS11",copulaPlural:false})
+ /* نَائِبُ فَاعِلٍ مُضْمَرٌ — the one-token structure, and the shortest key in this map, because
+    the exercise is one word: p. 97's deputy is written inside the verb, so there is no second
+    token for the structure to name. Both lanes compose through TS83, whose single slot hands the
+    whole English to the authorized muḍmar record.
+
+    THIS ENTRY IS WHAT MAKES THE LANE SURVIVE HISTORY, and it was the one thing missing while the
+    lane built, validated and rendered perfectly. composeCanonicalTranslation looks its key up here
+    and REJECTS on a miss; restoreExerciseSnapshot turns that null composition into a null restore
+    and says nothing at all. The gate sits a long way from the symptom, so it is the first place to
+    look when a brand-new lane «just does not come back from History». */
+ ,"T_VERB_ATTACHEDPRONOUN_RAF__01||verb:past":Object.freeze({templateId:"T_VERB_ATTACHEDPRONOUN_RAF__01",structure:"verb:past",shape:"TS83",copulaPlural:false})
+ ,"T_VERB_ATTACHEDPRONOUN_RAF__02||verb:past":Object.freeze({templateId:"T_VERB_ATTACHEDPRONOUN_RAF__02",structure:"verb:past",shape:"TS83",copulaPlural:true})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -2088,6 +2155,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='tawkidChainSentence')return canonicalTawkidChainTranslation(exercise);
  if(bits[0]==='badalSentence')return canonicalBadalTranslation(exercise);
  if(bits[0]==='passiveSentence')return canonicalPassiveTranslation(exercise);
+ if(bits[0]==='naibMudmarSentence')return canonicalNaibMudmarTranslation(exercise);
  if(bits[0]==='mutlaqSentence')return canonicalMutlaqTranslation(exercise);
  if(bits[0]==='mafulFihSentence')return canonicalMafulFihTranslation(exercise);
  if(bits[0]==='haalSentence')return canonicalHaalTranslation(exercise);
@@ -4802,6 +4870,28 @@ const PASSIVE_DEPUTY_PAIRS=Object.freeze(Object.assign(Object.create(null),{
  nasahaTeachers:Object.freeze({capabilityKey:'nasaha',deputy:passiveDeputyLexeme(smp,'the teachers'),inflection:'smp'}),
  nasahaFather:Object.freeze({capabilityKey:'nasaha',deputy:passiveDeputyLexeme(fiveNouns,'your father'),inflection:'fiveNouns'})
 }));
+/* نَائِبُ فَاعِلٍ مُضْمَرٌ — Al-Tuḥfah p. 97. «وَنَائِبُ الْفَاعِلِ يَكُونُ ظَاهِرًا وَيَكُونُ
+   مُضْمَرًا»; the شرح adds that the muḍmar deputy is «كَالْفَاعِلِ», referring its twelve forms back
+   to باب الفاعل, which pp. 71–72 have already ruled in full. This app carries those attached
+   pronouns already, so the chapter's second half needs no new grammar — only the surfaces.
+
+   And the surfaces are WRITTEN OUT, never composed. Attaching a moving rafʿ pronoun to a passive
+   past changes the vowel before it (نُصِحَ → نُصِحْتُ), which is morphology, not concatenation —
+   the opposite of سِينُ التَّنْفِيسِ, whose prefix changes nothing and is therefore derived. Two
+   forms only, the ones the source's own account of the fāʿil parses letter by letter: the
+   first-person tāʾ of p. 157's model iʿrāb and نَا of p. 72.
+
+   Each record names the passive capability it belongs to, so the verb's identity, its English and
+   its «مبني للمجهول» claim all still come from PASSIVE_VERB_CAPABILITIES and are never restated
+   here; and it names the component kind its person implies, which registration then PROVES against
+   PAST_MORPHOLOGY rather than trusting. */
+const NAIB_MUDMAR_VERBS=Object.freeze(Object.assign(Object.create(null),{
+ nusihtu:Object.freeze({key:'nusihtu',capabilityKey:'nasaha',pastPerson:'1s-naib',componentKind:'taa-naib-1s',
+  surface:'نُصِحْتُ',subjectEn:'I',copulaEn:'was'}),
+ nusihna:Object.freeze({key:'nusihna',capabilityKey:'nasaha',pastPerson:'1p-naib',componentKind:'naa-naib',
+  surface:'نُصِحْنَا',subjectEn:'We',copulaEn:'were'})
+}));
+const NAIB_MUDMAR_VERB_KEYS=Object.freeze(Object.keys(NAIB_MUDMAR_VERBS));
 /* Productive المفعول المطلق — Al-Tuḥfah pp. 146–147. باب المصدر defines المصدر as «الاسْمُ
    الْمَنْصُوبُ الَّذِي يَجِيءُ ثَالِثًا فِي تَصْرِيفِ الْفِعْلِ», and the شرح states the chapter's real
    purpose outright: the مفعول مطلق is «مَا لَيْسَ خَبَرًا مِمَّا دَلَّ عَلَى تَأْكِيدِ عَامِلِهِ، أَوْ
@@ -9120,15 +9210,31 @@ const COMPONENT_REGISTRY=Object.freeze({
     letters sit where a learner might read a subject or an object, and a prefixed sīn does not.
     That is why `denialAr` is registry data now rather than a fixed tail of the renderer. */
  'siin-tanfiis':Object.freeze({category:'particle',syntacticRole:'none',mahall:'none',binaaSign:null,functionAr:'دَالٌّ عَلَى التَّنْفِيسِ',functionEn:'marking futurity (tanfīs)',letterAr:'السِّينُ',nameAr:'سِينُ التَّنْفِيسِ',nameEn:'the sīn of futurity (sīn al-tanfīs)',denialAr:'',denialEn:'',ruleId:'C_SIIN_TANFIIS'}),
- 'yaa-mutakallim-maful':Object.freeze({category:'pronoun',syntacticRole:'maful',mahall:'nasb',binaaSign:'sukun',letterAr:'الْيَاءُ',nameAr:'يَاءُ الْمُتَكَلِّمِ',nameEn:'the first-person object yāʾ (yāʾ al-mutakallim)',ruleId:'C_YAA_MUTAKALLIM_MAFUL'})
+ 'yaa-mutakallim-maful':Object.freeze({category:'pronoun',syntacticRole:'maful',mahall:'nasb',binaaSign:'sukun',letterAr:'الْيَاءُ',nameAr:'يَاءُ الْمُتَكَلِّمِ',nameEn:'the first-person object yāʾ (yāʾ al-mutakallim)',ruleId:'C_YAA_MUTAKALLIM_MAFUL'}),
+ /* نَائِبُ فَاعِلٍ مُضْمَرٌ — Al-Tuḥfah p. 97: «وَنَائِبُ الْفَاعِلِ يَكُونُ ظَاهِرًا وَيَكُونُ
+    مُضْمَرًا», and the شرح refers the detail of the twelve muḍmars straight back to باب الفاعل,
+    where p. 72 has already ruled these very letters: «وَالتَّاءُ، أَوْ نَا أَوِ النُّونُ فَاعِلٌ،
+    مَبْنِيٌّ عَلَى الضَّمِّ أَوِ الْفَتْحِ أَوِ الْكَسْرِ أَوِ السُّكُونِ فِي مَحَلِّ رَفْعٍ». So
+    NOTHING here is new morphology: the letter, its bināʾ and its maḥall are the ones the fāʿil
+    entries above already carry, and the ONE fact that differs is the syntactic role — this pronoun
+    is what the omitted agent left behind, so it is نَائِبُ فَاعِلٍ and not فَاعِلٌ.
+
+    They are separate entries rather than a flag on the fāʿil pair because a component's role is
+    DATA in this registry and is never inferred: one kind, one role, one source rule. `focusable`
+    is the second thing that separates them, and it is the whole reason these two exist — the
+    deputy is written INSIDE the verb, so «نُصِحْتُ» is a one-word sentence and the term this lane
+    teaches has no token of its own to be the target. focusComponentOf descends into a component
+    marked here and into no other. */
+ 'taa-naib-1s':Object.freeze({category:'pronoun',syntacticRole:'naib',mahall:'raf',binaaSign:'damma',focusable:true,letterAr:'تُ',nameAr:'تَاءُ الْمُتَكَلِّمِ',nameEn:'the first-person deputy tāʾ (tāʾ al-mutakallim)',ruleId:'C_TAA_NAIB_1S'}),
+ 'naa-naib':Object.freeze({category:'pronoun',syntacticRole:'naib',mahall:'raf',binaaSign:'sukun',focusable:true,letterAr:'نَا',nameAr:'نَا الْفَاعِلِينَ',nameEn:'nā al-fāʿilīn (the “we” deputy-subject pronoun)',ruleId:'C_NAA_NAIB'})
 });
 const COMPONENT_CATEGORIES=Object.freeze({pronoun:1,particle:1,orthographic:1});
 /* A component's role is data, and there is now more than one: p.157 gives the same verb an
    internal fāʿil-less tāʾ and an internal mafʿūl yāʾ. Keeping both in one table is what lets
    renderComponentAnalysis stay a single function and stops a naṣb role from ever borrowing the
    rafʿ wording. */
-const COMPONENT_ROLE_AR=Object.freeze({fail:'فَاعِلٌ',maful:'مَفْعُولٌ بِهِ'});
-const COMPONENT_ROLE_EN=Object.freeze({fail:'fāʿil',maful:'mafʿūl bihi'});
+const COMPONENT_ROLE_AR=Object.freeze({fail:'فَاعِلٌ',maful:'مَفْعُولٌ بِهِ',naib:'نَائِبُ فَاعِلٍ'});
+const COMPONENT_ROLE_EN=Object.freeze({fail:'fāʿil',maful:'mafʿūl bihi',naib:'nāʾib fāʿil'});
 /* The class every pronoun component belongs to, named once. It is what distinguishes an
    attached-pronoun card from the whole-word card of the SAME role: «الدَّرْسَ: مَفْعُولٌ بِهِ
    مَنْصُوبٌ …» and «الْيَاءُ …: ضَمِيرٌ مُتَّصِلٌ … مَفْعُولٌ بِهِ» are two different claims, and
@@ -9149,6 +9255,12 @@ function componentRegistryError(reg){
  if(reg.binaaSign!==null&&!COMPONENT_BINAA_AR[reg.binaaSign])return `unknown bināʾ sign ${reg.binaaSign}`;
  if(reg.binaaSign===null&&!['particle','orthographic'].includes(reg.category))return 'only a particle or orthographic component may omit its bināʾ';
  if(reg.category==='pronoun'&&(!COMPONENT_ROLE_AR[reg.syntacticRole]||!COMPONENT_MAHALL_AR[reg.mahall]))return 'pronoun component must carry a real role and maḥall';
+ /* `focusable` says this component may BE the exercise's focus — the whole reason the نائب فاعل
+    مضمر entries exist. It is opt-in and must be spelled as a Boolean when spelled at all, and only
+    a pronoun may carry it: a particle or an orthographic addition has no maḥall, and a focus whose
+    state cannot be stated is not a focus. */
+ if(reg.focusable!==undefined&&typeof reg.focusable!=='boolean')return 'focusable must be a Boolean when declared';
+ if(reg.focusable===true&&reg.category!=='pronoun')return `a ${reg.category} component may not be an exercise focus`;
  /* Wave 15 — the denial clause. A particle component must DECIDE whether it denies anything, so
     both fields are required of it and both must be strings; the empty string is a decision and
     `undefined` is an oversight. A pronoun or orthographic component denies nothing by construction:
@@ -9191,7 +9303,7 @@ function renderComponentAnalysis(c){
 function makeComponent(kind,ownerId,index){
  const reg=COMPONENT_REGISTRY[kind];
  if(!reg)throw new Error(`Unknown internal-component kind: ${kind}`);
- const c={id:`${ownerId}:C${index}`,kind,category:reg.category,syntacticRole:reg.syntacticRole,mahall:reg.mahall,binaaSign:reg.binaaSign,functionAr:reg.functionAr||'',functionEn:reg.functionEn||'',denialAr:reg.denialAr||'',denialEn:reg.denialEn||'',letterAr:reg.letterAr,nameAr:reg.nameAr,nameEn:reg.nameEn,ruleId:reg.ruleId,ar:'',en:''};
+ const c={id:`${ownerId}:C${index}`,kind,category:reg.category,syntacticRole:reg.syntacticRole,mahall:reg.mahall,binaaSign:reg.binaaSign,focusable:reg.focusable===true,functionAr:reg.functionAr||'',functionEn:reg.functionEn||'',denialAr:reg.denialAr||'',denialEn:reg.denialEn||'',letterAr:reg.letterAr,nameAr:reg.nameAr,nameEn:reg.nameEn,ruleId:reg.ruleId,ar:'',en:''};
  renderComponentAnalysis(c);
  return c;
 }
@@ -9200,7 +9312,7 @@ function componentInstanceError(c,ownerId,index){
  if(!reg)return{code:'E_COMPONENT_INVARIANT',message:`unknown component kind ${c.kind}`};
  const canonical=makeComponent(c.kind,ownerId,index);
  if(c.id!==canonical.id)return{code:'E_COMPONENT_ID',message:`component ${c.kind} id ${c.id} is not the canonical owner/index id ${canonical.id}`};
- for(const key of ['category','syntacticRole','mahall','binaaSign','ruleId']){
+ for(const key of ['category','syntacticRole','mahall','binaaSign','focusable','ruleId']){
   if(c[key]!==canonical[key])return{code:'E_COMPONENT_INVARIANT',message:`component ${c.kind} field ${key} (${c[key]}) disagrees with the registry (${canonical[key]})`};
  }
  for(const key of ['letterAr','nameAr','nameEn','functionAr','functionEn','denialAr','denialEn','ar','en']){
@@ -9232,7 +9344,14 @@ const PAST_MORPHOLOGY=Object.freeze({
  /* p.142's «أَطَاعَنِي مُحَمَّدٌ»: the same protective nūn and object yāʾ with no feminine tāʾ before
     them. subjectMode is 'explicit' rather than the bare 3ms 'contextual', because this lane always
     states its fāʿil — which is what makes the yāʾ unmistakably the object and not the subject. */
- '3ms-obj-yaa':Object.freeze({tense:'past',person:'3ms-obj-yaa',subjectMode:'explicit',endingClass:'nuun-wiqaya-yaa',binaaClass:'visible-fath',feminineTaa:false})
+ '3ms-obj-yaa':Object.freeze({tense:'past',person:'3ms-obj-yaa',subjectMode:'explicit',endingClass:'nuun-wiqaya-yaa',binaaClass:'visible-fath',feminineTaa:false}),
+ /* نَائِبُ فَاعِلٍ مُضْمَرٌ (p. 97). The deputy is an attached rafʿ pronoun, so the mode is 'deputy'
+    — the agent is gone and nothing here is a fāʿil — while the BINĀʾ is exactly p. 72's: a moving
+    rafʿ pronoun makes the fatḥ estimated and the incidental sukūn occupies its place, precisely as
+    it does in the active «نَصَحْتُ» beside it. That is why these two rows differ from '1s' and '1p'
+    in their subject mode and their ending class ALONE. */
+ '1s-naib':Object.freeze({tense:'past',person:'1s-naib',subjectMode:'deputy',endingClass:'taa-naib-1s',binaaClass:'estimated-fath-incidental-sukun',feminineTaa:false}),
+ '1p-naib':Object.freeze({tense:'past',person:'1p-naib',subjectMode:'deputy',endingClass:'naa-naib',binaaClass:'estimated-fath-incidental-sukun',feminineTaa:false})
 });
 const PAST_ENDING_COMPONENTS=Object.freeze({
  'taa-taniith':Object.freeze(['taa-taniith-sakina']),
@@ -9245,7 +9364,10 @@ const PAST_ENDING_COMPONENTS=Object.freeze({
  'nuun-niswah':Object.freeze(['nuun-niswah']),
  /* Order is the reading order of the written word, which is also p.157's own order. */
  'taa-taniith-nuun-wiqaya-yaa':Object.freeze(['taa-taniith-sakina','nuun-wiqaya','yaa-mutakallim-maful']),
- 'nuun-wiqaya-yaa':Object.freeze(['nuun-wiqaya','yaa-mutakallim-maful'])
+ 'nuun-wiqaya-yaa':Object.freeze(['nuun-wiqaya','yaa-mutakallim-maful']),
+ // نَائِبُ فَاعِلٍ مُضْمَرٌ — one letter, one component, and it is the deputy subject.
+ 'taa-naib-1s':Object.freeze(['taa-naib-1s']),
+ 'naa-naib':Object.freeze(['naa-naib'])
 });
 const PAST_BINAA_RULE_IDS=Object.freeze({
  'visible-fath':'R_PAST_FATH_VISIBLE',
@@ -9995,7 +10117,15 @@ function authoritativeVerbMorphology(token,data=null){
  }
  if(token?.tense!=='past')return{feminineTaa:false};
  if(registered?.form==='passivePast'){
-  return{...PAST_MORPHOLOGY['3ms'],subjectMode:'deputy',voice:PASSIVE_VOICE,
+  /* The PERSON comes from the registered surface, exactly as it does for an active past. It used to
+     be hard-coded 3ms, which was true while every passive surface was «نُصِحَ»-shaped and the deputy
+     was a following noun; a passive past carrying its deputy INSIDE it (نُصِحْتُ) is a different
+     person with a different ending class and a different bināʾ, and hard-coding 3ms would have
+     handed it the wrong two. The mode stays 'deputy' for both: the agent is omitted either way. */
+  const person=registered.morphology?.pastPerson||'3ms';
+  const base=PAST_MORPHOLOGY[person];
+  if(!base)return{registered:false,feminineTaa:false};
+  return{...base,subjectMode:'deputy',voice:PASSIVE_VOICE,
    capabilityKey:registered.morphology.capabilityKey,registered:true};
  }
  if(registered?.form!=='past')return{registered:false,feminineTaa:false};
@@ -11046,7 +11176,14 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
     تُؤَاخِذْنَا﴾), and 2ms is deliberately non-productive in this engine because its تـ surfaces are
     ambiguous with 3fs. The third-person member of the same category is produced instead. */
  'second-person duʿāʾ (﴿رَبَّنَا لَا تُؤَاخِذْنَا﴾), whose 2ms surface is ambiguous with 3fs and non-productive here',
-  'feminine-dual past forms','passive deputy pronouns, feminine passive agreement, and non-authorized passive verb families',
+  'feminine-dual past forms',
+ /* «passive deputy pronouns» came off this entry when نَائِبُ فَاعِلٍ مُضْمَرٌ shipped: p. 97's
+    muḍmar deputy is produced, in the two persons pp. 72 and 157 analyse letter by letter. What
+    remains unproduced of the muḍmar half is named exactly — it is the other ten of the twelve,
+    and every one of them needs a passive-past surface this app has no registry for, not a rule it
+    lacks. Feminine agreement and the unauthorized families are unchanged. */
+  'the ten muḍmar deputies other than تُ and نَا, whose passive-past surfaces are unregistered here',
+  'feminine passive agreement, and non-authorized passive verb families',
   'five-verb person patterns other than third-person masculine plural in random templates'
  ]
 });
@@ -11487,6 +11624,13 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  C_TAA_FAIL_2MS:sourceRule("The 2ms subject tāʾ is the mukhāṭab pronoun: a connected pronoun built on fatḥ in the position of rafʿ as fāʿil.",[72,73,91],"Only an explicitly registered 2ms past form ending in تَ. p.73 assigns the tāʾ «للمخاطب» and p.91 lists «ضربتَ» as ضمير المخاطب الواحد المذكر."),
  C_TAA_FAIL_2FS:sourceRule("The 2fs subject tāʾ is the mukhāṭabah pronoun: a connected pronoun built on kasr in the position of rafʿ as fāʿil.",[72,91],"Only an explicitly registered 2fs past form ending in تِ. p.91 lists «ضربتِ» as ضمير المخاطبة الواحدة المؤنثة."),
  C_NAA_FAILIN:sourceRule('Nā al-fāʿilīn is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[72],'Only an explicitly registered 1p past form.'),
+ /* نَائِبُ فَاعِلٍ مُضْمَرٌ. Two rules rather than one because the two letters take DIFFERENT bināʾ
+    markers — p. 72 gives the tāʾ the ḍammah and نا the sukūn — and a component's bināʾ is exactly
+    the kind of claim this registry refuses to generalize. Both cite p. 97 for the ROLE and p. 72
+    for the letter's own analysis, which is the division the source itself makes: p. 97 states that
+    the deputy may be muḍmar and refers its detail «كَالْفَاعِلِ» back to باب الفاعل. */
+ C_TAA_NAIB_1S:sourceRule('When the agent of a passive past is deleted, the 1s tāʾ attached to it takes the agent’s place: a connected pronoun built on ḍamm in the position of rafʿ as nāʾib al-fāʿil.',[72,97],'Only an explicitly registered passive-past surface ending in تُ, and only under the template that owns it. p. 97 states that the deputy may be muḍmar and refers its detail back to باب الفاعل; p. 72 supplies the letter’s bināʾ and maḥall.'),
+ C_NAA_NAIB:sourceRule('When the agent of a passive past is deleted, nā attached to it takes the agent’s place: a connected pronoun built on sukūn in the position of rafʿ as nāʾib al-fāʿil.',[72,97],'Only an explicitly registered passive-past surface ending in نَا, and only under the template that owns it. Same division of authority as C_TAA_NAIB_1S.'),
  C_ALIF_ITHNAIN:secondarySupportedRule('Alif al-ithnayn is a connected pronoun built on sukūn in the position of rafʿ as fāʿil.',[71],'Al-Tuḥfah p.71 controls the whole past verb’s visible-fatḥ analysis; Daʿkūr p.86 supplies the exact component analysis.','C_ALIF_ITHNAIN',[DAKUR_ALIF_ITHNAIN]),
  /* Scope expanded in Phase 2b-B from past-only to past + present. The component analysis is
     identical in both tenses and Al-Tuḥfah states it for the present verbatim at p. 124
@@ -12109,6 +12253,49 @@ function registerPassiveVerbCapabilities(){
    morphology:Object.freeze({presentPerson:'3ms',voice:PASSIVE_VOICE,capabilityKey:capability.key})});
  });
 }
+/* The muḍmar-deputy surfaces, registered on top of the capability their record names. Every
+   relationship the record ASSERTS is proved here rather than believed:
+     · the capability must already own a passive past, and this surface must reuse that very
+       lexeme object — so «مبني للمجهول», the participle English and the family are one record,
+       not a second copy that could drift;
+     · the person must be a real PAST_MORPHOLOGY row whose subject mode is 'deputy', and the
+       component kind the record names must be exactly the one that person's ending class yields;
+     · the component must be a registered pronoun in the position of rafʿ whose role is the
+       deputy's — a fāʿil letter smuggled in here would be caught before load finishes; and
+     · the written-out surface must actually be the capability's own passive past with a moving
+       pronoun after it, which is what `startsWith` on the base minus its final vowel tests. A
+       typo could otherwise register a word that is not this verb at all.
+   A collision throws rather than overwriting, exactly as every other registration above does. */
+function registerNaibMudmarVerbs(){
+ NAIB_MUDMAR_VERB_KEYS.forEach(key=>{
+  const record=NAIB_MUDMAR_VERBS[key];
+  if(!Object.isFrozen(record)||record.key!==key)throw new Error(`Naib-mudmar verb ${key} is not frozen or not bound to its key.`);
+  const capability=PASSIVE_VERB_CAPABILITIES[record.capabilityKey];
+  if(!capability)throw new Error(`Naib-mudmar verb ${key} names an unregistered passive capability.`);
+  const base=verbFormIndex.get(capability.pastSurface);
+  if(base?.form!=='passivePast'||base.lexeme?.passiveCapability!==capability){
+   throw new Error(`Naib-mudmar verb ${key} does not stand on a registered passive past.`);
+  }
+  const morphology=PAST_MORPHOLOGY[record.pastPerson];
+  if(!morphology||morphology.subjectMode!=='deputy'){
+   throw new Error(`Naib-mudmar verb ${key} names a person that is not a deputy-subject past.`);
+  }
+  const kinds=PAST_ENDING_COMPONENTS[morphology.endingClass]||[];
+  if(kinds.length!==1||kinds[0]!==record.componentKind){
+   throw new Error(`Naib-mudmar verb ${key} names a component its own person does not produce.`);
+  }
+  const component=COMPONENT_REGISTRY[record.componentKind];
+  if(component?.category!=='pronoun'||component.syntacticRole!=='naib'||component.mahall!=='raf'||component.focusable!==true){
+   throw new Error(`Naib-mudmar verb ${key} names a component that is not a focusable deputy pronoun.`);
+  }
+  if(!record.surface.startsWith(capability.pastSurface.slice(0,-1))){
+   throw new Error(`Naib-mudmar surface ${record.surface} is not ${capability.pastSurface} carrying an attached pronoun.`);
+  }
+  if(verbFormIndex.has(record.surface))throw new Error(`Naib-mudmar surface already registered: ${record.surface}`);
+  verbFormIndex.set(record.surface,{lexeme:base.lexeme,form:'passivePast',surface:record.surface,
+   morphology:Object.freeze({pastPerson:record.pastPerson,voice:PASSIVE_VOICE,capabilityKey:capability.key})});
+ });
+}
 /* المفعول المطلق. Two small registrations, both fail-closed on collision, because a maṣdar surface
    or an intransitive ʿāmil already owned by another lexeme would silently inherit that lexeme's
    authority. The ʿāmils register their PAST surface only: these families exist to govern a maṣdar
@@ -12163,6 +12350,7 @@ registerAdvancedPastSet(advancedPastActions);
 registerAdvancedPastSet(objectPronounPastActions);
 registerAdvancedPresentSet(advancedPresentActions);
 registerPassiveVerbCapabilities();
+registerNaibMudmarVerbs();
 /* ── Wave 15 — سِينُ التَّنْفِيسِ (pp. 14–16, parsed at p. 95) ──────────────────────────────────
    The سـ-prefixed present surfaces, written out rather than derived. Nothing in this file composes
    an Arabic verb form at run time, and this is not the place to start: a prefix that changes the
@@ -13626,6 +13814,11 @@ const AR={
  // and everything about its bināʾ is re-resolved from AMR_VERBS by its own surface.
  amr:w=>grammarSpec('verb',AMR_INFLECTION),
  passivePast:w=>grammarSpec('verb','past',{person:'3ms',voice:PASSIVE_VOICE}),
+ /* The same passive past, but the PERSON is the muḍmar deputy's and comes from the record rather
+    than being pinned to 3ms — a deputy written inside the verb is a different person from one
+    standing after it, and materializeAuthoritativeMorphology re-derives it from the registered
+    surface either way. */
+ naibMudmar:(w,person)=>grammarSpec('verb','past',{person,voice:PASSIVE_VOICE}),
  passivePresent:w=>grammarSpec('verb','present',{conjugation:'regular',person:'3ms',voice:PASSIVE_VOICE}),
  faail:(w)=>grammarSpec('noun','faail'),
  naibFail:w=>grammarSpec('noun','naibFail'),
@@ -14249,6 +14442,81 @@ function canonicalPassiveTranslation(data){
  const plural=['broken','dual','smp','sfp'].includes(pair.inflection);
  const copula=authority.tense==='past'?(plural?'were':'was'):(plural?'are':'is');
  return`${cap(pair.deputy.en)} ${copula} ${capability.participleEn}.`;
+}
+/* ---- نَائِبُ فَاعِلٍ مُضْمَرٌ: the authority ----------------------------------------------------
+   The same shape as derivePassiveConstructionAuthority above and for the same reason — frozen
+   template ownership, an explicitly registered surface, and the real token structure — but the
+   structure it proves is the OPPOSITE one. There the deputy is a following noun and the sentence
+   has two words; here p. 97's deputy is a pronoun written inside the verb, so the sentence has ONE
+   word and the deputy is a component. Both facts are checked, not assumed: the exercise must be
+   exactly one token long, and that token must actually carry the component its registered person
+   implies, in the role and the maḥall the registry gives it.
+
+   Nothing here reads a relationship cache, a stored authorization flag or the token's own claim to
+   be passive: the voice, the person, the capability and the component all come back from the frozen
+   registries by the surface, which is already authority. And it refuses outright if any fāʿil,
+   object or ẓāhir deputy is left standing — p. 96's whole premise is that the agent is GONE. */
+function naibMudmarTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.naibMudmarVerbKeys?.length?template:null;
+}
+function deriveNaibMudmarAuthority(data){
+ const withheld=reason=>Object.freeze({authorized:false,reason});
+ const template=naibMudmarTemplateRecord(data);
+ if(!template)return withheld('unregistered-template');
+ const tokens=data?.tokens;
+ if(!Array.isArray(tokens)||tokens.length!==1)return withheld('not-a-one-word-sentence');
+ const verb=tokens[0];
+ if(verb?.grammar?.type!=='verb'||verb.tense!=='past'||verb.grammar.voice!==PASSIVE_VOICE){
+  return withheld('not-a-passive-past-verb');
+ }
+ const record=template.naibMudmarVerbKeys.map(key=>NAIB_MUDMAR_VERBS[key])
+  .find(item=>item&&item.surface===verb.word&&item.surface===verb.surfaceHint);
+ if(!record)return withheld('surface-not-declared-by-this-template');
+ const capability=PASSIVE_VERB_CAPABILITIES[record.capabilityKey];
+ const registered=verbFormIndex.get(verb.word);
+ if(registered?.form!=='passivePast'||registered.surface!==record.surface
+   ||registered.morphology?.capabilityKey!==record.capabilityKey
+   ||registered.morphology?.pastPerson!==record.pastPerson
+   ||registered.lexeme?.passiveCapability!==capability){
+  return withheld('passive-capability-mismatch');
+ }
+ const morphology=authoritativeVerbMorphology(verb,data);
+ if(!morphology.registered||morphology.voice!==PASSIVE_VOICE||morphology.subjectMode!=='deputy'
+   ||morphology.person!==record.pastPerson){
+  return withheld('deputy-morphology-mismatch');
+ }
+ /* The component is derived STRUCTURALLY — registered surface → person → ending class → registry —
+    and never read off `verb.components`. Two reasons, and the second is the one that bites:
+      · a materialized component list is a derived CACHE, and an authority that consulted it would
+        be trusting the very thing History discards and rebuilds; and
+      · restoreExerciseSnapshot resolves canonical GLOSSES before it rebuilds components, and the
+        gloss of this verb depends on this authority. Reading the cache made a snapshot with an
+        absent or stale component list fail to restore at all, instead of being repaired.
+    That the RENDERED components match this derivation is validateExercise's job (E_COMPONENT_SET
+    and componentInstanceError), and the focus check below pins that the focus is this component. */
+ const kinds=verbComponentKinds(verb,data);
+ if(kinds.length!==1||kinds[0]!==record.componentKind)return withheld('deputy-component-mismatch');
+ const registryEntry=COMPONENT_REGISTRY[record.componentKind];
+ if(registryEntry?.category!=='pronoun'||registryEntry.syntacticRole!=='naib'
+   ||registryEntry.mahall!=='raf'||registryEntry.focusable!==true){
+  return withheld('deputy-component-mismatch');
+ }
+ if(tokens.some(item=>['faail','object','naibFail'].includes(item?.grammar?.role))){
+  return withheld('active-subject-object-or-visible-deputy-remains');
+ }
+ return Object.freeze({authorized:true,reason:'',verbId:verb.id,verbKey:record.key,
+  capabilityKey:record.capabilityKey,pastPerson:record.pastPerson,
+  componentKind:record.componentKind,
+  /* The canonical id makeComponent assigns the verb's first and only component. Derived, not read,
+     for the same reason the kind above is. */
+  componentId:`${verb.id}:C1`,mahall:registryEntry.mahall});
+}
+function canonicalNaibMudmarTranslation(data){
+ const authority=deriveNaibMudmarAuthority(data);
+ if(!authority.authorized)return null;
+ const record=NAIB_MUDMAR_VERBS[authority.verbKey];
+ return`${record.subjectEn} ${record.copulaEn} ${PASSIVE_VERB_CAPABILITIES[record.capabilityKey].participleEn}.`;
 }
 /* ---- المفعول المطلق: the authority ---------------------------------------------------------
    Same shape as the passive and follower authorities: frozen template ownership + an exact
@@ -17024,31 +17292,62 @@ function presentMujarradAuthorityFor(token){
  const tokens=token?._tokens||[];
  return derivePresentMujarradRaf(token?._data||{tokens},tokens.indexOf(token));
 }
+/* ===== The past verb's bināʾ clause, keyed by its bināʾ class ==============================
+   This was an if/else chain inside renderVerbAnalysis with the PASSIVE branch standing in FRONT
+   of it, and that branch answered «مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ» for every passive past.
+   That held only while every passive surface this app knew was «نُصِحَ»-shaped. It is false the
+   moment a passive past carries its deputy INSIDE it: «نُصِحْتُ» ends in a moving rafʿ pronoun,
+   so p. 72's estimated fatḥ rules its bināʾ exactly as it rules the active «نَصَحْتُ» beside it,
+   and the card was asserting a visible vowel that is not written.
+
+   Voice and bināʾ are two independent facts about one word, so they are now two independent
+   pieces of the sentence: the voice ADDS a clause, the bināʾ class CHOOSES one. Every clause
+   below was lifted verbatim out of the chain, so no ACTIVE card moved a byte. The passive card
+   did move three: it was a second hand-typed copy of the visible-fatḥ clause that spelled
+   «مَبْنِيٌّ», «الظَّاهِرِ» and «مَحَلَّ» with the shadda and the vowel in the opposite order.
+   Same reading, same rendering, unequal bytes — the drift this repo keeps catching. It now has
+   ONE spelling because it now has one copy.
+
+   Each clause deliberately keeps its OWN «لا محل له من الإعراب» tail rather than sharing one:
+   the four are not byte-identical today either (the taʿadhdhur row writes «مَحَلَّ» vowel-first
+   where the other three write it shadda-first), and folding them together would move four more
+   rendered cards under cover of a refactor that has no reason to touch them. */
+const PAST_BINAA_CLAUSE_AR=Object.freeze({
+ 'visible-fath':"مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ عَلَى آخِرِهِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.",
+ 'estimated-fath-munasabah':"مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ عَلَى آخِرِهِ، مَنَعَ مِنْ ظُهُورِهِ اشْتِغَالُ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.",
+ 'estimated-fath-incidental-sukun':"مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ عَلَى آخِرِهِ، مَنَعَ مِنْ ظُهُورِهِ اشْتِغَالُ الْمَحَلِّ بِالسُّكُونِ الْعَارِضِ لِدَفْعِ كَرَاهَةِ تَوَالِي أَرْبَعِ مُتَحَرِّكَاتٍ فِيمَا هُوَ كَالْكَلِمَةِ الْوَاحِدَةِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.",
+ /* Wave 6 — خَلَا، عَدَا، حَاشَا on their verb reading. The three end in a permanent alif, so p. 21's
+    «تُقَدَّر عليه جميعُ الحركات للتعذر» applies to their bināʾ fatḥah exactly as it already does to
+    أَمْسَى and أَضْحَى among كان's sisters. This is the third member of an existing category rather
+    than a new claim, and the wording is the one those two already carry. */
+ 'estimated-fath-taadhdhur':"مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ عَلَى آخِرِهِ، مَنَعَ مِنْ ظُهُورِهِ التَّعَذُّرُ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ."
+});
+const PAST_BINAA_CLAUSE_EN=Object.freeze({
+ 'visible-fath':"built on the visible fatḥ at its end, with no syntactic position of its own.",
+ 'estimated-fath-munasabah':"built on an estimated fatḥ at its end; the position is occupied by the vowel suitable for wāw al-jamāʿah. It has no syntactic position of its own.",
+ 'estimated-fath-incidental-sukun':"built on an estimated fatḥ at its end; incidental sukūn prevents its appearance to avoid four successive vowels in what functions like one word. It has no syntactic position of its own.",
+ 'estimated-fath-taadhdhur':"built on an estimated fatḥ at its end, prevented from appearing by taʿadhdhur — a permanent alif cannot carry a vowel. It has no syntactic position of its own."
+});
+const PAST_VERB_LEAD_AR="فِعْلٌ مَاضٍ ";
+const PAST_PASSIVE_LABEL_AR="مَبْنِيٌّ لِلْمَجْهُولِ ";
+const PAST_VERB_LEAD_EN=Object.freeze({active:"A past-tense verb",passive:"A passive-voice past verb"});
+/* A bināʾ class the renderer cannot spell is a class the source-rule table has no business
+   knowing either. Pinning the three tables to ONE key set is what stops a new class from
+   shipping with a rule id and no card, or with a card in one language only. */
+(()=>{
+ const binaaClasses=Object.keys(PAST_BINAA_RULE_IDS).sort().join('|');
+ if(Object.keys(PAST_BINAA_CLAUSE_AR).sort().join('|')!==binaaClasses
+   ||Object.keys(PAST_BINAA_CLAUSE_EN).sort().join('|')!==binaaClasses){
+  throw new Error('The past bināʾ classes, their clauses and their source rules disagree.');
+ }
+})();
 function renderVerbAnalysis(token){
  if(token.tense==='past'){
-  if(token.grammar.voice===PASSIVE_VOICE){
-   token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ عَلَى آخِرِهِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
-   token.en='A passive-voice past verb built on the visible fatḥ at its end, with no syntactic position of its own.';
-   return;
-  }
   const binaaClass=token.grammar.morphology?.binaaClass;
-  if(binaaClass==='visible-fath'){
-   token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ عَلَى آخِرِهِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
-   token.en='A past-tense verb built on the visible fatḥ at its end, with no syntactic position of its own.';
-  }else if(binaaClass==='estimated-fath-munasabah'){
-   token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ عَلَى آخِرِهِ، مَنَعَ مِنْ ظُهُورِهِ اشْتِغَالُ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
-   token.en='A past-tense verb built on an estimated fatḥ at its end; the position is occupied by the vowel suitable for wāw al-jamāʿah. It has no syntactic position of its own.';
-  }else if(binaaClass==='estimated-fath-incidental-sukun'){
-   token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ عَلَى آخِرِهِ، مَنَعَ مِنْ ظُهُورِهِ اشْتِغَالُ الْمَحَلِّ بِالسُّكُونِ الْعَارِضِ لِدَفْعِ كَرَاهَةِ تَوَالِي أَرْبَعِ مُتَحَرِّكَاتٍ فِيمَا هُوَ كَالْكَلِمَةِ الْوَاحِدَةِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
-   token.en='A past-tense verb built on an estimated fatḥ at its end; incidental sukūn prevents its appearance to avoid four successive vowels in what functions like one word. It has no syntactic position of its own.';
-  /* Wave 6 — خَلَا، عَدَا، حَاشَا on their verb reading. The three end in a permanent alif, so p. 21's
-     «تُقَدَّر عليه جميعُ الحركات للتعذر» applies to their bināʾ fatḥah exactly as it already does to
-     أَمْسَى and أَضْحَى among كان's sisters. This is the third member of an existing category rather
-     than a new claim, and the wording is the one those two already carry. */
-  }else if(binaaClass==='estimated-fath-taadhdhur'){
-   token.ar=`${token.word}: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ عَلَى آخِرِهِ، مَنَعَ مِنْ ظُهُورِهِ التَّعَذُّرُ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
-   token.en='A past-tense verb built on an estimated fatḥ at its end, prevented from appearing by taʿadhdhur — a permanent alif cannot carry a vowel. It has no syntactic position of its own.';
-  }else throw new Error(`Unknown past bināʾ class: ${binaaClass}`);
+  if(!PAST_BINAA_CLAUSE_AR[binaaClass])throw new Error(`Unknown past bināʾ class: ${binaaClass}`);
+  const passive=token.grammar.voice===PASSIVE_VOICE;
+  token.ar=`${token.word}: ${PAST_VERB_LEAD_AR}${passive?PAST_PASSIVE_LABEL_AR:''}${PAST_BINAA_CLAUSE_AR[binaaClass]}`;
+  token.en=`${passive?PAST_VERB_LEAD_EN.passive:PAST_VERB_LEAD_EN.active} ${PAST_BINAA_CLAUSE_EN[binaaClass]}`;
   return;
  }
  /* Wave 14 — the imperative's card. Its identity, its bināʾ and its bināʾ marker are three separate
@@ -18204,6 +18503,24 @@ function whyVerbObjectComponents(t){
  }
  return lines;
 }
+/* The deputy side of p. 97, derived from the ending class exactly as the subject and object sides
+   above are, so the explanation cannot drift from the component actually rendered. It states the
+   ruling as a maṣdar («وَحُكْمُ نَائِبِ الْفَاعِلِ الرَّفْعُ») rather than calling the pronoun
+   مَرْفُوعٌ: this line hangs off a PAST verb's card, the word is built, and a built word is never
+   given an iʿrāb state here — the same wording discipline the fāʿil component line follows. */
+function whyVerbNaibComponents(t){
+ if(t.tense!=='past'||t.grammar?.voice!==PASSIVE_VOICE)return[];
+ const kinds=PAST_ENDING_COMPONENTS[t.grammar?.morphology?.endingClass]||[];
+ const lines=[];
+ for(const kind of kinds){
+  const component=COMPONENT_REGISTRY[kind];
+  if(component?.syntacticRole!=='naib')continue;
+  lines.push({id:'WHY_NAIB_MUDMAR',
+   ar:`وَ${component.nameAr} ضَمِيرٌ مُتَّصِلٌ، حُذِفَ فَاعِلُ الْفِعْلِ فَأُقِيمَ هَذَا الضَّمِيرُ مَقَامَهُ، فَهُوَ نَائِبُ فَاعِلٍ، وَحُكْمُ نَائِبِ الْفَاعِلِ الرَّفْعُ فَهُوَ فِي مَحَلِّ ${COMPONENT_MAHALL_AR[component.mahall]}، وَبُنِيَ عَلَى ${COMPONENT_BINAA_AR[component.binaaSign]}؛ لِأَنَّ الضَّمَائِرَ كُلَّهَا مَبْنِيَّةٌ.`,
+   en:`${cap(component.nameEn)} is a connected pronoun. The verb’s agent was deleted and this pronoun was put in its place, so it is نَائِبُ فَاعِلٍ; the ruling of نَائِب الْفَاعِل is rafʿ, so it stands in the position of ${COMPONENT_MAHALL_EN[component.mahall]}; and because every pronoun is مَبْنِيٌّ, it is built on ${COMPONENT_BINAA_EN[component.binaaSign]}.`});
+ }
+ return lines;
+}
 function whyVerbSubject(t){
  if(t.tense==='past'){
   const morphology=t.grammar.morphology;
@@ -18515,6 +18832,7 @@ function buildTokenWhy(token,data){
    else if(token.grammar.morphology?.binaaClass==='estimated-fath-taadhdhur')push({id:'WHY_PAST_FATH_EST_TAADHDHUR',ar:'وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ عَلَى فَتْحٍ مُقَدَّرٍ؛ لِأَنَّ آخِرَهُ أَلِفٌ لَازِمَةٌ، وَالْأَلِفُ لَا تَقْبَلُ الْحَرَكَةَ، فَمَنَعَ مِنْ ظُهُورِهِ التَّعَذُّرُ.',en:'The past verb is مَبْنِيٌّ on an estimated fatḥ because its last letter is a permanent alif, and an alif cannot carry a vowel — taʿadhdhur prevents the fatḥ from appearing.'});
    else throw new Error(`WHY: unknown past bināʾ class “${token.grammar.morphology?.binaaClass}”`);
    if(token.grammar.voice!==PASSIVE_VOICE)push(whyVerbSubject(token));
+   whyVerbNaibComponents(token).forEach(push);
    whyVerbObjectComponents(token).forEach(push);
   }else if(token.tense===AMR_INFLECTION){
    /* Wave 14 — three separate claims, in p. 70→72's own order: WHAT it is, that its ruling is
@@ -19500,6 +19818,17 @@ function validateExercise(data){
    ||productionTemplate.form!==data.templateForm
    ||productionTemplate.state!==data.templateState
    ||productionTemplate.sign!==data.templateSign))fail('E_TEMPLATE_METADATA','Exercise template metadata disagrees with its stable template ID.');
+ /* نَائِبُ فَاعِلٍ مُضْمَرٌ — the declaration must be honoured in BOTH directions. A template that
+    names the construction must actually produce it, and a component carrying the deputy role may
+    appear only under a template that names it. Without the second half, a نُصِحْتُ surface dropped
+    into any other lane would still render «نَائِبُ فَاعِلٍ» from the registry. */
+ if(productionTemplate?.naibMudmarVerbKeys?.length&&!deriveNaibMudmarAuthority(data).authorized){
+  fail('E_NAIB_MUDMAR_AUTHORITY',`A concealed-deputy template did not produce its construction: ${deriveNaibMudmarAuthority(data).reason}.`);
+ }
+ if(!productionTemplate?.naibMudmarVerbKeys?.length
+   &&data.tokens.some(token=>(token?.components||[]).some(component=>component?.syntacticRole==='naib'))){
+  fail('E_NAIB_MUDMAR_UNOWNED','A concealed deputy-subject component appears under a template that does not declare one.');
+ }
  /* Phase 3B0A — discourse authority. A claim is authorized only when the RESOLVED template's own
     frozen metadata names a registry record and the claim matches it exactly; otherwise its mere
     presence is the violation. No production template names one, so every claim rejects here.
@@ -19537,18 +19866,20 @@ function validateExercise(data){
  const focusTokens=data.tokens.filter(item=>item.target);
  if(focusTokens.length===1&&(data.templateForm||data.templateState||data.templateSign)){
   const focus=focusTokens[0];
-  const focusForm=focus.grammar?.type==='verb'
-   ?(focus.inflection==='afalKhamsa'?'fiveVerbs':focus.inflection==='weakFinal'?'weakFinal':'present')
-   :focus.inflection;
-  if(data.templateForm&&focusForm!==data.templateForm)fail('E_TARGET_FORM',`Focus form ${focusForm} disagrees with the template's declared form ${data.templateForm}.`,focus);
-  /* A built focus has no iʿrāb state or sign of its own, so the template's declared tuple names
-     its MAHALL instead — the convention the mabnī present verb already follows. The comparison
+  /* One description of the focus, shared with the harness, so the two can never disagree about
+     what the template's tuple is being compared against. It also settles WHERE the focus is: for
+     نَائِبُ فَاعِلٍ مُضْمَرٌ the term lives in a component of the focus token, and the descriptor
+     reports that component's class and maḥall instead of the host verb's — which is what lets a
+     lane whose target is written inside one word declare a tuple at all.
+
+     A built focus has no iʿrāb state or sign of its own, so the declared tuple names its MAHALL
+     instead — the convention the mabnī present verb already follows. The state comparison
      therefore moves to the maḥall rather than being skipped: a built munādā still has to sit in
      the position its template declares, and a forged maḥall still fails here. */
-  const builtFocus=isBuiltNoun(focus);
-  if(data.templateState&&!builtFocus&&focus.state!==data.templateState)fail('E_TARGET_STATE',`Focus state ${focus.state} disagrees with the template's declared state ${data.templateState}.`,focus);
-  if(data.templateState&&builtFocus&&focus.mahall!==data.templateState)fail('E_TARGET_STATE',`Focus maḥall ${focus.mahall} disagrees with the template's declared state ${data.templateState}.`,focus);
-  if(data.templateSign&&!builtFocus&&safeSignId(focus.sign)!==data.templateSign)fail('E_TARGET_SIGN',`Focus sign ${safeSignId(focus.sign)} disagrees with the template's declared sign ${data.templateSign}.`,focus);
+  const descriptor=focusDescriptor(focus);
+  if(data.templateForm&&descriptor.form!==data.templateForm)fail('E_TARGET_FORM',`Focus form ${descriptor.form} disagrees with the template's declared form ${data.templateForm}.`,focus);
+  if(data.templateState&&descriptor.state!==data.templateState)fail('E_TARGET_STATE',`Focus ${descriptor.built?'maḥall':'state'} ${descriptor.state} disagrees with the template's declared state ${data.templateState}.`,focus);
+  if(data.templateSign&&!descriptor.built&&descriptor.sign!==data.templateSign)fail('E_TARGET_SIGN',`Focus sign ${descriptor.sign} disagrees with the template's declared sign ${data.templateSign}.`,focus);
  }
  data.tokens.forEach(token=>{
   if(!['noun','verb','particle'].includes(token.grammar?.type))fail('E_GRAMMAR_TYPE','Token has an unknown grammar type.',token);
@@ -20016,8 +20347,24 @@ function validateExercise(data){
   if(token.grammar.type==='verb'&&token.tense!=='kana'){
    const passiveAuthority=derivePassiveConstructionAuthority(data);
    const claimsPassive=token.grammar.voice===PASSIVE_VOICE||['passivePast','passivePresent'].includes(verbFormIndex.get(token.word)?.form);
-   if(claimsPassive){
-    if(!passiveAuthority.authorized||passiveAuthority.verbId!==token.id)fail('E_PASSIVE_AUTHORITY',`Passive construction authority failed: ${passiveAuthority.reason}.`,token);
+   /* p. 97 gives the deputy two shapes, and they are structurally opposite: a VISIBLE deputy is a
+      following noun linked by a passiveDeputy relationship, a CONCEALED one is a pronoun written
+      inside this very verb and has no token to link to. So the two are checked separately and each
+      is required to be exactly what it claims — a verb may not satisfy one and be judged by the
+      other, and a lane whose deputy is internal may not also carry a deputy relationship. */
+   const mudmarAuthority=deriveNaibMudmarAuthority(data);
+   const mudmarVerb=claimsPassive&&mudmarAuthority.authorized&&mudmarAuthority.verbId===token.id;
+   if(mudmarVerb){
+    if(relationships.some(rel=>rel.type==='passiveDeputy'&&rel.verbId===token.id))fail('E_NAIB_MUDMAR_RELATION','A concealed deputy subject has no token, so its verb may not carry a deputy-subject relationship.',token);
+    if(relationships.some(rel=>rel.type==='verbSubject'&&rel.verbId===token.id))fail('E_PASSIVE_ACTIVE_SUBJECT','A passive verb may not carry an active fāʿil relationship.',token);
+    if(token.voiceRuleId!=='R_PASSIVE_PAST_FORM')fail('E_PASSIVE_VOICE_RULE','Passive verb lacks its exact tense-specific form rule.',token);
+    /* The focus must actually BE the deputy. Without this the lane could ship a card that renders
+       the term and asks the learner about something else — which is the one thing a template whose
+       whole purpose is this term must not do. */
+    const focusComponent=focusComponentOf(token);
+    if(!token.target||focusComponent?.id!==mudmarAuthority.componentId)fail('E_NAIB_MUDMAR_FOCUS','The concealed deputy subject is not this exercise’s focus.',token);
+   }else if(claimsPassive){
+    if(!passiveAuthority.authorized||passiveAuthority.verbId!==token.id)fail('E_PASSIVE_AUTHORITY',`Passive construction authority failed: ${passiveAuthority.reason} (concealed deputy: ${mudmarAuthority.reason}).`,token);
     const passiveRels=relationships.filter(rel=>rel.type==='passiveDeputy'&&rel.verbId===token.id);
     if(passiveRels.length!==1||passiveRels[0].deputyId!==passiveAuthority.deputyId)fail('E_PASSIVE_RELATION','Passive verb does not have exactly one canonical deputy-subject relationship.',token);
     if(relationships.some(rel=>rel.type==='verbSubject'&&rel.verbId===token.id))fail('E_PASSIVE_ACTIVE_SUBJECT','A passive verb may not carry an active fāʿil relationship.',token);
@@ -20877,9 +21224,45 @@ function add(starts,form,state,sign,build,metadata={}){
  if(passivePairKeys.some((key,position)=>passivePairKeys.indexOf(key)!==position||!PASSIVE_DEPUTY_PAIRS[key])){
   throw new Error(`Template ${stableId} names a duplicate or unregistered passive pair.`);
  }
+ /* نَائِبُ فَاعِلٍ مُضْمَرٌ — the ONLY road into p. 97's second half, declared the way every
+    curriculum lane declares its own: a frozen key list on the template, plus the exact component
+    the exercise's focus descends into. `componentFocusKind` is not decoration — it is the
+    template's claim about WHERE its target is, and the checks below refuse a template whose
+    advertised (form, state, sign) tuple is not the tuple that component actually has.
+
+    One template owns ONE surface, for the reason the diptote and sīn lanes own one word: the
+    tuple describes a specific pronoun's maḥall, and two surfaces mean two persons, two ending
+    classes and two bināʾ markers under one stable ID. The declared sign is empty because an
+    attached pronoun is BUILT and has no iʿrāb sign — the tuple names its maḥall instead. */
+ const naibMudmarVerbKeys=Object.freeze([...(metadata.naibMudmarVerbKeys||[])]);
+ const componentFocusKind=metadata.componentFocusKind||'';
+ if(naibMudmarVerbKeys.some((key,position)=>naibMudmarVerbKeys.indexOf(key)!==position||!NAIB_MUDMAR_VERBS[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered naib-mudmar verb.`);
+ }
+ if(naibMudmarVerbKeys.length){
+  if(naibMudmarVerbKeys.length!==1)throw new Error(`Template ${stableId} mixes naib-mudmar surfaces.`);
+  if(passiveTense)throw new Error(`Template ${stableId} claims both a visible and a concealed deputy subject.`);
+  const record=NAIB_MUDMAR_VERBS[naibMudmarVerbKeys[0]];
+  const component=COMPONENT_REGISTRY[componentFocusKind];
+  if(componentFocusKind!==record.componentKind||!component){
+   throw new Error(`Template ${stableId} does not name the component its own naib-mudmar surface carries.`);
+  }
+  if(component.focusable!==true)throw new Error(`Template ${stableId} focuses a component that may not be an exercise focus.`);
+  if(form!==COMPONENT_FOCUS_FORM||state!==component.mahall||sign!==''){
+   throw new Error(`Template ${stableId} advertises a tuple its focus component does not have.`);
+  }
+  if(presentCapabilities.length||pastCapabilities.length!==1
+    ||pastCapabilities[0].person!==record.pastPerson||pastCapabilities[0].subjectMode!=='deputy'){
+   throw new Error(`Template ${stableId} does not declare exactly its naib-mudmar person.`);
+  }
+ }else if(componentFocusKind){
+  throw new Error(`Template ${stableId} names a component focus with no construction that produces one.`);
+ }
  if(passiveTense==='past'&&(!pastCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='deputy')||presentCapabilities.length)
    ||passiveTense==='present'&&(!presentCapabilities.some(item=>item.person==='3ms'&&item.subjectMode==='deputy')||pastCapabilities.length)
-   ||!passiveTense&&(pastCapabilities.some(item=>item.subjectMode==='deputy')||presentCapabilities.some(item=>item.subjectMode==='deputy'))){
+   /* A deputy subject mode with no passive declaration at all is still a forgery. The muḍmar lane
+      is the one exemption, and it is exempt because it makes its OWN declaration above. */
+   ||!passiveTense&&!naibMudmarVerbKeys.length&&(pastCapabilities.some(item=>item.subjectMode==='deputy')||presentCapabilities.some(item=>item.subjectMode==='deputy'))){
   throw new Error(`Template ${stableId} has passive deputy morphology without matching passive authority.`);
  }
  const followerKind=metadata.followerKind||'';
@@ -21356,6 +21739,8 @@ function add(starts,form,state,sign,build,metadata={}){
   responsePairIds,
   passiveTense,
   passivePairKeys,
+  naibMudmarVerbKeys,
+  componentFocusKind,
   followerKind,
   followerPairKeys,
   followerConjunctionKeys,
@@ -23892,6 +24277,44 @@ for(const key of SIIN_TANFIS_VERB_KEYS){
   presentCapabilities:[{person:'3ms',subjectMode:'explicit',
    formClass:PRESENT_MORPHOLOGY['3ms'].formClass,endingClass:PRESENT_MORPHOLOGY['3ms'].endingClass,
    binaaClass:PRESENT_MORPHOLOGY['3ms'].binaaClass,governorMode:'none'}]});
+}
+
+/* ── نَائِبُ فَاعِلٍ مُضْمَرٌ (p. 97) ─────────────────────────────────────────────────────────
+   «وَنَائِبُ الْفَاعِلِ يَكُونُ ظَاهِرًا وَيَكُونُ مُضْمَرًا» — the chapter's own division, of which
+   this app produced only the first half. The شرح sends the muḍmar's detail back to باب الفاعل,
+   and pp. 71–72 have already ruled these letters, so nothing new is claimed here.
+
+   ONE WORD, and deliberately so. «نُصِحْتُ» is a complete sentence: the verb is passive, its agent
+   is deleted, and the pronoun that took the agent's place is written inside the verb. Inventing a
+   second visible word to stand beside it would be inventing a construction the source does not
+   parse, so the lane does not — which is exactly why the exercise's focus is a COMPONENT rather
+   than a token, and why this is the first template whose declared form is an attached pronoun.
+
+   The tuple it advertises is that pronoun's own: form `attachedPronoun`, state رَفْع (its maḥall),
+   and NO sign, because a built word has none. Unlike Wave 12's and Wave 15's lanes, this one could
+   not borrow an existing target — there is no other word in the sentence to borrow one from — so
+   the tuple is new and the «Word form» menu names it.
+
+   Registered LAST, as every wave is, so no earlier family's stableId ordinal moves. */
+function buildNaibMudmarExercise(key){
+ const record=NAIB_MUDMAR_VERBS[key];
+ const capability=PASSIVE_VERB_CAPABILITIES[record.capabilityKey];
+ return{
+  sentence:record.surface,
+  translation:`${record.subjectEn} ${record.copulaEn} ${capability.participleEn}.`,
+  tokens:[
+   token(record.surface,`${record.copulaEn} ${capability.participleEn}`,
+    AR.naibMudmar(record.surface,record.pastPerson),
+    'A registered passive past whose deputy subject is the pronoun written inside it.',true)
+  ]
+ };
+}
+for(const key of NAIB_MUDMAR_VERB_KEYS){
+ const record=NAIB_MUDMAR_VERBS[key];
+ add('verb',COMPONENT_FOCUS_FORM,COMPONENT_REGISTRY[record.componentKind].mahall,'',
+  ()=>buildNaibMudmarExercise(key),
+  {naibMudmarVerbKeys:[key],componentFocusKind:record.componentKind,
+   pastCapabilities:[{person:record.pastPerson,subjectMode:'deputy'}]});
 }
 
 const recent=[]; const HISTORY=40;

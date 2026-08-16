@@ -85,8 +85,15 @@ const rows = [
   R('G_HADHF_NUN_NASB', 'حَذْفُ النُّونِ عَلَامَةُ النَّصْبِ', CH.signs, '47,67,74–78', 'علامات النصب', 'وَعَلَامَةُ نَصْبِهِ حَذْفُ النُّونِ'),
   R('G_KASRA', 'الْكَسْرَةُ الظَّاهِرَةُ عَلَامَةُ الْخَفْضِ', CH.signs, '48,62', 'علامات الخفض', 'وَعَلَامَةُ خَفْضِهِ الْكَسْرَةُ'),
   R('G_YA_KHAFD', 'الْيَاءُ عَلَامَةُ الْخَفْضِ', CH.signs, '50,66–67', 'علامات الخفض', 'وَعَلَامَةُ خَفْضِهِ الْيَاءُ'),
+  /* FINAL MARATHON — shipped. The probe is now the WHOLE sign, written from the app's own
+     GRAMMAR_SIGNS.fathaSub by work/w15-diptote-probes.js rather than the bare tail it used to be:
+     «نيابة عن الكسرة» alone could equally have been matched by the sound feminine plural's mirror
+     substitution had that ever been worded the other way round. Both p. 154's ḥāl-chapter use and
+     pp. 52–54's own chapter were re-read; the citation is correct. Note that p. 154 words it
+     «مجرور» while p. 54 — the chapter that owns the rule — words it «مخفوض», and the app follows
+     p. 54, which is also this project's standing terminology. */
   R('G_DIPTOTE', 'الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ فِي الِاسْمِ الَّذِي لَا يَنْصَرِفُ', CH.signs, '52–55,154', 'علامات الخفض',
-    'نِيَابَةً عَنِ الْكَسْرَةِ', { missingReason: 'الممنوع من الصرف is not modelled; named in deliberatelyNotGenerated as "diptote". p. 154 uses it in the ḥāl chapter (إبراهيمَ مجرور بالفتحة نيابة عن الكسرة).' }),
+    'الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ'),
   R('G_SUKUN_JAZM', 'السُّكُونُ عَلَامَةُ الْجَزْمِ', CH.signs, '56,58,79–81', 'علامات الجزم', 'وَعَلَامَةُ جَزْمِهِ السُّكُونُ'),
   R('G_HADHF_NUN_JAZM', 'حَذْفُ النُّونِ عَلَامَةُ الْجَزْمِ', CH.signs, '57–58,67,79–81', 'علامات الجزم', 'وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ'),
   R('G_JAZM_HADHF_ILLAH', 'حَذْفُ حَرْفِ الْعِلَّةِ عَلَامَةُ الْجَزْمِ', CH.signs, '57–58,79–81', 'علامات الجزم', 'حَذْفُ حَرْفِ الْعِلَّةِ'),

@@ -1663,7 +1663,12 @@ const MARATHON15 = {
     /* Was PARTIAL on a flag that measured LEXICAL coverage — something this inventory counts for
        no ẓarf, and did not count for this row's own sibling B_ZARF_MAKAN, which registers six of
        p. 152's thirteen ألفاظ and is FULL. The term itself is uttered in full. */
-    'B_ZARF_ZAMAN'
+    'B_ZARF_ZAMAN',
+    /* The only row of this marathon that needed a new engine rather than a corrected probe or a
+       truthful reclassification. pp. 52–54 supply everything the contract wants — the sign, its
+       exhaustive scope, the شرط, and a worked parse of two words with two different pairs of ʿilal
+       — so it was never a blocker; it had simply never been built. */
+    'G_DIPTOTE'
   ],
   /* ── proved TRUE_BLOCKER ─────────────────────────────────────────────────────────────────
      Two distinct missing facts, not one. B_MAFUL_MUDMAR_MUNFASIL joins ضَمِيرٌ مُنْفَصِلٌ and

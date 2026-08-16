@@ -39,6 +39,32 @@ if (mode === 'api') {
   console.log(Object.keys(api).sort().join('\n'));
   process.exit(0);
 }
+/* Dump a complete rendered exercise for every template carrying a named metadata field —
+   sentence, translation, each token's iʿrāb card, and each token's Why. */
+if (mode === 'dump') {
+  for (let i = 0; i < api.templates.length; i++) {
+    const t = api.templates[i];
+    if (!t[arg] || (Array.isArray(t[arg]) && !t[arg].length)) continue;
+    const data = api.buildTemplate(i);
+    api.renderExercise(data);
+    console.log('\n================ ' + t.stableId + '  [' + arg + '=' + JSON.stringify(t[arg]) + '] ================');
+    console.log('SENTENCE   : ' + data.sentence);
+    console.log('TRANSLATION: ' + data.translation);
+    for (const tok of data.tokens) {
+      console.log('  ── ' + tok.word + (tok.isTarget ? '   ★TARGET' : ''));
+      if (tok.ar) console.log('     IʿRĀB : ' + tok.ar);
+      for (const c of tok.components || []) console.log('     COMP  : ' + c.ar);
+      if (tok.phraseAr) console.log('     PHRASE: ' + tok.phraseAr);
+      const why = [];
+      const walk = n => { if (!n) return; if (typeof n === 'string') { why.push(n); return; }
+        if (Array.isArray(n)) return n.forEach(walk);
+        if (typeof n === 'object') for (const k of Object.keys(n)) walk(n[k]); };
+      walk(tok.why); walk(tok.phraseWhy);
+      for (const line of why.filter(l => /[؀-ۿ]/.test(l))) console.log('     WHY   : ' + line);
+    }
+  }
+  process.exit(0);
+}
 if (mode === 'zarf') {
   const L = api.MAFUL_FIH_LEXEMES;
   const byKind = {};

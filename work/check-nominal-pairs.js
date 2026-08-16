@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,tawkidChainFrame,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,istithnaNaqisKeys,istithnaKhalaKeys,laJinsPairKeys,laIlghaFrameKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseIsharaFrameKeys,zarfKhabarFrameKeys,khabarClauseTarget,haalMahallFrameKeys,estimatedSignNounKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],tawkidChainFrame,isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],istithnaNaqisKeys:[...istithnaNaqisKeys],istithnaKhalaKeys:[...istithnaKhalaKeys],laJinsPairKeys:[...laJinsPairKeys],laIlghaFrameKeys:[...laIlghaFrameKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseIsharaFrameKeys:[...khabarClauseIsharaFrameKeys],zarfKhabarFrameKeys:[...zarfKhabarFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],estimatedSignNounKeys:[...estimatedSignNounKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,tawkidChainFrame,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,istithnaNaqisKeys,istithnaKhalaKeys,laJinsPairKeys,laIlghaFrameKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseIsharaFrameKeys,zarfKhabarFrameKeys,khabarClauseTarget,haalMahallFrameKeys,estimatedSignNounKeys,diptoteNounKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],tawkidChainFrame,isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],istithnaNaqisKeys:[...istithnaNaqisKeys],istithnaKhalaKeys:[...istithnaKhalaKeys],laJinsPairKeys:[...laJinsPairKeys],laIlghaFrameKeys:[...laIlghaFrameKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseIsharaFrameKeys:[...khabarClauseIsharaFrameKeys],zarfKhabarFrameKeys:[...zarfKhabarFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],estimatedSignNounKeys:[...estimatedSignNounKeys],diptoteNounKeys:[...diptoteNounKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -70,6 +70,9 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   COMPONENT_MAHALL_AR,
   COMPONENT_ROLE_AR,
   COMPONENT_ATTACHED_PRONOUN_AR,
+  /* Wave 15 — the ممنوع من الصرف registry, so the focused suite compares against the app's own
+     ʿilal rather than a retyped copy of p. 54's two pairs. */
+  DIPTOTE_NOUNS,
   PAST_MORPHOLOGY,
   PAST_BINAA_RULE_IDS,
   PRESENT_MORPHOLOGY,
@@ -7012,7 +7015,7 @@ assert(api.templates.every(template=>/^T_[A-Z0-9_]+_\d{2}$/.test(template.stable
 /* Six full declensions, plus Wave 6's مقصور — which is deliberately PARTIAL: p. 21's rule covers
    all three states («تُقَدَّر عليه جميعُ الحركات»), but only the naṣb cell is registered because only
    the naṣb is produced, and asking for a state the app never renders must throw rather than answer. */
-assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===8,'The noun declension matrix is incomplete');
+assert(Object.keys(api.GRAMMAR_RULES.nounInflection).length===9,'The noun declension matrix is incomplete');
 /* Wave 12 — المقصور gains the rafʿ cell p. 95 parses, and المنقوص joins it. Both stay deliberately
    PARTIAL, each for its own reason: p. 21 estimates all three vowels on المقصور, and estimates two
    of three on المنقوص («تُقَدَّر عليه الضمة والكسرة للثقل، وتظهر عليه الفتحة لخفتها»). Only the cells
@@ -7022,13 +7025,36 @@ assert(Object.keys(api.GRAMMAR_RULES.nounInflection.maqsur).join(',')==='nasb,ra
   'The مقصور declension claims a state this app does not produce');
 assert(Object.keys(api.GRAMMAR_RULES.nounInflection.manqus).join(',')==='raf',
   'The منقوص declension claims a state this app does not produce');
+/* Wave 15 — الممنوع من الصرف, and here the single cell is not a scope decision but the source's own
+   claim: p. 52's شرح says «لِلْفَتْحَةِ مَوْضِعٌ وَاحِدٌ تَكُونُ فِيهِ عَلَامَةً عَلَى خَفْضِ
+   الِاسْمِ». A rafʿ or naṣb cell here would be a sign this book never rules on. */
+assert(Object.keys(api.GRAMMAR_RULES.nounInflection.mamnu).join(',')==='jarr',
+  'The ممنوع من الصرف declension claims a state p. 52 does not rule on');
+assert(api.GRAMMAR_RULES.nounInflection.mamnu.jarr[0]==='fathaSub',
+  'The ممنوع من الصرف khafḍ is no longer signed by the fatḥah substitution');
+/* And the substitution is EXCLUSIVE to it, which is what «موضع واحد» means. No other declension may
+   ever reach for this sign — the mirror of the sound feminine plural owning kasraSub alone. */
+for(const [declension,cells] of Object.entries(api.GRAMMAR_RULES.nounInflection)){
+  if(declension==='mamnu')continue;
+  for(const [state,cell] of Object.entries(cells)){
+    assert(cell[0]!=='fathaSub',
+      'Declension '+declension+'/'+state+' claims the ممنوع من الصرف substitution, which p. 52 gives one place only');
+  }
+}
 for(const declension of ['singular','broken','dual','smp','sfp','fiveNouns']){
   assert(Object.keys(api.GRAMMAR_RULES.nounInflection[declension]).join(',')==='raf,nasb,jarr',
     'Declension '+declension+' is no longer complete');
 }
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.regular).join(',')==='raf,nasb,jazm','Regular present moods are incomplete');
 assert(Object.keys(api.GRAMMAR_RULES.presentVerb.afalKhamsa).join(',')==='raf,nasb,jazm','Five-verb moods are incomplete');
-assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),'Unsupported diptotes are not recorded in the coverage matrix');
+/* Wave 15 — this used to assert the OPPOSITE, that 'diptote' was recorded as unproduced. pp. 52–54
+   are now produced, on the two words p. 54 parses, so the bare entry is gone and what replaces it is
+   the vocabulary that genuinely is not registered. Asserting its absence is what stops the entry
+   drifting back while the lane still runs. */
+assert(!api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
+  'The coverage matrix still calls diptotes unproduced, but the ممنوع من الصرف lane ships');
+assert(api.GRAMMAR_COVERAGE_MATRIX.noun.mamnu.join(',')==='jarr',
+  'The coverage matrix no longer records the ممنوع من الصرف as khafḍ-only');
 // 65 through Phase 2b-C, plus Phase 3A1's three particle rules, Phase 3A2's two mabnī maḥall
 // rules, and Phase 3B0A's condition-only R_IDHAN_CONDITIONS. Plus
 // Phase 3A2's two governor-specific mabnī-present maḥall rules.
@@ -7050,7 +7076,7 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated.includes('diptote'),
 //   · R_AMR_BINAA_SUKUN (pp. 70–72) owns فِعْلُ الْأَمْرِ's bināʾ. It is separate from
 //     R_MUDARI_JAZM_SUKUN for the same reason in the opposite direction: both end in a sukūn, and
 //     one is a bināʾ while the other is an iʿrāb sign.
-assert(Object.keys(api.SOURCE_REGISTRY).length===223,`Expected 223 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===224,`Expected 224 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -11692,7 +11718,7 @@ for(const t of api.templates){
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
   // J1a appends exactly ten: five one-verb jawāzim × the two proven jazm regimes. All are appended,
   // so every pre-existing stableId is unchanged — pinned directly below by keeping لَمْ at _01.
-  assert(api.templates.length===268,`Expected 268 templates after Phase 2, found ${api.templates.length}`);
+  assert(api.templates.length===270,`Expected 270 templates after Phase 2, found ${api.templates.length}`);
   assert(api.templates.filter(t=>t.state==='jazm').map(t=>t.stableId).join(' | ')
     ==='T_NOUN_PRESENT_JAZM_SUKUN_01 | T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_01 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_02 | T_PARTICLE_PRESENT_JAZM_SUKUN_03 | T_PARTICLE_PRESENT_JAZM_SUKUN_04 | T_PARTICLE_PRESENT_JAZM_SUKUN_05 | T_PARTICLE_PRESENT_JAZM_SUKUN_06 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06 | T_PARTICLE_PRESENT_JAZM_SUKUN_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_08 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08 | T_PARTICLE_PRESENT_JAZM_SUKUN_09 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_10 | T_PARTICLE_PRESENT_JAZM_SUKUN_11 | T_PARTICLE_PRESENT_JAZM_SUKUN_12 | T_PARTICLE_PRESENT_JAZM_SUKUN_13 | T_PARTICLE_PRESENT_JAZM_SUKUN_14 | T_PARTICLE_PRESENT_JAZM_SUKUN_15 | T_PARTICLE_PRESENT_JAZM_SUKUN_16 | T_PARTICLE_PRESENT_JAZM_SUKUN_17 | T_PARTICLE_PRESENT_JAZM_SUKUN_18 | T_PARTICLE_PRESENT_JAZM_SUKUN_19 | T_PARTICLE_PRESENT_JAZM_SUKUN_20 | T_PARTICLE_PRESENT_JAZM_SUKUN_21',
     'the jazm template ordinals shifted: لَمْ must keep _01 in both families and J1a/J1b must append only');
@@ -14172,7 +14198,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===268,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===270,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
@@ -14225,7 +14251,14 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
     'an imperative lane reused an inherited stable ID');
   assert(zarfKhabarTemplateIds.length===3,'the three ẓarf-khabar lanes are not all registered');
   assert(estimatedSignTemplateIds.length===2,'the two estimated-sign lanes are not both registered');
-  assert([...ids].filter(id=>!amrTemplateIds.includes(id)&&!estimatedSignTemplateIds.includes(id)&&!zarfKhabarTemplateIds.includes(id)&&!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!sababiTemplateIds.includes(id)&&!isharaTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!istithnaNaqisTemplateIds.includes(id)&&!istithnaKhalaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  /* Wave 15 — the two ممنوع من الصرف lanes, on exactly the same footing: they declare their own
+     frozen key, they were APPENDED after every existing add() call, and so they are excluded here
+     rather than being allowed to change the inherited manifest. */
+  const diptoteTemplateIds=api.templates.filter(item=>item.diptoteNounKeys.length).map(item=>item.stableId);
+  assert(diptoteTemplateIds.length===2,'the two ممنوع من الصرف lanes are not both registered');
+  assert(diptoteTemplateIds.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
+    'a ممنوع من الصرف lane reused an inherited stable ID');
+  assert([...ids].filter(id=>!amrTemplateIds.includes(id)&&!estimatedSignTemplateIds.includes(id)&&!diptoteTemplateIds.includes(id)&&!zarfKhabarTemplateIds.includes(id)&&!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!sababiTemplateIds.includes(id)&&!isharaTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!istithnaNaqisTemplateIds.includes(id)&&!istithnaKhalaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
@@ -15624,7 +15657,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===268,'the repair block changed the production template count');
+  assert(api.templates.length===270,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -15758,7 +15791,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
        and both reuse TS13, whose parts are already «gloss 0 capitalised, gloss 1, full stop» —
        exactly an English imperative and its object. A TS83 with identical parts would be a second
        name for one thing, and shape ids are what History restores a translation through. */
-    assert(registeredKeys.length===275,'the structural map holds '+registeredKeys.length+' keys, not 275');
+    assert(registeredKeys.length===277,'the structural map holds '+registeredKeys.length+' keys, not 277');
     assert(registeredShapes.length===82,'the shape registry holds '+registeredShapes.length+' shapes, not 82');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
@@ -15843,7 +15876,14 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       const amrKeyOwners=api.templates.filter(item=>item.amrVerbKey).map(item=>item.stableId);
       const amrKeys=registeredKeys.filter(key=>amrKeyOwners.some(id=>key.startsWith(id+'||')));
       assert(amrKeys.length===2,'the imperative lanes do not own exactly two structural keys');
-      const inheritedKeys=registeredKeys.filter(k=>!amrKeys.includes(k)&&!estimatedSignKeys.includes(k)&&!zarfKhabarKeys.includes(k)&&!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!istithnaNaqisKeys.includes(k)&&!istithnaKhalaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
+      /* Wave 15 — the two ممنوع من الصرف lanes are fenced off on the same footing. They add no
+         shape: both reuse the inherited TS06 that every «مبتدأ + مضارع + حرف خفض + مخفوض» sentence
+         already composes through, because the diptote changes the fourth token's SIGN and not how
+         the sentence reads in English. So the inherited SHAPE count is untouched. */
+      const diptoteKeyOwners=api.templates.filter(item=>item.diptoteNounKeys.length).map(item=>item.stableId);
+      const diptoteKeys=registeredKeys.filter(key=>diptoteKeyOwners.some(id=>key.startsWith(id+'||')));
+      assert(diptoteKeys.length===2,'the ممنوع من الصرف lanes do not own exactly two structural keys');
+      const inheritedKeys=registeredKeys.filter(k=>!diptoteKeys.includes(k)&&!amrKeys.includes(k)&&!estimatedSignKeys.includes(k)&&!zarfKhabarKeys.includes(k)&&!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!istithnaNaqisKeys.includes(k)&&!istithnaKhalaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===148,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===47,'the inherited shape set changed: '+inheritedShapes.length);
@@ -15878,7 +15918,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===268,'the map covers '+mappedTemplates.size+' templates, not 268');
+    assert(mappedTemplates.size===270,'the map covers '+mappedTemplates.size+' templates, not 270');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -15940,7 +15980,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===275,'only '+keysSeen.size+' of the 275 structural keys were observed');
+    assert(keysSeen.size===277,'only '+keysSeen.size+' of the 277 structural keys were observed');
     assert(shapesSeen.size===82,'only '+shapesSeen.size+' of the 82 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
@@ -16275,7 +16315,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===275,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===277,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -16637,7 +16677,11 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
        fixed two-token command (the built verb and its accusative object). Both are fixed-length, so
        the RANGE keeps the width the ʿaṭf context rotation gave it and simply shifts again:
        919-922 becomes 923-926. */
-    assert([923,924,925,926].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 923-926 across the registered ʿaṭf context rotation)');
+    /* Wave 15 adds eight across two lanes of نِيَابَةُ الْفَتْحَةِ عَنِ الْكَسْرَةِ pp. 52–54: each
+       diptote frame is a fixed four-token sentence (the mubtadaʾ, its present khabar, the ḥarf
+       khafḍ, and the noun that does not take tanwīn). Both are fixed-length, so the RANGE keeps the
+       width the ʿaṭf context rotation gave it and simply shifts again: 923-926 becomes 931-934. */
+    assert([931,932,933,934].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 931-934 across the registered ʿaṭf context rotation)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -16826,7 +16870,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===268,'the presentation repair changed the template count');
+    assert(api.templates.length===270,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -18744,7 +18788,7 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===223,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules, the Wave-4 naʿt/maʿrifah rules, the Wave-7 munādā rules or the two Wave-14 بَابُ الْأَفْعَالِ rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===224,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules, the Wave-4 naʿt/maʿrifah rules, the Wave-7 munādā rules or the two Wave-14 بَابُ الْأَفْعَالِ rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
@@ -18766,8 +18810,8 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   }
   assert(!Object.prototype.hasOwnProperty.call(api.GRAMMAR_RULES.governors,'hamzatTaqrir'),
     'هَمْزَةُ التَّقْرِيرِ entered the governor table and could now govern');
-  assert(api.templates.length===268,'the production template count does not include the J1a additions or the two Wave-14 imperative lanes');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===275
+  assert(api.templates.length===270,'the production template count does not include the J1a additions or the two Wave-14 imperative lanes');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===277
     &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===82,
     'the composer authority does not include the J1a mappings or the two Wave-14 imperative keys');
   p7Cases+=8;
@@ -19793,7 +19837,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===268,`Expected 268 production templates, found ${api.templates.length}`);
+assert(api.templates.length===270,`Expected 270 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -20969,6 +21013,184 @@ while(Date.now()-started<durationMs){
 
   console.log('Wave-12 بَابُ الْمُعْرَبَاتِ audit passed: '+w12Cases+' canonical checks and '+w12Attacks+' adversarial checks.');
   console.log('  wave-12 refusal codes: '+JSON.stringify(w12Codes));
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════════════════════
+   WAVE 15 — نِيَابَةُ الْفَتْحَةِ عَنِ الْكَسْرَةِ (Al-Tuḥfah pp. 52–55, and its parse on p. 54)
+
+   The chapter's whole claim is a SUBSTITUTION with a scope: p. 52's شرح says «لِلْفَتْحَةِ مَوْضِعٌ
+   وَاحِدٌ تَكُونُ فِيهِ عَلَامَةً عَلَى خَفْضِ الِاسْمِ، وَهُوَ الِاسْمُ الَّذِي لَا يَنْصَرِفُ»,
+   and p. 54 performs the iʿrāb on two words with two DIFFERENT pairs of ʿilal. So the suite tests
+   three things and not more: that the card the source writes is the card the app renders, that the
+   sign reaches nothing else, and that neither the class nor the ʿillah can be forged onto a word.
+   ═════════════════════════════════════════════════════════════════════════════════════════════ */
+{
+  let w15Cases=0,w15Attacks=0;
+  const w15Codes={};
+  const diptoteTemplates=api.templates.filter(t=>t.diptoteNounKeys.length);
+  assert(diptoteTemplates.length===2,'the two ممنوع من الصرف lanes are not both registered');
+
+  /* Every label is read from the app, never retyped — the single-copy rule this repo keeps. */
+  const SUB_SIGN=api.GRAMMAR_SIGNS.fathaSub.ar;
+  const MAMNU_FORM=api.WHY_FORM.mamnu.ar;
+  assert(api.GRAMMAR_RULES.nounInflection.mamnu.jarr[1]==='R_MAMNU_JARR_FATHA',
+    'the ممنوع من الصرف khafḍ cell is not bound to its own source rule');
+
+  /* ── 1. THE CARD p. 54 WRITES ───────────────────────────────────────────────────────────── */
+  const diptoteWords=new Set();
+  for(const template of diptoteTemplates){
+    const key=template.diptoteNounKeys[0];
+    for(let r=0;r<12;r++){
+      const data=api.buildTemplate(template.id);
+      api.renderExercise(data);
+      const noun=data.tokens.find(t=>t.inflection==='mamnu');
+      assert(noun,key+': the ممنوع من الصرف noun was not produced');
+      diptoteWords.add(noun.word);
+      assert(noun.state==='jarr',key+': the diptote is not مخفوض');
+      assert(api.safeSignId(noun.sign)==='fathaSub',key+': the diptote is not signed by the substitution');
+      assert(noun.signRuleId==='R_MAMNU_JARR_FATHA',key+': the diptote cites another rule for its sign');
+      assert(noun.ar.includes(SUB_SIGN),key+': the card omits the substitution: '+noun.ar);
+      /* The sacred khafḍ terminology, which this chapter must not be the one to break. */
+      assert(!/مجرور/.test(noun.ar),key+': the diptote card says مجرور');
+      /* A muʿrab noun, so it carries a state and a sign and NO bināʾ or maḥall. */
+      assert(!noun.mahall&&!noun.binaaSign,key+': the diptote acquired a bināʾ or a maḥall');
+      /* p. 54's شرط, on the produced surface: no أل, and no muḍāf ilayh after it. */
+      assert(!noun.word.startsWith('ال'),key+': the produced diptote carries أل');
+      assert(!noun.grammar.isMudaf,key+': the produced diptote is a muḍāf');
+      /* And the Why names the preventer, which is the half of p. 54 the card itself does not say. */
+      const why=[];
+      (function walk(n){if(!n)return;if(typeof n==='string')return void why.push(n);
+        if(Array.isArray(n))return n.forEach(walk);
+        if(typeof n==='object')for(const k of Object.keys(n))walk(n[k])})(noun.why);
+      const illah=api.DIPTOTE_NOUNS[key].illahAr;
+      assert(why.some(line=>line.includes(illah)),key+': the Why does not name the ʿillah p. 54 gives it');
+      assert(why.some(line=>line.includes(MAMNU_FORM)),key+': the Why does not name the class');
+      w15Cases+=10;
+    }
+  }
+  /* Two words, two DIFFERENT pairs of ʿilal — p. 54's own contrast. */
+  assert(diptoteWords.size===2,'the two lanes do not produce two distinct diptotes');
+  assert(api.DIPTOTE_NOUNS.ibrahim.illahAr!==api.DIPTOTE_NOUNS.umar.illahAr,
+    'the two diptotes no longer carry different ʿilal');
+  w15Cases+=2;
+
+  /* ── 2. «مَوْضِعٌ وَاحِدٌ» — the sign reaches NOTHING else ─────────────────────────────────── */
+  {
+    let scanned=0;
+    for(let i=0;i<api.templates.length;i++){
+      for(let r=0;r<6;r++){
+        const data=api.buildTemplate(i);
+        api.renderExercise(data);
+        for(const token of data.tokens){
+          scanned++;
+          if(token.ar&&token.ar.includes(SUB_SIGN)){
+            assert(token.inflection==='mamnu',
+              'the fatḥah substitution appeared on a '+token.inflection+' noun: '+token.ar);
+            assert(token.state==='jarr','the fatḥah substitution appeared outside khafḍ: '+token.ar);
+          }
+          if(token.inflection==='mamnu'){
+            assert(token.state==='jarr','a ممنوع من الصرف noun reached a state p. 52 does not rule on');
+          }
+        }
+      }
+    }
+    assert(scanned>0,'the exclusivity scan examined nothing');
+    w15Cases+=1;
+  }
+
+  /* ── 3. THE STATES p. 52 DOES NOT RULE ON MUST THROW, not answer ─────────────────────────── */
+  for(const state of ['raf','nasb']){
+    assert(!api.GRAMMAR_RULES.nounInflection.mamnu[state],
+      'the ممنوع من الصرف class gained a '+state+' cell p. 52 does not rule on');
+    w15Attacks++;
+  }
+
+  /* ── 4. FORGERY. Neither the class nor the ʿillah may be attached to a word ──────────────── */
+  const w15Refuse=(name,data,mutate,expected)=>{
+    const forged=clone(data);
+    mutate(forged);
+    const problems=api.validateExercise(forged);
+    assert(problems.length>0,'a forged ممنوع من الصرف exercise validated: '+name);
+    for(const problem of problems)w15Codes[problem.code]=(w15Codes[problem.code]||0)+1;
+    if(expected)assert(problems.some(p=>p.code===expected),
+      name+': expected '+expected+', got '+problems.map(p=>p.code).join(','));
+    w15Attacks++;
+  };
+  const diptoteBase=api.buildTemplate(diptoteTemplates[0].id);
+  api.renderExercise(diptoteBase);
+  const diptoteAt=d=>d.tokens.findIndex(t=>t.inflection==='mamnu');
+
+  /* An ordinary singular relabelled a diptote — the class must be provable from the registry. */
+  w15Refuse('an ordinary singular relabelled ممنوع من الصرف',diptoteBase,d=>{
+    const i=d.tokens.findIndex(t=>t.grammar.type==='noun'&&t.inflection==='singular');
+    assert(i>=0,'the diptote lane carries no ordinary singular to relabel');
+    d.tokens[i].inflection='mamnu';
+  },'E_NOUN_FORM_CLASS');
+  /* And a diptote downgraded to an ordinary singular, which would print a kasrah on it. */
+  w15Refuse('a diptote relabelled an ordinary singular',diptoteBase,d=>{
+    d.tokens[diptoteAt(d)].inflection='singular';
+  },'E_NOUN_FORM_CLASS');
+  /* The sign swapped for the ordinary khafḍ kasrah, which is the exact error p. 54's شرط guards. */
+  w15Refuse('the substitution downgraded to an ordinary kasrah',diptoteBase,d=>{
+    d.tokens[diptoteAt(d)].sign=api.canonicalSignCopy('kasra');
+  });
+  /* The sign stolen by the sound feminine plural's substitution — the two are mirror images and
+     neither may ever stand for the other. */
+  w15Refuse('the fatḥah substitution swapped for the kasrah substitution',diptoteBase,d=>{
+    d.tokens[diptoteAt(d)].sign=api.canonicalSignCopy('kasraSub');
+  });
+  /* The rule stolen from the sound feminine plural, whose substitution runs the other way. */
+  w15Refuse('the diptote citing the sound-feminine-plural substitution rule',diptoteBase,d=>{
+    d.tokens[diptoteAt(d)].signRuleId='R_SFP_NASB_KASRA';
+  });
+
+  /* ── 5. BYTE MUTATION on the one new Arabic string ───────────────────────────────────────── */
+  {
+    const forged=clone(diptoteBase);
+    const i=diptoteAt(forged);
+    const label=forged.tokens[i].sign.ar;
+    const at=[...label].findIndex(character=>character.codePointAt(0)===0x064E);
+    assert(at>0,'the substitution label carries no fatḥah to move');
+    const characters=[...label];
+    characters.splice(at,1);characters.splice(at-1,0,String.fromCodePoint(0x064E));
+    forged.tokens[i].sign={...forged.tokens[i].sign,ar:characters.join('')};
+    assert(forged.tokens[i].sign.ar!==label,'the byte mutation changed nothing');
+    const problems=api.validateExercise(forged);
+    assert(problems.length>0,'a transposed combining mark inside the substitution label validated');
+    for(const problem of problems)w15Codes[problem.code]=(w15Codes[problem.code]||0)+1;
+    w15Attacks++;
+  }
+
+  /* ── 6. HISTORY ─────────────────────────────────────────────────────────────────────────── */
+  for(const template of diptoteTemplates){
+    const data=api.buildTemplate(template.id);
+    api.renderExercise(data);
+    const snapshot=clone(api.createExerciseSnapshot(data));
+    assert(snapshot,template.stableId+': the ممنوع من الصرف exercise refused to snapshot');
+    const restored=api.restoreExerciseSnapshot(snapshot);
+    assert(restored,template.stableId+': the ممنوع من الصرف snapshot did not restore');
+    assert(api.validateExercise(clone(restored)).length===0,
+      template.stableId+': the restored diptote exercise does not validate');
+    api.renderExercise(restored);
+    const before=data.tokens.find(t=>t.inflection==='mamnu');
+    const after=restored.tokens.find(t=>t.inflection==='mamnu');
+    assert(after,template.stableId+': the restored exercise lost its diptote');
+    assert(after.ar===before.ar,template.stableId+': the restored diptote card differs');
+    assert(api.safeSignId(after.sign)==='fathaSub',template.stableId+': the restored diptote lost its substitution');
+    w15Cases+=5;
+  }
+  /* A snapshot whose class was rewritten must not restore into a valid exercise. */
+  {
+    const snapshot=clone(api.createExerciseSnapshot(diptoteBase));
+    snapshot.tokens[diptoteAt(diptoteBase)].inflection='singular';
+    const restored=api.restoreExerciseSnapshot(snapshot);
+    assert(!restored||api.validateExercise(clone(restored)).length>0,
+      'forged History survived: a diptote downgraded to an ordinary singular');
+    w15Attacks++;
+  }
+
+  console.log('Wave-15 نِيَابَةُ الْفَتْحَةِ عَنِ الْكَسْرَةِ audit passed: '+w15Cases+' canonical checks and '+w15Attacks+' adversarial checks.');
+  console.log('  wave-15 refusal codes: '+JSON.stringify(w15Codes));
 }
 
 const untestedTemplateIds=api.templates.filter(template=>!api.grammarDiagnostics.validByTemplate[template.stableId]).map(template=>template.stableId);

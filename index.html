@@ -1994,6 +1994,11 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  ,"T_NOUN_SMP_RAF_WAW_04||noun:mubtada,noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SMP_RAF_WAW_04",structure:"noun:mubtada,noun:mubtada,noun:khabar",shape:"TS68",copulaPlural:false})
  ,"T_NOUN_SMP_RAF_WAW_05||noun:mubtada,noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SMP_RAF_WAW_05",structure:"noun:mubtada,noun:mubtada,noun:khabar",shape:"TS68",copulaPlural:false})
  ,"T_NOUN_SINGULAR_RAF_DAMMA_08||noun:mubtada,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_08",structure:"noun:mubtada,noun:adverb,noun:mudafIlayh",shape:"TS82",copulaPlural:false})
+/* Wave 15 — the two ممنوع من الصرف lanes. Their structure is the one the preposition lanes already
+   compose («مُحَمَّدٌ يَسْأَلُ عَنْ عُمَرَ»), so both REUSE the inherited TS06 rather than adding a
+   composer shape: the diptote changes what the fourth token's SIGN is, not how the sentence reads. */
+,"T_NOUN_SINGULAR_RAF_DAMMA_09||noun:mubtada,verb:present,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_09",structure:"noun:mubtada,verb:present,particle:particle,noun:majrur",shape:"TS06",copulaPlural:false})
+,"T_NOUN_SINGULAR_RAF_DAMMA_10||noun:mubtada,verb:present,particle:particle,noun:majrur":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_10",structure:"noun:mubtada,verb:present,particle:particle,noun:majrur",shape:"TS06",copulaPlural:false})
  ,"T_NOUN_SINGULAR_NASB_FATHA_07||noun:mubtada,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_07",structure:"noun:mubtada,noun:adverb,noun:mudafIlayh",shape:"TS82",copulaPlural:false})
  ,"T_NOUN_SINGULAR_JARR_KASRA_12||noun:mubtada,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_12",structure:"noun:mubtada,noun:adverb,noun:mudafIlayh",shape:"TS82",copulaPlural:false})
  /* ظنّ — one structure, ten lanes: the sister and its two accusatives. */
@@ -7133,6 +7138,30 @@ const ESTIMATED_DAMMA_SIGNS_AR=(()=>{
  thiql[7]=ESTIMATED_SIGN_NEW_WORDS_AR.thiql;
  return Object.freeze({taadhdhur:taadhdhur.join(' '),thiql:thiql.join(' ')});
 })();
+/* Wave 15 — «الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ», the khafḍ sign of الممنوع من الصرف (p. 52).
+   This is the ONE new learner-facing Arabic string of the chapter, so it is the one place where a
+   transposed shaddah or vowel could enter unseen — the failure mode this repo has met before, where
+   two mark orders render identically and only a byte comparison can tell them apart. The literal is
+   therefore checked against an explicit codepoint sequence at load, and the app refuses to start if
+   they disagree. The sequence is the four words of the source's own heading, in order:
+   الْفَتْحَةُ / نِيَابَةً / عَنِ / الْكَسْرَةِ. */
+const MAMNU_SIGN_AR='الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ';
+(()=>{
+ const PIN=[
+  0x0627,0x0644,0x0652,0x0641,0x064E,0x062A,0x0652,0x062D,0x064E,0x0629,0x064F, // الْفَتْحَةُ
+  0x0020,
+  0x0646,0x0650,0x064A,0x064E,0x0627,0x0628,0x064E,0x0629,0x064B,               // نِيَابَةً
+  0x0020,
+  0x0639,0x064E,0x0646,0x0650,                                                  // عَنِ
+  0x0020,
+  0x0627,0x0644,0x0652,0x0643,0x064E,0x0633,0x0652,0x0631,0x064E,0x0629,0x0650  // الْكَسْرَةِ
+ ];
+ const actual=[...MAMNU_SIGN_AR].map(ch=>ch.codePointAt(0));
+ if(actual.length!==PIN.length||actual.some((cp,i)=>cp!==PIN[i])){
+  throw new Error('MAMNU_SIGN_AR does not match its codepoint pin: '+
+   actual.map(cp=>cp.toString(16)).join(' '));
+ }
+})();
 const GRAMMAR_SIGN_SOURCE=Object.freeze({
  damma:{id:'damma',ar:'الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ',en:'the visible ḍammah'},
  fatha:{id:'fatha',ar:'الْفَتْحَةُ الظَّاهِرَةُ عَلَى آخِرِهِ',en:'the visible fatḥah'},
@@ -7142,6 +7171,13 @@ const GRAMMAR_SIGN_SOURCE=Object.freeze({
  waw:{id:'waw',ar:'الْوَاوُ',en:'wāw'},
  ya:{id:'ya',ar:'الْيَاءُ',en:'yāʾ'},
  kasraSub:{id:'kasraSub',ar:'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ',en:'kasrah in place of fatḥah'},
+ /* Wave 15 — the OTHER substitution, and the mirror image of the one above. Al-Tuḥfah p. 52 gives
+    it a heading of its own, «نِيَابَةُ الْفَتْحَةِ عَنِ الْكَسْرَةِ», and the matn states it in one
+    line: «وَأَمَّا الْفَتْحَةُ فَتَكُونُ عَلَامَةً لِلْخَفْضِ فِي الِاسْمِ الَّذِي لَا يَنْصَرِفُ».
+    The شرح adds the exhaustive clause this app needs to keep the two apart: «لِلْفَتْحَةِ مَوْضِعٌ
+    وَاحِدٌ تَكُونُ فِيهِ عَلَامَةً عَلَى خَفْضِ الِاسْمِ، وَهُوَ الِاسْمُ الَّذِي لَا يَنْصَرِفُ» —
+    ONE place, so this sign may never appear on any other noun class. */
+ fathaSub:{id:'fathaSub',ar:MAMNU_SIGN_AR,en:'fatḥah in place of kasrah'},
  nunKept:{id:'nunKept',ar:'ثُبُوتُ النُّونِ',en:'retention of the nūn'},
  nunDropped:{id:'nunDropped',ar:'حَذْفُ النُّونِ',en:'deletion of the nūn'},
  /* J2 — the third jazm sign. Al-Tuḥfah p. 57's matn: «وَأَمَّا الْحَذْفُ فَيَكُونُ عَلَامَةً لِلْجَزْمِ
@@ -10591,7 +10627,13 @@ const GRAMMAR_RULES=Object.freeze({
   /* Wave 12 — الاسم المنقوص (p. 21). RAFʿ ONLY, on exactly the Wave-6 principle: p. 21 estimates
      the ḍammah AND the kasrah on it للثقل and lets the fatḥah appear لخفتها, but p. 95 gives the
      rafʿ, and a cell for a state no lane renders would be a claim about signs nobody sees. */
-  manqus:{raf:['dammaMuqaddaraThiql','R_MANQUS_RAF_DAMMA_MUQADDARA']}
+  manqus:{raf:['dammaMuqaddaraThiql','R_MANQUS_RAF_DAMMA_MUQADDARA']},
+  /* Wave 15 — الاسم الذي لا ينصرف (pp. 52–54). KHAFḌ ONLY, and here that is not a scope decision
+     but the source's own claim: p. 52's شرح says «لِلْفَتْحَةِ مَوْضِعٌ وَاحِدٌ تَكُونُ فِيهِ
+     عَلَامَةً عَلَى خَفْضِ الِاسْمِ». The book rules on no other state for this class, so there is no
+     other cell; asking for one throws in inflectNoun, which is the intended answer rather than a
+     gap — exactly as for سِوَى in Wave 6 and الْقَاضِي in Wave 12. */
+  mamnu:{jarr:['fathaSub','R_MAMNU_JARR_FATHA']}
  },
  presentVerb:{
   regular:{raf:['damma','R_MUDARI_RAF_DAMMA'],nasb:['fatha','R_MUDARI_NASB_FATHA'],jazm:['sukun','R_MUDARI_JAZM_SUKUN']},
@@ -10835,7 +10877,9 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  noun:{singular:['raf','nasb','jarr'],broken:['raf','nasb','jarr'],dual:['raf','nasb','jarr'],smp:['raf','nasb','jarr'],sfp:['raf','nasb','jarr'],fiveNouns:['raf','nasb','jarr'],
   // p. 21's مقصور and منقوص each reach production in the states GRAMMAR_RULES.nounInflection
   // registers for them, and in no others.
-  maqsur:['nasb','raf'],manqus:['raf']},
+  maqsur:['nasb','raf'],manqus:['raf'],
+  // Wave 15 — p. 52 gives الممنوع من الصرف one state and one sign, and this is it.
+  mamnu:['jarr']},
  // `builtOnSukun` is a bināʾ label, not an iʿrāb state: it sits outside the raf/nasb/jazm axis
  // exactly as `builtOnFatha` does for the past, so no state/sign filter can ever offer it.
  /* Wave 14 — `amr` joins the two bināʾ rows and NOT the three iʿrāb ones. Its `builtOnSukun` is the
@@ -10877,7 +10921,16 @@ const GRAMMAR_COVERAGE_MATRIX=Object.freeze({
  'the weak-ended imperative, built on deletion of its weak letter (ادْعُ، اسْعَ)',
  'the five-verb imperative, built on deletion of the nūn (اكْتُبَا، اكْتُبُوا، اكْتُبِي)',
  'the imperative carrying nūn al-tawkīd or nūn al-niswah, whose sukūn p. 72 estimates or relocates',
- 'diptote','atf bayan','badal al-badaa and badal al-nisyan',
+ /* Wave 15 — the bare 'diptote' entry is GONE: pp. 52–54's «الفتحة نيابة عن الكسرة» is produced on
+    the two words p. 54 itself parses, إِبْرَاهِيمَ and عُمَرَ. What remains unproduced of that bāb
+    is named exactly, because it is a matter of VOCABULARY rather than of the rule: pp. 52–53
+    enumerate nine ʿilal with a long list of words for each, and only the two the source works
+    through in full are registered — a word the book does not analyse has no business in the noun
+    index. The rafʿ and naṣb of a diptote are not named here at all, because p. 52 rules on neither:
+    «لِلْفَتْحَةِ مَوْضِعٌ وَاحِدٌ», and a state the source does not treat is not a deferral. */
+ 'the seven ʿilal of pp. 52–53 other than العلمية مع العجمة and العلمية مع العدل',
+ 'the diptote khafḍ by an ordinary kasrah, which p. 54 requires once أل or an iḍāfah is added',
+ 'atf bayan','badal al-badaa and badal al-nisyan',
  'badal of a verb from a verb',
  /* المفعول المطلق ships with its three meanings (تأكيد، نوع، عدد) and both divisions
     (لفظي، معنوي). What is named here is everything p. 146–147 mentions that no productive lane
@@ -11299,6 +11352,16 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  R_SMP_JARR_YA:sourceRule('Yāʾ is the khafḍ sign of the sound masculine plural.',[66],'Only verified sound masculine plural entries.'),
  R_SFP_RAF_DAMMA:sourceRule('Ḍammah is the nominative sign of the sound feminine plural.',[26,30],'Only verified sound feminine plural entries.'),
  R_SFP_NASB_KASRA:sourceRule('Kasrah substitutes for fatḥah in the accusative sound feminine plural.',[49,69],'Only verified sound feminine plural entries.'),
+ /* Wave 15 — the mirror substitution, and the whole of باب نيابة الفتحة عن الكسرة. p. 52's matn:
+    «وَأَمَّا الْفَتْحَةُ فَتَكُونُ عَلَامَةً لِلْخَفْضِ فِي الِاسْمِ الَّذِي لَا يَنْصَرِفُ», with the
+    شرح making the scope exhaustive — «لِلْفَتْحَةِ مَوْضِعٌ وَاحِدٌ». p. 54 then performs the iʿrāb
+    this rule authorizes, on two words: «فَكُلٌّ مِنْ إِبْرَاهِيمَ وَعُمَرَ: مَخْفُوضٌ؛ لِدُخُولِ
+    حَرْفِ الْخَفْضِ عَلَيْهِ، وَعَلَامَةُ خَفْضِهِمَا الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّ
+    كُلَّ وَاحِدٍ مِنْهُمَا اسْمٌ لَا يَنْصَرِفُ». The condition on the same page is part of the rule
+    and is enforced as one: «وَيُشْتَرَطُ لِخَفْضِ الِاسْمِ الَّذِي لَا يَنْصَرِفُ بِالْفَتْحَةِ: أَنْ
+    يَكُونَ خَالِياً مِنْ «أَلْ» وَأَلَّا يُضَافَ إِلَى اسْمٍ بَعْدَهُ، فَإِنِ اقْتَرَنَ بِأَلْ أَوْ
+    أُضِيفَ خُفِضَ بِالْكَسْرَةِ». */
+ R_MAMNU_JARR_FATHA:sourceRule('Fatḥah substitutes for kasrah as the sign of khafḍ in a noun that does not take tanwīn — and in that noun alone — provided it carries no أل and is not a muḍāf.',[52,53,54],'Only the registered ممنوع من الصرف entries, and only in khafḍ: p. 52 makes this the sign’s ONE place, and the two states p. 54 does not rule on have no cell. A registered entry that acquires أل or a muḍāf ilayh falls back to the ordinary kasrah by the same page’s شرط.'),
  R_SFP_JARR_KASRA:sourceRule('Kasrah is the khafḍ sign of the sound feminine plural.',[62],'Only verified sound feminine plural entries.'),
  R_FIVE_NOUNS_RAF_WAW:sourceRule('Wāw is the nominative sign of the five nouns.',[32,35,66,67],'Only singular, non-diminutive forms in iḍāfah to something other than yāʾ al-mutakallim.'),
  R_FIVE_NOUNS_NASB_ALIF:sourceRule('Alif is the accusative sign of the five nouns.',[32,50,66,67],'Only singular, non-diminutive forms in iḍāfah to something other than yāʾ al-mutakallim.'),
@@ -11767,6 +11830,76 @@ for(const key of ESTIMATED_SIGN_NOUN_KEYS)registerNounSet([ESTIMATED_SIGN_NOUNS[
     of one class, would mean a lane quietly changed what it teaches. */
  if(ESTIMATED_SIGN_NOUN_KEYS.map(key=>ESTIMATED_SIGN_NOUNS[key].inflection).join(',')!=='manqus,maqsur'){
   throw new Error('The estimated-sign noun registry no longer holds exactly one منقوص and one مقصور.');
+ }
+})();
+/* ── Wave 15 — الممنوع من الصرف (pp. 52–55) ────────────────────────────────────────────────────
+   The two words p. 54 actually PARSES, and no others. The page performs the whole analysis on
+   them — «فَكُلٌّ مِنْ إِبْرَاهِيمَ وَعُمَرَ: مَخْفُوضٌ؛ لِدُخُولِ حَرْفِ الْخَفْضِ عَلَيْهِ،
+   وَعَلَامَةُ خَفْضِهِمَا الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّ كُلَّ وَاحِدٍ مِنْهُمَا
+   اسْمٌ لَا يَنْصَرِفُ، وَالْمَانِعُ مِنْ صَرْفِ إِبْرَاهِيمَ الْعَلَمِيَّةُ وَالْعُجْمَةُ،
+   وَالْمَانِعُ مِنْ صَرْفِ عُمَرَ: الْعَلَمِيَّةُ وَالْعَدْلُ» — including the pair of ʿilal for
+   each, which is why `illah` is registered DATA here and never inferred from the surface. pp. 52–53
+   enumerate nine ʿilal and a long list of examples for each; only the two the book parses are
+   registered, on the standing rule that a word the source does not analyse has no business in the
+   noun index.
+
+   Like the estimated-sign nouns, these live in their own registry rather than in singularPeople:
+   the general pools are drawn on by every noun slot in the app, and these two may only ever stand
+   in khafḍ. Only `gen` is registered, and it is the fatḥah-marked form — a diptote's khafḍ surface
+   is spelled with a fatḥah and no tanwīn, which is the whole point. */
+const DIPTOTE_NOUNS=Object.freeze(Object.assign(Object.create(null),{
+ ibrahim:Object.freeze({key:'ibrahim',gen:'إِبْرَاهِيمَ',en:'Ibrāhīm',inflection:'mamnu',
+  illahAr:'الْعَلَمِيَّةُ وَالْعُجْمَةُ',illahEn:'being a proper name and being foreign',
+  ruleId:'R_MAMNU_JARR_FATHA'}),
+ umar:Object.freeze({key:'umar',gen:'عُمَرَ',en:'ʿUmar',inflection:'mamnu',
+  illahAr:'الْعَلَمِيَّةُ وَالْعَدْلُ',illahEn:'being a proper name and being a deflected form',
+  ruleId:'R_MAMNU_JARR_FATHA'})
+}));
+const DIPTOTE_NOUN_KEYS=Object.freeze(Object.keys(DIPTOTE_NOUNS));
+for(const key of DIPTOTE_NOUN_KEYS)registerNounSet([DIPTOTE_NOUNS[key]],DIPTOTE_NOUNS[key].inflection);
+/* Startup invariant, on the Wave-6/12 pattern. The class IS the claim, so it is proved rather than
+   trusted: each surface is pinned by codepoint (a hidden mark, or a tanwīn where the diptote's
+   defining property is that it takes none, would otherwise render identically and put a false sign
+   on a learner's card), each record must own its own surface in the noun index, and each must be
+   bound to the one source rule that authorizes the substitution. */
+(()=>{
+ const PINS={
+  /* إِبْرَاهِيمَ */ ibrahim:[0x0625,0x0650,0x0628,0x0652,0x0631,0x064E,0x0627,0x0647,0x0650,0x064A,0x0645,0x064E],
+  /* عُمَرَ      */ umar:[0x0639,0x064F,0x0645,0x064E,0x0631,0x064E]
+ };
+ for(const key of DIPTOTE_NOUN_KEYS){
+  const record=DIPTOTE_NOUNS[key];
+  if(!Object.isFrozen(record)||record.key!==key)throw new Error('Diptote noun '+key+' is not frozen or not bound to its key.');
+  for(const name of ['gen','en','inflection','illahAr','illahEn','ruleId']){
+   if(typeof record[name]!=='string'||!record[name])throw new Error('Diptote noun '+key+'.'+name+' is not a non-empty string.');
+  }
+  if(record.nom||record.acc)throw new Error('Diptote noun '+key+' registers a case form no lane renders.');
+  /* p. 54's شرط, enforced on the DATA rather than only at build time: a diptote that carries أل is
+     khafḍ by the ordinary kasrah, so a registered surface bearing the article would be a word this
+     rule may not sign. */
+  if(record.gen.startsWith('ال'))throw new Error('Diptote noun '+key+' carries أل, which p. 54 excludes from the fatḥah.');
+  /* And it takes no tanwīn — «لَا يَجُوزُ تَنْوِينُهُ» (p. 54). */
+  if(/[ًٌٍ]/u.test(record.gen))throw new Error('Diptote noun '+key+' carries tanwīn, which is what «لا ينصرف» denies.');
+  const lane=GRAMMAR_RULES.nounInflection[record.inflection];
+  if(!lane||!lane.jarr)throw new Error('Diptote noun '+key+' claims a class with no khafḍ cell.');
+  if(lane.raf||lane.nasb)throw new Error('The ممنوع من الصرف class has gained a state p. 52 does not rule on.');
+  if(lane.jarr[1]!==record.ruleId)throw new Error('Diptote noun '+key+' is not bound to its own source rule.');
+  if(!GRAMMAR_SIGNS[lane.jarr[0]])throw new Error('Diptote noun '+key+' names an unregistered sign.');
+  if(GRAMMAR_SIGNS[lane.jarr[0]].ar!==MAMNU_SIGN_AR){
+   throw new Error('The ممنوع من الصرف khafḍ sign is no longer the pinned substitution string.');
+  }
+  if(nounFormIndex.get(record.gen)?.inflection!==record.inflection){
+   throw new Error('Diptote noun '+key+' is not the noun index’s owner of its own surface.');
+  }
+  const points=[...record.gen].map(character=>character.codePointAt(0));
+  if(points.length!==PINS[key].length||points.some((value,index)=>value!==PINS[key][index])){
+   throw new Error('Diptote noun '+key+' does not match its pinned codepoints.');
+  }
+ }
+ /* The two words p. 54 parses, with their two DIFFERENT pairs of ʿilal. Identical ʿilal on both
+    would mean the registry had lost the contrast the page draws. */
+ if(DIPTOTE_NOUNS.ibrahim.illahAr===DIPTOTE_NOUNS.umar.illahAr){
+  throw new Error('The two diptotes no longer carry the different ʿilal p. 54 gives them.');
  }
 })();
 /* Add only surfaces the existing vocabulary does not already own. Shared adjective surfaces keep
@@ -17060,7 +17193,11 @@ const WHY_FORM=Object.freeze({
  // Wave 6 — p. 21: «ويسمى الاسمُ المنتهي بالألف مقصوراً».
  maqsur:{ar:'اسْمٌ مَقْصُورٌ',en:'a maqṣūr noun — one ending in a permanent alif'},
  // Wave 12 — p. 21's other named class: «ويسمى الاسمُ المنتهي بالياء منقوصاً».
- manqus:{ar:'اسْمٌ مَنْقُوصٌ',en:'a manqūṣ noun — one ending in a permanent yāʾ'}
+ manqus:{ar:'اسْمٌ مَنْقُوصٌ',en:'a manqūṣ noun — one ending in a permanent yāʾ'},
+ /* Wave 15 — p. 54's own words for the class, in the indefinite these entries use:
+    «لِأَنَّ كُلَّ وَاحِدٍ مِنْهُمَا اسْمٌ لَا يَنْصَرِفُ». p. 52 explains what that means —
+    «وَمَعْنَى كَوْنِهِ لَا يَنْصَرِفُ: أَنَّهُ لَا يَقْبَلُ الصَّرْفَ، وَهُوَ التَّنْوِينُ». */
+ mamnu:{ar:'اسْمٌ لَا يَنْصَرِفُ',en:'a noun that does not take tanwīn (اسْمٌ لَا يَنْصَرِفُ)'}
 });
 /* English keeps the familiar transliterated state words (rafʿ/naṣb/khafḍ/jazm) but names the
    SIGN itself in Arabic, so the learner keeps meeting the real iʿrāb vocabulary. */
@@ -17069,6 +17206,8 @@ const WHY_SIGN_NAME=Object.freeze({
  kasra:{ar:'الْكَسْرَةُ',en:'the كَسْرَةُ'},sukun:{ar:'السُّكُونُ',en:'the سُكُونُ'},
  alif:{ar:'الْأَلِفُ',en:'the أَلِفُ'},waw:{ar:'الْوَاوُ',en:'the وَاوُ'},ya:{ar:'الْيَاءُ',en:'the يَاءُ'},
  kasraSub:{ar:'الْكَسْرَةُ نِيَابَةً عَنِ الْفَتْحَةِ',en:'the كَسْرَة in place of the فَتْحَة'},
+ // Wave 15 — read from the one pinned copy, never retyped.
+ fathaSub:{ar:MAMNU_SIGN_AR,en:'the فَتْحَة in place of the كَسْرَة'},
  nunKept:{ar:'ثُبُوتُ النُّونِ',en:'ثُبُوتُ النُّونِ'},
  nunDropped:{ar:'حَذْفُ النُّونِ',en:'حَذْفُ النُّونِ'},
  // Wave 6 — the estimated one. p. 21 names the preventer as well as the sign.
@@ -17806,6 +17945,20 @@ function whySignNoun(t){
  if(t.inflection==='sfp'&&t.state==='nasb')return{id,
   ar:`وَ${wq(t.word)} ${form.ar}، وَهُوَ يُنْصَبُ بِالْكَسْرَةِ نِيَابَةً عَنِ الْفَتْحَةِ.`,
   en:`${eq(t.word)} is ${form.en}, and it takes the كَسْرَة in place of the فَتْحَة for naṣb.`};
+ /* Wave 15 — the ممنوع من الصرف says one thing more than any other class, because p. 54 says one
+    thing more about it: after the sign it names the PREVENTER. «وَالْمَانِعُ مِنْ صَرْفِ إِبْرَاهِيمَ
+    الْعَلَمِيَّةُ وَالْعُجْمَةُ، وَالْمَانِعُ مِنْ صَرْفِ عُمَرَ: الْعَلَمِيَّةُ وَالْعَدْلُ» — two
+    words, two different pairs of ʿilal, and a learner who cannot say which pair applies has not
+    learnt pp. 52–53. The ʿilal are registry DATA on the word, never inferred from its letters, and
+    a mamnūʿ noun that reaches here without them is a registration error rather than a silent
+    omission. It stays ONE Why line, so no per-token Why budget moves. */
+ if(t.inflection==='mamnu'){
+  const illahAr=t.lexeme&&t.lexeme.illahAr,illahEn=t.lexeme&&t.lexeme.illahEn;
+  if(!illahAr||!illahEn)throw new Error(`A ممنوع من الصرف noun reached the Why with no registered ʿillah: ${t.word}`);
+  return{id,
+   ar:`وَ${wq(t.word)} ${form.ar}، فَعَلَامَةُ ${st.sign} ${sign.ar}؛ وَالْمَانِعُ مِنْ صَرْفِهِ ${illahAr}.`,
+   en:`${eq(t.word)} is ${form.en}, so its sign of ${st.signEn} is ${sign.en}; what prevents it from taking tanwīn is ${illahEn}.`};
+ }
  return{id,
   ar:`وَ${wq(t.word)} ${form.ar}، فَعَلَامَةُ ${st.sign} ${sign.ar}.`,
   en:`${eq(t.word)} is ${form.en}, so its sign of ${st.signEn} is ${sign.en}.`};
@@ -21001,6 +21154,21 @@ function add(starts,form,state,sign,build,metadata={}){
    throw new Error(`Template ${stableId} moved the estimated-sign lane off the accusative-object target.`);
   }
  }
+ /* Wave 15 — the same declaration for الممنوع من الصرف, and the same reason for holding the lane in
+    place. A diptote's khafḍ sign is «الفتحة نيابة عن الكسرة», which is neither a «Word form» nor a
+    sign the filters model, so the lane's TARGET must stay the ordinary singular mubtadaʾ. Moving it
+    onto the diptote would advertise a tuple that does not exist. */
+ const diptoteNounKeys=Object.freeze([...(metadata.diptoteNounKeys||[])]);
+ if(diptoteNounKeys.some((key,position)=>diptoteNounKeys.indexOf(key)!==position||!DIPTOTE_NOUNS[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered diptote noun.`);
+ }
+ if(diptoteNounKeys.length){
+  if(diptoteNounKeys.length!==1)throw new Error(`Template ${stableId} mixes diptote nouns.`);
+  if(estimatedSignNounKeys.length)throw new Error(`Template ${stableId} mixes the diptote lane with the estimated-sign lane.`);
+  if(form!=='singular'||state!=='raf'||sign!=='damma'){
+   throw new Error(`Template ${stableId} moved the diptote lane off the nominative-mubtadaʾ target.`);
+  }
+ }
  const conditionalGovernor=isConditionalGovernor(GRAMMAR_RULES.governors[presentGovernor]);
  if(conditionalGovernor!==Boolean(responsePairIds.length)){
   throw new Error(`Template ${stableId} must declare response pairs exactly when its governor is conditional.`);
@@ -21082,6 +21250,7 @@ function add(starts,form,state,sign,build,metadata={}){
   munadaPairKeys,
   presentCapabilities,
   estimatedSignNounKeys,
+  diptoteNounKeys,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
 }
@@ -23511,6 +23680,49 @@ function buildAmrExercise(key){
 }
 add('verb','singular','nasb','fatha',()=>buildAmrExercise('uktub'),{amrVerbKey:'uktub'});
 add('verb','singular','nasb','fatha',()=>buildAmrExercise('iftah'),{amrVerbKey:'iftah'});
+
+/* ── Wave 15 — نِيَابَةُ الْفَتْحَةِ عَنِ الْكَسْرَةِ reaches a card ────────────────────────────
+   One lane per registered diptote, in the shape p. 54 parses these very words in: a governing
+   ḥarf khafḍ and, after it, a noun that does not take tanwīn. The book's own two sentences are
+   «صَلَّى اللهُ عَلَى إِبْرَاهِيمَ خَلِيلِهِ» and «رَضِيَ اللهُ عَنْ عُمَرَ أَمِيرِ الْمُؤْمِنِينَ»,
+   and the two prepositions they use — عَلَى and عَنْ — are already in humanPrepActions attached to
+   «يُسَلِّمُ» and «يَسْأَلُ», so each diptote keeps the ḥarf khafḍ the source pairs it with rather
+   than drawing one at random. The trailing apposition of both sentences is NOT reproduced: the book
+   does not say whether خَلِيلِهِ is a badal or an ʿaṭf bayān, and this app may not decide that for it.
+
+   These REUSE the existing noun/singular/rafʿ/ḍammah filter tuple — the learner's target stays the
+   mubtadaʾ, an ordinary singular with a visible ḍammah — so no new filter tuple, no new «Word form»
+   option and no new sign option are advertised. That is the registration Wave 6 used for the
+   maqṣūr سِوَى and Wave 12 for الْقَاضِي and الْفَتَى, and for the same reason: the substituted sign
+   is something the learner READS in a full iʿrāb, not something they filter for.
+
+   Registered LAST, as every wave is, so no earlier family's stableId ordinal moves. */
+const DIPTOTE_PREPOSITIONS=Object.freeze(Object.assign(Object.create(null),{
+ /* p. 54's own pairing, kept: عَلَى governs إِبْرَاهِيمَ, عَنْ governs عُمَرَ. */
+ ibrahim:'عَلَى',
+ umar:'عَنْ'
+}));
+function diptotePrepAction(key){
+ const prep=DIPTOTE_PREPOSITIONS[key];
+ const matches=humanPrepActions.filter(action=>action.prep===prep&&!action.adverb);
+ if(!matches.length)throw new Error(`No registered ḥarf khafḍ action for the diptote ${key}: ${prep}`);
+ return matches[0];
+}
+for(const key of DIPTOTE_NOUN_KEYS){
+ const diptote=DIPTOTE_NOUNS[key];
+ add('noun','singular','raf','damma',()=>{
+  const s=pickPerson(),a=diptotePrepAction(key);
+  return{sentence:`${s.nom} ${a.pres} ${a.prep} ${diptote.gen}`,
+   translation:`${cap(s.en)} ${a.third} ${diptote.en}.`,
+   tokens:[
+    token(s.nom,s.en,AR.mubtada(s.nom),EN.mubtada,true),
+    token(a.pres,a.third,AR.presentPred(a.pres,'مَرْفُوعٌ',VISIBLE_DAMMA),EN.present),
+    relationToken(a),
+    token(diptote.gen,diptote.en,AR.majrur(diptote.gen,a.prep),
+     'A noun that does not take tanwīn; its khafḍ is marked by a fatḥah standing in for the kasrah.')
+   ]};
+ },{diptoteNounKeys:[key]});
+}
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

@@ -21,6 +21,7 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
+  composeSentence,
   renderNounAnalysis,
   nounRoleArabic,
   renderVerbAnalysis,
@@ -6868,12 +6869,15 @@ function assertNominalPair(data,label){
     assert(khabar.phraseAr.includes('جَارٌّ وَمَجْرُورٌ')||khabar.phraseAr.includes('ظَرْفٌ'),`${label}: delayed mubtada lacks its complete attached expression`);
     assert(khabar.phraseAr.includes('مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ مُقَدَّمٍ'),`${label}: delayed mubtada lacks its source-grounded omitted fronted khabar`);
     assert(khabar.phraseAr.includes(`«${mubtada.word}»`),`${label}: fronted khabar does not name its delayed mubtada`);
-    const phrase=data.tokens.slice(0,mubtadaIndex).map(token=>token.word).join(' ');
+    /* the app's OWN composer, never a second hand-written join: و/ف/ب/ك/ل are proclitics
+       and are written joined to the word after them, so a naive join asserts a phrase the card
+       must not contain («فِي الْفَصْلِ وَ الْمَكْتَبِ»). */
+    const phrase=api.composeSentence(data.tokens.slice(0,mubtadaIndex));
     assert(khabar.phraseAr.includes(phrase),`${label}: fronted khabar omits the complete phrase “${phrase}”`);
   }else if(verbIndex>=0){
     stats.verbalKhabar++;
     const verb=data.tokens[verbIndex];
-    const clause=data.tokens.slice(mubtadaIndex+1).map(token=>token.word).join(' ');
+    const clause=api.composeSentence(data.tokens.slice(mubtadaIndex+1));
     const constructionEnd=data.tokens.at(-1);
     assert(khabar===constructionEnd,`${label}: verbal khabar was not attached after its final component`);
     assert(constructionEnd.phraseAr.includes(api.KHABAR_CLAUSE_KINDS.verbal.ar),`${label}: missing verbal-sentence label`);
@@ -6912,7 +6916,7 @@ function assertNominalPair(data,label){
     const phraseStart=data.tokens.findIndex((token,index)=>index>mubtadaIndex
       &&(api.isKhafdParticleType(token.grammar.particleType)||api.isLicensedZarfKhabar(data,token)));
     assert(phraseStart>=0,`${label}: phrase-like khabar has no phrase lead`);
-    const phrase=data.tokens.slice(phraseStart).map(token=>token.word).join(' ');
+    const phrase=api.composeSentence(data.tokens.slice(phraseStart));
     assert(khabar.phraseAr.includes(phrase),`${label}: phrase-like khabar omits the complete phrase “${phrase}”`);
   }else{
     stats.directKhabar++;

@@ -10179,18 +10179,65 @@ const CONCEALED_AN_MODES=Object.freeze({
 });
 const CONCEALED_AN_CONSTRUCTIONS=Object.freeze({
  lamTalil:Object.freeze({id:'lamTalil',particleType:'lamTalilConcealedAn',surface:'لِ',mode:'jawazan',ruleId:'G_LAM_TALIL_CONCEALED_AN',
-  nameAr:'لَامِ التَّعْلِيلِ',nameEn:'lām al-taʿlīl',frame:'purpose',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_05',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_05'}),
+  nameArKhafd:'لَامِ التَّعْلِيلِ',declinable:true,nameEn:'lām al-taʿlīl',frame:'purpose',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_05',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_05'}),
  lamJuhud:Object.freeze({id:'lamJuhud',particleType:'lamJuhud',surface:'لِ',mode:'wujuban',ruleId:'G_LAM_JUHUD_CONCEALED_AN',
-  nameAr:'لَامِ الْجُحُودِ',nameEn:'lām al-juḥūd',frame:'negatedKana',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_06',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_06'}),
+  nameArKhafd:'لَامِ الْجُحُودِ',declinable:true,nameEn:'lām al-juḥūd',frame:'negatedKana',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_06',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_06'}),
  hatta:Object.freeze({id:'hatta',particleType:'hattaNasb',surface:'حَتَّى',mode:'wujuban',ruleId:'G_HATTA_CONCEALED_AN',
-  nameAr:'حَتَّى',nameEn:'ḥattā',frame:'purposeEndpoint',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_07',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_07'}),
+  nameArKhafd:'حَتَّى',declinable:false,nameEn:'ḥattā',frame:'purposeEndpoint',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_07',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_07'}),
  faSababiyya:Object.freeze({id:'faSababiyya',particleType:'faSababiyya',surface:'فَ',mode:'wujuban',ruleId:'G_FA_SABABIYYA_CONCEALED_AN',
-  nameAr:'فَاءِ السَّبَبِيَّةِ',nameEn:'fāʾ al-sababiyyah',frame:'negativeResult',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_08',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_08'}),
+  nameArKhafd:'فَاءِ السَّبَبِيَّةِ',declinable:true,nameEn:'fāʾ al-sababiyyah',frame:'negativeResult',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_08',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_08'}),
  wawMaiyya:Object.freeze({id:'wawMaiyya',particleType:'wawMaiyya',surface:'وَ',mode:'wujuban',ruleId:'G_WAW_MAIYYA_CONCEALED_AN',
-  nameAr:'وَاوِ الْمَعِيَّةِ',nameEn:'wāw al-maʿiyyah',frame:'negativeAccompaniment',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_09',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09'}),
+  nameArKhafd:'وَاوِ الْمَعِيَّةِ',declinable:true,nameEn:'wāw al-maʿiyyah',frame:'negativeAccompaniment',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_09',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_09'}),
  aw:Object.freeze({id:'aw',particleType:'awNasb',surface:'أَوْ',mode:'wujuban',ruleId:'G_AW_CONCEALED_AN',
-  nameAr:'«أَوْ» الَّتِي بِمَعْنَى «إِلَى أَنْ»',nameEn:'aw meaning “until”',frame:'untilMeaning',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_10',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10'})
+  nameArKhafd:'«أَوْ» الَّتِي بِمَعْنَى «إِلَى أَنْ»',declinable:false,nameEn:'aw meaning “until”',frame:'untilMeaning',ordinaryTemplateId:'T_PARTICLE_PRESENT_NASB_FATHA_10',fiveTemplateId:'T_PARTICLE_FIVEVERBS_NASB_NUNDROPPED_10'})
 });
+/* ── the construction's NAME, in the case its SLOT requires ─────────────────────────────
+   Four of these six names are iḍāfahs — «لَامُ الْجُحُودِ», «فَاءُ السَّبَبِيَّةِ» — in which the
+   muḍāf takes whatever case its position demands while the muḍāf ilayhi stays in khafḍ for
+   good. The registry stores exactly ONE copy of each name, in the khafḍ form its commonest
+   slot («… بَعْدَ لَامِ الْجُحُودِ») needs, and this helper re-vowels the muḍāf alone. Storing
+   three hand-typed copies is how combining-mark order has drifted invisibly here before.
+
+   It replaces `nameAr.replace(/ِ$/,'ُ')`, which the particle's own iʿrāb card used to apply.
+   That expression re-voweled the LAST word — the muḍāf ilayhi, i.e. exactly the word whose
+   khafḍ is permanent — and left the muḍāf in khafḍ, so the card read «لِ: لَامِ الْجُحُودُ»
+   and «فَ: فَاءِ السَّبَبِيَّةُ»: both halves of the iḍāfah wrong at once. Two Why clauses and
+   the combined-analysis card had the matching fault, each using the khafḍ form where its own
+   sentence governed rafʿ («هُوَ …») or naṣb («رَبَطَ … التَّرْكِيبُ»).
+
+   حَتَّى and the «أَوْ» phrase are indeclinable here, so they answer with one form for all
+   three cases; `declinable` says which is which and the invariant below proves it. */
+const IDAFA_CASE_MARK=Object.freeze({raf:'ُ',nasb:'َ',khafd:'ِ'});
+function concealedAnName(construction,state){
+ const mark=IDAFA_CASE_MARK[state];
+ if(!mark)throw new Error(`Unknown case «${state}» for a concealed-an construction name.`);
+ if(!construction.declinable)return construction.nameArKhafd;
+ const [mudaf,...rest]=construction.nameArKhafd.split(' ');
+ return [mudaf.slice(0,-1)+mark,...rest].join(' ');
+}
+(function verifyConcealedAnNames(){
+ for(const id of Object.keys(CONCEALED_AN_CONSTRUCTIONS)){
+  const record=CONCEALED_AN_CONSTRUCTIONS[id];
+  if(typeof record.nameArKhafd!=='string'||!record.nameArKhafd)throw new Error(`Concealed-an ${id} has no stored name.`);
+  if(typeof record.declinable!=='boolean')throw new Error(`Concealed-an ${id} does not declare whether its name declines.`);
+  const mudaf=record.nameArKhafd.split(' ')[0];
+  /* declinable ⇔ the stored muḍāf really ends in the kasrah this helper re-vowels. A name
+     edited into another shape trips here rather than silently rendering an unchanged form. */
+  if(record.declinable!==mudaf.endsWith(IDAFA_CASE_MARK.khafd)){
+   throw new Error(`Concealed-an ${id} declares declinable=${record.declinable} but its muḍāf «${mudaf}» says otherwise.`);
+  }
+  const forms=['raf','nasb','khafd'].map(state=>concealedAnName(record,state));
+  if(concealedAnName(record,'khafd')!==record.nameArKhafd)throw new Error(`Concealed-an ${id} does not round-trip its own khafḍ form.`);
+  if(record.declinable&&new Set(forms).size!==3)throw new Error(`Concealed-an ${id} declines but two of its cases collide.`);
+  if(!record.declinable&&new Set(forms).size!==1)throw new Error(`Concealed-an ${id} does not decline yet answers with more than one form.`);
+  /* the muḍāf ilayhi may never move: only the first word carries the slot's case */
+  for(const form of forms){
+   if(form.split(' ').slice(1).join(' ')!==record.nameArKhafd.split(' ').slice(1).join(' ')){
+    throw new Error(`Concealed-an ${id} re-voweled its muḍāf ilayhi, whose khafḍ is permanent.`);
+   }
+  }
+ }
+})();
 const CONCEALED_AN_BY_PARTICLE=Object.freeze(Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(item=>[item.particleType,item])));
 const CONCEALED_AN_FRAME_DATA=Object.freeze({
  lamTalil:Object.freeze({prefixPast:'دَرَسَ',targetPast:'حَفِظَ',targetObject:'الدَّرْسَ'}),
@@ -10410,7 +10457,11 @@ const WEAK_FINAL_VERBS=Object.freeze(Object.assign(Object.create(null),{
  baqiya:Object.freeze({key:'baqiya',letter:'alif',past:'بَقِيَ',pres:'يَبْقَى',juss:'يَبْقَ',
   en:'remain',third:'remains',pastEn:'remained',objectKeys:Object.freeze([])}),
  radiya:Object.freeze({key:'radiya',letter:'alif',past:'رَضِيَ',pres:'يَرْضَى',juss:'يَرْضَ',
-  en:'be content',third:'is content',pastEn:'was content',objectKeys:Object.freeze([])}),
+  /* `en` fills the bare-verb slot after English do-support («… did not ${v.en}»), so a copular
+     phrase cannot stand there: «be content» rendered «The Muslim did not be content». Its six
+     weak-final siblings all carry a plain verb (strive, remain, rise, call, hope for), and this
+     one now does too, keeping the same sense across all three slots. */
+  en:'feel content',third:'feels content',pastEn:'felt content',objectKeys:Object.freeze([])}),
  sama:Object.freeze({key:'sama',letter:'waw',past:'سَمَا',pres:'يَسْمُو',juss:'يَسْمُ',
   en:'rise',third:'rises',pastEn:'rose',objectKeys:Object.freeze([])}),
  daa:Object.freeze({key:'daa',letter:'waw',past:'دَعَا',pres:'يَدْعُو',juss:'يَدْعُ',
@@ -17418,7 +17469,7 @@ function renderVerbAnalysis(token){
   ?deriveConcealedAnNasb(token._data||{tokens:token._tokens},(token._tokens||[]).indexOf(token)):concealedAnRefusal('not-concealed');
  const concealedConstruction=concealedAuthorization.authorized?CONCEALED_AN_CONSTRUCTIONS[concealedAuthorization.construction]:null;
  const concealedMode=concealedConstruction?CONCEALED_AN_MODES[concealedConstruction.mode]:null;
- const concealedCause=concealedConstruction?` بِأَنْ مُضْمَرَةٍ ${concealedMode.ar} بَعْدَ ${concealedConstruction.nameAr}`:'';
+ const concealedCause=concealedConstruction?` بِأَنْ مُضْمَرَةٍ ${concealedMode.ar} بَعْدَ ${concealedAnName(concealedConstruction,'khafd')}`:'';
  /* Wave 14 — when no governor supplies a cause, the source does not leave the rafʿ uncaused: it
     names تجرُّده من الناصب والجازم, and that is what the learner must practise. Asked of the
     authority rather than inferred from the empty string above, so a verb that reaches here with a
@@ -17557,7 +17608,7 @@ function renderParticleAnalysis(token){
  }
  const concealed=CONCEALED_AN_BY_PARTICLE[type];
  if(concealed){
-  token.ar=`${token.word}: ${concealed.nameAr.replace(/ِ$/u,'ُ')}، حَرْفٌ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
+  token.ar=`${token.word}: ${concealedAnName(concealed,'raf')}، حَرْفٌ مَبْنِيٌّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
   token.en=`${concealed.nameEn}; it licenses the canonical concealed-an construction.`;return;
  }
  if(type==='maNafiyaKana'){token.ar=`${token.word}: حَرْفُ نَفْيٍ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;token.en='A negating particle, built on sukūn, with no syntactic position of its own.';return}
@@ -18421,7 +18472,7 @@ function whyStateVerb(t,data){
   const authorization=deriveConcealedAnNasb(data,data.tokens.indexOf(t));
   if(!authorization.authorized)throw new Error(`WHY: concealed an is not licensed (${authorization.reason}).`);
   const mode=CONCEALED_AN_MODES[concealed.mode];
-  return{id:'WHY_STATE_VERB_CONCEALED_AN',ar:`${wq(t.word)} فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِأَنْ مُضْمَرَةٍ ${mode.ar} بَعْدَ ${concealed.nameAr}.`,en:`${eq(t.word)} is مَنْصُوبٌ by a concealed أَنْ (${mode.en}) after ${concealed.nameEn}.`};
+  return{id:'WHY_STATE_VERB_CONCEALED_AN',ar:`${wq(t.word)} فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِأَنْ مُضْمَرَةٍ ${mode.ar} بَعْدَ ${concealedAnName(concealed,'khafd')}.`,en:`${eq(t.word)} is مَنْصُوبٌ by a concealed أَنْ (${mode.en}) after ${concealed.nameEn}.`};
  }
  /* Phase 3B1 — إِذَنْ. This is the ONE state Why that may not say merely "a nāṣib precedes it, so
     it is منصوب": p. 75 makes the naṣb conditional, so the explanation has to say WHY THIS
@@ -18677,7 +18728,7 @@ const WHY_PARTICLE=Object.freeze({
  atfBalNegation:t=>({id:'WHY_ATF_CONTEXT_BAL',ar:`${wq(t.word)} حَرْفُ نَفْيٍ هَيَّأَ سِيَاقَ الْإِضْرَابِ بِـ«بَلْ».`,en:`${eq(t.word)} supplies the negation for the registered rectification with بَلْ.`}),
  atfLakinNegation:t=>({id:'WHY_ATF_CONTEXT_LAKIN',ar:`${wq(t.word)} حَرْفُ نَفْيٍ هَيَّأَ سِيَاقَ الِاسْتِدْرَاكِ بِـ«لَكِنْ».`,en:`${eq(t.word)} supplies the negation required for conjunctive لَكِنْ.`}),
  ...Object.fromEntries(Object.values(CONCEALED_AN_CONSTRUCTIONS).map(construction=>[construction.particleType,t=>({
-  id:`WHY_PARTICLE_${construction.id.toUpperCase()}`,ar:`${wq(t.word)} هُوَ ${construction.nameAr} فِي التَّرْكِيبِ الْمُسَجَّلِ، وَلَيْسَ نَاصِبًا بِنَفْسِهِ.`,
+  id:`WHY_PARTICLE_${construction.id.toUpperCase()}`,ar:`${wq(t.word)} هُوَ ${concealedAnName(construction,'raf')} فِي التَّرْكِيبِ الْمُسَجَّلِ، وَلَيْسَ نَاصِبًا بِنَفْسِهِ.`,
   en:`${eq(t.word)} is ${construction.nameEn} in the registered construction; it is not itself a direct nāṣib.`
  })]))
 });
@@ -19154,7 +19205,7 @@ function buildRelationshipWhy(rel,data){
   const construction=CONCEALED_AN_CONSTRUCTIONS[rel.construction];
   const mode=CONCEALED_AN_MODES[rel.mode];
   if(!construction||!mode)return{ids,ar,en};
-  push({id:'WHY_REL_CONCEALED_AN_LICENSE',ar:`رَبَطَ هَذَا التَّرْكِيبُ ${construction.nameAr} بِالْفِعْلِ، فَكَانَ نَاصِبُهُ «أَنْ» الْمُضْمَرَةَ ${mode.ar}.`,en:`This construction links ${construction.nameEn} to the verb, whose nāṣib is a concealed أَنْ (${mode.en}).`});
+  push({id:'WHY_REL_CONCEALED_AN_LICENSE',ar:`رَبَطَ هَذَا التَّرْكِيبُ ${concealedAnName(construction,'nasb')} بِالْفِعْلِ، فَكَانَ نَاصِبُهُ «أَنْ» الْمُضْمَرَةَ ${mode.ar}.`,en:`This construction links ${construction.nameEn} to the verb, whose nāṣib is a concealed أَنْ (${mode.en}).`});
   return{ids,ar,en};
  }
  if(rel.type==='follower'){
@@ -19215,7 +19266,7 @@ function buildRelationshipWhy(rel,data){
  }
  const mubtada=data.tokens.find(item=>item.id===rel.mubtadaId);
  const anchor=data.tokens.find(item=>item.id===(rel.khabarId||rel.anchorId));
- const phrase=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)?.word).filter(Boolean).join(' ');
+ const phrase=composeSentence(rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)).filter(Boolean));
  if(rel.khabarKind==='verbalSentence'){
   push({id:'WHY_REL_VERBAL_KHABAR',ar:`${wq(phrase)} جُمْلَةٌ فِعْلِيَّةٌ أَخْبَرَتْ عَنِ الْمُبْتَدَأِ ${wq(mubtada.word)}.`,en:`${eq(phrase)} is a verbal sentence that gives information about the مُبْتَدَأ ${eq(mubtada.word)}.`});
   const attached=anchor.inflection==='afalKhamsa';
@@ -19394,7 +19445,7 @@ function renderRelationshipAnalysis(data){
   const parts=conditionRelationshipParts(rel,data);
   if(!parts)return;
   const {adah,shart,jawab}=parts;
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   jawab.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: ${CONDITION_ROLES.adah.ar} ${wq(adah.word)}، وَ${CONDITION_ROLES.shart.ar} ${wq(shart.word)}، وَ${CONDITION_ROLES.jawab.ar} ${wq(jawab.word)}، وَالْأَدَاةُ جَزَمَتْهُمَا جَمِيعًا.`;
   jawab.phraseEn=`Together, “${phrase}” is one conditional structure: ${CONDITION_ROLES.adah.en} “${adah.word}”, ${CONDITION_ROLES.shart.en} “${shart.word}”, and ${CONDITION_ROLES.jawab.en} “${jawab.word}” — the tool makes both verbs jussive.`;
   jawab.phraseLabel='Conditional construction';
@@ -19406,7 +19457,7 @@ function renderRelationshipAnalysis(data){
   const parts=haalMahallRelationshipParts(rel,data);
   if(!parts)return;
   const {head,verb,sahib}=parts;
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   sahib.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: ${wq(head.word)} ${HAAL_ISTIFHAM.nameAr} فِي مَحَلِّ ${HAAL_MAHALL.ar} حَالٌ مِنْ ${wq(sahib.word)}، وَعَامِلُهُ ${wq(verb.word)}، وَقُدِّمَ عَلَى الْكَلَامِ كُلِّهِ لِأَنَّهُ اسْمُ اسْتِفْهَامٍ.`;
   sahib.phraseEn=`Together, “${phrase}”: “${head.word}” is ${HAAL_ISTIFHAM.nameEn} holding the position of ${HAAL_MAHALL.en} as the haal of “${sahib.word}”, governed by “${verb.word}”, and it is put before the whole sentence because it is an interrogative.`;
   sahib.phraseLabel='Haal construction';
@@ -19415,7 +19466,7 @@ function renderRelationshipAnalysis(data){
   const parts=zannaRelationshipParts(rel,data);
   if(!parts)return;
   const {verb,first,second,record}=parts;
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   const origin=`${record.proposition.first.nom} ${record.proposition.second.nom}`;
   second.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: أَصْلُهُ «${origin}» مُبْتَدَأٌ وَخَبَرٌ، فَدَخَلَ عَلَيْهِمَا ${wq(verb.word)} فَنَصَبَهُمَا جَمِيعًا، فَصَارَ ${wq(first.word)} مَفْعُولًا أَوَّلَ وَ${wq(second.word)} مَفْعُولًا ثَانِيًا.`;
   second.phraseEn=`Together, “${phrase}”: its origin is the sentence “${origin}”, a mubtadaʾ and its khabar. “${verb.word}” entered upon them and made both accusative, so “${first.word}” became its first object and “${second.word}” its second.`;
@@ -19426,7 +19477,7 @@ function renderRelationshipAnalysis(data){
   const munada=data.tokens.find(item=>item.id===rel.munadaId);
   const label=MUNADA_SUBTYPE_LABELS[rel.subtype];
   if(!particle||!munada||!label)return;
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   const recipient=data.tokens[data.tokens.length-1];
   const ruling=rel.binaa
    ?`فَبُنِيَ عَلَى ${MUNADA_BINAA_SIGNS[rel.binaaMarker].ar} فِي مَحَلِّ ${MUNADA_MAHALL.ar}`
@@ -19440,7 +19491,7 @@ function renderRelationshipAnalysis(data){
   const companion=data.tokens.find(item=>item.id===rel.companionId);
   const pair=MAFUL_MAAH_PAIR_REGISTRY[rel.pairKey];
   if(!verb||!companion||!pair)return;
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   companion.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: الْوَاوُ لِلْمَعِيَّةِ لَا لِلْعَطْفِ، ${pair.reasonAr}، فَتَعَيَّنَ نَصْبُ ${wq(companion.word)} عَلَى الْمَعِيَّةِ.`;
   companion.phraseEn=`Together, “${phrase}”: the wāw is for accompaniment, not conjunction — ${pair.reasonEn} — so “${companion.word}” can only be accusative as a mafʿūl maʿah.`;
   companion.phraseLabel='Mafʿūl maʿah construction';
@@ -19450,7 +19501,7 @@ function renderRelationshipAnalysis(data){
   const subject=data.tokens.find(item=>item.id===rel.subjectId);
   const motive=data.tokens.find(item=>item.id===rel.motiveId);
   if(!verb||!subject||!motive)return;
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   motive.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: ${wq(motive.word)} مَصْدَرٌ قَلْبِيٌّ بَيَّنَ سَبَبَ ${wq(verb.word)}، وَاتَّحَدَ مَعَهُ فِي الْوَقْتِ وَفِي الْفَاعِلِ ${wq(subject.word)}، فَنُصِبَ مَفْعُولًا لِأَجْلِهِ.`;
   motive.phraseEn=`Together, “${phrase}”: “${motive.word}” is an inward maṣdar giving the reason for “${verb.word}”, sharing its time and its doer “${subject.word}”, so it is accusative as a mafʿūl lah.`;
   motive.phraseLabel='Mafʿūl lah construction';
@@ -19464,7 +19515,7 @@ function renderRelationshipAnalysis(data){
   if(!authority.authorized)return;
   const khabar=data.tokens.find(item=>item.id===authority.khabarId);
   if(!khabar)return;
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   khabar.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: وَقَعَ بَعْدَ «لَا» مَعْرِفَةٌ وَهِيَ ${wq(authority.mubtadaWord)}، وَ«لَا» النَّافِيَةُ لِلْجِنْسِ لَا تَنْصِبُ إِلَّا النَّكِرَاتِ، فَوَجَبَ إِلْغَاءُ عَمَلِهَا وَوَجَبَ تَكْرَارُهَا؛ فَهِيَ ${LA_MUHMALA_PARTICLE.nameAr}، وَبَقِيَتِ الْجُمْلَةُ عَلَى أَصْلِهَا: ${wq(authority.mubtadaWord)} مُبْتَدَأٌ، وَ${wq(authority.followerWord)} مَعْطُوفٌ عَلَى ${wq(authority.mubtadaWord)}، وَ${wq(authority.khabarWord)} خَبَرٌ.`;
   khabar.phraseEn=`Together, “${phrase}”: a definite word, “${authority.mubtadaWord}”, fell after «لا», and this «لا» makes only indefinites accusative — so cancelling it AND repeating it both became obligatory. It is a cancelled لا, and the sentence stays what it was: “${authority.mubtadaWord}” is the mubtadaʾ, “${authority.followerWord}” is joined to it, and “${authority.khabarWord}” is the khabar.`;
   khabar.phraseLabel='cancelled «لا» construction';
@@ -19490,7 +19541,7 @@ function renderRelationshipAnalysis(data){
   const authority=deriveLaJinsAuthority(data,data.tokens.indexOf(ism));
   if(!authority.authorized)return;
   const label=LA_JINS_SUBTYPE_LABELS[authority.subtype];
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   const rulingAr=authority.binaa
    ?`مَحَلًّا، فَهُوَ مَبْنِيٌّ عَلَى ${LA_JINS_BINAA_SIGNS[authority.binaaSignId].ar} فِي مَحَلِّ ${LA_JINS_MAHALL.ar}،`
    :'لَفْظًا،';
@@ -19542,7 +19593,7 @@ function renderRelationshipAnalysis(data){
   const roleEn={faail:'the fāʿil of “'+verb.word+'”, and so nominative',
    object:'the mafʿūl bihi of “'+verb.word+'”, and so accusative',
    majrur:'makhfūḍ by the particle of khafḍ that “'+verb.word+'” requires'}[rel.role];
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   noun.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: كَلَامٌ ${ISTITHNA_REGIME_LABELS.naqis.bareAr}؛ لِأَنَّ الْمُسْتَثْنَى مِنْهُ لَمْ يُذْكَرْ فِيهِ أَصْلًا، وَالنَّاقِصُ لَا يَكُونُ إِلَّا مَنْفِيًّا، وَحِينَئِذٍ يَجْرِي الِاسْمُ بَعْدَ ${wq(illa.word)} عَلَى حَسَبِ مَا قَبْلَهَا مِنَ الْعَوَامِلِ، فَجَاءَ ${wq(noun.word)} ${roleAr} لِـ${wq(verb.word)}، وَلَيْسَ مُسْتَثْنًى مَنْصُوبًا.`;
   noun.phraseEn=`Together, “${phrase}” is INCOMPLETE speech: the group the exception would be taken from is never mentioned at all, and incomplete speech of this kind is always negated. So the noun after “${illa.word}” simply runs on the ʿāmil before it — “${noun.word}” is ${roleEn}, and NOT an accusative mustathnā.`;
   noun.phraseLabel='Istithnāʾ construction';
@@ -19556,7 +19607,7 @@ function renderRelationshipAnalysis(data){
   const adaat=data.tokens.find(item=>item.id===authority.adaatId);
   const whole=data.tokens.find(item=>item.id===authority.wholeId);
   if(!noun||!adaat||!whole)return;
-  const phrase=data.tokens.map(item=>item.word).join(' ');
+  const phrase=composeSentence(data.tokens);
   if(authority.masdariyya){
    noun.phraseAr=`وَالتَّرْكِيبُ «${phrase}»: تَقَدَّمَتْ «${ISTITHNA_MA_MASDARIYYA.surface}» الْمَصْدَرِيَّةُ عَلَى ${wq(adaat.word)}، وَهِيَ لَا تَدْخُلُ إِلَّا عَلَى الْأَفْعَالِ؛ فَتَعَيَّنَ كَوْنُهَا فِعْلًا، وَوَجَبَ نَصْبُ ${wq(noun.word)} عَلَى الْمَفْعُولِيَّةِ، وَامْتَنَعَ خَفْضُهُ.`;
    noun.phraseEn=`Together, “${phrase}”: the maṣdar-forming mā stands before “${adaat.word}”, and it enters only upon verbs — so “${adaat.word}” must be a verb here, “${noun.word}” must be its accusative object, and the khafḍ reading is no longer available.`;
@@ -19604,7 +19655,7 @@ function renderRelationshipAnalysis(data){
   const construction=CONCEALED_AN_CONSTRUCTIONS[rel.construction];
   const mode=CONCEALED_AN_MODES[rel.mode];
   if(!verb||!licensor||!construction||!mode)return;
-  verb.phraseAr=`وَالتَّرْكِيبُ «${licensor.word}${verb.word}» رَبَطَ ${construction.nameAr} بِالْمُضَارِعِ، وَنَاصِبُهُ «أَنْ» مُضْمَرَةٌ ${mode.ar}.`;
+  verb.phraseAr=`وَالتَّرْكِيبُ «${licensor.word}${verb.word}» رَبَطَ ${concealedAnName(construction,'nasb')} بِالْمُضَارِعِ، وَنَاصِبُهُ «أَنْ» مُضْمَرَةٌ ${mode.ar}.`;
   verb.phraseEn=`Together, the licensed ${construction.nameEn} construction supplies a concealed أَنْ (${mode.en}) as the verb's nāṣib.`;
   verb.phraseLabel='Construction';
  });
@@ -19619,8 +19670,7 @@ function renderRelationshipAnalysis(data){
       the إلغاء construction of p. 167 puts a repeated «لا» between the conjunction and its maʿṭūf,
       and a combined block that quoted «الْمُعَلِّمُ وَ الطَّبِيبُ» would be quoting a sentence the
       learner is not looking at. Every other lane has nothing in between, so nothing else moves. */
-   const span=data.tokens.slice(data.tokens.indexOf(followed),data.tokens.indexOf(follower)+1)
-    .map(item=>item.word).join(' ');
+   const span=composeSentence(data.tokens.slice(data.tokens.indexOf(followed),data.tokens.indexOf(follower)+1));
    followed.phraseAr=`وَالتَّرْكِيبُ «${span}»: مَعْطُوفٌ عَلَيْهِ، وَحَرْفُ عَطْفٍ، وَمَعْطُوفٌ تَابِعٌ لَهُ فِي الْإِعْرَابِ.`;
    followed.phraseEn=`Together, “${span}” is a maʿṭūf ʿalayh, a conjunction, and a maʿṭūf inheriting its state.`;
    followed.phraseLabel='Follower';
@@ -19663,7 +19713,7 @@ function renderRelationshipAnalysis(data){
  data.relationships.filter(rel=>rel.type==='mubtadaKhabar').forEach(rel=>{
   const mubtada=data.tokens.find(item=>item.id===rel.mubtadaId);
   const anchor=data.tokens.find(item=>item.id===(rel.khabarId||rel.anchorId));
-  const phrase=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)?.word).filter(Boolean).join(' ');
+  const phrase=composeSentence(rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)).filter(Boolean));
   if(!anchor)return;
   if(rel.khabarKind==='nominalSentence'){
    const parts=khabarClauseRelationshipParts(rel,data);
@@ -20517,6 +20567,28 @@ function validateExercise(data){
       &&rel.id===token.relations.zannaRelationshipId
       &&(rel.firstId===token.id||rel.secondId===token.id)))){
    fail('E_ORPHAN_ZANNA_OBJECT','An object of ẓanna is not linked to the structure that made it accusative.',token);
+  }
+  /* Release QA — the reciprocal these three constructions were missing. Every other governing
+     relationship in this validator is DEMANDED by the token it governs, so deleting the record
+     invalidates the exercise. `condition`, `istithnaNaqis` and `istithnaKhala` were the only
+     three whose record could be deleted while the exercise still validated: their tokens carried
+     the claim («فِعْلُ الشَّرْطِ ... مَجْزُومٌ بِإِنْ») in their own metadata and nothing asked the
+     structure to back it up — the metadata-only governor authority the rest of this file refuses.
+
+     Nothing reachable produced that state: every builder emits the record, and
+     restoreExerciseSnapshot rebuilds relationships from the template rather than trusting the
+     snapshot, so a truncated History entry cannot carry it in either. What the gap did cost is
+     silence — the combined-analysis card is composed FROM the record, so a future edit that
+     stopped emitting it would drop «وَالتَّرْكِيبُ …» and leave the token cards still asserting a
+     government no structure expressed. */
+  if(token.grammar.shartRole&&!relationships.some(rel=>rel.type==='condition'
+    &&(token.grammar.shartRole==='shart'?rel.shartId:rel.jawabId)===token.id)){
+   fail('E_ORPHAN_CONDITION_VERB','A verb of a conditional structure is not linked to the condition that jussives it.',token);
+  }
+  for(const [field,type] of [['istithnaNaqisRelationshipId','istithnaNaqis'],['istithnaKhalaRelationshipId','istithnaKhala']]){
+   if(token.relations[field]&&!relationships.some(rel=>rel.type===type&&rel.id===token.relations[field])){
+    fail('E_ORPHAN_ISTITHNA_STRUCTURE','A token of an exception structure names a relationship the exercise does not carry.',token);
+   }
   }
   if((token.grammar.role===ISM_LA_ROLE||token.grammar.role===KHABAR_LA_ROLE)
     &&(!token.relations.governorId||!relationships.some(rel=>rel.type==='laJins'

@@ -56,6 +56,25 @@ const skeleton = text => String(text || '')
   .replace(/\s+/g, ' ')
   .trim();
 
+/* ── Arabic mark-ORDER normalisation: same base letters, and on each letter the same MULTISET
+   of combining marks, canonicalised by sorting. Two strings equal under this are the same word
+   however their ḥarakāt happen to be stored — which is the drift skeleton() exists to absorb —
+   while «ثَمَّ»/«ثُمَّ» and «أَلَمْ»/«أَلَمٌ» still compare unequal, because those differ in WHICH
+   mark they carry, not in what order. It is the exact-word test skeleton() cannot make.
+   ──────────────────────────────────────────────────────────────────────────────────────── */
+const COMBINING = /[ؐ-ًؚ-ٰٟۖ-ۭ]/;
+function markOrder(text) {
+  const source = String(text || ''), out = [];
+  let i = 0;
+  while (i < source.length) {
+    const base = source[i++], marks = [];
+    while (i < source.length && COMBINING.test(source[i])) marks.push(source[i++]);
+    marks.sort();
+    out.push(base + marks.join(''));
+  }
+  return out.join('');
+}
+
 /* ── load the application exactly as work/check-nominal-pairs.js does, by SLICING that
    harness's own injection block and DOM/vm bootstrap. Nothing is re-implemented here, so
    the two files cannot drift apart. ─────────────────────────────────────────────────── */
@@ -95,7 +114,10 @@ const cardHeads = new Map();       // head word skeleton -> Set(card body skelet
 const rawCardHeads = new Map();    // head word skeleton -> Set(head word AS RENDERED, unfolded)
 const whyText = new Set();
 const defText = new Set();
-const sentences = new Set();
+/* sentence skeleton -> { raw: <one exact rendering>, tpl: Set(stableId) }. A `sentence` row is
+   proved by the SENTENCE, so its lanes have to be counted from the templates that generate that
+   sentence; the raw copy is kept so the proof can also demand the exact word (see below). */
+const sentences = new Map();
 let built = 0;
 
 function collect(node, sink) {
@@ -112,7 +134,12 @@ for (let i = 0; i < api.templates.length; i++) {
     try { data = api.buildTemplate(i); api.renderExercise(data); }
     catch (error) { fail(`template ${stableId} refused to build/render: ${error.message}`); break; }
     built++;
-    sentences.add(skeleton(data.sentence));
+    {
+      const key = skeleton(data.sentence);
+      let record = sentences.get(key);
+      if (!record) { record = { raw: data.sentence, tpl: new Set() }; sentences.set(key, record); }
+      record.tpl.add(stableId);
+    }
     for (const token of data.tokens) {
       /* The rendered iʿrāb has THREE surfaces, not two. Besides the whole-word card
          (token.ar) and the combined-analysis card (token.phraseAr), every internal component
@@ -245,11 +272,29 @@ function observe(row) {
     if (ok && tpl.size === 0) tpl = new Set(['<card>']);
   } else if (mode === 'sentence') {
     /* WHOLE-WORD match: skeleton(«أَلَمْ») is "الم", which is a substring of
-       skeleton(«الْمُعَلِّمُ»). Only a standalone word counts. */
+       skeleton(«الْمُعَلِّمُ»). Only a standalone word counts.
+
+       …and the whole word must be the RIGHT one. Folding also erases the ḥarakah that separates
+       «أَلَمْ» from «أَلَمٌ», the same one-vowel difference that let «ثُمَّ» answer for «ثَمَّ» in
+       card mode, so candidacy is decided on the skeleton and the PROOF is decided on markOrder():
+       same letters carrying the same marks, in whatever order they were stored.
+
+       The lanes are then the templates that generate those sentences. They used to come from
+       templatesFor(), a plain substring search of the iʿrāb corpus — which for «أَلَمْ» matched
+       the "الم" inside «الْمُبْتَدَأِ», «الْمَاءَ», «الْمُتَرْجِمُ» … and recorded 203 template
+       lanes, and a randomization grade of GOOD, for a term two templates produce. The permanent
+       inventory stated that as fact; it is a false statement about the corpus, and this is the
+       narrowest fix that makes the count mean what its own proof string says. */
     const s = skeleton(row.probe);
+    const wanted = markOrder(row.probe);
     let n = 0;
-    for (const sent of sentences) if (sent.split(' ').includes(s)) n++;
-    tpl = n ? templatesFor(row.probe) : new Set();
+    tpl = new Set();
+    for (const record of sentences.values()) {
+      if (!skeleton(record.raw).split(' ').includes(s)) continue;
+      if (!record.raw.split(/\s+/).some(word => markOrder(word.replace(/[^؀-ۿ]/g, '')) === wanted)) continue;
+      n++;
+      record.tpl.forEach(id => tpl.add(id));
+    }
     if (n && tpl.size === 0) tpl = new Set(Array.from({ length: Math.min(n, 8) }, (_, i) => '<sentence' + i + '>'));
   } else if (mode === 'standalone') {
     tpl = standalone(row.probe);

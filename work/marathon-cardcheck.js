@@ -62,6 +62,47 @@ for (let i = 0; i < api.templates.length; i++) {
 }
 console.log('distinct card heads: ' + cardHeads.size);
 
+/* ── --mention <KEY>: where, exactly, does a GENERIC_ONLY row's probe live? ─────────────────
+   Rebuilds the checker's why/defs corpora the way the checker builds them, so a GENERIC_ONLY
+   verdict can be read rather than guessed at — in particular, whether the hit is a real mention
+   or a skeleton artefact (skeleton(«مُعْرَبٌ») is "معرب", a substring of "المعربات"). */
+if (process.argv[2] === '--mention') {
+  const collect = (node, sink) => {
+    if (node == null) return;
+    if (typeof node === 'string') { sink.push(node); return; }
+    if (Array.isArray(node)) { node.forEach(x => collect(x, sink)); return; }
+    if (typeof node === 'object') for (const k of Object.keys(node)) collect(node[k], sink);
+  };
+  const whyText = new Set(), defText = new Set();
+  for (let i = 0; i < api.templates.length; i++) {
+    for (let r = 0; r < 12; r++) {
+      const data = api.buildTemplate(i);
+      api.renderExercise(data);
+      for (const token of data.tokens) {
+        const sink = [];
+        collect(token.why, sink); collect(token.phraseWhy, sink);
+        for (const line of sink) if (/[؀-ۿ]/.test(line)) whyText.add(line);
+      }
+    }
+  }
+  { const sink = []; collect(api.grammarDefinitionGroups, sink);
+    for (const line of sink) if (/[؀-ۿ]/.test(line)) defText.add(line); }
+  console.log('why lines: ' + whyText.size + ', def lines: ' + defText.size);
+  for (const key of process.argv.slice(3)) {
+    const row = rows.find(r => r.key === key);
+    if (!row) { console.log(key + ': no such row'); continue; }
+    const s = skeleton(row.probe);
+    console.log('\n=== ' + key + '  probe=' + JSON.stringify(row.probe) + '  skeleton=' + JSON.stringify(s));
+    for (const [label, corpus] of [['WHY', whyText], ['DEFS', defText]]) {
+      const folded = [...corpus].filter(l => skeleton(l).includes(s));
+      const exact = folded.filter(l => l.includes(row.probe));
+      console.log('  ' + label + ': ' + folded.length + ' folded hit(s), ' + exact.length + ' spelling it exactly');
+      for (const l of folded.slice(0, 4)) console.log('     | ' + l.slice(0, 240));
+    }
+  }
+  process.exit(0);
+}
+
 /* ── GLOBAL AUDIT: every card-mode row whose skeleton head is AMBIGUOUS ──────────────────────
    Two different raw spellings that fold to one skeleton head is exactly how B_ZARF_THAMMA
    («ثَمَّ») came to be scored FULL by «ثُمَّ» the ḥarf ʿaṭf. A row in that position is only

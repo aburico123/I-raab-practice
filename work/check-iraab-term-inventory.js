@@ -1687,7 +1687,10 @@ const MARATHON15 = {
        ʿāmil. The first is a reading-choice between two already-counted analyses; the second is a
        word-class fact about something else, reached through a «وقولنا:» gloss. */
     B_MAAH_ATF: 'notCounted',
-    B_MAAH_ISM_FAIL: 'notCounted'
+    B_MAAH_ISM_FAIL: 'notCounted',
+    /* باب الإعراب والبناء — the inventory's last GENERIC_ONLY row. Taught in the definitions
+       panel with p. 22's own wording, uttered in no parse in the book. */
+    F_MUARAB: 'notCounted'
   }
 };
 {
@@ -1735,6 +1738,16 @@ const MARATHON15 = {
     stillProduced('B_MAFUL_AJL', 'the mafʿūl-lah حالات');
     stillProduced('X_MAKHFUD_HARF', 'the mafʿūl-lah حالات');
     stillProduced('X_MUDAF', 'the muḍāf mafʿūl lah');
+  }
+  if (MARATHON15.retired.F_MUARAB) {
+    /* Wave 9's standing rule: a notCounted term can still owe a lesson, and this one does — it is
+       half of the book's own مُعْرَب/مَبْنِيّ contrast. Both halves are pinned: the muʿrab must stay
+       TAUGHT, and the mabnī must stay PERFORMED, which is the whole reason only one of them is a
+       row. If the definition ever disappears, the retirement stops being honest. */
+    if (!mentionedOnly('مُعْرَبٌ') && !mentionedOnly('الْمُعْرَبُ')) {
+      fail('«معرب» is no longer taught anywhere, so retiring its row silently dropped the lesson');
+    }
+    stillProduced('F_MABNI', 'the muʿrab/mabnī contrast');
   }
   if (MARATHON15.retired.B_MAAH_ATF || MARATHON15.retired.B_MAAH_ISM_FAIL) {
     /* p. 174 names the two readings the نوع الثاني permits, in the source's own voice: naṣb as a

@@ -14,19 +14,19 @@
   "rule": "A row is FULL only when its canonical Arabic is observed in the rendered iʿrāb (token.ar / token.phraseAr). Appearing only in a Why explanation or in the definitions panel yields GENERIC_ONLY, never FULL."
  },
  "totals": {
-  "TOTAL": 275,
+  "TOTAL": 274,
   "FULL": 264,
-  "GENERIC_ONLY": 1,
+  "GENERIC_ONLY": 0,
   "PARTIAL": 0,
   "ABSENT": 3,
   "TRUE_BLOCKER": 7,
   "reconciles": true,
-  "percentFull": 96
+  "percentFull": 96.4
  },
  "randomizationTotals": {
   "GOOD": 162,
   "LIMITED": 102,
-  "NONE": 11
+  "NONE": 10
  },
  "marathon": {
   "target": 56,
@@ -128,6 +128,12 @@
    "reason": "The second of the two أنواع p. 173 gives the noun standing after the wāw — «ما يجوز نصبُه على ذلك وإتباعُه لما قبله في إعرابه معطوفاً عليه» — and therefore a statement about WHICH analysis is available, not a third analysis. p. 174 spells the alternatives out itself: for «حَضَرَ عَلِيٌّ وَمُحَمَّدٌ», «يَجُوزُ نَصْبُ «محمد» عَلَى أَنَّهُ مَفْعُولٌ مَعَهُ، وَيَجُوزُ رَفْعُهُ عَلَى أَنَّهُ مَعْطُوفٌ عَلَى «عليّ»» — and this inventory already counts both, as B_MAFUL_MAAH and as the maʿṭūf of باب العطف. The row’s own term is not the book’s wording; the book’s wording is «إتباعه لما قبله», and it is never uttered in a parse — p. 174’s أسئلة sets «أعرب المثالين اللذين في كلام المؤلف» as unanswered student work. The inventory carried no row for النوع الأول («ما يتعين نصبه»), which is precisely what all three productive lanes are, so this row tracked a coverage gap rather than a term. Its non-production stays recorded in deliberatelyNotGenerated."
   },
   {
+   "key": "F_MUARAB",
+   "term": "مُعْرَبٌ",
+   "pages": "19–24",
+   "reason": "Defined at p. 22 («الْمُعْرَبُ: مَا تَغَيَّرَ حَالُ آخِرِهِ لَفْظاً أَوْ تَقْدِيراً بِسَبَبِ تَغَيُّرِ الْعَوَامِلِ»), drilled by p. 22’s تمرين and p. 23’s أسئلة, and uttered in no iʿrāb anywhere in the book. The contrast with its pair is structural: a built word’s parse contains «مبني على …», so F_MABNI is a row; a muʿrab word’s parse states its state and sign instead and never says «معرب». It stays TAUGHT — the definitions panel carries an entry headed «الْمُعْرَبُ» with the source’s own wording — and the checker pins that it stays taught, exactly as الفضلة is pinned."
+  },
+  {
    "key": "B_MAAH_ISM_FAIL",
    "term": "الْمَفْعُولُ مَعَهُ عَامِلُهُ اسْمُ فَاعِلٍ",
    "pages": "173",
@@ -179,21 +185,6 @@
    "probeMode": "contains",
    "probeRequires": "",
    "observedTemplateLanes": 46
-  },
-  {
-   "key": "F_MUARAB",
-   "term": "مُعْرَبٌ",
-   "chapter": "باب الإعراب والبناء (pp. 19–24)",
-   "pages": "19–24",
-   "parent": "الإعراب والبناء",
-   "status": "GENERIC_ONLY",
-   "proof": "built 200× per template; «مُعْرَبٌ» observed in the rendered Why/definitions text only across 0 template lane(s) [mode=standalone]",
-   "missingReason": "The term is named in explanation or definition text, but the learner never says it as its own classification while performing iʿrāb.",
-   "randomization": "NONE",
-   "probe": "مُعْرَبٌ",
-   "probeMode": "standalone",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
   },
   {
    "key": "F_MABNI",
@@ -1027,13 +1018,13 @@
    "pages": "78",
    "parent": "نواصب المضارع",
    "status": "FULL",
-   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 109 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «أَوْ» observed in the rendered iʿrāb across 110 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَوْ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 109
+   "observedTemplateLanes": 110
   },
   {
    "key": "N_AN_MUDMARA_JAWAZ",
@@ -1117,13 +1108,13 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 40 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 39 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمَّا",
    "probeMode": "sentence",
    "probeRequires": "",
-   "observedTemplateLanes": 40
+   "observedTemplateLanes": 39
   },
   {
    "key": "J_HAMZAT_TAQRIR",
@@ -1807,13 +1798,13 @@
    "pages": "99–101",
    "parent": "المرفوعات",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 139 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 140 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 139
+   "observedTemplateLanes": 140
   },
   {
    "key": "M_KHABAR_MUFRAD",
@@ -4102,13 +4093,13 @@
    "pages": "176–177",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 41 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 40 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُذْ",
    "probeMode": "prep",
    "probeRequires": "",
-   "observedTemplateLanes": 41
+   "observedTemplateLanes": 40
   },
   {
    "key": "X_PREP_MUNDHU",

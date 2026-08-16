@@ -58,7 +58,9 @@ const rows = [
   R('F_ISM', 'اسْمٌ', CH.foundations, '9–13', 'أقسام الكلام', 'اسْمٌ', { mode: 'standalone' }),
   R('F_FIL', 'فِعْلٌ', CH.foundations, '9,14–16', 'أقسام الكلام', 'فِعْلٌ مَاضٍ'),
   R('F_HARF', 'حَرْفٌ', CH.foundations, '9,17–18', 'أقسام الكلام', 'حَرْفُ خَفْضٍ'),
-  R('F_MUARAB', 'مُعْرَبٌ', CH.irab, '19–24', 'الإعراب والبناء', 'مُعْرَبٌ', { mode: 'standalone' }),
+  /* FINAL MARATHON. «مُعْرَبٌ» is now in `notCounted`: this book defines and drills it, and never
+     utters it in a parse. Its pair «مَبْنِيٌّ» below is a row precisely because the book DOES
+     utter that one — the bināʾ marker is part of a built word's iʿrāb. */
   R('F_MABNI', 'مَبْنِيٌّ', CH.irab, '21–24', 'الإعراب والبناء', 'مَبْنِيٌّ عَلَى'),
   R('F_LA_MAHALL', 'لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ', CH.irab, '21–24', 'البناء', 'لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ'),
 
@@ -609,6 +611,22 @@ const notCounted = [
          ضَرْبَيْنِ: الْأَوَّلُ: الْفِعْلُ … الثَّانِي: الِاسْمُ الدَّالُّ عَلَى مَعْنَى الْفِعْلِ …
          كَاسْمِ الْفَاعِلِ». Again no row for الضرب الأول, which is what every shipped lane has. */
   { key: 'B_MAAH_ATF', term: 'الْعَطْفُ فِي مَوْضِعِ الْمَفْعُولِ مَعَهُ', pages: '173–174', reason: 'The second of the two أنواع p. 173 gives the noun standing after the wāw — «ما يجوز نصبُه على ذلك وإتباعُه لما قبله في إعرابه معطوفاً عليه» — and therefore a statement about WHICH analysis is available, not a third analysis. p. 174 spells the alternatives out itself: for «حَضَرَ عَلِيٌّ وَمُحَمَّدٌ», «يَجُوزُ نَصْبُ «محمد» عَلَى أَنَّهُ مَفْعُولٌ مَعَهُ، وَيَجُوزُ رَفْعُهُ عَلَى أَنَّهُ مَعْطُوفٌ عَلَى «عليّ»» — and this inventory already counts both, as B_MAFUL_MAAH and as the maʿṭūf of باب العطف. The row’s own term is not the book’s wording; the book’s wording is «إتباعه لما قبله», and it is never uttered in a parse — p. 174’s أسئلة sets «أعرب المثالين اللذين في كلام المؤلف» as unanswered student work. The inventory carried no row for النوع الأول («ما يتعين نصبه»), which is precisely what all three productive lanes are, so this row tracked a coverage gap rather than a term. Its non-production stays recorded in deliberatelyNotGenerated.' },
+  /* FINAL MARATHON CORRECTION — باب الإعراب والبناء. «مُعْرَبٌ» is the last GENERIC_ONLY row in
+     the inventory, and the verdict is honest rather than a probe artefact: the app's definitions
+     panel carries an entry headed «الْمُعْرَبُ» with p. 22's own wording, and three separate
+     definition lines spell the word exactly. It is TAUGHT and never PERFORMED.
+
+     The asymmetry with its own pair is the source's, and it is structural rather than accidental.
+     A built word's parse CONTAINS the claim: «قَالَ: فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ» — so
+     «مبني» is uttered every time, and F_MABNI is rightly a row. A muʿrab word's parse states its
+     STATE and its SIGN instead — «فَاعِلٌ مَرْفُوعٌ وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ»
+     — and has no «معرب» clause at all. Every model iʿrāb in this book behaves that way: pp. 94–95,
+     97, 103–104, 115, 123, 145, 157. The word appears in the definitional passage (p. 22, «فَإِنَّ
+     الْمُعْرَبَ: مَا تَغَيَّرَ حَالُ آخِرِهِ لَفْظاً أَوْ تَقْدِيراً بِسَبَبِ تَغَيُّرِ
+     الْعَوَامِلِ»), in the تمرين that asks the learner to SORT words («بَيِّنِ الْمُعْرَبَ
+     بِأَنْوَاعِهِ، وَالْمَبْنِيَّ»), and in p. 23's أسئلة — never in a parse. Sorting words into
+     muʿrab and mabnī is a classification exercise, not iʿrāb. */
+  { key: 'F_MUARAB', term: 'مُعْرَبٌ', pages: '19–24', reason: 'Defined at p. 22 («الْمُعْرَبُ: مَا تَغَيَّرَ حَالُ آخِرِهِ لَفْظاً أَوْ تَقْدِيراً بِسَبَبِ تَغَيُّرِ الْعَوَامِلِ»), drilled by p. 22’s تمرين and p. 23’s أسئلة, and uttered in no iʿrāb anywhere in the book. The contrast with its pair is structural: a built word’s parse contains «مبني على …», so F_MABNI is a row; a muʿrab word’s parse states its state and sign instead and never says «معرب». It stays TAUGHT — the definitions panel carries an entry headed «الْمُعْرَبُ» with the source’s own wording — and the checker pins that it stays taught, exactly as الفضلة is pinned.' },
   { key: 'B_MAAH_ISM_FAIL', term: 'الْمَفْعُولُ مَعَهُ عَامِلُهُ اسْمُ فَاعِلٍ', pages: '173', reason: 'A word-class fact about the ʿĀMIL, reached only through the شرح’s gloss of a qayd of its own definition — «وَقَوْلُنَا: "الْمَنْصُوبُ بِالْفِعْلِ أَوْ مَا فِيهِ مَعْنَى الْفِعْلِ وَحُرُوفُهُ" يَدُلُّ عَلَى أَنَّ الْعَامِلَ فِي الْمَفْعُولِ مَعَهُ عَلَى ضَرْبَيْنِ» — which is the same «وقولنا» construction that put الفضلة and الاسم المؤول بالصريح here in Wave 9. The mafʿūl maʿah’s own utterance is identical under both ضربان: parsing «الْأَمِيرُ حَاضِرٌ وَالْجَيْشَ» the learner says «وَالْجَيْشَ: مفعول معه منصوب وعلامة نصبه الفتحة الظاهرة», exactly as in «حَضَرَ الْأَمِيرُ وَالْجَيْشَ». What differs is the ʿāmil, and «اسم فاعل» is a morphological class this source teaches in باب الفاعل, not a claim made about the mafʿūl maʿah. As with its sibling, no row was ever carried for الضرب الأول, which is what the shipped lanes have. Its non-production stays recorded in deliberatelyNotGenerated.' }
 ];
 

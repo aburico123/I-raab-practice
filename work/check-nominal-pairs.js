@@ -449,6 +449,7 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   specs:AR,
   verbs,
   generalVerbActions,
+  isHumanNoun,
   nounLexicons:{singularPeople,singularThings,places,brokenHuman,brokenThings,duals,smp,sfp,fiveNouns,singularPredicates,dualPredicates,masculinePluralPredicates,femininePluralPredicates,masculineThingPredicates,feminineThingPredicates,ownedNouns},
   verbLexicons:{verbs,generalVerbActions,additionalVerbActions,humanActions,humanPrepActions,thingActions,thingPrepActions,femininePastActions,advancedPastActions,advancedPresentActions,brokenObjectActions},
   vocabularyHistory,
@@ -6706,7 +6707,7 @@ assert(elements.definitionsToggle.getAttribute('aria-expanded')==='true','Defini
 
 const mainNounKinds=['singularPeople','singularThings','places','brokenHuman','brokenThings','duals','smp','sfp','fiveNouns'];
 const mainNounEntries=mainNounKinds.flatMap(name=>api.nounLexicons[name]);
-assert(mainNounEntries.length===302,`Structured noun audit found ${mainNounEntries.length} entries instead of 302`);
+assert(mainNounEntries.length===545,`Structured noun audit found ${mainNounEntries.length} entries instead of 545`);
 const repeatedNounMeanings=[...new Set(mainNounEntries.map(item=>item.en).filter((meaning,index,all)=>all.indexOf(meaning)!==index))];
 assert(repeatedNounMeanings.length===0,`The ${mainNounEntries.length} main noun entries repeat: ${repeatedNounMeanings.join(', ')}`);
 for(const name of ['singularPeople','singularThings','places','brokenHuman','brokenThings']){
@@ -6782,7 +6783,7 @@ for(const list of [api.verbLexicons.verbs,api.verbLexicons.additionalVerbActions
 const verbMeaningKeys=[...uniquePresentRecords.values()].map(verb=>(verb.en||verb.third).toLowerCase());
 const repeatedVerbMeanings=[...new Set(verbMeaningKeys.filter((meaning,index,all)=>all.indexOf(meaning)!==index))];
 assert(repeatedVerbMeanings.length===0,`Distinct Arabic verb families repeat English meanings: ${repeatedVerbMeanings.join(', ')}`);
-assert(uniquePresentRecords.size+api.verbLexicons.femininePastActions.length===239,'The structured vocabulary does not contain 239 unique verb families');
+assert(uniquePresentRecords.size+api.verbLexicons.femininePastActions.length===334,'The structured vocabulary does not contain 334 unique verb families');
 
 const PLAIN_KHABAR=/(^|[\s:،])خَبَر[ٌٍ](?=$|[\s،.])/u;
 const stats={
@@ -9669,9 +9670,13 @@ for(const person of ['3fp','2fp']){
   assert(!wanted.size,`${person}: governed template never produced ${[...wanted].join(',')}`);
 }
 assert(Object.keys(c2Golden).length===6,'Phase-2b-C did not produce all six governed surfaces');
+// The leading constant is the ORDINARY verb index: the fully-conjugated base families plus two
+// surfaces (past + present) for every additionalVerbActions family and one for every action list.
+// The 2026-08 vocabulary expansion added 95 additional verb families = 190 ordinary surfaces,
+// which is the whole of the 604 → 794 move; no named registry below changed.
 // J1b adds exactly four surfaces per duʿāʾ lexeme (past/pres/acc/juss), owned by the frozen
 // duʿāʾ registry alone and reachable only inside a registered duʿāʾ frame.
-assert(api.verbFormIndex.size===604+2*Object.keys(api.PASSIVE_VERB_CAPABILITIES).length+Object.keys(api.MUTLAQ_VERB_CAPABILITIES).length+4*Object.keys(api.DUAA_LEXEMES).length+Object.keys(api.WEAK_FINAL_VERBS).length+Object.values(api.CONDITION_VERBS).filter(v=>v.owned).length+Object.keys(api.ZANNA_VERBS).length
+assert(api.verbFormIndex.size===794+2*Object.keys(api.PASSIVE_VERB_CAPABILITIES).length+Object.keys(api.MUTLAQ_VERB_CAPABILITIES).length+4*Object.keys(api.DUAA_LEXEMES).length+Object.keys(api.WEAK_FINAL_VERBS).length+Object.values(api.CONDITION_VERBS).filter(v=>v.owned).length+Object.keys(api.ZANNA_VERBS).length
   /* Wave 1 adds one present surface per بِ-of-taʿdiyah verb, owned by that frozen registry alone
      and reachable only inside the single lane that shows الباء carrying a verb to its object. */
   +api.WAVE1_BA_VERBS.length
@@ -19563,7 +19568,7 @@ assert(JSON.parse(storage.get('nahw-sentence-history-v1')).length===100,'Sentenc
 const additionalBlock=html.match(/const additionalVerbActions=\[([\s\S]*?)\n\];/)[1];
 const additionalRecords=[...additionalBlock.matchAll(/\{past:'([^']+)',pres:'([^']+)'/g)]
   .map(record=>({past:record[1],pres:record[2]}));
-assert(additionalRecords.length===196,`Expected 196 additional verb records, found ${additionalRecords.length}`);
+assert(additionalRecords.length===291,`Expected 291 additional verb records, found ${additionalRecords.length}`);
 const pastCoverageTemplate=api.templates.find(template=>template.stableId==='T_VERB_SINGULAR_RAF_DAMMA_01');
 const presentCoverageTemplate=api.templates.find(template=>template.stableId==='T_NOUN_SINGULAR_NASB_FATHA_01');
 assert(pastCoverageTemplate?.starts==='verb'&&pastCoverageTemplate.form==='singular'
@@ -19610,8 +19615,8 @@ for(const record of additionalRecords){
     `${record.pres}: canonical present coverage exercise did not validate`);
   additionalPresentSeen++;
 }
-assert(additionalPastSeen===196,`Only ${additionalPastSeen} of 196 added past verbs appeared`);
-assert(additionalPresentSeen===196,`Only ${additionalPresentSeen} of 196 added present verbs appeared`);
+assert(additionalPastSeen===291,`Only ${additionalPastSeen} of 291 added past verbs appeared`);
+assert(additionalPresentSeen===291,`Only ${additionalPresentSeen} of 291 added present verbs appeared`);
 
 const nounArrayNames=['singularPeople','singularThings','places','brokenHuman','brokenThings','duals','smp','sfp',
   'feminineHumanSingulars','feminineHumanDuals','fiveNouns'];
@@ -19627,8 +19632,8 @@ for(const name of presentArrayNames){
 }
 const femininePastBlock=html.match(/const femininePastActions=\[([\s\S]*?)\n\];/)[1];
 const totalVerbFamilies=uniquePresentVerbs.size+(femininePastBlock.match(/\{past:'/g)||[]).length;
-assert(nounEntries===308,`Expected 308 noun entries, found ${nounEntries}`);
-assert(totalVerbFamilies===239,`Expected 239 verb families, found ${totalVerbFamilies}`);
+assert(nounEntries===551,`Expected 551 noun entries, found ${nounEntries}`);
+assert(totalVerbFamilies===334,`Expected 334 verb families, found ${totalVerbFamilies}`);
 // The learner-facing footer must advertise the real, current totals in both English and Arabic-Indic
 // digits, so a future vocabulary change cannot update the engine counts while leaving the UI stale.
 const toArabicDigits=n=>String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[+d]);
@@ -19642,15 +19647,27 @@ assert(footerAr.includes(toArabicDigits(totalVerbFamilies))&&footerAr.includes(t
   `Footer (Arabic) ar-only span must state ${toArabicDigits(totalVerbFamilies)} and ${toArabicDigits(nounEntries)}`);
 
 // --- Vocabulary-expansion lexical audit (added with the 2026-07 vocabulary expansion) ---
+const readBaselineNoms=file=>new Set(fs.readFileSync(file,'utf8').match(/nom:'([^']+)'/g).map(m=>m.slice(5,-1)));
+const readBaselinePasts=file=>new Set([...fs.readFileSync(file,'utf8').matchAll(/past:'([^']+)'/g)].map(m=>m[1]));
+const preExpansionNoms=readBaselineNoms('work/index-pre-vocab-expansion-backup.html');
+const preBookNoms=readBaselineNoms('work/index-pre-book-vocab-expansion-backup.html');
+const preExpansionPasts=readBaselinePasts('work/index-pre-vocab-expansion-backup.html');
+const preBookPasts=readBaselinePasts('work/index-pre-book-vocab-expansion-backup.html');
+/* An expansion owns exactly the lexemes ITS baseline lacks and the NEXT baseline already has.
+   These three sets used to be read off the TAIL of each array (slice(-10) …), which the next
+   expansion silently steals the moment it appends; anchoring each set between two baselines
+   makes it permanent, so every expansion keeps being audited by its own block. */
+const fromJulyExpansion=list=>list.filter(item=>!preExpansionNoms.has(item.nom)&&preBookNoms.has(item.nom));
+const fromJulyVerbs=list=>list.filter(item=>!preExpansionPasts.has(item.past)&&preBookPasts.has(item.past));
 const addedNounEntries=[
-  ...api.nounLexicons.singularPeople.slice(-10),
-  ...api.nounLexicons.singularThings.slice(-20),
-  ...api.nounLexicons.places.slice(-10)
+  ...fromJulyExpansion(api.nounLexicons.singularPeople),
+  ...fromJulyExpansion(api.nounLexicons.singularThings),
+  ...fromJulyExpansion(api.nounLexicons.places)
 ];
 assert(addedNounEntries.length===40,`Expected 40 newly added noun entries, found ${addedNounEntries.length}`);
 const addedNomSurfaces=addedNounEntries.map(n=>n.nom);
 assert(new Set(addedNomSurfaces).size===addedNomSurfaces.length,'Two newly added nouns share the same Arabic nominative surface');
-const preExpansionNoms=new Set(fs.readFileSync('work/index-pre-vocab-expansion-backup.html','utf8').match(/nom:'([^']+)'/g).map(m=>m.slice(5,-1)));
+// preExpansionNoms is read above, beside the other expansion baselines.
 for(const noun of addedNounEntries){
   assert(!preExpansionNoms.has(noun.nom),`${noun.en}: newly added noun “${noun.nom}” already existed before the vocabulary expansion`);
 }
@@ -19660,15 +19677,15 @@ for(const noun of addedNounEntries){
   assert(noun.gen.endsWith('ِ')||/[ٍّ]$/u.test(noun.gen),`${noun.en}: added noun genitive has an unsupported ending`);
   assert(!/[ىأإ]$/u.test(noun.nom.replace(/[ً-ْ]/gu,'')),`${noun.en}: added noun looks defective (منقوص/مقصور), an unsupported morphology`);
 }
-const addedAdjectives=api.nounLexicons.singularPredicates.slice(-10);
+const addedAdjectives=fromJulyExpansion(api.nounLexicons.singularPredicates);
 assert(addedAdjectives.length===10,`Expected 10 newly added adjectives, found ${addedAdjectives.length}`);
 const allAdjectiveSurfaces=api.nounLexicons.singularPredicates.flatMap(a=>[a.nom,a.acc]);
 assert(new Set(allAdjectiveSurfaces).size===allAdjectiveSurfaces.length,'A duplicate Arabic adjective surface form exists');
 const allAdjectiveMeanings=api.nounLexicons.singularPredicates.map(a=>a.en.toLowerCase());
 assert(new Set(allAdjectiveMeanings).size===allAdjectiveMeanings.length,'Two adjectives share the same English gloss');
-const addedVerbRecords=additionalRecords.slice(-19);
+const addedVerbRecords=fromJulyVerbs(additionalRecords);
 assert(addedVerbRecords.length===19,`Expected 19 newly added verb families, found ${addedVerbRecords.length}`);
-const addedVerbLexemes=api.verbLexicons.additionalVerbActions.slice(-19);
+const addedVerbLexemes=fromJulyVerbs(api.verbLexicons.additionalVerbActions);
 for(const verb of addedVerbLexemes){
   const group=api.objectGroups[verb.group];
   assert(Array.isArray(group)&&group.length>0,`${verb.past}: object group “${verb.group}” referenced by a newly added verb is missing or empty`);
@@ -19701,11 +19718,17 @@ console.log(`Vocabulary-expansion lexical audit passed: ${addedNounEntries.lengt
 const bookBaseline=fs.readFileSync('work/index-pre-book-vocab-expansion-backup.html','utf8');
 const bookBaselineNoms=new Set(bookBaseline.match(/nom:'([^']+)'/g).map(m=>m.slice(5,-1)));
 const bookBaselinePasts=new Set([...bookBaseline.matchAll(/past:'([^']+)'/g)].map(m=>m[1]));
-const bookAddedPeople=api.nounLexicons.singularPeople.filter(n=>!bookBaselineNoms.has(n.nom));
-const bookAddedThings=api.nounLexicons.singularThings.filter(n=>!bookBaselineNoms.has(n.nom));
-const bookAddedPlaces=api.nounLexicons.places.filter(n=>!bookBaselineNoms.has(n.nom));
-const bookAddedAdjectives=api.nounLexicons.singularPredicates.filter(a=>!bookBaselineNoms.has(a.nom));
-const bookAddedVerbs=api.verbLexicons.additionalVerbActions.filter(v=>!bookBaselinePasts.has(v.past));
+/* The baseline the 2026-08 vocabulary expansion was cut from. Intersecting with it keeps the
+   book expansion's five counts describing the book expansion and nothing later. */
+const v2Baseline=fs.readFileSync('work/index-pre-vocabulary-expansion-2-backup.html','utf8');
+const v2BaselineNoms=new Set(v2Baseline.match(/nom:'([^']+)'/g).map(m=>m.slice(5,-1)));
+const v2BaselinePasts=new Set([...v2Baseline.matchAll(/past:'([^']+)'/g)].map(m=>m[1]));
+const fromBookExpansion=list=>list.filter(item=>!bookBaselineNoms.has(item.nom)&&v2BaselineNoms.has(item.nom));
+const bookAddedPeople=fromBookExpansion(api.nounLexicons.singularPeople);
+const bookAddedThings=fromBookExpansion(api.nounLexicons.singularThings);
+const bookAddedPlaces=fromBookExpansion(api.nounLexicons.places);
+const bookAddedAdjectives=fromBookExpansion(api.nounLexicons.singularPredicates);
+const bookAddedVerbs=api.verbLexicons.additionalVerbActions.filter(v=>!bookBaselinePasts.has(v.past)&&v2BaselinePasts.has(v.past));
 assert(bookAddedPeople.length===8,`Expected 8 added book people, found ${bookAddedPeople.length}`);
 assert(bookAddedThings.length===50,`Expected 50 added book/study nouns, found ${bookAddedThings.length}`);
 assert(bookAddedPlaces.length===4,`Expected 4 added places, found ${bookAddedPlaces.length}`);
@@ -19869,6 +19892,140 @@ for(const [gloss,approved] of Object.entries(approvedReligiousVerbs)){
   }
 }
 console.log(`Book-verb semantic lock passed: 20 verbs pinned to reviewed groups/glosses, ${Object.keys(bookGroupMembers).length} group memberships locked, forbidden and religious-safety pairings verified.`);
+
+// --- Vocabulary expansion 2 audit (2026-08-16) --------------------------------------
+// Every lexeme added on top of work/index-pre-vocabulary-expansion-2-backup.html. This is a
+// vocabulary change only: no new iʿrāb role, no new source rule, no new morphology class. Each
+// candidate had to fit an engine class that already existed, or it was dropped.
+const v2Added=name=>api.nounLexicons[name].filter(n=>!v2BaselineNoms.has(n.nom));
+const v2AddedPeople=v2Added('singularPeople'),v2AddedThings=v2Added('singularThings'),v2AddedPlaces=v2Added('places');
+const v2AddedBrokenHuman=v2Added('brokenHuman'),v2AddedBrokenThings=v2Added('brokenThings');
+const v2AddedDuals=v2Added('duals'),v2AddedSmp=v2Added('smp'),v2AddedSfp=v2Added('sfp');
+const v2AddedAdjectives=v2Added('singularPredicates');
+const v2AddedVerbs=api.verbLexicons.additionalVerbActions.filter(v=>!v2BaselinePasts.has(v.past));
+const v2Counts={people:[v2AddedPeople,56],things:[v2AddedThings,97],places:[v2AddedPlaces,40],
+  brokenHuman:[v2AddedBrokenHuman,8],brokenThings:[v2AddedBrokenThings,15],duals:[v2AddedDuals,11],
+  smp:[v2AddedSmp,8],sfp:[v2AddedSfp,8],adjectives:[v2AddedAdjectives,60],verbs:[v2AddedVerbs,95]};
+let v2Total=0;
+for(const [label,[list,expected]] of Object.entries(v2Counts)){
+  assert(list.length===expected,`Vocabulary expansion 2: expected ${expected} new ${label}, found ${list.length}`);
+  v2Total+=list.length;
+}
+assert(v2Total===398,`Vocabulary expansion 2: expected 398 new lexemes, found ${v2Total}`);
+const v2AddedNouns=[...v2AddedPeople,...v2AddedThings,...v2AddedPlaces,...v2AddedBrokenHuman,
+  ...v2AddedBrokenThings,...v2AddedDuals,...v2AddedSmp,...v2AddedSfp];
+// Morphology. Every added noun is definite, carries no tanwīn, is not maqṣūr/manqūṣ, and its three
+// case forms are ONE stem carrying three different signs — which is what makes them safely
+// declinable in every lane. The mark ranges are explicit escapes: an Arabic character class
+// typed as a literal range can silently swallow whole letters.
+const v2Marks=/[\u064B-\u0652]/gu;
+for(const noun of v2AddedNouns){
+  assert(noun.nom.startsWith('\u0627\u0644'),`${noun.en}: added noun is not definite`);
+  assert(!/[\u064B\u064C\u064D]/u.test(`${noun.nom}${noun.acc}${noun.gen}`),`${noun.en}: definite noun carries tanwīn`);
+  assert(!/[\u0649\u0623\u0625]$/u.test(noun.nom.replace(v2Marks,'')),`${noun.en}: added noun is maqṣūr/manqūṣ or hamza-on-alif final`);
+  for(const form of ['nom','acc','gen'])assert(noun[form]&&!noun[form].includes('undefined'),`${noun.en}: missing ${form} form`);
+}
+for(const noun of [...v2AddedPeople,...v2AddedThings,...v2AddedPlaces,...v2AddedBrokenHuman,...v2AddedBrokenThings]){
+  assert(noun.nom.slice(0,-1)===noun.acc.slice(0,-1)&&noun.nom.slice(0,-1)===noun.gen.slice(0,-1),
+    `${noun.en}: the three case forms are not one stem carrying three signs`);
+}
+for(const noun of [...v2AddedDuals,...v2AddedSmp])assert(noun.acc===noun.gen,`${noun.en}: dual/smp naṣb and khafḍ forms differ`);
+// Uniqueness of every added Arabic surface and English gloss across the whole noun registry.
+const v2AllNouns=bookMainNounKinds.flatMap(name=>api.nounLexicons[name]);
+for(const noun of v2AddedNouns){
+  assert(v2AllNouns.filter(n=>n.nom===noun.nom).length===1,`${noun.en}: added surface collides with an existing noun`);
+  assert(v2AllNouns.filter(n=>n.en===noun.en).length===1,`${noun.en}: added gloss collides with an existing noun gloss`);
+}
+// Added predicates: {nom,acc} with visible tanwīn, unique surface and unique gloss.
+for(const adj of v2AddedAdjectives){
+  assert(adj.nom&&adj.acc,`${adj.en}: added predicate is missing a case form`);
+  assert(adj.nom.endsWith('\u064C'),`${adj.en}: added predicate nominative lacks the tanwīn ḍamm`);
+  assert(adj.acc.endsWith('\u064B\u0627'),`${adj.en}: added predicate accusative lacks the tanwīn fatḥ`);
+  assert(api.nounLexicons.singularPredicates.filter(a=>a.nom===adj.nom).length===1,`${adj.en}: added predicate surface collides`);
+  assert(api.nounLexicons.singularPredicates.filter(a=>a.en===adj.en).length===1,`${adj.en}: added predicate gloss collides`);
+}
+// Added verbs: past on a visible fatḥah, present on a visible ḍammah, one canonical surface and
+// one canonical meaning apiece, and a real, non-empty object-compatibility group.
+const v2AllVerbLists=[api.verbLexicons.verbs,api.verbLexicons.additionalVerbActions,api.verbLexicons.humanActions,
+  api.verbLexicons.humanPrepActions,api.verbLexicons.thingActions,api.verbLexicons.thingPrepActions,api.verbLexicons.brokenObjectActions];
+const v2AllVerbs=v2AllVerbLists.flat();
+for(const verb of v2AddedVerbs){
+  for(const field of ['past','pres','en','third','pastEn','group'])assert(verb[field],`${verb.past||verb.en}: added verb is missing ${field}`);
+  assert(verb.past.endsWith('\u064E'),`${verb.past}: added past is not built on a visible fatḥah`);
+  assert(verb.pres.endsWith('\u064F'),`${verb.past}: added present lacks the visible ḍammah`);
+  assert(verb.pres.startsWith('\u064A'),`${verb.past}: added present is not the third-person masculine singular`);
+  assert(!'\u0649\u0627\u0648\u064A'.includes(verb.past.replace(v2Marks,'').slice(-1)),`${verb.past}: added verb has a weak final root letter`);
+  assert(v2AllVerbs.filter(v=>v.pres===verb.pres).length===1,`${verb.past}: present surface duplicates an existing verb family`);
+  assert(api.verbLexicons.generalVerbActions.filter(v=>v.en===verb.en).length===1,`${verb.past}: meaning “${verb.en}” is not one canonical family`);
+  const group=api.objectGroups[verb.group];
+  assert(Array.isArray(group)&&group.length>0,`${verb.past}: object group “${verb.group}” is missing or empty`);
+  assert(group.every(noun=>noun&&noun.acc&&noun.en),`${verb.past}: object group “${verb.group}” has a malformed member`);
+}
+// The new object-compatibility groups, and the pool each one is drawn from.
+const v2NewGroups={browsable:'singularThings',parsable:'singularThings',formulable:'singularThings',
+  narratable:'singularThings',editableText:'singularThings',money:'singularThings',payable:'singularThings',
+  applicable:'singularThings',choppable:'singularThings',harvestable:'singularThings',tearable:'singularThings',
+  diggableGround:'places'};
+for(const [name,pool] of Object.entries(v2NewGroups)){
+  assert(Array.isArray(api.objectGroups[name])&&api.objectGroups[name].length>0,`New object group “${name}” is empty or missing`);
+  assert(api.objectGroups[name].every(noun=>api.nounLexicons[pool].includes(noun)),`New object group “${name}” draws on a noun outside ${pool}`);
+}
+// Religious safety, on the same rule the book expansion set: a religious noun may only ever be the
+// object of a verb reviewed for it, and every other new verb must be unable to take one. The verb
+// surfaces are READ FROM THE APP by their English gloss, never retyped here.
+const v2ReligiousKeys=Object.keys(approvedReligiousVerbs);
+assert(v2ReligiousKeys.length===5,'The religious-safety gloss list changed shape');
+const v2RelKey=part=>{
+  const hits=v2ReligiousKeys.filter(key=>key.includes(part));
+  assert(hits.length===1,`Religious-safety gloss “${part}” no longer names exactly one noun`);
+  return hits[0];
+};
+const v2Quran=v2RelKey('Qur'),v2Hadith=v2RelKey('hadith'),v2Verse=v2RelKey('verse'),v2Sunnah=v2RelKey('Sunnah');
+const v2Surah=v2ReligiousKeys.find(key=>![v2Quran,v2Hadith,v2Verse,v2Sunnah].includes(key));
+assert(v2Surah,'The sūrah gloss vanished from the religious-safety list');
+const v2VerbPast=gloss=>{
+  const found=api.verbLexicons.additionalVerbActions.find(v=>v.en===gloss);
+  assert(found,`Religious safety: the reviewed verb “${gloss}” is missing`);
+  return sf(found.past);
+};
+const v2ApprovedReligious=new Map([
+  [v2Quran,['peruse','master','contemplate']],
+  [v2Hadith,['peruse','master','grasp','contemplate']],
+  [v2Verse,['grasp','contemplate','parse']],
+  [v2Surah,['contemplate']],
+  [v2Sunnah,[]]
+].map(([gloss,verbGlosses])=>[gloss,new Set(verbGlosses.map(v2VerbPast))]));
+for(const [gloss,approved] of v2ApprovedReligious){
+  for(const verb of v2AddedVerbs){
+    const takesIt=(api.objectGroups[verb.group]||[]).some(n=>n.en===gloss);
+    if(takesIt)assert(approved.has(sf(verb.past)),
+      `Religious safety: new verb ${verb.past} (“${verb.en}”) must not take “${gloss}”`);
+  }
+}
+// Reachability. Every added noun must be producible: people, places and the plural classes are
+// drawn on directly by their own templates, and every added thing must sit in at least one object
+// group (`general` holds all of singularThings, so this can only fail if the pool itself moved).
+const v2ReachableSurfaces=new Set([
+  ...api.nounLexicons.singularPeople.map(n=>n.nom),...api.nounLexicons.places.map(n=>n.nom),
+  ...api.nounLexicons.singularThings.map(n=>n.nom),...api.nounLexicons.brokenHuman.map(n=>n.nom),
+  ...api.nounLexicons.brokenThings.map(n=>n.nom),...api.nounLexicons.duals.map(n=>n.nom),
+  ...api.nounLexicons.smp.map(n=>n.nom),...api.nounLexicons.sfp.map(n=>n.nom),
+  ...Object.values(api.objectGroups).flat().map(n=>n.nom)]);
+for(const noun of v2AddedNouns)assert(v2ReachableSurfaces.has(noun.nom),`${noun.en}: added noun is not reachable through any generation pool`);
+for(const thing of v2AddedThings)assert(Object.values(api.objectGroups).some(group=>group.includes(thing)),`${thing.en}: added thing is wired into no object group`);
+// The dual lanes pick a human action or a thing action from the gloss. Both halves are asserted,
+// because a human dual handed to the thing actions produces “the student cleans the two students”.
+const v2HumanDuals=api.nounLexicons.duals.filter(d=>api.isHumanNoun(d));
+assert(v2HumanDuals.length>=12,`Only ${v2HumanDuals.length} duals are recognised as human`);
+for(const gloss of ['the two boxes','the two lamps','the two tables','the two keys','the two chairs','the two notebooks']){
+  const dual=api.nounLexicons.duals.find(d=>d.en===gloss);
+  assert(dual&&!api.isHumanNoun(dual),`The dual “${gloss}” is wrongly classified as human`);
+}
+for(const gloss of ['the two engineers','the two workers','the two researchers','the two drivers','the two Muslim men','the two students']){
+  const dual=api.nounLexicons.duals.find(d=>d.en===gloss);
+  assert(dual&&api.isHumanNoun(dual),`The dual “${gloss}” is not recognised as human`);
+}
+console.log(`Vocabulary expansion 2 audit passed: ${v2Total} new lexemes — ${v2AddedPeople.length} people, ${v2AddedThings.length} things, ${v2AddedPlaces.length} places, ${v2AddedBrokenHuman.length+v2AddedBrokenThings.length+v2AddedDuals.length+v2AddedSmp.length+v2AddedSfp.length} plural/dual forms, ${v2AddedAdjectives.length} predicates, ${v2AddedVerbs.length} verb families, ${Object.keys(v2NewGroups).length} new object groups.`);
 
 // ===================================================================================
 // Iʿrāb-state-filter audit (added with the state filter). The word-level filters

@@ -1,0 +1,3186 @@
+[
+ {
+  "kind": "brokenHuman",
+  "gloss": "the kings",
+  "role": "majrur",
+  "template": "T_PARTICLE_SMP_JARR_YA_03",
+  "sentence": "عَنْ الْمُلُوكِ أَجْمَعِينَ أَكْتَعِينَ أَبْتَعِينَ أَبْصَعِينَ سُؤَالٌ",
+  "translation": "There is a question about the kings, every single one of them."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the professor",
+  "role": "ismKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "أَصْبَحَ الْأُسْتَاذُ مُسْتَقِيمًا",
+  "translation": "The professor became upright."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "upright",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "أَصْبَحَ الْأُسْتَاذُ مُسْتَقِيمًا",
+  "translation": "The professor became upright."
+ },
+ {
+  "kind": "smp",
+  "gloss": "the authors",
+  "role": "object",
+  "template": "T_NOUN_SMP_NASB_YA_01",
+  "sentence": "الصَّيَّادُ يَقَابِلُ الْمُؤَلِّفِينَ",
+  "translation": "The fisherman meets the authors."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the husband",
+  "role": "ismKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "لَيْسَ الزَّوْجُ مُتَعَاوِنًا",
+  "translation": "The husband is not cooperative."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "cooperative",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "لَيْسَ الزَّوْجُ مُتَعَاوِنًا",
+  "translation": "The husband is not cooperative."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the bucket",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "وَضَعَ الْقَاضِي الدَّلْوَ",
+  "translation": "The judge placed the bucket."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two tables",
+  "role": "majrur",
+  "template": "T_NOUN_DUAL_JARR_YA_01",
+  "sentence": "الْمُنْشِدُ يَتَحَدَّثُ عَنْ الطَّاوِلَتَيْنِ",
+  "translation": "The chanter talks about the two tables."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the text editor",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07",
+  "sentence": "لِيَدْعُ الْمُحَقِّقُ الْعَالِمَ",
+  "translation": "Let the text editor call the scholar."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "blessed",
+  "role": "khabarKana",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_18",
+  "sentence": "مَا فَتِئَ حَمُوكَ مُبَارَكًا",
+  "translation": "Your father-in-law has not left off being blessed."
+ },
+ {
+  "kind": "brokenHuman",
+  "gloss": "the imams",
+  "role": "majrur",
+  "template": "T_PARTICLE_SMP_JARR_YA_02",
+  "sentence": "عَنْ الْأَئِمَّةِ كُلِّهِمْ أَجْمَعِينَ سُؤَالٌ",
+  "translation": "There is a question about the imams, all of them together."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the learner",
+  "role": "faail",
+  "template": "T_VERB_SMP_NASB_YA_01",
+  "sentence": "يُسَاعِدُ الْمُتَعَلِّمُ الْمُتَعَلِّمِينَ",
+  "translation": "The learner helps the learners."
+ },
+ {
+  "kind": "smp",
+  "gloss": "the learners",
+  "role": "object",
+  "template": "T_VERB_SMP_NASB_YA_01",
+  "sentence": "يُسَاعِدُ الْمُتَعَلِّمُ الْمُتَعَلِّمِينَ",
+  "translation": "The learner helps the learners."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the reviewer",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08",
+  "sentence": "لَا يَرْجُ الْمُرَاجِعُ الْجَوَابَ",
+  "translation": "Let the reviewer not hope for the answer."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the news reports",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_01",
+  "sentence": "الْمُصْلِحُ يَنْظُرُ إِلَى الْأَخْبَارِ",
+  "translation": "The repairer looks at the news reports."
+ },
+ {
+  "kind": "brokenHuman",
+  "gloss": "the boys",
+  "role": "mubtada",
+  "template": "T_NOUN_FIVEVERBS_RAF_NUNKEPT_01",
+  "sentence": "الْأَوْلَادُ يَغْسِلُونَ الْكُوبَ",
+  "translation": "The boys wash the cup."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the inspector",
+  "role": "faail",
+  "template": "T_VERB_DUAL_NASB_YA_01",
+  "sentence": "يُكَرِّمُ الْمُفَتِّشُ الْمُهَنْدِسَيْنِ",
+  "translation": "The inspector honors the two engineers."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two engineers",
+  "role": "object",
+  "template": "T_VERB_DUAL_NASB_YA_01",
+  "sentence": "يُكَرِّمُ الْمُفَتِّشُ الْمُهَنْدِسَيْنِ",
+  "translation": "The inspector honors the two engineers."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the lecturer",
+  "role": "ismKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "أَمْسَى الْمُحَاضِرُ غَاضِبًا",
+  "translation": "The lecturer ended the day being angry."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "angry",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "أَمْسَى الْمُحَاضِرُ غَاضِبًا",
+  "translation": "The lecturer ended the day being angry."
+ },
+ {
+  "kind": "brokenHuman",
+  "gloss": "the brothers",
+  "role": "object",
+  "template": "T_VERB_SMP_NASB_YA_04",
+  "sentence": "زَارَ الطَّالِبُ الْإِخْوَانَ أَجْمَعِينَ أَكْتَعِينَ أَبْتَعِينَ أَبْصَعِينَ",
+  "translation": "The student visited the brothers, every single one of them."
+ },
+ {
+  "kind": "places",
+  "gloss": "the courtyard",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "قَصَدَ الطَّالِبَانِ الْفِنَاءَ",
+  "translation": "The two students headed for the courtyard."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the assistant",
+  "role": "faail",
+  "template": "T_VERB_BROKEN_NASB_FATHA_01",
+  "sentence": "يَقْرَأُ الْمُسَاعِدُ الْأَجْوِبَةَ",
+  "translation": "The assistant reads the answers."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the dean",
+  "role": "faail",
+  "template": "T_VERB_SMP_NASB_YA_01",
+  "sentence": "يَحْتَرِمُ الْعَمِيدُ الْمُهَاجِرِينَ",
+  "translation": "The dean respects the emigrants."
+ },
+ {
+  "kind": "smp",
+  "gloss": "the emigrants",
+  "role": "object",
+  "template": "T_VERB_SMP_NASB_YA_01",
+  "sentence": "يَحْتَرِمُ الْعَمِيدُ الْمُهَاجِرِينَ",
+  "translation": "The dean respects the emigrants."
+ },
+ {
+  "kind": "sfp",
+  "gloss": "the mothers",
+  "role": "majrur",
+  "template": "T_NOUN_SFP_JARR_KASRA_02",
+  "sentence": "الطَّرْدُ مِنَ الْأُمَّهَاتِ",
+  "translation": "The parcel is from the mothers."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "follow up on",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "تَابَعَ حَمُوكَ الْمَلَفَّ",
+  "translation": "Your father-in-law followed up on the file."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the bookseller",
+  "role": "ismKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "بَاتَ الْوَرَّاقُ مُتَشَائِمًا",
+  "translation": "The bookseller spent the night being pessimistic."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "pessimistic",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "بَاتَ الْوَرَّاقُ مُتَشَائِمًا",
+  "translation": "The bookseller spent the night being pessimistic."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "recount",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "سَرَدَ الشَّاعِرُ الْقِصَّةَ",
+  "translation": "The poet recounted the story."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the poet",
+  "role": "faail",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "سَرَدَ الشَّاعِرُ الْقِصَّةَ",
+  "translation": "The poet recounted the story."
+ },
+ {
+  "kind": "smp",
+  "gloss": "the employees",
+  "role": "ismInna",
+  "template": "T_PARTICLE_SMP_NASB_YA_01",
+  "sentence": "إِنَّ الْمُوَظَّفِينَ مُجْتَهِدُونَ",
+  "translation": "Indeed, the employees are hardworking."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two workers",
+  "role": "ismInna",
+  "template": "T_PARTICLE_DUAL_NASB_YA_01",
+  "sentence": "لَكِنَّ الْعَامِلَيْنِ مُجْتَهِدَانِ",
+  "translation": "But the two workers are hardworking."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the literary man",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04",
+  "sentence": "لَا يَرْضَ الْأَدِيبُ",
+  "translation": "Let the literary man not feel content."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "sad",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "لَيْتَ أَبَاكَ حَزِينٌ",
+  "translation": "If only your father were sad."
+ },
+ {
+  "kind": "brokenHuman",
+  "gloss": "the shaykhs",
+  "role": "object",
+  "template": "T_VERB_SMP_NASB_YA_04",
+  "sentence": "زَارَ الطَّالِبُ الشُّيُوخَ أَجْمَعِينَ أَكْتَعِينَ أَبْتَعِينَ أَبْصَعِينَ",
+  "translation": "The student visited the shaykhs, every single one of them."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the president",
+  "role": "faail",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_06",
+  "sentence": "سَمِعَنِي الرَّئِيسُ",
+  "translation": "The president heard me."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the son",
+  "role": "mubtada",
+  "template": "T_NOUN_SMP_JARR_YA_01",
+  "sentence": "الِابْنُ يَسْأَلُ عَنْ الْمُجْتَهِدِينَ",
+  "translation": "The son asks about the hardworking men."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the advisor",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05",
+  "sentence": "لَمْ يَرْجُ الْمُسْتَشَارُ الْجَوَابَ",
+  "translation": "The advisor did not hope for the answer."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the witness",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "أَمَرَ الْفَتَى الشَّاهِدَ",
+  "translation": "The young man commanded the witness."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the nouns",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_01",
+  "sentence": "الشَّاهِدُ يَكْتُبُ عَنْ الْأَسْمَاءِ",
+  "translation": "The witness writes about the nouns."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the paternal uncle",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06",
+  "sentence": "لَمَّا يَرْجُ الْعَمُّ الْخَبَرَ",
+  "translation": "The paternal uncle did not yet hope for the news."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the pilgrim",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04",
+  "sentence": "لَا يَبْقَ الْحَاجُّ",
+  "translation": "Let the pilgrim not remain."
+ },
+ {
+  "kind": "sfp",
+  "gloss": "the truthful women",
+  "role": "object",
+  "template": "T_NOUN_SFP_NASB_KASRASUB_01",
+  "sentence": "الصَّيْدَلِيُّ يُرَافِقُ الصَّادِقَاتِ",
+  "translation": "The pharmacist accompanies the truthful women."
+ },
+ {
+  "kind": "brokenHuman",
+  "gloss": "the judges",
+  "role": "majrur",
+  "template": "T_PARTICLE_SMP_JARR_YA_03",
+  "sentence": "عَنْ الْقُضَاةِ أَجْمَعِينَ أَكْتَعِينَ أَبْتَعِينَ أَبْصَعِينَ سُؤَالٌ",
+  "translation": "There is a question about the judges, every single one of them."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the coat",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "عَلَّقَ الْفَتَى الْمِعْطَفَ",
+  "translation": "The young man hung the coat."
+ },
+ {
+  "kind": "sfp",
+  "gloss": "the female employees",
+  "role": "majrur",
+  "template": "T_NOUN_SFP_JARR_KASRA_01",
+  "sentence": "الْعَالِمُ يَنْظُرُ إِلَى الْمُوَظَّفَاتِ",
+  "translation": "The scholar looks at the female employees."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "tired",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "لَكِنَّ أَخَاكَ تَعِبٌ",
+  "translation": "But your brother is tired."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the boy",
+  "role": "mubtada",
+  "template": "T_NOUN_SFP_JARR_KASRA_01",
+  "sentence": "الْوَلَدُ يُسَلِّمُ عَلَى الْمُسَافِرَاتِ",
+  "translation": "The boy greets the female travelers."
+ },
+ {
+  "kind": "places",
+  "gloss": "the entrance",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْمَدْخَلِ طَالِبٌ",
+  "translation": "There is a student in the entrance."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the broom",
+  "role": "object",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "سَرَقَ أَبُوكَ الْمِكْنَسَةَ",
+  "translation": "Your father stole the broom."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the grammarian",
+  "role": "mubtada",
+  "template": "T_NOUN_SFP_NASB_KASRASUB_01",
+  "sentence": "النَّحْوِيُّ يَشْكُرُ الْأُمَّهَاتِ",
+  "translation": "The grammarian thanks the mothers."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "tear up",
+  "role": "past",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "مَزَّقَ الْخُدَّامُ الثَّوْبَ",
+  "translation": "The servants tore up the garment."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the player",
+  "role": "mubtada",
+  "template": "T_NOUN_BROKEN_NASB_FATHA_01",
+  "sentence": "اللَّاعِبُ يَجْمَعُ الْبُذُورَ",
+  "translation": "The player collects the seeds."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the orphan",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01",
+  "sentence": "لَمْ يَرْضَ الْيَتِيمُ",
+  "translation": "The orphan did not feel content."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the tourist",
+  "role": "mubtada",
+  "template": "T_NOUN_SMP_NASB_YA_01",
+  "sentence": "السَّائِحُ يَسْتَقْبِلُ الْمُبَرْمِجِينَ",
+  "translation": "The tourist welcomes the programmers."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "lengthen",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "أَطَالَ الْقَاضِي الْمَقَالَ",
+  "translation": "The judge lengthened the article."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the article",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "أَطَالَ الْقَاضِي الْمَقَالَ",
+  "translation": "The judge lengthened the article."
+ },
+ {
+  "kind": "sfp",
+  "gloss": "the female instructors",
+  "role": "majrur",
+  "template": "T_NOUN_SFP_JARR_KASRA_01",
+  "sentence": "الْعَمِيدُ يَبْحَثُ عَنْ الْمُدَرِّسَاتِ",
+  "translation": "The dean looks for the female instructors."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the calligrapher",
+  "role": "mubtada",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_10",
+  "sentence": "الْخَطَّاطُ يَسْأَلُ عَنْ عُمَرَ",
+  "translation": "The calligrapher asks about ʿUmar."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "notify",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "أَبْلَغَ الْبَاحِثَانِ الْمُبْتَدِئَ",
+  "translation": "The two researchers notified the beginner."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two researchers",
+  "role": "faail",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "أَبْلَغَ الْبَاحِثَانِ الْمُبْتَدِئَ",
+  "translation": "The two researchers notified the beginner."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the beginner",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "أَبْلَغَ الْبَاحِثَانِ الْمُبْتَدِئَ",
+  "translation": "The two researchers notified the beginner."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the tenant",
+  "role": "faail",
+  "template": "T_VERB_DUAL_NASB_YA_01",
+  "sentence": "يُكَرِّمُ الْمُسْتَأْجِرُ السَّائِقَيْنِ",
+  "translation": "The tenant honors the two drivers."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two drivers",
+  "role": "object",
+  "template": "T_VERB_DUAL_NASB_YA_01",
+  "sentence": "يُكَرِّمُ الْمُسْتَأْجِرُ السَّائِقَيْنِ",
+  "translation": "The tenant honors the two drivers."
+ },
+ {
+  "kind": "smp",
+  "gloss": "the patient men",
+  "role": "object",
+  "template": "T_VERB_SMP_NASB_YA_01",
+  "sentence": "يَحْتَرِمُ الْمُوَظَّفُ الصَّابِرِينَ",
+  "translation": "The employee respects the patient men."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two keys",
+  "role": "majrur",
+  "template": "T_NOUN_DUAL_JARR_YA_02",
+  "sentence": "الطَّرْدُ مِنَ الْمِفْتَاحَيْنِ",
+  "translation": "The parcel is from the two keys."
+ },
+ {
+  "kind": "brokenHuman",
+  "gloss": "the soldiers",
+  "role": "faail",
+  "template": "T_VERB_SMP_RAF_WAW_05",
+  "sentence": "زَارَ الْجُنُودُ كُلُّهُمْ أَجْمَعُونَ الصَّدِيقَ",
+  "translation": "The soldiers, all of them together, visited the friend."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the king",
+  "role": "mubtada",
+  "template": "T_NOUN_SMP_JARR_YA_01",
+  "sentence": "الْمَلِكُ يَسْأَلُ عَنْ الْمُهَنْدِسِينَ",
+  "translation": "The king asks about the engineers."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the waiter",
+  "role": "mubtada",
+  "template": "T_NOUN_PRESENT_NASB_FATHA_01",
+  "sentence": "النَّادِلُ لَنْ يَدْرُسَ الْقُرْآنَ",
+  "translation": "The waiter will not study the Qurʾān."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "optimistic",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَبُوكَ مُتَفَائِلٌ",
+  "translation": "Your father is optimistic."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "content",
+  "role": "khabar",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "الْمُدَرِّبُ قَانِعٌ",
+  "translation": "The coach is content."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the brother",
+  "role": "mubtada",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْأَخُ يَرُدُّ الْجَوَابَ",
+  "translation": "The brother gives back the answer."
+ },
+ {
+  "kind": "brokenHuman",
+  "gloss": "the residents",
+  "role": "object",
+  "template": "T_VERB_SMP_NASB_YA_03",
+  "sentence": "زَارَ الطَّالِبُ السُّكَّانَ كُلَّهُمْ أَجْمَعِينَ",
+  "translation": "The student visited the residents, all of them together."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "mistaken",
+  "role": "khabarKana",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_18",
+  "sentence": "مَا زَالَ أَخُوكَ مُخْطِئًا",
+  "translation": "Your brother has not ceased being mistaken."
+ },
+ {
+  "kind": "sfp",
+  "gloss": "the female learners",
+  "role": "majrur",
+  "template": "T_PARTICLE_SFP_JARR_KASRA_01",
+  "sentence": "إِلَى الْمُتَعَلِّمَاتِ رِسَالَةٌ",
+  "translation": "There is a letter for the female learners."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "outstanding",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "لَعَلَّ حَمَاكَ مُتَمَيِّزٌ",
+  "translation": "Perhaps your father-in-law is outstanding."
+ },
+ {
+  "kind": "places",
+  "gloss": "the canteen",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْمَقْصِفِ كِتَابٌ",
+  "translation": "There is a book in the canteen."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "successful",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَخُوكَ نَاجِحٌ",
+  "translation": "Your brother is successful."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two Muslim men",
+  "role": "ismInna",
+  "template": "T_PARTICLE_DUAL_NASB_YA_01",
+  "sentence": "لَكِنَّ الْمُسْلِمَيْنِ مُسْتَعِدَّانِ",
+  "translation": "But the two Muslim men are ready."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the officer",
+  "role": "mubtada",
+  "template": "T_NOUN_SFP_JARR_KASRA_01",
+  "sentence": "الضَّابِطُ يُسَلِّمُ عَلَى الْبَاحِثَاتِ",
+  "translation": "The officer greets the female researchers."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "stingy",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "أَضْحَى الْمُهَنْدِسُ بَخِيلًا",
+  "translation": "The engineer spent the forenoon being stingy."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the publisher",
+  "role": "mubtada",
+  "template": "T_NOUN_SFP_JARR_KASRA_01",
+  "sentence": "النَّاشِرُ يَبْحَثُ عَنْ الْمُعَلِّمَاتِ",
+  "translation": "The publisher looks for the female teachers."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "articulate",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "لَعَلَّ أَخَاكَ بَلِيغٌ",
+  "translation": "Perhaps your brother is articulate."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the needy man",
+  "role": "mubtada",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_10",
+  "sentence": "الْمِسْكِينُ يَسْأَلُ عَنْ عُمَرَ",
+  "translation": "The needy man asks about ʿUmar."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "transcribe",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "اِسْتَنْسَخَ الْقَاضِي الْفِهْرِسَ",
+  "translation": "The judge transcribed the index."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the index",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "اِسْتَنْسَخَ الْقَاضِي الْفِهْرِسَ",
+  "translation": "The judge transcribed the index."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "free",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَبُوكَ مُتَفَرِّغٌ",
+  "translation": "Your father is free."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the father",
+  "role": "faail",
+  "template": "T_VERB_PRESENT_RAF_DAMMA_01",
+  "sentence": "يَفْتَحُ الْأَبُ الْكِتَابَ",
+  "translation": "The father opens the book."
+ },
+ {
+  "kind": "sfp",
+  "gloss": "the female translators",
+  "role": "faail",
+  "template": "T_VERB_SFP_RAF_DAMMA_01",
+  "sentence": "حَضَرَتْ الْمُتَرْجِمَاتُ",
+  "translation": "The female translators arrived."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the instructor",
+  "role": "mubtada",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْمُدَرِّسُ يَطْحَنُ السُّكَّرَ",
+  "translation": "The instructor grinds the sugar."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the drawing",
+  "role": "object",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "كَبَّرَ أَبُوكَ الرَّسْمَ",
+  "translation": "Your father enlarged the drawing."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "innocent",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "إِنَّ حَمَاكَ بَرِيءٌ",
+  "translation": "Indeed, your father-in-law is innocent."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the minister",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08",
+  "sentence": "لَا يُعْطِ الْوَزِيرُ الْقَلَمَ",
+  "translation": "Let the minister not give the pen."
+ },
+ {
+  "kind": "places",
+  "gloss": "the tower",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "الْأَدِيبُ فِي الْبُرْجِ",
+  "translation": "The literary man is in the tower."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "title",
+  "role": "past",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "عَنْوَنَ الْمُعَلِّمُونَ الْخُلَاصَةَ",
+  "translation": "The teachers titled the summary."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the summary",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "عَنْوَنَ الْمُعَلِّمُونَ الْخُلَاصَةَ",
+  "translation": "The teachers titled the summary."
+ },
+ {
+  "kind": "smp",
+  "gloss": "the supervisors",
+  "role": "faail",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "حَلَّلَ الْمُشْرِفُونَ الدَّرْسَ",
+  "translation": "The supervisors analyzed the lesson."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the fasting man",
+  "role": "mubtada",
+  "template": "T_NOUN_DUAL_JARR_YA_01",
+  "sentence": "الصَّائِمُ يَبْحَثُ عَنْ الْكِتَابَيْنِ",
+  "translation": "The fasting man looks for the two books."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "try out",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "جَرَّبَ الْفَتَى الطَّابِعَةَ",
+  "translation": "The young man tried out the printer."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the printer",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "جَرَّبَ الْفَتَى الطَّابِعَةَ",
+  "translation": "The young man tried out the printer."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the young man",
+  "role": "mubtada",
+  "template": "T_NOUN_SFP_JARR_KASRA_01",
+  "sentence": "الشَّابُّ يَسْتَمِعُ إِلَى الطَّالِبَاتِ",
+  "translation": "The young man listens to the female students."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the deeds",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_01",
+  "sentence": "الْمُتَعَلِّمُ يَتَحَدَّثُ عَنْ الْأَعْمَالِ",
+  "translation": "The learner talks about the deeds."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the preacher",
+  "role": "mubtada",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_09",
+  "sentence": "الْخَطِيبُ يُسَلِّمُ عَلَى إِبْرَاهِيمَ",
+  "translation": "The preacher greets Ibrāhīm."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the builder",
+  "role": "mubtada",
+  "template": "T_NOUN_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "الْبَنَّاءُ يُرَافِقُ أَبَاكَ",
+  "translation": "The builder accompanies your father."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the painter",
+  "role": "mubtada",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_10",
+  "sentence": "الرَّسَّامُ يَسْأَلُ عَنْ عُمَرَ",
+  "translation": "The painter asks about ʿUmar."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "withhold",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "كَتَمَ الْمُرَاجِعُ الْخَبَرَ",
+  "translation": "The reviewer withheld the news."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two chairs",
+  "role": "majrur",
+  "template": "T_NOUN_DUAL_JARR_YA_01",
+  "sentence": "الشَّابُّ يَنْظُرُ إِلَى الْكُرْسِيَّيْنِ",
+  "translation": "The young man looks at the two chairs."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "apply",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "طَبَّقَ الرَّجُلَانِ الْقَاعِدَةَ",
+  "translation": "The two men applied the rule."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "hesitant",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَخُوكَ مُتَرَدِّدٌ",
+  "translation": "Your brother is hesitant."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "bold",
+  "role": "khabar",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "الْمَلِكُ جَرِيءٌ",
+  "translation": "The king is bold."
+ },
+ {
+  "kind": "smp",
+  "gloss": "the instructors",
+  "role": "majrur",
+  "template": "T_NOUN_SMP_JARR_YA_02",
+  "sentence": "الْخَبَرُ مِنَ الْمُدَرِّسِينَ",
+  "translation": "The news is from the instructors."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the historian",
+  "role": "mubtada",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْمُؤَرِّخُ يُؤَدِّبُ الْخَالَ",
+  "translation": "The historian disciplines the maternal uncle."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "discipline",
+  "role": "present",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْمُؤَرِّخُ يُؤَدِّبُ الْخَالَ",
+  "translation": "The historian disciplines the maternal uncle."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the maternal uncle",
+  "role": "object",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْمُؤَرِّخُ يُؤَدِّبُ الْخَالَ",
+  "translation": "The historian disciplines the maternal uncle."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the expert",
+  "role": "faail",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_46",
+  "sentence": "سَيَقْرَأُ الْخَبِيرُ الْقِصَّةَ",
+  "translation": "The expert will read the story."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "wait for",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "اِنْتَظَرَ الْفَتَى الْوَزِيرَ",
+  "translation": "The young man waited for the minister."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the grandfather",
+  "role": "mubtada",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "الْجَدُّ مُنْتَبِهٌ",
+  "translation": "The grandfather is attentive."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "attentive",
+  "role": "khabar",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "الْجَدُّ مُنْتَبِهٌ",
+  "translation": "The grandfather is attentive."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "postpone",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "أَجَّلَ النَّجَّارُ التَّقْرِيرَ",
+  "translation": "The carpenter postponed the report."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the owner",
+  "role": "mubtada",
+  "template": "T_NOUN_FIVENOUNS_JARR_YA_01",
+  "sentence": "الْمَالِكُ يَسْأَلُ عَنْ أَخِيكَ",
+  "translation": "The owner asks about your brother."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the cheese",
+  "role": "object",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "ذَاقَ أَخُوكَ الْجُبْنَ",
+  "translation": "Your brother tasted the cheese."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the proofs",
+  "role": "majrur",
+  "template": "T_PARTICLE_BROKEN_JARR_KASRA_01",
+  "sentence": "عَنْ الْأَدِلَّةِ سُؤَالٌ",
+  "translation": "There is a question about the proofs."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the result",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "أَثْبَتَ الْمُوَظَّفُونَ النَّتِيجَةَ",
+  "translation": "The employees proved the result."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "grant",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "مَنَحَ الْفَتَى الدَّوَاءَ",
+  "translation": "The young man granted the medicine."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the copyist",
+  "role": "mubtada",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "النَّاسِخُ فِي الْمَحْكَمَةِ",
+  "translation": "The copyist is in the courthouse."
+ },
+ {
+  "kind": "places",
+  "gloss": "the courthouse",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "النَّاسِخُ فِي الْمَحْكَمَةِ",
+  "translation": "The copyist is in the courthouse."
+ },
+ {
+  "kind": "places",
+  "gloss": "the alley",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الْجَوَابُ مِنَ الزُّقَاقِ",
+  "translation": "The answer is from the alley."
+ },
+ {
+  "kind": "sfp",
+  "gloss": "the believing women",
+  "role": "mubtada",
+  "template": "T_NOUN_SFP_RAF_DAMMA_01",
+  "sentence": "الْمُؤْمِنَاتُ حَاضِرَاتٌ",
+  "translation": "The believing women are present."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the surgeon",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08",
+  "sentence": "لَا يَرْجُ الْجَرَّاحُ الْخَبَرَ",
+  "translation": "Let the surgeon not hope for the news."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "late",
+  "role": "khabarKana",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_17",
+  "sentence": "مَا فَتِئَ الْمُشْرِفُ مُتَأَخِّرًا",
+  "translation": "The supervisor has not left off being late."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the objection",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "تَذَكَّرَ الْحَافِظُ الِاعْتِرَاضَ",
+  "translation": "The memorizer remembered the objection."
+ },
+ {
+  "kind": "places",
+  "gloss": "the warehouse",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "الْمِسْكِينُ فِي الْمَخْزَنِ",
+  "translation": "The needy man is in the warehouse."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two boxes",
+  "role": "majrur",
+  "template": "T_NOUN_DUAL_JARR_YA_02",
+  "sentence": "الْجَوَابُ مِنَ الصُّنْدُوقَيْنِ",
+  "translation": "The answer is from the two boxes."
+ },
+ {
+  "kind": "places",
+  "gloss": "the store",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "الْخَيَّاطُ فِي الْمَتْجَرِ",
+  "translation": "The tailor is in the store."
+ },
+ {
+  "kind": "places",
+  "gloss": "the lounge",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "بَلَغَ السَّائِقُونَ الصَّالَةَ",
+  "translation": "The drivers reached the lounge."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the chart",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "صَغَّرَ الْحَافِظُ الْجَدْوَلَ",
+  "translation": "The memorizer shrunk the chart."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the customer",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05",
+  "sentence": "لَمْ يَهْدِ الزَّبُونُ الْمُسَافِرَ",
+  "translation": "The customer did not guide the traveler."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "obey",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "أَطَاعَ الْفَتَى الْعَامِلَ",
+  "translation": "The young man obeyed the worker."
+ },
+ {
+  "kind": "places",
+  "gloss": "the lecture hall",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْمُدَرَّجِ ضَيْفٌ",
+  "translation": "There is a guest in the lecture hall."
+ },
+ {
+  "kind": "sfp",
+  "gloss": "the righteous women",
+  "role": "majrur",
+  "template": "T_PARTICLE_SFP_JARR_KASRA_01",
+  "sentence": "إِلَى الصَّالِحَاتِ رِسَالَةٌ",
+  "translation": "There is a letter for the righteous women."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "a visitor",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَخُوكَ زَائِرٌ",
+  "translation": "Your brother is a visitor."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the commander",
+  "role": "mubtada",
+  "template": "T_NOUN_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "الْقَائِدُ يَحْتَرِمُ أَخَاكَ",
+  "translation": "The commander respects your brother."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the reference",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "وَزَّعَ الْمَالِكُ الْمَرْجِعَ",
+  "translation": "The owner distributed the reference."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the benefit",
+  "role": "object",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "تَخَيَّلَ حَمُوكَ الْفَائِدَةَ",
+  "translation": "Your father-in-law imagined the benefit."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the pictures",
+  "role": "majrur",
+  "template": "T_PARTICLE_BROKEN_JARR_KASRA_01",
+  "sentence": "عَنْ الصُّوَرِ سُؤَالٌ",
+  "translation": "There is a question about the pictures."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "inaugurate",
+  "role": "present",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْوَزِيرُ يَفْتَتِحُ الطَّرِيقَ",
+  "translation": "The minister inaugurates the road."
+ },
+ {
+  "kind": "places",
+  "gloss": "the exit",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "الْمُشْرِفُ فِي الْمَخْرَجِ",
+  "translation": "The supervisor is in the exit."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the certificate",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "صَنَّفَ الطَّبِيبَانِ الشَّهَادَةَ",
+  "translation": "The two doctors classified the certificate."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two lamps",
+  "role": "majrur",
+  "template": "T_NOUN_DUAL_JARR_YA_02",
+  "sentence": "الْهَدِيَّةُ مِنَ الْمِصْبَاحَيْنِ",
+  "translation": "The gift is from the two lamps."
+ },
+ {
+  "kind": "places",
+  "gloss": "the exhibition",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الرِّسَالَةُ مِنَ الْمَعْرِضِ",
+  "translation": "The letter is from the exhibition."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the leather",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "مَزَّقَ الْخَالُ الْجِلْدَ",
+  "translation": "The maternal uncle tore up the leather."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the patient",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07",
+  "sentence": "لِيَرْجُ الْمَرِيضُ الْجَوَابَ",
+  "translation": "Let the patient hope for the answer."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the emigrant",
+  "role": "faail",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "حَاكَ الْمُهَاجِرُ الْقُمَاشَ",
+  "translation": "The emigrant wove the cloth."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "serve",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "خَدَمَ أَبُوكَ الرَّئِيسَ",
+  "translation": "Your father served the president."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "anxious",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_01",
+  "sentence": "لَعَلَّ الْمُؤَرِّخَ قَلِقٌ",
+  "translation": "Perhaps the historian is anxious."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the sciences",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_01",
+  "sentence": "الْمِسْكِينُ يَنْظُرُ إِلَى الْعُلُومِ",
+  "translation": "The needy man looks at the sciences."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "purchase",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "اِبْتَاعَ الْمُرَاسِلُ الْقَمِيصَ",
+  "translation": "The correspondent purchased the shirt."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the shirt",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "اِبْتَاعَ الْمُرَاسِلُ الْقَمِيصَ",
+  "translation": "The correspondent purchased the shirt."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "far away",
+  "role": "khabar",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "الزَّبُونُ بَعِيدٌ",
+  "translation": "The customer is far away."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "young",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "لَيْسَ الْوَرَّاقُ صَغِيرًا",
+  "translation": "The bookseller is not young."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "responsible",
+  "role": "khabarKana",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_18",
+  "sentence": "مَا انْفَكَّ حَمُوكَ مَسْؤُولًا",
+  "translation": "Your father-in-law has not stopped being responsible."
+ },
+ {
+  "kind": "smp",
+  "gloss": "the translators",
+  "role": "majrur",
+  "template": "T_NOUN_SMP_JARR_YA_01",
+  "sentence": "الْأَبُ يَنْظُرُ إِلَى الْمُتَرْجِمِينَ",
+  "translation": "The father looks at the translators."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "commence",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "بَاشَرَ الْجَدُّ التَّقْرِيرَ",
+  "translation": "The grandfather commenced the report."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "utilize",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "اِسْتَخْدَمَ الْمُخْتَرِعُ السُّلَّمَ",
+  "translation": "The inventor utilized the ladder."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the ladder",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "اِسْتَخْدَمَ الْمُخْتَرِعُ السُّلَّمَ",
+  "translation": "The inventor utilized the ladder."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "devout",
+  "role": "khabar",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "الْمُرَاسِلُ عَابِدٌ",
+  "translation": "The correspondent is devout."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the foods",
+  "role": "majrur",
+  "template": "T_PARTICLE_BROKEN_JARR_KASRA_01",
+  "sentence": "عَنْ الْأَطْعِمَةِ سُؤَالٌ",
+  "translation": "There is a question about the foods."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the prince",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06",
+  "sentence": "لَمَّا يَقْضِ الْأَمِيرُ الْوَاجِبَ",
+  "translation": "The prince did not yet complete the homework."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "dignified",
+  "role": "khabarKana",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_17",
+  "sentence": "مَا زَالَ الْخَيَّاطُ وَقُورًا",
+  "translation": "The tailor has not ceased being dignified."
+ },
+ {
+  "kind": "places",
+  "gloss": "the orchard",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الطَّرْدُ مِنَ الْبُسْتَانِ",
+  "translation": "The parcel is from the orchard."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "respected",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_01",
+  "sentence": "إِنَّ الْحَافِظَ مُحْتَرَمٌ",
+  "translation": "Indeed, the memorizer is respected."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the linguist",
+  "role": "mubtada",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_01",
+  "sentence": "اللُّغَوِيُّ يَتَحَدَّثُ عَنْ الْحُقُوقِ",
+  "translation": "The linguist talks about the rights."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the rights",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_01",
+  "sentence": "اللُّغَوِيُّ يَتَحَدَّثُ عَنْ الْحُقُوقِ",
+  "translation": "The linguist talks about the rights."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the symbol",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "كَبَّرَ الْقَاضِي الرَّمْزَ",
+  "translation": "The judge enlarged the symbol."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "asleep",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "حَمُوكَ نَائِمٌ",
+  "translation": "Your father-in-law is asleep."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the bridges",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_01",
+  "sentence": "الْعَمُّ يَبْحَثُ عَنْ الْجُسُورِ",
+  "translation": "The paternal uncle looks for the bridges."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "afraid",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_01",
+  "sentence": "لَكِنَّ الْعَمِيدَ خَائِفٌ",
+  "translation": "But the dean is afraid."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the vessel",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "فَقَدَ التَّاجِرُ الْإِنَاءَ",
+  "translation": "The merchant lost the vessel."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the colleague",
+  "role": "faail",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "حَذَّرَ الزَّمِيلُ الشَّابَّ",
+  "translation": "The colleague warned the young man."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "forbearing",
+  "role": "khabar",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "التَّاجِرُ حَلِيمٌ",
+  "translation": "The merchant is forbearing."
+ },
+ {
+  "kind": "places",
+  "gloss": "the parking lot",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْمَوْقِفِ مُعَلِّمٌ",
+  "translation": "There is a teacher in the parking lot."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "awake",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "أَصْبَحَ الْجَدُّ مُسْتَيْقِظًا",
+  "translation": "The grandfather became awake."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the servant",
+  "role": "mubtada",
+  "template": "T_NOUN_SMP_NASB_YA_01",
+  "sentence": "الْخَادِمُ يَحْتَرِمُ الْمُجْتَهِدِينَ",
+  "translation": "The servant respects the hardworking men."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "elderly",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَخُوكَ كَبِيرٌ",
+  "translation": "Your brother is elderly."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the rulings",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_02",
+  "sentence": "الْخَبَرُ مِنَ الْأَحْكَامِ",
+  "translation": "The news is from the rulings."
+ },
+ {
+  "kind": "places",
+  "gloss": "the complex",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الْهَدِيَّةُ مِنَ الْمَجْمَعِ",
+  "translation": "The gift is from the complex."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "retrieve",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "اِسْتَرْجَعَ النَّاسِخُ الْحَبْلَ",
+  "translation": "The copyist retrieved the rope."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "merciful",
+  "role": "khabarKana",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_18",
+  "sentence": "مَا بَرِحَ أَخُوكَ رَحِيمًا",
+  "translation": "Your brother has not ceased to be merciful."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "damage",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَتْلَفَ حَمُوكَ الْهَاتِفَ",
+  "translation": "Your father-in-law damaged the phone."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "ignorant",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "إِنَّ أَبَاكَ جَاهِلٌ",
+  "translation": "Indeed, your father is ignorant."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the thread",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "قَصَّ الْجَزَّارُ الْخَيْطَ",
+  "translation": "The butcher trimmed the thread."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the opinions",
+  "role": "majrur",
+  "template": "T_PARTICLE_BROKEN_JARR_KASRA_01",
+  "sentence": "عَنْ الْآرَاءِ سُؤَالٌ",
+  "translation": "There is a question about the opinions."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "seated",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "لَكِنَّ أَخَاكَ جَالِسٌ",
+  "translation": "But your brother is seated."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the fan",
+  "role": "object",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "دَوَّرَ الْعُمَّالُ الْمِرْوَحَةَ",
+  "translation": "The workers rotated the fan."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the verbs",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_02",
+  "sentence": "الطَّرْدُ مِنَ الْأَفْعَالِ",
+  "translation": "The parcel is from the verbs."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "shy",
+  "role": "khabarKana",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_17",
+  "sentence": "مَا انْفَكَّ الصَّدِيقُ خَجُولًا",
+  "translation": "The friend has not stopped being shy."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "hungry",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "لَعَلَّ حَمَاكَ جَائِعٌ",
+  "translation": "Perhaps your father-in-law is hungry."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "benevolent",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَبُوكَ مُحْسِنٌ",
+  "translation": "Your father is benevolent."
+ },
+ {
+  "kind": "places",
+  "gloss": "the capital",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْعَاصِمَةِ طَالِبٌ",
+  "translation": "There is a student in the capital."
+ },
+ {
+  "kind": "places",
+  "gloss": "the fortress",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الْخَبَرُ مِنَ الْحِصْنِ",
+  "translation": "The news is from the fortress."
+ },
+ {
+  "kind": "singularPeople",
+  "gloss": "the muezzin",
+  "role": "faail",
+  "template": "T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06",
+  "sentence": "لَمَّا يَهْدِ الْمُؤَذِّنُ الْمُسَافِرَ",
+  "translation": "The muezzin did not yet guide the traveler."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "bid farewell to",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "وَدَّعَ حَمُوكَ الْمُبْتَدِئَ",
+  "translation": "Your father-in-law bade farewell to the beginner."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the papers",
+  "role": "majrur",
+  "template": "T_PARTICLE_BROKEN_JARR_KASRA_01",
+  "sentence": "عَنْ الْأَوْرَاقِ سُؤَالٌ",
+  "translation": "There is a question about the papers."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "tighten",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "شَدَّ الْفَتَى الْحَبْلَ",
+  "translation": "The young man tightened the rope."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the creed",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "وَصَفَ الْعَامِلَانِ الْعَقِيدَةَ",
+  "translation": "The two workers described the creed."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "loan",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "أَقْرَضَ الْأَدِيبُ الرَّاتِبَ",
+  "translation": "The literary man loaned the salary."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the salary",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "أَقْرَضَ الْأَدِيبُ الرَّاتِبَ",
+  "translation": "The literary man loaned the salary."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "healthy",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_01",
+  "sentence": "لَكِنَّ الْعَمَّ صَحِيحٌ",
+  "translation": "But the paternal uncle is healthy."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "unjust",
+  "role": "khabar",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "الصَّدِيقُ ظَالِمٌ",
+  "translation": "The friend is unjust."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the pitcher",
+  "role": "object",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الِابْنُ يُمْسِكُ الْإِبْرِيقَ",
+  "translation": "The son holds the pitcher."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "parse",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَعْرَبَ أَخُوكَ الْعِبَارَةَ",
+  "translation": "Your brother parsed the phrase."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the arts",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_02",
+  "sentence": "الْأَمَانَةُ مِنَ الْفُنُونِ",
+  "translation": "The trust is from the arts."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "save up",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "اِدَّخَرَ الْفَتَى الْمَبْلَغَ",
+  "translation": "The young man saved up the sum."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the sum",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "اِدَّخَرَ الْفَتَى الْمَبْلَغَ",
+  "translation": "The young man saved up the sum."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "host",
+  "role": "past",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "اِسْتَضَافَ الْمُدَرِّسُونَ النَّاسِخَ",
+  "translation": "The instructors hosted the copyist."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "revise",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "نَقَّحَ الصَّدِيقَانِ الْمَخْطُوطَ",
+  "translation": "The two friends revised the manuscript."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the manuscript",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "نَقَّحَ الصَّدِيقَانِ الْمَخْطُوطَ",
+  "translation": "The two friends revised the manuscript."
+ },
+ {
+  "kind": "places",
+  "gloss": "the sitting room",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْمَجْلِسِ كِتَابٌ",
+  "translation": "There is a book in the sitting room."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "number",
+  "role": "past",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "رَقَّمَ الْمُتَعَلِّمُونَ التَّقْرِيرَ",
+  "translation": "The learners numbered the report."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "treat",
+  "role": "past",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "عَالَجَ الصُّنَّاعُ الْمُرَاجِعَ",
+  "translation": "The craftsmen treated the reviewer."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "enthusiastic",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَخُوكَ مُتَحَمِّسٌ",
+  "translation": "Your brother is enthusiastic."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "spend",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "أَنْفَقَ الشُّرْطِيُّ الرَّاتِبَ",
+  "translation": "The police officer spent the salary."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "rescue",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "أَنْقَذَ الطِّفْلَانِ الْخَبَّازَ",
+  "translation": "The two children rescued the baker."
+ },
+ {
+  "kind": "places",
+  "gloss": "the tunnel",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "الْأُسْتَاذُ فِي النَّفَقِ",
+  "translation": "The professor is in the tunnel."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "announce",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "أَعْلَنَ الْفَتَى الْبَرْنَامَجَ",
+  "translation": "The young man announced the program."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the paper",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "مَزَّقَ الْمُسْلِمَانِ الْوَرَقَ",
+  "translation": "The two Muslim men tore up the paper."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "slow",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "حَمُوكَ بَطِيءٌ",
+  "translation": "Your father-in-law is slow."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the exam",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "صَنَّفَ الْمُخْتَرِعُ الِامْتِحَانَ",
+  "translation": "The inventor classified the exam."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "married",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_01",
+  "sentence": "لَكِنَّ الْبَاحِثَ مُتَزَوِّجٌ",
+  "translation": "But the researcher is married."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the rhetoric",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "تَعَلَّمَ السَّائِقَانِ الْبَلَاغَةَ",
+  "translation": "The two drivers learned the rhetoric."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "affectionate",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_01",
+  "sentence": "لَعَلَّ الطَّبَّاخَ حَنُونٌ",
+  "translation": "Perhaps the cook is affectionate."
+ },
+ {
+  "kind": "places",
+  "gloss": "the observatory",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الْهَدِيَّةُ مِنَ الْمَرْصَدِ",
+  "translation": "The gift is from the observatory."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "drive",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "سَاقَ الْقَاضِي الْقِطَارَ",
+  "translation": "The judge drove the train."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the train",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "سَاقَ الْقَاضِي الْقِطَارَ",
+  "translation": "The judge drove the train."
+ },
+ {
+  "kind": "duals",
+  "gloss": "the two notebooks",
+  "role": "majrur",
+  "template": "T_NOUN_DUAL_JARR_YA_01",
+  "sentence": "الْخَيَّاطُ يَتَحَدَّثُ عَنْ الدَّفْتَرَيْنِ",
+  "translation": "The tailor talks about the two notebooks."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "decisive",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "كَانَ الْمُسَافِرُ حَازِمًا",
+  "translation": "The traveler was decisive."
+ },
+ {
+  "kind": "places",
+  "gloss": "the park",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الْجَوَابُ مِنَ الْمُنْتَزَهِ",
+  "translation": "The answer is from the park."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "abridge",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "اِخْتَصَرَ الْقَاضِي الْحَاشِيَةَ",
+  "translation": "The judge abridged the marginal note."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the marginal note",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "اِخْتَصَرَ الْقَاضِي الْحَاشِيَةَ",
+  "translation": "The judge abridged the marginal note."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "index",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "فَهْرَسَ الْخَبَّازُ الْفِهْرِسَ",
+  "translation": "The baker indexed the index."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "formulate",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "صَاغَ أَبُوكَ الْقَاعِدَةَ",
+  "translation": "Your father formulated the rule."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the saw",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "أَزَالَ الطَّالِبُ الْمِنْشَارَ",
+  "translation": "The student removed the saw."
+ },
+ {
+  "kind": "places",
+  "gloss": "the kindergarten",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الْخَبَرُ مِنَ الرَّوْضَةِ",
+  "translation": "The news is from the kindergarten."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "adjust",
+  "role": "past",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "عَدَّلَ الْمُسَافِرُونَ الْمِكْوَاةَ",
+  "translation": "The travelers adjusted the iron."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the iron",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "عَدَّلَ الْمُسَافِرُونَ الْمِكْوَاةَ",
+  "translation": "The travelers adjusted the iron."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the dates",
+  "role": "object",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "النَّحْوِيُّ يُقَدِّمُ التَّمْرَ",
+  "translation": "The grammarian offers the dates."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "deposit",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "أَوْدَعَ الْقَاضِي الرَّاتِبَ",
+  "translation": "The judge deposited the salary."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "awaited",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "كَأَنَّ أَبَاكَ مُنْتَظَرٌ",
+  "translation": "It is as if your father is awaited."
+ },
+ {
+  "kind": "places",
+  "gloss": "the forest",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الرِّسَالَةُ مِنَ الْغَابَةِ",
+  "translation": "The letter is from the forest."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the shelf",
+  "role": "object",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْمُبْتَدِئُ يُزَيِّنُ الرَّفَّ",
+  "translation": "The beginner decorates the shelf."
+ },
+ {
+  "kind": "places",
+  "gloss": "the suburb",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "الْمُؤَرِّخُ فِي الضَّاحِيَةِ",
+  "translation": "The historian is in the suburb."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "meticulous",
+  "role": "khabar",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "الْبَاحِثُ مُتْقِنٌ",
+  "translation": "The researcher is meticulous."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "obedient",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_01",
+  "sentence": "لَعَلَّ الْمُبَرْمِجَ مُطِيعٌ",
+  "translation": "Perhaps the programmer is obedient."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "survey",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "اِسْتَعْرَضَ الْبَاحِثَانِ الْمَشْرُوعَ",
+  "translation": "The two researchers surveyed the project."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "bestow",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "وَهَبَ الْفَتَى الطَّعَامَ",
+  "translation": "The young man bestowed the food."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "enumerate",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "عَدَّدَ الْقَاضِي الِاصْطِلَاحَ",
+  "translation": "The judge enumerated the technical term."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the technical term",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "عَدَّدَ الْقَاضِي الِاصْطِلَاحَ",
+  "translation": "The judge enumerated the technical term."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "shake hands with",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "صَافَحَ الْفَتَى الطَّبَّاخَ",
+  "translation": "The young man shook hands with the cook."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the history",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "تَخَيَّلَ الْقَاضِي التَّارِيخَ",
+  "translation": "The judge imagined the history."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the grammar",
+  "role": "object",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "تَوَقَّعَ أَبُوكَ النَّحْوَ",
+  "translation": "Your father expected the grammar."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "provide",
+  "role": "past",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "وَفَّرَ الْحُرَّاسُ الرِّسَالَةَ",
+  "translation": "The guards provided the letter."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "fasten",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "ثَبَّتَ حَمُوكَ الْبَرْنَامَجَ",
+  "translation": "Your father-in-law fastened the program."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the scale",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "سَرَقَ الْأَمِيرُ الْمِيزَانَ",
+  "translation": "The prince stole the scale."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the literature",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "تَذَكَّرَ الْمُتَرْجِمُونَ الْأَدَبَ",
+  "translation": "The translators remembered the literature."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "feed",
+  "role": "past",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "أَطْعَمَ الْعُمَّالُ الْخَطَّاطَ",
+  "translation": "The workers fed the calligrapher."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "instruct",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "لَقَّنَ أَبُوكَ الْمُصَمِّمَ",
+  "translation": "Your father instructed the designer."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the ink",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "بَرَّدَ الْمُعَلِّمُونَ الْحِبْرَ",
+  "translation": "The teachers cooled the ink."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the screen",
+  "role": "object",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "اِخْتَرَعَ أَبُوكَ الشَّاشَةَ",
+  "translation": "Your father invented the screen."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "weak",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_01",
+  "sentence": "لَكِنَّ الْمُصَمِّمَ ضَعِيفٌ",
+  "translation": "But the designer is weak."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "establish",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "أَسَّسَ النَّاشِرُ الْمَزْرَعَةَ",
+  "translation": "The publisher established the farm."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the fish",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "ذَاقَ الْفَتَى السَّمَكَ",
+  "translation": "The young man tasted the fish."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "browse",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "تَصَفَّحَ السَّائِقَانِ الْمَصْدَرَ",
+  "translation": "The two drivers browsed the source."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the source",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "تَصَفَّحَ السَّائِقَانِ الْمَصْدَرَ",
+  "translation": "The two drivers browsed the source."
+ },
+ {
+  "kind": "places",
+  "gloss": "the swimming pool",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الرِّسَالَةُ مِنَ الْمَسْبَحِ",
+  "translation": "The letter is from the swimming pool."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "negligent",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَبُوكَ مُهْمِلٌ",
+  "translation": "Your father is negligent."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the exercise",
+  "role": "object",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "صَحَّحَ الْأَطْفَالُ التَّمْرِينَ",
+  "translation": "The children corrected the exercise."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "finish",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَتَمَّ أَخُوكَ التَّقْرِيرَ",
+  "translation": "Your brother finished the report."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the dictionary",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "اِسْتَنْسَخَ النَّجَّارُ الْمُعْجَمَ",
+  "translation": "The carpenter transcribed the dictionary."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "build up",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "عَمَّرَ الْفَتَى الْمِينَاءَ",
+  "translation": "The young man built up the harbor."
+ },
+ {
+  "kind": "places",
+  "gloss": "the harbor",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "عَمَّرَ الْفَتَى الْمِينَاءَ",
+  "translation": "The young man built up the harbor."
+ },
+ {
+  "kind": "places",
+  "gloss": "the corridor",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْمَمَرِّ طَالِبٌ",
+  "translation": "There is a student in the corridor."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "conclude",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "اِسْتَنْتَجَ حَمُوكَ الْجَوَابَ",
+  "translation": "Your father-in-law concluded the answer."
+ },
+ {
+  "kind": "places",
+  "gloss": "the prayer niche",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "الْمَالِكُ فِي الْمِحْرَابِ",
+  "translation": "The owner is in the prayer niche."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "mature",
+  "role": "khabarKana",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_18",
+  "sentence": "مَا فَتِئَ أَخُوكَ بَالِغًا",
+  "translation": "Your brother has not left off being mature."
+ },
+ {
+  "kind": "places",
+  "gloss": "the kitchen",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الْجَوَابُ مِنَ الْمَطْبَخِ",
+  "translation": "The answer is from the kitchen."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "peruse",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "طَالَعَ الْحَافِظُ الْمُعْجَمَ",
+  "translation": "The memorizer perused the dictionary."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the glass",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "أَلْصَقَ الْمُصَوِّرُ الزُّجَاجَ",
+  "translation": "The photographer glued the glass."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "master",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَتْقَنَ أَبُوكَ الْمَصْدَرَ",
+  "translation": "Your father mastered the source."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "chop",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "قَطَّعَ الرَّجُلَانِ اللَّحْمَ",
+  "translation": "The two men chopped the meat."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the meat",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "قَطَّعَ الرَّجُلَانِ اللَّحْمَ",
+  "translation": "The two men chopped the meat."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the hammer",
+  "role": "object",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْمُحَقِّقُ يُعِيدُ الْمِطْرَقَةَ",
+  "translation": "The text editor returns the hammer."
+ },
+ {
+  "kind": "places",
+  "gloss": "the association",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "شَيَّدَ الْمُعَلِّمُونَ الْجَمْعِيَّةَ",
+  "translation": "The teachers constructed the association."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the exegesis",
+  "role": "object",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "اِسْتَعْرَضَ الْكُتَّابُ التَّفْسِيرَ",
+  "translation": "The writers surveyed the exegesis."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "reward",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "كَافَأَ الْقَارِئُ الشَّابَّ",
+  "translation": "The reader rewarded the young man."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "silent",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَبُوكَ سَاكِتٌ",
+  "translation": "Your father is silent."
+ },
+ {
+  "kind": "places",
+  "gloss": "the company",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "عَمَّرَ الْأُسْتَاذُ الشَّرِكَةَ",
+  "translation": "The professor built up the company."
+ },
+ {
+  "kind": "places",
+  "gloss": "the balcony",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "الشَّاهِدُ فِي الشُّرْفَةِ",
+  "translation": "The witness is in the balcony."
+ },
+ {
+  "kind": "places",
+  "gloss": "the field",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْحَقْلِ كِتَابٌ",
+  "translation": "There is a book in the field."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "absent",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "لَعَلَّ حَمَاكَ غَائِبٌ",
+  "translation": "Perhaps your father-in-law is absent."
+ },
+ {
+  "kind": "places",
+  "gloss": "the residence",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_02",
+  "sentence": "الْخَادِمُ فِي الْمَسْكَنِ",
+  "translation": "The servant is in the residence."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "well-mannered",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "لَيْسَ الْوَزِيرُ مُهَذَّبًا",
+  "translation": "The minister is not well-mannered."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "joyful",
+  "role": "khabar",
+  "template": "T_NOUN_SINGULAR_RAF_DAMMA_01",
+  "sentence": "الشَّاهِدُ سَعِيدٌ",
+  "translation": "The witness is joyful."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "attach",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "أَرْفَقَ الْفَتَى الْجَوَابَ",
+  "translation": "The young man attached the answer."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the magazine",
+  "role": "object",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "رَاجَعَ الرِّجَالُ الْمَجَلَّةَ",
+  "translation": "The men reviewed the magazine."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the ship",
+  "role": "object",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْخَادِمُ يَسُوقُ السَّفِينَةَ",
+  "translation": "The servant drives the ship."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "savor",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "تَذَوَّقَ الصَّدِيقُ الزَّيْتَ",
+  "translation": "The friend savored the oil."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the oil",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "تَذَوَّقَ الصَّدِيقُ الزَّيْتَ",
+  "translation": "The friend savored the oil."
+ },
+ {
+  "kind": "places",
+  "gloss": "the region",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الرِّسَالَةُ مِنَ الْإِقْلِيمِ",
+  "translation": "The letter is from the region."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the inkwell",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "أَفْرَغَ الْمُدَرِّسُونَ الْمَحْبَرَةَ",
+  "translation": "The instructors emptied the inkwell."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the contract",
+  "role": "object",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "قَبِلَ أَخُوكَ الْعَقْدَ",
+  "translation": "Your brother accepted the contract."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "overtake",
+  "role": "past",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "تَجَاوَزَ الصُّنَّاعُ السَّفِينَةَ",
+  "translation": "The craftsmen overtook the ship."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the main text",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "كَرَّرَ الْجُنْدِيُّ الْمَتْنَ",
+  "translation": "The soldier repeated the main text."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the problem",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "حَلَّ الْبَاحِثَانِ الْمُشْكِلَةَ",
+  "translation": "The two researchers solved the problem."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the honey",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "أَذَابَ الْفَتَى الْعَسَلَ",
+  "translation": "The young man melted the honey."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "speak to",
+  "role": "present",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْفَلَّاحُ يُخَاطِبُ الْبَنَّاءَ",
+  "translation": "The farmer speaks to the builder."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "hasty",
+  "role": "khabar",
+  "template": "T_NOUN_FIVENOUNS_RAF_WAW_01",
+  "sentence": "أَبُوكَ عَجُولٌ",
+  "translation": "Your father is hasty."
+ },
+ {
+  "kind": "brokenThings",
+  "gloss": "the statements",
+  "role": "majrur",
+  "template": "T_NOUN_BROKEN_JARR_KASRA_02",
+  "sentence": "الْهَدِيَّةُ مِنَ الْأَقْوَالِ",
+  "translation": "The gift is from the statements."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "affirm",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "قَرَّرَ حَمُوكَ الْحُكْمَ",
+  "translation": "Your father-in-law affirmed the ruling."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "prepare",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "أَعَدَّ الْمُدَرِّسُ الْفَاكِهَةَ",
+  "translation": "The instructor prepared the fruit."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "confident",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_SINGULAR_NASB_FATHA_01",
+  "sentence": "كَأَنَّ الْمُسْلِمَ وَاثِقٌ",
+  "translation": "It is as if the Muslim is confident."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "aid",
+  "role": "past",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "أَعَانَ الْمُحَاسِبُونَ الْبَنَّاءَ",
+  "translation": "The accountants aided the builder."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the wording",
+  "role": "object",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "اللُّغَوِيُّ يُوَقِّعُ اللَّفْظَ",
+  "translation": "The linguist signs the wording."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "resident",
+  "role": "khabarKana",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_02",
+  "sentence": "صَارَ الْأَبُ مُقِيمًا",
+  "translation": "The father came to be resident."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the eggs",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "ذَاقَ الْبَاحِثُونَ الْبَيْضَ",
+  "translation": "The researchers tasted the eggs."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the wallet",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "قَفَلَ الْمُوَظَّفُ الْمِحْفَظَةَ",
+  "translation": "The employee locked the wallet."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "nominate",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "رَشَّحَ الْقَاضِي الِابْنَ",
+  "translation": "The judge nominated the son."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the curtain",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "زَيَّنَ الْمُوَظَّفُونَ السِّتَارَةَ",
+  "translation": "The employees decorated the curtain."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the truck",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "سَاقَ الرَّجُلَانِ الشَّاحِنَةَ",
+  "translation": "The two men drove the truck."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "elect",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "اِنْتَخَبَ الْقَاضِي الْمُهَنْدِسَ",
+  "translation": "The judge elected the engineer."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "guide",
+  "role": "past",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "أَرْشَدَ الْمُسَافِرُونَ الْمُعَلِّمَ",
+  "translation": "The travelers guided the teacher."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the carpet",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "غَيَّرَ الْقَاضِي السَّجَّادَةَ",
+  "translation": "The judge changed the carpet."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "accomplish",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "أَنْجَزَ الْعَمِيدُ الْمَشْرُوعَ",
+  "translation": "The dean accomplished the project."
+ },
+ {
+  "kind": "predicates",
+  "gloss": "precise",
+  "role": "khabarInna",
+  "template": "T_PARTICLE_FIVENOUNS_NASB_ALIF_01",
+  "sentence": "إِنَّ أَبَاكَ دَقِيقٌ",
+  "translation": "Indeed, your father is precise."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "preserve",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "صَانَ اللَّاعِبُ السَّاعَةَ",
+  "translation": "The player preserved the clock."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "live in",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "سَكَنَ أَخُوكَ الْمَسْجِدَ",
+  "translation": "Your brother lived in the mosque."
+ },
+ {
+  "kind": "places",
+  "gloss": "the province",
+  "role": "object",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْخَبِيرُ يُشَيِّدُ الْوِلَايَةَ",
+  "translation": "The expert constructs the province."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "pick",
+  "role": "past",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "قَطَفَ الْأَوْلَادُ الْخُضَارَ",
+  "translation": "The boys picked the vegetables."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "consult",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "اِسْتَشَارَ السَّبَّاكُ الْيَتِيمَ",
+  "translation": "The plumber consulted the orphan."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "punish",
+  "role": "past",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "عَاقَبَ الْبَاحِثُونَ الْمَالِكَ",
+  "translation": "The researchers punished the owner."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the jurisprudence",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "نَاقَشَ الْفَتَى الْفِقْهَ",
+  "translation": "The young man discussed the jurisprudence."
+ },
+ {
+  "kind": "places",
+  "gloss": "the printing house",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْمَطْبَعَةِ مُعَلِّمٌ",
+  "translation": "There is a teacher in the printing house."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "pay",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "سَدَّدَ الْقَارِئُ الثَّمَنَ",
+  "translation": "The reader paid the price."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the price",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "سَدَّدَ الْقَارِئُ الثَّمَنَ",
+  "translation": "The reader paid the price."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the juice",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "حَرَّكَ الْمُمَرِّضُ الْعَصِيرَ",
+  "translation": "The nurse stirred the juice."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the board",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "مَسَحَ الْقَاضِي اللَّوْحَ",
+  "translation": "The judge wiped the board."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "trace",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "تَتَبَّعَ الْفَتَى الْجَوَابَ",
+  "translation": "The young man traced the answer."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "contemplate",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "تَأَمَّلَ أَبُوكَ الْمُرَادَ",
+  "translation": "Your father contemplated the intended meaning."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the tray",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "مَلَأَ الْبَائِعُ الصِّينِيَّةَ",
+  "translation": "The vendor filled the tray."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the edition",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "فَهْرَسَ الْمُعَلِّمُونَ الطَّبْعَةَ",
+  "translation": "The teachers indexed the edition."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "sit with",
+  "role": "past",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "جَالَسَ الْأَطْفَالُ الْمُهَاجِرَ",
+  "translation": "The children sat with the emigrant."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "represent",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "مَثَّلَ الْفَتَى الْمُبْتَدِئَ",
+  "translation": "The young man represented the beginner."
+ },
+ {
+  "kind": "places",
+  "gloss": "the hall",
+  "role": "majrur",
+  "template": "T_NOUN_SINGULAR_JARR_KASRA_02",
+  "sentence": "الرِّسَالَةُ مِنَ الْقَاعَةِ",
+  "translation": "The letter is from the hall."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the drawer",
+  "role": "object",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "كَسَرَ الْقُضَاةُ الدُّرْجَ",
+  "translation": "The judges broke the drawer."
+ },
+ {
+  "kind": "places",
+  "gloss": "the shop",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الدُّكَّانِ طَالِبٌ",
+  "translation": "There is a student in the shop."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "appoint",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "عَيَّنَ الْمُعَلِّمَانِ النَّادِلَ",
+  "translation": "The two teachers appointed the waiter."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "grasp",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "اِسْتَوْعَبَ الْفَتَى الشَّرْطَ",
+  "translation": "The young man grasped the condition."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "harvest",
+  "role": "past",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "حَصَدَ الْمُجْتَهِدُونَ الْفَاكِهَةَ",
+  "translation": "The hardworking men harvested the fruit."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "bind",
+  "role": "past",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "غَلَّفَ أَخُوكَ الْمَجَلَّةَ",
+  "translation": "Your brother bound the magazine."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the eyeglasses",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "خَفَضَ الْمُسْلِمَانِ النَّظَّارَةَ",
+  "translation": "The two Muslim men lowered the eyeglasses."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the research paper",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "عَنْوَنَ الْفَتَى الْبَحْثَ",
+  "translation": "The young man titled the research paper."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the airplane",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "سَاقَ الْفَتَى الطَّائِرَةَ",
+  "translation": "The young man drove the airplane."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "show",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "أَظْهَرَ الْمُشْرِفُ الْمَجَلَّةَ",
+  "translation": "The supervisor showed the magazine."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "direct",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "وَجَّهَ الْفَتَى الْمُهَاجِرَ",
+  "translation": "The young man directed the emigrant."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the nail",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "أَلْصَقَ الزَّبُونُ الْمِسْمَارَ",
+  "translation": "The customer glued the nail."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "resume",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "اِسْتَأْنَفَ الْمُرَاجِعُ الْبَرْنَامَجَ",
+  "translation": "The reviewer resumed the program."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "support",
+  "role": "present",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "النَّاسِخُ يَدْعَمُ الرَّئِيسَ",
+  "translation": "The copyist supports the president."
+ },
+ {
+  "kind": "places",
+  "gloss": "the institution",
+  "role": "majrur",
+  "template": "T_PARTICLE_SINGULAR_JARR_KASRA_01",
+  "sentence": "فِي الْمُؤَسَّسَةِ مُعَلِّمٌ",
+  "translation": "There is a teacher in the institution."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "praise",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "مَدَحَ الشَّابُّ الْمُفَتِّشَ",
+  "translation": "The young man praised the inspector."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "embrace",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "عَانَقَ الْإِمَامُ الْمُفَسِّرَ",
+  "translation": "The imam embraced the exegete."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "restore",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "رَمَّمَ الْفَتَى الْمَتْجَرَ",
+  "translation": "The young man restored the store."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the cotton",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "طَرَّزَ الْعَمِيدُ الْقُطْنَ",
+  "translation": "The dean embroidered the cotton."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the copy",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "وَفَّرَ الْمُؤَلِّفُونَ النُّسْخَةَ",
+  "translation": "The authors provided the copy."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "authorize",
+  "role": "present",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْمُفَتِّشُ يُجِيزُ الْفَقْرَةَ",
+  "translation": "The inspector authorizes the paragraph."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the paragraph",
+  "role": "object",
+  "template": "T_NOUN_SINGULAR_NASB_FATHA_01",
+  "sentence": "الْمُفَتِّشُ يُجِيزُ الْفَقْرَةَ",
+  "translation": "The inspector authorizes the paragraph."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the turban",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "طَرَّزَ الْمُتَرْجِمُونَ الْعِمَامَةَ",
+  "translation": "The translators embroidered the turban."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the school of thought",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "تَتَبَّعَ الرَّئِيسُ الْمَذْهَبَ",
+  "translation": "The president traced the school of thought."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the cover",
+  "role": "object",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "قَصَّ الرَّجُلَانِ الْغِلَافَ",
+  "translation": "The two men trimmed the cover."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "monitor",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "رَاقَبَ الْفَتَى الْهَاتِفَ",
+  "translation": "The young man monitored the phone."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the ruler",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "أَعَادَ الصَّادِقُونَ الْمِسْطَرَةَ",
+  "translation": "The truthful men returned the ruler."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the pot",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "مَلَأَ الْمُرَاجِعُ الْقِدْرَ",
+  "translation": "The reviewer filled the pot."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the prize",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "أَرَادَ الْمُفَتِّشُ الْجَائِزَةَ",
+  "translation": "The inspector wanted the prize."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the bus",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "سَاقَ الْمُرَاجِعُ الْحَافِلَةَ",
+  "translation": "The reviewer drove the bus."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "refine",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "هَذَّبَ الْعَالِمُ الْخُلَاصَةَ",
+  "translation": "The scholar refined the summary."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the lock",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "أَعَادَ الْفَتَى الْقُفْلَ",
+  "translation": "The young man returned the lock."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "dig",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "حَفَرَ الرَّجُلَانِ الْفِنَاءَ",
+  "translation": "The two men dug the courtyard."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the needle",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "وَضَعَ الْفَتَى الْإِبْرَةَ",
+  "translation": "The young man placed the needle."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the grapes",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_RAF_DAMMA_01",
+  "sentence": "حَصَدَ الشَّاعِرُ الْعِنَبَ",
+  "translation": "The poet harvested the grapes."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the abridgment",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "هَذَّبَ الْقَاضِي الْمُخْتَصَرَ",
+  "translation": "The judge refined the abridgment."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the morphology",
+  "role": "object",
+  "template": "T_VERB_SMP_RAF_WAW_01",
+  "sentence": "تَخَيَّلَ الْمُعَلِّمُونَ الصَّرْفَ",
+  "translation": "The teachers imagined the morphology."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "conceal",
+  "role": "past",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_01",
+  "sentence": "سَتَرَ الْمُسَاعِدُ التَّقْرِيرَ",
+  "translation": "The assistant concealed the report."
+ },
+ {
+  "kind": "verbs",
+  "gloss": "produce",
+  "role": "past",
+  "template": "T_VERB_DUAL_RAF_ALIF_01",
+  "sentence": "أَنْتَجَ الْمُسْلِمَانِ الْأَدَاةَ",
+  "translation": "The two Muslim men produced the tool."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the eraser",
+  "role": "object",
+  "template": "T_VERB_BROKEN_RAF_DAMMA_01",
+  "sentence": "سَرَقَ الْإِخْوَانُ الْمِمْحَاةَ",
+  "translation": "The brothers stole the eraser."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the volume",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "عَدَّدَ الْفَتَى الْمُجَلَّدَ",
+  "translation": "The young man enumerated the volume."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the washing machine",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "عَدَّلَ الْقَاضِي الْغَسَّالَةَ",
+  "translation": "The judge adjusted the washing machine."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the sofa",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_41",
+  "sentence": "اِبْتَاعَ الْقَاضِي الْأَرِيكَةَ",
+  "translation": "The judge purchased the sofa."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the line",
+  "role": "object",
+  "template": "T_VERB_FIVENOUNS_RAF_WAW_01",
+  "sentence": "عَدَّدَ أَخُوكَ السَّطْرَ",
+  "translation": "Your brother enumerated the line."
+ },
+ {
+  "kind": "singularThings",
+  "gloss": "the fork",
+  "role": "object",
+  "template": "T_VERB_SINGULAR_NASB_FATHA_42",
+  "sentence": "اِسْتَخْدَمَ الْفَتَى الشَّوْكَةَ",
+  "translation": "The young man utilized the fork."
+ }
+]

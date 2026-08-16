@@ -499,8 +499,10 @@ const rows = [
 
   // ─────────── PARTICLE IDENTITIES ALREADY PRODUCED ───────────
   R('P_SAWFA', 'سَوْفَ — حَرْفُ اسْتِقْبَالٍ', CH.foundations, '14–16', 'علامات الفعل', 'حَرْفُ اسْتِقْبَالٍ'),
-  R('P_SIN', 'السِّينُ — حَرْفٌ دَالٌّ عَلَى التَّنْفِيسِ', CH.foundations, '14–16,95', 'علامات الفعل', 'التَّنْفِيسِ',
-    { missingReason: 'p. 95\'s model parse names «السين حرف دال على التنفيس»; only سوف is produced.' }),
+  /* FINAL MARATHON — shipped. The probe is now the WHOLE claim p. 95 makes about the letter rather
+     than the bare word «التنفيس», which a sentence merely mentioning futurity could also match; it
+     is written from the app's own COMPONENT_REGISTRY by work/w15-siin-probes.js. */
+  R('P_SIN', 'السِّينُ — حَرْفٌ دَالٌّ عَلَى التَّنْفِيسِ', CH.foundations, '14–16,95', 'علامات الفعل', 'حَرْفٌ دَالٌّ عَلَى التَّنْفِيسِ'),
   R('P_HAMZAT_ISTIFHAM', 'هَمْزَةُ الِاسْتِفْهَامِ', CH.atf, '126', 'أدوات الاستفهام', 'هَمْزَةُ الِاسْتِفْهَامِ'),
   R('P_LA_NAFIYA', 'لَا — حَرْفُ نَفْيٍ', CH.nawasib, '76–77', 'حروف النفي', 'حَرْفُ نَفْيٍ مَبْنِيٌّ'),
   R('P_MA_NAFIYA', 'مَا — حَرْفُ نَفْيٍ', CH.nawasib, '76', 'حروف النفي', 'حَرْفُ نَفْيٍ مَبْنِيٌّ')

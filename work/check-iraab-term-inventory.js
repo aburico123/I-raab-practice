@@ -1668,7 +1668,10 @@ const MARATHON15 = {
        truthful reclassification. pp. 52–54 supply everything the contract wants — the sign, its
        exhaustive scope, the شرط, and a worked parse of two words with two different pairs of ʿilal
        — so it was never a blocker; it had simply never been built. */
-    'G_DIPTOTE'
+    'G_DIPTOTE',
+    /* The other engine of this marathon, and the app's first PREFIX component. p. 95 parses the
+       written word «سَيَزُورُنَا» in pieces, and the sīn is the first of them. */
+    'P_SIN'
   ],
   /* ── proved TRUE_BLOCKER ─────────────────────────────────────────────────────────────────
      Two distinct missing facts, not one. B_MAFUL_MUDMAR_MUNFASIL joins ضَمِيرٌ مُنْفَصِلٌ and

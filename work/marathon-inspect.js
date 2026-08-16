@@ -65,6 +65,17 @@ if (mode === 'dump') {
   }
   process.exit(0);
 }
+if (mode === 'verbforms') {
+  const idx = api.verbFormIndex;
+  let n = 0;
+  for (const [surface, rec] of idx) {
+    if (arg && rec.form !== arg) continue;
+    if (n++ > 30) break;
+    console.log(rec.form.padEnd(16) + surface + '   past=' + (rec.lexeme && rec.lexeme.past));
+  }
+  console.log('--- forms present in the index: ' + [...new Set([...idx.values()].map(r => r.form))].join(', '));
+  process.exit(0);
+}
 if (mode === 'zarf') {
   const L = api.MAFUL_FIH_LEXEMES;
   const byKind = {};

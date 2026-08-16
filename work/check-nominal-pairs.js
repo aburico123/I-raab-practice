@@ -17,7 +17,7 @@ for(const id of new Set([...script.matchAll(/byId\('([^']+)'\)/g)].map(match=>ma
 const exportNeedle='window.nahwGenerate=generate;';
 if(!script.includes(exportNeedle))throw new Error('Generator export point was not found');
 script=script.replace(exportNeedle,`window.__nahwTest={
-  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,tawkidChainFrame,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,istithnaNaqisKeys,istithnaKhalaKeys,laJinsPairKeys,laIlghaFrameKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseIsharaFrameKeys,zarfKhabarFrameKeys,khabarClauseTarget,haalMahallFrameKeys,estimatedSignNounKeys,diptoteNounKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],tawkidChainFrame,isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],istithnaNaqisKeys:[...istithnaNaqisKeys],istithnaKhalaKeys:[...istithnaKhalaKeys],laJinsPairKeys:[...laJinsPairKeys],laIlghaFrameKeys:[...laIlghaFrameKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseIsharaFrameKeys:[...khabarClauseIsharaFrameKeys],zarfKhabarFrameKeys:[...zarfKhabarFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],estimatedSignNounKeys:[...estimatedSignNounKeys],diptoteNounKeys:[...diptoteNounKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
+  templates:templates.map(({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities,presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys,conditionFrameKeys,concealedAnConstruction,responseContextId,responsePairIds,passiveTense,passivePairKeys,followerKind,followerPairKeys,followerConjunctionKeys,tawkidChainFrame,isharaLexemeKeys,mutlaqPairKeys,mafulFihPairKeys,haalPairKeys,tamyizPairKeys,mustathnaPairKeys,istithnaNaqisKeys,istithnaKhalaKeys,laJinsPairKeys,laIlghaFrameKeys,mafulAjlPairKeys,mafulMaahPairKeys,munadaPairKeys,zannaPairKeys,zannaTarget,khabarClauseFrameKeys,khabarClauseIsharaFrameKeys,zarfKhabarFrameKeys,khabarClauseTarget,haalMahallFrameKeys,estimatedSignNounKeys,diptoteNounKeys,siinTanfisVerbKeys,presentCapabilities})=>({id,stableId,starts,form,state,sign,pastPerson,pastCapabilities:pastCapabilities.map(capability=>({...capability})),presentPerson,frontedPresent,governedPresent,presentGovernor,amrVerbKey,duaaConstruction,duaaFrameKeys:[...duaaFrameKeys],conditionFrameKeys:[...conditionFrameKeys],concealedAnConstruction,responseContextId,responsePairIds:[...responsePairIds],passiveTense,passivePairKeys:[...passivePairKeys],followerKind,followerPairKeys:[...followerPairKeys],followerConjunctionKeys:[...followerConjunctionKeys],tawkidChainFrame,isharaLexemeKeys:[...isharaLexemeKeys],mutlaqPairKeys:[...mutlaqPairKeys],mafulFihPairKeys:[...mafulFihPairKeys],haalPairKeys:[...haalPairKeys],tamyizPairKeys:[...tamyizPairKeys],mustathnaPairKeys:[...mustathnaPairKeys],istithnaNaqisKeys:[...istithnaNaqisKeys],istithnaKhalaKeys:[...istithnaKhalaKeys],laJinsPairKeys:[...laJinsPairKeys],laIlghaFrameKeys:[...laIlghaFrameKeys],mafulAjlPairKeys:[...mafulAjlPairKeys],mafulMaahPairKeys:[...mafulMaahPairKeys],munadaPairKeys:[...munadaPairKeys],zannaPairKeys:[...zannaPairKeys],zannaTarget,khabarClauseFrameKeys:[...khabarClauseFrameKeys],khabarClauseIsharaFrameKeys:[...khabarClauseIsharaFrameKeys],zarfKhabarFrameKeys:[...zarfKhabarFrameKeys],khabarClauseTarget,haalMahallFrameKeys:[...haalMahallFrameKeys],estimatedSignNounKeys:[...estimatedSignNounKeys],diptoteNounKeys:[...diptoteNounKeys],siinTanfisVerbKeys:[...siinTanfisVerbKeys],presentCapabilities:presentCapabilities.map(capability=>({...capability}))})),
   buildTemplate:id=>completeNominalAnalysis(templates[id].build()),
   completeNominalAnalysis,
   renderExercise,
@@ -73,6 +73,8 @@ script=script.replace(exportNeedle,`window.__nahwTest={
   /* Wave 15 — the ممنوع من الصرف registry, so the focused suite compares against the app's own
      ʿilal rather than a retyped copy of p. 54's two pairs. */
   DIPTOTE_NOUNS,
+  SIIN_TANFIS_VERBS,
+  SIIN_TANFIS_VERB_KEYS,
   PAST_MORPHOLOGY,
   PAST_BINAA_RULE_IDS,
   PRESENT_MORPHOLOGY,
@@ -7076,7 +7078,7 @@ assert(api.GRAMMAR_COVERAGE_MATRIX.noun.mamnu.join(',')==='jarr',
 //   · R_AMR_BINAA_SUKUN (pp. 70–72) owns فِعْلُ الْأَمْرِ's bināʾ. It is separate from
 //     R_MUDARI_JAZM_SUKUN for the same reason in the opposite direction: both end in a sukūn, and
 //     one is a bināʾ while the other is an iʿrāb sign.
-assert(Object.keys(api.SOURCE_REGISTRY).length===224,`Expected 224 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
+assert(Object.keys(api.SOURCE_REGISTRY).length===225,`Expected 225 source-registry entries, found ${Object.keys(api.SOURCE_REGISTRY).length}`);
 assert(Object.entries(api.SOURCE_REGISTRY).every(([ruleId,entry])=>entry.ruleId===ruleId),
   'A canonical source record is not bound to its owning SOURCE_REGISTRY key');
 assert(Object.values(api.REVIEWED_SOURCE_EVIDENCE).every(evidence=>
@@ -9661,7 +9663,12 @@ assert(api.verbFormIndex.size===604+2*Object.keys(api.PASSIVE_VERB_CAPABILITIES)
      owned by TAMYIZ_VERBS alone. They are deliberately absent from every general verb pool: no
      ordinary sentence may pick حَسُنَ or فَجَّرَ up as an action, and they are reachable only
      inside the two lanes that perform the promotion the source describes. */
-  +Object.keys(api.TAMYIZ_VERBS).length,
+  +Object.keys(api.TAMYIZ_VERBS).length
+  /* Wave 15 adds exactly one PRESENT surface per entry of the sin al-tanfis registry - the
+     s-prefixed forms p. 15 restricts to the mudari and p. 95 parses. They are owned by
+     SIIN_TANFIS_VERBS alone, derived from a base that must already be a registered ordinary
+     present, and reachable only inside the two lanes that render the sin component. */
+  +api.SIIN_TANFIS_VERB_KEYS.length,
   `Phase-2b-C must reuse its existing surfaces; only the named registries — passive pairs, muṭlaq ʿāmils, duʿāʾ, weak-final, conditional, the ten ẓanna sisters, the Wave-1 bāʾ verbs, the Wave-6 exceptive أدوات and the Wave-8 tamyīz ʿāmils — may extend the verb index, found ${api.verbFormIndex.size}`);
 c2Cases+=2;
 
@@ -11718,7 +11725,7 @@ for(const t of api.templates){
   assert(new Set(ids).size===ids.length,'Duplicate template stableId after Phase 3A2');
   // J1a appends exactly ten: five one-verb jawāzim × the two proven jazm regimes. All are appended,
   // so every pre-existing stableId is unchanged — pinned directly below by keeping لَمْ at _01.
-  assert(api.templates.length===270,`Expected 270 templates after Phase 2, found ${api.templates.length}`);
+  assert(api.templates.length===272,`Expected 272 templates after Phase 2, found ${api.templates.length}`);
   assert(api.templates.filter(t=>t.state==='jazm').map(t=>t.stableId).join(' | ')
     ==='T_NOUN_PRESENT_JAZM_SUKUN_01 | T_NOUN_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_01 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_01 | T_PARTICLE_PRESENT_JAZM_SUKUN_02 | T_PARTICLE_PRESENT_JAZM_SUKUN_03 | T_PARTICLE_PRESENT_JAZM_SUKUN_04 | T_PARTICLE_PRESENT_JAZM_SUKUN_05 | T_PARTICLE_PRESENT_JAZM_SUKUN_06 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_02 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_03 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_04 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_05 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_06 | T_PARTICLE_PRESENT_JAZM_SUKUN_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_08 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_01 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_02 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_03 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_04 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_05 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_06 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_07 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_08 | T_PARTICLE_PRESENT_JAZM_SUKUN_09 | T_PARTICLE_WEAKFINAL_JAZM_HADHFILLAH_09 | T_PARTICLE_FIVEVERBS_JAZM_NUNDROPPED_07 | T_PARTICLE_PRESENT_JAZM_SUKUN_10 | T_PARTICLE_PRESENT_JAZM_SUKUN_11 | T_PARTICLE_PRESENT_JAZM_SUKUN_12 | T_PARTICLE_PRESENT_JAZM_SUKUN_13 | T_PARTICLE_PRESENT_JAZM_SUKUN_14 | T_PARTICLE_PRESENT_JAZM_SUKUN_15 | T_PARTICLE_PRESENT_JAZM_SUKUN_16 | T_PARTICLE_PRESENT_JAZM_SUKUN_17 | T_PARTICLE_PRESENT_JAZM_SUKUN_18 | T_PARTICLE_PRESENT_JAZM_SUKUN_19 | T_PARTICLE_PRESENT_JAZM_SUKUN_20 | T_PARTICLE_PRESENT_JAZM_SUKUN_21',
     'the jazm template ordinals shifted: لَمْ must keep _01 in both families and J1a/J1b must append only');
@@ -14198,7 +14205,7 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
 
 /* --- T/U/V/W/X: production isolation, restated after everything above has run. --- */
 {
-  assert(api.templates.length===270,'the production template count changed: '+api.templates.length);
+  assert(api.templates.length===272,'the production template count changed: '+api.templates.length);
   const ids=api.templates.map(template=>template.stableId);
   assert(new Set(ids).size===ids.length,'duplicate stable IDs');
   /* X: the exact inherited stable IDs remain unchanged. Productive إِذَنْ, concealed-an, and
@@ -14258,7 +14265,12 @@ const ctxFixture=api.buildIdhanSourceDirectFixture();
   assert(diptoteTemplateIds.length===2,'the two ممنوع من الصرف lanes are not both registered');
   assert(diptoteTemplateIds.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
     'a ممنوع من الصرف lane reused an inherited stable ID');
-  assert([...ids].filter(id=>!amrTemplateIds.includes(id)&&!estimatedSignTemplateIds.includes(id)&&!diptoteTemplateIds.includes(id)&&!zarfKhabarTemplateIds.includes(id)&&!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!sababiTemplateIds.includes(id)&&!isharaTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!istithnaNaqisTemplateIds.includes(id)&&!istithnaKhalaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
+  /* Wave 15 - the two SIN al-tanfis lanes, appended after those, on the same footing. */
+  const siinTemplateIds=api.templates.filter(item=>item.siinTanfisVerbKeys.length).map(item=>item.stableId);
+  assert(siinTemplateIds.length===2,'the two sin-tanfis lanes are not both registered');
+  assert(siinTemplateIds.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
+    'a sin-tanfis lane reused an inherited stable ID');
+  assert([...ids].filter(id=>!amrTemplateIds.includes(id)&&!estimatedSignTemplateIds.includes(id)&&!diptoteTemplateIds.includes(id)&&!siinTemplateIds.includes(id)&&!zarfKhabarTemplateIds.includes(id)&&!api.IDHAN_PRODUCTION_CONSUMERS.includes(id)&&!concealedTemplateIds.includes(id)&&!naatTemplateIds.includes(id)&&!sababiTemplateIds.includes(id)&&!isharaTemplateIds.includes(id)&&!atfTemplateIds.includes(id)&&!tawkidTemplateIds.includes(id)&&!badalTemplateIds.includes(id)&&!passiveTemplateIds.includes(id)&&!mutlaqTemplateIds.includes(id)&&!mafulFihTemplateIds.includes(id)&&!haalTemplateIds.includes(id)&&!tamyizTemplateIds.includes(id)&&!mustathnaTemplateIds.includes(id)&&!istithnaNaqisTemplateIds.includes(id)&&!istithnaKhalaTemplateIds.includes(id)&&!laJinsTemplateIds.includes(id)&&!mafulAjlTemplateIds.includes(id)&&!mafulMaahTemplateIds.includes(id)&&!munadaTemplateIds.includes(id)&&!zannaTemplateIds.includes(id)&&!khabarClauseTemplateIds.includes(id)&&!haalMahallTemplateIds.includes(id)).sort().join(',')===PHASE3B0A_STABLE_TEMPLATE_IDS,
     'the set of stable template IDs changed');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>ids.includes(id)),'a productive إِذَنْ lane template is not registered');
   assert(api.IDHAN_PRODUCTION_CONSUMERS.every(id=>!PHASE3B0A_STABLE_TEMPLATE_IDS.split(',').includes(id)),
@@ -15657,7 +15669,7 @@ let ctxRepairCases=0,ctxRepairAttacks=0,ctxRepairSurvivors=0,ctxRepairThrows=0,c
   assert(ctxRepairThrows===0,'the repair block saw '+ctxRepairThrows+' escaped exceptions');
   assert(ctxRepairSurvivors===0,'the repair block saw '+ctxRepairSurvivors+' surviving unknown or exotic values');
   // Production is still isolated: nothing in this block created a live إِذَنْ surface.
-  assert(api.templates.length===270,'the repair block changed the production template count');
+  assert(api.templates.length===272,'the repair block changed the production template count');
   /* Phase 3B1: G_IDHAN_NASB now exists, so the isolation property is restated where it still
      holds — this block builds only FIXTURE exercises, so none of them may carry the productive
      governor's rule, and the fixture registry must still hold exactly one record. */
@@ -15791,7 +15803,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
        and both reuse TS13, whose parts are already «gloss 0 capitalised, gloss 1, full stop» —
        exactly an English imperative and its object. A TS83 with identical parts would be a second
        name for one thing, and shape ids are what History restores a translation through. */
-    assert(registeredKeys.length===277,'the structural map holds '+registeredKeys.length+' keys, not 277');
+    assert(registeredKeys.length===279,'the structural map holds '+registeredKeys.length+' keys, not 279');
     assert(registeredShapes.length===82,'the shape registry holds '+registeredShapes.length+' shapes, not 82');
     assert(MAP[api.IDHAN_PRODUCTION_TEMPLATE_ID+'||particle:particle,verb:present'],
       'the productive إِذَنْ structure has no registered composer');
@@ -15883,7 +15895,12 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       const diptoteKeyOwners=api.templates.filter(item=>item.diptoteNounKeys.length).map(item=>item.stableId);
       const diptoteKeys=registeredKeys.filter(key=>diptoteKeyOwners.some(id=>key.startsWith(id+'||')));
       assert(diptoteKeys.length===2,'the ممنوع من الصرف lanes do not own exactly two structural keys');
-      const inheritedKeys=registeredKeys.filter(k=>!diptoteKeys.includes(k)&&!amrKeys.includes(k)&&!estimatedSignKeys.includes(k)&&!zarfKhabarKeys.includes(k)&&!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!istithnaNaqisKeys.includes(k)&&!istithnaKhalaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
+      /* Wave 15 - the two sin al-tanfis lanes are fenced off too. They add no shape: both reuse
+         the inherited shape every verb+fail+object sentence already composes through. */
+      const siinKeyOwners=api.templates.filter(item=>item.siinTanfisVerbKeys.length).map(item=>item.stableId);
+      const siinKeys=registeredKeys.filter(key=>siinKeyOwners.some(id=>key.startsWith(id+'||')));
+      assert(siinKeys.length===2,'the sin-tanfis lanes do not own exactly two structural keys');
+      const inheritedKeys=registeredKeys.filter(k=>!siinKeys.includes(k)&&!diptoteKeys.includes(k)&&!amrKeys.includes(k)&&!estimatedSignKeys.includes(k)&&!zarfKhabarKeys.includes(k)&&!laneKeys.includes(k)&&!concealedKeys.includes(k)&&!naatKeys.includes(k)&&!sababiKeys.includes(k)&&!isharaKeys.includes(k)&&!atfKeys.includes(k)&&!tawkidKeys.includes(k)&&!badalKeys.includes(k)&&!passiveKeys.includes(k)&&!mutlaqKeys.includes(k)&&!mafulFihKeys.includes(k)&&!haalKeys.includes(k)&&!tamyizKeys.includes(k)&&!mustathnaKeys.includes(k)&&!istithnaNaqisKeys.includes(k)&&!istithnaKhalaKeys.includes(k)&&!laJinsKeys.includes(k)&&!mafulAjlKeys.includes(k)&&!mafulMaahKeys.includes(k)&&!munadaKeys.includes(k)&&!zannaKeys.includes(k)&&!khabarClauseKeys.includes(k)&&!haalMahallKeys.includes(k));
       const inheritedShapes=registeredShapes.filter(id=>!laneShapes.includes(id));
       assert(inheritedKeys.length===148,'the inherited structural-key set changed: '+inheritedKeys.length);
       assert(inheritedShapes.length===47,'the inherited shape set changed: '+inheritedShapes.length);
@@ -15918,7 +15935,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(key===m.templateId+'||'+m.structure,'mapping key and its fields disagree: '+key);
       mappedTemplates.add(m.templateId);
     }
-    assert(mappedTemplates.size===270,'the map covers '+mappedTemplates.size+' templates, not 270');
+    assert(mappedTemplates.size===272,'the map covers '+mappedTemplates.size+' templates, not 272');
     // Five inherited templates carry two structures; productive ʿaṭf carries three source contexts.
     const lanes=new Map();
     for(const key of registeredKeys)lanes.set(MAP[key].templateId,(lanes.get(MAP[key].templateId)||0)+1);
@@ -15980,7 +15997,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
       assert(found,'structural key '+key+' was never produced in 20,000 targeted builds — it is '
         +'registered but unreachable, or its lane changed');
     }
-    assert(keysSeen.size===277,'only '+keysSeen.size+' of the 277 structural keys were observed');
+    assert(keysSeen.size===279,'only '+keysSeen.size+' of the 279 structural keys were observed');
     assert(shapesSeen.size===82,'only '+shapesSeen.size+' of the 82 composer shapes were observed');
     /* Every slot kind the registry actually references must be exercised. The list is taken FROM
        the registry rather than guessed: `verb.pastEn` is legitimately unused, because a past-tense
@@ -16315,7 +16332,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
         assert(Object.getPrototypeOf(MAP)===null,'the mapping store is prototype-bearing, so `in` '
           +'would consult inherited keys and own-property lookup is no longer redundant');
         assert(Object.getPrototypeOf(SHAPES)===null,'the shape store is prototype-bearing');
-        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===277,'the mapping store changed');
+        assert(Object.isFrozen(MAP)&&Object.keys(MAP).length===279,'the mapping store changed');
         ctxPresCases+=3;
       }
       /* 21 — registry self-consistency, which is what makes runtime revalidation redundant. */
@@ -16681,7 +16698,10 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
        diptote frame is a fixed four-token sentence (the mubtadaʾ, its present khabar, the ḥarf
        khafḍ, and the noun that does not take tanwīn). Both are fixed-length, so the RANGE keeps the
        width the ʿaṭf context rotation gave it and simply shifts again: 923-926 becomes 931-934. */
-    assert([931,932,933,934].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 931-934 across the registered ʿaṭf context rotation)');
+    /* Wave 15 adds six more across two lanes of sin al-tanfis pp. 14-16/95: each frame is a fixed
+       three-token sentence (the s-prefixed present, its explicit fail, and its object). Both are
+       fixed-length, so the RANGE keeps its width and shifts again: 931-934 becomes 937-940. */
+    assert([937,938,939,940].includes(tokensChecked),'the production token population changed: '+tokensChecked+' (expected 937-940 across the registered ʿaṭf context rotation)');
     ctxPresCases+=tokensChecked+1;ctxCases++;
   }
 
@@ -16870,7 +16890,7 @@ let ctxPresCases=0,ctxPresAttacks=0,ctxPresSurvivors=0,ctxPresThrows=0,ctxPresDo
     assert(!String(rendered.sentence||'').includes(MARK),'a forged marker reached fixture rendering');
     const roundTripped=api.restoreFixtureSnapshot(api.createFixtureSnapshot(fixture));
     assert(roundTripped&&ctxProof(roundTripped).satisfied===true,'the fixture History round trip broke');
-    assert(api.templates.length===270,'the presentation repair changed the template count');
+    assert(api.templates.length===272,'the presentation repair changed the template count');
     api.renderResponseContext('');
     ctxPresCases+=5;ctxCases+=5;
   }
@@ -18788,7 +18808,7 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   assert(!/SEPARATOR_PRODUCTION_MODES=Object\.freeze\(\[[^\]]*(qasam|nida|laNafiya|oath|vocative)/i.test(source),
     'a real separator construction became production-enabled');
   assert(!api.SOURCE_REGISTRY.R_IDHAN_SEPARATORS,'a duplicate separator source rule was registered');
-  assert(Object.keys(api.SOURCE_REGISTRY).length===224,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules, the Wave-4 naʿt/maʿrifah rules, the Wave-7 munādā rules or the two Wave-14 بَابُ الْأَفْعَالِ rules');
+  assert(Object.keys(api.SOURCE_REGISTRY).length===225,'the source-rule count does not include the J1a jawāzim rules, the Wave-2 attached-object rules, the Wave-4 naʿt/maʿrifah rules, the Wave-7 munādā rules or the two Wave-14 بَابُ الْأَفْعَالِ rules');
   assert(!api.MABNI_PRESENT_GOVERNORS[api.IDHAN_PARTICLE_TYPE]
     &&!api.MABNI_PRESENT_GOVERNOR_MODES.includes(api.IDHAN_PARTICLE_TYPE),
     'إِذَنْ acquired a mabnī-present lane');
@@ -18810,8 +18830,8 @@ const p7Authorize=d=>api.deriveIdhanProductiveNasb(d,p7VerbIndex(d));
   }
   assert(!Object.prototype.hasOwnProperty.call(api.GRAMMAR_RULES.governors,'hamzatTaqrir'),
     'هَمْزَةُ التَّقْرِيرِ entered the governor table and could now govern');
-  assert(api.templates.length===270,'the production template count does not include the J1a additions or the two Wave-14 imperative lanes');
-  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===277
+  assert(api.templates.length===272,'the production template count does not include the J1a additions or the two Wave-14 imperative lanes');
+  assert(Object.keys(api.TRANSLATION_STRUCTURE_MAP).length===279
     &&Object.keys(api.TRANSLATION_COMPOSER_SHAPES).length===82,
     'the composer authority does not include the J1a mappings or the two Wave-14 imperative keys');
   p7Cases+=8;
@@ -19837,7 +19857,7 @@ for(const start of optionValues.startFilter){
 //     matches the template metadata. Rebuilt many times to cover randomized vocabulary. ---
 // 74 through Phase 2b-C, plus Phase 3A1's four muʿrab أَنْ / لِكَيْ templates, plus Phase 3A2's
 // four mabnī nūn-al-niswah أَنْ / لِكَيْ templates.
-assert(api.templates.length===270,`Expected 270 production templates, found ${api.templates.length}`);
+assert(api.templates.length===272,`Expected 272 production templates, found ${api.templates.length}`);
 for(const t of api.templates){
   for(let i=0;i<40;i++){
     const data=api.buildTemplate(t.id);
@@ -21189,7 +21209,110 @@ while(Date.now()-started<durationMs){
     w15Attacks++;
   }
 
-  console.log('Wave-15 نِيَابَةُ الْفَتْحَةِ عَنِ الْكَسْرَةِ audit passed: '+w15Cases+' canonical checks and '+w15Attacks+' adversarial checks.');
+  /* ── 7. سِينُ التَّنْفِيسِ (pp. 14–16, parsed at p. 95) ──────────────────────────────────────
+     The sīn is this app's only PREFIX component, and its lesson is largely a negative one: it
+     enters on the muḍāriʿ alone, it means futurity, and it GOVERNS NOTHING — which is exactly why
+     p. 95 can parse the verb after it as marfūʿ «لتجرده من الناصب والجازم». Each is tested. */
+  {
+    const siinTemplates=api.templates.filter(t=>t.siinTanfisVerbKeys.length);
+    assert(siinTemplates.length===2,'the two سِينُ التَّنْفِيسِ lanes are not both registered');
+    const SIIN_KIND='siin-tanfiis';
+    const reg=api.COMPONENT_REGISTRY[SIIN_KIND];
+    assert(reg&&reg.category==='particle','the sīn is not registered as a particle component');
+    /* p. 95 gives it a FUNCTION and no bināʾ, exactly as p. 157 does for نون الوقاية. Claiming one
+       would be the invented-bināʾ move this registry exists to refuse. */
+    assert(reg.binaaSign===null,'the sīn component claims a bināʾ p. 95 does not give it');
+    assert(reg.syntacticRole==='none'&&reg.mahall==='none','the sīn component claims a role or a maḥall');
+    /* And it denies nothing further: the fāʿil/mafʿūl denials the other two particle components
+       carry exist because those letters sit where a subject or an object could be read. */
+    assert(reg.denialAr===''&&reg.denialEn==='','the sīn component denies something p. 95 does not');
+    assert(reg.ruleId==='C_SIIN_TANFIIS','the sīn component is not bound to its own source rule');
+    w15Cases+=5;
+
+    for(const template of siinTemplates){
+      const key=template.siinTanfisVerbKeys[0];
+      const base=api.SIIN_TANFIS_VERBS[key].base;
+      for(let r=0;r<8;r++){
+        const data=api.buildTemplate(template.id);
+        api.renderExercise(data);
+        const verb=data.tokens.find(t=>t.grammar.type==='verb');
+        assert(verb,key+': the sīn lane produced no verb');
+        assert(verb.word.endsWith(base),key+': the surface is not its own base with the sīn prefixed: '+verb.word);
+        assert(verb.word!==base,key+': the sīn was dropped from the surface');
+        /* p. 95's verb ruling: marfūʿ, and marfūʿ FOR BEING UNGOVERNED. */
+        assert(verb.state==='raf',key+': the verb after the sīn is not مرفوع');
+        assert(verb.ar.includes(api.PRESENT_MUJARRAD_CAUSE_AR.replace(/^[،\s]+/,'')),
+          key+': the verb after the sīn does not state the mujarrad cause p. 95 gives it: '+verb.ar);
+        /* The component itself, and FIRST, because the sīn is written first. */
+        const components=verb.components||[];
+        assert(components.length&&components[0].kind===SIIN_KIND,key+': the sīn is not the first component');
+        assert(components[0].ar.includes(reg.functionAr),key+': the sīn card omits its function');
+        assert(!components[0].ar.includes('مَبْنِيٌّ'),key+': the sīn card claims a bināʾ');
+        assert(!components[0].ar.includes('فِي مَحَلِّ'),key+': the sīn card claims a maḥall');
+        w15Cases+=8;
+      }
+    }
+
+    /* The sīn may reach NO other word: only the registered surfaces carry it. */
+    {
+      let seen=0;
+      for(let i=0;i<api.templates.length;i++){
+        for(let r=0;r<4;r++){
+          const data=api.buildTemplate(i);
+          api.renderExercise(data);
+          for(const token of data.tokens){
+            for(const c of token.components||[]){
+              if(c.kind!==SIIN_KIND)continue;
+              seen++;
+              assert(api.SIIN_TANFIS_VERB_KEYS.some(k=>token.word.endsWith(api.SIIN_TANFIS_VERBS[k].base)),
+                'the sīn component reached an unregistered word: '+token.word);
+              assert(token.grammar.type==='verb'&&token.tense==='present',
+                'the sīn component reached something that is not a present verb: '+token.word);
+            }
+          }
+        }
+      }
+      assert(seen>0,'the sīn component was never observed');
+      w15Cases+=1;
+    }
+
+    /* FORGERY. */
+    const siinBase=api.buildTemplate(siinTemplates[0].id);
+    api.renderExercise(siinBase);
+    w15Refuse('the sīn stripped from a word that carries one',siinBase,d=>{
+      d.tokens[d.tokens.findIndex(t=>t.grammar.type==='verb')].components=[];
+    });
+    w15Refuse('the verb after the sīn made منصوب',siinBase,d=>{
+      d.tokens[d.tokens.findIndex(t=>t.grammar.type==='verb')].state='nasb';
+    });
+    w15Refuse('the sīn component relabelled the protective nūn',siinBase,d=>{
+      const i=d.tokens.findIndex(t=>t.grammar.type==='verb');
+      d.tokens[i].components=[{...d.tokens[i].components[0],kind:'nuun-wiqaya'}];
+    });
+
+    /* HISTORY — the whole word, its component and its English must survive the round trip. */
+    for(const template of siinTemplates){
+      const data=api.buildTemplate(template.id);
+      api.renderExercise(data);
+      const snapshot=clone(api.createExerciseSnapshot(data));
+      assert(snapshot,template.stableId+': the sīn exercise refused to snapshot');
+      const restored=api.restoreExerciseSnapshot(snapshot);
+      assert(restored,template.stableId+': the sīn snapshot did not restore');
+      assert(api.validateExercise(clone(restored)).length===0,
+        template.stableId+': the restored sīn exercise does not validate');
+      api.renderExercise(restored);
+      const before=data.tokens.find(t=>t.grammar.type==='verb');
+      const after=restored.tokens.find(t=>t.grammar.type==='verb');
+      assert(after.word===before.word,template.stableId+': the restored word lost its sīn');
+      assert(after.ar===before.ar,template.stableId+': the restored verb card differs');
+      assert((after.components||[])[0]?.ar===(before.components||[])[0]?.ar,
+        template.stableId+': the restored sīn component card differs');
+      assert(after.en===before.en,template.stableId+': the restored English gloss differs');
+      w15Cases+=6;
+    }
+  }
+
+  console.log('Wave-15 نِيَابَةُ الْفَتْحَةِ عَنِ الْكَسْرَةِ + سِينُ التَّنْفِيسِ audit passed: '+w15Cases+' canonical checks and '+w15Attacks+' adversarial checks.');
   console.log('  wave-15 refusal codes: '+JSON.stringify(w15Codes));
 }
 

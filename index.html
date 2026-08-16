@@ -1281,6 +1281,14 @@ function resolveCanonicalTokenGloss(data,token,index){
   const duaaObject=Object.values(DUAA_OBJECTS).find(item=>item.acc===surface);
   if(duaaObject)return duaaObject.en;
  }
+ /* Wave 15 — a سـ-prefixed present. The sīn is INSIDE the word, so unlike سَوْفَ there is no
+    particle token to carry the English modality and the verb's own gloss must carry it. Resolved
+    from the registered surface, which is the only thing that can say a word has a sīn, and composed
+    from the base lexeme's own English so the builder and this resolver cannot drift apart. */
+ if(type==='verb'){
+  const siin=verbFormIndex.get(surface);
+  if(siin?.morphology?.siinTanfis)return `will ${siin.lexeme.en}`;
+ }
  if(type==='verb'){
   const duaaVerb=Object.values(DUAA_LEXEMES).find(item=>item.juss===surface);
   if(duaaVerb)return duaaVerb.en;
@@ -2018,6 +2026,12 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
     second name for one thing, and the shape ids are what History restores a translation through. */
  ,"T_VERB_SINGULAR_NASB_FATHA_43||verb:amr,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_43",structure:"verb:amr,noun:object",shape:"TS13",copulaPlural:false})
  ,"T_VERB_SINGULAR_NASB_FATHA_44||verb:amr,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_44",structure:"verb:amr,noun:object",shape:"TS13",copulaPlural:false})
+/* Wave 15 — the two سِينُ التَّنْفِيسِ lanes. Both REUSE the inherited TS11 that every
+   «فعل مضارع + فاعل + مفعول» sentence composes through: the futurity the sīn adds rides on the
+   VERB TOKEN'S OWN GLOSS («will visit»), which is where the English belongs, so the shape that
+   assembles the sentence does not change and no composer shape is added. */
+,"T_VERB_SINGULAR_NASB_FATHA_45||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_45",structure:"verb:present,noun:faail,noun:object",shape:"TS11",copulaPlural:false})
+,"T_VERB_SINGULAR_NASB_FATHA_46||verb:present,noun:faail,noun:object":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_46",structure:"verb:present,noun:faail,noun:object",shape:"TS11",copulaPlural:false})
 }));
 const TRANSLATION_VERB_FIELDS=Object.freeze(['en','third','pastEn']);
 /* A key component must be a non-empty string carrying none of the key's own delimiters. */
@@ -9065,7 +9079,7 @@ function responseContextClaimSite(data,allowed){
    is source-verified (نونا التوكيد are intentionally absent for that reason). */
 const COMPONENT_REGISTRY=Object.freeze({
  'waw-jamaaah':Object.freeze({category:'pronoun',syntacticRole:'fail',mahall:'raf',binaaSign:'sukun',letterAr:'الْوَاوُ',nameAr:'وَاوُ الْجَمَاعَةِ',nameEn:'the plural wāw (wāw al-jamāʿah)',ruleId:'C_WAW_JAMAAH_FAIL'}),
- 'taa-taniith-sakina':Object.freeze({category:'particle',syntacticRole:'none',mahall:'none',binaaSign:'sukun',letterAr:'التَّاءُ',nameAr:'تَاءُ التَّأْنِيثِ السَّاكِنَةُ',nameEn:'the sākinah feminine tāʾ',ruleId:'C_TAA_TANIITH_SAKINA'}),
+ 'taa-taniith-sakina':Object.freeze({category:'particle',syntacticRole:'none',mahall:'none',binaaSign:'sukun',letterAr:'التَّاءُ',nameAr:'تَاءُ التَّأْنِيثِ السَّاكِنَةُ',nameEn:'the sākinah feminine tāʾ',denialAr:'، وَلَيْسَ فَاعِلًا',denialEn:' and is not the fāʿil',ruleId:'C_TAA_TANIITH_SAKINA'}),
  'alif-fariqa':Object.freeze({category:'orthographic',syntacticRole:'notApplicable',mahall:'notApplicable',binaaSign:null,letterAr:'الْأَلِفُ',nameAr:'الْأَلِفُ الْفَارِقَةُ',nameEn:'the differentiating alif (alif fāriqah)',ruleId:'C_ALIF_FARIQA'}),
  /* Phase 1 — attached rafʿ pronouns of the past verb. Al-Tuḥfah (workspace scan p.72):
     «وَالتَّاءُ، أَوْ نَا أَوِ النُّونُ فَاعِلٌ، مَبْنِيٌّ عَلَى الضَّمِّ أَوِ الْفَتْحِ أَوِ الْكَسْرِ أَوِ السُّكُونِ فِي مَحَلِّ رَفْعٍ». */
@@ -9091,7 +9105,21 @@ const COMPONENT_REGISTRY=Object.freeze({
     this registry — a component's bināʾ must be source-verified, and inventing a plausible one for
     the nūn would be exactly the kind of unsourced claim this file refuses. functionAr carries the
     source's own three-word account of what the nūn is for («لِلْوِقَايَةِ»). */
- 'nuun-wiqaya':Object.freeze({category:'particle',syntacticRole:'none',mahall:'none',binaaSign:null,functionAr:'لِلْوِقَايَةِ',functionEn:'for protection',letterAr:'النُّونُ',nameAr:'نُونُ الْوِقَايَةِ',nameEn:'the protective nūn (nūn al-wiqāyah)',ruleId:'C_NUUN_WIQAYA'}),
+ 'nuun-wiqaya':Object.freeze({category:'particle',syntacticRole:'none',mahall:'none',binaaSign:null,functionAr:'لِلْوِقَايَةِ',functionEn:'for protection',letterAr:'النُّونُ',nameAr:'نُونُ الْوِقَايَةِ',nameEn:'the protective nūn (nūn al-wiqāyah)',denialAr:'، وَلَيْسَ فَاعِلًا وَلَا مَفْعُولًا',denialEn:', and is neither the fāʿil nor the mafʿūl',ruleId:'C_NUUN_WIQAYA'}),
+ /* Wave 15 — سِينُ التَّنْفِيسِ, the one component of this registry that is a PREFIX. Al-Tuḥfah
+    p. 15: «وَأَمَّا السِّينُ وَسَوْفَ فَيَدْخُلَانِ عَلَى الْفِعْلِ الْمُضَارِعِ وَحْدَهُ، وَهُمَا
+    يَدُلَّانِ عَلَى التَّنْفِيسِ، وَمَعْنَاهُ الِاسْتِقْبَالُ، إِلَّا أَنَّ «السِّينَ» أَقَلُّ
+    اسْتِقْبَالاً مِنْ «سَوْفَ»», and p. 16 sorts it with سوف as the pair that «يَخْتَصُّ
+    بِالدُّخُولِ عَلَى الْمُضَارِعِ». p. 95 then PARSES it, in the analysis that also gives this app
+    its mujarrad rafʿ cause: «سَيَزُورُنَا الْقَاضِي ـ السِّينُ حَرْفٌ دَالٌّ عَلَى التَّنْفِيسِ،
+    يَزُورُ: فِعْلٌ مُضَارِعٌ مَرْفُوعٌ لِتَجَرُّدِهِ مِنَ النَّاصِبِ وَالْجَازِمِ …».
+
+    Note exactly how much p. 95 gives and how much it withholds: a function and no bināʾ. So
+    binaaSign is null, as for نون الوقاية, and the card says what the letter is FOR. It denies
+    nothing further — the fāʿil/mafʿūl denials the other two particles carry exist because those
+    letters sit where a learner might read a subject or an object, and a prefixed sīn does not.
+    That is why `denialAr` is registry data now rather than a fixed tail of the renderer. */
+ 'siin-tanfiis':Object.freeze({category:'particle',syntacticRole:'none',mahall:'none',binaaSign:null,functionAr:'دَالٌّ عَلَى التَّنْفِيسِ',functionEn:'marking futurity (tanfīs)',letterAr:'السِّينُ',nameAr:'سِينُ التَّنْفِيسِ',nameEn:'the sīn of futurity (sīn al-tanfīs)',denialAr:'',denialEn:'',ruleId:'C_SIIN_TANFIIS'}),
  'yaa-mutakallim-maful':Object.freeze({category:'pronoun',syntacticRole:'maful',mahall:'nasb',binaaSign:'sukun',letterAr:'الْيَاءُ',nameAr:'يَاءُ الْمُتَكَلِّمِ',nameEn:'the first-person object yāʾ (yāʾ al-mutakallim)',ruleId:'C_YAA_MUTAKALLIM_MAFUL'})
 });
 const COMPONENT_CATEGORIES=Object.freeze({pronoun:1,particle:1,orthographic:1});
@@ -9121,6 +9149,16 @@ function componentRegistryError(reg){
  if(reg.binaaSign!==null&&!COMPONENT_BINAA_AR[reg.binaaSign])return `unknown bināʾ sign ${reg.binaaSign}`;
  if(reg.binaaSign===null&&!['particle','orthographic'].includes(reg.category))return 'only a particle or orthographic component may omit its bināʾ';
  if(reg.category==='pronoun'&&(!COMPONENT_ROLE_AR[reg.syntacticRole]||!COMPONENT_MAHALL_AR[reg.mahall]))return 'pronoun component must carry a real role and maḥall';
+ /* Wave 15 — the denial clause. A particle component must DECIDE whether it denies anything, so
+    both fields are required of it and both must be strings; the empty string is a decision and
+    `undefined` is an oversight. A pronoun or orthographic component denies nothing by construction:
+    its render branch never reads these, so declaring one would be a claim nothing prints. */
+ if(reg.category==='particle'){
+  if(typeof reg.denialAr!=='string'||typeof reg.denialEn!=='string')return 'particle component must declare both denial clauses, even if empty';
+  if(Boolean(reg.denialAr)!==Boolean(reg.denialEn))return 'particle component denies in one language only';
+ }else if(reg.denialAr||reg.denialEn){
+  return `a ${reg.category} component may not carry a denial clause, which its card never renders`;
+ }
  return null;
 }
 Object.entries(COMPONENT_REGISTRY).forEach(([kind,reg])=>{const e=componentRegistryError(reg);if(e)throw new Error(`COMPONENT_REGISTRY[${kind}] is invalid: ${e}`)});
@@ -9133,12 +9171,17 @@ function renderComponentAnalysis(c){
      whose bināʾ is not stated says what it is FOR instead, and never invents a bināʾ. Both end
      with the same denial of any iʿrāb position, and the no-bināʾ shape also denies the object
      role, because in this very construction the letter beside it IS the object. */
+  /* The DENIAL is registry data, not a fixed tail. Two of the three particle components deny being
+     the fāʿil (and one of them the mafʿūl as well) because those letters sit exactly where a
+     learner might read a subject or an object; the prefixed sīn sits nowhere near either, and
+     p. 95 denies nothing about it. Both existing entries carry their previous wording verbatim, so
+     no rendered byte moved when this became data. */
   if(c.binaaSign===null){
-   c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ ${c.functionAr}، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَ فَاعِلًا وَلَا مَفْعُولًا.`;
-   c.en=`${cap(c.nameEn)} is a particle ${c.functionEn}; it has no position in iʿrāb, and is neither the fāʿil nor the mafʿūl.`;
+   c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ ${c.functionAr}، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ${c.denialAr}.`;
+   c.en=`${cap(c.nameEn)} is a particle ${c.functionEn}; it has no position in iʿrāb${c.denialEn}.`;
   }else{
-   c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ مَبْنِيٌّ عَلَى ${COMPONENT_BINAA_AR[c.binaaSign]} لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، وَلَيْسَ فَاعِلًا.`;
-   c.en=`${cap(c.nameEn)} is a particle built on ${COMPONENT_BINAA_EN[c.binaaSign]}; it has no position in iʿrāb and is not the fāʿil.`;
+   c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ مَبْنِيٌّ عَلَى ${COMPONENT_BINAA_AR[c.binaaSign]} لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ${c.denialAr}.`;
+   c.en=`${cap(c.nameEn)} is a particle built on ${COMPONENT_BINAA_EN[c.binaaSign]}; it has no position in iʿrāb${c.denialEn}.`;
   }
  }else{
   c.ar=`«${c.letterAr}» ${c.nameAr}: حَرْفٌ زَائِدٌ لِلتَّفْرِيقِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`;
@@ -9148,7 +9191,7 @@ function renderComponentAnalysis(c){
 function makeComponent(kind,ownerId,index){
  const reg=COMPONENT_REGISTRY[kind];
  if(!reg)throw new Error(`Unknown internal-component kind: ${kind}`);
- const c={id:`${ownerId}:C${index}`,kind,category:reg.category,syntacticRole:reg.syntacticRole,mahall:reg.mahall,binaaSign:reg.binaaSign,functionAr:reg.functionAr||'',functionEn:reg.functionEn||'',letterAr:reg.letterAr,nameAr:reg.nameAr,nameEn:reg.nameEn,ruleId:reg.ruleId,ar:'',en:''};
+ const c={id:`${ownerId}:C${index}`,kind,category:reg.category,syntacticRole:reg.syntacticRole,mahall:reg.mahall,binaaSign:reg.binaaSign,functionAr:reg.functionAr||'',functionEn:reg.functionEn||'',denialAr:reg.denialAr||'',denialEn:reg.denialEn||'',letterAr:reg.letterAr,nameAr:reg.nameAr,nameEn:reg.nameEn,ruleId:reg.ruleId,ar:'',en:''};
  renderComponentAnalysis(c);
  return c;
 }
@@ -9160,7 +9203,7 @@ function componentInstanceError(c,ownerId,index){
  for(const key of ['category','syntacticRole','mahall','binaaSign','ruleId']){
   if(c[key]!==canonical[key])return{code:'E_COMPONENT_INVARIANT',message:`component ${c.kind} field ${key} (${c[key]}) disagrees with the registry (${canonical[key]})`};
  }
- for(const key of ['letterAr','nameAr','nameEn','functionAr','functionEn','ar','en']){
+ for(const key of ['letterAr','nameAr','nameEn','functionAr','functionEn','denialAr','denialEn','ar','en']){
   if(c[key]!==canonical[key])return{code:'E_COMPONENT_PRESENTATION',message:`component ${c.kind} presentation field ${key} is not canonical`};
  }
  const registryError=componentRegistryError(reg);
@@ -9903,6 +9946,12 @@ function verbComponentKinds(token,data=null){
  if(token.tense==='present'){
   const kinds=[...(PRESENT_ENDING_COMPONENTS[morphology.endingClass]||[])];
   if(morphology.endingClass==='waw-jamaaah'&&(token.state==='nasb'||token.state==='jazm'))kinds.push('alif-fariqa');
+  /* Wave 15 — the one component of this app that is a PREFIX, so it goes at the FRONT. p. 95
+     parses «سَيَزُورُنَا» in written order — the sīn first, then the verb — and the answers panel
+     renders components in this array's order, so unshifting is what keeps the card reading the way
+     the source reads. The flag comes from the REGISTERED SURFACE and never from the token: a word
+     the registry does not know cannot acquire a sīn by happening to be spelled with one. */
+  if(morphology.siinTanfis)kinds.unshift('siin-tanfiis');
   return kinds;
  }
  return [];
@@ -9933,6 +9982,9 @@ function authoritativeVerbMorphology(token,data=null){
   const base=PRESENT_MORPHOLOGY[person];
   if(!base)return{registered:false,feminineTaa:false};
   const result={...base,registered:true,feminineTaa:false};
+  /* Wave 15 — carried from the registered surface, because the sīn is part of the WORD. Nothing
+     else may set it: this is the only path by which a token can be said to carry one. */
+  if(registered?.morphology?.siinTanfis)result.siinTanfis=true;
   if(person==='3ms'){
    const tokens=data?.tokens||[];
    const index=tokens.indexOf(token);
@@ -11478,6 +11530,12 @@ const SOURCE_REGISTRY_DEFINITIONS=Object.freeze({
  /* Two rules, not one, because p.157 makes two separate claims about two different letters, and a
     letter that has no place in iʿrāb must never be able to borrow the rule of the pronoun beside
     it. The nūn's rule asserts no bināʾ, because the source asserts none. */
+ /* Wave 15 — سِينُ التَّنْفِيسِ. p. 15 gives its identity and its restriction («يَدْخُلَانِ عَلَى
+    الْفِعْلِ الْمُضَارِعِ وَحْدَهُ»), p. 16 files it among the علامات that belong to the muḍāriʿ
+    alone, and p. 95 parses it in the model iʿrāb that also gives this app its mujarrad rafʿ cause.
+    The rule authorizes an IDENTITY and no government at all — which is the whole point of putting
+    the verb it prefixes inside R_MUDARI_RAF_TAJARRUD rather than outside it. */
+ C_SIIN_TANFIIS:sourceRule('The sīn is a ḥarf marking tanfīs — futurity — that enters only on the present verb; it has no place in iʿrāb and governs nothing, so the verb after it stays marfūʿ for being free of a nāṣib and a jāzim.',[14,15,16,95],'Only the explicitly registered present surfaces that carry it. p. 95 gives it a function and no bināʾ, so the card states what the letter is FOR and claims no bināʾ, exactly as نون الوقاية does.'),
  C_NUUN_WIQAYA:sourceRule('Nūn al-wiqāyah is a ḥarf that must separate a verb from the first-person object yāʾ; it has no place in iʿrāb and is neither the fāʿil nor the mafʿūl.',[142,157],'Only the explicitly registered past surfaces that carry the first-person object yāʾ. Attested twice: p.142 names it and states its office — «وَيَجِبُ أَنْ يُفْصَلَ بَيْنَهَا وَبَيْنَ الْفِعْلِ بِنُونٍ تُسَمَّى نُونَ الْوِقَايَةِ», with «أَطَاعَنِي مُحَمَّدٌ» — and p.157’s model iʿrāb of «لَقِيَتْنِي هِنْدٌ بَاكِيَةً» says «وَالنُّونُ لِلْوِقَايَةِ». Neither page gives it a bināʾ or a maḥall, so this rule claims neither.'),
  C_YAA_MUTAKALLIM_MAFUL:sourceRule('The first-person object yāʾ is a connected pronoun built on sukūn in the position of naṣb as mafʿūl bihi.',[95,157],'Only the explicitly registered past surfaces that carry it. p.157: «وَالْيَاءُ ضَمِيرُ الْمُتَكَلِّمِ مَفْعُولٌ بِهِ، مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ»; p.95 parses the parallel attached «نَا» of «سَيَزُورُنَا الْقَاضِي» as «مَفْعُولٌ بِهِ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ». It is deliberately NOT the classification «مَفْعُولٌ بِهِ مُضْمَرٌ مُتَّصِلٌ», which belongs to باب المفعول به.'),
  C_ALIF_FARIQA:orthographyRule('The differentiating alif (الألف الفارقة) is written after wāw al-jamāʿah in verbs to distinguish it from the original wāw; it has no grammatical role and no place in iʿrāb.',ALJAZEERA_ALIF_FARIQA_AUTHORITY,[91],'Al Jazeera Learning Arabic («الألف الفارقة») names the rule and gives كَتَبُوا / لم يكتُبُوا / اكْتُبُوا. Workspace scan separately attests the written spelling «ضَرَبُوا» (p.91) as form-only; that attestation does not authorize this rule.'),
@@ -12105,6 +12163,56 @@ registerAdvancedPastSet(advancedPastActions);
 registerAdvancedPastSet(objectPronounPastActions);
 registerAdvancedPresentSet(advancedPresentActions);
 registerPassiveVerbCapabilities();
+/* ── Wave 15 — سِينُ التَّنْفِيسِ (pp. 14–16, parsed at p. 95) ──────────────────────────────────
+   The سـ-prefixed present surfaces, written out rather than derived. Nothing in this file composes
+   an Arabic verb form at run time, and this is not the place to start: a prefix that changes the
+   first letter's vowel is exactly the kind of morphology a string concatenation gets subtly wrong.
+   Each record names the BASE surface it prefixes, and the registration proves the relationship
+   instead of trusting it — the prefixed form must be the sīn followed by a base that is itself a
+   registered ordinary present, so a typo cannot register a word that is not this verb.
+
+   Only 3ms is registered, because that is the person p. 95 parses and the only one these lanes
+   produce. `siinTanfis` is the flag verbComponentKinds reads; it is set here and nowhere else. */
+const SIIN_TANFIS_VERBS=Object.freeze(Object.assign(Object.create(null),{
+ /* p. 95's own verb, from its own parse of «سَيَزُورُنَا الْقَاضِي». */
+ yazur:Object.freeze({key:'yazur',base:'يَزُورُ'}),
+ yaqra:Object.freeze({key:'yaqra',base:'يَقْرَأُ'})
+}));
+const SIIN_TANFIS_VERB_KEYS=Object.freeze(Object.keys(SIIN_TANFIS_VERBS));
+/* The prefixed surface is DERIVED, and that is safe here in a way it is not for person morphology:
+   p. 15 says the sīn simply «يَدْخُلُ عَلَى» the muḍāriʿ, changing not one letter or vowel of it, so
+   concatenation IS the morphology rather than an approximation of it. Deriving it also removes the
+   last place a second typed copy of an Arabic word could drift out of step with the first. */
+const SIIN_PREFIX_AR=String.fromCodePoint(0x0633,0x064E);
+const siinTanfisSurface=key=>SIIN_PREFIX_AR+SIIN_TANFIS_VERBS[key].base;
+(()=>{
+ /* The component names the letter in the definite («السِّينُ»), as every other letter component
+    does, so the check is that the letter is IN the name, not that the name starts with it. */
+ if(!COMPONENT_REGISTRY['siin-tanfiis'].letterAr.includes(String.fromCodePoint(0x0633))){
+  throw new Error('The sīn component no longer names the letter sīn.');
+ }
+ for(const key of SIIN_TANFIS_VERB_KEYS){
+  const record=SIIN_TANFIS_VERBS[key];
+  if(!Object.isFrozen(record)||record.key!==key)throw new Error('Sīn-tanfīs verb '+key+' is not frozen or not bound to its key.');
+  if(record.surface)throw new Error('Sīn-tanfīs verb '+key+' writes out a surface that must be derived.');
+  const base=verbFormIndex.get(record.base);
+  /* The base must be an ORDINARY present, which is exactly what p. 15 restricts the sīn to
+     («يَدْخُلَانِ عَلَى الْفِعْلِ الْمُضَارِعِ وَحْدَهُ»). Prefixing a past, an imperative or an
+     already-governed form would be a claim this source denies. */
+  if(!base||base.form!=='pres'){
+   throw new Error('Sīn-tanfīs verb '+key+' prefixes a surface that is not a registered ordinary present: '+record.base);
+  }
+  const surface=siinTanfisSurface(key);
+  if(verbFormIndex.has(surface))throw new Error('Sīn-tanfīs surface already registered: '+surface);
+  /* Registered as an ORDINARY present, not as the person-bound advanced lane. p. 95 parses only
+     the third-person masculine, which is this app's GENERIC present person — so the surface must
+     not claim `exactPresentRaf`, a marker that means "person-bound" and that
+     E_PRESENT_EXACT_MARKER checks against the authoritative person. What makes the surface
+     non-derivable is the prefix, and that is what `siinTanfis` records. */
+  verbFormIndex.set(surface,{lexeme:base.lexeme,form:'pres',surface,
+   morphology:Object.freeze({siinTanfis:true})});
+ }
+})();
 registerMutlaqVerbCapabilities();
 registerMutlaqNounForms();
 /* Every surface a mafʿūl-muṭlaq pair names must already resolve in the registries it borrows from.
@@ -15903,6 +16011,13 @@ function inflectVerb(token,tokens,index){
   // The person must be one the surface can genuinely carry. Which single reading is correct
   // is settled later by resolvePresentReading against the canonical template.
   if(token.state!=='raf'||!registered.morphology.presentPersonCandidates?.includes(token.grammar.person))throw new Error(`Exact present surface is not authorized for this person/state: ${token.surfaceHint}`);
+  token.expectedSurface=registered.surface;
+ }else if(registered?.morphology?.siinTanfis){
+  /* Wave 15 — a سـ-prefixed present. The surface is registered and NOT derivable from the lexeme,
+     whose own `pres` is the bare verb, so it comes from the registry like every other exact
+     surface. Only rafʿ: p. 15 restricts the sīn to the muḍāriʿ and p. 95 parses the verb after it
+     as marfūʿ «لتجرده من الناصب والجازم», so a governed state here would contradict both. */
+  if(token.state!=='raf')throw new Error(`A sīn-tanfīs surface may only be marfūʿ: ${token.surfaceHint}`);
   token.expectedSurface=registered.surface;
  }else if(registered?.form==='passivePresent'&&token.grammar.voice===PASSIVE_VOICE)token.expectedSurface=registered.surface;
  else if(token.inflection==='afalKhamsa') token.expectedSurface=inflectFiveVerb(token.lexeme,token.grammar.person,token.state,false);
@@ -21169,6 +21284,23 @@ function add(starts,form,state,sign,build,metadata={}){
    throw new Error(`Template ${stableId} moved the diptote lane off the nominative-mubtadaʾ target.`);
   }
  }
+ /* Wave 15 — سِينُ التَّنْفِيسِ. Held on the accusative-object target for the reason Wave 12's
+    estimated signs are: the sīn is read inside a full iʿrāb and is not a filterable «Word form».
+    And it may never be declared beside a GOVERNOR — p. 95's whole point is that the verb after the
+    sīn stays marfūʿ «لتجرده من الناصب والجازم», which is only true while nothing governs it. */
+ const siinTanfisVerbKeys=Object.freeze([...(metadata.siinTanfisVerbKeys||[])]);
+ if(siinTanfisVerbKeys.some((key,position)=>siinTanfisVerbKeys.indexOf(key)!==position||!SIIN_TANFIS_VERBS[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered sīn-tanfīs verb.`);
+ }
+ if(siinTanfisVerbKeys.length){
+  if(siinTanfisVerbKeys.length!==1)throw new Error(`Template ${stableId} mixes sīn-tanfīs verbs.`);
+  if(form!=='singular'||state!=='nasb'||sign!=='fatha'){
+   throw new Error(`Template ${stableId} moved the sīn-tanfīs lane off the accusative-object target.`);
+  }
+  if(presentGovernor&&presentGovernor!=='none'){
+   throw new Error(`Template ${stableId} puts a governor on a sīn-tanfīs verb, which p. 95 parses as ungoverned.`);
+  }
+ }
  const conditionalGovernor=isConditionalGovernor(GRAMMAR_RULES.governors[presentGovernor]);
  if(conditionalGovernor!==Boolean(responsePairIds.length)){
   throw new Error(`Template ${stableId} must declare response pairs exactly when its governor is conditional.`);
@@ -21251,6 +21383,7 @@ function add(starts,form,state,sign,build,metadata={}){
   presentCapabilities,
   estimatedSignNounKeys,
   diptoteNounKeys,
+  siinTanfisVerbKeys,
   build(){return{...build(),templateId:stableId,templateStarts:starts,templateForm:form,templateState:state,templateSign:sign}}
  });
 }
@@ -23722,6 +23855,43 @@ for(const key of DIPTOTE_NOUN_KEYS){
      'A noun that does not take tanwīn; its khafḍ is marked by a fatḥah standing in for the kasrah.')
    ]};
  },{diptoteNounKeys:[key]});
+}
+
+/* ── Wave 15 — سِينُ التَّنْفِيسِ reaches a card ────────────────────────────────────────────────
+   p. 95's own model sentence is «سَيَزُورُنَا الْقَاضِي», and it parses the written word in three
+   pieces: «السِّينُ حَرْفٌ دَالٌّ عَلَى التَّنْفِيسِ، يَزُورُ: فِعْلٌ مُضَارِعٌ مَرْفُوعٌ
+   لِتَجَرُّدِهِ مِنَ النَّاصِبِ وَالْجَازِمِ …، وَنَا: مَفْعُولٌ بِهِ مَبْنِيٌّ عَلَى السُّكُونِ فِي
+   مَحَلِّ نَصْبٍ». The sīn is therefore an internal COMPONENT — one visible word, two analyses —
+   which is precisely the lane Phase 0 built for وَاوُ الْجَمَاعَةِ and p. 157's object yāʾ.
+
+   The attached object of that sentence is NOT reproduced here: نَا as a mafʿūl would be a second
+   new component, and the row this lane exists for is the sīn. p. 157's yāʾ already gives the
+   attached object its lane, so nothing is lost.
+
+   These REUSE the existing verb/singular/naṣb/fatḥah tuple with the OBJECT as target, exactly as
+   Wave 12's estimated-sign lanes do: the sīn is something the learner READS inside a full iʿrāb,
+   not a «Word form» the filters model. The verb keeps its mujarrad rafʿ, which is the whole reason
+   p. 95 matters twice — the sīn governs nothing, so the verb is marfūʿ «لتجرده من الناصب
+   والجازم» even though something precedes it. */
+for(const key of SIIN_TANFIS_VERB_KEYS){
+ const record=SIIN_TANFIS_VERBS[key];
+ add('verb','singular','nasb','fatha',()=>{
+  const surface=siinTanfisSurface(key);
+  const lexeme=verbFormIndex.get(record.base).lexeme;
+  const subject=pickPerson();
+  const o=pickGeneralObject(lexeme,subject);
+  return{sentence:`${surface} ${subject.nom} ${o.acc}`,
+   translation:`${cap(subject.en)} will ${lexeme.en} ${objectEnglish(o.acc)}.`,
+   tokens:[
+    token(surface,`will ${lexeme.en}`,AR.presentPred(surface,'مَرْفُوعٌ',VISIBLE_DAMMA),
+     'A present verb carrying the sīn of futurity, which governs nothing.'),
+    token(subject.nom,subject.en,AR.faail(subject.nom),EN.faail),
+    token(o.acc,o.en,AR.object(o.acc),EN.object,true)
+   ]};
+ },{siinTanfisVerbKeys:[key],
+  presentCapabilities:[{person:'3ms',subjectMode:'explicit',
+   formClass:PRESENT_MORPHOLOGY['3ms'].formClass,endingClass:PRESENT_MORPHOLOGY['3ms'].endingClass,
+   binaaClass:PRESENT_MORPHOLOGY['3ms'].binaaClass,governorMode:'none'}]});
 }
 
 const recent=[]; const HISTORY=40;

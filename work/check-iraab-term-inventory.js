@@ -1626,7 +1626,13 @@ const MARATHON15 = {
     'B_MAFUL_MUDMAR_MUNFASIL'
   ],
   /* ── removed from the denominator, with the table each must now live in ───────────────────── */
-  retired: {}
+  retired: {
+    /* باب المفعول من أجله — p. 171's ثَلَاث حَالَات of the noun, not أقسام of the term. Each
+       حالة selects between two readings this inventory already counts separately, and the source
+       parses neither. See the reasons in iraab-term-rows.js. */
+    B_MAFUL_AJL_AL: 'notCounted',
+    B_MAFUL_AJL_MUDAF: 'notCounted'
+  }
 };
 {
   for (const key of MARATHON15.full) {
@@ -1655,6 +1661,24 @@ const MARATHON15 = {
     if (!list || !list.some(entry => entry.key === key)) {
       fail('retired row ' + key + ' is not recorded in the ' + table + ' table');
     }
+  }
+
+  /* A notCounted verdict of the form "the readings this حالة selects are ALREADY counted" is only
+     honest while those readings are actually produced. Wave 9 established that a notCounted term
+     can still owe a lesson; this is the stronger version — a notCounted term owes the rows it was
+     retired IN FAVOUR OF. If any of them stops reaching the learner, the retirement was wrong and
+     this fails rather than quietly shrinking the curriculum. */
+  const stillProduced = (key, why) => {
+    const row = observed.find(r => r.key === key);
+    if (!row) return fail('the row ' + key + ' that ' + why + ' was retired in favour of is missing');
+    if (row.status !== 'FULL') fail('the row ' + key + ' that ' + why + ' was retired in favour of is ' + row.status + ', not FULL');
+  };
+  if (MARATHON15.retired.B_MAFUL_AJL_AL || MARATHON15.retired.B_MAFUL_AJL_MUDAF) {
+    /* p. 172 gives every حالة of the mafʿūl lah exactly two permitted readings: naṣb as a
+       mafʿūl lah, or khafḍ by a particle of causation. Both must remain live. */
+    stillProduced('B_MAFUL_AJL', 'the mafʿūl-lah حالات');
+    stillProduced('X_MAKHFUD_HARF', 'the mafʿūl-lah حالات');
+    stillProduced('X_MUDAF', 'the muḍāf mafʿūl lah');
   }
 }
 

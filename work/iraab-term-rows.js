@@ -442,11 +442,9 @@ const rows = [
   R('B_NIDA_AY', 'أَيْ — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', "«أَيْ» لِلنِّدَاءِ"),
   R('B_NIDA_AYA', 'أَيَا — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', "«أَيَا» لِلنِّدَاءِ"),
   R('B_NIDA_HAYA', 'هَيَا — حَرْفُ نِدَاءٍ', CH.munada, '168', 'أدوات النداء', "«هَيَا» لِلنِّدَاءِ"),
+  /* FINAL MARATHON. The two «أقسام المفعول له» rows that stood here are p. 171's own
+     ثَلَاث حَالَات — states of the noun, not names for it — and both are now in `notCounted`. */
   R('B_MAFUL_AJL', 'مَفْعُولٌ لِأَجْلِهِ مَنْصُوبٌ', CH.mafulAjl, '170–172', 'المنصوبات', 'مَفْعُولٌ لِأَجْلِهِ'),
-  R('B_MAFUL_AJL_AL', 'الْمَفْعُولُ لَهُ الْمُقْتَرِنُ بِأَلْ', CH.mafulAjl, '172', 'أقسام المفعول له', 'الْمُقْتَرِنُ بِأَلْ',
-    { missingReason: 'deliberatelyNotGenerated: p. 172 makes khafḍ the more frequent reading there.' }),
-  R('B_MAFUL_AJL_MUDAF', 'الْمَفْعُولُ لَهُ الْمُضَافُ', CH.mafulAjl, '172', 'أقسام المفعول له', 'الْمَفْعُولُ لَهُ الْمُضَافُ',
-    { missingReason: 'deliberatelyNotGenerated: naṣb and khafḍ equally permissible.' }),
   R('B_MAFUL_MAAH', 'مَفْعُولٌ مَعَهُ مَنْصُوبٌ', CH.mafulMaah, '172–173', 'المنصوبات', 'مَفْعُولٌ مَعَهُ'),
   R('B_WAW_MAIYYA_MAAH', 'وَاوُ الْمَعِيَّةِ الدَّاخِلَةُ عَلَى الْمَفْعُولِ مَعَهُ', CH.mafulMaah, '172–173', 'المفعول معه', 'وَاوُ الْمَعِيَّةِ'),
   R('B_MAAH_ATF', 'الْعَطْفُ فِي مَوْضِعِ الْمَفْعُولِ مَعَهُ', CH.mafulMaah, '173', 'المفعول معه', 'الْعَطْفُ عَلَى مَا قَبْلَهُ',
@@ -556,7 +554,29 @@ const notCounted = [
      امْرَأَةٌ» resolves into the two readings this inventory ALREADY counts — the built اسم لا on the
      إعمال side, the نافية المهملة on the إلغاء side. */
   { term: 'تَكْرَارُ «لَا»', pages: '166–167', reason: 'The fourth of the four شروط of obligatory government (p. 166), and the thing p. 167 makes obligatory alongside الإلغاء. A condition, never a sayable iʿrāb term: the bāb’s own model parse utters «نافية مهملة» and no form of «تكرار». It stays TAUGHT — the cancelled-لا Why and combined block both state that repetition is obligatory, and the frame proves it structurally by carrying two «لا»s — and its two permitted readings are already counted as B_ISM_LA_MUFRAD and B_LA_ILGHA.' },
-  { term: 'الِاسْمُ الْمُؤَوَّلُ بِالصَّرِيحِ', pages: '154', reason: 'Appears only inside the gloss of the qayd «الاسم»: «يشمل الصريح مثل ضاحكاً … ويشمل المؤول بالصريح مثل يَضْحَكُ … فإنه في تأويل ضاحكاً». It names how a sentence-shaped ḥāl is UNDERSTOOD, and the chapter never parses يضحك with it — nor with any modern حال جملة label, which is separately source-excluded. p. 158 confirms the direction of the contrast from the tamyīz side: «وقولنا الصريح لإخراج الاسم المؤول … بخلاف الحال كما سبق». Explanatory analysis, not a sayable iʿrāb term.' }
+  { term: 'الِاسْمُ الْمُؤَوَّلُ بِالصَّرِيحِ', pages: '154', reason: 'Appears only inside the gloss of the qayd «الاسم»: «يشمل الصريح مثل ضاحكاً … ويشمل المؤول بالصريح مثل يَضْحَكُ … فإنه في تأويل ضاحكاً». It names how a sentence-shaped ḥāl is UNDERSTOOD, and the chapter never parses يضحك with it — nor with any modern حال جملة label, which is separately source-excluded. p. 158 confirms the direction of the contrast from the tamyīz side: «وقولنا الصريح لإخراج الاسم المؤول … بخلاف الحال كما سبق». Explanatory analysis, not a sayable iʿrāb term.' },
+  /* FINAL MARATHON CORRECTION — باب المفعول من أجله. p. 171 does not divide the mafʿūl lah into
+     أقسام at all; it gives the NOUN «ثَلَاثَ حَالَاتٍ»: «الأولى: أن يكون مقترناً بـ«أل». الثانية: أن
+     يكون مضافاً. الثالثة: أن يكون مجرداً من «أل» ومن الإضافة» — and then rules, for each, which of
+     naṣb and khafḍ is the more frequent reading. A حالة is a CONDITION that selects between two
+     readings, and both readings are already counted here: the naṣb reading is B_MAFUL_AJL
+     («مَفْعُولٌ لِأَجْلِهِ مَنْصُوبٌ», FULL), and the khafḍ reading is the ordinary
+     X_MAKHFUD_HARF / G_KASRA pair after a particle of causation (also FULL). Neither حالة adds a
+     third utterance, and the source never parses one: p. 170's own matn examples «قَامَ زَيْدٌ
+     إِجْلَالاً لِعَمْرٍو» and «قَصَدْتُكَ ابْتِغَاءَ مَعْرُوفِكَ» are cited and not analysed, and
+     p. 172's أسئلة sets «أعرب كل واحد منها» as unanswered student work.
+
+     THE TELL that these were authoring artefacts rather than terms: the source states three
+     حالات and the inventory carried rows for exactly the two the app does not PRODUCE. The third —
+     المجرد من أل والإضافة, which the app does produce — never had a row. A row set that tracks
+     coverage gaps is not a row set that tracks terms.
+
+     Note the separate and still-true fact these rows used to conflate with this one:
+     GRAMMAR_COVERAGE_MATRIX.deliberatelyNotGenerated correctly records that neither construction is
+     produced. That is a SCOPE statement about sentences. This is a statement about UTTERANCES, and
+     it would hold even if both constructions shipped tomorrow. */
+  { key: 'B_MAFUL_AJL_AL', term: 'الْمَفْعُولُ لَهُ الْمُقْتَرِنُ بِأَلْ', pages: '171–172', reason: 'The first of the three حَالَات p. 171 gives the noun that falls as a mafʿūl lah, not a قسم of the mafʿūl lah and not a term. p. 172 rules on it — «فَإِنْ كَانَ مُقْتَرِناً بِأَلْ فَالْأَكْثَرُ فِيهِ أَنْ يُجَرَّ بِحَرْفِ جَرٍّ دَالٍّ عَلَى التَّعْلِيلِ نَحْوَ: «ضَرَبْتُ ابْنِي لِلتَّأْدِيبِ» وَيَقِلُّ نَصْبُهُ» — and what the learner then utters is one of two already-counted analyses: «اسم مخفوض وعلامة خفضه الكسرة» after the lām, or «مفعول لأجله منصوب». The book never parses the noun as «المفعول له المقترن بأل»; the phrase occurs only in p. 172’s أسئلة, naming the category in order to ask about its حكم. Its non-production is separately and correctly recorded in deliberatelyNotGenerated; this entry is about the term.' },
+  { key: 'B_MAFUL_AJL_MUDAF', term: 'الْمَفْعُولُ لَهُ الْمُضَافُ', pages: '171–172', reason: 'The second of p. 171’s three حَالَات, on the same footing as the first. p. 172: «وَإِنْ كَانَ مُضَافاً جَازَ جَوَازاً مُتَسَاوِياً أَنْ يُجَرَّ بِالْحَرْفِ وَأَنْ يُنْصَبَ، نَحْوَ: «زُرْتُكَ مَحَبَّةَ أَدَبِكَ» أَوْ «زُرْتُكَ لِمَحَبَّةِ أَدَبِكَ»». Parsing the naṣb reading, the learner says «مَحَبَّةَ: مفعول لأجله منصوب وعلامة نصبه الفتحة الظاهرة، وهو مضاف» — three claims, all of which are already rows (B_MAFUL_AJL, G_FATHA, X_MUDAF). «المفعول له المضاف» itself is uttered nowhere in the bāb outside the أسئلة’s question. Its non-production is separately recorded in deliberatelyNotGenerated.' }
 ];
 
 module.exports = { rows, sourceExcluded, notCounted, CH };

@@ -14,19 +14,19 @@
   "rule": "A row is FULL only when its canonical Arabic is observed in the rendered iʿrāb (token.ar / token.phraseAr). Appearing only in a Why explanation or in the definitions panel yields GENERIC_ONLY, never FULL."
  },
  "totals": {
-  "TOTAL": 279,
+  "TOTAL": 277,
   "FULL": 264,
   "GENERIC_ONLY": 2,
   "PARTIAL": 1,
-  "ABSENT": 7,
+  "ABSENT": 5,
   "TRUE_BLOCKER": 5,
   "reconciles": true,
-  "percentFull": 94.6
+  "percentFull": 95.3
  },
  "randomizationTotals": {
   "GOOD": 163,
   "LIMITED": 102,
-  "NONE": 14
+  "NONE": 12
  },
  "marathon": {
   "target": 56,
@@ -108,6 +108,18 @@
    "term": "الِاسْمُ الْمُؤَوَّلُ بِالصَّرِيحِ",
    "pages": "154",
    "reason": "Appears only inside the gloss of the qayd «الاسم»: «يشمل الصريح مثل ضاحكاً … ويشمل المؤول بالصريح مثل يَضْحَكُ … فإنه في تأويل ضاحكاً». It names how a sentence-shaped ḥāl is UNDERSTOOD, and the chapter never parses يضحك with it — nor with any modern حال جملة label, which is separately source-excluded. p. 158 confirms the direction of the contrast from the tamyīz side: «وقولنا الصريح لإخراج الاسم المؤول … بخلاف الحال كما سبق». Explanatory analysis, not a sayable iʿrāb term."
+  },
+  {
+   "key": "B_MAFUL_AJL_AL",
+   "term": "الْمَفْعُولُ لَهُ الْمُقْتَرِنُ بِأَلْ",
+   "pages": "171–172",
+   "reason": "The first of the three حَالَات p. 171 gives the noun that falls as a mafʿūl lah, not a قسم of the mafʿūl lah and not a term. p. 172 rules on it — «فَإِنْ كَانَ مُقْتَرِناً بِأَلْ فَالْأَكْثَرُ فِيهِ أَنْ يُجَرَّ بِحَرْفِ جَرٍّ دَالٍّ عَلَى التَّعْلِيلِ نَحْوَ: «ضَرَبْتُ ابْنِي لِلتَّأْدِيبِ» وَيَقِلُّ نَصْبُهُ» — and what the learner then utters is one of two already-counted analyses: «اسم مخفوض وعلامة خفضه الكسرة» after the lām, or «مفعول لأجله منصوب». The book never parses the noun as «المفعول له المقترن بأل»; the phrase occurs only in p. 172’s أسئلة, naming the category in order to ask about its حكم. Its non-production is separately and correctly recorded in deliberatelyNotGenerated; this entry is about the term."
+  },
+  {
+   "key": "B_MAFUL_AJL_MUDAF",
+   "term": "الْمَفْعُولُ لَهُ الْمُضَافُ",
+   "pages": "171–172",
+   "reason": "The second of p. 171’s three حَالَات, on the same footing as the first. p. 172: «وَإِنْ كَانَ مُضَافاً جَازَ جَوَازاً مُتَسَاوِياً أَنْ يُجَرَّ بِالْحَرْفِ وَأَنْ يُنْصَبَ، نَحْوَ: «زُرْتُكَ مَحَبَّةَ أَدَبِكَ» أَوْ «زُرْتُكَ لِمَحَبَّةِ أَدَبِكَ»». Parsing the naṣb reading, the learner says «مَحَبَّةَ: مفعول لأجله منصوب وعلامة نصبه الفتحة الظاهرة، وهو مضاف» — three claims, all of which are already rows (B_MAFUL_AJL, G_FATHA, X_MUDAF). «المفعول له المضاف» itself is uttered nowhere in the bāb outside the أسئلة’s question. Its non-production is separately recorded in deliberatelyNotGenerated."
   }
  ],
  "rows": [
@@ -3815,36 +3827,6 @@
    "probeMode": "contains",
    "probeRequires": "",
    "observedTemplateLanes": 2
-  },
-  {
-   "key": "B_MAFUL_AJL_AL",
-   "term": "الْمَفْعُولُ لَهُ الْمُقْتَرِنُ بِأَلْ",
-   "chapter": "باب المفعول من أجله (pp. 170–172)",
-   "pages": "172",
-   "parent": "أقسام المفعول له",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "deliberatelyNotGenerated: p. 172 makes khafḍ the more frequent reading there.",
-   "randomization": "NONE",
-   "probe": "الْمُقْتَرِنُ بِأَلْ",
-   "probeMode": "contains",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
-  },
-  {
-   "key": "B_MAFUL_AJL_MUDAF",
-   "term": "الْمَفْعُولُ لَهُ الْمُضَافُ",
-   "chapter": "باب المفعول من أجله (pp. 170–172)",
-   "pages": "172",
-   "parent": "أقسام المفعول له",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "deliberatelyNotGenerated: naṣb and khafḍ equally permissible.",
-   "randomization": "NONE",
-   "probe": "الْمَفْعُولُ لَهُ الْمُضَافُ",
-   "probeMode": "contains",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
   },
   {
    "key": "B_MAFUL_MAAH",

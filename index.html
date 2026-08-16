@@ -1645,6 +1645,14 @@ const TRANSLATION_COMPOSER_SHAPES=Object.freeze(Object.assign(Object.create(null
  ,TS68:Object.freeze({parts:Object.freeze([Object.freeze({slot:'khabarClauseSentence'})])})
  /* الحال في محل نصب — the authorized frame owns the whole English question. */
  ,TS69:Object.freeze({parts:Object.freeze([Object.freeze({slot:'haalMahallSentence'})])})
+ /* Wave 13 — الظرف خبرًا. The authorized frame owns the whole English sentence, all three target
+    lanes alike. The demonstrative-linked خبر جملة اسمية needs no shape of its own: it is the same
+    construction as the pronoun-linked one and reuses TS68.
+    The ordinal is TS82 because TS01–TS81 are all taken. A first attempt reused TS70, which is a
+    LIVE shape (the lām of ownership, «X belongs to Y»): a duplicate key in this object literal is
+    silent, the later definition wins, and the only symptom was one unrelated template quietly
+    failing its History round trip. Check the whole range before assigning an ordinal here. */
+ ,TS82:Object.freeze({parts:Object.freeze([Object.freeze({slot:'zarfKhabarSentence'})])})
  ,TS65:Object.freeze({parts:Object.freeze([Object.freeze({slot:'conditionSentence'})])})
  ,TS59:Object.freeze({parts:Object.freeze([Object.freeze({slot:'gloss:2:cap'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:0'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
  ,TS60:Object.freeze({parts:Object.freeze([Object.freeze({lit:'Let '}),Object.freeze({slot:'gloss:2'}),Object.freeze({lit:' '}),Object.freeze({slot:'gloss:1'}),Object.freeze({lit:'.'})])})
@@ -1972,6 +1980,13 @@ const TRANSLATION_STRUCTURE_MAP=Object.freeze(Object.assign(Object.create(null),
  ,"T_NOUN_SINGULAR_RAF_DAMMA_04||noun:mubtada,noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_04",structure:"noun:mubtada,noun:mubtada,noun:khabar",shape:"TS68",copulaPlural:false})
  ,"T_NOUN_SINGULAR_RAF_DAMMA_05||noun:mubtada,noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_05",structure:"noun:mubtada,noun:mubtada,noun:khabar",shape:"TS68",copulaPlural:false})
  ,"T_NOUN_SINGULAR_RAF_DAMMA_06||noun:mubtada,noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_06",structure:"noun:mubtada,noun:mubtada,noun:khabar",shape:"TS68",copulaPlural:false})
+ /* Wave 13 — the demonstrative-linked خبر جملة اسمية reuses TS68: same construction, same
+    frame-owned English. The three ẓarf-khabar lanes get TS70. */
+ ,"T_NOUN_SMP_RAF_WAW_04||noun:mubtada,noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SMP_RAF_WAW_04",structure:"noun:mubtada,noun:mubtada,noun:khabar",shape:"TS68",copulaPlural:false})
+ ,"T_NOUN_SMP_RAF_WAW_05||noun:mubtada,noun:mubtada,noun:khabar":Object.freeze({templateId:"T_NOUN_SMP_RAF_WAW_05",structure:"noun:mubtada,noun:mubtada,noun:khabar",shape:"TS68",copulaPlural:false})
+ ,"T_NOUN_SINGULAR_RAF_DAMMA_08||noun:mubtada,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SINGULAR_RAF_DAMMA_08",structure:"noun:mubtada,noun:adverb,noun:mudafIlayh",shape:"TS82",copulaPlural:false})
+ ,"T_NOUN_SINGULAR_NASB_FATHA_07||noun:mubtada,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SINGULAR_NASB_FATHA_07",structure:"noun:mubtada,noun:adverb,noun:mudafIlayh",shape:"TS82",copulaPlural:false})
+ ,"T_NOUN_SINGULAR_JARR_KASRA_12||noun:mubtada,noun:adverb,noun:mudafIlayh":Object.freeze({templateId:"T_NOUN_SINGULAR_JARR_KASRA_12",structure:"noun:mubtada,noun:adverb,noun:mudafIlayh",shape:"TS82",copulaPlural:false})
  /* ظنّ — one structure, ten lanes: the sister and its two accusatives. */
  ,"T_VERB_SINGULAR_NASB_FATHA_35||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_SINGULAR_NASB_FATHA_35",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
  ,"T_VERB_BROKEN_NASB_FATHA_02||verb:past,noun:mafulAwwal,noun:mafulThani":Object.freeze({templateId:"T_VERB_BROKEN_NASB_FATHA_02",structure:"verb:past,noun:mafulAwwal,noun:mafulThani",shape:"TS67",copulaPlural:false})
@@ -2050,6 +2065,7 @@ function resolveTranslationSlot(exercise,mapping,spec){
  if(bits[0]==='mafulMaahSentence')return canonicalMafulMaahTranslation(exercise);
  if(bits[0]==='zannaSentence')return canonicalZannaTranslation(exercise);
  if(bits[0]==='khabarClauseSentence')return canonicalKhabarClauseTranslation(exercise);
+ if(bits[0]==='zarfKhabarSentence')return canonicalZarfKhabarTranslation(exercise);
  if(bits[0]==='haalMahallSentence')return canonicalHaalMahallTranslation(exercise);
  if(bits[0]==='munadaSentence')return canonicalMunadaTranslation(exercise);
  if(bits[0]==='conditionSentence')return canonicalConditionTranslation(exercise);
@@ -5059,6 +5075,60 @@ const MAFUL_FIH_PAIR_REGISTRY=Object.freeze(Object.assign(Object.create(null),{
   sentenceEn:'The student sat with the teacher.'})
 }));
 const MAFUL_FIH_ALL_PAIR_KEYS=Object.freeze(Object.keys(MAFUL_FIH_PAIR_REGISTRY));
+/* ── Wave 13 — الظرف as شبه الجملة standing where the خبر goes ──────────────────────────────────
+   This is a SECOND ʿāmil for the very same ẓarf role, and it is the source's, not an extension of
+   it. p. 101's matn makes الظرف one of the four «غير المفرد» khabars («وَزَيْدٌ عِنْدَكَ»); p. 102
+   names it as the second of the two شبه الجملة kinds, «الظَّرْفُ، نَحْوُ «فُوْقَ الْغُصْنِ» مِنْ قَوْلِكَ:
+   «الطَّائِرُ فَوْقَ الْغُصْنِ»»; and p. 104's model iʿrāb performs it outright:
+
+     «(٥) محمد عندك — محمد: مبتدأ، عند: ظرف مكان متعلق بمحذوف خبر المبتدإ.»
+
+   The sentence has NO verb, which is exactly the ʿāmil case mafulFihAmilFor already recognizes for
+   the verbless p. 152 examples. Three things this registry is careful about:
+
+     · Every ẓarf here is a مبهم place from the شرح's thirteen (p. 152) — the same lexemes the
+       verb-governed lanes draw on, never a new word and never a مختص place.
+     · The source's three examples all put the ẓarf AFTER its mubtadaʾ («زيد عندك», «الطائر فوق
+       الغصن», «محمد عندك»), so this lane is never fronted and its authority refuses a delayed
+       mubtadaʾ outright. خبر مقدم keeps the جار ومجرور shape the source fronts.
+     · Nothing is typed in Arabic. A frame names its mubtadaʾ and its muḍāf ilayh in English and the
+       app's own audited pools supply the surfaces; an ambiguous or missing name is a load-time
+       throw, not a silent wrong pick. */
+const ZARF_KHABAR_POOLS=Object.freeze([['singularThings',()=>singularThings],['places',()=>places],
+ ['singularPeople',()=>singularPeople]]);
+function zarfKhabarNoun(en){
+ const all=ZARF_KHABAR_POOLS.flatMap(([,pool])=>pool());
+ const hits=all.filter(item=>item.en===en);
+ if(hits.length!==1)throw new Error(`The ẓarf-khabar registry matched ${hits.length} nouns for “${en}”.`);
+ /* And the SURFACE must be unambiguous too, not merely the English. «الْمَكْتَبُ» is "the desk" in
+    singularThings and "the office" in places: resolving it by English picks one record while the
+    canonical gloss authority picks the other, and the two only disagree once a restored card is
+    compared with its builder. Refusing the shared surface here is the cheap end of that bug. */
+ const twins=all.filter(item=>item!==hits[0]&&(item.nom===hits[0].nom||item.gen===hits[0].gen));
+ if(twins.length)throw new Error(`The ẓarf-khabar registry names “${en}”, whose surface another lexicon record also owns.`);
+ return hits[0];
+}
+const ZARF_KHABAR_FRAMES=Object.freeze(Object.assign(Object.create(null),{
+ bookOnTable:Object.freeze({key:'bookOnTable',mubtadaEn:'the book',zarfKey:'fawqa',hostEn:'the table',
+  sentenceEn:'The book is on top of the table.'}),
+ keyUnderPillow:Object.freeze({key:'keyUnderPillow',mubtadaEn:'the key',zarfKey:'tahta',hostEn:'the pillow',
+  sentenceEn:'The key is under the pillow.'}),
+ bagBehindDoor:Object.freeze({key:'bagBehindDoor',mubtadaEn:'the bag',zarfKey:'khalfa',hostEn:'the door',
+  sentenceEn:'The bag is behind the door.'}),
+ carInFrontOfSchool:Object.freeze({key:'carInFrontOfSchool',mubtadaEn:'the car',zarfKey:'amama',hostEn:'the school',
+  sentenceEn:'The car is in front of the school.'}),
+ bookWithTeacher:Object.freeze({key:'bookWithTeacher',mubtadaEn:'the book',zarfKey:'inda',hostEn:'the teacher',
+  sentenceEn:'The book is with the teacher.'})
+}));
+const ZARF_KHABAR_FRAME_KEYS=Object.freeze(Object.keys(ZARF_KHABAR_FRAMES));
+function zarfKhabarFrameRecord(frameKey){
+ const frame=ZARF_KHABAR_FRAMES[frameKey];
+ if(!frame)throw new Error(`Unknown ẓarf-khabar frame: ${frameKey}`);
+ const lexeme=MAFUL_FIH_LEXEMES[frame.zarfKey];
+ if(!lexeme)throw new Error(`Ẓarf-khabar frame ${frameKey} names an unregistered ẓarf: ${frame.zarfKey}`);
+ return Object.freeze({key:frameKey,lexemeKey:frame.zarfKey,lexeme,
+  mubtada:zarfKhabarNoun(frame.mubtadaEn),host:zarfKhabarNoun(frame.hostEn),sentenceEn:frame.sentenceEn});
+}
 /* Productive الحال المفردة — Al-Tuḥfah pp. 153–157. The source defines الحال as the
    accusative noun that makes an otherwise unclear condition explicit, then states the productive
    defaults used here: the haal is indefinite, it follows a complete clause, and its صاحب is
@@ -6215,14 +6285,31 @@ const KHABAR_CLAUSE_KINDS=Object.freeze(Object.assign(Object.create(null),{
    analysis, never in place of it. */
 const SHIBH_JUMLA_KHABAR_AR='خَبَرٌ شِبْهُ جُمْلَةٍ';
 const SHIBH_JUMLA_KHABAR_EN='a shibh-jumlah khabar';
+/* pp. 103–104 parse the two kinds of shibh jumlah with ONE clause and two names. Wave 13 lifts
+   the shared half out of the composer — these are its own former bytes, MOVED, never retyped —
+   and reads each NAME from the registry that owns it. The zarf name now comes from
+   MAFUL_FIH_KIND_LABELS, which is where the source’s own wording already lived, so this card can
+   never name a kind its lexeme does not have. */
+const MUTAALLIQ_MAHDHUF_KHABAR_AR='مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ';
+const JARR_MAJRUR_NAME_AR='جَارٌّ وَمَجْرُورٌ';
 const FEMININE_ENDING_RE=/ة[ً-ْ]*$/u;
 const RABIT_NAME_AR='الرَّابِطُ';
 const RABIT_KINDS=Object.freeze(Object.assign(Object.create(null),{
  pronoun:Object.freeze({id:'pronoun',ar:'ضَمِيرٌ يَعُودُ عَلَى الْمُبْتَدَأِ',
   en:'a pronoun returning to the mubtadaʾ',ruleId:'R_KHABAR_JUMLA_RABIT',produced:true}),
+ /* Wave 13 — p. 102's OTHER link, «وَإِمَّا اسْمُ إِشَارَةٍ نَحْوُ «مُحَمَّدٌ هَذَا رَجُلٌ كَرِيمٌ»», is
+    produced now. It carries its OWN clause and never the pronoun's: «يَعُودُ عَلَى» is what this
+    source says of the pronoun link, and it is the exact string the pronoun rābiṭ row is counted on,
+    so the demonstrative states the same job in the source's other verb from the same sentence —
+    «رَابِطٍ يَرْبِطُهُ بِالْمُبْتَدَإِ». Neither link can be read off the other's iʿrāb line. */
  ismIshara:Object.freeze({id:'ismIshara',ar:'اسْمُ إِشَارَةٍ',
-  en:'a demonstrative noun',ruleId:'R_KHABAR_JUMLA_RABIT',produced:false})
+  clauseAr:'يَرْبِطُ الْجُمْلَةَ بِالْمُبْتَدَأِ',clauseEn:'binds that sentence to the mubtadaʾ',
+  en:'a demonstrative noun',ruleId:'R_KHABAR_JUMLA_RABIT',produced:true})
 }));
+/* The pronoun link's own verb, DERIVED from the pronoun kind's name rather than typed a second
+   time: it is the exact string the pronoun-rābiṭ inventory row is counted on, and Wave 13's
+   demonstrative link is checked against it so the two links can never share one sentence. */
+const PRONOUN_RABIT_RETURN_AR=RABIT_KINDS.pronoun.ar.split(' ').slice(1,3).join(' ');
 /* The two shapes the pronoun link takes in this app: attached to the clause's own muḍāf, or
    concealed in its verb. Both are «ضمير يعود إلى المبتدإ»; only the morphology differs. */
 const RABIT_SHAPES=Object.freeze(Object.assign(Object.create(null),{
@@ -6261,6 +6348,31 @@ const KHABAR_CLAUSE_FRAMES=Object.freeze(Object.assign(Object.create(null),{
   predicateEn:'new',sentenceEn:'The merchant — his door is new.'})
 }));
 const KHABAR_CLAUSE_FRAME_KEYS=Object.freeze(Object.keys(KHABAR_CLAUSE_FRAMES));
+/* Wave 13 — the demonstrative-linked shape of the same construction, in the source's own words and
+   the source's own order: «مُحَمَّدٌ هَذَا رَجُلٌ كَرِيمٌ» (p. 102) is an outer mubtadaʾ followed by a
+   nominal sentence whose OWN mubtadaʾ is a demonstrative standing for it. The demonstrative is
+   هَؤُلَاءِ, because it is the one demonstrative this source gives a bināʾ for (p. 22's own list of
+   what is built and upon what), so every outer mubtadaʾ here is a sound masculine plural of
+   rational beings for it to stand for. Al-Tuḥfah's own example carries the same shape a تابع reading
+   could also take; the app teaches the reading the source teaches with it, and states the whole
+   structure on the card rather than leaving it to be felt.
+   Nothing is typed in Arabic: a frame names its three words in English and the app's own audited
+   pools supply every surface. */
+const KHABAR_CLAUSE_ISHARA_FRAMES=Object.freeze(Object.assign(Object.create(null),{
+ engineersHardworking:Object.freeze({key:'engineersHardworking',ownerEn:'the engineers',
+  isharaKey:'haaulaa',predicateEn:'hardworking',sentenceEn:'The engineers — these are hardworking.'}),
+ teachersPresent:Object.freeze({key:'teachersPresent',ownerEn:'the teachers',
+  isharaKey:'haaulaa',predicateEn:'present',sentenceEn:'The teachers — these are present.'}),
+ researchersSkilled:Object.freeze({key:'researchersSkilled',ownerEn:'the researchers',
+  isharaKey:'haaulaa',predicateEn:'skilled',sentenceEn:'The researchers — these are skilled.'}),
+ travelersReady:Object.freeze({key:'travelersReady',ownerEn:'the travelers',
+  isharaKey:'haaulaa',predicateEn:'ready',sentenceEn:'The travelers — these are ready.'}),
+ accountantsActive:Object.freeze({key:'accountantsActive',ownerEn:'the accountants',
+  isharaKey:'haaulaa',predicateEn:'active',sentenceEn:'The accountants — these are active.'}),
+ programmersTruthful:Object.freeze({key:'programmersTruthful',ownerEn:'the programmers',
+  isharaKey:'haaulaa',predicateEn:'truthful',sentenceEn:'The programmers — these are truthful.'})
+}));
+const KHABAR_CLAUSE_ISHARA_FRAME_KEYS=Object.freeze(Object.keys(KHABAR_CLAUSE_ISHARA_FRAMES));
 const ZANNA_FIRST_ROLE='mafulAwwal';
 const ZANNA_SECOND_ROLE='mafulThani';
 /* p. 111's four أقسام, in the شرح's own order and its own words. The class is not decoration: it
@@ -12872,6 +12984,24 @@ function khabarClauseFrameRecord(frameKey){
  return Object.freeze({key:frameKey,owner:owners[0],owned,
   predicate:khabarClausePredicate(owned.base.gender,frame.predicateEn),sentenceEn:frame.sentenceEn});
 }
+/* Wave 13 — the demonstrative-linked frame resolves through the SAME discipline: English in, the
+   app's own audited records out, and an ambiguous or missing name is a load-time throw. The
+   demonstrative itself comes from ISHARA_LEXEMES, so this frame can never name a demonstrative the
+   source states no bināʾ for. */
+function khabarClauseIsharaFrameRecord(frameKey){
+ const frame=KHABAR_CLAUSE_ISHARA_FRAMES[frameKey];
+ if(!frame)throw new Error(`Unknown demonstrative khabar-clause frame: ${frameKey}`);
+ const owners=smp.filter(item=>item.en===frame.ownerEn);
+ if(owners.length!==1)throw new Error(`Demonstrative khabar-clause frame ${frameKey} matched ${owners.length} owners.`);
+ const predicates=masculinePluralPredicates.filter(item=>item.en===frame.predicateEn);
+ if(predicates.length!==1)throw new Error(`Demonstrative khabar-clause frame ${frameKey} matched ${predicates.length} predicates.`);
+ const ishara=ISHARA_LEXEMES[frame.isharaKey];
+ if(!ishara)throw new Error(`Demonstrative khabar-clause frame ${frameKey} names an unregistered demonstrative.`);
+ return Object.freeze({key:frameKey,owner:owners[0],ishara,isharaKey:frame.isharaKey,
+  predicate:predicates[0],sentenceEn:frame.sentenceEn});
+}
+const KHABAR_CLAUSE_ISHARA_LEXEME_KEYS=Object.freeze([...new Set(
+ KHABAR_CLAUSE_ISHARA_FRAME_KEYS.map(key=>KHABAR_CLAUSE_ISHARA_FRAMES[key].isharaKey))]);
 function registerKhabarClauseForms(){
  Object.keys(OWNED_HAA_LEXEMES).forEach(key=>{
   const record=khabarClauseOwned(key);
@@ -12929,6 +13059,34 @@ function verifyKhabarClauseRegistry(){
   if(!record.predicate.nom)throw new Error(`Khabar-clause frame ${key} has no predicate.`);
   if(typeof record.sentenceEn!=='string'||!record.sentenceEn.trim()){
    throw new Error(`Khabar-clause frame ${key} carries no canonical English.`);
+  }
+ });
+ /* 4 — Wave 13. Both links are produced now, so BOTH must carry a clause of their own and the two
+    clauses must be different strings: one rābiṭ crediting the other is exactly what the inventory's
+    `requires` discriminator exists to catch, and it is cheaper to make it impossible here. The
+    demonstrative's clause is checked for canonical Unicode order for the same reason «الرابط» is —
+    this repo has shipped two byte orders of one word before. */
+ if(!RABIT_KINDS.pronoun.produced||!RABIT_KINDS.ismIshara.produced){
+  throw new Error('A rābiṭ kind the source names is not produced.');
+ }
+ if(!RABIT_KINDS.ismIshara.clauseAr||RABIT_KINDS.ismIshara.clauseAr!==RABIT_KINDS.ismIshara.clauseAr.normalize('NFC')){
+  throw new Error('The demonstrative rābiṭ clause is missing or not in canonical Unicode order.');
+ }
+ if(RABIT_KINDS.ismIshara.clauseAr.includes(PRONOUN_RABIT_RETURN_AR)
+  ||!RABIT_KINDS.pronoun.ar.includes(PRONOUN_RABIT_RETURN_AR)){
+  throw new Error('The two rābiṭ kinds no longer state their link in their own words.');
+ }
+ // 5 — every demonstrative frame resolves, and its demonstrative is one the source gives a bināʾ for.
+ KHABAR_CLAUSE_ISHARA_FRAME_KEYS.forEach(key=>{
+  const record=khabarClauseIsharaFrameRecord(key);
+  if(!ISHARA_BINAA_SIGNS[record.ishara.binaaSignId]){
+   throw new Error(`Demonstrative khabar-clause frame ${key} names a demonstrative with no source-stated bināʾ.`);
+  }
+  if(record.owner.nom===record.predicate.nom){
+   throw new Error(`Demonstrative khabar-clause frame ${key} repeats one word in two positions.`);
+  }
+  if(typeof record.sentenceEn!=='string'||!record.sentenceEn.trim()){
+   throw new Error(`Demonstrative khabar-clause frame ${key} carries no canonical English.`);
   }
  });
 }
@@ -13905,18 +14063,70 @@ function mafulFihTemplateRecord(data){
    (p. 152) have no visible verb at all — and the app already analyses that shape as a ẓarf attached
    to an omitted khabar. So an omitted-khabar ʿāmil is authorized, but only where the sentence
    actually offers one: a mubtadaʾ standing before the ẓarf. */
-function mafulFihAmilFor(tokens,index){
+function mafulFihAmilFor(data,index){
+ const tokens=data?.tokens||[];
  const verb=[...tokens.slice(0,index)].reverse().find(item=>item?.grammar?.type==='verb');
  if(verb)return{kind:'verb',token:verb};
- const mubtada=tokens.slice(0,index).find(item=>item?.grammar?.role==='mubtada');
- return mubtada?{kind:'omittedKhabar',token:null}:null;
+ /* Wave 13 makes the verbless case PROVE itself. "There is a mubtadaʾ somewhere before this ẓarf"
+    is a scan, not an authority, and on its own it would hand a governor to any ẓarf dropped into
+    any nominal sentence — the exact «mutaalliq = true» shortcut this chapter must not take. The
+    omitted khabar counts as an ʿāmil only where a template owns the source's own verbless frame
+    AND this very token is that frame's ẓarf. */
+ const frame=deriveZarfKhabarAuthority(data);
+ return frame.authorized&&frame.zarfId&&frame.zarfId===tokens[index]?.id?{kind:'omittedKhabar',token:null}:null;
+}
+function zarfKhabarTemplateRecord(data){
+ const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
+ return template?.zarfKhabarFrameKeys?.length?template:null;
+}
+function zarfKhabarRefusal(reason){return Object.freeze({authorized:false,reason,frameKey:''})}
+/* The whole shape is the proof, re-derived from the tokens every time: p. 104's «محمد عندك» is a
+   mubtadaʾ, then an annexed ẓarf, then its muḍāf ilayh, and no verb anywhere. A ẓarf that merely
+   carries the role, or one that sits in a sentence that also has a verb, or one whose mubtadaʾ is
+   delayed, is refused here and therefore has no ʿāmil, and therefore cannot be built at all. */
+function deriveZarfKhabarAuthority(data){
+ const template=zarfKhabarTemplateRecord(data);
+ if(!template)return zarfKhabarRefusal('template-declares-no-zarf-khabar-frame');
+ const tokens=data?.tokens;
+ if(!Array.isArray(tokens)||tokens.length!==3)return zarfKhabarRefusal('not-the-three-word-shape');
+ const [mubtada,zarf,host]=tokens;
+ if(mubtada?.grammar?.role!=='mubtada')return zarfKhabarRefusal('the-first-word-is-not-the-mubtada');
+ if(mubtada.grammar.delayed)return zarfKhabarRefusal('the-source-puts-this-zarf-after-its-mubtada');
+ if(zarf?.grammar?.role!==MAFUL_FIH_ROLE||!zarf.grammar.isMudaf){
+  return zarfKhabarRefusal('the-second-word-is-not-an-annexed-zarf');
+ }
+ if(host?.grammar?.role!=='mudafIlayh')return zarfKhabarRefusal('the-zarf-has-no-mudaf-ilayh');
+ if(tokens.some(item=>item?.grammar?.type==='verb')){
+  return zarfKhabarRefusal('this-shape-has-no-verb-to-govern-the-zarf');
+ }
+ for(const frameKey of template.zarfKhabarFrameKeys){
+  const record=zarfKhabarFrameRecord(frameKey);
+  if(mubtada.word!==record.mubtada.nom)continue;
+  if(zarf.word!==record.lexeme.acc||zarf.surfaceHint!==record.lexeme.acc)continue;
+  if(host.word!==record.host.gen)continue;
+  return Object.freeze({authorized:true,reason:'',frameKey,lexemeKey:record.lexemeKey,
+   kind:record.lexeme.kind,mubtadaId:mubtada.id,zarfId:zarf.id,hostId:host.id});
+ }
+ return zarfKhabarRefusal('the-three-words-are-not-a-registered-frame');
+}
+function canonicalZarfKhabarTranslation(data){
+ const authority=deriveZarfKhabarAuthority(data);
+ return authority.authorized?zarfKhabarFrameRecord(authority.frameKey).sentenceEn:null;
+}
+/* The single question every شبه الجملة site asks about a non-particle anchor: is THIS token the
+   ẓarf its own template's frame licenses? Anything else is not a ẓarf khabar, whatever role label
+   it carries. */
+function isLicensedZarfKhabar(data,token){
+ if(token?.grammar?.role!==MAFUL_FIH_ROLE)return false;
+ const authority=deriveZarfKhabarAuthority(data);
+ return authority.authorized&&authority.zarfId===token.id;
 }
 function mafulFihPairAt(data,index){
  const template=mafulFihTemplateRecord(data);
  const tokens=data?.tokens;
  const zarf=Array.isArray(tokens)?tokens[index]:null;
  if(!template||!zarf||zarf.grammar?.role!==MAFUL_FIH_ROLE)return null;
- const amil=mafulFihAmilFor(tokens,index)?.token;
+ const amil=mafulFihAmilFor(data,index)?.token;
  if(!amil)return null;
  const objects=tokens.filter(item=>item.grammar?.role==='object');
  const qualifier=tokens[index+1]?.grammar?.role==='mudafIlayh'?tokens[index+1]:null;
@@ -13963,7 +14173,7 @@ function deriveMafulFihAuthority(data,index){
  if(lexeme.indexed&&nounFormIndex.get(zarf.word)?.lexeme!==lexeme){
   return Object.freeze({authorized:false,reason:'zarf-lexeme-mismatch'});
  }
- const amil=mafulFihAmilFor(tokens,index);
+ const amil=mafulFihAmilFor(data,index);
  if(!amil)return Object.freeze({authorized:false,reason:'no-amil-for-the-zarf'});
  if(Boolean(zarf.grammar.isMudaf)!==Boolean(lexeme.mudaf)){
   return Object.freeze({authorized:false,reason:'idafa-declaration-mismatch'});
@@ -14854,9 +15064,16 @@ function mafulMaahPairAt(data,index){
    mubtadaʾ. Nothing is read from a stored claim. */
 function khabarClauseTemplateRecord(data){
  const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
- return template?.khabarClauseFrameKeys?.length?template:null;
+ if(!template)return null;
+ return template.khabarClauseFrameKeys.length||template.khabarClauseIsharaFrameKeys.length?template:null;
 }
 function khabarClauseRefusal(reason){return Object.freeze({authorized:false,reason,frameKey:''})}
+/* Wave 13 — p. 102 names TWO rābiṭs, and they are two different STRUCTURES, not one structure with
+   two labels. The inner mubtadaʾ is what tells them apart and it is read from the tokens, never from
+   the relationship: the pronoun link is a muḍāf carrying the hāʾ, the demonstrative link is a built
+   demonstrative standing alone. A template owns one of the two frame tables and never both, so
+   relabelling one link as the other — the exact forgery Wave 4 left this row non-FULL to prevent —
+   cannot survive either half of this function. */
 function deriveKhabarClauseAuthority(data){
  const template=khabarClauseTemplateRecord(data);
  if(!template)return khabarClauseRefusal('template-declares-no-khabar-clause-frame');
@@ -14865,6 +15082,26 @@ function deriveKhabarClauseAuthority(data){
  const [owner,inner,predicate]=tokens;
  if(owner?.grammar?.role!=='mubtada'||inner?.grammar?.role!=='mubtada'||predicate?.grammar?.role!=='khabar'){
   return khabarClauseRefusal('the-three-roles-are-not-outer-mubtada-inner-mubtada-khabar');
+ }
+ if(inner.grammar.isharaKey){
+  if(!template.khabarClauseIsharaFrameKeys.length){
+   return khabarClauseRefusal('template-declares-no-demonstrative-link-frame');
+  }
+  if(inner.grammar.attachedHaa||inner.grammar.isMudaf){
+   return khabarClauseRefusal('the-demonstrative-link-is-not-a-mudaf');
+  }
+  for(const frameKey of template.khabarClauseIsharaFrameKeys){
+   const record=khabarClauseIsharaFrameRecord(frameKey);
+   if(owner.word!==record.owner.nom)continue;
+   if(inner.word!==record.ishara.surface||inner.grammar.isharaKey!==record.isharaKey)continue;
+   if(predicate.word!==record.predicate.nom)continue;
+   return Object.freeze({authorized:true,reason:'',frameKey,kind:'nominal',
+    rabitKind:'ismIshara',rabitShape:''});
+  }
+  return khabarClauseRefusal('the-three-words-are-not-a-registered-demonstrative-frame');
+ }
+ if(!template.khabarClauseFrameKeys.length){
+  return khabarClauseRefusal('template-declares-no-pronoun-link-frame');
  }
  if(!inner.grammar.attachedHaa||!inner.grammar.isMudaf){
   return khabarClauseRefusal('the-inner-mubtada-carries-no-attached-link');
@@ -14879,6 +15116,13 @@ function deriveKhabarClauseAuthority(data){
  }
  return khabarClauseRefusal('the-three-words-are-not-a-registered-frame');
 }
+/* One frame record per link kind, chosen by the kind the authority PROVED — never by the
+   relationship's own claim, which is what the parts function then checks against this. */
+function khabarClauseRecordFor(authority){
+ return authority.rabitKind==='ismIshara'
+  ?khabarClauseIsharaFrameRecord(authority.frameKey)
+  :khabarClauseFrameRecord(authority.frameKey);
+}
 /* The relationship must BE the proof. A khabar-clause relationship pasted onto another exercise,
    or one that renames the clause kind or its link, renders nothing and fails validation. */
 function khabarClauseRelationshipParts(rel,data){
@@ -14890,13 +15134,16 @@ function khabarClauseRelationshipParts(rel,data){
  if(rel.rabitKind!==authority.rabitKind||rel.rabitShape!==authority.rabitShape)return null;
  if(rel.rabitTokenId!==inner.id)return null;
  if((rel.tokenIds||[]).join('|')!==[inner.id,predicate.id].join('|'))return null;
- return{owner,inner,predicate,record:khabarClauseFrameRecord(authority.frameKey),
+ /* The demonstrative link has no morphological SHAPE — it is a whole word, not a letter inside
+    one — so it carries none, and every site that words the link branches on that rather than on a
+    label it could be handed. */
+ return{owner,inner,predicate,record:khabarClauseRecordFor(authority),
   kind:KHABAR_CLAUSE_KINDS[authority.kind],rabit:RABIT_KINDS[authority.rabitKind],
-  shape:RABIT_SHAPES[authority.rabitShape]};
+  shape:authority.rabitShape?RABIT_SHAPES[authority.rabitShape]:null};
 }
 function canonicalKhabarClauseTranslation(data){
  const authority=deriveKhabarClauseAuthority(data);
- return authority.authorized?khabarClauseFrameRecord(authority.frameKey).sentenceEn:null;
+ return authority.authorized?khabarClauseRecordFor(authority).sentenceEn:null;
 }
 function zannaTemplateRecord(data){
  const template=data?.templateId?templates.find(item=>item.stableId===data.templateId):null;
@@ -15850,7 +16097,13 @@ function resolveRelationships(data){
    relationship=addRelationship(data,'mubtadaKhabar',{mubtadaId:mubtada.id,khabarKind:'single',khabarId:khabar.id,tokenIds:[khabar.id]});
    khabar.relations.mubtadaId=mubtada.id;
   }else if(mubtada.grammar.delayed){
-   const anchor=tokens.slice(0,mIndex).find(item=>isKhafdParticleType(item.grammar.particleType)||item.grammar.role==='adverb');
+   /* Wave 13 — a شبه الجملة anchor is a particle of khafḍ, or the ONE ẓarf a template's own
+      verbless frame licenses. Carrying the ẓarf role is not enough: without this the composer's
+      ẓarf wording could be reached by any adverb that happened to sit beside a mubtadaʾ. The
+      fronted branch keeps the same gate and the frame refuses a delayed mubtadaʾ, so a fronted
+      ẓarf khabar is unreachable — which is the source's own arrangement, since all three of its
+      ẓarf-khabar examples put the ẓarf after its mubtadaʾ. */
+   const anchor=tokens.slice(0,mIndex).find(item=>isKhafdParticleType(item.grammar.particleType)||isLicensedZarfKhabar(data,item));
    if(anchor){
     const phraseTokens=tokens.slice(tokens.indexOf(anchor),mIndex);
     relationship=addRelationship(data,'mubtadaKhabar',{mubtadaId:mubtada.id,khabarKind:'frontedPhrase',anchorId:anchor.id,tokenIds:phraseTokens.map(item=>item.id)});
@@ -15861,7 +16114,7 @@ function resolveRelationships(data){
     const phraseTokens=tokens.slice(mIndex+1);
     relationship=addRelationship(data,'mubtadaKhabar',{mubtadaId:mubtada.id,khabarKind:'verbalSentence',anchorId:verb.id,tokenIds:phraseTokens.map(item=>item.id)});
    }else{
-    const anchor=tokens.slice(mIndex+1).find(item=>isKhafdParticleType(item.grammar.particleType)||item.grammar.role==='adverb');
+    const anchor=tokens.slice(mIndex+1).find(item=>isKhafdParticleType(item.grammar.particleType)||isLicensedZarfKhabar(data,item));
     if(anchor){
      const phraseTokens=tokens.slice(tokens.indexOf(anchor));
      relationship=addRelationship(data,'mubtadaKhabar',{mubtadaId:mubtada.id,khabarKind:'phrase',anchorId:anchor.id,tokenIds:phraseTokens.map(item=>item.id)});
@@ -17901,8 +18154,12 @@ function buildRelationshipWhy(rel,data){
    ar:`وَهِيَ فِي مَحَلِّ رَفْعٍ خَبَرٌ لِلْمُبْتَدَأِ الْأَوَّلِ ${wq(owner.word)}.`,
    en:`That sentence holds the position of rafʿ as the khabar of the first mubtadaʾ ${eq(owner.word)}.`});
   push({id:'WHY_REL_NOMINAL_KHABAR_RABIT',
-   ar:`وَلَا بُدَّ لِخَبَرِ الْجُمْلَةِ مِنْ رَابِطٍ، وَهُوَ هُنَا ${rabit.ar}، وَهُوَ الْهَاءُ فِي ${wq(inner.word)}.`,
-   en:`A sentence khabar must carry a link, and here it is ${rabit.en}: the ${shape.en} pronoun in ${eq(inner.word)}.`});
+   ar:shape
+    ?`وَلَا بُدَّ لِخَبَرِ الْجُمْلَةِ مِنْ رَابِطٍ، وَهُوَ هُنَا ${rabit.ar}، وَهُوَ الْهَاءُ فِي ${wq(inner.word)}.`
+    :`وَلَا بُدَّ لِخَبَرِ الْجُمْلَةِ مِنْ رَابِطٍ، وَهُوَ هُنَا ${rabit.ar} ${wq(inner.word)}، ${rabit.clauseAr}.`,
+   en:shape
+    ?`A sentence khabar must carry a link, and here it is ${rabit.en}: the ${shape.en} pronoun in ${eq(inner.word)}.`
+    :`A sentence khabar must carry a link, and here it is ${rabit.en}, ${eq(inner.word)}, which ${rabit.clauseEn}.`});
   return{ids,ar,en};
  }
  if(rel.type==='haal'&&rel.mahall){
@@ -18583,10 +18840,20 @@ function renderRelationshipAnalysis(data){
   if(rel.khabarKind==='nominalSentence'){
    const parts=khabarClauseRelationshipParts(rel,data);
    if(!parts)return;
-   const {owner,inner,predicate,kind,shape}=parts;
+   const {owner,inner,predicate,kind,rabit,shape}=parts;
    const clause=`${inner.word} ${predicate.word}`;
-   predicate.phraseAr=`وَ${kind.ar} «${clause}» فِي مَحَلِّ رَفْعٍ خَبَرٌ لِلْمُبْتَدَأِ «${owner.word}»، فَهُوَ ${kind.labelAr}. وَالْهَاءُ فِي «${inner.word}» ضَمِيرٌ ${shape.ar} يَعُودُ عَلَى الْمُبْتَدَأِ، وَهُوَ ${RABIT_NAME_AR} بَيْنَهُمَا.`;
-   predicate.phraseEn=`Together, “${clause}” is ${kind.labelEn} of “${owner.word}”, holding the position of rafʿ. The ${shape.en} pronoun in “${inner.word}” returns to the mubtadaʾ; it is the link between them.`;
+   /* p. 102 gives the sentence khabar one job and two links. The pronoun link keeps the wording it
+      has always had, down to the byte; the demonstrative link states the same job in the source's
+      own other verb from the same sentence. Neither clause contains the other's, so no iʿrāb line
+      can ever credit the link it does not carry. */
+   const linkAr=shape
+    ?`وَالْهَاءُ فِي «${inner.word}» ضَمِيرٌ ${shape.ar} يَعُودُ عَلَى الْمُبْتَدَأِ، وَهُوَ ${RABIT_NAME_AR} بَيْنَهُمَا.`
+    :`وَ«${inner.word}» ${rabit.ar} ${rabit.clauseAr}، وَهُوَ ${RABIT_NAME_AR} بَيْنَهُمَا.`;
+   const linkEn=shape
+    ?`The ${shape.en} pronoun in “${inner.word}” returns to the mubtadaʾ; it is the link between them.`
+    :`“${inner.word}” is ${rabit.en} and ${rabit.clauseEn}; it is the link between them.`;
+   predicate.phraseAr=`وَ${kind.ar} «${clause}» فِي مَحَلِّ رَفْعٍ خَبَرٌ لِلْمُبْتَدَأِ «${owner.word}»، فَهُوَ ${kind.labelAr}. ${linkAr}`;
+   predicate.phraseEn=`Together, “${clause}” is ${kind.labelEn} of “${owner.word}”, holding the position of rafʿ. ${linkEn}`;
    predicate.phraseLabel='Sentence';
    return;
   }
@@ -18605,9 +18872,17 @@ function renderRelationshipAnalysis(data){
    sentenceRecipient.phraseLabel='Sentence';
    }else{
     const fronted=rel.khabarKind==='frontedPhrase';
-   const attachment=isKhafdParticleType(anchor.grammar.particleType)
-     ?`«${phrase}»: جَارٌّ وَمَجْرُورٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ${fronted?' مُقَدَّمٍ':''}`
-     :`«${phrase}»: ظَرْفٌ مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ${fronted?' مُقَدَّمٍ':''}`;
+   /* Wave 13 — the zarf half of this line used to be the `else` of "is the anchor a particle of
+      khafd?", which would have named ANY non-particle anchor a zarf. It now has to prove it is the
+      zarf its own template's verbless frame licenses, and the name it prints is read from that
+      frame's own lexeme, so this card can never call a word a zarf that is not one. */
+   const zarfKhabar=deriveZarfKhabarAuthority(data);
+   const isPrep=isKhafdParticleType(anchor.grammar.particleType);
+   const isZarf=zarfKhabar.authorized&&zarfKhabar.zarfId===anchor.id;
+   if(!isPrep&&!isZarf){
+    throw new Error('Cannot render a shibh-jumlah khabar whose anchor is neither a particle of khafd nor a licensed zarf.');
+   }
+   const attachment=`«${phrase}»: ${isPrep?JARR_MAJRUR_NAME_AR:MAFUL_FIH_KIND_LABELS[zarfKhabar.kind].ar} ${MUTAALLIQ_MAHDHUF_KHABAR_AR}${fronted?' مُقَدَّمٍ':''}`;
     const phraseRecipient=rel.tokenIds.map(id=>data.tokens.find(item=>item.id===id)).filter(Boolean).at(-1)||anchor;
     phraseRecipient.phraseAr=`وَ${attachment} لِلْمُبْتَدَأِ${fronted?' الْمُؤَخَّرِ':''} «${mubtada.word}»، فَهُوَ ${SHIBH_JUMLA_KHABAR_AR}.`;
     phraseRecipient.phraseEn=`Together, “${phrase}” is attached to an omitted ${fronted?'fronted ':''}khabar of “${mubtada.word}”, so it is ${SHIBH_JUMLA_KHABAR_EN}.`;
@@ -19842,6 +20117,15 @@ function validateExercise(data){
   if(rel.khabarKind==='verbalSentence'&&(!anchor||anchor.grammar.type!=='verb'||data.tokens.indexOf(anchor)<=mIndex))fail('E_VERBAL_KHABAR_RELATION','Verbal-sentence khabar has no following verb anchor.',item);
   if(rel.khabarKind==='phrase'&&(!anchor||data.tokens.indexOf(anchor)<=mIndex))fail('E_PHRASE_KHABAR_RELATION','Phrase khabar has no following phrase anchor.',item);
   if(rel.khabarKind==='frontedPhrase'&&(!anchor||data.tokens.indexOf(anchor)>=mIndex))fail('E_FRONTED_KHABAR_RELATION','Fronted khabar is not before its delayed mubtadaʾ.',item);
+  /* Wave 13 — a شبه الجملة khabar is anchored by a particle of khafḍ or by a licensed ẓarf, and by
+     nothing else. Without this, a token could be given the ẓarf role, dropped after a mubtadaʾ and
+     handed the phrase relationship, and the card would call it «ظَرْفُ مَكَانٍ مُتَعَلِّقٌ بِمَحْذُوفٍ
+     خَبَرٍ» on the strength of a label. The composer refuses to render such a card; this refuses to
+     validate one, so the forgery dies on both paths. */
+  if((rel.khabarKind==='phrase'||rel.khabarKind==='frontedPhrase')&&anchor
+    &&!isKhafdParticleType(anchor.grammar.particleType)&&!isLicensedZarfKhabar(data,anchor)){
+   fail('E_SHIBH_JUMLA_ANCHOR','A shibh-jumlah khabar is anchored by neither a particle of khafḍ nor a licensed ẓarf.',item);
+  }
   const anchorIndex=data.tokens.indexOf(anchor);
   const expectedIds=rel.khabarKind==='single'?[anchor?.id]:rel.khabarKind==='frontedPhrase'?data.tokens.slice(anchorIndex,mIndex).map(token=>token.id):rel.khabarKind==='verbalSentence'?data.tokens.slice(mIndex+1).map(token=>token.id):data.tokens.slice(anchorIndex).map(token=>token.id);
   if(Array.isArray(rel.tokenIds)&&expectedIds.some(Boolean)&&expectedIds.filter(Boolean).join('|')!==rel.tokenIds.join('|'))fail('E_KHABAR_SPAN','Khabar relationship does not cover its complete visible span.',item);
@@ -20189,8 +20473,55 @@ function add(starts,form,state,sign,build,metadata={}){
   if(form!=='singular'||state!=='raf'){
    throw new Error(`Template ${stableId} declares a khabar-clause word of the wrong declension or state.`);
   }
- }else if(khabarClauseTarget){
+ }else if(khabarClauseTarget&&!(metadata.khabarClauseIsharaFrameKeys||[]).length){
   throw new Error(`Template ${stableId} names a khabar-clause target with no frames.`);
+ }
+ /* Wave 13 — the demonstrative-linked frames of the same construction. A template owns ONE of the
+    two link tables, never both: that is what makes the rābiṭ kind a property of the template the
+    exercise came from and not a label that can be swapped on a relationship. The demonstrative is
+    never the target — it carries no iʿrāb sign — so its two lanes ask about the outer mubtadaʾ and
+    the predicate, both of which are sound masculine plurals in rafʿ. */
+ const khabarClauseIsharaFrameKeys=Object.freeze([...(metadata.khabarClauseIsharaFrameKeys||[])]);
+ if(khabarClauseIsharaFrameKeys.some((key,position)=>khabarClauseIsharaFrameKeys.indexOf(key)!==position
+   ||!KHABAR_CLAUSE_ISHARA_FRAMES[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered demonstrative khabar-clause frame.`);
+ }
+ if(khabarClauseIsharaFrameKeys.length){
+  if(khabarClauseFrameKeys.length){
+   throw new Error(`Template ${stableId} claims both rābiṭ kinds of the sentence khabar.`);
+  }
+  if(!['owner','predicate'].includes(khabarClauseTarget)){
+   throw new Error(`Template ${stableId} produces a demonstrative khabar clause without naming which word it targets.`);
+  }
+  if(form!=='smp'||state!=='raf'){
+   throw new Error(`Template ${stableId} declares a demonstrative khabar-clause word of the wrong declension or state.`);
+  }
+  const declared=new Set(khabarClauseIsharaFrameKeys.map(key=>KHABAR_CLAUSE_ISHARA_FRAMES[key].isharaKey));
+  if([...declared].some(key=>!isharaLexemeKeys.includes(key))){
+   throw new Error(`Template ${stableId} hosts a demonstrative link whose demonstrative it does not declare.`);
+  }
+ }
+ /* Wave 13 — الظرف standing where the خبر goes. A template owns one target position, and the tuple
+    it advertises must be the one that position really has: the mubtadaʾ is a nominative singular,
+    the ẓarf an accusative one, the muḍāf ilayh a genitive one. This lane has no verb at all, so it
+    may never also claim the verb-governed half of the chapter. */
+ const zarfKhabarFrameKeys=Object.freeze([...(metadata.zarfKhabarFrameKeys||[])]);
+ if(zarfKhabarFrameKeys.some((key,position)=>zarfKhabarFrameKeys.indexOf(key)!==position
+   ||!ZARF_KHABAR_FRAMES[key])){
+  throw new Error(`Template ${stableId} names a duplicate or unregistered ẓarf-khabar frame.`);
+ }
+ const zarfKhabarTarget=metadata.zarfKhabarTarget||'';
+ if(zarfKhabarFrameKeys.length){
+  if(mafulFihPairKeys.length){
+   throw new Error(`Template ${stableId} claims both a verb ʿāmil and an omitted-khabar ʿāmil for its ẓarf.`);
+  }
+  const tuple={mubtada:'raf|damma',zarf:'nasb|fatha',host:'jarr|kasra'}[zarfKhabarTarget];
+  if(!tuple)throw new Error(`Template ${stableId} produces a ẓarf khabar without naming which word it targets.`);
+  if(form!=='singular'||`${state}|${sign}`!==tuple){
+   throw new Error(`Template ${stableId} declares a ẓarf-khabar word of the wrong declension, state or sign.`);
+  }
+ }else if(zarfKhabarTarget){
+  throw new Error(`Template ${stableId} names a ẓarf-khabar target with no frames.`);
  }
  /* ظنّ. One template owns one target role and one declension lane, because the (form,state,sign)
     tuple describes the TARGET and the two objects can decline differently — «ظننت الطلابَ
@@ -20451,6 +20782,8 @@ function add(starts,form,state,sign,build,metadata={}){
   zannaPairKeys,
   zannaTarget,
   khabarClauseFrameKeys,
+  khabarClauseIsharaFrameKeys,
+  zarfKhabarFrameKeys,
   khabarClauseTarget,
   haalMahallFrameKeys,
   munadaPairKeys,
@@ -22808,6 +23141,55 @@ for(const key of ESTIMATED_SIGN_NOUN_KEYS){
    ]};
  },{...pastTemplateMetadata('3ms','explicit'),estimatedSignNounKeys:[key]});
 }
+
+/* ── Wave 13 — بَابُ الْمُبْتَدَأِ وَالْخَبَرِ ──────────────────────────────────────────────────
+   Registered at the very end, like every wave before it: a stableId is `T_<family>_<ordinal>` with
+   the ordinal assigned in registration order, so inserting a template beside its relatives would
+   silently renumber every later member of that family.
+
+   (1) اسْمُ إِشَارَةٍ as the رابط — p. 102's «مُحَمَّدٌ هَذَا رَجُلٌ كَرِيمٌ». The demonstrative is never
+   the target: it carries a position, not an iʿrāb sign, exactly as in the باب النعت lane it reuses.
+   The two lanes ask about the outer mubtadaʾ and about the predicate, and both of those carry the
+   sentence card that states the link. Both REUSE the existing noun/smp/rafʿ/wāw tuple. */
+function buildKhabarClauseIsharaExercise(frameKey,target){
+ const record=khabarClauseIsharaFrameRecord(frameKey);
+ return{sentence:'',translation:record.sentenceEn,tokens:[
+  token(record.owner.nom,record.owner.en,AR.mubtada(record.owner.nom),
+   'The first mubtadaʾ; its khabar is the sentence that follows.',target==='owner'),
+  token(record.ishara.surface,record.ishara.en,AR.isharaMubtada(record.isharaKey),
+   'A second mubtadaʾ: a built demonstrative standing for the first mubtadaʾ, and the link back to it.'),
+  token(record.predicate.nom,record.predicate.en,AR.khabar(record.predicate.nom),
+   'The khabar of the second mubtadaʾ.',target==='predicate')
+ ]};
+}
+const khabarClauseIsharaMetadata=target=>({khabarClauseIsharaFrameKeys:KHABAR_CLAUSE_ISHARA_FRAME_KEYS,
+ isharaLexemeKeys:KHABAR_CLAUSE_ISHARA_LEXEME_KEYS,khabarClauseTarget:target});
+const khabarClauseIsharaLane=target=>()=>buildKhabarClauseIsharaExercise(
+ pickVaried([...KHABAR_CLAUSE_ISHARA_FRAME_KEYS],`w13-khabar-clause-ishara:${target}`,String),target);
+add('noun','smp','raf','waw',khabarClauseIsharaLane('owner'),khabarClauseIsharaMetadata('owner'));
+add('noun','smp','raf','waw',khabarClauseIsharaLane('predicate'),khabarClauseIsharaMetadata('predicate'));
+
+/* (2) الظرف مُتَعَلِّقٌ بِمَحْذُوفٍ خَبَرٍ — p. 102's «الطَّائِرُ فَوْقَ الْغُصْنِ» and p. 104's own parse of
+   «مُحَمَّدٌ عِنْدَكَ». Three lanes, one per word, and each REUSES an existing filter tuple: the
+   mubtadaʾ is a nominative singular, the ẓarf an accusative singular, the muḍāf ilayh a genitive
+   singular. Every word of the sentence is targetable because the chapter's point is the whole
+   verbless shape, and the learner has to be able to place each part of it. */
+function buildZarfKhabarExercise(frameKey,target){
+ const record=zarfKhabarFrameRecord(frameKey);
+ return{sentence:'',translation:record.sentenceEn,tokens:[
+  token(record.mubtada.nom,record.mubtada.en,AR.mubtada(record.mubtada.nom),
+   'The mubtadaʾ; the shibh-jumlah after it stands where its khabar goes.',target==='mubtada'),
+  token(record.lexeme.acc,record.lexeme.en,AR.adverbMudaf(record.lexeme.acc),
+   'A mubham noun of place, accusative as the mafʿūl fīh of the omitted khabar it attaches to.',target==='zarf'),
+  token(record.host.gen,record.host.en,AR.mudafIlayh(record.host.gen),EN.mudafIlayh,target==='host')
+ ]};
+}
+const zarfKhabarMetadata=target=>({zarfKhabarFrameKeys:ZARF_KHABAR_FRAME_KEYS,zarfKhabarTarget:target});
+const zarfKhabarLane=target=>()=>buildZarfKhabarExercise(
+ pickVaried([...ZARF_KHABAR_FRAME_KEYS],`w13-zarf-khabar:${target}`,String),target);
+add('noun','singular','raf','damma',zarfKhabarLane('mubtada'),zarfKhabarMetadata('mubtada'));
+add('noun','singular','nasb','fatha',zarfKhabarLane('zarf'),zarfKhabarMetadata('zarf'));
+add('noun','singular','jarr','kasra',zarfKhabarLane('host'),zarfKhabarMetadata('host'));
 
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;

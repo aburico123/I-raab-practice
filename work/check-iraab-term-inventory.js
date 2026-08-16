@@ -1353,6 +1353,160 @@ const WAVE12_PROBE_CORRECTIONS = ['G_SAHIH_AKHIR', 'G_EST_TAADHDHUR'];
   }
 }
 
+/* ── Wave 13 — بَابُ الْمُبْتَدَأِ وَالْخَبَرِ (pp. 99–104) ──────────────────────────────────────
+   Three rows, resolved three different ways, and each has to be held down by its own evidence:
+
+     M_RABIT_ISHARA    a production gap that looked like a collision. p. 102 names two rābiṭs —
+                       «إِمَّا ضَمِيرٌ يَعُودُ إِلَى الْمُبْتَدَإِ … وَإِمَّا اسْمُ إِشَارَةٍ نَحْوُ «مُحَمَّدٌ
+                       هَذَا رَجُلٌ كَرِيمٌ»» — and only the pronoun one was produced. باب النعت's
+                       demonstrative was NOT this row: it is a demonstrative standing as an ordinary
+                       mubtadaʾ, which is why the row has always carried a `requires` discriminator.
+     M_ZARF_MUTAALLIQ  a production gap AND a probe correction. The ẓarf half of شبه الجملة existed
+                       only as an unreachable `else` in the composer; and the row asked for a
+                       wording this source does not use. p. 104 says «عند: ظرف مكان متعلق بمحذوف خبر
+                       المبتدإ», so the probe now asks for ظَرْفُ مَكَانٍ.
+     M_MUBTADA_MUDMAR  a TRUE BLOCKER, and a stricter one than ضَمِيرٌ مُنْفَصِلٌ: p. 101 closes both
+                       escapes this engine has — «وَإِذَا كَانَ الْمُبْتَدَأُ ضَمِيراً فَإِنَّهُ لَا يَكُونُ
+                       إِلَّا بَارِزاً مُنْفَصِلاً» — and p. 22's bināʾ catalogue names no pronoun.
+
+   And one row outside the wave's three is corrected here, for the same reason Wave 12 corrected
+   G_EST_TAADHDHUR: M_JARR_MUTAALLIQ probed the bare clause «متعلق بمحذوف خبر», which BOTH شبه
+   الجملة cards carry. The moment the ẓarf half shipped, a ẓarf card alone would have scored the
+   jār-majrūr row. Each row now names its own half of p. 102's division. */
+const WAVE13_FULL_KEYS = ['M_RABIT_ISHARA', 'M_ZARF_MUTAALLIQ'];
+const WAVE13_BLOCKED_KEYS = ['M_MUBTADA_MUDMAR'];
+const WAVE13_PROBE_CORRECTIONS = ['M_ZARF_MUTAALLIQ', 'M_JARR_MUTAALLIQ'];
+{
+  for (const key of WAVE13_FULL_KEYS) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('Wave-13 row ' + key + ' is missing from the inventory'); continue; }
+    if (!/^باب المبتدأ والخبر/.test(row.chapter)) fail('Wave-13 row ' + key + ' is not in the wave scope: ' + row.chapter);
+    if (row.status !== 'FULL') fail('Wave-13 row ' + key + ' is ' + row.status + ', not FULL');
+  }
+  for (const key of WAVE13_BLOCKED_KEYS) {
+    const row = observed.find(r => r.key === key);
+    if (!row) { fail('Wave-13 row ' + key + ' is missing from the inventory'); continue; }
+    if (row.status !== 'TRUE_BLOCKER') fail('Wave-13 row ' + key + ' is ' + row.status + ', not TRUE_BLOCKER');
+  }
+
+  /* The chapter is now resolved except for that one blocker. Anything else appearing non-FULL here
+     is a regression in a chapter this wave declared finished. */
+  {
+    const chapterObserved = observed.filter(r => /^باب المبتدأ والخبر/.test(r.chapter));
+    const unresolved = chapterObserved.filter(r => r.status !== 'FULL' && !WAVE13_BLOCKED_KEYS.includes(r.key));
+    if (unresolved.length) {
+      fail('باب المبتدأ والخبر has unresolved rows beyond its one blocker: ' +
+        unresolved.map(r => r.key + '=' + r.status).join(', '));
+    }
+  }
+
+  /* THE RĀBIṬ DISCRIMINATION, proved from the rendered corpus rather than trusted, in BOTH
+     directions. This is the whole reason the row stayed non-FULL through Wave 4:
+       · the demonstrative must still reach a card as an ORDINARY mubtadaʾ with no rābiṭ on it —
+         otherwise the two readings have collapsed into one and the discriminator proves nothing;
+       · the link card must name the demonstrative AND the rābiṭ together;
+       · and it must NOT carry the pronoun link's own verb, or the two rābiṭ rows credit each
+         other. «يَعُودُ عَلَى» is exactly M_RABIT_DAMIR's probe. */
+  {
+    const isharaName = rows.find(r => r.key === 'M_RABIT_ISHARA').probe;
+    const rabitName = rows.find(r => r.key === 'M_RABIT_ISHARA').requires;
+    const damirProbe = rows.find(r => r.key === 'M_RABIT_DAMIR').probe;
+    const withIshara = [...iraabLines.keys()].filter(line => line.includes(skeleton(isharaName)));
+    const linkCards = withIshara.filter(line => line.includes(skeleton(rabitName)));
+    const plainCards = withIshara.filter(line => !line.includes(skeleton(rabitName)));
+    if (!linkCards.length) fail('no rendered card carries the demonstrative as p. 102\'s rābiṭ');
+    if (!plainCards.length) {
+      fail('the ordinary demonstrative card disappeared, so «اسم إشارة» and «اسم إشارة رابطًا» are ' +
+        'no longer two distinguishable practices and the discriminator proves nothing');
+    }
+    for (const line of linkCards) {
+      if (line.includes(skeleton(damirProbe))) {
+        fail('the demonstrative rābiṭ card also carries the pronoun link\'s «' + damirProbe +
+          '», so the two rābiṭ rows credit each other');
+      }
+    }
+    /* And the pronoun link must still exist on cards of its own. */
+    const damirCards = [...iraabLines.keys()].filter(line =>
+      line.includes(skeleton(damirProbe)) && line.includes(skeleton(rabitName)));
+    if (!damirCards.length) fail('the pronoun rābiṭ stopped reaching a card of its own');
+    if (damirCards.every(line => line.includes(skeleton(isharaName)))) {
+      fail('every pronoun-rābiṭ card also names a demonstrative, so neither rābiṭ row discriminates');
+    }
+  }
+
+  /* THE تعلق DISCRIMINATION, same shape. p. 102 divides شبه الجملة into two kinds; the two cards
+     share one clause and differ only in the NAME, so each row must be provable from its own name
+     and neither card may carry both names. */
+  {
+    const jarr = rows.find(r => r.key === 'M_JARR_MUTAALLIQ').probe;
+    const zarf = rows.find(r => r.key === 'M_ZARF_MUTAALLIQ').probe;
+    const jarrCards = [...iraabLines.keys()].filter(line => line.includes(skeleton(jarr)));
+    const zarfCards = [...iraabLines.keys()].filter(line => line.includes(skeleton(zarf)));
+    if (!jarrCards.length) fail('«' + jarr + '» reaches no rendered card');
+    if (!zarfCards.length) fail('«' + zarf + '» reaches no rendered card');
+    if (zarfCards.some(line => jarrCards.includes(line))) {
+      fail('one card carries both شبه الجملة names, so neither تعلق row discriminates');
+    }
+    /* The ẓarf khabar must be a KHABAR, not an ordinary mafʿūl fīh wearing the clause: every card
+       that names it must also place it as the shibh-jumlah khabar of a named mubtadaʾ. */
+    const shibh = rows.find(r => r.key === 'M_KHABAR_SHIBH').probe;
+    for (const line of zarfCards) {
+      if (!line.includes(skeleton(shibh))) {
+        fail('a ẓarf carries the تعلق clause without being placed as the shibh-jumlah khabar: ' + line);
+      }
+    }
+    /* …and the ordinary verb-governed ẓarf must still exist, or the contrast is gone: a ẓarf under
+       a real verbal ʿāmil must NEVER carry the omitted-khabar clause. */
+    const verbZarf = [...iraabLines.keys()].filter(line =>
+      line.includes(skeleton('عَلَى الظَّرْفِيَّةِ بِتَقْدِيرِ')));
+    if (!verbZarf.length) fail('the verb-governed ẓarf stopped being produced, so the ẓarf khabar contrasts with nothing');
+    for (const line of verbZarf) {
+      if (line.includes(skeleton(zarf))) {
+        fail('a verb-governed ẓarf card also claims to be attached to an omitted khabar: ' + line);
+      }
+    }
+  }
+
+  /* THE PAIR INVARIANT, on the rendered text of the two new constructions. A mubtadaʾ the wave
+     introduced must reach a card, and the khabar that answers it must reach one too. */
+  {
+    const mubtada = rows.find(r => r.key === 'M_MUBTADA').probe;
+    for (const key of WAVE13_FULL_KEYS) {
+      const probe = rows.find(r => r.key === key).probe;
+      const ids = templatesFor(probe, rows.find(r => r.key === key).requires);
+      if (!ids.size) { fail('Wave-13 row ' + key + ' reaches no template lane'); continue; }
+      const named = [...iraabLines.entries()].some(([line, owners]) =>
+        line.includes(skeleton(mubtada)) && [...ids].some(id => owners.has(id)));
+      if (!named) fail('Wave-13 row ' + key + ' produces a khabar structure whose mubtadaʾ is never parsed');
+    }
+  }
+
+  /* THE BLOCKER, held down by what it claims. The declaration says the source parses no detached
+     pronoun; if one ever reached a card, the row is wrong and must be reopened rather than left
+     standing as a blocker. */
+  {
+    for (const surface of ['أَنَا', 'نَحْنُ', 'أَنْتَ', 'هُوَ', 'هِيَ', 'هُمْ', 'هُنَّ']) {
+      const cards = [...cardHeads.keys()].filter(head => head === skeleton(surface));
+      if (cards.length) {
+        fail('«' + surface + '» now heads an iʿrāb card, so M_MUBTADA_MUDMAR is no longer blocked ' +
+          'and its TRUE_BLOCKER declaration must be re-decided against the source');
+      }
+    }
+    const row = rows.find(r => r.key === 'M_MUBTADA_MUDMAR');
+    if (!row.trueBlocker || row.trueBlocker.length < 400) {
+      fail('M_MUBTADA_MUDMAR carries no written blocker proof');
+    }
+    /* The two blocked pronoun rows must state the SAME missing fact, so that one reviewed citation
+       is known to unblock both. */
+    const munfasil = rows.find(r => r.key === 'M_DAMIR_MUNFASIL');
+    for (const [key, text] of [['M_MUBTADA_MUDMAR', row.trueBlocker], ['M_DAMIR_MUNFASIL', munfasil.trueBlocker]]) {
+      if (!/secondarySupportedRule/.test(text) || !/REVIEWED_SOURCE_AUTHORITIES/.test(text)) {
+        fail(key + '\'s blocker no longer names the registered unblock mechanism');
+      }
+    }
+  }
+}
+
 if (!totals.reconciles) fail('totals do not reconcile with the row count');
 if (totals.TOTAL !== rows.length) fail('denominator does not equal the actual row count');
 
@@ -1408,6 +1562,10 @@ console.log(JSON.stringify({
   wave12: { name: 'باب المعربات', target: WAVE12_FULL_KEYS.length,
     full: WAVE12_FULL_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
     probeCorrections: WAVE12_PROBE_CORRECTIONS.length },
+  wave13: { name: 'باب المبتدأ والخبر', target: WAVE13_FULL_KEYS.length + WAVE13_BLOCKED_KEYS.length,
+    full: WAVE13_FULL_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'FULL').length,
+    trueBlocker: WAVE13_BLOCKED_KEYS.filter(k => (observed.find(r => r.key === k) || {}).status === 'TRUE_BLOCKER').length,
+    probeCorrections: WAVE13_PROBE_CORRECTIONS.length },
   sourceExcluded: sourceExcluded.length, notCounted: notCounted.length,
   failures: failures.length
 }, null, 1));

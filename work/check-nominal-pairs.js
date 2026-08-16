@@ -20027,6 +20027,56 @@ for(const gloss of ['the two engineers','the two workers','the two researchers',
 }
 console.log(`Vocabulary expansion 2 audit passed: ${v2Total} new lexemes — ${v2AddedPeople.length} people, ${v2AddedThings.length} things, ${v2AddedPlaces.length} places, ${v2AddedBrokenHuman.length+v2AddedBrokenThings.length+v2AddedDuals.length+v2AddedSmp.length+v2AddedSfp.length} plural/dual forms, ${v2AddedAdjectives.length} predicates, ${v2AddedVerbs.length} verb families, ${Object.keys(v2NewGroups).length} new object groups.`);
 
+// --- Sacred-text semantic pool lock -------------------------------------------------
+// الْقُرْآنُ and الْحَدِيثُ sit in the general `text` pool, which used to be the object pool of the
+// EDITORIAL verbs as well, so “deleted the Qurʾān”, “corrected the hadith” and “stamped the
+// Qurʾān” were all producible. Those verbs now draw on `editableText` — ordinary written
+// material, carrying no sacred noun. Both halves are asserted, because the wrong fix here is as
+// bad as the defect: an editorial verb must not be able to reach a sacred noun, AND the sacred
+// nouns must stay reachable rather than become dead vocabulary.
+// Verbs are named by their English gloss, which is ASCII and unique across the general pool;
+// retyping their Arabic here would reintroduce combining-mark drift.
+const sacredGlosses=new Set(Object.keys(approvedReligiousVerbs));
+assert(sacredGlosses.size===5,'The sacred-noun gloss list changed shape');
+const groupVerbs=api.verbLexicons.additionalVerbActions;
+const reachesSacred=verb=>(api.objectGroups[verb.group]||[]).some(noun=>sacredGlosses.has(noun.en));
+/* Everything that alters, destroys or executes upon its object. None of these may see a sacred
+   noun, whatever pool a later edit points them at. */
+const EDITORIAL_VERB_GLOSSES=['edit','correct','proofread','summarize','delete','remove','translate','sign',
+  'stamp','classify','define','revise','refine','abridge','lengthen','authorize','title','tear up'];
+for(const gloss of EDITORIAL_VERB_GLOSSES){
+  const verb=groupVerbs.find(item=>item.en===gloss);
+  assert(verb,`Sacred-text lock: the editorial verb “${gloss}” is missing`);
+  assert(!reachesSacred(verb),`Sacred-text lock: “${gloss}” draws on ${verb.group}, which carries a sacred noun`);
+}
+/* The complete roster of pool-based verbs that MAY reach a sacred noun, pinned by meaning. Each
+   one is something done WITH a sacred text (reading, reproducing, studying, transmitting) or to a
+   physical copy of one, never something done TO the text itself. A new verb that reaches one of
+   these nouns fails here until it has been reviewed and named. */
+const SACRED_REACHING_VERB_GLOSSES=['cite','clarify','contemplate','copy','describe','find','grasp',
+  'hold','learn','lose','lower','make clear','master','mention','parse','peruse','place','print',
+  'publish','pull','push','raise','record','reflect on','repeat','return','review','steal',
+  'store','understand'];
+const sacredReachers=groupVerbs.filter(reachesSacred).map(verb=>verb.en).sort();
+const expectedReachers=[...SACRED_REACHING_VERB_GLOSSES].sort();
+assert(JSON.stringify(sacredReachers)===JSON.stringify(expectedReachers),
+  `Sacred-text lock: the verbs able to take a sacred noun drifted → [${sacredReachers.join(", ")}]`);
+/* Not dead vocabulary: every sacred noun some pool still carries must still have a verb that
+   reaches it, so the fix cannot have quietly removed it from practice. */
+for(const gloss of sacredGlosses){
+  const carried=Object.values(api.objectGroups).some(group=>group.some(noun=>noun.en===gloss));
+  if(!carried)continue;
+  const reachedBy=groupVerbs.filter(verb=>(api.objectGroups[verb.group]||[]).some(noun=>noun.en===gloss));
+  assert(reachedBy.length>0,`Sacred-text lock: “${gloss}” is carried by a pool no verb can reach`);
+}
+/* The two pools the split is made of: `text` keeps the sacred nouns, `editableText` must not.
+   Read off the live registry, so renaming or re-pointing either one is caught here. */
+assert(api.objectGroups.text.some(noun=>sacredGlosses.has(noun.en)),
+  'Sacred-text lock: the text pool no longer carries any sacred noun — they would be out of practice');
+assert(!api.objectGroups.editableText.some(noun=>sacredGlosses.has(noun.en)),
+  'Sacred-text lock: a sacred noun entered the editableText pool');
+console.log(`Sacred-text semantic pool lock passed: ${EDITORIAL_VERB_GLOSSES.length} editorial verbs held off the sacred nouns, ${sacredReachers.length} reviewed verbs still reach them.`);
+
 // ===================================================================================
 // Iʿrāb-state-filter audit (added with the state filter). The word-level filters
 // form/state/sign must all describe the SAME single focus token; state is taken from

@@ -151,14 +151,30 @@ replaced:**
 | `الْمِظَلَّةُ` “the umbrella”, `مَظْلُومٌ` “wronged” | both skeletonise to something containing `ظل`, the `K_ZALLA` inventory probe — they inflated `ظَلَّ` from 3 observed template lanes to 13 and flipped its randomization grade from LIMITED to GOOD. The inventory checker matches probes as undiacritized substrings, so this was a false improvement, not a real one. Replaced by `الْقُفْلُ` “the lock” and `مُحْسِنٌ` “benevolent”, after which the stored inventory needed **no edit at all**. |
 | `هَنَّأَ` “congratulate” | skeletonises to exactly `هنا`, the probe of the TRUE_BLOCKER row `B_ZARF_HUNA`. It did not flip the row in four measured runs, but leaving a lexeme whose skeleton *is* a blocker's probe is a booby trap. Replaced by `جَالَسَ` “sit with”. |
 
-## Known pre-existing issue, not changed here
+## Sacred-text semantic pools
 
-The general `text` object group contains `الْقُرْآنُ` and `الْحَدِيثُ`, and the pre-existing verbs on
-that group include `حَذَفَ` (delete), `صَحَّحَ` (correct) and `اِخْتَصَرَ`-adjacent meanings, so pairings
-such as “deleted the Qurʾān” were already producible before this branch. The new verbs deliberately
-avoid that group — that is why `editableText` exists — but the existing pins were left alone,
-because narrowing `text` changes released behaviour and is a grammar/content decision rather than a
-vocabulary one. Flagging it rather than fixing it silently.
+The general `text` object group carries `الْقُرْآنُ` and `الْحَدِيثُ`, and it was also the object pool of
+the editorial verbs, so “deleted the Qurʾān”, “corrected the hadith” and “stamped the Qurʾān” were
+producible — a pre-existing defect this branch inherited. It is fixed by separating **editable
+ordinary text** from **sacred text** through the pools, not by removing the nouns:
+
+* Ten verbs moved from `text` to `editableText` (ordinary written material, no sacred noun):
+  `حَرَّرَ` edit, `صَحَّحَ` correct, `دَقَّقَ` proofread, `لَخَّصَ` summarize, `حَذَفَ` delete, `تَرْجَمَ` translate,
+  `وَقَّعَ` sign, `خَتَمَ` stamp, `صَنَّفَ` classify, `عَرَّفَ` define.
+* Eight stay on `text` and keep the sacred nouns, because they are things one does *with* a sacred
+  text rather than *to* it: `طَبَعَ` print, `نَسَخَ` copy, `أَصْدَرَ` publish, `رَاجَعَ` review, `سَجَّلَ` record,
+  `ذَكَرَ` mention, `كَرَّرَ` repeat, `فَهِمَ` understand.
+* One verb outside `text` asserted erasure the same way: `أَزَالَ` “remove”, on the physical-handling
+  pool `portable`, produced “removed the Qurʾān”. It moved to `household`. The rest of `portable` —
+  raise, lower, push, pull, hold, place, store, find, return, lose, steal — describes handling a
+  physical copy and stays.
+
+Nothing became dead vocabulary. 73 declared routes still lead from a verb to a sacred noun and none
+is editorial: `الْقُرْآنُ` is reachable by 28 verbs, `الْحَدِيثُ` by 33, `الْآيَةُ` by 8, `السُّورَةُ` by 3.
+
+A **sacred-text semantic pool lock** in the harness pins both halves: the 18 editorial verbs may
+never reach a sacred noun, and the 30 pool-based verbs that may are pinned by meaning, so a new verb
+that reaches one fails until it has been reviewed and named.
 
 ## Harness changes
 

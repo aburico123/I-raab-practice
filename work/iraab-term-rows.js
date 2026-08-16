@@ -446,11 +446,10 @@ const rows = [
      ثَلَاث حَالَات — states of the noun, not names for it — and both are now in `notCounted`. */
   R('B_MAFUL_AJL', 'مَفْعُولٌ لِأَجْلِهِ مَنْصُوبٌ', CH.mafulAjl, '170–172', 'المنصوبات', 'مَفْعُولٌ لِأَجْلِهِ'),
   R('B_MAFUL_MAAH', 'مَفْعُولٌ مَعَهُ مَنْصُوبٌ', CH.mafulMaah, '172–173', 'المنصوبات', 'مَفْعُولٌ مَعَهُ'),
+  /* FINAL MARATHON. The two remaining «المفعول معه» rows are pp. 173–174's نَوْعَان of the noun
+     after the wāw and ضَرْبَان of its ʿāmil — a reading-choice and a word-class of something else.
+     Both are now in `notCounted`. */
   R('B_WAW_MAIYYA_MAAH', 'وَاوُ الْمَعِيَّةِ الدَّاخِلَةُ عَلَى الْمَفْعُولِ مَعَهُ', CH.mafulMaah, '172–173', 'المفعول معه', 'وَاوُ الْمَعِيَّةِ'),
-  R('B_MAAH_ATF', 'الْعَطْفُ فِي مَوْضِعِ الْمَفْعُولِ مَعَهُ', CH.mafulMaah, '173', 'المفعول معه', 'الْعَطْفُ عَلَى مَا قَبْلَهُ',
-    { missingReason: 'deliberatelyNotGenerated: p. 173 permits BOTH naṣb and ʿaṭf.' }),
-  R('B_MAAH_ISM_FAIL', 'الْمَفْعُولُ مَعَهُ عَامِلُهُ اسْمُ فَاعِلٍ', CH.mafulMaah, '173', 'المفعول معه', 'عَامِلُهُ اسْمُ فَاعِلٍ',
-    { missingReason: 'deliberatelyNotGenerated: (الأمير حاضر والجيشَ).' }),
 
   // ─────────── MAKHFŪḌĀT ───────────
   R('X_MAKHFUD_HARF', 'الْمَخْفُوضُ بِالْحَرْفِ', CH.makhfudat, '174–177', 'المخفوضات', 'حَرْفُ خَفْضٍ'),
@@ -576,7 +575,27 @@ const notCounted = [
      produced. That is a SCOPE statement about sentences. This is a statement about UTTERANCES, and
      it would hold even if both constructions shipped tomorrow. */
   { key: 'B_MAFUL_AJL_AL', term: 'الْمَفْعُولُ لَهُ الْمُقْتَرِنُ بِأَلْ', pages: '171–172', reason: 'The first of the three حَالَات p. 171 gives the noun that falls as a mafʿūl lah, not a قسم of the mafʿūl lah and not a term. p. 172 rules on it — «فَإِنْ كَانَ مُقْتَرِناً بِأَلْ فَالْأَكْثَرُ فِيهِ أَنْ يُجَرَّ بِحَرْفِ جَرٍّ دَالٍّ عَلَى التَّعْلِيلِ نَحْوَ: «ضَرَبْتُ ابْنِي لِلتَّأْدِيبِ» وَيَقِلُّ نَصْبُهُ» — and what the learner then utters is one of two already-counted analyses: «اسم مخفوض وعلامة خفضه الكسرة» after the lām, or «مفعول لأجله منصوب». The book never parses the noun as «المفعول له المقترن بأل»; the phrase occurs only in p. 172’s أسئلة, naming the category in order to ask about its حكم. Its non-production is separately and correctly recorded in deliberatelyNotGenerated; this entry is about the term.' },
-  { key: 'B_MAFUL_AJL_MUDAF', term: 'الْمَفْعُولُ لَهُ الْمُضَافُ', pages: '171–172', reason: 'The second of p. 171’s three حَالَات, on the same footing as the first. p. 172: «وَإِنْ كَانَ مُضَافاً جَازَ جَوَازاً مُتَسَاوِياً أَنْ يُجَرَّ بِالْحَرْفِ وَأَنْ يُنْصَبَ، نَحْوَ: «زُرْتُكَ مَحَبَّةَ أَدَبِكَ» أَوْ «زُرْتُكَ لِمَحَبَّةِ أَدَبِكَ»». Parsing the naṣb reading, the learner says «مَحَبَّةَ: مفعول لأجله منصوب وعلامة نصبه الفتحة الظاهرة، وهو مضاف» — three claims, all of which are already rows (B_MAFUL_AJL, G_FATHA, X_MUDAF). «المفعول له المضاف» itself is uttered nowhere in the bāb outside the أسئلة’s question. Its non-production is separately recorded in deliberatelyNotGenerated.' }
+  { key: 'B_MAFUL_AJL_MUDAF', term: 'الْمَفْعُولُ لَهُ الْمُضَافُ', pages: '171–172', reason: 'The second of p. 171’s three حَالَات, on the same footing as the first. p. 172: «وَإِنْ كَانَ مُضَافاً جَازَ جَوَازاً مُتَسَاوِياً أَنْ يُجَرَّ بِالْحَرْفِ وَأَنْ يُنْصَبَ، نَحْوَ: «زُرْتُكَ مَحَبَّةَ أَدَبِكَ» أَوْ «زُرْتُكَ لِمَحَبَّةِ أَدَبِكَ»». Parsing the naṣb reading, the learner says «مَحَبَّةَ: مفعول لأجله منصوب وعلامة نصبه الفتحة الظاهرة، وهو مضاف» — three claims, all of which are already rows (B_MAFUL_AJL, G_FATHA, X_MUDAF). «المفعول له المضاف» itself is uttered nowhere in the bāb outside the أسئلة’s question. Its non-production is separately recorded in deliberatelyNotGenerated.' },
+  /* FINAL MARATHON CORRECTION — باب المفعول معه. Same shape as the مفعول له pair above, and the
+     same tell. pp. 173–174 make TWO divisions in this bāb, and the inventory carried a row for one
+     member of each — in both cases the member the app does not produce, never the one it does.
+
+       · النوعان of the noun after the wāw (p. 173): «١ ـ ما يتعين نصبُه على أنه مفعولٌ معه.
+         ٢ ـ ما يجوز نصبُه على ذلك وإتباعُه لما قبله في إعرابه معطوفاً عليه.» p. 174 works the
+         second out in the source's own voice: «حَضَرَ عَلِيٌّ وَمُحَمَّدٌ» — «فَإِنَّهُ يَجُوزُ
+         نَصْبُ «محمد» عَلَى أَنَّهُ مَفْعُولٌ مَعَهُ، وَيَجُوزُ رَفْعُهُ عَلَى أَنَّهُ مَعْطُوفٌ
+         عَلَى «عليّ»». Those are the two readings, and both are already counted: B_MAFUL_MAAH and
+         the باب العطف maʿṭūf row. The نوع itself is a statement about WHICH of them is available.
+         There is no row for النوع الأول, which is the one all three shipped lanes are.
+
+       · الضربان of the ʿāmil (p. 173), which arrive inside a «وقولنا:» gloss — the شرح explaining
+         a qayd of its own definition, which is exactly the class Wave 9 established as explanation
+         rather than utterance: «وَقَوْلُنَا: "الْمَنْصُوبُ بِالْفِعْلِ أَوْ مَا فِيهِ مَعْنَى
+         الْفِعْلِ وَحُرُوفُهُ" يَدُلُّ عَلَى أَنَّ الْعَامِلَ فِي الْمَفْعُولِ مَعَهُ عَلَى
+         ضَرْبَيْنِ: الْأَوَّلُ: الْفِعْلُ … الثَّانِي: الِاسْمُ الدَّالُّ عَلَى مَعْنَى الْفِعْلِ …
+         كَاسْمِ الْفَاعِلِ». Again no row for الضرب الأول, which is what every shipped lane has. */
+  { key: 'B_MAAH_ATF', term: 'الْعَطْفُ فِي مَوْضِعِ الْمَفْعُولِ مَعَهُ', pages: '173–174', reason: 'The second of the two أنواع p. 173 gives the noun standing after the wāw — «ما يجوز نصبُه على ذلك وإتباعُه لما قبله في إعرابه معطوفاً عليه» — and therefore a statement about WHICH analysis is available, not a third analysis. p. 174 spells the alternatives out itself: for «حَضَرَ عَلِيٌّ وَمُحَمَّدٌ», «يَجُوزُ نَصْبُ «محمد» عَلَى أَنَّهُ مَفْعُولٌ مَعَهُ، وَيَجُوزُ رَفْعُهُ عَلَى أَنَّهُ مَعْطُوفٌ عَلَى «عليّ»» — and this inventory already counts both, as B_MAFUL_MAAH and as the maʿṭūf of باب العطف. The row’s own term is not the book’s wording; the book’s wording is «إتباعه لما قبله», and it is never uttered in a parse — p. 174’s أسئلة sets «أعرب المثالين اللذين في كلام المؤلف» as unanswered student work. The inventory carried no row for النوع الأول («ما يتعين نصبه»), which is precisely what all three productive lanes are, so this row tracked a coverage gap rather than a term. Its non-production stays recorded in deliberatelyNotGenerated.' },
+  { key: 'B_MAAH_ISM_FAIL', term: 'الْمَفْعُولُ مَعَهُ عَامِلُهُ اسْمُ فَاعِلٍ', pages: '173', reason: 'A word-class fact about the ʿĀMIL, reached only through the شرح’s gloss of a qayd of its own definition — «وَقَوْلُنَا: "الْمَنْصُوبُ بِالْفِعْلِ أَوْ مَا فِيهِ مَعْنَى الْفِعْلِ وَحُرُوفُهُ" يَدُلُّ عَلَى أَنَّ الْعَامِلَ فِي الْمَفْعُولِ مَعَهُ عَلَى ضَرْبَيْنِ» — which is the same «وقولنا» construction that put الفضلة and الاسم المؤول بالصريح here in Wave 9. The mafʿūl maʿah’s own utterance is identical under both ضربان: parsing «الْأَمِيرُ حَاضِرٌ وَالْجَيْشَ» the learner says «وَالْجَيْشَ: مفعول معه منصوب وعلامة نصبه الفتحة الظاهرة», exactly as in «حَضَرَ الْأَمِيرُ وَالْجَيْشَ». What differs is the ʿāmil, and «اسم فاعل» is a morphological class this source teaches in باب الفاعل, not a claim made about the mafʿūl maʿah. As with its sibling, no row was ever carried for الضرب الأول, which is what the shipped lanes have. Its non-production stays recorded in deliberatelyNotGenerated.' }
 ];
 
 module.exports = { rows, sourceExcluded, notCounted, CH };

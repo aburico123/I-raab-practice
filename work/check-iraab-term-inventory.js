@@ -1631,7 +1631,12 @@ const MARATHON15 = {
        حالة selects between two readings this inventory already counts separately, and the source
        parses neither. See the reasons in iraab-term-rows.js. */
     B_MAFUL_AJL_AL: 'notCounted',
-    B_MAFUL_AJL_MUDAF: 'notCounted'
+    B_MAFUL_AJL_MUDAF: 'notCounted',
+    /* باب المفعول معه — pp. 173–174's نَوْعَان of the noun after the wāw and ضَرْبَان of its
+       ʿāmil. The first is a reading-choice between two already-counted analyses; the second is a
+       word-class fact about something else, reached through a «وقولنا:» gloss. */
+    B_MAAH_ATF: 'notCounted',
+    B_MAAH_ISM_FAIL: 'notCounted'
   }
 };
 {
@@ -1679,6 +1684,13 @@ const MARATHON15 = {
     stillProduced('B_MAFUL_AJL', 'the mafʿūl-lah حالات');
     stillProduced('X_MAKHFUD_HARF', 'the mafʿūl-lah حالات');
     stillProduced('X_MUDAF', 'the muḍāf mafʿūl lah');
+  }
+  if (MARATHON15.retired.B_MAAH_ATF || MARATHON15.retired.B_MAAH_ISM_FAIL) {
+    /* p. 174 names the two readings the نوع الثاني permits, in the source's own voice: naṣb as a
+       mafʿūl maʿah, or rafʿ as a maʿṭūf on what precedes. Both must remain live, or the row was
+       retired in favour of something the learner cannot reach. */
+    stillProduced('B_MAFUL_MAAH', 'the mafʿūl-maʿah نوعان');
+    stillProduced('T_ATF_NASAQ', 'the mafʿūl-maʿah نوعان');
   }
 }
 

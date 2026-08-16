@@ -14,19 +14,19 @@
   "rule": "A row is FULL only when its canonical Arabic is observed in the rendered iʿrāb (token.ar / token.phraseAr). Appearing only in a Why explanation or in the definitions panel yields GENERIC_ONLY, never FULL."
  },
  "totals": {
-  "TOTAL": 277,
+  "TOTAL": 275,
   "FULL": 264,
   "GENERIC_ONLY": 2,
   "PARTIAL": 1,
-  "ABSENT": 5,
+  "ABSENT": 3,
   "TRUE_BLOCKER": 5,
   "reconciles": true,
-  "percentFull": 95.3
+  "percentFull": 96
  },
  "randomizationTotals": {
   "GOOD": 163,
   "LIMITED": 102,
-  "NONE": 12
+  "NONE": 10
  },
  "marathon": {
   "target": 56,
@@ -120,6 +120,18 @@
    "term": "الْمَفْعُولُ لَهُ الْمُضَافُ",
    "pages": "171–172",
    "reason": "The second of p. 171’s three حَالَات, on the same footing as the first. p. 172: «وَإِنْ كَانَ مُضَافاً جَازَ جَوَازاً مُتَسَاوِياً أَنْ يُجَرَّ بِالْحَرْفِ وَأَنْ يُنْصَبَ، نَحْوَ: «زُرْتُكَ مَحَبَّةَ أَدَبِكَ» أَوْ «زُرْتُكَ لِمَحَبَّةِ أَدَبِكَ»». Parsing the naṣb reading, the learner says «مَحَبَّةَ: مفعول لأجله منصوب وعلامة نصبه الفتحة الظاهرة، وهو مضاف» — three claims, all of which are already rows (B_MAFUL_AJL, G_FATHA, X_MUDAF). «المفعول له المضاف» itself is uttered nowhere in the bāb outside the أسئلة’s question. Its non-production is separately recorded in deliberatelyNotGenerated."
+  },
+  {
+   "key": "B_MAAH_ATF",
+   "term": "الْعَطْفُ فِي مَوْضِعِ الْمَفْعُولِ مَعَهُ",
+   "pages": "173–174",
+   "reason": "The second of the two أنواع p. 173 gives the noun standing after the wāw — «ما يجوز نصبُه على ذلك وإتباعُه لما قبله في إعرابه معطوفاً عليه» — and therefore a statement about WHICH analysis is available, not a third analysis. p. 174 spells the alternatives out itself: for «حَضَرَ عَلِيٌّ وَمُحَمَّدٌ», «يَجُوزُ نَصْبُ «محمد» عَلَى أَنَّهُ مَفْعُولٌ مَعَهُ، وَيَجُوزُ رَفْعُهُ عَلَى أَنَّهُ مَعْطُوفٌ عَلَى «عليّ»» — and this inventory already counts both, as B_MAFUL_MAAH and as the maʿṭūf of باب العطف. The row’s own term is not the book’s wording; the book’s wording is «إتباعه لما قبله», and it is never uttered in a parse — p. 174’s أسئلة sets «أعرب المثالين اللذين في كلام المؤلف» as unanswered student work. The inventory carried no row for النوع الأول («ما يتعين نصبه»), which is precisely what all three productive lanes are, so this row tracked a coverage gap rather than a term. Its non-production stays recorded in deliberatelyNotGenerated."
+  },
+  {
+   "key": "B_MAAH_ISM_FAIL",
+   "term": "الْمَفْعُولُ مَعَهُ عَامِلُهُ اسْمُ فَاعِلٍ",
+   "pages": "173",
+   "reason": "A word-class fact about the ʿĀMIL, reached only through the شرح’s gloss of a qayd of its own definition — «وَقَوْلُنَا: \"الْمَنْصُوبُ بِالْفِعْلِ أَوْ مَا فِيهِ مَعْنَى الْفِعْلِ وَحُرُوفُهُ\" يَدُلُّ عَلَى أَنَّ الْعَامِلَ فِي الْمَفْعُولِ مَعَهُ عَلَى ضَرْبَيْنِ» — which is the same «وقولنا» construction that put الفضلة and الاسم المؤول بالصريح here in Wave 9. The mafʿūl maʿah’s own utterance is identical under both ضربان: parsing «الْأَمِيرُ حَاضِرٌ وَالْجَيْشَ» the learner says «وَالْجَيْشَ: مفعول معه منصوب وعلامة نصبه الفتحة الظاهرة», exactly as in «حَضَرَ الْأَمِيرُ وَالْجَيْشَ». What differs is the ʿāmil, and «اسم فاعل» is a morphological class this source teaches in باب الفاعل, not a claim made about the mafʿūl maʿah. As with its sibling, no row was ever carried for الضرب الأول, which is what the shipped lanes have. Its non-production stays recorded in deliberatelyNotGenerated."
   }
  ],
  "rows": [
@@ -1105,13 +1117,13 @@
    "pages": "79–80",
    "parent": "جوازم فعل واحد",
    "status": "FULL",
-   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 40 template lane(s) [mode=sentence]",
+   "proof": "built 200× per template; «أَلَمَّا» observed in the rendered iʿrāb across 39 template lane(s) [mode=sentence]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "أَلَمَّا",
    "probeMode": "sentence",
    "probeRequires": "",
-   "observedTemplateLanes": 40
+   "observedTemplateLanes": 39
   },
   {
    "key": "J_HAMZAT_TAQRIR",
@@ -1795,13 +1807,13 @@
    "pages": "99–101",
    "parent": "المرفوعات",
    "status": "FULL",
-   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 140 template lane(s) [mode=contains]",
+   "proof": "built 200× per template; «خَبَرٌ» observed in the rendered iʿrāb across 139 template lane(s) [mode=contains]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "خَبَرٌ",
    "probeMode": "contains",
    "probeRequires": "",
-   "observedTemplateLanes": 140
+   "observedTemplateLanes": 139
   },
   {
    "key": "M_KHABAR_MUFRAD",
@@ -3859,36 +3871,6 @@
    "observedTemplateLanes": 3
   },
   {
-   "key": "B_MAAH_ATF",
-   "term": "الْعَطْفُ فِي مَوْضِعِ الْمَفْعُولِ مَعَهُ",
-   "chapter": "باب المفعول معه (pp. 172–173)",
-   "pages": "173",
-   "parent": "المفعول معه",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "deliberatelyNotGenerated: p. 173 permits BOTH naṣb and ʿaṭf.",
-   "randomization": "NONE",
-   "probe": "الْعَطْفُ عَلَى مَا قَبْلَهُ",
-   "probeMode": "contains",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
-  },
-  {
-   "key": "B_MAAH_ISM_FAIL",
-   "term": "الْمَفْعُولُ مَعَهُ عَامِلُهُ اسْمُ فَاعِلٍ",
-   "chapter": "باب المفعول معه (pp. 172–173)",
-   "pages": "173",
-   "parent": "المفعول معه",
-   "status": "ABSENT",
-   "proof": "",
-   "missingReason": "deliberatelyNotGenerated: (الأمير حاضر والجيشَ).",
-   "randomization": "NONE",
-   "probe": "عَامِلُهُ اسْمُ فَاعِلٍ",
-   "probeMode": "contains",
-   "probeRequires": "",
-   "observedTemplateLanes": 0
-  },
-  {
    "key": "X_MAKHFUD_HARF",
    "term": "الْمَخْفُوضُ بِالْحَرْفِ",
    "chapter": "باب المخفوضات من الأسماء (pp. 174–178)",
@@ -4120,13 +4102,13 @@
    "pages": "176–177",
    "parent": "حروف الخفض",
    "status": "FULL",
-   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 40 template lane(s) [mode=prep]",
+   "proof": "built 200× per template; «مُذْ» observed in the rendered iʿrāb across 41 template lane(s) [mode=prep]",
    "missingReason": "",
    "randomization": "GOOD",
    "probe": "مُذْ",
    "probeMode": "prep",
    "probeRequires": "",
-   "observedTemplateLanes": 40
+   "observedTemplateLanes": 41
   },
   {
    "key": "X_PREP_MUNDHU",

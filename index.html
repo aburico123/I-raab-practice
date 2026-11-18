@@ -3,73 +3,103 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nahw Iʿrāb Practice</title>
+<title>Madarij | Nahw</title>
 <style>
 :root{
-  --bg:#f5f1e8; --card:#fffdf8; --ink:#1f2623; --muted:#68716c;
-  --green:#1f654b; --green-dark:#174c39; --green-soft:#eaf4ee;
-  --gold:#ba8a36; --line:#ded6c8; --danger:#8b2f2f;
+  --bg:#f4f0e7;--card:#fffdf8;--ink:#18231f;--muted:#66716c;
+  --green:#176044;--green-dark:#104733;--green-soft:#e9f3ed;
+  --gold:#ad7a24;--gold-soft:#fbf2df;--blue:#285ba7;--line:#ddd5c7;--danger:#8b2f2f;
 }
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(180deg,#f8f5ef 0,#f2ede3 100%);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Noto Naskh Arabic",Arial,sans-serif;min-height:100vh}
-.wrap{width:min(980px,100%);margin:auto;padding:18px}
-header{text-align:center;padding:14px 8px 18px}
-h1{margin:0;font-size:clamp(28px,5vw,42px);letter-spacing:-.03em}
-.subtitle{margin:8px auto 0;max-width:720px;color:var(--muted);line-height:1.55}
-.controls{background:rgba(255,253,248,.86);border:1px solid var(--line);border-radius:20px;padding:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;box-shadow:0 8px 28px rgba(39,45,41,.06)}
+body{margin:0;background:linear-gradient(180deg,#f8f5ef,var(--bg));color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;min-height:100vh}
+button,select{font:inherit}button{cursor:pointer}.wrap{width:min(980px,100%);margin:auto;padding:18px}
+.site-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:18px 2px 14px}.brand{font-weight:950;font-size:clamp(29px,5vw,43px);letter-spacing:-.04em}.brand span{color:var(--green)}
+.site-head p{margin:4px 0 0;color:var(--muted)}.edition{text-align:right;font-size:13px;color:var(--muted);line-height:1.45}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;background:#e9e3d8;padding:6px;border-radius:16px;position:sticky;top:0;z-index:3}
+.tab{border:0;background:transparent;border-radius:11px;padding:11px 8px;font-weight:850;color:#4d5853}.tab.active{background:var(--card);color:var(--green-dark);box-shadow:0 2px 8px #0000000c}
+.view{display:none}.view.active{display:block}.toolbar,.panel,.practice{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 34px rgba(38,46,41,.06)}
+.toolbar{margin-top:14px;padding:14px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;align-items:end}
+.field label,.control label{display:block;font-size:12px;font-weight:850;color:#59635e;margin:0 0 6px 3px;text-transform:uppercase;letter-spacing:.055em}
+.field select,.controls select,.controls button{width:100%;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);padding:11px 12px;min-height:46px}
+.switch{display:flex;align-items:center;gap:9px;min-height:46px;padding:0 5px;font-weight:750}.switch input{width:20px;height:20px;accent-color:var(--green)}
+.progress-summary{font-size:14px;color:var(--muted);text-align:right;padding:0 4px 11px}.book-card{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,34px);box-shadow:0 14px 42px rgba(38,46,41,.07)}
+.meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px;font-weight:750}.badge{display:inline-flex;align-items:center;background:var(--green-soft);color:var(--green-dark);border-radius:999px;padding:5px 9px}.source-line{margin-top:10px;color:var(--muted);font-size:13px}
+.book-ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:center;font-size:clamp(39px,8vw,63px);font-weight:850;line-height:1.75;color:var(--green-dark);margin:18px 0 0}.book-en{text-align:center;color:#53605a;font-size:18px;margin:-2px 0 18px;font-style:italic}
+.oral{border-top:1px solid #eee7dc;padding-top:16px}.oral-label{text-align:center;color:var(--muted);font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}.word-row{display:flex;direction:rtl;justify-content:center;flex-wrap:wrap;gap:9px;margin-top:10px}.word-chip{font-family:"Noto Naskh Arabic","Geeza Pro",serif;font-size:27px;font-weight:800;background:#f5f1e8;border:1px solid #e3dbcd;border-radius:10px;padding:7px 13px}
+.book-actions{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:9px;margin-top:20px}.primary,.secondary,.mark{border:1px solid var(--line);border-radius:12px;min-height:49px;padding:10px 12px;font-weight:850}.primary{background:var(--green);border-color:var(--green);color:#fff}.primary:hover{background:var(--green-dark)}.secondary{background:#fff}.mark.active{background:var(--gold-soft);border-color:#d8b66e;color:#6c4a0e}
+.answer-wrap{display:none;margin-top:20px}.answer-wrap.open{display:block}.answer-heading{text-align:center;color:var(--green-dark);margin:0 0 12px}.answers{display:grid;gap:11px}.word-card{border:1px solid #e4dccf;border-radius:16px;overflow:hidden;background:#fff}.word-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;background:var(--green-soft)}.word-ar{font-family:"Noto Naskh Arabic","Geeza Pro",serif;font-size:29px;font-weight:900;color:var(--green);direction:rtl}.gloss{color:#68716c;font-size:14px}.iraab{font-family:"Noto Naskh Arabic","Geeza Pro",serif;direction:rtl;text-align:right;padding:14px 15px 8px;font-size:21px;line-height:1.9}.english{border-top:1px solid #eee7db;padding:11px 15px;color:#59625d;line-height:1.55;font-size:15px}.why-btn{width:auto;margin:0 15px 13px;border:0;background:transparent;padding:2px;color:var(--blue);font-weight:800}.why{display:none;margin:0 15px 14px;padding:11px 12px;border-left:3px solid var(--gold);background:#fbf7ef;color:#4f5954;line-height:1.55}.why.open{display:block}.provenance{margin-top:14px;background:#f7f4ed;border:1px solid #e6dfd3;border-radius:13px;padding:12px 14px;color:#555f59;font-size:14px;line-height:1.55}
+.panel{margin-top:14px;padding:clamp(18px,4vw,30px)}.panel h2{margin-top:0}.help-rule{border-top:1px solid #e9e2d6;padding:16px 0}.help-rule:first-of-type{border-top:0}.help-ar{font-family:"Noto Naskh Arabic","Geeza Pro",serif;direction:rtl;text-align:right;font-size:24px;line-height:1.8;color:var(--green-dark)}.help-en{color:#53605a;line-height:1.65}.return-btn{max-width:300px}.generated-label{display:inline-flex;margin-bottom:10px;background:#e8eef8;color:#234f8e;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:850}
+.controls{background:rgba(255,253,248,.86);border:1px solid var(--line);border-radius:20px;padding:14px;display:grid;grid-template-columns:2fr 1fr;gap:10px;box-shadow:0 8px 28px rgba(39,45,41,.06)}.legacy-filter{display:none}
 .control label{display:block;font-size:12px;font-weight:800;color:#58615c;margin:0 0 6px 3px;text-transform:uppercase;letter-spacing:.06em}
-select,button{width:100%;font:inherit;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);padding:12px 13px;min-height:48px}
-select:focus,button:focus{outline:3px solid rgba(31,101,75,.17);border-color:var(--green)}
-button{font-weight:850;cursor:pointer}
-#newBtn{align-self:end;background:var(--green);border-color:var(--green);color:white}
-#newBtn:hover{background:var(--green-dark)}
+#newBtn{align-self:end;background:var(--blue);border:0;color:white;border-radius:11px;font-weight:850}
 .practice{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,32px);box-shadow:0 14px 40px rgba(39,45,41,.08)}
 .eyebrow{text-align:center;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.11em}
 #sentence{direction:rtl;text-align:center;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:clamp(34px,7vw,56px);font-weight:800;line-height:1.75;color:var(--green);margin:10px 0 0}
 #translation{text-align:center;color:var(--muted);font-size:17px;min-height:26px;margin:0 0 14px}
 .tip{text-align:center;background:#f7f5ef;border:1px dashed #d9d0c0;border-radius:13px;padding:11px;color:#59625d;line-height:1.5}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
-#revealBtn{background:var(--gold);color:#fff;border-color:var(--gold)}
-#nextBtn{background:var(--green);color:#fff;border-color:var(--green)}
+#revealBtn{background:#fde68a;color:#42350d;border-color:#fde68a}
+#nextBtn{background:var(--blue);color:#fff;border-color:var(--blue)}
 #answerPanel{display:none;margin-top:18px}
 #answerPanel.open{display:block}
 .answer-title{text-align:center;font-weight:900;margin:0 0 11px;color:var(--green-dark)}
-.answers{display:grid;gap:11px}
-.word-card{border:1px solid #e6ded0;border-radius:16px;overflow:hidden;background:#fff}
 .word-card.target{border:2px solid var(--gold);box-shadow:0 0 0 3px rgba(186,138,54,.10)}
-.word-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;background:var(--green-soft)}
 .word-card.target .word-head{background:#fbf2df}
-.word-ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-size:29px;font-weight:900;color:var(--green);direction:rtl}
-.gloss{color:#68716c;font-size:14px;text-align:left}
-.iraab{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;direction:rtl;text-align:right;padding:14px 15px;font-size:21px;line-height:1.9}
-.english{border-top:1px solid #eee7db;padding:11px 15px;color:#59625d;line-height:1.55;font-size:15px}
 .target-note{display:inline-block;margin-left:7px;background:var(--gold);color:#fff;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;vertical-align:middle}
 .status{display:none;margin-top:12px;padding:11px 13px;border-radius:12px;text-align:center;line-height:1.5}
 .status.notice{display:block;background:#eef7f1;border:1px solid #b9d8c5;color:var(--green-dark)}
 .status.error{display:block;background:#fff0f0;border:1px solid #e3bebe;color:var(--danger)}
-.footer{text-align:center;color:#7a817d;font-size:13px;line-height:1.5;margin:14px 0 4px}
-@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.wrap{padding:11px}.practice{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}}
+.footer{text-align:center;color:#7a817d;font-size:13px;line-height:1.5;margin:14px 0 4px}.arabic-only .book-en,.arabic-only .english,.arabic-only .help-en,.arabic-only .en-only,.arabic-only .why-btn{display:none}
+@media(max-width:760px){.toolbar{grid-template-columns:1fr 1fr}.field:first-child{grid-column:1/-1}.controls{grid-template-columns:1fr 1fr}.actions,.book-actions{grid-template-columns:1fr}.wrap{padding:11px}.practice,.book-card{border-radius:19px}.word-head{align-items:flex-start}.word-ar{font-size:26px}.site-head{align-items:flex-start}.edition{display:none}}
 @media(max-width:460px){.controls{grid-template-columns:1fr}#sentence{font-size:36px}.iraab{font-size:19px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>Nahw Iʿrāb Practice</h1>
-    <p class="subtitle">Generate varied Arabic sentences, make the full iʿrāb yourself, then reveal the iʿrāb of every word. No score or record is kept.</p>
-  </header>
+  <header class="site-head"><div><div class="brand">Madarij <span>مدارج</span></div><p>Nahw · guided iʿrāb practice</p></div><div class="edition">Al-Mutammimah<br>2018 · Mālik al-Mahdharī edition</div></header>
+  <nav class="tabs" aria-label="Nahw sections">
+    <button class="tab active" data-view="bookView">Book practice</button>
+    <button class="tab" data-view="generatedView">Extra practice</button>
+    <button class="tab" data-view="helpView">Chapter help</button>
+  </nav>
+
+  <section id="bookView" class="view active">
+    <div class="toolbar">
+      <div class="field"><label for="chapterSelect">Chapter</label><select id="chapterSelect"><option>الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ · Speech and its composition</option></select></div>
+      <label class="switch"><input id="arabicOnly" type="checkbox"> Arabic only</label>
+      <div id="progressSummary" class="progress-summary">0 of 3 completed</div>
+    </div>
+    <article class="book-card">
+      <div class="meta"><span id="position" class="badge">Exercise 1 of 3</span><span id="pageRef">Printed page 19</span></div>
+      <div class="source-line"><span id="sourceKind">Book example</span> · <span id="statusText">Not completed</span></div>
+      <div id="bookSentence" class="book-ar" lang="ar"></div>
+      <div id="bookTranslation" class="book-en"></div>
+      <div class="oral"><div class="oral-label">Word-by-word oral practice</div><div id="wordRow" class="word-row"></div></div>
+      <div class="book-actions">
+        <button id="bookReveal" class="primary">Reveal full iʿrāb</button>
+        <button id="completeBtn" class="mark">Mark completed</button>
+        <button id="difficultBtn" class="mark">Save as difficult</button>
+      </div>
+      <section id="bookAnswer" class="answer-wrap" aria-live="polite"><h2 class="answer-heading">Full iʿrāb</h2><div id="bookAnswers" class="answers"></div><div id="provenance" class="provenance"></div></section>
+      <div class="book-actions"><button id="prevBook" class="secondary">Previous</button><button id="nextBook" class="primary">Next in chapter</button><button id="openHelp" class="secondary">Open chapter help</button></div>
+    </article>
+  </section>
+
+  <section id="generatedView" class="view panel">
+    <span class="generated-label">Generated practice</span>
+    <h2>Checked generator patterns</h2>
+    <p class="en-only">Use this for extra practice. Generated sentences are not quotations from al-Mutammimah.</p>
 
   <section class="controls" aria-label="Practice filters">
     <div class="control">
-      <label for="startFilter">Sentence starts with</label>
+      <label for="startFilter">Checked pattern</label>
       <select id="startFilter">
-        <option value="noun">اسم — Noun first</option>
-        <option value="any" selected>Any beginning</option>
-        <option value="verb">فعل — Verb first</option>
-        <option value="particle">حرف — Particle first</option>
+        <option value="noun">اسْمَانِ — Nominal sentence</option>
+        <option value="any" selected>Both patterns</option>
+        <option value="verb">فِعْلٌ وَاسْمٌ — Verb and subject</option>
       </select>
     </div>
-    <div class="control">
+    <div class="control legacy-filter">
       <label for="formFilter">Word form</label>
       <select id="formFilter">
         <option value="any">All forms</option>
@@ -83,7 +113,7 @@ button{font-weight:850;cursor:pointer}
         <option value="fiveVerbs">الْأَفْعَالُ الْخَمْسَةُ</option>
       </select>
     </div>
-    <div class="control">
+    <div class="control legacy-filter">
       <label for="signFilter">Iʿrāb sign</label>
       <select id="signFilter">
         <option value="any">All signs</option>
@@ -103,7 +133,7 @@ button{font-weight:850;cursor:pointer}
   </section>
 
   <main class="practice">
-    <div class="eyebrow">Practice sentence</div>
+    <div class="eyebrow">Generated practice</div>
     <div id="sentence" lang="ar">الطَّالِبُ مُجْتَهِدٌ</div>
     <div id="translation">The student is hardworking.</div>
     <div class="tip">Say the complete iʿrāb of <strong>every word</strong>. The gold card after revealing is the word that matches your selected form and sign.</div>
@@ -116,9 +146,50 @@ button{font-weight:850;cursor:pointer}
       <div id="answers" class="answers"></div>
     </section>
     <div id="status" class="status"></div>
-    <div class="footer">Practice draws from 200 verb families and 200 noun entries. Every compatible choice is randomized, and recent repeats are avoided.</div>
-  </main>
+    <div class="footer">This pilot uses two checked patterns from the selected chapter: a nominal sentence and a past verb with its subject. Vocabulary varies; these are not quotations from the book.</div>
+  </main></section>
+
+  <section id="helpView" class="view panel">
+    <h2>Chapter help</h2>
+    <p class="en-only">Consult the rule without losing your exercise or revealed-answer state.</p>
+    <div class="help-rule"><div class="help-ar" lang="ar">الْكَلَامُ هُوَ اللَّفْظُ الْمُرَكَّبُ الْمُفِيدُ بِالْوَضْعِ.</div><div class="help-en">Speech is an utterance that is composed, conveys a complete meaning, and follows Arabic usage.</div></div>
+    <div class="help-rule"><div class="help-ar" lang="ar">وَأَقَلُّ مَا يَتَأَلَّفُ مِنْهُ: اسْمَانِ، نَحْوُ: زَيْدٌ قَائِمٌ؛ أَوْ فِعْلٌ وَاسْمٌ، نَحْوُ: قَامَ زَيْدٌ.</div><div class="help-en">Its smallest complete form is two nouns, as in “Zayd is standing,” or a verb and a noun, as in “Zayd stood.”</div></div>
+    <div class="help-rule"><div class="help-ar" lang="ar">إِنْ قَامَ زَيْدٌ</div><div class="help-en">“If Zayd stood…” is not complete useful speech by itself because the condition still needs an answer.</div></div>
+    <div class="provenance"><strong>Source:</strong> The Arabic rule and examples are verified on printed page 19. The English explanations and full analysis of the conditional example are prepared for Madarij.</div>
+    <button id="returnPractice" class="primary return-btn">Return to the same exercise</button>
+  </section>
 </div>
+
+<script>
+(function(){
+'use strict';
+const KEY='madarij.nahw.v1';
+const exercises=[
+ {id:'speech-01',ar:'زَيْدٌ قَائِمٌ',en:'Zayd is standing.',words:['زَيْدٌ','قَائِمٌ'],source:'Book example · author gives the parsing',tokens:[
+  {word:'زَيْدٌ',gloss:'Zayd',ar:'مُبْتَدَأٌ مَرْفُوعٌ بِالِابْتِدَاءِ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.',en:'Zayd is the subject of the nominal sentence. It is nominative, marked by the visible ḍammah on its final letter.',why:'“Zayd” is the person about whom the statement begins, so it is the mubtadaʾ.'},
+  {word:'قَائِمٌ',gloss:'standing',ar:'خَبَرُ الْمُبْتَدَأِ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.',en:'Standing is the predicate of the subject. It is nominative, marked by the visible ḍammah on its final letter.',why:'“Standing” tells us something about Zayd and completes the statement. That relationship makes it the khabar.'}],prov:'Direct from printed page 19: the sentence and the author’s iʿrāb of both words. Supplied by Madarij: full vowel marks in the answer, English translation, English explanation, and “Why?” notes.'},
+ {id:'speech-02',ar:'قَامَ زَيْدٌ',en:'Zayd stood.',words:['قَامَ','زَيْدٌ'],source:'Book example · author gives the parsing',tokens:[
+  {word:'قَامَ',gloss:'stood',ar:'فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.',en:'Stood is a past-tense verb built on fatḥ. Its ending is fixed rather than governed by a syntactic case or mood.',why:'The action is placed in the past. A past-tense verb is indeclinable, and this form has a fixed fatḥ ending.'},
+  {word:'زَيْدٌ',gloss:'Zayd',ar:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.',en:'Zayd is the doer of the action. It is nominative, marked by the visible ḍammah on its final letter.',why:'Zayd is the one who performed the standing, so he is the fāʿil.'}],prov:'Direct from printed page 19: the sentence and the author’s iʿrāb of both words. Supplied by Madarij: full vowel marks in the answer, English translation, expanded English explanation, and “Why?” notes.'},
+ {id:'speech-03',ar:'إِنْ قَامَ زَيْدٌ',en:'If Zayd stood…',words:['إِنْ','قَامَ','زَيْدٌ'],source:'Book example · Madarij answer',tokens:[
+  {word:'إِنْ',gloss:'if',ar:'حَرْفُ شَرْطٍ جَازِمٌ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'If is a jussive conditional particle built on sukūn. It has no syntactic position in iʿrāb.',why:'It introduces a condition and normally governs both the condition verb and its answer. Here the answer is deliberately absent.'},
+  {word:'قَامَ',gloss:'stood',ar:'فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَزْمٍ فِعْلُ الشَّرْطِ.',en:'Stood is a past-tense verb built on fatḥ, in the syntactic position of the jussive as the condition verb.',why:'The form itself stays built on fatḥ, but the whole verb occupies a jussive position because it follows the jussive conditional particle.'},
+  {word:'زَيْدٌ',gloss:'Zayd',ar:'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.',en:'Zayd is the doer of the condition verb. It is nominative, marked by the visible ḍammah on its final letter.',why:'Zayd is the one whose standing is made the condition, so he is the fāʿil of qāma.'}],prov:'Direct from printed page 19: the wording and the author’s point that this is an incomplete, non-useful predicative construction. Supplied by Madarij: all word-by-word iʿrāb, full vowel marks, English translation, and “Why?” notes. The page does not itself parse these three words.'}
+];
+let state={index:0,revealed:false,arabicOnly:false,completed:[],difficult:[]};
+try{state={...state,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(_){/* keep defaults */}
+state.index=Math.max(0,Math.min(exercises.length-1,Number(state.index)||0));
+const $=id=>document.getElementById(id), save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===id));}
+function render(){const x=exercises[state.index],done=state.completed.includes(x.id),hard=state.difficult.includes(x.id);document.body.classList.toggle('arabic-only',state.arabicOnly);$('arabicOnly').checked=state.arabicOnly;$('position').textContent=`Exercise ${state.index+1} of ${exercises.length}`;$('pageRef').textContent='Printed page 19';$('sourceKind').textContent=x.source;$('statusText').textContent=done?'Completed':'Not completed';$('bookSentence').textContent=x.ar;$('bookTranslation').textContent=x.en;$('wordRow').innerHTML=x.words.map(w=>`<span class="word-chip" lang="ar">${w}</span>`).join('');$('bookAnswers').innerHTML=x.tokens.map((t,i)=>`<article class="word-card"><div class="word-head"><span class="gloss">${t.gloss}</span><span class="word-ar" lang="ar">${t.word}</span></div><div class="iraab" lang="ar">${t.ar}</div><div class="english">${t.en}</div><button class="why-btn" data-why="${i}" aria-expanded="false">Why?</button><div class="why en-only" id="why-${i}">${t.why}</div></article>`).join('');$('provenance').innerHTML=`<strong>What comes from the page:</strong> ${x.prov}`;$('bookAnswer').classList.toggle('open',state.revealed);$('bookReveal').textContent=state.revealed?'Hide full iʿrāb':'Reveal full iʿrāb';$('completeBtn').classList.toggle('active',done);$('completeBtn').textContent=done?'Completed ✓':'Mark completed';$('difficultBtn').classList.toggle('active',hard);$('difficultBtn').textContent=hard?'Saved as difficult ★':'Save as difficult';$('progressSummary').textContent=`${state.completed.length} of ${exercises.length} completed · ${state.difficult.length} difficult`;save();}
+function toggleList(key){const id=exercises[state.index].id,arr=state[key],p=arr.indexOf(id);p>=0?arr.splice(p,1):arr.push(id);render()}
+function move(delta){state.index=(state.index+delta+exercises.length)%exercises.length;state.revealed=false;render();window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showView(t.dataset.view)));
+$('bookReveal').addEventListener('click',()=>{state.revealed=!state.revealed;render()});$('completeBtn').addEventListener('click',()=>toggleList('completed'));$('difficultBtn').addEventListener('click',()=>toggleList('difficult'));$('nextBook').addEventListener('click',()=>move(1));$('prevBook').addEventListener('click',()=>move(-1));$('arabicOnly').addEventListener('change',e=>{state.arabicOnly=e.target.checked;render()});$('openHelp').addEventListener('click',()=>showView('helpView'));$('returnPractice').addEventListener('click',()=>showView('bookView'));
+$('bookAnswers').addEventListener('click',e=>{const b=e.target.closest('[data-why]');if(!b)return;const w=$(`why-${b.dataset.why}`),open=w.classList.toggle('open');b.setAttribute('aria-expanded',String(open));b.textContent=open?'Hide why':'Why?'});
+window.madarijState=()=>({...state});render();
+})();
+</script>
 
 <script>
 (function(){
@@ -830,6 +901,10 @@ add('particle','fiveVerbs','nunKept',()=>{const v=pickVerb(),o=pickVerbObject(v)
 const recent=[]; const HISTORY=40;
 const recentTemplates=[]; const TEMPLATE_HISTORY=6;
 let current=null;
+const verifiedTemplateIds=new Set([
+ templates[0].id,
+ templates.find(t=>t.starts==='verb'&&t.form==='singular'&&t.sign==='damma').id
+]);
 
 function selectedFilters(){
  return {
@@ -844,7 +919,7 @@ function matchesTemplate(t,start,form,sign){
    && (sign==='any'||t.sign===sign);
 }
 function poolFor(start,form,sign){
- return templates.filter(t=>matchesTemplate(t,start,form,sign));
+ return templates.filter(t=>verifiedTemplateIds.has(t.id)&&matchesTemplate(t,start,form,sign));
 }
 function compatible(){
  const {start,form,sign}=selectedFilters();

@@ -5,6 +5,7 @@
 // future lessons do not repeat a fact already stated in the iʿrāb.
 const token=(word,gloss,ar,en)=>({word,gloss,ar,en,whyAr:'',whyEn:''});
 const whyToken=(word,gloss,ar,en,whyAr,whyEn)=>({word,gloss,ar,en,whyAr,whyEn});
+const answerParts=(word,gloss,parts)=>({word,gloss,parts,ar:parts.map(part=>part.ar).join(' '),en:parts.map(part=>part.en).join(' '),whyAr:'',whyEn:''});
 const exercise=(id,page,ar,en,tokens,directEn,directAr,appEn='Miftāḥ al-ʿIlm supplies any sentence-level detail not stated there, together with full answer vocalization and concise English.',appAr='وَيُكْمِلُ مِفْتَاحُ الْعِلْمِ مَا لَمْ يُذْكَرْ مِنْ تَفْصِيلِ إِعْرَابِ الْجُمْلَةِ، مَعَ ضَبْطِ الْجَوَابِ وَالتَّرْجَمَةِ الْمُوجَزَةِ.')=>({
  id,page,ar,en,tokens,
  sourceEn:`Al-Mutammimah, printed page ${page}. ${directEn} ${appEn}`,
@@ -208,11 +209,21 @@ const particleForms=[
 ];
 
 const needsSignReason=signAr=>/نِيَابَةً|الْمُقَدَّرَةُ|ثُبُوتُ|حَذْفُ/.test(signAr);
-const rafToken=(word,gloss,roleAr,roleEn,causeAr,causeEn,signAr,signEn,reasonAr,reasonEn)=>token(
- word,gloss,
- `${roleAr}، وَعَلَامَةُ رَفْعِهِ ${signAr}${needsSignReason(signAr)?`؛ ${reasonAr}`:''}.`,
- `${roleEn}; ${/verb/i.test(roleEn)?'indicative':'nominative'} with ${signEn}${needsSignReason(signAr)?` because ${reasonEn}`:''}.`
-);
+const splitAnnexedRole=roleAr=>{
+ const marker='وَهُوَ مُضَافٌ',index=roleAr.indexOf(marker);
+ if(index<0)return {role:roleAr,tail:''};
+ const role=roleAr.slice(0,index).replace(/[،\s]+$/,'');
+ const attached=roleAr.slice(index+marker.length).replace(/^[،\s]+/,'');
+ return {role,tail:`${marker}${attached?`، ${attached}`:''}`};
+};
+const rafToken=(word,gloss,roleAr,roleEn,causeAr,causeEn,signAr,signEn,reasonAr,reasonEn)=>{
+ const ordered=splitAnnexedRole(roleAr),reason=needsSignReason(signAr)?`؛ ${reasonAr}`:'';
+ return token(
+  word,gloss,
+  `${ordered.role}، وَعَلَامَةُ رَفْعِهِ ${signAr}${reason}${ordered.tail?`، ${ordered.tail}`:''}.`,
+  `${roleEn}; ${/verb/i.test(roleEn)?'indicative':'nominative'} with ${signEn}${needsSignReason(signAr)?` because ${reasonEn}`:''}.`
+ );
+};
 const rafExercise=(id,page,ar,en,tokens,citationEn,citationAr,targetEn,targetAr,noteEn='',noteAr='')=>exercise(
  id,page,ar,en,tokens,
  `${citationEn} The page prints the example and explicitly identifies ${targetEn}, including its cause of rafʿ and its sign.${noteEn}`,
@@ -355,11 +366,14 @@ const rafSigns=[
  ],'Qur’an 11:72.','سُورَةُ هُودٍ، الْآيَةُ ٧٢.','taʿjabīna as a five-form present verb raised by retained nūn','«تَعْجَبِينَ» فِعْلًا مِنَ الْأَفْعَالِ الْخَمْسَةِ مَرْفُوعًا بِثُبُوتِ النُّونِ')
 ];
 
-const nasbToken=(word,gloss,roleAr,roleEn,causeAr,causeEn,signAr,signEn,reasonAr,reasonEn)=>token(
- word,gloss,
- `${roleAr}، وَعَلَامَةُ نَصْبِهِ ${signAr}${needsSignReason(signAr)?`؛ ${reasonAr}`:''}.`,
- `${roleEn}; ${/verb/i.test(roleEn)?'subjunctive':'accusative'} with ${signEn}${needsSignReason(signAr)?` because ${reasonEn}`:''}.`
-);
+const nasbToken=(word,gloss,roleAr,roleEn,causeAr,causeEn,signAr,signEn,reasonAr,reasonEn)=>{
+ const ordered=splitAnnexedRole(roleAr),reason=needsSignReason(signAr)?`؛ ${reasonAr}`:'';
+ return token(
+  word,gloss,
+  `${ordered.role}، وَعَلَامَةُ نَصْبِهِ ${signAr}${reason}${ordered.tail?`، ${ordered.tail}`:''}.`,
+  `${roleEn}; ${/verb/i.test(roleEn)?'subjunctive':'accusative'} with ${signEn}${needsSignReason(signAr)?` because ${reasonEn}`:''}.`
+ );
+};
 const nasbExercise=(id,page,ar,en,tokens,citationEn,citationAr,targetEn,targetAr,noteEn='',noteAr='')=>exercise(
  id,page,ar,en,tokens,
  `${citationEn} The page prints the example, and the author’s note gives its word-by-word parsing, explicitly identifying ${targetEn} and its accusative sign.${noteEn}`,
@@ -480,11 +494,14 @@ const nasbSigns=[
  ],'Qur’an 2:184.','سُورَةُ الْبَقَرَةِ، الْآيَةُ ١٨٤.','taṣūmū as a five-form verb made subjunctive by deletion of nūn','«تَصُومُوا» فِعْلًا مِنَ الْأَفْعَالِ الْخَمْسَةِ مَنْصُوبًا بِحَذْفِ النُّونِ',' The author’s note continues at the top of printed page 43 and ends before the heading for Signs of khafḍ; the app adds no missing syntactic step.',' وَيَسْتَمِرُّ تَعْلِيقُ الْمُؤَلِّفِ فِي أَعْلَى الصَّفْحَةِ الْمَطْبُوعَةِ ٤٣، وَيَنْتَهِي قَبْلَ عُنْوَانِ «عَلَامَاتِ الْخَفْضِ»؛ وَلَا يُضِيفُ التَّطْبِيقُ خُطْوَةً إِعْرَابِيَّةً مَفْقُودَةً.')
 ];
 
-const khafdToken=(word,gloss,roleAr,roleEn,causeAr,causeEn,signAr,signEn,reasonAr,reasonEn)=>token(
- word,gloss,
- `${roleAr}، وَعَلَامَةُ جَرِّهِ ${signAr}${needsSignReason(signAr)?`؛ ${reasonAr}`:''}.`,
- `${roleEn}; genitive with ${signEn}${needsSignReason(signAr)?` because ${reasonEn}`:''}.`
-);
+const khafdToken=(word,gloss,roleAr,roleEn,causeAr,causeEn,signAr,signEn,reasonAr,reasonEn)=>{
+ const ordered=splitAnnexedRole(roleAr),reason=needsSignReason(signAr)?`؛ ${reasonAr}`:'';
+ return token(
+  word,gloss,
+  `${ordered.role}، وَعَلَامَةُ جَرِّهِ ${signAr}${reason}${ordered.tail?`، ${ordered.tail}`:''}.`,
+  `${roleEn}; genitive with ${signEn}${needsSignReason(signAr)?` because ${reasonEn}`:''}.`
+ );
+};
 const khafdExercise=(id,page,ar,en,tokens,citationEn,citationAr,targetEn,targetAr,noteEn='',noteAr='')=>exercise(
  id,page,ar,en,tokens,
  `${citationEn} The page prints the example, and the author’s note gives its word-by-word parsing, explicitly identifying ${targetEn}, the relevant governors, and each item’s sign of khafḍ or its fixed form and genitive position.${noteEn}`,
@@ -599,6 +616,18 @@ const setConciseAnswer=(exerciseId,word,ar,en)=>{
  if(!answer)throw new Error(`Missing concise-answer target: ${exerciseId} / ${word}`);
  answer.ar=ar;answer.en=en;
 };
+const setAnswerParts=(exerciseId,word,parts)=>{
+ const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
+ const index=item&&item.tokens.findIndex(entry=>entry.word===word);
+ if(index==null||index<0)throw new Error(`Missing split-answer target: ${exerciseId} / ${word}`);
+ item.tokens[index]=answerParts(word,item.tokens[index].gloss,parts);
+};
+const setWhy=(exerciseId,word,whyAr,whyEn)=>{
+ const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
+ const answer=item&&item.tokens.find(entry=>entry.word===word);
+ if(!answer)throw new Error(`Missing why target: ${exerciseId} / ${word}`);
+ answer.whyAr=whyAr;answer.whyEn=whyEn;
+};
 
 setConciseAnswer('speech-02','قَامَ','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ، لَا مَحَلَّ لَهُ.','Past verb built on visible fatḥ, with no syntactic position.');
 setConciseAnswer('speech-02','زَيْدٌ','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject of the verb, nominative with a visible ḍammah.');
@@ -623,7 +652,8 @@ setConciseAnswer('raf-14','وَأَخُوهُ','الْوَاوُ حَرْفُ ع
 setConciseAnswer('raf-16','وَهَنُوكَ','الْوَاوُ حَرْفُ عَطْفٍ، وَ«هَنُوكَ» مَعْطُوفٌ مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ، وَالْكَافُ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Wāw coordinates. Hanūka is coordinated and nominative with wāw instead of ḍammah because it is one of the six nouns and is annexed; kāf completes the iḍāfah in the genitive position.');
 setConciseAnswer('raf-17','لَذُو','اللَّامُ لَامُ التَّوْكِيدِ الْمُزَحْلَقَةُ، وَ«ذُو» خَبَرُ «إِنَّ» مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ.','Lām is the displaced lām of emphasis. Dhū is the predicate of inna, nominative with wāw instead of ḍammah because it is one of the six nouns and is annexed.');
 setConciseAnswer('raf-21','يَسْجُدَانِ','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَأَلِفُ الِاثْنَيْنِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','Present verb, indicative with retained nūn because it is one of the five forms; dual alif is its subject, and the clause is in the nominative position as predicate.');
-setConciseAnswer('raf-22','يُؤْمِنُونَ','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَوَاوُ الْجَمَاعَةِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْجُمْلَةُ صِلَةُ الْمَوْصُولِ لَا مَحَلَّ لَهَا.','Present verb, indicative with retained nūn because it is one of the five forms; plural wāw is its subject, and the clause is a relative clause with no syntactic position.');
+setConciseAnswer('raf-22','يُؤْمِنُونَ','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَوَاوُ الْجَمَاعَةِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Present verb, indicative with retained nūn because it is one of the five forms; plural wāw is its subject.');
+setWhy('raf-22','يُؤْمِنُونَ','وَجُمْلَةُ الْفِعْلِ وَالْفَاعِلِ صِلَةُ الْمَوْصُولِ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','The verb-and-subject clause completes the relative pronoun and has no syntactic position.');
 setConciseAnswer('raf-23','أَتَعْجَبِينَ','الْهَمْزَةُ حَرْفُ اسْتِفْهَامٍ، وَ«تَعْجَبِينَ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَيَاءُ الْمُخَاطَبَةِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','The hamzah is interrogative. Taʿjabīna is a present verb, indicative with retained nūn because it is one of the five forms; feminine-address yāʾ is its subject.');
 setConciseAnswer('khafd-02','هُدًى','اسْمٌ مَجْرُورٌ بِـ«عَلَى»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.','Noun governed by ʿalā, genitive with an estimated kasrah on the alif.');
 setConciseAnswer('khafd-03','لِلرِّجَالِ','اللَّامُ حَرْفُ جَرٍّ، وَ«الرِّجَالِ» اسْمٌ مَجْرُورٌ بِاللَّامِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','Lām is a preposition; al-rijāli is governed by it, genitive with a visible kasrah.');
@@ -638,6 +668,12 @@ setConciseAnswer('khafd-11','وَاثْنَيْنِ','الْوَاوُ حَرْ�
 setConciseAnswer('khafd-12','لِلْمُؤْمِنِينَ','اللَّامُ حَرْفُ جَرٍّ، وَ«الْمُؤْمِنِينَ» اسْمٌ مَجْرُورٌ بِاللَّامِ، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ، وَالنُّونُ عِوَضٌ عَنِ التَّنْوِينِ.','Lām is a preposition; al-muʾminīna is governed by it, genitive with yāʾ instead of kasrah because it is a sound masculine plural; nūn replaces tanwīn.');
 setConciseAnswer('khafd-15','بِأَحْسَنَ','الْبَاءُ حَرْفُ جَرٍّ، وَ«أَحْسَنَ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مَمْنُوعٌ مِنَ الصَّرْفِ.','Bāʾ is a preposition; aḥsana is governed by it, genitive with fatḥah instead of kasrah because it is diptote.');
 setConciseAnswer('khafd-18','الْمَسَاجِدِ','اسْمٌ مَجْرُورٌ بِـ«فِي»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ؛ لِدُخُولِ «أَلْ» عَلَى الِاسْمِ الْمَمْنُوعِ مِنَ الصَّرْفِ.','Noun governed by fī, genitive with a visible kasrah because the diptote has the definite article al.');
+setAnswerParts('khafd-01','بِسْمِ',[
+ {ar:'الْبَاءُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْكَسْرِ.',en:'The bāʾ is a preposition fixed with kasrah.'},
+ {ar:'«اسْمِ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ، وَهُوَ مُضَافٌ.',en:'The noun is governed by the bāʾ, with a visible final kasrah. It is the first term of the iḍāfah.'}
+]);
+setConciseAnswer('khafd-17','أَحْسَنِ','اسْمٌ مَجْرُورٌ بِـ«فِي»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ، وَهُوَ مُضَافٌ.','A noun governed by fī, with a visible final kasrah. It is the first term of the iḍāfah.');
+setConciseAnswer('khafd-17','تَقْوِيمٍ','مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ.','The second term of the iḍāfah, genitive with a visible final kasrah.');
 
 const chapters=[
  {id:'speech-core',babId:'opening',order:1,titleEn:'Speech and what it consists of',titleAr:'الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ',pages:'19',book:speechCore,help:[

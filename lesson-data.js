@@ -607,9 +607,79 @@ const khafdSigns=[
  ],'Qur’an 2:187.','سُورَةُ الْبَقَرَةِ، الْآيَةُ ١٨٧.','al-masājidi after fī','«الْمَسَاجِدِ» بَعْدَ «فِي»',' The author’s parsing continues at the top of printed page 48 and ends before the heading “عَلَامَتَا الْجَزْمِ”.',' وَيَسْتَمِرُّ إِعْرَابُ الْمُؤَلِّفِ فِي أَعْلَى الصَّفْحَةِ الْمَطْبُوعَةِ ٤٨، وَيَنْتَهِي قَبْلَ عُنْوَانِ «عَلَامَتَا الْجَزْمِ».')
 ];
 
+const jazmExercise=(id,page,ar,en,tokens,directEn,directAr,appEn='Miftāḥ al-ʿIlm reorganizes the author’s analysis into concise cards and supplies full answer vocalization and English.',appAr='وَيُعِيدُ مِفْتَاحُ الْعِلْمِ تَنْظِيمَ إِعْرَابِ الْمُؤَلِّفِ فِي بِطَاقَاتٍ مُوجَزَةٍ، وَيُضِيفُ الضَّبْطَ التَّامَّ وَالتَّرْجَمَةَ.')=>exercise(
+ id,page,ar,en,tokens,directEn,directAr,appEn,appAr
+);
+
+const jazmSigns=[
+ jazmExercise('jazm-01',48,'لَمْ يَلِدْ وَلَمْ يُولَدْ','He neither begets nor is born.',[
+  token('لَمْ','did not','حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','A particle of negation, jazm, and past meaning, built on sukūn with no syntactic position.'),
+  token('يَلِدْ','beget','فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَمْ»، وَعَلَامَةُ جَزْمِهِ السُّكُونُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','A present verb made jussive by lam, marked by sukūn; its subject is a hidden “He.”'),
+  token('وَلَمْ','and did not','الْوَاوُ حَرْفُ عَطْفٍ، وَ«لَمْ» حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Wāw coordinates. Lam is a particle of negation, jazm, and past meaning, built on sukūn with no syntactic position.'),
+  token('يُولَدْ','be born','فِعْلٌ مُضَارِعٌ مَبْنِيٌّ لِلْمَجْهُولِ مَجْزُومٌ بِـ«لَمْ»، وَعَلَامَةُ جَزْمِهِ السُّكُونُ، وَنَائِبُ فَاعِلِهِ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','A passive present verb made jussive by lam, marked by sukūn; its hidden deputy subject is “He.”')
+ ],'Qur’an 112:3. The page prints the verse, and the author’s note parses every word, naming lam as the governor and sukūn as the sign on both verbs.','سُورَةُ الْإِخْلَاصِ، الْآيَةُ ٣. تَطْبَعُ الصَّفْحَةُ الْآيَةَ، وَيُعْرِبُ الْمُؤَلِّفُ كُلَّ كَلِمَةٍ، وَيَنْصُّ عَلَى أَنَّ «لَمْ» هِيَ الْجَازِمَةُ وَأَنَّ السُّكُونَ عَلَامَةُ الْفِعْلَيْنِ.'),
+ jazmExercise('jazm-02',48,'وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ','And there is none comparable to Him.',[
+  token('وَلَمْ','and was not','الْوَاوُ حَرْفُ عَطْفٍ، وَ«لَمْ» حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Wāw coordinates. Lam is a particle of negation, jazm, and past meaning, built on sukūn with no syntactic position.'),
+  token('يَكُنْ','be','فِعْلٌ مُضَارِعٌ نَاقِصٌ مَجْزُومٌ بِـ«لَمْ»، وَعَلَامَةُ جَزْمِهِ السُّكُونُ.','A deficient present verb made jussive by lam, marked by sukūn.'),
+  answerParts('لَهُ','to Him',[
+   {ar:'اللَّامُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْكَسْرِ.',en:'Lām is a preposition fixed with kasrah.'},
+   {ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ بِاللَّامِ، وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«كُفُوًا».',en:'Hāʾ is an attached pronoun built on ḍamm in the genitive position after lām; the phrase modifies kufuwan.'}
+  ]),
+  token('كُفُوًا','comparable','خَبَرُ «يَكُنْ» مُقَدَّمٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','The fronted predicate of yakun, accusative with a visible fatḥah.'),
+  token('أَحَدٌ','anyone','اسْمُ «يَكُنْ» مُؤَخَّرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','The delayed subject of yakun, nominative with a visible ḍammah.')
+ ],'Qur’an 112:4. The page prints the verse, and the author’s note parses every word, including the fronted predicate and delayed subject of yakun.','سُورَةُ الْإِخْلَاصِ، الْآيَةُ ٤. تَطْبَعُ الصَّفْحَةُ الْآيَةَ، وَيُعْرِبُ الْمُؤَلِّفُ كُلَّ كَلِمَةٍ، وَمِنْ ذَلِكَ خَبَرُ «يَكُنْ» الْمُقَدَّمُ وَاسْمُهَا الْمُؤَخَّرُ.'),
+ jazmExercise('jazm-03',49,'وَلَمْ يَخْشَ إِلَّا اللَّهَ','And he fears none but Allah.',[
+  token('وَلَمْ','and did not','الْوَاوُ حَرْفُ عَطْفٍ، وَ«لَمْ» حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Wāw coordinates. Lam is a particle of negation, jazm, and past meaning, built on sukūn with no syntactic position.'),
+  token('يَخْشَ','fear','فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَمْ»، وَعَلَامَةُ جَزْمِهِ حَذْفُ حَرْفِ الْعِلَّةِ، وَهُوَ الْأَلِفُ؛ لِأَنَّهُ مُعْتَلُّ الْآخِرِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','A present verb made jussive by lam; its sign is deletion of the final weak alif because it is weak-final. Its subject is a hidden “he.”'),
+  token('إِلَّا','except','حَرْفُ اسْتِثْنَاءٍ مَبْنِيٌّ عَلَى السُّكُونِ الْمُقَدَّرِ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','An exceptive particle built on an estimated sukūn on the alif, with no syntactic position.'),
+  token('اللَّهَ','Allah','لَفْظُ الْجَلَالَةِ مَنْصُوبٌ عَلَى التَّعْظِيمِ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','The divine name is accusative in exaltation, marked by a visible fatḥah.')
+ ],'Qur’an 9:18. The page prints the phrase, and the author’s note identifies deletion of the weak letter as the sign on yakhsha and gives the remaining parsing.','سُورَةُ التَّوْبَةِ، الْآيَةُ ١٨. تَطْبَعُ الصَّفْحَةُ الْعِبَارَةَ، وَيَنْصُّ إِعْرَابُ الْمُؤَلِّفِ عَلَى حَذْفِ حَرْفِ الْعِلَّةِ مِنْ «يَخْشَ»، وَيُتِمُّ إِعْرَابَ بَقِيَّةِ الْكَلِمَاتِ.'),
+ jazmExercise('jazm-04',49,'وَمَنْ يَدْعُ مَعَ اللَّهِ','And whoever invokes alongside Allah…',[
+  answerParts('وَمَنْ','and whoever',[
+   {ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ.',en:'Wāw begins a new sentence.'},
+   {ar:'«مَنْ» اسْمُ شَرْطٍ جَازِمٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.',en:'Man is a jussive conditional noun built on sukūn in the nominative position as mubtadaʾ.'}
+  ]),
+  whyToken('يَدْعُ','invoke','فِعْلٌ مُضَارِعٌ فِعْلُ الشَّرْطِ مَجْزُومٌ بِـ«مَنْ»، وَعَلَامَةُ جَزْمِهِ حَذْفُ حَرْفِ الْعِلَّةِ، وَهُوَ الْوَاوُ؛ لِأَنَّهُ مُعْتَلُّ الْآخِرِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','The condition verb, made jussive by man; its sign is deletion of the final weak wāw because it is weak-final. Its subject is a hidden “he.”','جُمْلَةُ فِعْلِ الشَّرْطِ وَفَاعِلِهِ فِي مَحَلِّ رَفْعٍ خَبَرٌ لِـ«مَنْ».','The condition clause is in the nominative position as the predicate of man.'),
+  whyToken('مَعَ','alongside','ظَرْفُ مَكَانٍ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','An adverb of place, accusative with a visible fatḥah, and the first term of an iḍāfah.','هُوَ مُتَعَلِّقٌ بِـ«يَدْعُ».','It modifies yadʿu.'),
+  token('اللَّهِ','Allah','لَفْظُ الْجَلَالَةِ مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','The divine name is the second term of the iḍāfah, genitive with a visible kasrah.')
+ ],'Qur’an 23:117. The page prints the phrase, and the author’s note parses it word by word, identifying the deleted wāw in yadʿu and the conditional construction.','سُورَةُ الْمُؤْمِنُونَ، الْآيَةُ ١١٧. تَطْبَعُ الصَّفْحَةُ الْعِبَارَةَ، وَيُعْرِبُهَا الْمُؤَلِّفُ كَلِمَةً كَلِمَةً، وَيَنْصُّ عَلَى حَذْفِ الْوَاوِ مِنْ «يَدْعُ» وَعَلَى تَرْكِيبِ الشَّرْطِ.'),
+ jazmExercise('jazm-05',49,'وَمَنْ يَهْدِ اللَّهُ','And whomever Allah guides…',[
+  answerParts('وَمَنْ','and whomever',[
+   {ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ.',en:'Wāw begins a new sentence.'},
+   {ar:'«مَنْ» اسْمُ شَرْطٍ جَازِمٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ مُقَدَّمٌ.',en:'Man is a jussive conditional noun built on sukūn in the accusative position as a fronted object.'}
+  ]),
+  token('يَهْدِ','guide','فِعْلٌ مُضَارِعٌ فِعْلُ الشَّرْطِ مَجْزُومٌ بِـ«مَنْ»، وَعَلَامَةُ جَزْمِهِ حَذْفُ حَرْفِ الْعِلَّةِ، وَهُوَ الْيَاءُ؛ لِأَنَّهُ مُعْتَلُّ الْآخِرِ.','The condition verb, made jussive by man; its sign is deletion of the final weak yāʾ because it is weak-final.'),
+  token('اللَّهُ','Allah','لَفْظُ الْجَلَالَةِ فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','The divine name is the subject of the verb, nominative with a visible ḍammah.')
+ ],'Qur’an 17:97. The page prints the phrase, and the author’s note identifies man as the fronted object, deletion of the weak yāʾ as the sign on yahdi, and Allāhu as the subject.','سُورَةُ الْإِسْرَاءِ، الْآيَةُ ٩٧. تَطْبَعُ الصَّفْحَةُ الْعِبَارَةَ، وَيَنْصُّ إِعْرَابُ الْمُؤَلِّفِ عَلَى أَنَّ «مَنْ» مَفْعُولٌ بِهِ مُقَدَّمٌ، وَعَلَى حَذْفِ الْيَاءِ مِنْ «يَهْدِ»، وَعَلَى فَاعِلِيَّةِ «اللَّهُ».'),
+ jazmExercise('jazm-06',49,'إِنْ تَتُوبَا','If you two repent…',[
+  token('إِنْ','if','حَرْفُ شَرْطٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','A conditional and jussive particle built on sukūn, with no syntactic position.'),
+  whyToken('تَتُوبَا','you two repent','فِعْلٌ مُضَارِعٌ فِعْلُ الشَّرْطِ مَجْزُومٌ بِـ«إِنْ»، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَأَلِفُ الِاثْنَيْنِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','The condition verb, made jussive by in; its sign is deletion of nūn because it is one of the five forms. Dual alif is its attached subject pronoun.','جَوَابُ الشَّرْطِ مَحْذُوفٌ لِلْعِلْمِ بِهِ، وَيُبَيِّنُ الْمُؤَلِّفُ أَنَّ «فَقَدْ صَغَتْ قُلُوبُكُمَا» لَيْسَ هُوَ الْجَوَابَ.','The answer of the condition is omitted because it is understood; the author explains that “your hearts have inclined” is not the answer.')
+ ],'Qur’an 66:4. The phrase is printed on page 49. The author’s parsing begins there and continues at the top of page 50, identifying deletion of nūn and the attached dual pronoun.','سُورَةُ التَّحْرِيمِ، الْآيَةُ ٤. تُطْبَعُ الْعِبَارَةُ فِي ص ٤٩، وَيَبْدَأُ إِعْرَابُ الْمُؤَلِّفِ فِيهَا وَيَسْتَمِرُّ فِي أَعْلَى ص ٥٠، وَيَنْصُّ عَلَى حَذْفِ النُّونِ وَعَلَى ضَمِيرِ الِاثْنَيْنِ الْمُتَّصِلِ.'),
+ jazmExercise('jazm-07',50,'وَإِنْ تَصْبِرُوا وَتَتَّقُوا','And if you are patient and mindful of Allah…',[
+  answerParts('وَإِنْ','and if',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw coordinates.'},
+   {ar:'«إِنْ» حَرْفُ شَرْطٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'In is a conditional and jussive particle built on sukūn, with no syntactic position.'}
+  ]),
+  token('تَصْبِرُوا','you are patient','فِعْلٌ مُضَارِعٌ فِعْلُ الشَّرْطِ مَجْزُومٌ بِـ«إِنْ»، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَوَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْأَلِفُ فَارِقَةٌ.','The condition verb, made jussive by in; its sign is deletion of nūn because it is one of the five forms. Plural wāw is its attached subject pronoun, and the final alif is orthographic.'),
+  whyToken('وَتَتَّقُوا','and are mindful','الْوَاوُ حَرْفُ عَطْفٍ، وَ«تَتَّقُوا» مَعْطُوفٌ مَجْزُومٌ، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَوَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْأَلِفُ فَارِقَةٌ.','Wāw coordinates. Tattaqū is coordinated in the jussive, marked by deletion of nūn because it is one of the five forms. Plural wāw is its subject, and the final alif is orthographic.','جَوَابُ الشَّرْطِ فِي سِيَاقِ الْآيَةِ: «فَإِنَّ ذَلِكَ مِنْ عَزْمِ الْأُمُورِ».','In the verse, the answer of the condition is “then indeed that is among the matters requiring resolve.”')
+ ],'Qur’an 3:120. The page prints the phrase, and the author’s note parses both verbs, naming deletion of nūn and each attached plural wāw.','سُورَةُ آلِ عِمْرَانَ، الْآيَةُ ١٢٠. تَطْبَعُ الصَّفْحَةُ الْعِبَارَةَ، وَيُعْرِبُ الْمُؤَلِّفُ الْفِعْلَيْنِ، وَيَنْصُّ عَلَى حَذْفِ النُّونِ وَعَلَى وَاوِ الْجَمَاعَةِ الْمُتَّصِلَةِ بِكُلٍّ مِنْهُمَا.'),
+ jazmExercise('jazm-08',50,'وَلَا تَخَافِي وَلَا تَحْزَنِي','And do not fear, and do not grieve.',[
+  answerParts('وَلَا','and do not',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw coordinates.'},
+   {ar:'«لَا» حَرْفُ نَهْيٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lā is a prohibitive and jussive particle built on sukūn, with no syntactic position.'}
+  ]),
+  token('تَخَافِي','fear','فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا»، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَيَاءُ الْمُخَاطَبَةِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','A present verb made jussive by lā; its sign is deletion of nūn because it is one of the five forms. Feminine-address yāʾ is its attached subject pronoun.'),
+  answerParts('وَلَا','and do not',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw coordinates.'},
+   {ar:'«لَا» حَرْفُ نَهْيٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lā is a prohibitive and jussive particle built on sukūn, with no syntactic position.'}
+  ]),
+  token('تَحْزَنِي','grieve','فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا»، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَيَاءُ الْمُخَاطَبَةِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','A present verb made jussive by lā; its sign is deletion of nūn because it is one of the five forms. Feminine-address yāʾ is its attached subject pronoun.')
+ ],'Qur’an 28:7. The page prints the phrase. The author’s note fully parses lā takhāfī and states that lā taḥzanī receives the same parsing.','سُورَةُ الْقَصَصِ، الْآيَةُ ٧. تَطْبَعُ الصَّفْحَةُ الْعِبَارَةَ، وَيُعْرِبُ الْمُؤَلِّفُ «لَا تَخَافِي» إِعْرَابًا تَامًّا، ثُمَّ يَنْصُّ عَلَى أَنَّ «لَا تَحْزَنِي» تُعْرَبُ مِثْلَهَا.')
+];
+
 // Complex cards still use one compact classroom answer. These overrides keep
 // attached elements and sentence-level positions only when they complete the parse.
-const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns];
+const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns];
 const setConciseAnswer=(exerciseId,word,ar,en)=>{
  const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
  const answer=item&&item.tokens.find(entry=>entry.word===word);
@@ -732,12 +802,19 @@ const chapters=[
   help('تَنُوبُ الْفَتْحَةُ عَنِ الْكَسْرَةِ فِي الِاسْمِ الَّذِي لَا يَنْصَرِفُ، مَا لَمْ تَدْخُلْ عَلَيْهِ «أَلْ» أَوْ يُضَفْ؛ فَإِنْ دَخَلَتْ عَلَيْهِ «أَلْ» أَوْ أُضِيفَ خُفِضَ بِالْكَسْرَةِ.','Fatḥah substitutes for kasrah in a diptote unless it has the definite article al or is annexed; with al or annexation, it takes kasrah.'),
   help('عِنْدَ كُلِّ اسْمٍ مَخْفُوضٍ يُسْأَلُ: مَا الْعَامِلُ الَّذِي خَفَضَهُ؟ وَمَا وَظِيفَتُهُ فِي التَّرْكِيبِ؟ وَمَا عَلَامَةُ خَفْضِهِ؟ وَلِمَ اخْتِيرَتْ هَذِهِ الْعَلَامَةُ؟ وَإِنْ كَانَ الِاسْمُ مَبْنِيًّا فَيُفَرَّقُ بَيْنَ بِنَائِهِ وَمَحَلِّهِ مِنَ الْخَفْضِ.','For every noun in khafḍ, ask what governs it, what role it has in the construction, which sign marks its khafḍ, and why that sign applies. For a fixed noun, distinguish its fixed ending from its genitive syntactic position.')
  ],helpSourceEn:'Al-Mutammimah, printed pages 43–47, with the final author note ending at the top of page 48. The exact heading, three signs of khafḍ, their positions, exceptions, displayed examples, and core parsing are the author’s. English, card organization, and the four-question study prompt are app-prepared.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٤٣–٤٧، وَيَنْتَهِي تَعْلِيقُ الْمُؤَلِّفِ الْأَخِيرُ فِي أَعْلَى ص ٤٨. الْعُنْوَانُ وَعَلَامَاتُ الْخَفْضِ الثَّلَاثُ وَمَوَاضِعُهَا وَاسْتِثْنَاءَاتُهَا وَالْأَمْثِلَةُ وَأُصُولُ إِعْرَابِهَا مِنَ الْمُؤَلِّفِ، وَأَمَّا التَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ وَأَسْئِلَةُ الْمُرَاجَعَةِ فَمِنَ التَّطْبِيقِ.'}
+ ,{id:'jazm-signs',babId:'iraab-signs',order:4,titleEn:'The Two Signs of Jazm',titleAr:'عَلَامَتَا الْجَزْمِ',pages:'48–50',book:jazmSigns,help:[
+  help('لِلْجَزْمِ عَلَامَتَانِ: السُّكُونُ، وَهُوَ الْأَصْلُ؛ وَالْحَذْفُ، وَهُوَ نَائِبٌ عَنْهُ.','Jazm has two signs: sukūn, the original sign, and deletion, which substitutes for it.'),
+  help('يَكُونُ السُّكُونُ عَلَامَةً لِلْجَزْمِ فِي الْفِعْلِ الْمُضَارِعِ الصَّحِيحِ الْآخِرِ الَّذِي لَمْ يَتَّصِلْ بِآخِرِهِ شَيْءٌ، نَحْوَ: «لَمْ يَلِدْ وَلَمْ يُولَدْ».','Sukūn marks jazm in a sound-final present verb with nothing attached to its ending, as in lam yalid wa-lam yūlad.'),
+  help('يَنُوبُ حَذْفُ حَرْفِ الْعِلَّةِ عَنِ السُّكُونِ فِي الْفِعْلِ الْمُضَارِعِ الْمُعْتَلِّ الْآخِرِ. فَتُحْذَفُ الْأَلِفُ فِي «يَخْشَ»، وَالْوَاوُ فِي «يَدْعُ»، وَالْيَاءُ فِي «يَهْدِ».','Deletion of the weak final letter substitutes for sukūn in a weak-final present verb: alif is deleted in yakhsha, wāw in yadʿu, and yāʾ in yahdi.'),
+  help('وَيَنُوبُ حَذْفُ النُّونِ عَنِ السُّكُونِ فِي الْأَفْعَالِ الْخَمْسَةِ الَّتِي رَفْعُهَا بِثُبُوتِ النُّونِ، نَحْوَ: «إِنْ تَتُوبَا»، وَ«إِنْ تَصْبِرُوا وَتَتَّقُوا»، وَ«لَا تَخَافِي وَلَا تَحْزَنِي».','Deletion of nūn substitutes for sukūn in the five verb forms whose rafʿ sign is retained nūn, as in in tatūbā, in taṣbirū wa-tattaqū, and lā takhāfī wa-lā taḥzanī.'),
+  help('عِنْدَ كُلِّ فِعْلٍ مَجْزُومٍ يُذْكَرُ الْعَامِلُ مَرَّةً وَاحِدَةً، ثُمَّ يُذْكَرُ الْجَزْمُ وَعَلَامَتُهُ. فَإِنْ كَانَتِ الْعَلَامَةُ الْحَذْفَ بُيِّنَ الْمَحْذُوفُ وَسَبَبُ الْحَذْفِ.','For each jussive verb, name the governor once, then state jazm and its sign. When the sign is deletion, identify what was deleted and briefly explain why.')
+ ],helpSourceEn:'Al-Mutammimah, printed pages 48–50. The exact heading, the two signs, their positions, the displayed examples, and the author’s core parsing are from the book. English, full vocalization, concise card organization, and the final study prompt are app-prepared.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٤٨–٥٠. الْعُنْوَانُ وَالْعَلَامَتَانِ وَمَوَاضِعُهُمَا وَالْأَمْثِلَةُ الْمَطْبُوعَةُ وَأُصُولُ إِعْرَابِهَا مِنَ الْكِتَابِ، وَأَمَّا التَّرْجَمَةُ وَالضَّبْطُ التَّامُّ وَتَنْظِيمُ الْبِطَاقَاتِ الْمُوجَزَةِ وَسُؤَالُ الْمُرَاجَعَةِ الْأَخِيرُ فَمِنَ التَّطْبِيقِ.'}
 ];
 
 const babs=[
  {id:'opening',order:1,titleEn:'Opening section: Speech and what it consists of',titleAr:'الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ',pages:'19–24'},
  {id:'iraab-bina',order:2,titleEn:'Bāb al-Iʿrāb wa-l-Bināʾ',titleAr:'بَابُ الْإِعْرَابِ وَالْبِنَاءِ',pages:'25–30'},
- {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–47'}
+ {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–50'}
 ];
 
 const subjects=[{ar:'الطَّالِبُ',en:'the student'},{ar:'الْمُعَلِّمُ',en:'the teacher'},{ar:'الطَّبِيبُ',en:'the doctor'},{ar:'التَّاجِرُ',en:'the merchant'},{ar:'الْإِمَامُ',en:'the imam'}];

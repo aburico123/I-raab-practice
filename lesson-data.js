@@ -243,7 +243,7 @@ const rafSigns=[
  rafExercise('raf-01',31,'قَالَ اللَّهُ','Allah said.',[
   pastWithExplicitSubject(),
   rafToken('اللَّهُ','Allah','فَاعِلٌ','Allah is the subject of qāla','رَفَعَهُ إِسْنَادُ الْقَوْلِ إِلَيْهِ','the saying is attributed to Him','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ','the visible ḍammah','لِأَنَّهُ اسْمٌ مُفْرَدٌ','it is a singular noun')
- ],'This is the author’s displayed phrase rather than a verse citation.','هَذَا لَفْظُ مِثَالِ الْمُؤَلِّفِ وَلَيْسَ عَزْوًا إِلَى آيَةٍ مُعَيَّنَةٍ.','Allāhu as the subject of qāla','«اللَّهُ» فَاعِلًا لِـ«قَالَ»'),
+ ],'Qur’an 3:55.','سُورَةُ آلِ عِمْرَانَ، الْآيَةُ ٥٥.','Allāhu as the subject of qāla','«اللَّهُ» فَاعِلًا لِـ«قَالَ»'),
  rafExercise('raf-02',31,'وَإِذْ قَالَ إِبْرَاهِيمُ','And when Abraham said…',[
   token('وَإِذْ','and when','الْوَاوُ حَرْفُ عَطْفٍ، وَ«إِذْ» ظَرْفُ زَمَانٍ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ.','The wāw is a fixed conjunction. Idh is an adverb of time built on sukūn in the accusative position.','أَدْخَلَتِ الْوَاوُ الْمِثَالَ فِي سِيَاقٍ مَعْطُوفٍ، وَتَدُلُّ «إِذْ» عَلَى زَمَنٍ مَاضٍ وَتُحَدِّدُ زَمَنَ الْقَوْلِ.','The wāw coordinates the passage. Idh refers to past time and locates the saying.'),
   pastWithExplicitSubject(),
@@ -716,9 +716,108 @@ const summaryRecap=[
  ],'The sentence and the author’s complete core parsing are printed on the page.','نَصُّ الْجُمْلَةِ وَأَصْلُ إِعْرَابِ جَمِيعِ أَجْزَائِهَا مِنَ الْمُؤَلِّفِ.')
 ];
 
+const estimatedExercise=(id,page,ar,en,tokens,directEn,directAr)=>exercise(
+ id,page,ar,en,tokens,directEn,directAr,
+ 'Miftāḥ al-ʿIlm preserves the printed example and reorganizes the author’s analysis into concise cards; it supplies English, full answer vocalization, and any explicitly identified hidden subject.',
+ 'وَيَحْفَظُ مِفْتَاحُ الْعِلْمِ نَصَّ الْمِثَالِ الْمَطْبُوعِ، وَيُعِيدُ تَنْظِيمَ إِعْرَابِ الْمُؤَلِّفِ فِي بِطَاقَاتٍ مُوجَزَةٍ، وَيُضِيفُ التَّرْجَمَةَ وَالضَّبْطَ التَّامَّ وَالْفَاعِلَ الْمُسْتَتِرَ حَيْثُ نُصَّ عَلَى أَنَّهُ مِنْ إِعْدَادِ التَّطْبِيقِ.'
+);
+const estimatedInflection=[
+ estimatedExercise('estimated-01',61,'جَاءَ غُلَامِي وَابْنِي','My boy and my son came.',[
+  token('جَاءَ','came','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb built on fatḥ.'),
+  answerParts('غُلَامِي','my boy',[
+   {ar:'«غُلَامِ» فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ، مَنَعَ مِنْ ظُهُورِهَا اشْتِغَالُ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.',en:'Ghulām is the subject, nominative with an estimated ḍammah before the speaker’s yāʾ; the place is occupied by the matching kasrah. It begins an iḍāfah.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'The speaker’s yāʾ is an attached pronoun built on sukūn in the genitive position as the second term.'}
+  ]),
+  answerParts('وَابْنِي','and my son',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«ابْنِ» مَعْطُوفٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ، مَنَعَ مِنْ ظُهُورِهَا اشْتِغَالُ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.',en:'Ibn is coordinated and nominative with an estimated ḍammah before the speaker’s yāʾ; the place is occupied by the matching kasrah. It begins an iḍāfah.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'The speaker’s yāʾ is an attached pronoun in the genitive position as the second term.'}
+  ])
+ ],'The footnote prints this sentence and states that the case vowels before the speaker’s yāʾ are estimated because the position is occupied by the matching vowel.','تَطْبَعُ الْحَاشِيَةُ هَذِهِ الْجُمْلَةَ، وَتَنْصُّ عَلَى تَقْدِيرِ حَرَكَاتِ الْإِعْرَابِ قَبْلَ يَاءِ الْمُتَكَلِّمِ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ.'),
+ estimatedExercise('estimated-02',61,'رَأَيْتُ غُلَامِي وَابْنِي','I saw my boy and my son.',[
+  token('رَأَيْتُ','I saw','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَالتَّاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Past verb built on sukūn; tāʾ is its attached subject.'),
+  answerParts('غُلَامِي','my boy',[
+   {ar:'«غُلَامِ» مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الْمُقَدَّرَةُ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ، مَنَعَ مِنْ ظُهُورِهَا اشْتِغَالُ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.',en:'Ghulām is the object, accusative with an estimated fatḥah before the speaker’s yāʾ; the place is occupied by the matching kasrah. It begins an iḍāfah.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'The speaker’s yāʾ is an attached pronoun in the genitive position as the second term.'}
+  ]),
+  answerParts('وَابْنِي','and my son',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«ابْنِ» مَعْطُوفٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الْمُقَدَّرَةُ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ، مَنَعَ مِنْ ظُهُورِهَا اشْتِغَالُ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.',en:'Ibn is coordinated and accusative with an estimated fatḥah before the speaker’s yāʾ; the place is occupied by the matching kasrah. It begins an iḍāfah.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'The speaker’s yāʾ is an attached pronoun in the genitive position as the second term.'}
+  ])
+ ],'The footnote prints this sentence and assigns the estimated accusative vowels before the speaker’s yāʾ.','تَطْبَعُ الْحَاشِيَةُ هَذِهِ الْجُمْلَةَ، وَتَجْعَلُ فَتْحَتَيِ النَّصْبِ مُقَدَّرَتَيْنِ قَبْلَ يَاءِ الْمُتَكَلِّمِ.'),
+ estimatedExercise('estimated-03',61,'مَرَرْتُ بِغُلَامِي وَابْنِي','I passed by my boy and my son.',[
+  token('مَرَرْتُ','I passed','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَالتَّاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Past verb built on sukūn; tāʾ is its attached subject.'),
+  answerParts('بِغُلَامِي','by my boy',[
+   {ar:'الْبَاءُ حَرْفُ جَرٍّ.',en:'Bāʾ is a preposition.'},
+   {ar:'«غُلَامِ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الْمُقَدَّرَةُ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ، مَنَعَ مِنْ ظُهُورِهَا اشْتِغَالُ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.',en:'Ghulām is governed by bāʾ, genitive with an estimated kasrah before the speaker’s yāʾ; the place is occupied by the matching kasrah. It begins an iḍāfah.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'The speaker’s yāʾ is an attached pronoun in the genitive position as the second term.'}
+  ]),
+  answerParts('وَابْنِي','and my son',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«ابْنِ» مَعْطُوفٌ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الْمُقَدَّرَةُ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ، مَنَعَ مِنْ ظُهُورِهَا اشْتِغَالُ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.',en:'Ibn is coordinated and genitive with an estimated kasrah before the speaker’s yāʾ; the place is occupied by the matching kasrah. It begins an iḍāfah.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'The speaker’s yāʾ is an attached pronoun in the genitive position as the second term.'}
+  ])
+ ],'The footnote prints this sentence and assigns the estimated genitive vowels before the speaker’s yāʾ.','تَطْبَعُ الْحَاشِيَةُ هَذِهِ الْجُمْلَةَ، وَتَجْعَلُ كَسْرَتَيِ الْجَرِّ مُقَدَّرَتَيْنِ قَبْلَ يَاءِ الْمُتَكَلِّمِ.'),
+ estimatedExercise('estimated-04',61,'جَاءَ الْفَتَى','The young man came.',[
+  token('جَاءَ','came','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb built on fatḥ.'),
+  token('الْفَتَى','the young man','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.','Subject, nominative with an estimated ḍammah on the alif because the vowel cannot appear there.')
+ ],'The footnote prints this sentence and states that the maqṣūr noun takes an estimated ḍammah on its final alif.','تَطْبَعُ الْحَاشِيَةُ هَذِهِ الْجُمْلَةَ، وَتَنْصُّ عَلَى تَقْدِيرِ الضَّمَّةِ عَلَى أَلِفِ الِاسْمِ الْمَقْصُورِ لِلتَّعَذُّرِ.'),
+ estimatedExercise('estimated-05',61,'رَأَيْتُ الْفَتَى','I saw the young man.',[
+  token('رَأَيْتُ','I saw','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَالتَّاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Past verb built on sukūn; tāʾ is its attached subject.'),
+  token('الْفَتَى','the young man','مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.','Object, accusative with an estimated fatḥah on the alif because the vowel cannot appear there.')
+ ],'The footnote prints this sentence and states that the maqṣūr noun takes an estimated fatḥah on its final alif.','تَطْبَعُ الْحَاشِيَةُ هَذِهِ الْجُمْلَةَ، وَتَنْصُّ عَلَى تَقْدِيرِ الْفَتْحَةِ عَلَى أَلِفِ الِاسْمِ الْمَقْصُورِ لِلتَّعَذُّرِ.'),
+ estimatedExercise('estimated-06',61,'مَرَرْتُ بِالْفَتَى','I passed by the young man.',[
+  token('مَرَرْتُ','I passed','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَالتَّاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Past verb built on sukūn; tāʾ is its attached subject.'),
+  answerParts('بِالْفَتَى','by the young man',[
+   {ar:'الْبَاءُ حَرْفُ جَرٍّ.',en:'Bāʾ is a preposition.'},
+   {ar:'«الْفَتَى» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.',en:'Al-fatā is governed by bāʾ, genitive with an estimated kasrah on the alif because the vowel cannot appear there.'}
+  ])
+ ],'The footnote prints this sentence and states that the maqṣūr noun takes an estimated kasrah on its final alif.','تَطْبَعُ الْحَاشِيَةُ هَذِهِ الْجُمْلَةَ، وَتَنْصُّ عَلَى تَقْدِيرِ الْكَسْرَةِ عَلَى أَلِفِ الِاسْمِ الْمَقْصُورِ لِلتَّعَذُّرِ.'),
+ estimatedExercise('estimated-07',62,'يَوْمَ يَدْعُ الدَّاعِ','On the day the caller calls…',[
+  token('يَوْمَ','on the day','ظَرْفُ زَمَانٍ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','Adverb of time, accusative with a visible fatḥah; it begins an iḍāfah.'),
+  token('يَدْعُ','calls','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى الْوَاوِ الْمَحْذُوفَةِ لِالْتِقَاءِ السَّاكِنَيْنِ.','Present verb, indicative with an estimated ḍammah on the deleted wāw; the wāw is absent because two vowelless letters meet.'),
+  token('الدَّاعِ','the caller','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى الْيَاءِ الْمَحْذُوفَةِ لِلتَّخْفِيفِ.','Subject, nominative with an estimated ḍammah on the yāʾ omitted for lightness.')
+ ],'Qur’an 54:6. The page prints this excerpt and its footnote parses the adverb, the verb’s estimated ḍammah on a deleted wāw, and the subject’s estimated ḍammah on a deleted yāʾ.','سُورَةُ الْقَمَرِ، الْآيَةُ ٦. تَطْبَعُ الصَّفْحَةُ هَذَا الْمُقْتَطَفَ، وَتُعْرِبُ حَاشِيَتُهَا الظَّرْفَ وَالْفِعْلَ بِضَمَّةٍ مُقَدَّرَةٍ عَلَى وَاوٍ مَحْذُوفَةٍ وَالْفَاعِلَ بِضَمَّةٍ مُقَدَّرَةٍ عَلَى يَاءٍ مَحْذُوفَةٍ.'),
+ estimatedExercise('estimated-08',62,'مُهْطِعِينَ إِلَى الدَّاعِ','Hastening toward the caller…',[
+  token('مُهْطِعِينَ','hastening','حَالٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْيَاءُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.','Circumstantial qualifier, accusative with yāʾ instead of fatḥah because it is a sound masculine plural.'),
+  token('إِلَى','toward','حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ الْمُقَدَّرِ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.','Preposition built on an estimated sukūn on the alif.'),
+  token('الدَّاعِ','the caller','اسْمٌ مَجْرُورٌ بِـ«إِلَى»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الْمُقَدَّرَةُ عَلَى الْيَاءِ لِلثِّقَلِ.','Noun governed by ilā, genitive with an estimated kasrah on the yāʾ because pronouncing it is heavy.')
+ ],'Qur’an 54:8. The page prints this excerpt and its footnote identifies the circumstantial qualifier and the estimated kasrah on the manqūṣ noun.','سُورَةُ الْقَمَرِ، الْآيَةُ ٨. تَطْبَعُ الصَّفْحَةُ هَذَا الْمُقْتَطَفَ، وَتَنْصُّ حَاشِيَتُهَا عَلَى الْحَالِ وَعَلَى الْكَسْرَةِ الْمُقَدَّرَةِ فِي الِاسْمِ الْمَنْقُوصِ.'),
+ estimatedExercise('estimated-09',62,'أَجِيبُوا دَاعِيَ اللَّهِ','Respond to Allah’s caller.',[
+  answerParts('أَجِيبُوا','respond',[
+   {ar:'«أَجِيبُوا» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى حَذْفِ النُّونِ.',en:'Ajībū is an imperative built on deletion of nūn.'},
+   {ar:'وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْأَلِفُ فَارِقَةٌ.',en:'Plural wāw is its attached subject; the final alif is orthographic.'}
+  ]),
+  token('دَاعِيَ','caller','مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ عَلَى الْيَاءِ لِخِفَّتِهَا، وَهُوَ مُضَافٌ.','Object, accusative with a visible fatḥah on the yāʾ because fatḥah is light; it begins an iḍāfah.'),
+  token('اللَّهِ','Allah','مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','Second term of the iḍāfah, genitive with a visible kasrah.')
+ ],'Qur’an 46:31. The page prints this excerpt and its footnote parses every word, explicitly contrasting the visible accusative fatḥah with the estimated signs of the manqūṣ noun.','سُورَةُ الْأَحْقَافِ، الْآيَةُ ٣١. تَطْبَعُ الصَّفْحَةُ هَذَا الْمُقْتَطَفَ، وَتُعْرِبُ حَاشِيَتُهَا كُلَّ كَلِمَةٍ، وَتُظْهِرُ فَتْحَةَ النَّصْبِ فِي الِاسْمِ الْمَنْقُوصِ لِخِفَّتِهَا.'),
+ estimatedExercise('estimated-10',63,'يَخْشَى','He fears.',[
+  token('يَخْشَى','he fears','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Present verb, indicative with an estimated ḍammah on the alif because the vowel cannot appear there; its subject is hidden “he.”')
+ ],'The page prints the verb and explicitly gives its estimated nominative ḍammah on the alif. The hidden subject is app-supplied.','تَطْبَعُ الصَّفْحَةُ الْفِعْلَ، وَتَنْصُّ عَلَى ضَمَّةِ رَفْعِهِ الْمُقَدَّرَةِ عَلَى الْأَلِفِ. وَالْفَاعِلُ الْمُسْتَتِرُ مِنْ إِعْدَادِ التَّطْبِيقِ.'),
+ estimatedExercise('estimated-11',63,'لَنْ يَخْشَى','He will not fear.',[
+  token('لَنْ','will not','حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ.','Particle of negation, naṣb, and future meaning, built on sukūn.'),
+  token('يَخْشَى','fear','فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِـ«لَنْ»، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Present verb made subjunctive by lan, with an estimated fatḥah on the alif because the vowel cannot appear there; its subject is hidden “he.”')
+ ],'The page prints the construction and explicitly gives the estimated accusative fatḥah on the alif. The hidden subject is app-supplied.','تَطْبَعُ الصَّفْحَةُ التَّرْكِيبَ، وَتَنْصُّ عَلَى فَتْحَةِ نَصْبِ الْفِعْلِ الْمُقَدَّرَةِ عَلَى الْأَلِفِ. وَالْفَاعِلُ الْمُسْتَتِرُ مِنْ إِعْدَادِ التَّطْبِيقِ.'),
+ estimatedExercise('estimated-12',63,'يَدْعُو','He calls.',[
+  token('يَدْعُو','he calls','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى الْوَاوِ لِلثِّقَلِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Present verb, indicative with an estimated ḍammah on the wāw because pronouncing it is heavy; its subject is hidden “he.”')
+ ],'The page prints the verb and explicitly gives its estimated nominative ḍammah on the wāw. The hidden subject is app-supplied.','تَطْبَعُ الصَّفْحَةُ الْفِعْلَ، وَتَنْصُّ عَلَى ضَمَّةِ رَفْعِهِ الْمُقَدَّرَةِ عَلَى الْوَاوِ لِلثِّقَلِ. وَالْفَاعِلُ الْمُسْتَتِرُ مِنْ إِعْدَادِ التَّطْبِيقِ.'),
+ estimatedExercise('estimated-13',63,'يَرْمِي','He throws.',[
+  token('يَرْمِي','he throws','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى الْيَاءِ لِلثِّقَلِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Present verb, indicative with an estimated ḍammah on the yāʾ because pronouncing it is heavy; its subject is hidden “he.”')
+ ],'The page prints the verb and states that it is parsed like yadʿū, with an estimated nominative ḍammah on the yāʾ. The hidden subject is app-supplied.','تَطْبَعُ الصَّفْحَةُ الْفِعْلَ، وَتَنْصُّ عَلَى أَنَّهُ يُعْرَبُ مِثْلَ «يَدْعُو»، بِضَمَّةٍ مُقَدَّرَةٍ عَلَى الْيَاءِ لِلثِّقَلِ. وَالْفَاعِلُ الْمُسْتَتِرُ مِنْ إِعْدَادِ التَّطْبِيقِ.'),
+ estimatedExercise('estimated-14',63,'لَنْ يَدْعُوَ','He will not call.',[
+  token('لَنْ','will not','حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ.','Particle of negation, naṣb, and future meaning, built on sukūn.'),
+  token('يَدْعُوَ','call','فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِـ«لَنْ»، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ عَلَى الْوَاوِ لِخِفَّتِهَا، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Present verb made subjunctive by lan, with a visible fatḥah on the wāw because fatḥah is light; its subject is hidden “he.”')
+ ],'The page prints the construction and explicitly contrasts its visible accusative fatḥah with the estimated nominative ḍammah. The hidden subject is app-supplied.','تَطْبَعُ الصَّفْحَةُ التَّرْكِيبَ، وَتُظْهِرُ فَتْحَةَ النَّصْبِ عَلَى الْوَاوِ لِخِفَّتِهَا مُقَابِلَ ضَمَّةِ الرَّفْعِ الْمُقَدَّرَةِ. وَالْفَاعِلُ الْمُسْتَتِرُ مِنْ إِعْدَادِ التَّطْبِيقِ.'),
+ estimatedExercise('estimated-15',63,'لَنْ يَرْمِيَ','He will not throw.',[
+  token('لَنْ','will not','حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ مَبْنِيٌّ عَلَى السُّكُونِ.','Particle of negation, naṣb, and future meaning, built on sukūn.'),
+  token('يَرْمِيَ','throw','فِعْلٌ مُضَارِعٌ مَنْصُوبٌ بِـ«لَنْ»، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ عَلَى الْيَاءِ لِخِفَّتِهَا، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Present verb made subjunctive by lan, with a visible fatḥah on the yāʾ because fatḥah is light; its subject is hidden “he.”')
+ ],'The page prints the construction and explicitly contrasts its visible accusative fatḥah with the estimated nominative ḍammah. The hidden subject is app-supplied.','تَطْبَعُ الصَّفْحَةُ التَّرْكِيبَ، وَتُظْهِرُ فَتْحَةَ النَّصْبِ عَلَى الْيَاءِ لِخِفَّتِهَا مُقَابِلَ ضَمَّةِ الرَّفْعِ الْمُقَدَّرَةِ. وَالْفَاعِلُ الْمُسْتَتِرُ مِنْ إِعْدَادِ التَّطْبِيقِ.')
+];
+
 // Complex cards still use one compact classroom answer. These overrides keep
 // attached elements and sentence-level positions only when they complete the parse.
-const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap];
+const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection];
 const setConciseAnswer=(exerciseId,word,ar,en)=>{
  const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
  const answer=item&&item.tokens.find(entry=>entry.word===word);
@@ -860,13 +959,103 @@ const chapters=[
   help('الْأَمْثِلَةُ الْخَمْسَةُ هِيَ كُلُّ فِعْلٍ مُضَارِعٍ اتَّصَلَتْ بِهِ أَلِفُ الِاثْنَيْنِ، أَوْ وَاوُ الْجَمَاعَةِ، أَوْ يَاءُ الْمُخَاطَبَةِ. تُرْفَعُ بِثُبُوتِ النُّونِ، وَتُنْصَبُ وَتُجْزَمُ بِحَذْفِهَا.','The five forms are present verbs attached to dual alif, plural wāw, or feminine-address yāʾ. They are indicative with retained nūn and subjunctive or jussive with its deletion.'),
   help('عَلَامَاتُ الْإِعْرَابِ أَرْبَعَ عَشْرَةَ: أَرْبَعَةٌ أُصُولٌ، وَهِيَ الضَّمَّةُ وَالْفَتْحَةُ وَالْكَسْرَةُ وَالسُّكُونُ؛ وَعَشْرَةٌ فُرُوعٌ تَقَعُ فِي سَبْعَةِ أَبْوَابٍ: مَا لَا يَنْصَرِفُ، وَجَمْعُ الْمُؤَنَّثِ السَّالِمُ، وَالْمُضَارِعُ الْمُعْتَلُّ الْآخِرِ، وَالْمُثَنَّى، وَجَمْعُ الْمُذَكَّرِ السَّالِمُ، وَالْأَسْمَاءُ السِّتَّةُ، وَالْأَمْثِلَةُ الْخَمْسَةُ.','The book totals fourteen inflection signs: four originals—ḍammah, fatḥah, kasrah, and sukūn—and ten substitutes distributed across seven forms: diptotes, sound feminine plurals, weak-final present verbs, duals, sound masculine plurals, the six nouns, and the five verb forms.')
  ],helpSourceEn:'Al-Mutammimah, printed pages 50–60. The heading, categories, rules, conditions, and fourteen-sign total are the author’s. The six Book Practice items reproduce the consecutive kilā/kiltā examples and their core parsing on pages 52–53. English, full answer vocalization, and concise card organization are app-prepared.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٥٠–٦٠. الْعُنْوَانُ وَالْأَقْسَامُ وَالْقَوَاعِدُ وَالشُّرُوطُ وَمَجْمُوعُ الْعَلَامَاتِ الْأَرْبَعَ عَشْرَةَ مِنَ الْمُؤَلِّفِ. وَتَنْقُلُ تَدْرِيبَاتُ الْكِتَابِ السِّتَّةُ أَمْثِلَةَ «كِلَا» وَ«كِلْتَا» الْمُتَتَابِعَةَ وَأَصْلَ إِعْرَابِهَا فِي ص ٥٢–٥٣، وَأَمَّا التَّرْجَمَةُ وَالضَّبْطُ التَّامُّ وَتَنْظِيمُ الْبِطَاقَاتِ الْمُوجَزَةِ فَمِنَ التَّطْبِيقِ.'}
+ ,{id:'estimated-inflection',babId:'iraab-signs',order:6,titleEn:'Estimated Inflection',titleAr:'الْإِعْرَابُ التَّقْدِيرِيُّ',pages:'61–63',book:estimatedInflection,help:[
+  help('يَقَعُ الْإِعْرَابُ التَّقْدِيرِيُّ فِي الْأَسْمَاءِ وَالْأَفْعَالِ. وَالْحَرَكَةُ الْمُقَدَّرَةُ حُكْمٌ إِعْرَابِيٌّ لَا تَظْهَرُ عَلَى الْحَرْفِ، فَيُذْكَرُ مَوْضِعُهَا وَسَبَبُ امْتِنَاعِ ظُهُورِهَا.','Estimated inflection occurs in nouns and verbs. The estimated vowel is an inflectional ruling that does not appear on the letter, so its location and the reason it cannot appear must be named.'),
+  help('تُقَدَّرُ الْحَرَكَاتُ الثَّلَاثُ قَبْلَ يَاءِ الْمُتَكَلِّمِ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، نَحْوَ: «جَاءَ غُلَامِي»، وَ«رَأَيْتُ غُلَامِي»، وَ«مَرَرْتُ بِغُلَامِي».','All three case vowels are estimated before the speaker’s yāʾ because that place is occupied by the matching vowel, as in jāʾa ghulāmī, raʾaytu ghulāmī, and marartu bi-ghulāmī.'),
+  help('تُقَدَّرُ الْحَرَكَاتُ الثَّلَاثُ عَلَى أَلِفِ الِاسْمِ الْمَقْصُورِ لِلتَّعَذُّرِ، نَحْوَ: «جَاءَ الْفَتَى»، وَ«رَأَيْتُ الْفَتَى»، وَ«مَرَرْتُ بِالْفَتَى».','All three case vowels are estimated on the alif of a maqṣūr noun because they cannot appear there, as in jāʾa al-fatā, raʾaytu al-fatā, and marartu bi-l-fatā.'),
+  help('فِي الِاسْمِ الْمَنْقُوصِ تُقَدَّرُ الضَّمَّةُ وَالْكَسْرَةُ عَلَى الْيَاءِ لِلثِّقَلِ، وَتَظْهَرُ الْفَتْحَةُ لِخِفَّتِهَا. وَقَدْ تُحْذَفُ الْيَاءُ تَخْفِيفًا فَيُقَدَّرُ الْإِعْرَابُ عَلَيْهَا.','In a manqūṣ noun, ḍammah and kasrah are estimated on the yāʾ because they are heavy, while fatḥah appears because it is light. The yāʾ may be omitted for lightness, with the sign still estimated on it.'),
+  help('فِي الْفِعْلِ الْمُضَارِعِ الْمُعْتَلِّ بِالْأَلِفِ تُقَدَّرُ الضَّمَّةُ وَالْفَتْحَةُ لِلتَّعَذُّرِ. وَفِي الْمُعْتَلِّ بِالْوَاوِ أَوِ الْيَاءِ تُقَدَّرُ الضَّمَّةُ لِلثِّقَلِ وَتَظْهَرُ الْفَتْحَةُ لِخِفَّتِهَا.','In an alif-final present verb, ḍammah and fatḥah are estimated because they cannot appear. In a wāw- or yāʾ-final verb, ḍammah is estimated because it is heavy, while fatḥah appears because it is light.')
+ ],helpSourceEn:'Al-Mutammimah, printed pages 61–63. The exact heading, its noun and verb divisions, the categories, examples, reasons, and the author’s core parsing are from the book. English, full vocalization, concise cards, hidden subjects where identified, and the visual comparison labels are app-prepared.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٦١–٦٣. الْعُنْوَانُ وَقِسْمَا الْأَسْمَاءِ وَالْأَفْعَالِ وَالْأَنْوَاعُ وَالْأَمْثِلَةُ وَالْأَسْبَابُ وَأُصُولُ إِعْرَابِهَا مِنَ الْكِتَابِ، وَأَمَّا التَّرْجَمَةُ وَالضَّبْطُ التَّامُّ وَالْبِطَاقَاتُ الْمُوجَزَةُ وَالضَّمَائِرُ الْمُسْتَتِرَةُ حَيْثُ نُصَّ عَلَيْهَا وَتَسْمِيَاتُ الْمُقَارَنَةِ الْبَصَرِيَّةِ فَمِنَ التَّطْبِيقِ.'}
 ];
 
 const babs=[
  {id:'opening',order:1,titleEn:'Opening section: Speech and what it consists of',titleAr:'الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ',pages:'19–24'},
  {id:'iraab-bina',order:2,titleEn:'Bāb al-Iʿrāb wa-l-Bināʾ',titleAr:'بَابُ الْإِعْرَابِ وَالْبِنَاءِ',pages:'25–30'},
- {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–60'}
+ {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–63'}
 ];
+
+const helpVisuals={
+ 'speech-core':{type:'branches',titleAr:'مِنَ اللَّفْظِ إِلَى الْكَلَامِ الْمُفِيدِ',titleEn:'From words to useful speech',branches:[
+  {id:'speech-nominal',labelAr:'جُمْلَةٌ اسْمِيَّةٌ مُفِيدَةٌ',labelEn:'Complete nominal sentence',descAr:'«زَيْدٌ قَائِمٌ» أَفَادَ مَعْنًى تَامًّا.',descEn:'Zaydun qāʾimun gives a complete meaning.',exerciseId:'speech-01'},
+  {id:'speech-verbal',labelAr:'جُمْلَةٌ فِعْلِيَّةٌ مُفِيدَةٌ',labelEn:'Complete verbal sentence',descAr:'«قَامَ زَيْدٌ» جَمَعَ الْفِعْلَ وَفَاعِلَهُ.',descEn:'Qāma Zaydun joins a verb to its subject.',exerciseId:'speech-02'},
+  {id:'speech-incomplete',labelAr:'تَرْكِيبٌ غَيْرُ مُفِيدٍ',labelEn:'Incomplete construction',descAr:'«إِنْ قَامَ زَيْدٌ» يَنْتَظِرُ جَوَابَ الشَّرْطِ.',descEn:'In qāma Zaydun still needs the answer to the condition.',exerciseId:'speech-03'}
+ ]},
+ 'word-types':{type:'branches',titleAr:'أَقْسَامُ الْكَلِمَةِ وَعَلَامَاتُهَا',titleEn:'Word classes and their signs',branches:[
+  {id:'word-noun',labelAr:'اسْمٌ',labelEn:'Noun',descAr:'يَقْبَلُ حَرْفَ الْجَرِّ: «مِنَ الْبَيْتِ».',descEn:'It accepts a preposition: mina al-bayti.',exerciseId:'word-01'},
+  {id:'word-past',labelAr:'فِعْلٌ مَاضٍ',labelEn:'Past verb',descAr:'تَلْحَقُهُ تَاءُ التَّأْنِيثِ السَّاكِنَةُ: «قَامَتْ».',descEn:'It accepts silent feminine tāʾ: qāmat.',exerciseId:'word-02'},
+  {id:'word-present',labelAr:'فِعْلٌ مُضَارِعٌ',labelEn:'Present verb',descAr:'تَدْخُلُ عَلَيْهِ «لَمْ»: «لَمْ يَقُمْ».',descEn:'It accepts lam: lam yaqum.',exerciseId:'word-03'},
+  {id:'word-command',labelAr:'فِعْلُ أَمْرٍ',labelEn:'Imperative',descAr:'يَدُلُّ عَلَى الطَّلَبِ وَيَقْبَلُ يَاءَ الْمُخَاطَبَةِ: «قُومِي».',descEn:'It expresses a command and accepts feminine-address yāʾ: qūmī.',exerciseId:'word-04'},
+  {id:'word-particle',labelAr:'حَرْفٌ',labelEn:'Particle',descAr:'لَا يَقْبَلُ عَلَامَاتِ الِاسْمِ وَلَا الْفِعْلِ: «مِنْ».',descEn:'It accepts neither noun nor verb signs: min.',exerciseId:'word-01'}
+ ]},
+ 'iraab-bina':{type:'changes',titleAr:'تَغَيُّرُ الْآخِرِ بِتَغَيُّرِ الْعَامِلِ',titleEn:'The ending changes with the governor',pairs:[
+  {beforeAr:'جَاءَ زَيْدٌ',beforeEn:'Zayd came: rafʿ',afterAr:'رَأَيْتُ زَيْدًا ← مَرَرْتُ بِزَيْدٍ',afterEn:'I saw Zayd: naṣb ← I passed by Zayd: khafḍ',noteAr:'الضَّمَّةُ ← الْفَتْحَةُ ← الْكَسْرَةُ',noteEn:'Ḍammah ← fatḥah ← kasrah',exerciseId:'iraab-01'},
+  {beforeAr:'يَذْهَبُ',beforeEn:'He goes: rafʿ',afterAr:'لَنْ يَذْهَبَ ← لَمْ يَذْهَبْ',afterEn:'He will not go: naṣb ← He did not go: jazm',noteAr:'الضَّمَّةُ ← الْفَتْحَةُ ← السُّكُونُ',noteEn:'Ḍammah ← fatḥah ← sukūn',exerciseId:'iraab-02'}
+ ]},
+ 'noun-forms':{type:'table',titleAr:'الِاسْمُ الْمُعْرَبُ وَالِاسْمُ الْمَبْنِيُّ',titleEn:'Declinable and fixed nouns',headersAr:['النَّوْعُ','الْمِثَالُ','مَا الَّذِي يَظْهَرُ؟'],headersEn:['Type','Example','What appears?'],rows:[
+  {cellsAr:['مُعْرَبٌ بِحَرَكَةٍ ظَاهِرَةٍ','زَيْدٌ / زَيْدًا / زَيْدٍ','تَتَغَيَّرُ الْحَرَكَةُ'],cellsEn:['Declinable with a visible vowel','Zaydun / Zaydan / Zaydin','The vowel changes'],exerciseId:'noun-01'},
+  {cellsAr:['مُعْرَبٌ بِحَرَكَةٍ مُقَدَّرَةٍ','مُوسَى','يَتَغَيَّرُ الْحُكْمُ وَلَا تَظْهَرُ الْحَرَكَةُ'],cellsEn:['Declinable with an estimated vowel','Mūsā','The ruling changes while the vowel stays hidden'],exerciseId:'noun-04'},
+  {cellsAr:['مَبْنِيٌّ','أَيْنَ / أَمْسِ / حَيْثُ','يَثْبُتُ آخِرُهُ وَيُذْكَرُ مَحَلُّهُ'],cellsEn:['Fixed','Ayna / amsi / ḥaythu','Its ending stays fixed; its position is named'],exerciseId:'noun-08'}
+ ]},
+ 'verb-forms':{type:'table',titleAr:'بِنَاءُ الْأَفْعَالِ وَإِعْرَابُ الْمُضَارِعِ',titleEn:'Fixed verbs and the declinable present',headersAr:['الْفِعْلُ','الْأَصْلُ','مِثَالٌ'],headersEn:['Verb','Default','Example'],rows:[
+  {cellsAr:['الْمَاضِي','مَبْنِيٌّ','ضَرَبَ / ضَرَبْتُ / ضَرَبُوا'],cellsEn:['Past','Fixed','Ḍaraba / ḍarabtu / ḍarabū'],exerciseId:'verb-01'},
+  {cellsAr:['الْأَمْرُ','مَبْنِيٌّ','اضْرِبْ / اضْرِبُوا / اخْشَ'],cellsEn:['Imperative','Fixed','Iḍrib / iḍribū / ikhsha'],exerciseId:'verb-06'},
+  {cellsAr:['الْمُضَارِعُ','مُعْرَبٌ إِلَّا مَعَ نُونِ النِّسْوَةِ أَوِ التَّوْكِيدِ','يَضْرِبُ / يُرْضِعْنَ'],cellsEn:['Present','Declinable except with feminine nūn or emphasis nūn','Yaḍribu / yurḍiʿna'],exerciseId:'verb-14'}
+ ]},
+ 'particle-forms':{type:'table',titleAr:'أَوْجُهُ بِنَاءِ الْحُرُوفِ',titleEn:'Fixed particle endings',headersAr:['الْبِنَاءُ','أَمْثِلَةٌ','الْحُكْمُ'],headersEn:['Fixed on','Examples','Ruling'],rows:[
+  {cellsAr:['السُّكُونُ','هَلْ، بَلْ','لَا مَحَلَّ لَهَا'],cellsEn:['Sukūn','hal, bal','No syntactic position'],exerciseId:'particle-01'},
+  {cellsAr:['الْفَتْحُ','لَعَلَّ، لَيْتَ','لَا مَحَلَّ لَهَا'],cellsEn:['Fatḥ','laʿalla, layta','No syntactic position'],exerciseId:'particle-01'},
+  {cellsAr:['الْكَسْرُ','لِـ، بِـ','لَا مَحَلَّ لَهَا'],cellsEn:['Kasr','li-, bi-','No syntactic position'],exerciseId:'particle-01'},
+  {cellsAr:['الضَّمُّ','مُنْذُ','لَا مَحَلَّ لَهَا'],cellsEn:['Ḍamm','mundhu','No syntactic position'],exerciseId:'particle-01'}
+ ]},
+ 'raf-signs':{type:'table',titleAr:'عَلَامَاتُ الرَّفْعِ الْأَرْبَعُ',titleEn:'The four signs of rafʿ',headersAr:['الْعَلَامَةُ','مَوْضِعٌ أَسَاسِيٌّ','مِثَالٌ'],headersEn:['Sign','Main use','Example'],rows:[
+  {cellsAr:['الضَّمَّةُ','الْمُفْرَدُ وَجَمْعُ التَّكْسِيرِ وَالْمُضَارِعُ','﴿قَالَ اللَّهُ﴾'],cellsEn:['Ḍammah','Singular, broken plural, present verb','“Allah said”'],exerciseId:'raf-01'},
+  {cellsAr:['الْوَاوُ','جَمْعُ الْمُذَكَّرِ السَّالِمُ وَالْأَسْمَاءُ السِّتَّةُ','قَالَ أَبُوهُمْ'],cellsEn:['Wāw','Sound masculine plural and six nouns','Their father said'],exerciseId:'raf-13'},
+  {cellsAr:['الْأَلِفُ','الْمُثَنَّى','قَالَ رَجُلَانِ'],cellsEn:['Alif','Dual','Two men said'],exerciseId:'raf-18'},
+  {cellsAr:['ثُبُوتُ النُّونِ','الْأَفْعَالُ الْخَمْسَةُ','يَسْجُدَانِ'],cellsEn:['Retention of nūn','Five verb forms','They two prostrate'],exerciseId:'raf-21'}
+ ]},
+ 'nasb-signs':{type:'table',titleAr:'عَلَامَاتُ النَّصْبِ الْخَمْسُ',titleEn:'The five signs of naṣb',headersAr:['الْعَلَامَةُ','مَوْضِعٌ','مِثَالٌ'],headersEn:['Sign','Use','Example'],rows:[
+  {cellsAr:['الْفَتْحَةُ','الْمُفْرَدُ وَجَمْعُ التَّكْسِيرِ وَالْمُضَارِعُ','وَاتَّقُوا اللَّهَ'],cellsEn:['Fatḥah','Singular, broken plural, present verb','Fear Allah'],exerciseId:'nasb-01'},
+  {cellsAr:['الْأَلِفُ','الْأَسْمَاءُ السِّتَّةُ','وَتَحْفَظُ أَخَانَا'],cellsEn:['Alif','Six nouns','And protect our brother'],exerciseId:'nasb-09'},
+  {cellsAr:['الْكَسْرَةُ','جَمْعُ الْمُؤَنَّثِ السَّالِمُ','خَلَقَ اللَّهُ السَّمَاوَاتِ'],cellsEn:['Kasrah','Sound feminine plural','Allah created the heavens'],exerciseId:'nasb-12'},
+  {cellsAr:['الْيَاءُ','الْمُثَنَّى وَجَمْعُ الْمُذَكَّرِ السَّالِمُ','وَاجْعَلْنَا مُسْلِمَيْنِ'],cellsEn:['Yāʾ','Dual and sound masculine plural','Make us two submitting'],exerciseId:'nasb-14'},
+  {cellsAr:['حَذْفُ النُّونِ','الْأَفْعَالُ الْخَمْسَةُ','أَنْ تَكُونَا'],cellsEn:['Deletion of nūn','Five verb forms','That you two become'],exerciseId:'nasb-19'}
+ ]},
+ 'khafd-signs':{type:'table',titleAr:'عَلَامَاتُ الْخَفْضِ الثَّلَاثُ',titleEn:'The three signs of khafḍ',headersAr:['الْعَلَامَةُ','مَوْضِعٌ','مِثَالٌ'],headersEn:['Sign','Use','Example'],rows:[
+  {cellsAr:['الْكَسْرَةُ','الْمُنْصَرِفُ وَجَمْعُ الْمُؤَنَّثِ السَّالِمُ','لِلرِّجَالِ'],cellsEn:['Kasrah','Declinable nouns and sound feminine plurals','For the men'],exerciseId:'khafd-03'},
+  {cellsAr:['الْيَاءُ','الْأَسْمَاءُ السِّتَّةُ وَالْمُثَنَّى وَجَمْعُ الْمُذَكَّرِ السَّالِمُ','إِلَى أَبِيكُمْ'],cellsEn:['Yāʾ','Six nouns, dual, sound masculine plural','To your father'],exerciseId:'khafd-06'},
+  {cellsAr:['الْفَتْحَةُ','الِاسْمُ الَّذِي لَا يَنْصَرِفُ','بِأَحْسَنَ'],cellsEn:['Fatḥah','Diptote','With better'],exerciseId:'khafd-15'}
+ ]},
+ 'jazm-signs':{type:'branches',titleAr:'عَلَامَتَا الْجَزْمِ',titleEn:'The two signs of jazm',branches:[
+  {id:'jazm-sukun',labelAr:'السُّكُونُ',labelEn:'Sukūn',descAr:'فِي الْمُضَارِعِ الصَّحِيحِ الْآخِرِ.',descEn:'For a sound-final present verb.',exerciseId:'jazm-01',compare:{beforeAr:'يَلِدُ',afterAr:'لَمْ يَلِدْ',noteAr:'ظَهَرَ السُّكُونُ عَلَى الدَّالِ.',noteEn:'Sukūn appears on the final dāl.',focus:'دْ'}},
+  {id:'jazm-weak',labelAr:'الْحَذْفُ: حَرْفُ الْعِلَّةِ',labelEn:'Deletion: weak letter',descAr:'تُحْذَفُ الْأَلِفُ أَوِ الْوَاوُ أَوِ الْيَاءُ.',descEn:'Final alif, wāw, or yāʾ is deleted.',exerciseId:'jazm-03',compare:{beforeAr:'يَخْشَى',afterAr:'لَمْ يَخْشَ',noteAr:'حُذِفَتِ الْأَلِفُ «ى».',noteEn:'The final alif “ى” disappeared.',deletedAr:'ى'}},
+  {id:'jazm-nun',labelAr:'الْحَذْفُ: النُّونُ',labelEn:'Deletion: nūn',descAr:'تُحْذَفُ نُونُ الْأَفْعَالِ الْخَمْسَةِ.',descEn:'The nūn of the five verb forms is deleted.',exerciseId:'jazm-06',compare:{beforeAr:'تَتُوبَانِ',afterAr:'إِنْ تَتُوبَا',noteAr:'حُذِفَتِ النُّونُ «نِ».',noteEn:'Final nūn “ni” disappeared.',deletedAr:'نِ'}}
+ ]},
+ 'summary-recap':{type:'table',titleAr:'مَجْمُوعَاتُ الْمُعْرَبَاتِ وَعَلَامَاتُهَا',titleEn:'Declinable groups and their signs',headersAr:['الْمَجْمُوعَةُ','الرَّفْعُ','النَّصْبُ','الْخَفْضُ / الْجَزْمُ'],headersEn:['Word class','Rafʿ','Naṣb','Khafḍ / jazm'],rows:[
+  {cellsAr:['الِاسْمُ الْمُفْرَدُ وَجَمْعُ التَّكْسِيرِ','الضَّمَّةُ','الْفَتْحَةُ','الْكَسْرَةُ'],cellsEn:['Singular noun and broken plural','Ḍammah','Fatḥah','Kasrah']},
+  {cellsAr:['جَمْعُ الْمُؤَنَّثِ السَّالِمُ','الضَّمَّةُ','الْكَسْرَةُ','الْكَسْرَةُ'],cellsEn:['Sound feminine plural','Ḍammah','Kasrah','Kasrah']},
+  {cellsAr:['الْمُضَارِعُ الصَّحِيحُ الْآخِرِ','الضَّمَّةُ','الْفَتْحَةُ','السُّكُونُ'],cellsEn:['Sound-final present verb','Ḍammah','Fatḥah','Sukūn']},
+  {cellsAr:['الْمُثَنَّى وَمَا أُلْحِقَ بِهِ','الْأَلِفُ','الْيَاءُ','الْيَاءُ'],cellsEn:['Dual and forms treated like it','Alif','Yāʾ','Yāʾ'],exerciseId:'summary-01'},
+  {cellsAr:['جَمْعُ الْمُذَكَّرِ السَّالِمُ','الْوَاوُ','الْيَاءُ','الْيَاءُ'],cellsEn:['Sound masculine plural','Wāw','Yāʾ','Yāʾ']},
+  {cellsAr:['الْأَسْمَاءُ السِّتَّةُ','الْوَاوُ','الْأَلِفُ','الْيَاءُ'],cellsEn:['Six nouns','Wāw','Alif','Yāʾ']},
+  {cellsAr:['الْأَفْعَالُ الْخَمْسَةُ','ثُبُوتُ النُّونِ','حَذْفُ النُّونِ','حَذْفُ النُّونِ'],cellsEn:['Five verb forms','Retention of nūn','Deletion of nūn','Deletion of nūn']}
+ ]},
+ 'estimated-inflection':{type:'table',titleAr:'أَيْنَ تُقَدَّرُ الْعَلَامَةُ؟',titleEn:'Where is the sign estimated?',headersAr:['الْكَلِمَةُ','الْعَلَامَةُ فِي إِعْرَابِهَا','لِمَاذَا هِيَ مُقَدَّرَةٌ؟'],headersEn:['Written word','Sign in its iʿrāb','Why estimated?'],rows:[
+  {cellsAr:['غُلَامِي','ضَمَّةٌ مُقَدَّرَةٌ قَبْلَ يَاءِ الْمُتَكَلِّمِ','اشْتِغَالُ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ'],cellsEn:['Ghulāmī','Estimated ḍammah before the speaker’s yāʾ','The place is occupied by the matching vowel'],exerciseId:'estimated-01'},
+  {cellsAr:['الْفَتَى','ضَمَّةٌ مُقَدَّرَةٌ عَلَى الْأَلِفِ','التَّعَذُّرُ'],cellsEn:['Al-fatā','Estimated ḍammah on the alif','The vowel cannot appear'],exerciseId:'estimated-04'},
+  {cellsAr:['الدَّاعِ','ضَمَّةٌ مُقَدَّرَةٌ عَلَى يَاءٍ مَحْذُوفَةٍ','حُذِفَتِ الْيَاءُ لِلتَّخْفِيفِ'],cellsEn:['Al-dāʿi','Estimated ḍammah on an omitted yāʾ','The yāʾ is omitted for lightness'],exerciseId:'estimated-07'},
+  {cellsAr:['يَخْشَى','ضَمَّةٌ مُقَدَّرَةٌ عَلَى الْأَلِفِ','التَّعَذُّرُ'],cellsEn:['Yakhshā','Estimated ḍammah on the alif','The vowel cannot appear'],exerciseId:'estimated-10'},
+  {cellsAr:['يَدْعُو','ضَمَّةٌ مُقَدَّرَةٌ عَلَى الْوَاوِ','الثِّقَلُ'],cellsEn:['Yadʿū','Estimated ḍammah on the wāw','Pronouncing the vowel is heavy'],exerciseId:'estimated-12'},
+  {cellsAr:['لَنْ يَدْعُوَ','فَتْحَةٌ ظَاهِرَةٌ عَلَى الْوَاوِ','مُقَارَنَةٌ مِنْ إِعْدَادِ التَّطْبِيقِ: الْفَتْحَةُ خَفِيفَةٌ فَتَظْهَرُ'],cellsEn:['Lan yadʿuwa','Visible fatḥah on the wāw','App-supplied comparison label: fatḥah is light, so it appears'],exerciseId:'estimated-14'}
+ ]}
+};
+chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});
+
+const quranEn=/Qur[’']an (\d+):(\d+)\./u;
+const quranAr=/سُورَةُ\s+([^،.]+)،\s+الْآيَةُ\s+([٠-٩]+)/u;
+chapters.flatMap(chapter=>chapter.book).forEach(item=>{
+ const en=item.sourceEn.match(quranEn),ar=item.sourceAr.match(quranAr);
+ if(en&&ar)item.quran={surahNumber:Number(en[1]),ayah:Number(en[2]),surahAr:ar[1],ayahAr:ar[2]};
+});
 
 const subjects=[{ar:'الطَّالِبُ',en:'the student'},{ar:'الْمُعَلِّمُ',en:'the teacher'},{ar:'الطَّبِيبُ',en:'the doctor'},{ar:'التَّاجِرُ',en:'the merchant'},{ar:'الْإِمَامُ',en:'the imam'}];
 const predicates=[{ar:'مُجْتَهِدٌ',en:'hardworking'},{ar:'حَاضِرٌ',en:'present'},{ar:'قَائِمٌ',en:'standing'},{ar:'صَادِقٌ',en:'truthful'},{ar:'نَشِيطٌ',en:'active'}];

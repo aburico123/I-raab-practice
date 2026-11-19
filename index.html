@@ -246,6 +246,8 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .idafa-hero{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:16px}
 .idafa-phrase{display:flex;direction:rtl;justify-content:center;align-items:baseline;gap:.28em;color:var(--heading);font-size:clamp(34px,5vw,48px);line-height:1.9;white-space:nowrap}
 .idafa-first,.idafa-second{padding:0 .16em;border-radius:6px}
+.idafa-first-word .idafa-first{padding-inline-start:0}
+.idafa-list-waw{color:var(--heading)}
 .idafa-first{background:var(--sage-fill);box-shadow:inset 0 -.09em 0 var(--sage-line)}
 .idafa-second{background:var(--gold-soft);box-shadow:inset 0 -.09em 0 var(--gold)}
 .idafa-term-labels{display:grid;direction:rtl;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px}
@@ -570,7 +572,7 @@ function renderHelpVisual(chapter){
   $('helpVisual').innerHTML=`${title}<section class="article-meaning">${hero}<div class="article-groups">${groups}</div>${renderVisualExample(visual.exerciseId,'visual-article-example')}</section>`;return
  }
  if(visual.type==='idafa-definiteness'){
-  const phrase=`<div class="idafa-phrase arabic" lang="ar"><span class="idafa-first">${escapeHtml(visual.firstAr)}</span><span class="idafa-second">${escapeHtml(visual.secondAr)}</span></div>`;
+  const phrase=`<div class="idafa-phrase arabic" lang="ar"><span class="idafa-first-word"><span class="idafa-list-waw">وَ</span><span class="idafa-first">${escapeHtml(visual.firstAr)}</span></span><span class="idafa-second">${escapeHtml(visual.secondAr)}</span></div>`;
   const labels=`<div class="idafa-term-labels"><article class="idafa-term-card"><div class="idafa-label-ar arabic" lang="ar">${arabicDisplay(visual.firstLabelAr)}</div>${state.lang==='ar'?'':`<div class="idafa-label-en">${escapeHtml(visual.firstLabelEn)}</div>`}</article><article class="idafa-term-card"><div class="idafa-label-ar arabic" lang="ar">${arabicDisplay(visual.secondLabelAr)}</div>${state.lang==='ar'?'':`<div class="idafa-label-en">${escapeHtml(visual.secondLabelEn)}</div>`}<div class="idafa-term-note-ar arabic" lang="ar">${arabicDisplay(visual.secondNoteAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="idafa-term-note-en">${escapeHtml(visual.secondNoteEn)}</div>`}</article></div>`;
   const types=visual.types.map(item=>`<article class="idafa-type"><div class="idafa-type-label-ar arabic" lang="ar">${arabicDisplay(item.labelAr)}</div>${state.lang==='ar'?'':`<div class="idafa-type-label-en">${escapeHtml(item.labelEn)}</div>`}<div class="idafa-type-example arabic" lang="ar">${highlightLast(item.exampleAr,item.focusAr,'idafa-definite-focus')}</div><div class="idafa-type-note-ar arabic" lang="ar">${arabicDisplay(item.noteAr)}</div>${state.lang==='ar'?'':`<div class="idafa-type-note-en">${escapeHtml(item.noteEn)}</div>`}</article>`).join('');
   $('helpVisual').innerHTML=`${title}<section class="idafa-definiteness"><div class="idafa-hero">${phrase}${labels}</div><div class="idafa-types">${types}</div>${renderVisualExample(visual.exerciseId,'visual-idafa-example')}</section>`;return

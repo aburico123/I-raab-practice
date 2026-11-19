@@ -1421,9 +1421,47 @@ const definiteArticle=[
  ],'The author prints this example for inclusion of the characteristics of individuals. The footnote parses anta as subject, al-rajulu as predicate, and ʿilman as specification.','يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمِثَالَ لِاسْتِغْرَاقِ خَصَائِصِ الْأَفْرَادِ، وَتُعْرِبُ الْحَاشِيَةُ «أَنْتَ» مُبْتَدَأً وَ«الرَّجُلُ» خَبَرًا وَ«عِلْمًا» تَمْيِيزًا.')
 ];
 
+const definiteIdafaExercise=(id,ar,en,tokens,definiteEn,definiteAr)=>exercise(
+ id,96,ar,en,tokens,
+ `The author prints this standalone iḍāfah phrase in order. Footnote 4 explains that ghulām was indefinite before annexation and became definite through ${definiteEn}. The page does not assign it a sentence-level role or supply a word-by-word parse.`,
+ `يَطْبَعُ الْمُؤَلِّفُ هَذَا التَّرْكِيبَ الْإِضَافِيَّ الْمُسْتَقِلَّ فِي تَرْتِيبِهِ، وَتُبَيِّنُ الْحَاشِيَةُ الرَّابِعَةُ أَنَّ «غُلَامًا» كَانَ نَكِرَةً قَبْلَ الْإِضَافَةِ ثُمَّ اكْتَسَبَ التَّعْرِيفَ مِنْ ${definiteAr}. وَلَا يُسْنِدُ السِّيَاقُ إِلَيْهِ وَظِيفَةً فِي جُمْلَةٍ، وَلَا يُعْرِبُهُ الْمُؤَلِّفُ كَلِمَةً كَلِمَةً.`,
+ 'Miftāḥ al-ʿIlm supplies only the phrase-level parse, full answer vocalization, concise English, and card organization.',
+ 'وَيُضِيفُ مِفْتَاحُ الْعِلْمِ إِعْرَابَ التَّرْكِيبِ فَقَطْ، مَعَ ضَبْطِ الْجَوَابِ وَالتَّرْجَمَةِ الْمُوجَزَةِ وَتَنْظِيمِ الْبِطَاقَةِ.'
+);
+
+const definiteIdafa=[
+ definiteIdafaExercise('idafa-definite-01','غُلَامِي','My servant.',[
+  answerParts('غُلَامِي','my servant',[{ar:'«غُلَام» اسْمٌ، وَهُوَ مُضَافٌ.','en':'Ghulām is a noun and the first term of the iḍāfah.'},{ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','en':'Speaker yāʾ is an attached pronoun fixed on sukūn in the genitive position as the second term.'}])
+ ],'the speaker pronoun','ضَمِيرِ الْمُتَكَلِّمِ'),
+ definiteIdafaExercise('idafa-definite-02','وَغُلَامُكَ','And your servant.',[
+  answerParts('وَغُلَامُكَ','and your servant',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«غُلَامُ» اسْمٌ، وَهُوَ مُضَافٌ.','en':'Ghulāmu is a noun and the first term of the iḍāfah.'},{ar:'الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','en':'Kāf is an attached pronoun fixed on fatḥ in the genitive position as the second term.'}])
+ ],'the addressee pronoun','ضَمِيرِ الْمُخَاطَبِ'),
+ definiteIdafaExercise('idafa-definite-03','وَغُلَامُهُ','And his servant.',[
+  answerParts('وَغُلَامُهُ','and his servant',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«غُلَامُ» اسْمٌ، وَهُوَ مُضَافٌ.','en':'Ghulāmu is a noun and the first term of the iḍāfah.'},{ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','en':'Hāʾ is an attached pronoun fixed on ḍamm in the genitive position as the second term.'}])
+ ],'the third-person pronoun','ضَمِيرِ الْغَائِبِ'),
+ definiteIdafaExercise('idafa-definite-04','وَغُلَامُ زَيْدٍ','And Zayd’s servant.',[
+  answerParts('وَغُلَامُ','and a servant of',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«غُلَامُ» اسْمٌ، وَهُوَ مُضَافٌ.','en':'Ghulāmu is a noun and the first term of the iḍāfah.'}]),
+  token('زَيْدٍ','Zayd','مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','Second term of the iḍāfah, genitive with a visible kasrah.')
+ ],'the definite proper name Zayd','الِاسْمِ الْعَلَمِ «زَيْدٍ»'),
+ definiteIdafaExercise('idafa-definite-05','وَغُلَامُ هَذَا','And the servant of this one.',[
+  answerParts('وَغُلَامُ','and a servant of',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«غُلَامُ» اسْمٌ، وَهُوَ مُضَافٌ.','en':'Ghulāmu is a noun and the first term of the iḍāfah.'}]),
+  answerParts('هَذَا','this one',[{ar:'هَاءُ التَّنْبِيهِ حَرْفٌ مَبْنِيٌّ عَلَى السُّكُونِ.','en':'The attention hāʾ is a particle fixed on sukūn.'},{ar:'«ذَا» اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','en':'Dhā is a demonstrative built on sukūn in the genitive position as the second term of the iḍāfah.'}])
+ ],'the definite demonstrative hādhā','اسْمِ الْإِشَارَةِ «هَذَا»'),
+ definiteIdafaExercise('idafa-definite-06','وَغُلَامُ الَّذِي قَامَ أَبُوهُ','And the servant of the one whose father stood.',[
+  answerParts('وَغُلَامُ','and a servant of',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«غُلَامُ» اسْمٌ، وَهُوَ مُضَافٌ.','en':'Ghulāmu is a noun and the first term of the iḍāfah.'}]),
+  token('الَّذِي','the one who','اسْمٌ مَوْصُولٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Relative noun built on sukūn in the genitive position as the second term of the iḍāfah.'),
+  token('قَامَ','stood','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb built on fatḥ.'),
+  answerParts('أَبُوهُ','his father',[{ar:'«أَبُو» فَاعِلٌ مَرْفُوعٌ بِالْوَاوِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ، وَهُوَ مُضَافٌ.','en':'Subject of the verb, nominative with wāw because it is one of the six nouns, and the first term of an iḍāfah.'},{ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ، وَهُوَ الْعَائِدُ.','en':'Hāʾ is the attached second term and returning pronoun.'},{ar:'وَجُمْلَةُ «قَامَ أَبُوهُ» صِلَةُ الْمَوْصُولِ لَا مَحَلَّ لَهَا.','en':'The clause is the relative clause and has no syntactic position.'}])
+ ],'the definite relative noun alladhī','الِاسْمِ الْمَوْصُولِ «الَّذِي»'),
+ definiteIdafaExercise('idafa-definite-07','وَغُلَامُ الرَّجُلِ','And the man’s servant.',[
+  answerParts('وَغُلَامُ','and a servant of',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«غُلَامُ» اسْمٌ، وَهُوَ مُضَافٌ.','en':'Ghulāmu is a noun and the first term of the iḍāfah.'}]),
+  token('الرَّجُلِ','the man','مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','Second term of the iḍāfah, genitive with a visible kasrah.')
+ ],'the noun made definite by al','الِاسْمِ الْمُعَرَّفِ بِالْأَدَاةِ «الرَّجُلِ»')
+];
+
 // Complex cards still use one compact classroom answer. These overrides keep
 // attached elements and sentence-level positions only when they complete the parse.
-const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns,definitenessIntro,pronounForms,properNames,demonstrativeNouns,relativeNouns,definiteArticle];
+const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns,definitenessIntro,pronounForms,properNames,demonstrativeNouns,relativeNouns,definiteArticle,definiteIdafa];
 const setConciseAnswer=(exerciseId,word,ar,en)=>{
  const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
  const answer=item&&item.tokens.find(entry=>entry.word===word);
@@ -1621,6 +1659,11 @@ const chapters=[
   help('الْعَهْدِيَّةُ ثَلَاثَةُ أَنْوَاعٍ: لِلْعَهْدِ الذِّكْرِيِّ، نَحْوَ «فِي زُجَاجَةٍ الزُّجَاجَةُ»؛ وَلِلْعَهْدِ الذِّهْنِيِّ، نَحْوَ «إِذْ هُمَا فِي الْغَارِ»؛ وَلِلْعَهْدِ الْحُضُورِيِّ، نَحْوَ «الْيَوْمَ أَكْمَلْتُ لَكُمْ دِينَكُمْ».','Referential al has three uses: prior mention, as in “in a glass; the glass”; something mentally known, as in “when the two were in the cave”; and something present at the time of speech, as in “today I have perfected your religion for you.”'),
   help('الْجِنْسِيَّةُ ثَلَاثَةُ أَنْوَاعٍ أَيْضًا: لِتَعْرِيفِ الْمَاهِيَّةِ، نَحْوَ «وَجَعَلْنَا مِنَ الْمَاءِ كُلَّ شَيْءٍ حَيٍّ»؛ وَلِاسْتِغْرَاقِ الْأَفْرَادِ، نَحْوَ «وَخُلِقَ الْإِنْسَانُ ضَعِيفًا»؛ وَلِاسْتِغْرَاقِ خَصَائِصِ الْأَفْرَادِ، نَحْوَ «أَنْتَ الرَّجُلُ عِلْمًا».','Generic al also has three uses: identifying an essence, including every member of a class, and gathering a class’s defining characteristics. The examples follow the author’s printed order.')
  ],helpSourceEn:'Al-Mutammimah, printed pages 94–96. The exact heading, definition, division into referential and generic al, the three subdivisions of each, all six examples, and their core parsing in the footnotes come from the book. The app supplies the concise recitation order, full answer vocalization, English, card organization, the short contextual Why notes, and the visual highlighting of al. No item from this section is held from practice.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٩٤–٩٦. الْعُنْوَانُ وَالتَّعْرِيفُ وَتَقْسِيمُ الْأَدَاةِ إِلَى عَهْدِيَّةٍ وَجِنْسِيَّةٍ وَأَنْوَاعُ كُلٍّ مِنْهُمَا الثَّلَاثَةُ وَالْأَمْثِلَةُ السِّتَّةُ وَأُصُولُ إِعْرَابِهَا فِي الْحَوَاشِي مِنَ الْمُؤَلِّفِ. وَأَمَّا تَرْتِيبُ الْجَوَابِ الْمُوجَزُ وَالضَّبْطُ التَّامُّ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ وَشُرُوحُ «لِمَاذَا؟» الْقَصِيرَةُ وَإِبْرَازُ «أَلْ» فِي الرَّسْمِ فَمِنَ التَّطْبِيقِ. وَلَا شَاهِدَ مَحْجُوبًا مِنْ هَذَا الْفَصْلِ.'}
+ ,{id:'definite-idafa',babId:'definiteness',order:7,titleEn:'Definite through iḍāfah',titleAr:'الْمُضَافُ إِلَى وَاحِدٍ مِنَ الْمَعَارِفِ',pages:'96',book:definiteIdafa,help:[
+  help('الْمُضَافُ إِلَى وَاحِدٍ مِنَ الْمَعَارِفِ يَكْتَسِبُ التَّعْرِيفَ مِنَ الْمُضَافِ إِلَيْهِ. وَيُبَيِّنُ الْمُؤَلِّفُ أَنَّ «غُلَامًا» كَانَ نَكِرَةً قَبْلَ الْإِضَافَةِ، ثُمَّ صَارَ مَعْرِفَةً بِإِضَافَتِهِ إِلَى مَعْرِفَةٍ.','A noun annexed to a definite noun acquires definiteness from its second term. The author explains that ghulām was indefinite before iḍāfah and became definite when annexed to something definite.'),
+  help('يَرِدُ التَّرْتِيبُ الْمَطْبُوعُ هَكَذَا: ضَمِيرٌ فِي «غُلَامِي، وَغُلَامُكَ، وَغُلَامُهُ»؛ وَعَلَمٌ فِي «غُلَامُ زَيْدٍ»؛ وَاسْمُ إِشَارَةٍ فِي «غُلَامُ هَذَا»؛ وَاسْمٌ مَوْصُولٌ فِي «غُلَامُ الَّذِي قَامَ أَبُوهُ»؛ وَمُعَرَّفٌ بِالْأَدَاةِ فِي «غُلَامُ الرَّجُلِ».','The printed order is: a pronoun in ghulāmī, ghulāmuka, and ghulāmuhu; a proper name in ghulāmu Zaydin; a demonstrative in ghulāmu hādhā; a relative noun in ghulāmu alladhī qāma abūhu; and a noun defined by the article in ghulāmu al-rajuli.'),
+  help('هَذِهِ تَرَاكِيبُ إِضَافَةٍ مُسْتَقِلَّةٌ، فَتُثْبِتُ أَنَّ «غُلَامًا» مُضَافٌ وَأَنَّ مَا بَعْدَهُ مُضَافٌ إِلَيْهِ، وَلَا تُثْبِتُ لِلْمُضَافِ وَظِيفَةَ مُبْتَدَإٍ أَوْ فَاعِلٍ أَوْ مَفْعُولٍ بِهِ مِنْ غَيْرِ جُمْلَةٍ.','These are standalone iḍāfah phrases. They establish the first and second terms, but without a sentence they do not make the first noun a subject, verb-subject, or object. This scope note is supplied by the app.')
+ ],helpSourceEn:'Al-Mutammimah, printed page 96. The exact heading, the seven phrases in printed order, and footnote 4’s explanation that ghulām gains definiteness from annexation to one of the five definite classes come from the book. The app supplies the phrase-level parsing, scope note, full vocalization of the answers, concise English, card organization, and visual labels. No item from this section is held from practice.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٩٦. الْعُنْوَانُ وَالتَّرَاكِيبُ السَّبْعَةُ فِي تَرْتِيبِهَا وَبَيَانُ الْحَاشِيَةِ الرَّابِعَةِ أَنَّ «غُلَامًا» يَكْتَسِبُ التَّعْرِيفَ بِإِضَافَتِهِ إِلَى وَاحِدٍ مِنَ الْمَعَارِفِ الْخَمْسَةِ مِنَ الْمُؤَلِّفِ. وَأَمَّا إِعْرَابُ التَّرْكِيبِ وَتَنْبِيهُ حَدِّهِ وَضَبْطُ الْجَوَابِ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ وَتَسْمِيَاتُ الرَّسْمِ فَمِنَ التَّطْبِيقِ. وَلَا شَاهِدَ مَحْجُوبًا مِنْ هَذَا الْفَصْلِ.'}
 ];
 
 const babs=[
@@ -1757,6 +1800,13 @@ const helpVisuals={
    {kindAr:'اسْتِغْرَاقُ الْأَفْرَادِ',kindEn:'including every individual',exampleAr:'وَخُلِقَ الْإِنْسَانُ ضَعِيفًا',referenceAr:'سورة النساء، ٢٨'},
    {kindAr:'اسْتِغْرَاقُ خَصَائِصِ الْأَفْرَادِ',kindEn:'gathering the class’s qualities',exampleAr:'أَنْتَ الرَّجُلُ عِلْمًا',referenceAr:''}
   ]}
+ ]},
+ 'definite-idafa':{type:'idafa-definiteness',titleAr:'أَيُّ كَلِمَةٍ جَعَلَتِ التَّرْكِيبَ مَعْرِفَةً؟',titleEn:'Which word makes this phrase definite?',exerciseId:'idafa-definite-04',firstAr:'غُلَامُ',secondAr:'زَيْدٍ',firstLabelAr:'الْمُضَافُ',firstLabelEn:'first term',secondLabelAr:'الْمُضَافُ إِلَيْهِ',secondLabelEn:'second term',secondNoteAr:'«زَيْدٌ» عَلَمٌ، وَالْعَلَمُ مَعْرِفَةٌ؛ فَاكْتَسَبَ «غُلَامٌ» التَّعْرِيفَ مِنْهُ.',secondNoteEn:'Zayd is a proper name and therefore definite; ghulām gains definiteness from it.',types:[
+  {labelAr:'ضَمِيرٌ',labelEn:'Pronoun',exampleAr:'غُلَامِي',focusAr:'ي',noteAr:'يَاءُ الْمُتَكَلِّمِ',noteEn:'speaker yāʾ',exerciseId:'idafa-definite-01'},
+  {labelAr:'عَلَمٌ',labelEn:'Proper name',exampleAr:'غُلَامُ زَيْدٍ',focusAr:'زَيْدٍ',noteAr:'زَيْدٌ',noteEn:'Zayd',exerciseId:'idafa-definite-04'},
+  {labelAr:'اسْمُ إِشَارَةٍ',labelEn:'Demonstrative',exampleAr:'غُلَامُ هَذَا',focusAr:'هَذَا',noteAr:'هَذَا',noteEn:'this one',exerciseId:'idafa-definite-05'},
+  {labelAr:'اسْمٌ مَوْصُولٌ',labelEn:'Relative noun',exampleAr:'غُلَامُ الَّذِي قَامَ أَبُوهُ',focusAr:'الَّذِي',noteAr:'الَّذِي',noteEn:'the one who',exerciseId:'idafa-definite-06'},
+  {labelAr:'مُعَرَّفٌ بِالْأَدَاةِ',labelEn:'Noun with al',exampleAr:'غُلَامُ الرَّجُلِ',focusAr:'الرَّجُلِ',noteAr:'الرَّجُلِ',noteEn:'the man',exerciseId:'idafa-definite-07'}
  ]}
 };
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});

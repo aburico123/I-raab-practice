@@ -212,6 +212,19 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .demonstrative-note-ar{direction:rtl;text-align:right;color:var(--forest);font-size:17px;line-height:1.9;margin-top:7px}
 .demonstrative-distance-card .visual-row-link{display:block;margin:10px -13px -13px;border-radius:0 0 9px 9px}
 .demonstrative-distance-card .visual-open{display:block;margin:8px auto 0}
+.relative-anatomy{border:1px solid var(--sage-line);border-radius:12px;background:var(--sage-fill);padding:18px;overflow:hidden}
+.relative-sentence{direction:rtl;text-align:center;color:var(--forest);font-size:clamp(25px,4vw,38px);line-height:2.25;padding:10px 8px 18px}
+.relative-noun-focus{display:inline;padding:1px 5px;border-radius:7px;background:var(--gold-soft);box-decoration-break:clone;-webkit-box-decoration-break:clone;font-weight:700}
+.relative-silah-focus{text-decoration:underline;text-decoration-color:#c69a47;text-decoration-thickness:.12em;text-underline-offset:.2em}
+.relative-key{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.relative-key-card{min-width:0;border:1px solid var(--line);border-radius:9px;background:var(--card);padding:12px;text-align:center}
+.relative-label-ar{direction:rtl;color:var(--forest);font-size:18px;font-weight:700;line-height:1.8}
+.relative-label-en{color:var(--muted);font-size:12px;line-height:1.35}
+.relative-sample{direction:rtl;color:var(--heading);font-size:22px;line-height:1.9;margin-top:4px}
+.relative-return{font-size:25px;font-weight:700}
+.relative-return-note{direction:rtl;color:var(--muted);font-size:16px;line-height:1.8}
+.relative-return-note-en{color:var(--muted);font-size:12px;line-height:1.4}
+.relative-anatomy .visual-row-link{margin:14px -18px -18px;border-radius:0 0 12px 12px}
 .help-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
 .help-actions button{width:auto;min-width:180px}
 
@@ -253,6 +266,9 @@ html[data-theme="dark"] .visual-open{background:#1d2a25;color:#a9d9c5;border-col
 html[data-theme="dark"] .ending-focus{background:#5b4728;color:#ffe2a8}
 html[data-theme="dark"] .contrast-example .ending-focus{background:transparent;color:#ffe2a8;text-decoration-color:#d8ae5c}
 html[data-theme="dark"] .deleted-focus{background:#5b302b;color:#ffd4ca}
+html[data-theme="dark"] .relative-sentence,html[data-theme="dark"] .relative-label-ar{color:#dcebe1}
+html[data-theme="dark"] .relative-noun-focus{background:#5b4728;color:#ffe2a8}
+html[data-theme="dark"] .relative-silah-focus{text-decoration-color:#d8ae5c}
 
 /* Arabic-only mode */
 .rtl .crumb,.rtl .subject-card,.rtl .choice-card{text-align:right}
@@ -261,7 +277,7 @@ html[data-theme="dark"] .deleted-focus{background:#5b302b;color:#ffd4ca}
 .rtl .word-gloss:empty{display:none}
 .rtl .screen-heading,.rtl .answer-title{font-family:var(--arabic);font-weight:400;line-height:1.85}
 .rtl button,.rtl select,.rtl label,.rtl .crumb,.rtl .nav-label,.rtl .screen-sub,.rtl .chapter-meta,.rtl .book-page,.rtl .source-detail,.rtl .preferences-copy,.rtl .preferences-copy h2{font-family:var(--arabic)}
-.rtl .visual-title-en,.rtl .visual-branch-en,.rtl .visual-panel-en,.rtl .visual-cell-en,.rtl .compare-en,.rtl .visual-example-en,.rtl .demonstrative-label-en,.rtl .demonstrative-form-en,.rtl .demonstrative-note-en,.rtl .demonstrative-distance-title-en{display:none}
+.rtl .visual-title-en,.rtl .visual-branch-en,.rtl .visual-panel-en,.rtl .visual-cell-en,.rtl .compare-en,.rtl .visual-example-en,.rtl .demonstrative-label-en,.rtl .demonstrative-form-en,.rtl .demonstrative-note-en,.rtl .demonstrative-distance-title-en,.rtl .relative-label-en,.rtl .relative-return-note-en{display:none}
 
 @media(max-width:760px){
   .app-shell{display:block}
@@ -320,6 +336,16 @@ html[data-theme="dark"] .deleted-focus{background:#5b302b;color:#ffd4ca}
   .visual-contrast,.visual-contrast.three{grid-template-columns:1fr}
   .demonstrative-number-grid,.demonstrative-distance-grid{grid-template-columns:1fr}
   .demonstrative-form-ar{font-size:23px;line-height:2.05}
+  .relative-anatomy{padding:13px}
+  .relative-sentence{font-size:27px;line-height:2.35;padding-inline:0}
+  .relative-key{grid-template-columns:1fr}
+  .relative-key-card{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;column-gap:10px;text-align:right}
+  .relative-label-ar,.relative-label-en{grid-column:1}
+  .relative-sample{grid-column:2;grid-row:1/span 2;margin:0;text-align:right}
+  .relative-return-note{grid-column:1/-1;grid-row:3;margin-top:6px;text-align:center}
+  .relative-return-note-en{grid-column:1/-1;grid-row:4;text-align:center}
+  .relative-anatomy .visual-row-link{display:block;margin:12px -13px -13px}
+  .relative-anatomy .visual-open{display:block;margin:8px auto 0}
   .compare-arrow{transform:rotate(90deg);text-align:center}
   .compare-note{grid-column:1}
 }
@@ -470,6 +496,12 @@ function renderHelpVisual(chapter){
   const groups=visual.groups.map((group,index)=>`<article class="demonstrative-card" id="visual-demonstrative-${index}"><div class="demonstrative-label-ar arabic" lang="ar">${arabicDisplay(group.labelAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-label-en">${escapeHtml(group.labelEn)}</div>`}<div class="demonstrative-form"><div class="demonstrative-form-ar arabic" lang="ar">${lines(group.masculineAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-form-en">${escapeHtml(group.masculineEn)}</div>`}</div><div class="demonstrative-form"><div class="demonstrative-form-ar arabic" lang="ar">${lines(group.feminineAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-form-en">${escapeHtml(group.feminineEn)}</div>`}</div>${group.exerciseId?renderVisualExample(group.exerciseId,`visual-demonstrative-${index}-example`):''}</article>`).join('');
   const distance=visual.distance,items=distance.items.map((item,index)=>`<article class="demonstrative-distance-card" id="visual-distance-${index}"><div class="demonstrative-label-ar arabic" lang="ar">${arabicDisplay(item.labelAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-label-en">${escapeHtml(item.labelEn)}</div>`}<div class="demonstrative-form-ar arabic" lang="ar">${lines(item.formsAr)}</div><div class="demonstrative-note-ar arabic" lang="ar">${arabicDisplay(item.noteAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-note-en">${escapeHtml(item.noteEn)}</div>`}${item.exerciseId?renderVisualExample(item.exerciseId,`visual-distance-${index}-example`):''}</article>`).join('');
   $('helpVisual').innerHTML=`${title}<div class="demonstrative-number-grid">${groups}</div><section class="demonstrative-distance"><div class="demonstrative-distance-title arabic" lang="ar">${arabicDisplay(distance.titleAr)}${state.lang==='ar'?'':`<span class="demonstrative-distance-title-en">${escapeHtml(distance.titleEn)}</span>`}</div><div class="demonstrative-distance-grid">${items}</div></section>`;return
+ }
+ if(visual.type==='relative-anatomy'){
+  const label=(ar,en)=>`<div class="relative-label-ar arabic" lang="ar">${arabicDisplay(ar)}</div>${state.lang==='ar'?'':`<div class="relative-label-en">${escapeHtml(en)}</div>`}`;
+  const sentence=`<div class="relative-sentence arabic" lang="ar"><span aria-hidden="true">﴿</span>${escapeHtml(visual.leadAr)} <span class="relative-noun-focus">${escapeHtml(visual.relativeAr)}</span> <span class="relative-silah-focus">${escapeHtml(visual.silahAr)}</span><span aria-hidden="true">﴾</span></div>`;
+  const cards=`<div class="relative-key"><article class="relative-key-card">${label(visual.labels.relativeAr,visual.labels.relativeEn)}<div class="relative-sample arabic" lang="ar"><span class="relative-noun-focus">${escapeHtml(visual.relativeAr)}</span></div></article><article class="relative-key-card">${label(visual.labels.silahAr,visual.labels.silahEn)}<div class="relative-sample arabic relative-silah-focus" lang="ar">${escapeHtml(visual.silahAr)}</div></article><article class="relative-key-card">${label(visual.labels.returnAr,visual.labels.returnEn)}<div class="relative-sample relative-return arabic" lang="ar">${escapeHtml(visual.returnAr)}</div><div class="relative-return-note arabic" lang="ar">${arabicDisplay(visual.returnNoteAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="relative-return-note-en">${escapeHtml(visual.returnNoteEn)}</div>`}</article></div>`;
+  $('helpVisual').innerHTML=`${title}<section class="relative-anatomy">${sentence}${cards}${renderVisualExample(visual.exerciseId,'visual-relative-example')}</section>`;return
  }
  if(visual.type==='table'){const columns=visual.headersAr.length,head=`<div class="visual-row visual-head" style="--visual-cols:${columns}">${visual.headersAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${arabicDisplay(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(visual.headersEn[index])}</div>`}</div>`).join('')}</div>`,rows=visual.rows.map((row,rowIndex)=>`<div class="visual-row" id="visual-row-${rowIndex}" style="--visual-cols:${columns}">${row.cellsAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${escapeHtml(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(row.cellsEn[index])}</div>`}</div>`).join('')}${row.exerciseId?renderVisualExample(row.exerciseId,`visual-row-${rowIndex}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-table">${head}${rows}</div>`;return}
  if(visual.type==='contrast'){const cards=visual.examples.map((example,index)=>{const highlighted=highlightLast(example.exampleAr,example.focusAr,'ending-focus');return `<article class="contrast-card" id="visual-contrast-${index}"><div class="contrast-label-ar arabic" lang="ar">${arabicDisplay(example.labelAr)}</div><div class="contrast-example arabic" lang="ar">${highlighted}</div>${state.lang==='ar'?'':`<div class="contrast-en">${escapeHtml(example.exampleEn)}</div>`}${example.exerciseId?renderVisualExample(example.exerciseId,`visual-contrast-${index}-example`):''}</article>`}).join('');$('helpVisual').innerHTML=`${title}<div class="visual-contrast${visual.examples.length===3?' three':''}">${cards}</div>`;return}

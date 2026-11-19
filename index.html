@@ -166,7 +166,7 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .compare-side{border:1px solid var(--line);border-radius:9px;background:var(--card);padding:10px;text-align:center;min-width:0}
 .compare-side .compare-ar{text-align:center;font-size:25px}
 .compare-arrow{color:var(--forest-3);font-size:22px;font-weight:700}
-.ending-focus{background:#f4dba9;border-radius:5px;padding:0 .1em;color:#704c13}
+.ending-focus{background:#f4dba9;border-radius:5px;color:#704c13}
 .deleted-focus{background:#f6d0c8;border-radius:5px;padding:0 .1em;color:#8b3024;text-decoration:line-through;text-decoration-thickness:2px}
 .compare-note{grid-column:1/-1;margin-top:2px;text-align:center}
 .visual-table{border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -191,7 +191,7 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .contrast-card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:16px;min-width:0}
 .contrast-label-ar{direction:rtl;text-align:right;color:var(--muted);font-size:17px;line-height:1.8}
 .contrast-example{direction:rtl;text-align:center;color:var(--forest);font-size:34px;line-height:2.1;margin:6px 0}
-.contrast-example .ending-focus{display:inline-block;padding-inline:.18em}
+.contrast-example .ending-focus{display:inline;background:transparent;border-radius:0;font-weight:700;text-decoration:underline;text-decoration-color:#c69a47;text-decoration-thickness:.13em;text-underline-offset:.13em}
 .contrast-en{color:var(--muted);line-height:1.5;text-align:center}
 .contrast-card .visual-open{display:block;margin:12px auto 0}
 .help-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
@@ -233,6 +233,7 @@ html[data-theme="dark"] .visual-title,html[data-theme="dark"] .visual-branch-ar,
 html[data-theme="dark"] .visual-panel-en,html[data-theme="dark"] .visual-cell-en,html[data-theme="dark"] .compare-en,html[data-theme="dark"] .visual-example-en{color:#c2cdc7}
 html[data-theme="dark"] .visual-open{background:#1d2a25;color:#a9d9c5;border-color:#567665}
 html[data-theme="dark"] .ending-focus{background:#5b4728;color:#ffe2a8}
+html[data-theme="dark"] .contrast-example .ending-focus{background:transparent;color:#ffe2a8;text-decoration-color:#d8ae5c}
 html[data-theme="dark"] .deleted-focus{background:#5b302b;color:#ffd4ca}
 
 /* Arabic-only mode */
@@ -427,7 +428,8 @@ function renderNav(){document.querySelectorAll('.screen').forEach(s=>s.classList
 const exerciseLocation=id=>{for(const chapter of chapters){const index=chapter.book.findIndex(item=>item.id===id);if(index!==-1)return{chapter,index,exercise:chapter.book[index]}}return null};
 function quranReferenceHtml(exercise){return exercise.quran?`<span class="quran-ref">(${escapeHtml(stripMarks(`سُورَةُ ${exercise.quran.surahAr}`))}، ${escapeHtml(exercise.quran.ayahAr)})</span>`:''}
 function exerciseArabicHtml(exercise){return exercise.quran?`${exercise.quranLeadAr?`<span class="quran-lead">${escapeHtml(exercise.quranLeadAr)}</span>`:''}<span class="quran-quote">﴿${escapeHtml(exercise.ar)}﴾</span>${quranReferenceHtml(exercise)}`:escapeHtml(exercise.ar)}
-function highlightLast(text,target,className){const source=String(text||''),index=target?source.lastIndexOf(target):-1;if(index<0)return escapeHtml(source);return `${escapeHtml(source.slice(0,index))}<span class="${className}">${escapeHtml(source.slice(index,index+target.length))}</span>${escapeHtml(source.slice(index+target.length))}`}
+function highlightLast(text,target,className){const source=String(text||''),index=target?source.lastIndexOf(target):-1;if(index<0)return escapeHtml(source);const before=source.slice(0,index),match=source.slice(index,index+target.length),after=source.slice(index+target.length),joinsArabic=/[بتثجحخسشصضطظعغفقكلمنهيئ][\u064B-\u065F\u0670\u06D6-\u06ED]*$/u.test(before)&&/^[\u0620-\u063F\u0641-\u064A\u066E\u066F\u0671-\u06D3]/u.test(match),joiner=joinsArabic?'\u200D':'';return `${escapeHtml(before)}${joiner}<span class="${className}">${joiner}${escapeHtml(match)}</span>${escapeHtml(after)}`}
+function renderVisualFocus(example){if(!example?.exampleAr)return'';const highlighted=example.focusAr?highlightLast(example.exampleAr,example.focusAr,'ending-focus'):escapeHtml(example.exampleAr);return `<div class="contrast-example arabic" lang="ar">${highlighted}</div>${state.lang==='ar'||!example.exampleEn?'':`<div class="contrast-en">${escapeHtml(example.exampleEn)}</div>`}`}
 function renderComparison(compare){if(!compare)return'';const before=compare.deletedAr?highlightLast(compare.beforeAr,compare.deletedAr,'deleted-focus'):escapeHtml(compare.beforeAr);const after=compare.focus?highlightLast(compare.afterAr,compare.focus,'ending-focus'):escapeHtml(compare.afterAr);return `<div class="visual-compare"><div class="compare-side"><div class="compare-ar arabic" lang="ar">${before}</div><div class="compare-en">${escapeHtml(compare.beforeEn||tr('before'))}</div></div><div class="compare-arrow" aria-hidden="true">→</div><div class="compare-side"><div class="compare-ar arabic" lang="ar">${after}</div><div class="compare-en">${escapeHtml(compare.afterEn||tr('after'))}</div></div><div class="compare-note"><div class="visual-panel-ar arabic" lang="ar">${escapeHtml(compare.noteAr||'')}</div>${state.lang==='ar'?'':`<div class="visual-panel-en">${escapeHtml(compare.noteEn||'')}</div>`}</div></div>`}
 function renderVisualExample(exerciseId,anchor=''){const found=exerciseLocation(exerciseId);if(!found)return'';const {exercise}=found;return `<div class="visual-row-link" id="${escapeHtml(anchor)}"><div class="visual-example"><div class="visual-example-ar arabic" lang="ar">${exerciseArabicHtml(exercise)}</div>${state.lang==='ar'?'':`<div class="visual-example-en">${escapeHtml(exercise.en)}</div>`}</div><button class="visual-open" data-open-exercise="${escapeHtml(exercise.id)}" data-help-anchor="${escapeHtml(anchor)}">${tr('openExercise')} · ${state.lang==='ar'?`ص ${localDigits(exercise.page)}`:`pg:${exercise.page}`}</button></div>`}
 function renderHelpVisual(chapter){
@@ -440,7 +442,7 @@ function renderHelpVisual(chapter){
   const children=parent?.children||[];
   const childButtons=children.length?`<div class="visual-subbranches">${children.map(child=>`<button class="visual-branch${child.id===active?' active':''}" data-visual-branch="${escapeHtml(child.id)}" aria-expanded="${child.id===active}"><span class="visual-branch-ar arabic" lang="ar">${arabicDisplay(child.labelAr)}</span>${state.lang==='ar'?'':`<span class="visual-branch-en">${escapeHtml(child.labelEn)}</span>`}</button>`).join('')}</div>`:'';
   const detail=children.find(child=>child.id===active)||parent;
-  const panel=detail?`<div class="visual-panel" id="visual-${escapeHtml(detail.id)}"><div class="visual-panel-ar arabic" lang="ar">${arabicDisplay(detail.descAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="visual-panel-en">${escapeHtml(detail.descEn)}</div>`}${renderComparison(detail.compare)}${detail.exerciseId?renderVisualExample(detail.exerciseId,`visual-${detail.id}-example`):''}</div>`:'';
+  const panel=detail?`<div class="visual-panel" id="visual-${escapeHtml(detail.id)}"><div class="visual-panel-ar arabic" lang="ar">${arabicDisplay(detail.descAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="visual-panel-en">${escapeHtml(detail.descEn)}</div>`}${renderVisualFocus(detail)}${renderComparison(detail.compare)}${detail.exerciseId?renderVisualExample(detail.exerciseId,`visual-${detail.id}-example`):''}</div>`:'';
   $('helpVisual').innerHTML=`${title}<div class="visual-branches">${buttons}${childButtons}${panel}</div>`;return
  }
  if(visual.type==='table'){const columns=visual.headersAr.length,head=`<div class="visual-row visual-head" style="--visual-cols:${columns}">${visual.headersAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${arabicDisplay(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(visual.headersEn[index])}</div>`}</div>`).join('')}</div>`,rows=visual.rows.map((row,rowIndex)=>`<div class="visual-row" id="visual-row-${rowIndex}" style="--visual-cols:${columns}">${row.cellsAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${escapeHtml(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(row.cellsEn[index])}</div>`}</div>`).join('')}${row.exerciseId?renderVisualExample(row.exerciseId,`visual-row-${rowIndex}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-table">${head}${rows}</div>`;return}

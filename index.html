@@ -194,6 +194,24 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .contrast-example .ending-focus{display:inline;background:transparent;border-radius:0;font-weight:700;text-decoration:underline;text-decoration-color:#c69a47;text-decoration-thickness:.13em;text-underline-offset:.13em}
 .contrast-en{color:var(--muted);line-height:1.5;text-align:center}
 .contrast-card .visual-open{display:block;margin:12px auto 0}
+.demonstrative-number-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.demonstrative-card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:15px;min-width:0}
+.demonstrative-label-ar,.demonstrative-distance-title{direction:rtl;text-align:right;color:var(--forest);font-size:20px;font-weight:700;line-height:1.8}
+.demonstrative-label-en,.demonstrative-form-en,.demonstrative-note-en{color:var(--muted);font-size:13px;line-height:1.45}
+.demonstrative-form{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.demonstrative-form:first-of-type{margin-top:7px;padding-top:0;border-top:0}
+.demonstrative-form-ar{direction:rtl;text-align:center;color:var(--forest);font-size:24px;line-height:2;white-space:normal}
+.demonstrative-form-en{text-align:center;margin-top:2px}
+.demonstrative-card .visual-row-link{display:block;margin:11px -15px -15px;border-top:1px dashed var(--line);border-radius:0 0 10px 10px}
+.demonstrative-card .visual-open{display:block;margin:8px auto 0}
+.demonstrative-distance{margin-top:18px;border:1px solid var(--sage-line);border-radius:10px;background:var(--sage-fill);padding:15px}
+.demonstrative-distance-title-en{display:block;color:var(--muted);font-family:var(--serif);font-size:15px;font-weight:400;line-height:1.35;direction:ltr;text-align:left}
+.demonstrative-distance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+.demonstrative-distance-card{border:1px solid var(--line);border-radius:9px;background:var(--card);padding:13px;min-width:0}
+.demonstrative-distance-card .demonstrative-form-ar{font-size:21px}
+.demonstrative-note-ar{direction:rtl;text-align:right;color:var(--forest);font-size:17px;line-height:1.9;margin-top:7px}
+.demonstrative-distance-card .visual-row-link{display:block;margin:10px -13px -13px;border-radius:0 0 9px 9px}
+.demonstrative-distance-card .visual-open{display:block;margin:8px auto 0}
 .help-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
 .help-actions button{width:auto;min-width:180px}
 
@@ -243,7 +261,7 @@ html[data-theme="dark"] .deleted-focus{background:#5b302b;color:#ffd4ca}
 .rtl .word-gloss:empty{display:none}
 .rtl .screen-heading,.rtl .answer-title{font-family:var(--arabic);font-weight:400;line-height:1.85}
 .rtl button,.rtl select,.rtl label,.rtl .crumb,.rtl .nav-label,.rtl .screen-sub,.rtl .chapter-meta,.rtl .book-page,.rtl .source-detail,.rtl .preferences-copy,.rtl .preferences-copy h2{font-family:var(--arabic)}
-.rtl .visual-title-en,.rtl .visual-branch-en,.rtl .visual-panel-en,.rtl .visual-cell-en,.rtl .compare-en,.rtl .visual-example-en{display:none}
+.rtl .visual-title-en,.rtl .visual-branch-en,.rtl .visual-panel-en,.rtl .visual-cell-en,.rtl .compare-en,.rtl .visual-example-en,.rtl .demonstrative-label-en,.rtl .demonstrative-form-en,.rtl .demonstrative-note-en,.rtl .demonstrative-distance-title-en{display:none}
 
 @media(max-width:760px){
   .app-shell{display:block}
@@ -300,6 +318,8 @@ html[data-theme="dark"] .deleted-focus{background:#5b302b;color:#ffd4ca}
   .visual-row-link{display:flex;border-top:1px dashed var(--line);padding:9px 12px}
   .visual-compare{grid-template-columns:1fr}
   .visual-contrast,.visual-contrast.three{grid-template-columns:1fr}
+  .demonstrative-number-grid,.demonstrative-distance-grid{grid-template-columns:1fr}
+  .demonstrative-form-ar{font-size:23px;line-height:2.05}
   .compare-arrow{transform:rotate(90deg);text-align:center}
   .compare-note{grid-column:1}
 }
@@ -383,13 +403,13 @@ function arabicDisplay(text,{words=null,quotes=true}={}){
   return output+plain(source.slice(last));
 }
 const escapeHtml=text=>String(text==null?'':text).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const PARSED_COMPONENTS=['وَاوُ الْجَمَاعَةِ','وَاوُ الْمَعِيَّةِ','تَاءُ التَّأْنِيثِ','تَاءُ الْفَاعِلِ','يَاءُ الْمُخَاطَبَةِ','يَاءُ الْمُتَكَلِّمِ','أَلِفُ الِاثْنَيْنِ','نُونُ النِّسْوَةِ','نُونُ التَّوْكِيدِ','هَاءُ الْغَائِبِ','كَافُ الْخِطَابِ','الْهَمْزَةُ','الْوَاوُ','الْفَاءُ','الْبَاءُ','اللَّامُ','التَّاءُ','الْيَاءُ','النُّونُ','الْمِيمُ','الْأَلِفُ','الْهَاءُ','الْكَافُ'];
+const PARSED_COMPONENTS=['وَاوُ الْجَمَاعَةِ','وَاوُ الْمَعِيَّةِ','تَاءُ التَّأْنِيثِ','تَاءُ الْفَاعِلِ','يَاءُ الْمُخَاطَبَةِ','يَاءُ الْمُتَكَلِّمِ الْمَحْذُوفَةُ','يَاءُ الْمُتَكَلِّمِ','أَلِفُ الِاثْنَيْنِ','نُونُ النِّسْوَةِ','نُونُ التَّوْكِيدِ','هَاءُ الْغَائِبِ','كَافُ الْخِطَابِ','الْهَمْزَةُ','الْوَاوُ','الْفَاءُ','الْبَاءُ','اللَّامُ','التَّاءُ','الْيَاءُ','النُّونُ','الْمِيمُ','الْأَلِفُ','الْهَاءُ','الْكَافُ'];
 const COMPONENT_ANALYSIS=/^\s+(?:حَرْف[ٌُ]|ضَمِيرٌ|اسْمٌ|فِعْلٌ|فَاعِلٌ|نَائِبُ|مَفْعُولٌ|مُبْتَدَأٌ|خَبَرٌ|نَعْتٌ|مَعْطُوفٌ|ظَرْفُ|مَبْنِيٌّ|فِي مَحَلٍّ|لِلْوِقَايَةِ|لِلتَّثْنِيَةِ|عَلَامَةُ)/u;
 function emphasizeIraab(text,tokenWord){
  const source=String(text==null?'':text),ranges=[];
  const add=(start,end)=>{if(start>=0&&end>start)ranges.push({start,end})};
  let match;
- const quoted=/«([^»]+)»(?=\s+(?:حَرْف[ٌَُِ]?|فِعْل[ٌَُِ]?|اسْم[ٌَُِ]?|ضَمِير[ٌَُِ]?|مُبْتَدَأ[ٌَُِ]?|خَبَر[ٌَُِ]?|فَاعِل[ٌَُِ]?|نَائِب[ٌَُِ]?|مَفْعُول[ٌَُِ]?|نَعْت[ٌَُِ]?|مَعْطُوف[ٌَُِ]?|ظَرْف[ٌَُِ]?))/gu;
+ const quoted=/«([^»]+)»(?=\s+(?:حَرْف[ٌَُِ]?|فِعْل[ٌَُِ]?|اسْم[ٌَُِ]?|ضَمِير[ٌَُِ]?|مُبْتَدَأ[ٌَُِ]?|خَبَر[ٌَُِ]?|فَاعِل[ٌَُِ]?|نَائِب[ٌَُِ]?|مَفْعُول[ٌَُِ]?|مُنَادًى|نَعْت[ٌَُِ]?|مَعْطُوف[ٌَُِ]?|ظَرْف[ٌَُِ]?))/gu;
  while((match=quoted.exec(source)))add(match.index+1,match.index+1+match[1].length);
  PARSED_COMPONENTS.forEach(label=>{let from=0,index;while((index=source.indexOf(label,from))!==-1){if(COMPONENT_ANALYSIS.test(source.slice(index+label.length)))add(index,index+label.length);from=index+label.length}});
  const dualSuffix=/الْمِيمُ\s+وَالْأَلِفُ(?=\s+لِلتَّثْنِيَةِ)/gu;
@@ -444,6 +464,12 @@ function renderHelpVisual(chapter){
   const detail=children.find(child=>child.id===active)||parent;
   const panel=detail?`<div class="visual-panel" id="visual-${escapeHtml(detail.id)}"><div class="visual-panel-ar arabic" lang="ar">${arabicDisplay(detail.descAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="visual-panel-en">${escapeHtml(detail.descEn)}</div>`}${renderVisualFocus(detail)}${renderComparison(detail.compare)}${detail.exerciseId?renderVisualExample(detail.exerciseId,`visual-${detail.id}-example`):''}</div>`:'';
   $('helpVisual').innerHTML=`${title}<div class="visual-branches">${buttons}${childButtons}${panel}</div>`;return
+ }
+ if(visual.type==='demonstratives'){
+  const lines=text=>escapeHtml(text).replace(/\n/g,'<br>');
+  const groups=visual.groups.map((group,index)=>`<article class="demonstrative-card" id="visual-demonstrative-${index}"><div class="demonstrative-label-ar arabic" lang="ar">${arabicDisplay(group.labelAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-label-en">${escapeHtml(group.labelEn)}</div>`}<div class="demonstrative-form"><div class="demonstrative-form-ar arabic" lang="ar">${lines(group.masculineAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-form-en">${escapeHtml(group.masculineEn)}</div>`}</div><div class="demonstrative-form"><div class="demonstrative-form-ar arabic" lang="ar">${lines(group.feminineAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-form-en">${escapeHtml(group.feminineEn)}</div>`}</div>${group.exerciseId?renderVisualExample(group.exerciseId,`visual-demonstrative-${index}-example`):''}</article>`).join('');
+  const distance=visual.distance,items=distance.items.map((item,index)=>`<article class="demonstrative-distance-card" id="visual-distance-${index}"><div class="demonstrative-label-ar arabic" lang="ar">${arabicDisplay(item.labelAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-label-en">${escapeHtml(item.labelEn)}</div>`}<div class="demonstrative-form-ar arabic" lang="ar">${lines(item.formsAr)}</div><div class="demonstrative-note-ar arabic" lang="ar">${arabicDisplay(item.noteAr)}</div>${state.lang==='ar'?'':`<div class="demonstrative-note-en">${escapeHtml(item.noteEn)}</div>`}${item.exerciseId?renderVisualExample(item.exerciseId,`visual-distance-${index}-example`):''}</article>`).join('');
+  $('helpVisual').innerHTML=`${title}<div class="demonstrative-number-grid">${groups}</div><section class="demonstrative-distance"><div class="demonstrative-distance-title arabic" lang="ar">${arabicDisplay(distance.titleAr)}${state.lang==='ar'?'':`<span class="demonstrative-distance-title-en">${escapeHtml(distance.titleEn)}</span>`}</div><div class="demonstrative-distance-grid">${items}</div></section>`;return
  }
  if(visual.type==='table'){const columns=visual.headersAr.length,head=`<div class="visual-row visual-head" style="--visual-cols:${columns}">${visual.headersAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${arabicDisplay(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(visual.headersEn[index])}</div>`}</div>`).join('')}</div>`,rows=visual.rows.map((row,rowIndex)=>`<div class="visual-row" id="visual-row-${rowIndex}" style="--visual-cols:${columns}">${row.cellsAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${escapeHtml(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(row.cellsEn[index])}</div>`}</div>`).join('')}${row.exerciseId?renderVisualExample(row.exerciseId,`visual-row-${rowIndex}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-table">${head}${rows}</div>`;return}
  if(visual.type==='contrast'){const cards=visual.examples.map((example,index)=>{const highlighted=highlightLast(example.exampleAr,example.focusAr,'ending-focus');return `<article class="contrast-card" id="visual-contrast-${index}"><div class="contrast-label-ar arabic" lang="ar">${arabicDisplay(example.labelAr)}</div><div class="contrast-example arabic" lang="ar">${highlighted}</div>${state.lang==='ar'?'':`<div class="contrast-en">${escapeHtml(example.exampleEn)}</div>`}${example.exerciseId?renderVisualExample(example.exerciseId,`visual-contrast-${index}-example`):''}</article>`}).join('');$('helpVisual').innerHTML=`${title}<div class="visual-contrast${visual.examples.length===3?' three':''}">${cards}</div>`;return}

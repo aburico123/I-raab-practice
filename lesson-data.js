@@ -1085,9 +1085,136 @@ const properNames=[
  ],'The author’s footnote prints this full sentence while explaining that, when the ism and laqab are both single words, the ism is annexed to the laqab. The page states the construction but does not give a complete word-by-word parse.','تَطْبَعُ حَاشِيَةُ الْمُؤَلِّفِ هَذِهِ الْجُمْلَةَ لِبَيَانِ إِضَافَةِ الِاسْمِ إِلَى اللَّقَبِ إِذَا كَانَا مُفْرَدَيْنِ، وَتَنْصُّ الصَّفْحَةُ عَلَى التَّرْكِيبِ مِنْ غَيْرِ إِعْرَابٍ تَفْصِيلِيٍّ.','The word-by-word parse, concise English, and full vocalization are app-supplied.','وَأَمَّا الْإِعْرَابُ كَلِمَةً كَلِمَةً وَالتَّرْجَمَةُ الْمُوجَزَةُ وَالضَّبْطُ التَّامُّ فَمِنَ التَّطْبِيقِ.')
 ];
 
+const demonstrativeNouns=[
+ exercise('demonstrative-01',81,'ذَا زَيْدٌ','This is Zayd.',[
+  token('ذَا','this','اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Demonstrative built on sukūn in the nominative position as the nominal-sentence subject.'),
+  token('زَيْدٌ','Zayd','خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Predicate, nominative with a visible ḍammah.')
+ ],'The author prints the sentence and parses dhā as a demonstrative built on sukūn in the nominative position as mubtadaʾ.','يَطْبَعُ الْمُؤَلِّفُ الْجُمْلَةَ وَيُعْرِبُ «ذَا» اسْمَ إِشَارَةٍ مَبْنِيًّا عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأً.','The predicate parse, full vocalization, concise English, and card organization are app-prepared.','وَأَمَّا إِعْرَابُ الْخَبَرِ وَالضَّبْطُ التَّامُّ وَالتَّرْجَمَةُ الْمُوجَزَةُ وَتَنْظِيمُ الْبِطَاقَاتِ فَمِنَ التَّطْبِيقِ.'),
+ exercise('demonstrative-02',81,'هَذَانِ مُجْتَهِدَانِ','These two are diligent.',[
+  answerParts('هَذَانِ','these two',[
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«ذَانِ» اسْمُ إِشَارَةٍ مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.',en:'Dhāni is the demonstrative and nominal-sentence subject, nominative with alif because it is dual.'}
+  ]),
+  token('مُجْتَهِدَانِ','diligent','خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.','Predicate, nominative with alif because it is dual.')
+ ],'The author gives this sentence as the example for the masculine dual demonstrative in rafʿ. The page also notes that the author’s wording treats the dual demonstratives as genuinely dual and inflected.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ مِثَالًا لِاسْمِ الْإِشَارَةِ لِلْمُثَنَّى الْمُذَكَّرِ فِي الرَّفْعِ، وَيَدُلُّ ظَاهِرُ عِبَارَتِهِ عَلَى أَنَّ صِيغَتَيِ الْمُثَنَّى مُعْرَبَتَانِ.','The complete word-by-word parse, vocalization, English, and component cards are app-prepared in accordance with that treatment.','وَأَمَّا الْإِعْرَابُ التَّامُّ كَلِمَةً كَلِمَةً وَالضَّبْطُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْأَجْزَاءِ فَمِنَ التَّطْبِيقِ وَفْقَ ذَلِكَ الْوَجْهِ.'),
+ exercise('demonstrative-03',81,'هَذَانِ خَصْمَانِ اخْتَصَمُوا','These are two opposing parties who disputed.',[
+  answerParts('هَذَانِ','these two',[
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«ذَانِ» اسْمُ إِشَارَةٍ مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.',en:'Dhāni is the demonstrative and nominal-sentence subject, nominative with alif because it is dual.'}
+  ]),
+  token('خَصْمَانِ','two opposing parties','خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.','Predicate, nominative with alif because it is dual.'),
+  answerParts('اخْتَصَمُوا','they disputed',[
+   {ar:'«اخْتَصَمُوا» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الضَّمِّ لِاتِّصَالِهِ بِوَاوِ الْجَمَاعَةِ.',en:'The past verb is built on ḍamm because group wāw is attached.'},
+   {ar:'وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ نَعْتٌ لِـ«خَصْمَانِ».',en:'Group wāw is the attached subject pronoun; the clause is a nominative modifier of khaṣmāni.'}
+  ])
+ ],'Qur’an 22:19. The author quotes the excerpt as another example of the masculine dual demonstrative in rafʿ.','سُورَةُ الْحَجِّ، الْآيَةُ ١٩. يَقْتَبِسُ الْمُؤَلِّفُ هَذَا الْجُزْءَ مِثَالًا آخَرَ لِاسْمِ الْإِشَارَةِ لِلْمُثَنَّى الْمُذَكَّرِ فِي الرَّفْعِ.','The full word-by-word parse, clause role, vocalization, concise English, and card organization are app-supplied.','وَأَمَّا الْإِعْرَابُ التَّامُّ كَلِمَةً كَلِمَةً وَمَحَلُّ الْجُمْلَةِ وَالضَّبْطُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ فَمِنَ التَّطْبِيقِ.'),
+ exercise('demonstrative-04',81,'أَكْرَمْتُ هَذَيْنِ الرَّجُلَيْنِ','I honored these two men.',[
+  answerParts('أَكْرَمْتُ','I honored',[
+   {ar:'«أَكْرَمْتُ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.',en:'The past verb is built on sukūn because subject tāʾ is attached.'},
+   {ar:'تَاءُ الْفَاعِلِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',en:'Subject tāʾ is the attached subject pronoun.'}
+  ]),
+  answerParts('هَذَيْنِ','these two',[
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«ذَيْنِ» اسْمُ إِشَارَةٍ مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.',en:'Dhayni is the demonstrative and object, accusative with yāʾ because it is dual.'}
+  ]),
+  token('الرَّجُلَيْنِ','the two men','بَدَلٌ مِنِ اسْمِ الْإِشَارَةِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.','Substitute for the demonstrative, accusative with yāʾ because it is dual.')
+ ],'The author gives this sentence for the masculine dual demonstrative in naṣb.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ مِثَالًا لِاسْمِ الْإِشَارَةِ لِلْمُثَنَّى الْمُذَكَّرِ فِي النَّصْبِ.','The complete parse, vocalization, English, and card organization are app-prepared.','وَأَمَّا الْإِعْرَابُ التَّامُّ وَالضَّبْطُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ فَمِنَ التَّطْبِيقِ.'),
+ exercise('demonstrative-05',81,'مَرَرْتُ بِهَذَيْنِ الرَّجُلَيْنِ','I passed by these two men.',[
+  answerParts('مَرَرْتُ','I passed',[
+   {ar:'«مَرَرْتُ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.',en:'The past verb is built on sukūn because subject tāʾ is attached.'},
+   {ar:'تَاءُ الْفَاعِلِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',en:'Subject tāʾ is the attached subject pronoun.'}
+  ]),
+  answerParts('بِهَذَيْنِ','by these two',[
+   {ar:'الْبَاءُ حَرْفُ جَرٍّ.',en:'Bāʾ is a preposition.'},
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«ذَيْنِ» اسْمُ إِشَارَةٍ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.',en:'Dhayni is the demonstrative governed by bāʾ, genitive with yāʾ because it is dual.'}
+  ]),
+  token('الرَّجُلَيْنِ','the two men','بَدَلٌ مِنِ اسْمِ الْإِشَارَةِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.','Substitute for the demonstrative, genitive with yāʾ because it is dual.')
+ ],'The author gives this sentence for the masculine dual demonstrative in khafḍ.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ مِثَالًا لِاسْمِ الْإِشَارَةِ لِلْمُثَنَّى الْمُذَكَّرِ فِي الْجَرِّ.','The complete parse, vocalization, English, and card organization are app-prepared.','وَأَمَّا الْإِعْرَابُ التَّامُّ وَالضَّبْطُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ فَمِنَ التَّطْبِيقِ.'),
+ exercise('demonstrative-06',81,'جَاءَتْ هَاتَانِ الْمَرْأَتَانِ','These two women came.',[
+  answerParts('جَاءَتْ','came',[
+   {ar:'«جَاءَتْ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.',en:'The past verb is built on fatḥ.'},
+   {ar:'تَاءُ التَّأْنِيثِ السَّاكِنَةُ حَرْفٌ لَا مَحَلَّ لَهُ.',en:'Silent feminine tāʾ is a particle with no syntactic position.'}
+  ]),
+  answerParts('هَاتَانِ','these two',[
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«تَانِ» اسْمُ إِشَارَةٍ فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.',en:'Tāni is the demonstrative and subject, nominative with alif because it is dual.'}
+  ]),
+  token('الْمَرْأَتَانِ','the two women','بَدَلٌ مِنِ اسْمِ الْإِشَارَةِ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.','Substitute for the demonstrative, nominative with alif because it is dual.')
+ ],'The author gives this sentence for the feminine dual demonstrative in rafʿ.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ مِثَالًا لِاسْمِ الْإِشَارَةِ لِلْمُثَنَّى الْمُؤَنَّثِ فِي الرَّفْعِ.','The complete parse, vocalization, English, and card organization are app-prepared in accordance with the author’s dual treatment.','وَأَمَّا الْإِعْرَابُ التَّامُّ وَالضَّبْطُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ فَمِنَ التَّطْبِيقِ وَفْقَ مَعَامَلَةِ الْمُؤَلِّفِ لِلصِّيغَةِ مُعَامَلَةَ الْمُثَنَّى.'),
+ exercise('demonstrative-07',81,'أَكْرَمْتُ هَاتَيْنِ الْمَرْأَتَيْنِ','I honored these two women.',[
+  answerParts('أَكْرَمْتُ','I honored',[
+   {ar:'«أَكْرَمْتُ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.',en:'The past verb is built on sukūn because subject tāʾ is attached.'},
+   {ar:'تَاءُ الْفَاعِلِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',en:'Subject tāʾ is the attached subject pronoun.'}
+  ]),
+  answerParts('هَاتَيْنِ','these two',[
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«تَيْنِ» اسْمُ إِشَارَةٍ مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.',en:'Tayni is the demonstrative and object, accusative with yāʾ because it is dual.'}
+  ]),
+  token('الْمَرْأَتَيْنِ','the two women','بَدَلٌ مِنِ اسْمِ الْإِشَارَةِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.','Substitute for the demonstrative, accusative with yāʾ because it is dual.')
+ ],'The author gives this sentence for the feminine dual demonstrative in naṣb.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ مِثَالًا لِاسْمِ الْإِشَارَةِ لِلْمُثَنَّى الْمُؤَنَّثِ فِي النَّصْبِ.','The complete parse, vocalization, English, and card organization are app-prepared.','وَأَمَّا الْإِعْرَابُ التَّامُّ وَالضَّبْطُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ فَمِنَ التَّطْبِيقِ.'),
+ exercise('demonstrative-08',81,'مَرَرْتُ بِهَاتَيْنِ الْمَرْأَتَيْنِ','I passed by these two women.',[
+  answerParts('مَرَرْتُ','I passed',[
+   {ar:'«مَرَرْتُ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.',en:'The past verb is built on sukūn because subject tāʾ is attached.'},
+   {ar:'تَاءُ الْفَاعِلِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',en:'Subject tāʾ is the attached subject pronoun.'}
+  ]),
+  answerParts('بِهَاتَيْنِ','by these two',[
+   {ar:'الْبَاءُ حَرْفُ جَرٍّ.',en:'Bāʾ is a preposition.'},
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«تَيْنِ» اسْمُ إِشَارَةٍ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.',en:'Tayni is the demonstrative governed by bāʾ, genitive with yāʾ because it is dual.'}
+  ]),
+  token('الْمَرْأَتَيْنِ','the two women','بَدَلٌ مِنِ اسْمِ الْإِشَارَةِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْيَاءُ؛ لِأَنَّهُ مُثَنًّى.','Substitute for the demonstrative, genitive with yāʾ because it is dual.')
+ ],'The author gives this sentence for the feminine dual demonstrative in khafḍ.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ مِثَالًا لِاسْمِ الْإِشَارَةِ لِلْمُثَنَّى الْمُؤَنَّثِ فِي الْجَرِّ.','The complete parse, vocalization, English, and card organization are app-prepared.','وَأَمَّا الْإِعْرَابُ التَّامُّ وَالضَّبْطُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ فَمِنَ التَّطْبِيقِ.'),
+ exercise('demonstrative-09',81,'هَأَنْتُمْ أُولَاءِ','Here you are.',[
+  answerParts('هَأَنْتُمْ','here you are',[
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«أَنْتُمْ» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.',en:'Antum is a detached pronoun built on sukūn in the nominative position as the nominal-sentence subject.'}
+  ]),
+  token('أُولَاءِ','these','اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى الْكَسْرِ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','Demonstrative built on kasr in the nominative position as predicate.')
+ ],'Qur’an 3:119. The author quotes the excerpt to attest ulāʾ as the plural demonstrative.','سُورَةُ آلِ عِمْرَانَ، الْآيَةُ ١١٩. يَقْتَبِسُ الْمُؤَلِّفُ هَذَا الْجُزْءَ شَاهِدًا عَلَى اسْمِ الْإِشَارَةِ لِلْجَمْعِ «أُولَاءِ».','The complete parse, vocalization, concise English, and component cards are app-supplied.','وَأَمَّا الْإِعْرَابُ التَّامُّ وَالضَّبْطُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْأَجْزَاءِ فَمِنَ التَّطْبِيقِ.'),
+ exercise('demonstrative-10',81,'قَالَ يَا قَوْمِ هَؤُلَاءِ بَنَاتِي','He said, “My people, these are my daughters.”',[
+  token('قَالَ','he said','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Past verb built on fatḥ; its subject is a hidden “he.”'),
+  token('يَا','O','حَرْفُ نِدَاءٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ.','Vocative particle built on sukūn, with no syntactic position.'),
+  answerParts('قَوْمِ','my people',[
+   {ar:'«قَوْمِ» مُنَادًى مُضَافٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الْمُقَدَّرَةُ قَبْلَ يَاءِ الْمُتَكَلِّمِ الْمَحْذُوفَةِ، وَهُوَ مُضَافٌ.',en:'Qawmi is a vocative in an iḍāfah, accusative with an estimated fatḥah before the omitted speaker’s yāʾ.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ الْمَحْذُوفَةُ ضَمِيرٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'The omitted speaker’s yāʾ is the pronoun in the genitive position as the second term of the iḍāfah.'}
+  ]),
+  answerParts('هَؤُلَاءِ','these',[
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«أُولَاءِ» اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى الْكَسْرِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.',en:'Ulāʾi is the demonstrative built on kasr in the nominative position as nominal-sentence subject.'}
+  ]),
+  answerParts('بَنَاتِي','my daughters',[
+   {ar:'«بَنَاتِ» خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ قَبْلَ يَاءِ الْمُتَكَلِّمِ، وَهُوَ مُضَافٌ.',en:'Banāti is the predicate, nominative with an estimated ḍammah before the speaker’s yāʾ, and the first term of an iḍāfah.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'Speaker’s yāʾ is the attached pronoun in the genitive position as the second term of the iḍāfah.'}
+  ])
+ ],'Qur’an 11:78. The author quotes the excerpt to attest the plural demonstrative hāʾulāʾi.','سُورَةُ هُودٍ، الْآيَةُ ٧٨. يَقْتَبِسُ الْمُؤَلِّفُ هَذَا الْجُزْءَ شَاهِدًا عَلَى اسْمِ الْإِشَارَةِ لِلْجَمْعِ «هَؤُلَاءِ».','The complete word-by-word parse, vocalization, concise English, and component cards are app-supplied.','وَأَمَّا الْإِعْرَابُ التَّامُّ كَلِمَةً كَلِمَةً وَالضَّبْطُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْأَجْزَاءِ فَمِنَ التَّطْبِيقِ.'),
+ exercise('demonstrative-11',83,'إِنَّا هَهُنَا قَاعِدُونَ','We are sitting here.',[
+  answerParts('إِنَّا','indeed we',[
+   {ar:'«إِنَّ» حَرْفُ تَوْكِيدٍ وَنَصْبٍ.',en:'Inna is a particle of emphasis that assigns the accusative.'},
+   {ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ اسْمُ «إِنَّ».',en:'Nā is an attached pronoun built on sukūn in the accusative position as the subject noun of inna.'}
+  ]),
+  answerParts('هَهُنَا','here',[
+   {ar:'الْهَاءُ حَرْفُ تَنْبِيهٍ.',en:'Hāʾ is a particle of attention.'},
+   {ar:'«هُنَا» اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ ظَرْفُ مَكَانٍ مُتَعَلِّقٌ بِـ«قَاعِدُونَ».',en:'Hunā is a place demonstrative built on sukūn in the accusative position as an adverb of place related to qāʿidūna.'}
+  ]),
+  token('قَاعِدُونَ','sitting','خَبَرُ «إِنَّ» مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.','Predicate of inna, nominative with wāw because it is a sound masculine plural.')
+ ],'Qur’an 5:24. The author quotes the excerpt, and the footnote parses inna, nā, the attention hāʾ, hunā as an accusative place demonstrative, and qāʿidūna as the predicate.','سُورَةُ الْمَائِدَةِ، الْآيَةُ ٢٤. يَقْتَبِسُ الْمُؤَلِّفُ هَذَا الْجُزْءَ، وَتُعْرِبُ الْحَاشِيَةُ «إِنَّ» وَ«نَا» وَهَاءَ التَّنْبِيهِ وَ«هُنَا» اسْمَ إِشَارَةٍ فِي مَحَلِّ نَصْبٍ ظَرْفَ مَكَانٍ وَ«قَاعِدُونَ» خَبَرًا.','The compact English, full answer vocalization, and card organization are app-prepared.','وَأَمَّا التَّرْجَمَةُ الْمُوجَزَةُ وَالضَّبْطُ التَّامُّ وَتَنْظِيمُ الْبِطَاقَاتِ فَمِنَ التَّطْبِيقِ.'),
+ exercise('demonstrative-12',83,'وَإِذَا رَأَيْتَ ثَمَّ','And when you look there…',[
+  answerParts('وَإِذَا','and when',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«إِذَا» ظَرْفُ زَمَانٍ لِمَا يُسْتَقْبَلُ مُتَضَمِّنٌ مَعْنَى الشَّرْطِ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ.',en:'Idhā is a future-time adverb carrying a conditional sense, built on sukūn in the accusative position.'}
+  ]),
+  answerParts('رَأَيْتَ','you look',[
+   {ar:'«رَأَيْتَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.',en:'The past verb is built on sukūn because subject tāʾ is attached.'},
+   {ar:'تَاءُ الْفَاعِلِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',en:'Subject tāʾ is the attached subject pronoun.'}
+  ]),
+  token('ثَمَّ','there','اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ نَصْبٍ ظَرْفُ مَكَانٍ مُتَعَلِّقٌ بِـ«رَأَيْتَ».','Place demonstrative built on fatḥ in the accusative position as an adverb of place related to raʾayta.')
+ ],'Qur’an 76:20. The author quotes the excerpt, and the footnote parses wāw, idhā, raʾayta, and thamma as a place demonstrative built on fatḥ in the accusative position.','سُورَةُ الْإِنْسَانِ، الْآيَةُ ٢٠. يَقْتَبِسُ الْمُؤَلِّفُ هَذَا الْجُزْءَ، وَتُعْرِبُ الْحَاشِيَةُ الْوَاوَ وَ«إِذَا» وَ«رَأَيْتَ» وَ«ثَمَّ» اسْمَ إِشَارَةٍ مَبْنِيًّا عَلَى الْفَتْحِ فِي مَحَلِّ نَصْبٍ ظَرْفَ مَكَانٍ.','The compact English, full answer vocalization, and card organization are app-prepared.','وَأَمَّا التَّرْجَمَةُ الْمُوجَزَةُ وَالضَّبْطُ التَّامُّ وَتَنْظِيمُ الْبِطَاقَاتِ فَمِنَ التَّطْبِيقِ.')
+];
+
 // Complex cards still use one compact classroom answer. These overrides keep
 // attached elements and sentence-level positions only when they complete the parse.
-const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns,definitenessIntro,pronounForms,properNames];
+const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns,definitenessIntro,pronounForms,properNames,demonstrativeNouns];
 const setConciseAnswer=(exerciseId,word,ar,en)=>{
  const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
  const answer=item&&item.tokens.find(entry=>entry.word===word);
@@ -1265,6 +1392,13 @@ const chapters=[
   help('إِذَا اجْتَمَعَ الِاسْمُ وَاللَّقَبُ وَجَبَ تَأْخِيرُ اللَّقَبِ فِي الْأَفْصَحِ، وَيَتْبَعُ اللَّقَبُ الِاسْمَ فِي الْإِعْرَابِ. فَإِنْ كَانَا مُفْرَدَيْنِ أُضِيفَ الِاسْمُ إِلَى اللَّقَبِ، نَحْوَ: «جَاءَ سَعِيدُ كُرْزٍ». وَلَا تَرْتِيبَ بَيْنَ الْكُنْيَةِ وَالِاسْمِ وَلَا بَيْنَ الْكُنْيَةِ وَاللَّقَبِ.','When an ism and laqab occur together, the laqab follows the ism in the most eloquent order and follows it in inflection. If both are single words, the ism is annexed to the laqab, as in jāʾa Saʿīdu Kurzin. There is no required order between a kunyah and ism or between a kunyah and laqab.'),
   help('يَنْقَسِمُ الْعَلَمُ أَيْضًا إِلَى مُفْرَدٍ وَمُرَكَّبٍ. فَالْمُفْرَدُ نَحْوُ «زَيْدٍ» وَ«هِنْدٍ». وَالْمُرَكَّبُ إِضَافِيٌّ، نَحْوُ «عَبْدِ اللَّهِ»؛ أَوْ مَزْجِيٌّ، نَحْوُ «بَعْلَبَكَّ» وَ«حَضْرَمَوْتَ» وَ«سِيبَوَيْهِ»؛ أَوْ إِسْنَادِيٌّ، نَحْوُ «بَرَقَ نَحْرُهُ» وَ«شَابَ قَرْنَاهَا».','A proper name is also simple or compound. A simple name includes Zayd and Hind. A compound may be an iḍāfah, such as ʿAbd Allāh; fused, such as Baʿlabakk, Ḥaḍramawt, and Sībawayh; or predicative, such as Baraq Naḥruhu and Shāba Qarnāhā.')
  ],helpSourceEn:'Al-Mutammimah, printed pages 77–80. The exact heading, personal/generic division, ism/kunyah/laqab division, ordering rules, simple/compound division, and all examples in Help are the author’s. The page-78 and first page-79 exercises reproduce parsing given in the footnotes; the final page-79 exercise reproduces the author’s sentence and rule, with its word-by-word parse supplied by the app. Full answer vocalization, concise English, card organization, and visual labels are app-prepared. The Qurʾānic citation in footnote 6 is held from practice because the page does not choose between the plausible syntactic relations for its internal proper-name sequence.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٧٧–٨٠. الْعُنْوَانُ وَتَقْسِيمُ الْعَلَمِ إِلَى شَخْصِيٍّ وَجِنْسِيٍّ وَإِلَى اسْمٍ وَكُنْيَةٍ وَلَقَبٍ وَأَحْكَامُ تَرْتِيبِهَا وَتَقْسِيمُ الْعَلَمِ إِلَى مُفْرَدٍ وَمُرَكَّبٍ وَجَمِيعُ أَمْثِلَةِ الْمُسَاعَدَةِ مِنَ الْمُؤَلِّفِ. وَإِعْرَابُ مِثَالِ ص ٧٨ وَالْمِثَالِ الْأَوَّلِ فِي ص ٧٩ مِنَ الْحَوَاشِي، وَالْمِثَالُ الْأَخِيرُ فِي ص ٧٩ وَقَاعِدَتُهُ مِنَ الْمُؤَلِّفِ وَإِعْرَابُهُ كَلِمَةً كَلِمَةً مِنَ التَّطْبِيقِ. وَأَمَّا الضَّبْطُ التَّامُّ وَالتَّرْجَمَةُ الْمُوجَزَةُ وَتَنْظِيمُ الْبِطَاقَاتِ وَتَسْمِيَاتُ الرَّسْمِ فَمِنَ التَّطْبِيقِ. وَقَدْ حُجِبَ الشَّاهِدُ الْقُرْآنِيُّ فِي الْحَاشِيَةِ السَّادِسَةِ عَنِ التَّدْرِيبِ؛ لِأَنَّ الصَّفْحَةَ لَمْ تُعَيِّنْ وَجْهَ الْعَلَاقَةِ النَّحْوِيَّةِ بَيْنَ أَجْزَاءِ تَسَلْسُلِ الْعَلَمِ دَاخِلَهُ.'}
+ ,{id:'demonstrative-nouns',babId:'definiteness',order:4,titleEn:'The demonstrative',titleAr:'اسْمُ الْإِشَارَةِ',pages:'81–83',book:demonstrativeNouns,help:[
+  help('اسْمُ الْإِشَارَةِ مَا وُضِعَ لِمُشَارٍ إِلَيْهِ. لِلْمُفْرَدِ الْمُذَكَّرِ «ذَا»، وَلِلْمُفْرَدَةِ الْمُؤَنَّثَةِ «ذِي، وَذِهِ، وَتِي، وَتِهِ، وَتَا».','A demonstrative is a form assigned to something pointed out. For a singular masculine referent the book gives dhā; for a singular feminine referent it gives dhī, dhihi, tī, tihi, and tā.'),
+  help('لِلْمُثَنَّى الْمُذَكَّرِ «ذَانِ» فِي الرَّفْعِ وَ«ذَيْنِ» فِي النَّصْبِ وَالْجَرِّ. وَلِلْمُثَنَّى الْمُؤَنَّثِ «تَانِ» فِي الرَّفْعِ وَ«تَيْنِ» فِي النَّصْبِ وَالْجَرِّ. وَظَاهِرُ عِبَارَةِ الْمُؤَلِّفِ إِعْرَابُ هَذِهِ الصِّيَغِ إِعْرَابَ الْمُثَنَّى.','For the masculine dual the author gives dhāni in rafʿ and dhayni in naṣb and khafḍ. For the feminine dual he gives tāni in rafʿ and tayni in naṣb and khafḍ. His wording treats these forms as inflected like the dual.'),
+  help('لِلْجَمْعِ مُذَكَّرًا كَانَ أَوْ مُؤَنَّثًا «أُولَاءِ» بِالْمَدِّ عِنْدَ الْحِجَازِيِّينَ، وَبِالْقَصْرِ «أُولَى» عِنْدَ التَّمِيمِيِّينَ. وَتَدْخُلُ هَاءُ التَّنْبِيهِ عَلَى أَسْمَاءِ الْإِشَارَةِ، نَحْوَ «هَذَا، وَهَذِهِ، وَهَذَانِ، وَهَذَيْنِ، وَهَاتَانِ، وَهَاتَيْنِ، وَهَؤُلَاءِ».','For a masculine or feminine plural, the Ḥijāzī form is ulāʾi with a long vowel; the Tamīmī form is ulā with a shortened ending. The attention hāʾ may precede demonstratives, producing forms such as hādhā, hādhihi, hādhāni, hādhayni, hātāni, hātayni, and hāʾulāʾi.'),
+  help('إِذَا كَانَ الْمُشَارُ إِلَيْهِ بَعِيدًا لَحِقَتِ اسْمَ الْإِشَارَةِ كَافُ الْخِطَابِ، نَحْوَ «ذَاكَ، وَذَاكِ، وَذَاكُمَا، وَذَاكُمْ، وَذَاكُنَّ». وَيَجُوزُ أَنْ تَتَقَدَّمَهَا لَامُ الْبُعْدِ، نَحْوَ «ذَلِكَ، وَذَلِكُمَا، وَذَلِكُمْ، وَذَلِكُنَّ». وَلَا تَدْخُلُ اللَّامُ فِي الْمُثَنَّى، وَلَا فِي جَمْعِ لُغَةِ مَنْ مَدَّهُ، وَلَا مَعَ هَاءِ التَّنْبِيهِ فِي الْمُفْرَدِ.','For a distant referent, the address kāf is attached, as in dhāka, dhāki, dhākumā, dhākum, and dhākunna. The distance lām may come before it, as in dhālika and its address forms. Lām is excluded from the dual, from the lengthened plural form, and from a singular already preceded by the attention hāʾ.'),
+  help('يُشَارُ إِلَى الْمَكَانِ الْقَرِيبِ بِـ«هُنَا» أَوْ «هَاهُنَا»، وَإِلَى الْمَكَانِ الْبَعِيدِ بِـ«هُنَاكَ، وَهَاهُنَاكَ، وَهُنَالِكَ، وَهَنَّا، وَهِنَّا، وَثَمَّ».','A nearby place is indicated with hunā or hāhunā. A distant place is indicated with hunāka, hāhunāka, hunālika, hannā, hinnā, or thamma.')
+ ],helpSourceEn:'Al-Mutammimah, printed pages 81–83. The exact heading, definition, singular/dual/plural lists, the author’s treatment of the dual forms, attention hāʾ, address kāf, distance lām and its three exclusions, place demonstratives, all twelve Book Practice excerpts, and the footnote parsing of the page-83 verses are from the book. The first exercise reproduces the book’s explicit parse; the other complete word-by-word parses are app-prepared except where the page-83 footnotes state them. Full answer vocalization, concise English, card organization, and visual grouping are app-prepared. The held page-79 proper-name citation remains excluded from practice for the previously reported syntactic ambiguity.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٨١–٨٣. الْعُنْوَانُ وَالتَّعْرِيفُ وَقَوَائِمُ الْمُفْرَدِ وَالْمُثَنَّى وَالْجَمْعِ وَمُعَامَلَةُ الْمُؤَلِّفِ لِصِيَغِ الْمُثَنَّى وَهَاءُ التَّنْبِيهِ وَكَافُ الْخِطَابِ وَلَامُ الْبُعْدِ وَمَوَاضِعُ امْتِنَاعِهَا الثَّلَاثَةُ وَأَسْمَاءُ الْإِشَارَةِ لِلْمَكَانِ وَجَمِيعُ شَوَاهِدِ التَّدْرِيبَاتِ الِاثْنَيْ عَشَرَ وَإِعْرَابُ شَاهِدَيِ ص ٨٣ فِي الْحَوَاشِي مِنَ الْمُؤَلِّفِ. وَيَنْقُلُ التَّدْرِيبُ الْأَوَّلُ إِعْرَابَ الْكِتَابِ الصَّرِيحَ، وَأَمَّا سَائِرُ الْإِعْرَابِ التَّامِّ كَلِمَةً كَلِمَةً فَمِنَ التَّطْبِيقِ إِلَّا مَا نَصَّتْ عَلَيْهِ حَوَاشِي ص ٨٣. وَالضَّبْطُ التَّامُّ وَالتَّرْجَمَةُ الْمُوجَزَةُ وَتَنْظِيمُ الْبِطَاقَاتِ وَتَجْمِيعُ الرَّسْمِ مِنَ التَّطْبِيقِ. وَيَبْقَى شَاهِدُ ص ٧٩ فِي فَصْلِ الْعَلَمِ مَحْجُوبًا عَنِ التَّدْرِيبِ لِوَجْهِ الِاحْتِمَالِ النَّحْوِيِّ الْمُبَيَّنِ سَابِقًا.'}
 ];
 
 const babs=[
@@ -1380,7 +1514,15 @@ const helpVisuals={
    {id:'proper-mazji',labelAr:'مُرَكَّبٌ مَزْجِيٌّ',labelEn:'Fused compound',descAr:'امْتَزَجَ جُزْآهُ فَصَارَا كَلِمَةً وَاحِدَةً.',descEn:'Its two parts fuse into one word.',exampleAr:'بَعْلَبَكَّ',exampleEn:'Baʿlabakk is the first printed example.',focusAr:'بَعْلَبَكَّ'},
    {id:'proper-isnadi',labelAr:'مُرَكَّبٌ إِسْنَادِيٌّ',labelEn:'Predicative compound',descAr:'أُسْنِدَتْ إِحْدَى كَلِمَتَيْهِ إِلَى الْأُخْرَى، فَصَارَتَا عَلَمًا.',descEn:'Its original predication is used as a name.',exampleAr:'بَرَقَ نَحْرُهُ',exampleEn:'Baraq Naḥruhu is the first printed example.',focusAr:'بَرَقَ نَحْرُهُ'}
   ]}
- ]}
+ ]},
+ 'demonstrative-nouns':{type:'demonstratives',titleAr:'أَيُّ اسْمِ إِشَارَةٍ أَسْتَعْمِلُ؟',titleEn:'Which demonstrative do I use?',groups:[
+  {labelAr:'لِلْمُفْرَدِ',labelEn:'Pointing to one',masculineAr:'ذَا',masculineEn:'masculine',feminineAr:'ذِي، ذِهِ، تِي، تِهِ، تَا',feminineEn:'feminine',exerciseId:'demonstrative-01'},
+  {labelAr:'لِلْمُثَنَّى',labelEn:'Pointing to two',masculineAr:'ذَانِ ← رَفْعٌ\nذَيْنِ ← نَصْبٌ أَوْ جَرٌّ',masculineEn:'masculine: dhāni in rafʿ; dhayni in naṣb or khafḍ',feminineAr:'تَانِ ← رَفْعٌ\nتَيْنِ ← نَصْبٌ أَوْ جَرٌّ',feminineEn:'feminine: tāni in rafʿ; tayni in naṣb or khafḍ',exerciseId:'demonstrative-02'},
+  {labelAr:'لِلْجَمْعِ',labelEn:'Pointing to several',masculineAr:'أُولَاءِ',masculineEn:'masculine or feminine in the Ḥijāzī usage',feminineAr:'أُولَى',feminineEn:'shortened Tamīmī form',exerciseId:'demonstrative-09'}
+ ],distance:{titleAr:'الْقَرِيبُ وَالْبَعِيدُ',titleEn:'Near and far',items:[
+  {labelAr:'لِلْقَرِيبِ',labelEn:'Near',formsAr:'هَذَا · هَذِهِ · هَؤُلَاءِ\nهُنَا · هَاهُنَا',noteAr:'تَدْخُلُ هَاءُ التَّنْبِيهِ عَلَى اسْمِ الْإِشَارَةِ.',noteEn:'The attention hāʾ precedes the demonstrative.',exerciseId:'demonstrative-11'},
+  {labelAr:'لِلْبَعِيدِ',labelEn:'Far',formsAr:'ذَاكَ = ذَا + كَافُ الْخِطَابِ\nذَلِكَ = ذَا + لَامُ الْبُعْدِ + كَافُ الْخِطَابِ\nهُنَاكَ · هُنَالِكَ · ثَمَّ',noteAr:'تَمْتَنِعُ لَامُ الْبُعْدِ فِي الْمُثَنَّى، وَفِي «أُولَاءِ» الْمَمْدُودَةِ، وَمَعَ هَاءِ التَّنْبِيهِ فِي الْمُفْرَدِ.',noteEn:'Distance lām is excluded from the dual, lengthened ulāʾi, and a singular with attention hāʾ.',exerciseId:'demonstrative-12'}
+ ]}}
 };
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});
 

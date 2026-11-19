@@ -815,9 +815,55 @@ const estimatedInflection=[
  ],'The page prints the construction and explicitly contrasts its visible accusative fatḥah with the estimated nominative ḍammah. The hidden subject is app-supplied.','تَطْبَعُ الصَّفْحَةُ التَّرْكِيبَ، وَتُظْهِرُ فَتْحَةَ النَّصْبِ عَلَى الْيَاءِ لِخِفَّتِهَا مُقَابِلَ ضَمَّةِ الرَّفْعِ الْمُقَدَّرَةِ. وَالْفَاعِلُ الْمُسْتَتِرُ مِنْ إِعْدَادِ التَّطْبِيقِ.')
 ];
 
+const diptoteExercise=(id,page,ar,en,tokens,directEn,directAr)=>exercise(
+ id,page,ar,en,tokens,directEn,directAr,
+ 'Miftāḥ al-ʿIlm preserves the printed wording and the author’s stated parsing; it supplies the remaining word-by-word analysis, full answer vocalization, and concise English.',
+ 'وَيَحْفَظُ مِفْتَاحُ الْعِلْمِ لَفْظَ الْمِثَالِ الْمَطْبُوعِ وَإِعْرَابَ الْمُؤَلِّفِ الْمَنْصُوصَ عَلَيْهِ، وَيُضِيفُ إِعْرَابَ بَقِيَّةِ الْكَلِمَاتِ وَالضَّبْطَ التَّامَّ وَالتَّرْجَمَةَ الْمُوجَزَةَ.'
+);
+const diptoteNouns=[
+ diptoteExercise('diptote-01',66,'جَاءَ الْقَوْمُ أُحَادَ','The people came one by one.',[
+  token('جَاءَ','came','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb built on fatḥ.'),
+  token('الْقَوْمُ','the people','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject, nominative with a visible ḍammah.'),
+  token('أُحَادَ','one by one','حَالٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَلَمْ يُنَوَّنْ؛ لِأَنَّهُ مَمْنُوعٌ مِنَ الصَّرْفِ لِلصِّفَةِ وَالْعَدْلِ.','Circumstantial qualifier, accusative with a visible fatḥah; it has no tanwīn because adjectivehood and semantic conversion make it diptote.')
+ ],'The footnote prints this sentence and parses all three words, explicitly naming adjectivehood and semantic conversion as the two causes that prevent tanwīn.','تَطْبَعُ الْحَاشِيَةُ هَذِهِ الْجُمْلَةَ وَتُعْرِبُ كَلِمَاتِهَا الثَّلَاثَ، وَتَنْصُّ عَلَى أَنَّ الصِّفَةَ وَالْعَدْلَ مَنَعَا «أُحَادَ» مِنَ التَّنْوِينِ.'),
+ diptoteExercise('diptote-02',66,'جَاءَ الْقَوْمُ مَثْنَى','The people came two by two.',[
+  token('جَاءَ','came','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb built on fatḥ.'),
+  token('الْقَوْمُ','the people','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject, nominative with a visible ḍammah.'),
+  token('مَثْنَى','two by two','حَالٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَهُوَ مَمْنُوعٌ مِنَ الصَّرْفِ لِلصِّفَةِ وَالْعَدْلِ.','Circumstantial qualifier, accusative with an estimated fatḥah on the alif because the vowel cannot appear; adjectivehood and semantic conversion make it diptote.')
+ ],'The footnote prints this sentence and gives the estimated accusative fatḥah on the alif. The surrounding text identifies adjectivehood and semantic conversion as the causes of the diptote form.','تَطْبَعُ الْحَاشِيَةُ هَذِهِ الْجُمْلَةَ وَتَنْصُّ عَلَى فَتْحَةِ نَصْبِ «مَثْنَى» الْمُقَدَّرَةِ عَلَى الْأَلِفِ، وَيُبَيِّنُ السِّيَاقُ أَنَّ الصِّفَةَ وَالْعَدْلَ هُمَا سَبَبَا مَنْعِهِ مِنَ الصَّرْفِ.'),
+ diptoteExercise('diptote-03',70,'إِنَّا أَعْتَدْنَا لِلْكَافِرِينَ سَلَاسِلًا وَأَغْلَالًا وَسَعِيرًا','Indeed, We have prepared for the disbelievers chains, shackles, and a Blaze.',[
+  answerParts('إِنَّا','indeed We',[
+   {ar:'«إِنَّ» حَرْفُ تَوْكِيدٍ وَنَصْبٍ مَبْنِيٌّ عَلَى الْفَتْحِ.',en:'Inna is a particle of emphasis and naṣb, built on fatḥ.'},
+   {ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ نَصْبٍ اسْمُ «إِنَّ».',en:'Nā is an attached pronoun in the accusative position as the subject of inna.'}
+  ]),
+  answerParts('أَعْتَدْنَا','We prepared',[
+   {ar:'«أَعْتَدْ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِـ«نَا» الْفَاعِلِينَ.',en:'Aʿtad is a past verb built on sukūn because subject nā is attached.'},
+   {ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرُ «إِنَّ».',en:'Nā is its attached subject; the clause is in the nominative position as the predicate of inna.'}
+  ]),
+  answerParts('لِلْكَافِرِينَ','for the disbelievers',[
+   {ar:'اللَّامُ حَرْفُ جَرٍّ.',en:'Lām is a preposition.'},
+   {ar:'«الْكَافِرِينَ» اسْمٌ مَجْرُورٌ بِاللَّامِ، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.',en:'Al-kāfirīna is governed by lām, genitive with yāʾ instead of kasrah because it is a sound masculine plural.'}
+  ]),
+  token('سَلَاسِلًا','chains','مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ. وَقَدْ صُرِفَ فِي هَذِهِ الْقِرَاءَةِ لِلتَّنَاسُبِ.','Object, accusative with a visible fatḥah. In this cited reading it is fully declined for formal matching.'),
+  answerParts('وَأَغْلَالًا','and shackles',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«أَغْلَالًا» مَعْطُوفٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.',en:'Aghlālan is coordinated and accusative with a visible fatḥah.'}
+  ]),
+  answerParts('وَسَعِيرًا','and a Blaze',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«سَعِيرًا» مَعْطُوفٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.',en:'Saʿīran is coordinated and accusative with a visible fatḥah.'}
+  ])
+ ],'Qur’an 76:4. The page cites Nāfiʿ’s fully declined reading of “salāsilan,” and the footnote prints the complete verse and parses that word as the object with visible fatḥah. The other word-by-word details are app-supplied.','سُورَةُ الْإِنْسَانِ، الْآيَةُ ٤. تَسْتَشْهِدُ الصَّفْحَةُ بِقِرَاءَةِ نَافِعٍ بِصَرْفِ «سَلَاسِلًا»، وَتَطْبَعُ الْحَاشِيَةُ الْآيَةَ تَامَّةً وَتُعْرِبُ هَذِهِ الْكَلِمَةَ مَفْعُولًا بِهِ مَنْصُوبًا بِالْفَتْحَةِ الظَّاهِرَةِ. وَإِعْرَابُ بَقِيَّةِ الْكَلِمَاتِ مِنَ التَّطْبِيقِ.'),
+ diptoteExercise('diptote-04',71,'قَوَارِيرًا قَوَارِيرًا','Crystal vessels—crystal clear…',[
+  token('قَوَارِيرًا','crystal vessels','خَبَرُ «كَانَتْ» مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ. وَقَدْ صُرِفَ فِي هَذِهِ الْقِرَاءَةِ لِلتَّنَاسُبِ.','Predicate of kānat, accusative with a visible fatḥah. In this cited reading it is fully declined for formal matching.'),
+  token('قَوَارِيرًا','crystal clear','بَدَلٌ مِنَ الْأُولَى مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ. وَقَدْ صُرِفَ فِي هَذِهِ الْقِرَاءَةِ لِلتَّنَاسُبِ.','Substitute for the first word, accusative with a visible fatḥah. It is likewise fully declined in this reading.')
+ ],'Qur’an 76:15–16. The page cites Nāfiʿ’s reading of both words with tanwīn. Its footnote identifies the first as the predicate of kānat and the second as its substitute. The displayed conjunction before the quotation belongs to the book’s prose, not to the quoted Qur’anic words.','سُورَةُ الْإِنْسَانِ، الْآيَتَانِ ١٥–١٦. تَسْتَشْهِدُ الصَّفْحَةُ بِقِرَاءَةِ نَافِعٍ بِتَنْوِينِ الْكَلِمَتَيْنِ، وَتَجْعَلُ حَاشِيَتُهَا الْأُولَى خَبَرَ «كَانَتْ» وَالثَّانِيَةَ بَدَلًا مِنْهَا. وَالْوَاوُ الظَّاهِرَةُ قَبْلَ الِاقْتِبَاسِ مِنْ نَثْرِ الْكِتَابِ وَلَيْسَتْ مِنَ الْآيَةِ.')
+];
+diptoteNouns[3].quranLeadAr='وَ';
+
 // Complex cards still use one compact classroom answer. These overrides keep
 // attached elements and sentence-level positions only when they complete the parse.
-const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection];
+const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns];
 const setConciseAnswer=(exerciseId,word,ar,en)=>{
  const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
  const answer=item&&item.tokens.find(entry=>entry.word===word);
@@ -964,14 +1010,21 @@ const chapters=[
   help('تُقَدَّرُ الْحَرَكَاتُ الثَّلَاثُ قَبْلَ يَاءِ الْمُتَكَلِّمِ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، نَحْوَ: «جَاءَ غُلَامِي»، وَ«رَأَيْتُ غُلَامِي»، وَ«مَرَرْتُ بِغُلَامِي».','All three case vowels are estimated before the speaker’s yāʾ because that place is occupied by the matching vowel, as in jāʾa ghulāmī, raʾaytu ghulāmī, and marartu bi-ghulāmī.'),
   help('تُقَدَّرُ الْحَرَكَاتُ الثَّلَاثُ عَلَى أَلِفِ الِاسْمِ الْمَقْصُورِ لِلتَّعَذُّرِ، نَحْوَ: «جَاءَ الْفَتَى»، وَ«رَأَيْتُ الْفَتَى»، وَ«مَرَرْتُ بِالْفَتَى».','All three case vowels are estimated on the alif of a maqṣūr noun because they cannot appear there, as in jāʾa al-fatā, raʾaytu al-fatā, and marartu bi-l-fatā.'),
   help('فِي الِاسْمِ الْمَنْقُوصِ تُقَدَّرُ الضَّمَّةُ وَالْكَسْرَةُ عَلَى الْيَاءِ لِلثِّقَلِ، وَتَظْهَرُ الْفَتْحَةُ لِخِفَّتِهَا. وَقَدْ تُحْذَفُ الْيَاءُ تَخْفِيفًا فَيُقَدَّرُ الْإِعْرَابُ عَلَيْهَا.','In a manqūṣ noun, ḍammah and kasrah are estimated on the yāʾ because they are heavy, while fatḥah appears because it is light. The yāʾ may be omitted for lightness, with the sign still estimated on it.'),
-  help('فِي الْفِعْلِ الْمُضَارِعِ الْمُعْتَلِّ بِالْأَلِفِ تُقَدَّرُ الضَّمَّةُ وَالْفَتْحَةُ لِلتَّعَذُّرِ. وَفِي الْمُعْتَلِّ بِالْوَاوِ أَوِ الْيَاءِ تُقَدَّرُ الضَّمَّةُ لِلثِّقَلِ وَتَظْهَرُ الْفَتْحَةُ لِخِفَّتِهَا.','In an alif-final present verb, ḍammah and fatḥah are estimated because they cannot appear. In a wāw- or yāʾ-final verb, ḍammah is estimated because it is heavy, while fatḥah appears because it is light.')
+ help('فِي الْفِعْلِ الْمُضَارِعِ الْمُعْتَلِّ بِالْأَلِفِ تُقَدَّرُ الضَّمَّةُ وَالْفَتْحَةُ لِلتَّعَذُّرِ. وَفِي الْمُعْتَلِّ بِالْوَاوِ أَوِ الْيَاءِ تُقَدَّرُ الضَّمَّةُ لِلثِّقَلِ وَتَظْهَرُ الْفَتْحَةُ لِخِفَّتِهَا.','In an alif-final present verb, ḍammah and fatḥah are estimated because they cannot appear. In a wāw- or yāʾ-final verb, ḍammah is estimated because it is heavy, while fatḥah appears because it is light.')
  ],helpSourceEn:'Al-Mutammimah, printed pages 61–63. The exact heading, its noun and verb divisions, the categories, examples, reasons, and the author’s core parsing are from the book. English, full vocalization, concise cards, hidden subjects where identified, and the visual comparison labels are app-prepared.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٦١–٦٣. الْعُنْوَانُ وَقِسْمَا الْأَسْمَاءِ وَالْأَفْعَالِ وَالْأَنْوَاعُ وَالْأَمْثِلَةُ وَالْأَسْبَابُ وَأُصُولُ إِعْرَابِهَا مِنَ الْكِتَابِ، وَأَمَّا التَّرْجَمَةُ وَالضَّبْطُ التَّامُّ وَالْبِطَاقَاتُ الْمُوجَزَةُ وَالضَّمَائِرُ الْمُسْتَتِرَةُ حَيْثُ نُصَّ عَلَيْهَا وَتَسْمِيَاتُ الْمُقَارَنَةِ الْبَصَرِيَّةِ فَمِنَ التَّطْبِيقِ.'}
+ ,{id:'diptote-nouns',babId:'iraab-signs',order:7,titleEn:'The noun that does not take full declension',titleAr:'الِاسْمُ الَّذِي لَا يَنْصَرِفُ',pages:'64–71',book:diptoteNouns,help:[
+  help('الِاسْمُ الَّذِي لَا يَنْصَرِفُ هُوَ اسْمٌ مُعْرَبٌ شَابَهَ الْفِعْلَ بِوُجُودِ عِلَّتَيْنِ فَرْعِيَّتَيْنِ مُخْتَلِفَتَيْنِ، أَوْ عِلَّةٍ وَاحِدَةٍ تَقُومُ مَقَامَ عِلَّتَيْنِ.','A diptote is an inflected noun that resembles the verb through two different secondary causes, or through one cause equivalent to two.'),
+  help('الْعِلَّةُ الْوَاحِدَةُ الْقَائِمَةُ مَقَامَ عِلَّتَيْنِ هِيَ صِيغَةُ مُنْتَهَى الْجُمُوعِ، نَحْوُ «مَسَاجِدَ» وَ«مَصَابِيحَ»، أَوْ أَلِفُ التَّأْنِيثِ الْمَقْصُورَةُ أَوِ الْمَمْدُودَةُ، نَحْوُ «حُبْلَى» وَ«صَحْرَاءَ».','A single cause equivalent to two is either the ultimate plural pattern, such as masājid and maṣābīḥ, or the shortened or extended feminine alif, such as ḥublā and ṣaḥrāʾ.'),
+  help('وَتَجْتَمِعُ الْعِلَّتَانِ فِي مَوَاضِعَ مِنْهَا: الْوَصْفُ مَعَ الْعَدْلِ أَوْ زِيَادَةِ الْأَلِفِ وَالنُّونِ أَوْ وَزْنِ الْفِعْلِ؛ وَالْعَلَمِيَّةُ مَعَ وَزْنِ الْفِعْلِ أَوِ الْعَدْلِ أَوِ التَّأْنِيثِ أَوِ التَّرْكِيبِ الْمَزْجِيِّ أَوْ زِيَادَةِ الْأَلِفِ وَالنُّونِ أَوِ الْعُجْمَةِ.','The book’s paired causes include adjectivehood with semantic conversion, added alif and nūn, or a verbal pattern; and proper-name status with a verbal pattern, semantic conversion, femininity, a fused compound, added alif and nūn, or foreign origin.'),
+  help('يُرْفَعُ الِاسْمُ الَّذِي لَا يَنْصَرِفُ بِالضَّمَّةِ، وَيُنْصَبُ بِالْفَتْحَةِ، وَيُجَرُّ بِالْفَتْحَةِ نِيَابَةً عَنِ الْكَسْرَةِ إِذَا كَانَ مُجَرَّدًا مِنْ «أَلْ» وَالْإِضَافَةِ. فَإِنْ دَخَلَتْ عَلَيْهِ «أَلْ» أَوْ أُضِيفَ جُرَّ بِالْكَسْرَةِ.','A diptote takes ḍammah in rafʿ and fatḥah in naṣb. In khafḍ it takes fatḥah instead of kasrah while bare; with al or in an iḍāfah, it takes ordinary kasrah.'),
+  help('يَسْتَشْهِدُ الْكِتَابُ بِصَرْفِ غَيْرِ الْمُنْصَرِفِ لِلتَّنَاسُبِ فِي قِرَاءَةِ نَافِعٍ: «سَلَاسِلًا» وَ«قَوَارِيرًا قَوَارِيرًا»، وَيَذْكُرُ أَنَّهُ قَدْ يُصْرَفُ لِضَرُورَةِ الشِّعْرِ.','The book cites Nāfiʿ’s fully declined readings salāsilan and qawārīran qawārīran for formal matching, and notes that a diptote may also receive tanwīn for poetic necessity.')
+ ],helpSourceEn:'Al-Mutammimah, printed pages 64–71. The exact heading, the one-cause and two-cause groupings, the nine causes, examples, special readings, and the author’s parsing of the four Book Practice items are from the book. The compact English, full answer vocalization, remaining word-by-word parsing, and the three comparison phrases in the visual are app-prepared; the comparison words themselves are verified from the printed examples and the already-published page-47 verse.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٦٤–٧١. الْعُنْوَانُ وَتَقْسِيمُ الْعِلَلِ إِلَى الْوَاحِدَةِ الْقَائِمَةِ مَقَامَ عِلَّتَيْنِ وَالْعِلَّتَيْنِ الْمُجْتَمِعَتَيْنِ وَالْعِلَلُ التِّسْعُ وَالْأَمْثِلَةُ وَالْقِرَاءَاتُ وَإِعْرَابُ تَدْرِيبَاتِ الْكِتَابِ الْأَرْبَعَةِ مِنَ الْمُؤَلِّفِ. وَأَمَّا التَّرْجَمَةُ الْمُوجَزَةُ وَضَبْطُ الْجَوَابِ وَإِعْرَابُ بَقِيَّةِ الْكَلِمَاتِ وَعِبَارَاتُ الْمُقَارَنَةِ الثَّلَاثُ فَمِنَ التَّطْبِيقِ، وَأَلْفَاظُ الْمُقَارَنَةِ مُرَاجَعَةٌ عَلَى أَمْثِلَةِ هَذَا الْفَصْلِ وَآيَةِ ص ٤٧ الْمَنْشُورَةِ سَابِقًا.'}
 ];
 
 const babs=[
  {id:'opening',order:1,titleEn:'Opening section: Speech and what it consists of',titleAr:'الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ',pages:'19–24'},
  {id:'iraab-bina',order:2,titleEn:'Bāb al-Iʿrāb wa-l-Bināʾ',titleAr:'بَابُ الْإِعْرَابِ وَالْبِنَاءِ',pages:'25–30'},
- {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–63'}
+ {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–71'}
 ];
 
 const helpVisuals={
@@ -1027,8 +1080,10 @@ const helpVisuals={
  ]},
  'jazm-signs':{type:'branches',titleAr:'عَلَامَتَا الْجَزْمِ',titleEn:'The two signs of jazm',branches:[
   {id:'jazm-sukun',labelAr:'السُّكُونُ',labelEn:'Sukūn',descAr:'فِي الْمُضَارِعِ الصَّحِيحِ الْآخِرِ.',descEn:'For a sound-final present verb.',exerciseId:'jazm-01',compare:{beforeAr:'يَلِدُ',afterAr:'لَمْ يَلِدْ',noteAr:'ظَهَرَ السُّكُونُ عَلَى الدَّالِ.',noteEn:'Sukūn appears on the final dāl.',focus:'دْ'}},
-  {id:'jazm-weak',labelAr:'الْحَذْفُ: حَرْفُ الْعِلَّةِ',labelEn:'Deletion: weak letter',descAr:'تُحْذَفُ الْأَلِفُ أَوِ الْوَاوُ أَوِ الْيَاءُ.',descEn:'Final alif, wāw, or yāʾ is deleted.',exerciseId:'jazm-03',compare:{beforeAr:'يَخْشَى',afterAr:'لَمْ يَخْشَ',noteAr:'حُذِفَتِ الْأَلِفُ «ى».',noteEn:'The final alif “ى” disappeared.',deletedAr:'ى'}},
-  {id:'jazm-nun',labelAr:'الْحَذْفُ: النُّونُ',labelEn:'Deletion: nūn',descAr:'تُحْذَفُ نُونُ الْأَفْعَالِ الْخَمْسَةِ.',descEn:'The nūn of the five verb forms is deleted.',exerciseId:'jazm-06',compare:{beforeAr:'تَتُوبَانِ',afterAr:'إِنْ تَتُوبَا',noteAr:'حُذِفَتِ النُّونُ «نِ».',noteEn:'Final nūn “ni” disappeared.',deletedAr:'نِ'}}
+  {id:'jazm-deletion',labelAr:'الْحَذْفُ',labelEn:'Deletion',descAr:'يَكُونُ بِحَذْفِ حَرْفِ الْعِلَّةِ أَوْ حَذْفِ النُّونِ.',descEn:'It is either deletion of a weak letter or deletion of nūn.',children:[
+   {id:'jazm-weak',labelAr:'حَذْفُ حَرْفِ الْعِلَّةِ',labelEn:'Deletion of a weak letter',descAr:'تُحْذَفُ الْأَلِفُ أَوِ الْوَاوُ أَوِ الْيَاءُ.',descEn:'Final alif, wāw, or yāʾ is deleted.',exerciseId:'jazm-03',compare:{beforeAr:'يَخْشَى',afterAr:'لَمْ يَخْشَ',noteAr:'حُذِفَتِ الْأَلِفُ «ى».',noteEn:'The final alif “ى” disappeared.',deletedAr:'ى'}},
+   {id:'jazm-nun',labelAr:'حَذْفُ النُّونِ',labelEn:'Deletion of nūn',descAr:'تُحْذَفُ نُونُ الْأَفْعَالِ الْخَمْسَةِ.',descEn:'The nūn of the five verb forms is deleted.',exerciseId:'jazm-06',compare:{beforeAr:'تَتُوبَانِ',afterAr:'إِنْ تَتُوبَا',noteAr:'حُذِفَتِ النُّونُ «نِ».',noteEn:'Final nūn “ni” disappeared.',deletedAr:'نِ'}}
+  ]}
  ]},
  'summary-recap':{type:'table',titleAr:'مَجْمُوعَاتُ الْمُعْرَبَاتِ وَعَلَامَاتُهَا',titleEn:'Declinable groups and their signs',headersAr:['الْمَجْمُوعَةُ','الرَّفْعُ','النَّصْبُ','الْخَفْضُ / الْجَزْمُ'],headersEn:['Word class','Rafʿ','Naṣb','Khafḍ / jazm'],rows:[
   {cellsAr:['الِاسْمُ الْمُفْرَدُ وَجَمْعُ التَّكْسِيرِ','الضَّمَّةُ','الْفَتْحَةُ','الْكَسْرَةُ'],cellsEn:['Singular noun and broken plural','Ḍammah','Fatḥah','Kasrah']},
@@ -1045,16 +1100,22 @@ const helpVisuals={
   {cellsAr:['الدَّاعِ','ضَمَّةٌ مُقَدَّرَةٌ عَلَى يَاءٍ مَحْذُوفَةٍ','حُذِفَتِ الْيَاءُ لِلتَّخْفِيفِ'],cellsEn:['Al-dāʿi','Estimated ḍammah on an omitted yāʾ','The yāʾ is omitted for lightness'],exerciseId:'estimated-07'},
   {cellsAr:['يَخْشَى','ضَمَّةٌ مُقَدَّرَةٌ عَلَى الْأَلِفِ','التَّعَذُّرُ'],cellsEn:['Yakhshā','Estimated ḍammah on the alif','The vowel cannot appear'],exerciseId:'estimated-10'},
   {cellsAr:['يَدْعُو','ضَمَّةٌ مُقَدَّرَةٌ عَلَى الْوَاوِ','الثِّقَلُ'],cellsEn:['Yadʿū','Estimated ḍammah on the wāw','Pronouncing the vowel is heavy'],exerciseId:'estimated-12'},
-  {cellsAr:['لَنْ يَدْعُوَ','فَتْحَةٌ ظَاهِرَةٌ عَلَى الْوَاوِ','مُقَارَنَةٌ مِنْ إِعْدَادِ التَّطْبِيقِ: الْفَتْحَةُ خَفِيفَةٌ فَتَظْهَرُ'],cellsEn:['Lan yadʿuwa','Visible fatḥah on the wāw','App-supplied comparison label: fatḥah is light, so it appears'],exerciseId:'estimated-14'}
+ {cellsAr:['لَنْ يَدْعُوَ','فَتْحَةٌ ظَاهِرَةٌ عَلَى الْوَاوِ','مُقَارَنَةٌ مِنْ إِعْدَادِ التَّطْبِيقِ: الْفَتْحَةُ خَفِيفَةٌ فَتَظْهَرُ'],cellsEn:['Lan yadʿuwa','Visible fatḥah on the wāw','App-supplied comparison label: fatḥah is light, so it appears'],exerciseId:'estimated-14'}
+ ]},
+ 'diptote-nouns':{type:'table',titleAr:'مَتَى تَكُونُ الْفَتْحَةُ وَمَتَى تَعُودُ الْكَسْرَةُ؟',titleEn:'When does fatḥah appear, and when does kasrah return?',headersAr:['حَالُ الِاسْمِ','مِثَالٌ','عَلَامَةُ الْجَرِّ'],headersEn:['Form of the noun','Example','Genitive sign'],rows:[
+  {cellsAr:['مُجَرَّدٌ مِنْ «أَلْ» وَالْإِضَافَةِ','مَرَرْتُ بِمَسَاجِدَ','الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ'],cellsEn:['Bare: no al and no iḍāfah','I passed by mosques','Fatḥah instead of kasrah — app-prepared comparison using the page-65 example word']},
+  {cellsAr:['مَعَ «أَلْ»','مَرَرْتُ بِالْمَسَاجِدِ','الْكَسْرَةُ الظَّاهِرَةُ'],cellsEn:['With al','I passed by the mosques','Visible kasrah — app-prepared comparison using the page-65 example word']},
+  {cellsAr:['فِي الْإِضَافَةِ','﴿فِي أَحْسَنِ تَقْوِيمٍ﴾','الْكَسْرَةُ الظَّاهِرَةُ'],cellsEn:['In an iḍāfah','In the finest form','Visible kasrah — the book’s page-47 example'],exerciseId:'khafd-17'},
+  {cellsAr:['مَنْصُوبٌ وَمَمْنُوعٌ مِنَ التَّنْوِينِ','جَاءَ الْقَوْمُ أُحَادَ','الْفَتْحَةُ الظَّاهِرَةُ'],cellsEn:['Accusative without tanwīn','The people came one by one','Visible fatḥah; adjectivehood and semantic conversion prevent tanwīn'],exerciseId:'diptote-01'}
  ]}
 };
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});
 
-const quranEn=/Qur[’']an (\d+):(\d+)\./u;
-const quranAr=/سُورَةُ\s+([^،.]+)،\s+الْآيَةُ\s+([٠-٩]+)/u;
+const quranEn=/Qur[’']an (\d+):(\d+)(?:[–-](\d+))?\./u;
+const quranAr=/سُورَةُ\s+([^،.]+)،\s+(?:الْآيَةُ|الْآيَتَانِ)\s+([٠-٩]+(?:[–-][٠-٩]+)?)/u;
 chapters.flatMap(chapter=>chapter.book).forEach(item=>{
  const en=item.sourceEn.match(quranEn),ar=item.sourceAr.match(quranAr);
- if(en&&ar)item.quran={surahNumber:Number(en[1]),ayah:Number(en[2]),surahAr:ar[1],ayahAr:ar[2]};
+ if(en&&ar)item.quran={surahNumber:Number(en[1]),ayah:Number(en[2]),ayahEnd:en[3]?Number(en[3]):null,surahAr:ar[1],ayahAr:ar[2]};
 });
 
 const subjects=[{ar:'الطَّالِبُ',en:'the student'},{ar:'الْمُعَلِّمُ',en:'the teacher'},{ar:'الطَّبِيبُ',en:'the doctor'},{ar:'التَّاجِرُ',en:'the merchant'},{ar:'الْإِمَامُ',en:'the imam'}];

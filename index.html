@@ -4,13 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Miftāḥ al-ʿIlm — مفتاح العلم</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&amp;family=Noto+Naskh+Arabic:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
+/* Lotus is resolved only from a user's licensed local installation. Amiri is the bundled OFL fallback. */
+@font-face{font-family:"Miftah Lotus";src:local("Lotus Linotype Light"),local("Lotus-Light");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"Miftah Amiri";src:url("assets/fonts/Amiri-Regular.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"Miftah Amiri";src:url("assets/fonts/Amiri-Bold.ttf") format("truetype");font-style:normal;font-weight:700;font-display:swap}
 :root{
   --serif:Georgia,"Times New Roman","Liberation Serif",serif;
   --sans:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;
+  --arabic:"Miftah Lotus","Lotus Linotype Light","Lotus-Light","Miftah Amiri","Amiri",serif;
   --forest:#183b33;--forest-2:#1f4a3d;--forest-3:#2f6b55;
   --heading:#1d3a2f;--ink:#1f2d27;--muted:#66756d;
   --paper:#f7f8f5;--card:#fff;--line:#dde3d6;
@@ -25,7 +27,7 @@ button,select{font:inherit}
 button{cursor:pointer}
 button:disabled{cursor:not-allowed;opacity:.45}
 button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outline-offset:2px}
-.arabic{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-variant-ligatures:common-ligatures contextual;text-rendering:optimizeLegibility;letter-spacing:0}
+.arabic{font-family:var(--arabic);font-variant-ligatures:common-ligatures contextual;font-feature-settings:"liga" 1,"calt" 1,"mark" 1,"mkmk" 1;font-kerning:normal;text-rendering:optimizeLegibility;letter-spacing:0}
 .ico{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 
 /* Sidebar */
@@ -101,9 +103,10 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .chapter-meta{text-align:center;color:var(--muted);font-size:13px}
 .practice-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:60px clamp(20px,5vw,48px) clamp(26px,4vw,40px)}
 .book-page{position:absolute;top:16px;right:18px;z-index:1;border:1px solid #c9d6bf;background:var(--sage-fill);color:#4a6342;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:500;line-height:1.2;direction:ltr}
-.sentence{direction:rtl;text-align:center;font-size:clamp(38px,6.4vw,60px);font-weight:600;line-height:2.2;color:var(--forest);margin:0 auto;padding:.14em 0;max-width:900px;overflow:visible}
+.sentence{direction:rtl;text-align:center;font-size:clamp(38px,6.4vw,60px);font-weight:400;line-height:2.3;color:var(--forest);margin:0 auto;padding:.18em 0;max-width:900px;overflow:visible}
 .quran-quote{unicode-bidi:isolate;white-space:normal}
-.quran-ref{display:inline-block;margin-inline-start:.5em;direction:rtl;unicode-bidi:isolate;white-space:nowrap;font-family:"Amiri","Noto Naskh Arabic",serif;font-size:.35em;font-weight:400;line-height:1.8;color:var(--muted);vertical-align:.17em}
+.quran-lead{unicode-bidi:isolate;margin-inline-end:.08em}
+.quran-ref{display:inline-block;margin-inline-start:.5em;direction:rtl;unicode-bidi:isolate;white-space:nowrap;font-family:var(--arabic);font-size:.38em;font-weight:400;line-height:1.9;color:var(--muted);vertical-align:.14em}
 .translation{text-align:center;color:#56655d;font-size:clamp(17px,2.1vw,20px);font-weight:400;line-height:1.6;margin:6px auto 26px;max-width:760px}
 .practice-actions{display:grid;grid-template-columns:1fr minmax(180px,1.35fr) 1fr;gap:12px;max-width:640px;margin:26px auto 0}
 .primary,.secondary{min-height:50px;border-radius:8px;padding:11px 16px;font-size:15px;font-weight:500}
@@ -119,9 +122,9 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .answers{display:grid;gap:12px;max-width:820px;margin:0 auto}
 .word-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
 .word-head{display:flex;justify-content:space-between;align-items:center;gap:14px;background:var(--sage-fill);padding:8px 14px}
-.word-ar{direction:rtl;color:var(--forest);font-size:30px;font-weight:600;line-height:2.2;padding-block:.05em;overflow:visible}
+.word-ar{direction:rtl;color:var(--forest);font-size:31px;font-weight:400;line-height:2.35;padding-block:.08em;overflow:visible}
 .word-gloss{color:var(--muted);font-size:14px}
-.iraab-ar{direction:rtl;text-align:right;padding:13px 16px;font-size:21px;line-height:2.35;overflow:visible}
+.iraab-ar{direction:rtl;text-align:right;padding:14px 16px;font-size:22px;line-height:2.45;overflow:visible}
 .parsed-focus{font-weight:800;color:var(--forest);text-decoration-thickness:.08em;text-underline-offset:.12em}
 .focus-separator{font-weight:400;color:var(--muted)}
 .iraab-en{border-top:1px solid #e9ece4;padding:12px 16px;color:#515c57;line-height:1.6}
@@ -147,6 +150,8 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .visual-branch.active{border-color:var(--sage-line);background:var(--sage-fill)}
 .visual-branch-ar{display:block;direction:rtl;text-align:right;color:var(--forest);font-size:20px;font-weight:700;line-height:1.9}
 .visual-branch-en{display:block;color:var(--muted);font-size:13px;line-height:1.35;margin-top:2px}
+.visual-subbranches{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-inline:18px;padding-inline-start:18px;border-inline-start:2px solid var(--sage-line)}
+.visual-subbranches .visual-branch{min-height:68px;background:color-mix(in srgb,var(--sage-fill) 45%,var(--card))}
 .visual-panel{grid-column:1/-1;border:1px solid var(--sage-line);border-radius:10px;background:var(--sage-fill);padding:16px}
 .visual-panel-ar,.visual-cell-ar,.compare-ar,.visual-example-ar{direction:rtl;text-align:right;color:var(--forest);font-size:20px;line-height:2}
 .visual-panel-en,.visual-cell-en,.compare-en,.visual-example-en{color:#526059;line-height:1.55;margin-top:3px}
@@ -217,7 +222,8 @@ html[data-theme="dark"] .deleted-focus{background:#5b302b;color:#ffd4ca}
 .rtl .brand-en,.rtl .screen-sub.arabic,.rtl .card-title,.rtl .help-en{display:none}
 .rtl .brand-ar{display:block}
 .rtl .word-gloss:empty{display:none}
-.rtl .screen-heading,.rtl .answer-title{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;font-weight:600;line-height:1.7}
+.rtl .screen-heading,.rtl .answer-title{font-family:var(--arabic);font-weight:400;line-height:1.85}
+.rtl button,.rtl select,.rtl label,.rtl .crumb,.rtl .nav-label,.rtl .screen-sub,.rtl .chapter-meta,.rtl .book-page,.rtl .source-detail,.rtl .preferences-copy,.rtl .preferences-copy h2{font-family:var(--arabic)}
 .rtl .visual-title-en,.rtl .visual-branch-en,.rtl .visual-panel-en,.rtl .visual-cell-en,.rtl .compare-en,.rtl .visual-example-en{display:none}
 
 @media(max-width:760px){
@@ -263,6 +269,7 @@ html[data-theme="dark"] .deleted-focus{background:#5b302b;color:#ffd4ca}
   .iraab-en{padding:11px 14px}
   .source-detail{padding:12px}
   .visual-branches{grid-template-columns:1fr}
+  .visual-subbranches{grid-column:1;grid-template-columns:1fr;margin-inline:10px;padding-inline-start:12px}
   .visual-panel{grid-column:1}
   .visual-row{display:block;border-top:0;border-bottom:1px solid var(--line);padding:8px 0}
   .visual-row:last-child{border-bottom:0}
@@ -358,7 +365,7 @@ function emphasizeIraab(text,tokenWord){
  const source=String(text==null?'':text),ranges=[];
  const add=(start,end)=>{if(start>=0&&end>start)ranges.push({start,end})};
  let match;
- const quoted=/«([^»]+)»(?=\s+(?:حَرْفٌ|فِعْلٌ|اسْمٌ|ضَمِيرٌ|مُبْتَدَأٌ|خَبَرٌ|فَاعِلٌ|نَائِبُ|مَفْعُولٌ|مَعْطُوفٌ|ظَرْفُ))/gu;
+ const quoted=/«([^»]+)»(?=\s+(?:حَرْف[ٌَُِ]?|فِعْل[ٌَُِ]?|اسْم[ٌَُِ]?|ضَمِير[ٌَُِ]?|مُبْتَدَأ[ٌَُِ]?|خَبَر[ٌَُِ]?|فَاعِل[ٌَُِ]?|نَائِب[ٌَُِ]?|مَفْعُول[ٌَُِ]?|مَعْطُوف[ٌَُِ]?|ظَرْف[ٌَُِ]?))/gu;
  while((match=quoted.exec(source)))add(match.index+1,match.index+1+match[1].length);
  PARSED_COMPONENTS.forEach(label=>{let from=0,index;while((index=source.indexOf(label,from))!==-1){if(COMPONENT_ANALYSIS.test(source.slice(index+label.length)))add(index,index+label.length);from=index+label.length}});
  const dualSuffix=/الْمِيمُ\s+وَالْأَلِفُ(?=\s+لِلتَّثْنِيَةِ)/gu;
@@ -392,12 +399,27 @@ function renderPickers(){fillSelect($('babSelect'),babs,state.selectedBabId);fil
 function renderNav(){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===`${state.screen}Screen`));const activeNav=state.screen==='home'?'home':state.screen==='preferences'?'preferences':'nahw';document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.go===activeNav));const crumbKeys={home:'home',nahw:'nahwCrumb',help:'helpCrumb',preferences:'preferencesCrumb',practice:state.mode==='book'?'bookCrumb':'extraCrumb'};$('crumb').textContent=tr(crumbKeys[state.screen]);const category=['book','extra','help'].includes(state.category)?state.category:'book';document.querySelectorAll('.choice-card').forEach(card=>{const selected=(card.dataset.start||'help')===category;card.classList.toggle('selected',selected);card.setAttribute('aria-pressed',String(selected))});$('returnPractice').style.display=state.resumeAvailable?'inline-flex':'none';$('backHelpLink').style.display=state.helpLaunch?'inline-flex':'none'}
 const exerciseLocation=id=>{for(const chapter of chapters){const index=chapter.book.findIndex(item=>item.id===id);if(index!==-1)return{chapter,index,exercise:chapter.book[index]}}return null};
 function quranReferenceHtml(exercise){return exercise.quran?`<span class="quran-ref">(${escapeHtml(stripMarks(`سُورَةُ ${exercise.quran.surahAr}`))}، ${escapeHtml(exercise.quran.ayahAr)})</span>`:''}
-function exerciseArabicHtml(exercise){return exercise.quran?`<span class="quran-quote">﴿${escapeHtml(exercise.ar)}﴾</span>${quranReferenceHtml(exercise)}`:escapeHtml(exercise.ar)}
+function exerciseArabicHtml(exercise){return exercise.quran?`${exercise.quranLeadAr?`<span class="quran-lead">${escapeHtml(exercise.quranLeadAr)}</span>`:''}<span class="quran-quote">﴿${escapeHtml(exercise.ar)}﴾</span>${quranReferenceHtml(exercise)}`:escapeHtml(exercise.ar)}
 function highlightLast(text,target,className){const source=String(text||''),index=target?source.lastIndexOf(target):-1;if(index<0)return escapeHtml(source);return `${escapeHtml(source.slice(0,index))}<span class="${className}">${escapeHtml(source.slice(index,index+target.length))}</span>${escapeHtml(source.slice(index+target.length))}`}
 function renderComparison(compare){if(!compare)return'';const before=compare.deletedAr?highlightLast(compare.beforeAr,compare.deletedAr,'deleted-focus'):escapeHtml(compare.beforeAr);const after=compare.focus?highlightLast(compare.afterAr,compare.focus,'ending-focus'):escapeHtml(compare.afterAr);return `<div class="visual-compare"><div class="compare-side"><div class="compare-ar arabic" lang="ar">${before}</div><div class="compare-en">${escapeHtml(compare.beforeEn||tr('before'))}</div></div><div class="compare-arrow" aria-hidden="true">→</div><div class="compare-side"><div class="compare-ar arabic" lang="ar">${after}</div><div class="compare-en">${escapeHtml(compare.afterEn||tr('after'))}</div></div><div class="compare-note"><div class="visual-panel-ar arabic" lang="ar">${escapeHtml(compare.noteAr||'')}</div>${state.lang==='ar'?'':`<div class="visual-panel-en">${escapeHtml(compare.noteEn||'')}</div>`}</div></div>`}
 function renderVisualExample(exerciseId,anchor=''){const found=exerciseLocation(exerciseId);if(!found)return'';const {exercise}=found;return `<div class="visual-row-link" id="${escapeHtml(anchor)}"><div class="visual-example"><div class="visual-example-ar arabic" lang="ar">${exerciseArabicHtml(exercise)}</div>${state.lang==='ar'?'':`<div class="visual-example-en">${escapeHtml(exercise.en)}</div>`}</div><button class="visual-open" data-open-exercise="${escapeHtml(exercise.id)}" data-help-anchor="${escapeHtml(anchor)}">${tr('openExercise')} · ${state.lang==='ar'?`ص ${localDigits(exercise.page)}`:`pg:${exercise.page}`}</button></div>`}
-function renderHelpVisual(chapter){const visual=chapter.visual;if(!visual){$('helpVisual').innerHTML='';return}const title=`<h2 class="visual-title arabic" lang="ar">${arabicDisplay(visual.titleAr)}${state.lang==='ar'?'':`<span class="visual-title-en">${escapeHtml(visual.titleEn)}</span>`}</h2>`;if(visual.type==='branches'){const active=state.helpVisualBranches[chapter.id]||'',buttons=visual.branches.map(branch=>`<button class="visual-branch${branch.id===active?' active':''}" data-visual-branch="${escapeHtml(branch.id)}" aria-expanded="${branch.id===active}"><span class="visual-branch-ar arabic" lang="ar">${arabicDisplay(branch.labelAr)}</span>${state.lang==='ar'?'':`<span class="visual-branch-en">${escapeHtml(branch.labelEn)}</span>`}</button>`).join(''),branch=visual.branches.find(item=>item.id===active);const panel=branch?`<div class="visual-panel" id="visual-${escapeHtml(branch.id)}"><div class="visual-panel-ar arabic" lang="ar">${arabicDisplay(branch.descAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="visual-panel-en">${escapeHtml(branch.descEn)}</div>`}${renderComparison(branch.compare)}${branch.exerciseId?renderVisualExample(branch.exerciseId,`visual-${branch.id}-example`):''}</div>`:'';$('helpVisual').innerHTML=`${title}<div class="visual-branches">${buttons}${panel}</div>`;return}if(visual.type==='table'){const columns=visual.headersAr.length,head=`<div class="visual-row visual-head" style="--visual-cols:${columns}">${visual.headersAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${arabicDisplay(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(visual.headersEn[index])}</div>`}</div>`).join('')}</div>`,rows=visual.rows.map((row,rowIndex)=>`<div class="visual-row" id="visual-row-${rowIndex}" style="--visual-cols:${columns}">${row.cellsAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${escapeHtml(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(row.cellsEn[index])}</div>`}</div>`).join('')}${row.exerciseId?renderVisualExample(row.exerciseId,`visual-row-${rowIndex}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-table">${head}${rows}</div>`;return}const pairs=visual.pairs.map((pair,index)=>`<div class="visual-pair" id="visual-pair-${index}">${renderComparison(pair)}${pair.exerciseId?renderVisualExample(pair.exerciseId,`visual-pair-${index}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-pairs">${pairs}</div>`}
-function openVisualExercise(exerciseId,anchor){const found=exerciseLocation(exerciseId);if(!found)return;state.helpLaunch={babId:found.chapter.babId,chapterId:found.chapter.id,anchor:anchor||''};state.helpBabId=found.chapter.babId;state.helpChapterId=found.chapter.id;state.selectedBabId=found.chapter.babId;state.selectedChapterId=found.chapter.id;state.positions[found.chapter.id]=found.index;state.mode='book';state.category='book';state.revealed=false;state.resumeAvailable=true;setScreen('practice')}
+function renderHelpVisual(chapter){
+ const visual=chapter.visual;if(!visual){$('helpVisual').innerHTML='';return}
+ const title=`<h2 class="visual-title arabic" lang="ar">${arabicDisplay(visual.titleAr)}${state.lang==='ar'?'':`<span class="visual-title-en">${escapeHtml(visual.titleEn)}</span>`}</h2>`;
+ if(visual.type==='branches'){
+  const active=state.helpVisualBranches[chapter.id]||'';
+  const parent=visual.branches.find(branch=>branch.id===active||(branch.children||[]).some(child=>child.id===active));
+  const buttons=visual.branches.map(branch=>{const expanded=branch===parent;return `<button class="visual-branch${expanded?' active':''}" data-visual-branch="${escapeHtml(branch.id)}" aria-expanded="${expanded}"><span class="visual-branch-ar arabic" lang="ar">${arabicDisplay(branch.labelAr)}</span>${state.lang==='ar'?'':`<span class="visual-branch-en">${escapeHtml(branch.labelEn)}</span>`}</button>`}).join('');
+  const children=parent?.children||[];
+  const childButtons=children.length?`<div class="visual-subbranches">${children.map(child=>`<button class="visual-branch${child.id===active?' active':''}" data-visual-branch="${escapeHtml(child.id)}" aria-expanded="${child.id===active}"><span class="visual-branch-ar arabic" lang="ar">${arabicDisplay(child.labelAr)}</span>${state.lang==='ar'?'':`<span class="visual-branch-en">${escapeHtml(child.labelEn)}</span>`}</button>`).join('')}</div>`:'';
+  const detail=children.find(child=>child.id===active)||parent;
+  const panel=detail?`<div class="visual-panel" id="visual-${escapeHtml(detail.id)}"><div class="visual-panel-ar arabic" lang="ar">${arabicDisplay(detail.descAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="visual-panel-en">${escapeHtml(detail.descEn)}</div>`}${renderComparison(detail.compare)}${detail.exerciseId?renderVisualExample(detail.exerciseId,`visual-${detail.id}-example`):''}</div>`:'';
+  $('helpVisual').innerHTML=`${title}<div class="visual-branches">${buttons}${childButtons}${panel}</div>`;return
+ }
+ if(visual.type==='table'){const columns=visual.headersAr.length,head=`<div class="visual-row visual-head" style="--visual-cols:${columns}">${visual.headersAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${arabicDisplay(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(visual.headersEn[index])}</div>`}</div>`).join('')}</div>`,rows=visual.rows.map((row,rowIndex)=>`<div class="visual-row" id="visual-row-${rowIndex}" style="--visual-cols:${columns}">${row.cellsAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${escapeHtml(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(row.cellsEn[index])}</div>`}</div>`).join('')}${row.exerciseId?renderVisualExample(row.exerciseId,`visual-row-${rowIndex}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-table">${head}${rows}</div>`;return}
+ const pairs=visual.pairs.map((pair,index)=>`<div class="visual-pair" id="visual-pair-${index}">${renderComparison(pair)}${pair.exerciseId?renderVisualExample(pair.exerciseId,`visual-pair-${index}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-pairs">${pairs}</div>`
+}
+function openVisualExercise(exerciseId,anchor){const found=exerciseLocation(exerciseId);if(!found)return;state.helpLaunch={babId:state.helpBabId,chapterId:state.helpChapterId,anchor:anchor||''};state.selectedBabId=found.chapter.babId;state.selectedChapterId=found.chapter.id;state.positions[found.chapter.id]=found.index;state.mode='book';state.category='book';state.revealed=false;state.resumeAvailable=true;setScreen('practice')}
 function returnToHelp(){if(!state.helpLaunch)return;state.helpBabId=state.helpLaunch.babId;state.helpChapterId=state.helpLaunch.chapterId;state.category='help';const anchor=state.helpLaunch.anchor;setScreen('help');if(anchor)setTimeout(()=>document.getElementById(anchor)?.scrollIntoView({block:'center'}),0)}
 function renderAnswer(exercise){const arabic=state.lang==='ar',words=quotedWords(exercise);$('answers').innerHTML=exercise.tokens.map((token,index)=>{const why=arabic?token.whyAr:token.whyEn,parts=token.parts||[{ar:token.ar,en:token.en}],answer=parts.map(part=>`<div class="answer-part"><div class="iraab-ar arabic" lang="ar">${emphasizeIraab(part.ar,token.word)}</div>${arabic?'':`<div class="iraab-en">${escapeHtml(part.en)}</div>`}</div>`).join('');return `<article class="word-card"><div class="word-head"><span class="word-gloss">${arabic?'':escapeHtml(token.gloss)}</span><span class="word-ar arabic" lang="ar">${escapeHtml(token.word)}</span></div>${answer}${why?`<button class="why-toggle" data-why="${index}" aria-expanded="false">${tr('why')}</button><div class="why-text ${arabic?'why-ar arabic':''}" id="why-${index}">${arabic?arabicDisplay(token.whyAr,{words}):escapeHtml(token.whyEn)}</div>`:''}</article>`}).join('');$('sourceDetail').textContent=arabic?arabicDisplay(exercise.sourceAr,{words}):exercise.sourceEn}
 function renderPractice(){const exercise=currentExercise(),chapter=selectedChapter(),arabic=state.lang==='ar',index=currentIndex(),total=state.mode==='extra'?null:chapter.book.length;$('sentence').innerHTML=exerciseArabicHtml(exercise);$('translation').textContent=exercise.en;$('translation').style.display=arabic?'none':'block';$('bookPage').textContent=state.mode==='book'?(arabic?`ص ${localDigits(exercise.page)}`:`pg:${exercise.page}`):'';$('bookPage').style.display=state.mode==='book'?'block':'none';$('answerPanel').classList.toggle('open',state.revealed);$('previousBtn').textContent=tr('previous');$('revealBtn').textContent=state.revealed?tr('hide'):tr('reveal');$('nextBtn').textContent=tr('next');$('previousBtn').disabled=index===0;$('nextBtn').disabled=state.mode==='book'&&index===total-1;$('chapterMeta').textContent=state.mode==='extra'?tr('generated'):`${tr('item')} ${localDigits(index+1)} ${tr('of')} ${localDigits(total)}`;renderAnswer(exercise)}

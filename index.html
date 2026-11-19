@@ -187,6 +187,7 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .visual-pairs{display:grid;gap:12px}
 .visual-pair{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--card)}
 .visual-contrast{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.visual-contrast.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .contrast-card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:16px;min-width:0}
 .contrast-label-ar{direction:rtl;text-align:right;color:var(--muted);font-size:17px;line-height:1.8}
 .contrast-example{direction:rtl;text-align:center;color:var(--forest);font-size:34px;line-height:2.1;margin:6px 0}
@@ -297,7 +298,7 @@ html[data-theme="dark"] .deleted-focus{background:#5b302b;color:#ffd4ca}
   .visual-cell+.visual-cell{border-top:1px dashed var(--line)}
   .visual-row-link{display:flex;border-top:1px dashed var(--line);padding:9px 12px}
   .visual-compare{grid-template-columns:1fr}
-  .visual-contrast{grid-template-columns:1fr}
+  .visual-contrast,.visual-contrast.three{grid-template-columns:1fr}
   .compare-arrow{transform:rotate(90deg);text-align:center}
   .compare-note{grid-column:1}
 }
@@ -443,7 +444,7 @@ function renderHelpVisual(chapter){
   $('helpVisual').innerHTML=`${title}<div class="visual-branches">${buttons}${childButtons}${panel}</div>`;return
  }
  if(visual.type==='table'){const columns=visual.headersAr.length,head=`<div class="visual-row visual-head" style="--visual-cols:${columns}">${visual.headersAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${arabicDisplay(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(visual.headersEn[index])}</div>`}</div>`).join('')}</div>`,rows=visual.rows.map((row,rowIndex)=>`<div class="visual-row" id="visual-row-${rowIndex}" style="--visual-cols:${columns}">${row.cellsAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${escapeHtml(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(row.cellsEn[index])}</div>`}</div>`).join('')}${row.exerciseId?renderVisualExample(row.exerciseId,`visual-row-${rowIndex}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-table">${head}${rows}</div>`;return}
- if(visual.type==='contrast'){const cards=visual.examples.map((example,index)=>{const highlighted=highlightLast(example.exampleAr,example.focusAr,'ending-focus');return `<article class="contrast-card" id="visual-contrast-${index}"><div class="contrast-label-ar arabic" lang="ar">${arabicDisplay(example.labelAr)}</div><div class="contrast-example arabic" lang="ar">${highlighted}</div>${state.lang==='ar'?'':`<div class="contrast-en">${escapeHtml(example.exampleEn)}</div>`}${example.exerciseId?renderVisualExample(example.exerciseId,`visual-contrast-${index}-example`):''}</article>`}).join('');$('helpVisual').innerHTML=`${title}<div class="visual-contrast">${cards}</div>`;return}
+ if(visual.type==='contrast'){const cards=visual.examples.map((example,index)=>{const highlighted=highlightLast(example.exampleAr,example.focusAr,'ending-focus');return `<article class="contrast-card" id="visual-contrast-${index}"><div class="contrast-label-ar arabic" lang="ar">${arabicDisplay(example.labelAr)}</div><div class="contrast-example arabic" lang="ar">${highlighted}</div>${state.lang==='ar'?'':`<div class="contrast-en">${escapeHtml(example.exampleEn)}</div>`}${example.exerciseId?renderVisualExample(example.exerciseId,`visual-contrast-${index}-example`):''}</article>`}).join('');$('helpVisual').innerHTML=`${title}<div class="visual-contrast${visual.examples.length===3?' three':''}">${cards}</div>`;return}
  const pairs=visual.pairs.map((pair,index)=>`<div class="visual-pair" id="visual-pair-${index}">${renderComparison(pair)}${pair.exerciseId?renderVisualExample(pair.exerciseId,`visual-pair-${index}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-pairs">${pairs}</div>`
 }
 function openVisualExercise(exerciseId,anchor){const found=exerciseLocation(exerciseId);if(!found)return;state.helpLaunch={babId:state.helpBabId,chapterId:state.helpChapterId,anchor:anchor||''};state.selectedBabId=found.chapter.babId;state.selectedChapterId=found.chapter.id;state.positions[found.chapter.id]=found.index;state.mode='book';state.category='book';state.bookFilter='all';state.revealed=false;state.resumeAvailable=true;setScreen('practice')}

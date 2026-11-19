@@ -889,9 +889,183 @@ const definitenessIntro=[
  ],'Footnote 3 prints “marartu bi-Zaydin ṣāḥibika” to show that the descriptive annexed noun does not outrank the proper noun it describes. The page does not give a word-by-word parse.','تَطْبَعُ الْحَاشِيَةُ الثَّالِثَةُ «مَرَرْتُ بِزَيْدٍ صَاحِبِكَ»، لِبَيَانِ أَنَّ الصِّفَةَ الْمُضَافَةَ لَا تَكُونُ أَعْرَفَ مِنَ الْمَوْصُوفِ الْعَلَمِ، وَلَا تَذْكُرُ إِعْرَابًا مُفَصَّلًا.')
 ];
 
+const pronounForms=[
+ exercise('pronoun-01',73,'اِضْرِبْ وَقُمْ','Strike and stand.',[
+  token('اِضْرِبْ','strike','فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.','Imperative built on sukūn; its obligatorily hidden subject is “you.”'),
+  answerParts('وَقُمْ','and stand',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«قُمْ» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.',en:'Qum is an imperative built on sukūn; its obligatorily hidden subject is “you.”'}
+  ])
+ ],'The author gives both imperatives as examples whose subject pronoun must be hidden. The page does not parse the remaining details word by word.','يَذْكُرُ الْمُؤَلِّفُ فِعْلَيِ الْأَمْرِ مِثَالَيْنِ لِوُجُوبِ اسْتِتَارِ ضَمِيرِ الْفَاعِلِ، وَلَا يُفَصِّلُ بَقِيَّةَ الْإِعْرَابِ كَلِمَةً كَلِمَةً.'),
+ exercise('pronoun-02',73,'تَقُومُ وَتَضْرِبُ','You stand and strike.',[
+  token('تَقُومُ','you stand','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.','Present verb, nominative with a visible ḍammah; its obligatorily hidden subject is “you.”'),
+  answerParts('وَتَضْرِبُ','and you strike',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«تَضْرِبُ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.',en:'Taḍribu is present and nominative with a visible ḍammah; its obligatorily hidden subject is “you.”'}
+  ])
+ ],'The author gives these singular masculine address forms as examples of an obligatorily hidden subject pronoun.','يَذْكُرُ الْمُؤَلِّفُ هَذَيْنِ الْفِعْلَيْنِ الْمَبْدُوءَيْنِ بِتَاءِ خِطَابِ الْوَاحِدِ الْمُذَكَّرِ مِثَالَيْنِ لِلضَّمِيرِ الْمُسْتَتِرِ وُجُوبًا.'),
+ exercise('pronoun-03',73,'أَقُومُ وَأَضْرِبُ','I stand and strike.',[
+  token('أَقُومُ','I stand','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنَا.','Present verb, nominative with a visible ḍammah; its obligatorily hidden subject is “I.”'),
+  answerParts('وَأَضْرِبُ','and I strike',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«أَضْرِبُ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنَا.',en:'Aḍribu is present and nominative with a visible ḍammah; its obligatorily hidden subject is “I.”'}
+  ])
+ ],'The author gives these hamzah-initial present verbs as examples of an obligatorily hidden speaker pronoun.','يَذْكُرُ الْمُؤَلِّفُ هَذَيْنِ الْفِعْلَيْنِ الْمَبْدُوءَيْنِ بِهَمْزَةِ الْمُضَارَعَةِ مِثَالَيْنِ لِضَمِيرِ الْمُتَكَلِّمِ الْمُسْتَتِرِ وُجُوبًا.'),
+ exercise('pronoun-04',73,'نَقُومُ وَنَضْرِبُ','We stand and strike.',[
+  token('نَقُومُ','we stand','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ نَحْنُ.','Present verb, nominative with a visible ḍammah; its obligatorily hidden subject is “we.”'),
+  answerParts('وَنَضْرِبُ','and we strike',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«نَضْرِبُ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ نَحْنُ.',en:'Naḍribu is present and nominative with a visible ḍammah; its obligatorily hidden subject is “we.”'}
+  ])
+ ],'The author gives these nūn-initial present verbs as examples of an obligatorily hidden speaker pronoun.','يَذْكُرُ الْمُؤَلِّفُ هَذَيْنِ الْفِعْلَيْنِ الْمَبْدُوءَيْنِ بِنُونِ الْمُضَارَعَةِ مِثَالَيْنِ لِضَمِيرِ الْمُتَكَلِّمِينَ الْمُسْتَتِرِ وُجُوبًا.'),
+ exercise('pronoun-05',73,'فَاذْهَبْ أَنْتَ وَرَبُّكَ فَقَاتِلَا','So go, you and your Lord, and fight.',[
+  answerParts('فَاذْهَبْ','so go',[
+   {ar:'الْفَاءُ حَرْفُ عَطْفٍ.',en:'Fāʾ is a conjunction.'},
+   {ar:'«اذْهَبْ» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.',en:'Idhhab is an imperative built on sukūn; its obligatorily hidden subject is “you.”'}
+  ]),
+  answerParts('أَنْتَ','you',[
+   {ar:'«أَنْ» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ تَوْكِيدٌ لِلضَّمِيرِ الْمُسْتَتِرِ فِي «اذْهَبْ».',en:'An is a detached pronoun built on sukūn in the nominative position as emphasis of the hidden subject of idhhab.'},
+   {ar:'التَّاءُ حَرْفُ خِطَابٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ.',en:'Tāʾ is an address letter built on fatḥ, with no syntactic position.'}
+  ]),
+  answerParts('وَرَبُّكَ','and your Lord',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«رَبُّ» مَعْطُوفٌ عَلَى الضَّمِيرِ الْمُسْتَتِرِ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.',en:'Rabbu is coordinated with the hidden subject, nominative with a visible ḍammah. It is the first term of the iḍāfah.'},
+   {ar:'الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'Kāf is an attached pronoun built on fatḥ in the genitive position as the second term of the iḍāfah.'}
+  ]),
+  answerParts('فَقَاتِلَا','then fight, you two',[
+   {ar:'الْفَاءُ حَرْفُ عَطْفٍ.',en:'Fāʾ is a conjunction.'},
+   {ar:'«قَاتِلَا» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى حَذْفِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.',en:'Qātilā is an imperative built by deleting nūn because it is one of the five verb forms.'},
+   {ar:'أَلِفُ الِاثْنَيْنِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',en:'Dual alif is an attached pronoun in the nominative position as subject.'}
+  ])
+ ],'Qur’an 5:24. The footnote quotes the excerpt and explicitly identifies anta as emphasis of the obligatorily hidden subject in idhhab. The remaining word-by-word analysis is app-supplied.','سُورَةُ الْمَائِدَةِ، الْآيَةُ ٢٤. تَقْتَبِسُ الْحَاشِيَةُ هَذَا الْجُزْءَ، وَتَنُصُّ عَلَى أَنَّ «أَنْتَ» تَوْكِيدٌ لِلضَّمِيرِ الْمُسْتَتِرِ وُجُوبًا فِي «اذْهَبْ». وَإِعْرَابُ بَقِيَّةِ الْكَلِمَاتِ مِنَ التَّطْبِيقِ.'),
+ exercise('pronoun-06',74,'زَيْدٌ يَقُومُ','Zayd stands.',[
+  token('زَيْدٌ','Zayd','مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Nominal-sentence subject, nominative with a visible ḍammah.'),
+  token('يَقُومُ','stands','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ، وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','Present verb, nominative with a visible ḍammah; its optionally hidden subject is “he.” The verbal sentence is the predicate.')
+ ],'The author gives this sentence as an example of a subject pronoun that may be hidden because the explicit noun could take its place.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ مِثَالًا لِجَوَازِ اسْتِتَارِ ضَمِيرِ الْفَاعِلِ؛ لِإِمْكَانِ قِيَامِ الِاسْمِ الظَّاهِرِ مَقَامَهُ.'),
+ exercise('pronoun-07',74,'هِنْدٌ تَقُومُ','Hind stands.',[
+  token('هِنْدٌ','Hind','مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Nominal-sentence subject, nominative with a visible ḍammah.'),
+  token('تَقُومُ','stands','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هِيَ، وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','Present verb, nominative with a visible ḍammah; its optionally hidden subject is “she.” The verbal sentence is the predicate.')
+ ],'The author gives this sentence as the feminine example of a subject pronoun that may be hidden.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ مِثَالًا مُؤَنَّثًا لِجَوَازِ اسْتِتَارِ ضَمِيرِ الْفَاعِلِ.'),
+ exercise('pronoun-08',74,'قُمْتُ','I stood.',[
+  answerParts('قُمْتُ','I stood',[
+   {ar:'«قُمْتُ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.',en:'The past verb is built on sukūn because subject tāʾ is attached.'},
+   {ar:'تَاءُ الْفَاعِلِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',en:'Subject tāʾ is an attached pronoun built on ḍamm in the nominative position as subject.'}
+  ])
+ ],'The author uses this form to illustrate a pronoun that is attached and cannot begin an utterance or follow illā. The detailed parse is app-supplied.','يَسْتَعْمِلُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ مِثَالًا لِلضَّمِيرِ الْمُتَّصِلِ الَّذِي لَا يُبْتَدَأُ بِهِ وَلَا يَقَعُ بَعْدَ «إِلَّا»، وَالْإِعْرَابُ التَّفْصِيلِيُّ مِنَ التَّطْبِيقِ.'),
+ exercise('pronoun-09',74,'أَكْرَمَكَ','He honored you.',[
+  answerParts('أَكْرَمَكَ','he honored you',[
+   {ar:'«أَكْرَمَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.',en:'Akrama is a past verb built on fatḥ; its hidden subject is “he.”'},
+   {ar:'الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ.',en:'Kāf is an attached pronoun built on fatḥ in the accusative position as object.'}
+  ])
+ ],'The author uses this form as a second example of an attached pronoun. The detailed parse is app-supplied.','يَسْتَعْمِلُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ مِثَالًا ثَانِيًا لِلضَّمِيرِ الْمُتَّصِلِ، وَالْإِعْرَابُ التَّفْصِيلِيُّ مِنَ التَّطْبِيقِ.'),
+ exercise('pronoun-10',74,'أَنَا مُؤْمِنٌ','I am a believer.',[
+  token('أَنَا','I','ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Detached pronoun built on sukūn in the nominative position as nominal-sentence subject.'),
+  token('مُؤْمِنٌ','a believer','خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Predicate, nominative with a visible ḍammah.')
+ ],'The author uses this sentence to show that a detached pronoun can begin an utterance. The detailed parse is app-supplied.','يَسْتَعْمِلُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ لِبَيَانِ أَنَّ الضَّمِيرَ الْمُنْفَصِلَ يُبْتَدَأُ بِهِ، وَالْإِعْرَابُ التَّفْصِيلِيُّ مِنَ التَّطْبِيقِ.'),
+ exercise('pronoun-11',74,'مَا قَامَ إِلَّا أَنَا','No one stood except me.',[
+  token('مَا','not','حَرْفُ نَفْيٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ.','Negation particle built on sukūn, with no syntactic position.'),
+  token('قَامَ','stood','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb built on fatḥ.'),
+  token('إِلَّا','except','أَدَاةُ حَصْرٍ لَا مَحَلَّ لَهَا.','Restriction particle with no syntactic position.'),
+  token('أَنَا','I','ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Detached pronoun built on sukūn in the nominative position as subject.')
+ ],'The author uses this sentence to show that a detached pronoun may occur after illā. The detailed parse is app-supplied.','يَسْتَعْمِلُ الْمُؤَلِّفُ هَذِهِ الْجُمْلَةَ لِبَيَانِ وُقُوعِ الضَّمِيرِ الْمُنْفَصِلِ بَعْدَ «إِلَّا»، وَالْإِعْرَابُ التَّفْصِيلِيُّ مِنَ التَّطْبِيقِ.'),
+ exercise('pronoun-12',75,'مَرَّ بِي','He passed by me.',[
+  token('مَرَّ','he passed','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Past verb built on fatḥ; its hidden subject is “he.”'),
+  answerParts('بِي','by me',[
+   {ar:'الْبَاءُ حَرْفُ جَرٍّ.',en:'Bāʾ is a preposition.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ بِالْبَاءِ.',en:'Speaker’s yāʾ is an attached pronoun built on sukūn in the genitive position after bāʾ.'}
+  ])
+ ],'The author gives this phrase first among examples of attached pronouns in the genitive position. The detailed parse is app-supplied.','يَذْكُرُ الْمُؤَلِّفُ هَذَا التَّرْكِيبَ أَوَّلَ أَمْثِلَةِ الضَّمَائِرِ الْمُتَّصِلَةِ فِي مَحَلِّ الْجَرِّ، وَالْإِعْرَابُ التَّفْصِيلِيُّ مِنَ التَّطْبِيقِ.'),
+ exercise('pronoun-13',75,'مَرَّ بِنَا','He passed by us.',[
+  token('مَرَّ','he passed','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Past verb built on fatḥ; its hidden subject is “he.”'),
+  answerParts('بِنَا','by us',[
+   {ar:'الْبَاءُ حَرْفُ جَرٍّ.',en:'Bāʾ is a preposition.'},
+   {ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ بِالْبَاءِ.',en:'Nā is an attached pronoun built on sukūn in the genitive position after bāʾ.'}
+  ])
+ ],'The author gives this phrase next in the genitive attached-pronoun series. The detailed parse is app-supplied.','يَذْكُرُ الْمُؤَلِّفُ هَذَا التَّرْكِيبَ بَعْدَ الْمِثَالِ السَّابِقِ فِي سِلْسِلَةِ الضَّمَائِرِ الْمُتَّصِلَةِ الْمَجْرُورَةِ، وَالْإِعْرَابُ التَّفْصِيلِيُّ مِنَ التَّطْبِيقِ.'),
+ exercise('pronoun-14',75,'أَنَا رَبُّكُمْ','I am your lord.',[
+  token('أَنَا','I','ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Detached pronoun built on sukūn in the nominative position as nominal-sentence subject.'),
+  answerParts('رَبُّكُمْ','your lord',[
+   {ar:'«رَبُّ» خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.',en:'Rabbu is the predicate, nominative with a visible ḍammah. It is the first term of the iḍāfah.'},
+   {ar:'الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'Kāf is an attached pronoun built on ḍamm in the genitive position as the second term of the iḍāfah.'},
+   {ar:'الْمِيمُ عَلَامَةُ الْجَمْعِ.',en:'Mīm marks the plural.'}
+  ])
+ ],'Qur’an 79:24. The footnote quotes and parses the excerpt, identifying anā as the detached nominal-sentence subject and rabbukum as its predicate.','سُورَةُ النَّازِعَاتِ، الْآيَةُ ٢٤. تَقْتَبِسُ الْحَاشِيَةُ الْجُزْءَ وَتُعْرِبُهُ، فَتَجْعَلُ «أَنَا» مُبْتَدَأً وَ«رَبُّكُمْ» خَبَرَهُ.'),
+ exercise('pronoun-15',75,'وَنَحْنُ الْوَارِثُونَ','And We are the inheritors.',[
+  answerParts('وَنَحْنُ','and We',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«نَحْنُ» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.',en:'Naḥnu is a detached pronoun built on ḍamm in the nominative position as nominal-sentence subject.'}
+  ]),
+  token('الْوَارِثُونَ','the inheritors','خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْوَاوُ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.','Predicate, nominative with wāw instead of ḍammah because it is a sound masculine plural.')
+ ],'Qur’an 15:23. The footnote quotes and parses the excerpt, identifying naḥnu as the detached pronoun and al-wārithūna as its predicate.','سُورَةُ الْحِجْرِ، الْآيَةُ ٢٣. تَقْتَبِسُ الْحَاشِيَةُ الْجُزْءَ وَتُعْرِبُهُ، فَتَجْعَلُ «نَحْنُ» الضَّمِيرَ الْمُنْفَصِلَ وَ«الْوَارِثُونَ» خَبَرَهُ.'),
+ exercise('pronoun-16',76,'وَأَنْتَ مَوْلَانَا','And You are our Protector.',[
+  answerParts('وَأَنْتَ','and You',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«أَنْ» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.',en:'An is a detached pronoun built on sukūn in the nominative position as nominal-sentence subject.'},
+   {ar:'التَّاءُ حَرْفُ خِطَابٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ.',en:'Tāʾ is an address letter built on fatḥ, with no syntactic position.'}
+  ]),
+  answerParts('مَوْلَانَا','our Protector',[
+   {ar:'«مَوْلَى» خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَهُوَ مُضَافٌ.',en:'Mawlā is the predicate, nominative with an estimated ḍammah on the alif because it cannot appear. It is the first term of the iḍāfah.'},
+   {ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'Nā is an attached pronoun built on sukūn in the genitive position as the second term of the iḍāfah.'}
+  ])
+ ],'Qur’an 2:286. The footnote quotes and parses the excerpt, including the detached anta and the attached nā.','سُورَةُ الْبَقَرَةِ، الْآيَةُ ٢٨٦. تَقْتَبِسُ الْحَاشِيَةُ الْجُزْءَ وَتُعْرِبُهُ، وَمِنْهُ الضَّمِيرُ الْمُنْفَصِلُ «أَنْتَ» وَالضَّمِيرُ الْمُتَّصِلُ «نَا».'),
+ exercise('pronoun-17',76,'وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ','And He has power over all things.',[
+  answerParts('وَهُوَ','and He',[
+   {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
+   {ar:'«هُوَ» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.',en:'Huwa is a detached pronoun built on fatḥ in the nominative position as nominal-sentence subject.'}
+  ]),
+  token('عَلَى','over','حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ الْمُقَدَّرِ عَلَى الْأَلِفِ، لَا مَحَلَّ لَهُ.','Preposition built on an estimated sukūn on the alif, with no syntactic position.'),
+  token('كُلِّ','all','اسْمٌ مَجْرُورٌ بِـ«عَلَى»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ. وَشِبْهُ الْجُمْلَةِ مُتَعَلِّقٌ بِـ«قَدِيرٌ».','Noun governed by ʿalā, genitive with a visible kasrah. It is the first term of the iḍāfah; the prepositional phrase relates to qadīrun.'),
+  token('شَيْءٍ','thing','مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','The second term of the iḍāfah, genitive with a visible kasrah.'),
+  token('قَدِيرٌ','powerful','خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Predicate, nominative with a visible ḍammah.')
+ ],'Qur’an 5:120. The footnote quotes and parses the excerpt, including huwa as the detached pronoun and the relation of the prepositional phrase to qadīrun.','سُورَةُ الْمَائِدَةِ، الْآيَةُ ١٢٠. تَقْتَبِسُ الْحَاشِيَةُ الْجُزْءَ وَتُعْرِبُهُ، وَمِنْهُ «هُوَ» الضَّمِيرُ الْمُنْفَصِلُ وَتَعَلُّقُ الْجَارِّ وَالْمَجْرُورِ بِـ«قَدِيرٌ».'),
+ exercise('pronoun-18',76,'إِيَّاكَ نَعْبُدُ','You alone we worship.',[
+  answerParts('إِيَّاكَ','You alone',[
+   {ar:'«إِيَّا» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ مُقَدَّمٌ.',en:'Iyyā is a detached pronoun built on sukūn in the accusative position as the fronted object.'},
+   {ar:'كَافُ الْخِطَابِ حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ.',en:'Address kāf is a particle built on fatḥ, with no syntactic position.'}
+  ]),
+  token('نَعْبُدُ','we worship','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ نَحْنُ.','Present verb, nominative with a visible ḍammah; its obligatorily hidden subject is “we.”')
+ ],'Qur’an 1:5. The footnote quotes and parses the excerpt, treating iyyā as the detached accusative pronoun and kāf as the address letter.','سُورَةُ الْفَاتِحَةِ، الْآيَةُ ٥. تَقْتَبِسُ الْحَاشِيَةُ الْجُزْءَ وَتُعْرِبُهُ، فَتَجْعَلُ «إِيَّا» الضَّمِيرَ الْمُنْفَصِلَ الْمَنْصُوبَ وَالْكَافَ حَرْفَ خِطَابٍ.'),
+ exercise('pronoun-19',76,'إِيَّاكُمْ كَانُوا يَعْبُدُونَ','You they used to worship.',[
+  answerParts('إِيَّاكُمْ','you',[
+   {ar:'«إِيَّا» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ مُقَدَّمٌ لِـ«يَعْبُدُونَ».',en:'Iyyā is a detached pronoun built on sukūn in the accusative position as the fronted object of yaʿbudūna.'},
+   {ar:'كَافُ الْخِطَابِ حَرْفٌ مَبْنِيٌّ عَلَى الضَّمِّ، لَا مَحَلَّ لَهُ.',en:'Address kāf is a particle built on ḍamm, with no syntactic position.'},
+   {ar:'الْمِيمُ لِلْجَمْعِ.',en:'Mīm marks the plural.'}
+  ]),
+  answerParts('كَانُوا','they used to',[
+   {ar:'«كَانَ» فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الضَّمِّ لِاتِّصَالِهِ بِوَاوِ الْجَمَاعَةِ.',en:'Kāna is a deficient past verb built on ḍamm because group wāw is attached.'},
+   {ar:'وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ اسْمُ «كَانَ».',en:'Group wāw is an attached pronoun in the nominative position as the subject noun of kāna.'}
+  ]),
+  answerParts('يَعْبُدُونَ','they worship',[
+   {ar:'«يَعْبُدُونَ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ ثُبُوتُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.',en:'Yaʿbudūna is present and nominative by retention of nūn because it is one of the five verb forms.'},
+   {ar:'وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ نَصْبٍ خَبَرُ «كَانَ».',en:'Group wāw is an attached pronoun in the nominative position as subject; the verbal sentence is the predicate of kāna.'}
+  ])
+ ],'Qur’an 34:40. The footnote quotes and parses the excerpt, including the detached object and both attached group-wāw pronouns.','سُورَةُ سَبَإٍ، الْآيَةُ ٤٠. تَقْتَبِسُ الْحَاشِيَةُ الْجُزْءَ وَتُعْرِبُهُ، وَمِنْهُ الضَّمِيرُ الْمُنْفَصِلُ الْمَفْعُولُ بِهِ وَوَاوَا الْجَمَاعَةِ الْمُتَّصِلَتَانِ.'),
+ exercise('pronoun-20',77,'سَلْنِي إِيَّاهُ','Ask me for it.',[
+  answerParts('سَلْنِي','ask me',[
+   {ar:'«سَلْ» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.',en:'Sal is an imperative built on sukūn; its obligatorily hidden subject is “you.”'},
+   {ar:'النُّونُ لِلْوِقَايَةِ.',en:'Nūn is protective.'},
+   {ar:'يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ أَوَّلٌ.',en:'Speaker’s yāʾ is an attached pronoun built on sukūn in the accusative position as first object.'}
+  ]),
+  answerParts('إِيَّاهُ','it',[
+   {ar:'«إِيَّا» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ ثَانٍ.',en:'Iyyā is a detached pronoun built on sukūn in the accusative position as second object.'},
+   {ar:'الْهَاءُ حَرْفُ غَيْبَةٍ.',en:'Hāʾ marks the absent referent.'}
+  ])
+ ],'The author gives the separated form and its footnote parses the imperative, hidden subject, protective nūn, attached first object, and detached second object.','يَذْكُرُ الْمُؤَلِّفُ الصِّيغَةَ الْمَفْصُولَةَ، وَتُعْرِبُ حَاشِيَتُهُ فِعْلَ الْأَمْرِ وَفَاعِلَهُ الْمُسْتَتِرَ وَنُونَ الْوِقَايَةِ وَالْمَفْعُولَيْنِ الْمُتَّصِلَ وَالْمُنْفَصِلَ.'),
+ exercise('pronoun-21',77,'كُنْتُ إِيَّاهُ','I was it.',[
+  answerParts('كُنْتُ','I was',[
+   {ar:'«كَانَ» فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.',en:'Kāna is a deficient past verb built on sukūn because subject tāʾ is attached.'},
+   {ar:'تَاءُ الْفَاعِلِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ اسْمُ «كَانَ».',en:'Subject tāʾ is an attached pronoun built on ḍamm in the nominative position as the subject noun of kāna.'}
+  ]),
+  answerParts('إِيَّاهُ','it',[
+   {ar:'«إِيَّا» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ خَبَرُ «كَانَ».',en:'Iyyā is a detached pronoun built on sukūn in the accusative position as the predicate of kāna.'},
+   {ar:'الْهَاءُ حَرْفُ غَيْبَةٍ.',en:'Hāʾ marks the absent referent.'}
+  ])
+ ],'The author gives the separated form and its footnote parses the attached tāʾ as the subject noun of kāna and iyyā as its predicate.','يَذْكُرُ الْمُؤَلِّفُ الصِّيغَةَ الْمَفْصُولَةَ، وَتُعْرِبُ حَاشِيَتُهُ تَاءَ الْفَاعِلِ اسْمًا لِـ«كَانَ» وَ«إِيَّا» خَبَرًا لَهَا.')
+];
+
 // Complex cards still use one compact classroom answer. These overrides keep
 // attached elements and sentence-level positions only when they complete the parse.
-const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns,definitenessIntro];
+const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns,definitenessIntro,pronounForms];
 const setConciseAnswer=(exerciseId,word,ar,en)=>{
  const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
  const answer=item&&item.tokens.find(entry=>entry.word===word);
@@ -1051,8 +1225,17 @@ const chapters=[
   help('الِاسْمُ ضَرْبَانِ: نَكِرَةٌ وَمَعْرِفَةٌ. وَالنَّكِرَةُ هِيَ الْأَصْلُ، وَهِيَ كُلُّ اسْمٍ شَائِعٍ فِي جِنْسِهِ لَا يَخْتَصُّ بِهِ وَاحِدٌ دُونَ آخَرَ، نَحْوَ: «رَجُلٌ» وَ«فَرَسٌ» وَ«كِتَابٌ».','A noun is either indefinite or definite. The indefinite is the default: any noun common to its class and not restricted to one individual, such as rajulun, farasun, and kitābun.'),
   help('يُقَرَّبُ حَدُّ النَّكِرَةِ بِأَنَّهَا كُلُّ مَا صَلَحَ دُخُولُ «أَلْ» عَلَيْهِ، نَحْوَ: «رَجُلٌ» وَ«امْرَأَةٌ» وَ«ثَوْبٌ»؛ أَوْ مَا وَقَعَ مَوْقِعَ مَا يَصْلُحُ دُخُولُهَا عَلَيْهِ، نَحْوَ «ذِي» بِمَعْنَى «صَاحِبٍ».','A practical test for an indefinite noun is that it accepts al, as rajulun, imraʾatun, and thawbun do, or that it occupies the place of a word that accepts al, as dhī in the meaning ṣāḥib.'),
   help('الْمَعْرِفَةُ سِتَّةُ أَنْوَاعٍ بِتَرْتِيبِ الْمُؤَلِّفِ: الْمُضْمَرُ، ثُمَّ الْعَلَمُ، ثُمَّ اسْمُ الْإِشَارَةِ، ثُمَّ الْمَوْصُولُ، ثُمَّ الْمُعَرَّفُ بِالْأَدَاةِ، وَالسَّادِسُ مَا أُضِيفَ إِلَى وَاحِدٍ مِنْهَا.','The definite noun has six types in the author’s order: pronoun, proper name, demonstrative, relative noun, noun made definite by the article, and a noun annexed to one of those.'),
-  help('الْمُضْمَرُ أَعْرَفُ الْمَعَارِفِ، وَمَا أُضِيفَ إِلَى وَاحِدٍ مِنَ الْمَعَارِفِ فَهُوَ فِي رُتْبَةِ مَا أُضِيفَ إِلَيْهِ، إِلَّا الْمُضَافَ إِلَى الضَّمِيرِ فَهُوَ فِي رُتْبَةِ الْعَلَمِ. وَاسْمُ اللَّهِ تَعَالَى أَعْرَفُ الْمَعَارِفِ بِالْإِجْمَاعِ.','The pronoun is the most definite category. An annexed noun normally takes the rank of the definite noun to which it is annexed, except one annexed to a pronoun has the rank of a proper name. The name of Allah is, by agreement, the most definite of all.')
+ help('الْمُضْمَرُ أَعْرَفُ الْمَعَارِفِ، وَمَا أُضِيفَ إِلَى وَاحِدٍ مِنَ الْمَعَارِفِ فَهُوَ فِي رُتْبَةِ مَا أُضِيفَ إِلَيْهِ، إِلَّا الْمُضَافَ إِلَى الضَّمِيرِ فَهُوَ فِي رُتْبَةِ الْعَلَمِ. وَاسْمُ اللَّهِ تَعَالَى أَعْرَفُ الْمَعَارِفِ بِالْإِجْمَاعِ.','The pronoun is the most definite category. An annexed noun normally takes the rank of the definite noun to which it is annexed, except one annexed to a pronoun has the rank of a proper name. The name of Allah is, by agreement, the most definite of all.')
  ],helpSourceEn:'Al-Mutammimah, printed page 72. The bāb heading, both subheadings, definitions, examples, and ordered list of six definite types are the author’s. The two Book Practice sentences come from footnotes 2 and 3; the author explains their role in the definitions but does not parse them word by word. Full sentence vocalization, concise card parsing, English, and the comparison labels are app-prepared.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٧٢. عُنْوَانُ الْبَابِ وَعُنْوَانَا النَّكِرَةِ وَالْمَعْرِفَةِ وَالتَّعْرِيفَاتُ وَالْأَمْثِلَةُ وَتَرْتِيبُ أَنْوَاعِ الْمَعَارِفِ السِّتَّةِ مِنَ الْمُؤَلِّفِ. وَجُمْلَتَا تَدْرِيبَيِ الْكِتَابِ مِنَ الْحَاشِيَتَيْنِ ٢ وَ٣؛ وَيَشْرَحُ الْمُؤَلِّفُ وَظِيفَتَهُمَا فِي التَّعْرِيفَيْنِ مِنْ غَيْرِ إِعْرَابٍ تَفْصِيلِيٍّ. وَأَمَّا الضَّبْطُ التَّامُّ لِلْجُمْلَتَيْنِ وَالْإِعْرَابُ الْمُوجَزُ فِي الْبِطَاقَاتِ وَالتَّرْجَمَةُ وَتَسْمِيَاتُ الْمُقَارَنَةِ فَمِنَ التَّطْبِيقِ.'}
+ ,{id:'pronoun-forms',babId:'definiteness',order:2,titleEn:'The pronoun',titleAr:'الضَّمِيرُ أَوِ الْمُضْمَرُ',pages:'73–77',book:pronounForms,help:[
+  help('الضَّمِيرُ أَوِ الْمُضْمَرُ اسْمٌ وُضِعَ لِمُتَكَلِّمٍ، نَحْوَ «أَنَا»، أَوْ مُخَاطَبٍ، نَحْوَ «أَنْتَ»، أَوْ غَائِبٍ، نَحْوَ «هُوَ». وَيَنْقَسِمُ إِلَى مُسْتَتِرٍ وَبَارِزٍ.','A pronoun is a noun assigned to a speaker, such as anā; an addressee, such as anta; or an absent referent, such as huwa. It is either hidden or explicit.'),
+  help('الضَّمِيرُ الْمُسْتَتِرُ لَيْسَ لَهُ صُورَةٌ فِي اللَّفْظِ. يَجِبُ اسْتِتَارُهُ فِي فِعْلِ أَمْرِ الْوَاحِدِ الْمُذَكَّرِ، وَالْمُضَارِعِ الْمَبْدُوءِ بِتَاءِ خِطَابِهِ، أَوْ بِهَمْزَةِ الْمُتَكَلِّمِ، أَوْ نُونِ الْمُتَكَلِّمِينَ. وَيَجُوزُ اسْتِتَارُهُ إِذَا أَمْكَنَ أَنْ يَقُومَ الِاسْمُ الظَّاهِرُ مَقَامَهُ، نَحْوَ «زَيْدٌ يَقُومُ» وَ«هِنْدٌ تَقُومُ». وَلَا يَكُونُ إِلَّا فِي مَحَلِّ رَفْعٍ فَاعِلًا أَوْ نَائِبَ فَاعِلٍ.','A hidden pronoun has no spoken form. It must be hidden in a singular masculine imperative and in present verbs beginning with singular-address tāʾ, speaker hamzah, or speaker nūn. It may be hidden where an explicit noun could replace it, as in Zaydun yaqūmu and Hindun taqūmu. It occurs only in a nominative position as subject or deputy subject.'),
+  help('الضَّمِيرُ الْبَارِزُ لَهُ صُورَةٌ فِي اللَّفْظِ، وَهُوَ مُتَّصِلٌ أَوْ مُنْفَصِلٌ. الْمُتَّصِلُ لَا يُبْتَدَأُ بِهِ وَلَا يَقَعُ بَعْدَ «إِلَّا»، نَحْوَ «قُمْتُ» وَ«أَكْرَمَكَ». وَالْمُنْفَصِلُ يُبْتَدَأُ بِهِ وَيَقَعُ بَعْدَ «إِلَّا»، نَحْوَ «أَنَا مُؤْمِنٌ» وَ«مَا قَامَ إِلَّا أَنَا».','An explicit pronoun has a spoken form and is attached or detached. An attached pronoun cannot begin an utterance or follow illā, as in qumtu and akramaka. A detached pronoun can do both, as in anā muʾminun and mā qāma illā anā.'),
+  help('مِنْ صِيَغِ الْمُتَّصِلِ الْمَرْفُوعِ الَّتِي سَرَدَهَا الْمُؤَلِّفُ: «ضَرَبْتُ، وَضَرَبْتَ، وَضَرَبْتِ، وَضَرَبْنَا، وَضَرَبْتُمَا، وَضَرَبْتُمْ، وَضَرَبْتُنَّ، وَضَرَبَا، وَضَرَبَتَا، وَضَرَبُوا، وَضَرَبْنَ». وَمِنْ صِيَغِهِ الْمَنْصُوبِ: «أَكْرَمَنِي، وَأَكْرَمَنَا، وَأَكْرَمَكَ، وَأَكْرَمَكُمَا، وَأَكْرَمَكُمْ، وَأَكْرَمَكُنَّ، وَأَكْرَمَهُ، وَأَكْرَمَهَا، وَأَكْرَمَهُمَا، وَأَكْرَمَهُمْ، وَأَكْرَمَهُنَّ». وَيَكُونُ مَجْرُورًا إِذَا دَخَلَ عَلَيْهِ حَرْفُ جَرٍّ أَوْ أُضِيفَ إِلَيْهِ اسْمٌ.','The author lists attached nominative forms across the ḍarabtu paradigm and attached accusative forms across the akramanī paradigm. The same attached forms occupy the genitive position after a preposition or when a noun is annexed to them.'),
+  help('الضَّمَائِرُ الْمُنْفَصِلَةُ الْمَرْفُوعَةُ اثْنَا عَشَرَ: «أَنَا، وَنَحْنُ، وَأَنْتَ، وَأَنْتِ، وَأَنْتُمَا، وَأَنْتُمْ، وَأَنْتُنَّ، وَهُوَ، وَهِيَ، وَهُمَا، وَهُمْ، وَهُنَّ». وَالْمَنْصُوبَةُ اثْنَا عَشَرَ: «إِيَّايَ، وَإِيَّانَا، وَإِيَّاكَ، وَإِيَّاكِ، وَإِيَّاكُمَا، وَإِيَّاكُمْ، وَإِيَّاكُنَّ، وَإِيَّاهُ، وَإِيَّاهَا، وَإِيَّاهُمَا، وَإِيَّاهُمْ، وَإِيَّاهُنَّ».','There are twelve detached nominative pronouns and twelve detached accusative pronouns, listed here in the author’s order.'),
+  help('إِذَا أَمْكَنَ الْإِتْيَانُ بِالضَّمِيرِ مُتَّصِلًا لَمْ يُؤْتَ بِهِ مُنْفَصِلًا، نَحْوَ «قُمْتُ» وَ«أَكْرَمَكَ». وَيَجُوزُ الْفَصْلُ فِي نَحْوِ «سَلْنِي إِيَّاهُ» وَ«كُنْتُ إِيَّاهُ». وَأَلْفَاظُ الضَّمَائِرِ كُلُّهَا مَبْنِيَّةٌ، فَلَا يَظْهَرُ فِيهَا الْإِعْرَابُ، وَإِنَّمَا يُذْكَرُ مَحَلُّهَا.','Use an attached pronoun whenever attachment is possible, as in qumtu and akramaka. Separation is permitted in forms such as salnī iyyāhu and kuntu iyyāhu. Every pronoun form is indeclinable, so its syntactic position is stated rather than a changing case ending.'),
+  help('فِي «قَامَتْ» تَاءُ التَّأْنِيثِ السَّاكِنَةُ حَرْفٌ لَا مَحَلَّ لَهُ، وَلَيْسَتْ ضَمِيرًا. وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ «هِيَ». هَذِهِ مُقَارَنَةٌ مِنَ التَّطْبِيقِ تَرْبِطُ قَاعِدَةَ ص ٧٣ بِمِثَالِ الْكِتَابِ الْمَنْشُورِ فِي ص ٢٢.','In qāmat, silent feminine tāʾ is a particle with no syntactic position, not a pronoun. The subject is the hidden pronoun “she.” This app-prepared comparison connects the page-73 rule with the already-published book example on page 22.')
+ ],helpSourceEn:'Al-Mutammimah, printed pages 73–77. The heading, hidden/explicit division, attached/detached division, positional classifications, pronoun lists, attachment rule, fixed-ending rule, examples, and the footnote parsing of the Qurʾānic excerpts and final separated forms are the author’s. Full vocalization, concise English, card organization, and the qāmat visual connection to the book’s page-22 example are app-prepared.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٧٣–٧٧. الْعُنْوَانُ وَتَقْسِيمُ الضَّمِيرِ إِلَى مُسْتَتِرٍ وَبَارِزٍ وَإِلَى مُتَّصِلٍ وَمُنْفَصِلٍ وَأَقْسَامُهُ بِحَسَبِ مَوَاقِعِهِ وَقَوَائِمُ الضَّمَائِرِ وَحُكْمُ الِاتِّصَالِ وَحُكْمُ بِنَاءِ الضَّمَائِرِ وَالْأَمْثِلَةُ وَإِعْرَابُ الْحَوَاشِي لِلشَّوَاهِدِ الْقُرْآنِيَّةِ وَصِيغَتَيِ الْفَصْلِ الْأَخِيرَتَيْنِ مِنَ الْمُؤَلِّفِ. وَأَمَّا الضَّبْطُ التَّامُّ وَالتَّرْجَمَةُ الْمُوجَزَةُ وَتَنْظِيمُ الْبِطَاقَاتِ وَرَبْطُ «قَامَتْ» الْبَصَرِيُّ بِمِثَالِ الْكِتَابِ فِي ص ٢٢ فَمِنَ التَّطْبِيقِ.'}
 ];
 
 const babs=[
@@ -1146,6 +1329,11 @@ const helpVisuals={
  'definiteness-intro':{type:'contrast',titleAr:'النَّكِرَةُ وَالْمَعْرِفَةُ',titleEn:'Indefinite and definite compared',examples:[
   {labelAr:'نَكِرَةٌ',labelEn:'Indefinite',exampleAr:'رَجُلٌ',exampleEn:'a man — common to its class, not one specified individual',focusAr:'رَجُلٌ'},
   {labelAr:'مَعْرِفَةٌ',labelEn:'Definite',exampleAr:'زَيْدٌ',exampleEn:'Zayd — a proper name identifying one individual',focusAr:'زَيْدٌ',exerciseId:'definiteness-02'}
+ ]},
+ 'pronoun-forms':{type:'contrast',titleAr:'أَيْنَ الضَّمِيرُ؟',titleEn:'Where is the pronoun?',examples:[
+  {labelAr:'ضَمِيرٌ مُنْفَصِلٌ',labelEn:'Standing on its own',exampleAr:'أَنَا رَبُّكُمْ',exampleEn:'Anā stands as its own written word in the book’s page-75 quotation.',focusAr:'أَنَا',exerciseId:'pronoun-14'},
+  {labelAr:'ضَمِيرٌ مُتَّصِلٌ',labelEn:'Attached to a word',exampleAr:'قُمْتُ',exampleEn:'The final tu is the attached subject pronoun.',focusAr:'تُ',exerciseId:'pronoun-08'},
+  {labelAr:'ضَمِيرٌ مُسْتَتِرٌ',labelEn:'Understood from the verb',exampleAr:'قَامَتْ ← هِيَ',exampleEn:'The tāʾ marks feminine gender; “she” is the hidden subject. App-prepared comparison from the page-73 rule and page-22 example.',focusAr:'هِيَ',exerciseId:'word-02'}
  ]}
 };
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});

@@ -265,6 +265,26 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .idafa-type-note-ar{direction:rtl;color:var(--muted);font-size:15px;line-height:1.65}
 .idafa-type-note-en{color:var(--muted);font-size:12px;line-height:1.4}
 .idafa-definiteness .visual-row-link{margin:14px -18px -18px;border-radius:0 0 12px 12px}
+.faail-overview{display:grid;gap:18px}
+.faail-category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;counter-reset:faail-category}
+.faail-category{counter-increment:faail-category;position:relative;border:1px solid var(--sage-line);border-radius:11px;background:var(--sage-fill);padding:12px 46px 12px 12px;min-height:74px}
+.faail-category::after{content:counter(faail-category);position:absolute;inset-inline-end:12px;top:13px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--sage-line);color:var(--muted);font:700 .78rem/1 var(--sans)}
+.faail-category.current{border-color:var(--forest);background:var(--sage-fill);box-shadow:inset 4px 0 0 var(--forest)}
+.faail-category.current::after{background:var(--forest);border-color:var(--forest);color:#fff}
+.faail-category-ar{direction:rtl;font-size:1.12rem;line-height:1.65;color:var(--heading)}
+.faail-category-en{margin-top:2px;font-size:.82rem;line-height:1.35;color:var(--muted)}
+.faail-current{display:inline-flex;align-items:center;gap:6px;margin-top:7px;padding:3px 8px;border-radius:999px;background:var(--forest);color:#fff;font-size:.72rem;font-weight:700}
+.faail-current-en{font-family:var(--sans);font-size:.68rem;font-weight:700}
+.faail-relation{border:1px solid var(--sage-line);border-radius:12px;background:var(--card);padding:18px;overflow:hidden}
+.faail-relation-title{font-weight:700;color:var(--forest);margin-bottom:10px}
+.faail-sentence{display:flex;justify-content:center;align-items:flex-end;gap:24px;direction:rtl;font-size:2rem;line-height:2.1;padding:10px 8px}
+.faail-piece{position:relative;padding:0 7px;border-radius:8px}
+.faail-verb-focus{background:var(--tan);box-shadow:inset 0 -3px 0 var(--gold)}
+.faail-subject-focus{background:var(--sage-fill);box-shadow:inset 0 -3px 0 var(--forest)}
+.faail-piece-label{position:absolute;top:calc(100% - 3px);inset-inline:0;text-align:center;font-size:.72rem;line-height:1.25;color:var(--muted);white-space:nowrap}
+.faail-piece-label-en{display:block;font-family:var(--sans);font-size:.65rem}
+.faail-reference{text-align:center;margin-top:26px;color:var(--muted);font-size:.9rem}
+.faail-relation .visual-row-link{margin:14px -18px -18px;border-radius:0 0 12px 12px}
 .help-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
 .help-actions button{width:auto;min-width:180px}
 
@@ -407,6 +427,13 @@ html[data-theme="dark"] .relative-silah-focus{text-decoration-color:#d8ae5c}
   .idafa-type-note-ar,.idafa-type-note-en{grid-column:1/-1;text-align:center}
   .idafa-definiteness .visual-row-link{display:block;margin:12px -13px -13px}
   .idafa-definiteness .visual-open{display:block;margin:8px auto 0}
+  .faail-category-grid{grid-template-columns:1fr}
+  .faail-category{min-height:0;padding:10px 42px 10px 10px}
+  .faail-category-ar{font-size:1rem}
+  .faail-relation{padding:13px}
+  .faail-sentence{font-size:1.7rem;gap:14px;padding-inline:0}
+  .faail-relation .visual-row-link{display:block;margin:12px -13px -13px}
+  .faail-relation .visual-open{display:block;margin:8px auto 0}
   .compare-arrow{transform:rotate(90deg);text-align:center}
   .compare-note{grid-column:1}
 }
@@ -453,7 +480,7 @@ html[data-theme="dark"] .relative-silah-focus{text-decoration-color:#d8ae5c}
     </div>
   </main>
 </div>
-<script src="lesson-data.js?v=idafa-96"></script>
+<script src="lesson-data.js?v=faail-97-103"></script>
 <script>
 (function(){
 'use strict';
@@ -576,6 +603,12 @@ function renderHelpVisual(chapter){
   const labels=`<div class="idafa-term-labels"><article class="idafa-term-card"><div class="idafa-label-ar arabic" lang="ar">${arabicDisplay(visual.firstLabelAr)}</div>${state.lang==='ar'?'':`<div class="idafa-label-en">${escapeHtml(visual.firstLabelEn)}</div>`}</article><article class="idafa-term-card"><div class="idafa-label-ar arabic" lang="ar">${arabicDisplay(visual.secondLabelAr)}</div>${state.lang==='ar'?'':`<div class="idafa-label-en">${escapeHtml(visual.secondLabelEn)}</div>`}<div class="idafa-term-note-ar arabic" lang="ar">${arabicDisplay(visual.secondNoteAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="idafa-term-note-en">${escapeHtml(visual.secondNoteEn)}</div>`}</article></div>`;
   const types=visual.types.map(item=>`<article class="idafa-type"><div class="idafa-type-label-ar arabic" lang="ar">${arabicDisplay(item.labelAr)}</div>${state.lang==='ar'?'':`<div class="idafa-type-label-en">${escapeHtml(item.labelEn)}</div>`}<div class="idafa-type-example arabic" lang="ar">${highlightLast(item.exampleAr,item.focusAr,'idafa-definite-focus')}</div><div class="idafa-type-note-ar arabic" lang="ar">${arabicDisplay(item.noteAr)}</div>${state.lang==='ar'?'':`<div class="idafa-type-note-en">${escapeHtml(item.noteEn)}</div>`}</article>`).join('');
   $('helpVisual').innerHTML=`${title}<section class="idafa-definiteness"><div class="idafa-hero">${phrase}${labels}</div><div class="idafa-types">${types}</div>${renderVisualExample(visual.exerciseId,'visual-idafa-example')}</section>`;return
+ }
+ if(visual.type==='faail-overview'){
+  const categories=visual.categories.map(item=>`<article class="faail-category${item.current?' current':''}"><div class="faail-category-ar arabic" lang="ar">${arabicDisplay(item.labelAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="faail-category-en">${escapeHtml(item.labelEn)}</div>`}${item.current?`<div class="faail-current"><span class="arabic" lang="ar">الدَّرْسُ الْحَالِي</span>${state.lang==='ar'?'':`<span class="faail-current-en">current lesson</span>`}</div>`:''}</article>`).join('');
+  const example=visual.example,label=(ar,en)=>`<span class="faail-piece-label"><span class="arabic" lang="ar">${arabicDisplay(ar)}</span>${state.lang==='ar'?'':`<span class="faail-piece-label-en">${escapeHtml(en)}</span>`}</span>`;
+  const relation=`<section class="faail-relation"><div class="faail-relation-title arabic" lang="ar">عَلَاقَةُ الْفِعْلِ بِفَاعِلِهِ</div><div class="faail-sentence arabic" lang="ar"><span class="faail-piece faail-verb-focus">${escapeHtml(example.verbAr)}${label(example.verbLabelAr,example.verbLabelEn)}</span><span class="faail-piece faail-subject-focus">${escapeHtml(example.subjectAr)}${label(example.subjectLabelAr,example.subjectLabelEn)}</span></div><div class="faail-reference arabic" lang="ar">(${escapeHtml(example.referenceAr)})</div>${renderVisualExample(example.exerciseId,'visual-faail-example')}</section>`;
+  $('helpVisual').innerHTML=`${title}<section class="faail-overview"><div class="faail-category-grid">${categories}</div>${relation}</section>`;return
  }
  if(visual.type==='table'){const columns=visual.headersAr.length,head=`<div class="visual-row visual-head" style="--visual-cols:${columns}">${visual.headersAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${arabicDisplay(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(visual.headersEn[index])}</div>`}</div>`).join('')}</div>`,rows=visual.rows.map((row,rowIndex)=>`<div class="visual-row" id="visual-row-${rowIndex}" style="--visual-cols:${columns}">${row.cellsAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${escapeHtml(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(row.cellsEn[index])}</div>`}</div>`).join('')}${row.exerciseId?renderVisualExample(row.exerciseId,`visual-row-${rowIndex}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-table">${head}${rows}</div>`;return}
  if(visual.type==='contrast'){const cards=visual.examples.map((example,index)=>{const highlighted=highlightLast(example.exampleAr,example.focusAr,'ending-focus');return `<article class="contrast-card" id="visual-contrast-${index}"><div class="contrast-label-ar arabic" lang="ar">${arabicDisplay(example.labelAr)}</div><div class="contrast-example arabic" lang="ar">${highlighted}</div>${state.lang==='ar'?'':`<div class="contrast-en">${escapeHtml(example.exampleEn)}</div>`}${example.exerciseId?renderVisualExample(example.exerciseId,`visual-contrast-${index}-example`):''}</article>`}).join('');$('helpVisual').innerHTML=`${title}<div class="visual-contrast${visual.examples.length===3?' three':''}">${cards}</div>`;return}

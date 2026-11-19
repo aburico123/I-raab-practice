@@ -1459,9 +1459,179 @@ const definiteIdafa=[
  ],'the noun made definite by al','الِاسْمِ الْمُعَرَّفِ بِالْأَدَاةِ «الرَّجُلِ»')
 ];
 
+const faailBook=(id,page,ar,en,tokens,directEn='The author prints this example in the fāʿil discussion.',directAr='يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمِثَالَ فِي بَابِ الْفَاعِلِ.')=>exercise(id,page,ar,en,tokens,directEn,directAr);
+const faailQuran=(id,page,ar,en,tokens,surahNumber,ayah,surahAr,directEn='The author prints this excerpt and supplies its core parsing in the footnote.',directAr='يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمَقْطَعَ وَيَذْكُرُ أَصْلَ إِعْرَابِهِ فِي الْحَاشِيَةِ.')=>exercise(
+ id,page,ar,en,tokens,
+ `Qur’an ${surahNumber}:${ayah}. ${directEn}`,
+ `سُورَةُ ${surahAr}، الْآيَةُ ${String(ayah).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d])}. ${directAr}`
+);
+const faailPast=(word,gloss)=>token(word,gloss,'فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb built on fatḥ.');
+const faailDamma=(word,gloss)=>token(word,gloss,'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject of the verb, nominative with a visible ḍammah.');
+const faailDual=(word,gloss)=>token(word,gloss,'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.','Subject of the verb, nominative with alif because it is dual.');
+const faailSoundPlural=(word,gloss)=>token(word,gloss,'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْوَاوُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.','Subject of the verb, nominative with wāw because it is a sound masculine plural.');
+const presentVisible=(word,gloss)=>token(word,gloss,'فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Present verb, indicative with a visible ḍammah.');
+
+const faailForms=[
+ faailQuran('faail-01',97,'قَالَ اللَّهُ','Allah said.',[
+  faailPast('قَالَ','said'),
+  faailDamma('اللَّهُ','Allah')
+ ],5,115,'الْمَائِدَةِ'),
+ faailQuran('faail-02',97,'قَالَ رَجُلَانِ','Two men said.',[
+  faailPast('قَالَ','said'),
+  faailDual('رَجُلَانِ','two men')
+ ],5,23,'الْمَائِدَةِ'),
+ faailQuran('faail-03',97,'وَجَاءَ الْمُعَذِّرُونَ','And those with excuses came.',[
+  answerParts('وَجَاءَ','and came',[{ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ.',en:'Wāw begins a new statement.'},{ar:'«جَاءَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.',en:'Jāʾa is a past verb built on fatḥ.'}]),
+  faailSoundPlural('الْمُعَذِّرُونَ','those with excuses')
+ ],9,90,'التَّوْبَةِ'),
+ faailQuran('faail-04',97,'يَوْمَ يَقُومُ النَّاسُ','On the Day when the people stand.',[
+  token('يَوْمَ','on the Day','ظَرْفُ زَمَانٍ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','Time adverb, accusative with a visible fatḥah, and the first term of an iḍāfah.'),
+  presentVisible('يَقُومُ','stand'),
+  faailDamma('النَّاسُ','the people')
+ ],83,6,'الْمُطَفِّفِينَ','The author prints this excerpt and parses the time adverb, present verb, and subject in the footnote.','يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمَقْطَعَ، وَتُعْرِبُ الْحَاشِيَةُ ظَرْفَ الزَّمَانِ وَالْفِعْلَ الْمُضَارِعَ وَالْفَاعِلَ.'),
+ faailQuran('faail-05',98,'وَيَوْمَئِذٍ يَفْرَحُ الْمُؤْمِنُونَ','And on that day the believers will rejoice.',[
+  answerParts('وَيَوْمَئِذٍ','and on that day',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«يَوْمَ» ظَرْفُ زَمَانٍ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','en':'Yawm is a time adverb, accusative with a visible fatḥah, and the first term of an iḍāfah.'},{ar:'«إِذٍ» اسْمٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','en':'Idh is fixed on sukūn in the genitive position as the second term.'}]),
+  presentVisible('يَفْرَحُ','rejoice'),
+  faailSoundPlural('الْمُؤْمِنُونَ','the believers')
+ ],30,4,'الرُّومِ'),
+ faailQuran('faail-06',98,'قَالَ أَبُوهُمْ','Their father said.',[
+  faailPast('قَالَ','said'),
+  answerParts('أَبُوهُمْ','their father',[{ar:'«أَبُو» فَاعِلٌ مَرْفُوعٌ بِالْوَاوِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ، وَهُوَ مُضَافٌ.','en':'Subject of the verb, nominative with wāw because it is one of the six nouns, and the first term of an iḍāfah.'},{ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ، وَالْمِيمُ عَلَامَةُ الْجَمْعِ.','en':'Hāʾ is the attached second term; mīm marks the plural referent.'}])
+ ],12,94,'يُوسُفَ'),
+ faailBook('faail-07',98,'ضَرَبْتُ','I struck.',[
+  answerParts('ضَرَبْتُ','I struck',[{ar:'«ضَرَبْ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.','en':'Ḍaraba is a past verb built on sukūn because the subject tāʾ is attached.'},{ar:'التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','en':'The tāʾ is an attached pronoun fixed on ḍamm in the nominative position as subject.'}])
+ ],'The author prints this first pronominal-subject form and refers back to the earlier pronoun section.','يَطْبَعُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ الْأُولَى لِلْفَاعِلِ الْمُضْمَرِ، وَيُحِيلُ عَلَى فَصْلِ الْمُضْمَرِ.'),
+ faailBook('faail-08',98,'ضَرَبْنَا','We struck.',[
+  answerParts('ضَرَبْنَا','we struck',[{ar:'«ضَرَبْ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِـ«نَا».','en':'Ḍaraba is a past verb built on sukūn because nā is attached.'},{ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','en':'Nā is an attached pronoun fixed on sukūn in the nominative position as subject.'}])
+ ],'The author prints this pronominal-subject form and refers back to the earlier pronoun section.','يَطْبَعُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ لِلْفَاعِلِ الْمُضْمَرِ، وَيُحِيلُ عَلَى فَصْلِ الْمُضْمَرِ.'),
+ faailBook('faail-09',98,'ضَرَبْتَ','You struck.',[
+  answerParts('ضَرَبْتَ','you struck',[{ar:'«ضَرَبْ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.','en':'Ḍaraba is a past verb built on sukūn because the subject tāʾ is attached.'},{ar:'التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','en':'The tāʾ is an attached pronoun fixed on fatḥ in the nominative position as subject.'}])
+ ],'The author prints this final explicit pronominal-subject form before saying “and so on.”','يَطْبَعُ الْمُؤَلِّفُ هَذِهِ آخِرَ صِيغَةٍ مُصَرَّحٍ بِهَا لِلْفَاعِلِ الْمُضْمَرِ قَبْلَ قَوْلِهِ: «إِلَى آخِرِهِ».'),
+ faailBook('faail-10',98,'أَقَائِمٌ الزَّيْدَانِ','Are the two Zayds standing?',[
+  answerParts('أَقَائِمٌ','are standing',[{ar:'الْهَمْزَةُ حَرْفُ اسْتِفْهَامٍ.','en':'The hamzah is an interrogative particle.'},{ar:'«قَائِمٌ» مُبْتَدَأٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ اسْمُ فَاعِلٍ عَمِلَ عَمَلَ فِعْلِهِ.','en':'Qāʾim is a nominal-sentence subject, nominative with a visible ḍammah; it is an active participle working like its verb.'}]),
+  token('الزَّيْدَانِ','the two Zayds','فَاعِلٌ لِاسْمِ الْفَاعِلِ مَرْفُوعٌ بِالْأَلِفِ؛ لِأَنَّهُ مُثَنًّى، وَسَدَّ مَسَدَّ الْخَبَرِ.','Subject of the active participle, nominative with alif because it is dual; it completes the predicate position.')
+ ],'The author prints this example of a subject governed by an expression equivalent to a verb, and the footnote parses both words.','يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمِثَالَ لِفَاعِلٍ عَمِلَ فِيهِ مَا هُوَ فِي تَأْوِيلِ الْفِعْلِ، وَتُعْرِبُ الْحَاشِيَةُ كِلْتَا الْكَلِمَتَيْنِ.'),
+ faailQuran('faail-11',98,'مُخْتَلِفٌ أَلْوَانُهُ','Its colors are varied.',[
+  token('مُخْتَلِفٌ','varied','نَعْتٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ اسْمُ فَاعِلٍ عَمِلَ عَمَلَ فِعْلِهِ.','Adjective, nominative with a visible ḍammah; it is an active participle working like its verb.'),
+  answerParts('أَلْوَانُهُ','its colors',[{ar:'«أَلْوَانُ» فَاعِلٌ لِاسْمِ الْفَاعِلِ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','en':'Subject of the active participle, nominative with a visible ḍammah, and the first term of an iḍāfah.'},{ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','en':'Hāʾ is the attached second term.'}])
+ ],16,69,'النَّحْلِ','The author quotes this excerpt as a second example of a subject governed by an expression equivalent to a verb; the footnote explains that mukhtalif works like yakhtalifu.','يَسْتَشْهِدُ الْمُؤَلِّفُ بِهَذَا الْمَقْطَعِ لِفَاعِلٍ عَمِلَ فِيهِ مَا هُوَ فِي تَأْوِيلِ الْفِعْلِ، وَتُبَيِّنُ الْحَاشِيَةُ أَنَّ «مُخْتَلِفًا» يَعْمَلُ عَمَلَ «يَخْتَلِفُ».'),
+ faailBook('faail-12',99,'قَامَ زَيْدٌ','Zayd stood.',[faailPast('قَامَ','stood'),faailDamma('زَيْدٌ','Zayd')],'The author prints this example while explaining that an overt subject is the indispensable support of its verb. The footnote gives both parses.','يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمِثَالَ فِي بَيَانِ أَنَّ الْفَاعِلَ الظَّاهِرَ عُمْدَةُ فِعْلِهِ، وَتُعْرِبُ الْحَاشِيَةُ كِلْتَا الْكَلِمَتَيْنِ.'),
+ faailBook('faail-13',99,'الزَّيْدَانِ قَامَا','The two Zayds stood.',[
+  token('الزَّيْدَانِ','the two Zayds','مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْأَلِفُ؛ لِأَنَّهُ مُثَنًّى.','Nominal-sentence subject, nominative with alif because it is dual.'),
+  answerParts('قَامَا','they two stood',[{ar:'«قَامَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Qāma is a past verb built on fatḥ.'},{ar:'أَلِفُ الِاثْنَيْنِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','en':'Dual alif is an attached pronoun fixed on sukūn in the nominative position as subject.'},{ar:'وَجُمْلَةُ «قَامَا» فِي مَحَلِّ رَفْعٍ خَبَرٌ.','en':'The verbal clause is in the nominative position as predicate.'}])
+ ],'The author prints this example to show that when the dual noun precedes, the attached dual pronoun is the verb’s subject; the footnote gives this parse.','يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمِثَالَ لِبَيَانِ أَنَّ الْأَلِفَ هِيَ الْفَاعِلُ إِذَا تَقَدَّمَ الِاسْمُ الْمُثَنَّى، وَتُعْرِبُ الْحَاشِيَةُ الْجُمْلَةَ.'),
+ faailBook('faail-14',99,'زَيْدٌ قَامَ','Zayd stood.',[
+  token('زَيْدٌ','Zayd','مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Nominal-sentence subject, nominative with a visible ḍammah.'),
+  answerParts('قَامَ','stood',[{ar:'فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Past verb built on fatḥ.'},{ar:'وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','en':'Its subject is a hidden “he.”'},{ar:'وَجُمْلَةُ «قَامَ» فِي مَحَلِّ رَفْعٍ خَبَرٌ.','en':'The verbal clause is in the nominative position as predicate.'}])
+ ],'The author prints this example to show that an overt noun before its verb is a nominal-sentence subject and the verb has a hidden subject. The footnote gives that parse.','يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمِثَالَ لِبَيَانِ أَنَّ الِاسْمَ الْمُتَقَدِّمَ مُبْتَدَأٌ وَأَنَّ لِلْفِعْلِ فَاعِلًا مُسْتَتِرًا، وَتُعْرِبُ الْحَاشِيَةُ الْجُمْلَةَ.'),
+ faailQuran('faail-15',99,'وَإِنْ أَحَدٌ مِنَ الْمُشْرِكِينَ اسْتَجَارَكَ','And if any one of the polytheists seeks your protection…',[
+  token('وَإِنْ','and if','الْوَاوُ حَرْفُ اسْتِئْنَافٍ، وَ«إِنْ» حَرْفُ شَرْطٍ جَازِمٌ.','Wāw begins a new statement; in is a jussive conditional particle.'),
+  token('أَحَدٌ','any one','فَاعِلٌ مَرْفُوعٌ لِفِعْلٍ مَحْذُوفٍ يُفَسِّرُهُ الْفِعْلُ الْمَذْكُورُ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject of an omitted verb explained by the stated verb, nominative with a visible ḍammah.'),
+  token('مِنَ','of','حَرْفُ جَرٍّ.','Preposition.'),
+  token('الْمُشْرِكِينَ','the polytheists','اسْمٌ مَجْرُورٌ بِـ«مِنْ»، وَعَلَامَةُ جَرِّهِ الْيَاءُ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.','Noun governed by min, genitive with yāʾ because it is a sound masculine plural.'),
+  answerParts('اسْتَجَارَكَ','seeks your protection',[{ar:'«اسْتَجَارَ» فِعْلٌ مَاضٍ فِي مَحَلِّ جَزْمٍ فِعْلُ الشَّرْطِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','en':'Istajāra is a past verb in the jussive position as the condition verb; its subject is hidden “he.”'},{ar:'الْكَافُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ.','en':'Kāf is the attached object.'}])
+ ],9,6,'التَّوْبَةِ','The author quotes this construction to show that a condition particle does not introduce a nominal-sentence subject; the footnote supplies the omitted-verb analysis.','يَسْتَشْهِدُ الْمُؤَلِّفُ بِهَذَا التَّرْكِيبِ لِبَيَانِ أَنَّ أَدَاةَ الشَّرْطِ لَا تَدْخُلُ عَلَى الْمُبْتَدَإِ، وَتَذْكُرُ الْحَاشِيَةُ تَقْدِيرَ الْفِعْلِ الْمَحْذُوفِ.'),
+ faailBook('faail-16',99,'قَامَ الزَّيْدَانِ','The two Zayds stood.',[faailPast('قَامَ','stood'),faailDual('الزَّيْدَانِ','the two Zayds')]),
+ faailBook('faail-17',99,'قَامَ الزَّيْدُونَ','The Zayds stood.',[faailPast('قَامَ','stood'),faailSoundPlural('الزَّيْدُونَ','the Zayds')]),
+ faailQuran('faail-18',99,'قَالَ رَجُلَانِ','Two men said.',[faailPast('قَالَ','said'),faailDual('رَجُلَانِ','two men')],5,23,'الْمَائِدَةِ','The author repeats this excerpt here as evidence that the verb remains singular before a dual subject; its parsing was supplied earlier in the chapter.','يُعِيدُ الْمُؤَلِّفُ هَذَا الْمَقْطَعَ هُنَا لِلدَّلَالَةِ عَلَى إِفْرَادِ الْفِعْلِ قَبْلَ الْفَاعِلِ الْمُثَنَّى، وَقَدْ تَقَدَّمَ إِعْرَابُهُ فِي الْبَابِ.'),
+ faailQuran('faail-19',99,'وَجَاءَ الْمُعَذِّرُونَ','And those with excuses came.',[
+  answerParts('وَجَاءَ','and came',[{ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ.','en':'Wāw begins a new statement.'},{ar:'«جَاءَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Jāʾa is a past verb built on fatḥ.'}]),faailSoundPlural('الْمُعَذِّرُونَ','those with excuses')
+ ],9,90,'التَّوْبَةِ','The author repeats this excerpt here as evidence that the verb remains singular before a plural subject; its parsing was supplied earlier in the chapter.','يُعِيدُ الْمُؤَلِّفُ هَذَا الْمَقْطَعَ هُنَا لِلدَّلَالَةِ عَلَى إِفْرَادِ الْفِعْلِ قَبْلَ الْفَاعِلِ الْمَجْمُوعِ، وَقَدْ تَقَدَّمَ إِعْرَابُهُ فِي الْبَابِ.'),
+ faailQuran('faail-20',99,'وَقَالَ الظَّالِمُونَ','And the wrongdoers said.',[
+  answerParts('وَقَالَ','and said',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«قَالَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Qāla is a past verb built on fatḥ.'}]),faailSoundPlural('الظَّالِمُونَ','the wrongdoers')
+ ],25,8,'الْفُرْقَانِ'),
+ faailQuran('faail-21',99,'وَقَالَ نِسْوَةٌ','And some women said.',[
+  answerParts('وَقَالَ','and said',[{ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ.','en':'Wāw begins a new statement.'},{ar:'«قَالَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Qāla is a past verb built on fatḥ.'}]),faailDamma('نِسْوَةٌ','some women')
+ ],12,30,'يُوسُفَ'),
+ faailBook('faail-22',100,'قَامَا الزَّيْدَانِ','The two Zayds stood.',[
+  answerParts('قَامَا','they two stood',[{ar:'«قَامَا» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، وَالْأَلِفُ حَرْفٌ دَالٌّ عَلَى التَّثْنِيَةِ فِي هَذِهِ اللُّغَةِ.','en':'Qāmā is a past verb built on fatḥ; alif marks dual number in this dialect.'}]),
+  faailDual('الزَّيْدَانِ','the two Zayds')
+ ],'The author prints this dialectal form, called “the fleas ate me” language, and states that alif marks dual number while the following noun is the subject.','يَطْبَعُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ فِي لُغَةِ «أَكَلُونِي الْبَرَاغِيثُ»، وَيَنُصُّ عَلَى أَنَّ الْأَلِفَ عَلَامَةُ التَّثْنِيَةِ وَأَنَّ الِاسْمَ بَعْدَهَا هُوَ الْفَاعِلُ.'),
+ faailBook('faail-23',100,'قَامُوا الزَّيْدُونَ','The Zayds stood.',[
+  answerParts('قَامُوا','they stood',[{ar:'«قَامُوا» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الضَّمِّ، وَالْوَاوُ حَرْفٌ دَالٌّ عَلَى جَمْعِ الذُّكُورِ فِي هَذِهِ اللُّغَةِ.','en':'Qāmū is a past verb built on ḍamm; wāw marks masculine plural number in this dialect.'}]),
+  faailSoundPlural('الزَّيْدُونَ','the Zayds')
+ ],'The author prints this dialectal form and states that wāw marks masculine plural number while the following noun is the subject.','يَطْبَعُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ، وَيَنُصُّ عَلَى أَنَّ الْوَاوَ عَلَامَةُ جَمْعِ الذُّكُورِ وَأَنَّ الِاسْمَ بَعْدَهَا هُوَ الْفَاعِلُ.'),
+ faailBook('faail-24',100,'قُمْنَ الْهِنْدَاتُ','The Hind women stood.',[
+  answerParts('قُمْنَ','they stood',[{ar:'«قُمْنَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَالنُّونُ حَرْفٌ دَالٌّ عَلَى جَمْعِ الْإِنَاثِ فِي هَذِهِ اللُّغَةِ.','en':'Qumna is a past verb built on sukūn; nūn marks feminine plural number in this dialect.'}]),
+  faailDamma('الْهِنْدَاتُ','the Hind women')
+ ],'The author prints this dialectal form and states that nūn marks feminine plural number while the following noun is the subject.','يَطْبَعُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ، وَيَنُصُّ عَلَى أَنَّ النُّونَ عَلَامَةُ جَمْعِ الْإِنَاثِ وَأَنَّ الِاسْمَ بَعْدَهَا هُوَ الْفَاعِلُ.'),
+ faailBook('faail-25',100,'يَتَعَاقَبُونَ فِيكُمْ مَلَائِكَةٌ بِاللَّيْلِ وَمَلَائِكَةٌ بِالنَّهَارِ','Angels take turns among you by night and angels by day.',[
+  answerParts('يَتَعَاقَبُونَ','they take turns',[{ar:'«يَتَعَاقَبُونَ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ.','en':'Yataʿāqabūna is a present verb, indicative by retention of nūn.'},{ar:'وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','en':'Plural wāw is the attached subject.'}]),
+  answerParts('فِيكُمْ','among you',[{ar:'«فِي» حَرْفُ جَرٍّ.','en':'Fī is a preposition.'},{ar:'«كُمْ» ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ بِـ«فِي».','en':'Kum is the attached genitive complement of fī.'}]),
+  token('مَلَائِكَةٌ','angels','بَدَلٌ مِنْ وَاوِ الْجَمَاعَةِ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Substitute for plural wāw, nominative with a visible ḍammah.'),
+  answerParts('بِاللَّيْلِ','by night',[{ar:'الْبَاءُ حَرْفُ جَرٍّ.','en':'Bāʾ is a preposition.'},{ar:'«اللَّيْلِ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','en':'Al-layl is governed by bāʾ, genitive with a visible kasrah.'}]),
+  token('وَمَلَائِكَةٌ','and angels','الْوَاوُ حَرْفُ عَطْفٍ، وَ«مَلَائِكَةٌ» مَعْطُوفٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ.','Wāw coordinates; malāʾikatun is coordinated and nominative with a visible ḍammah.'),
+  answerParts('بِالنَّهَارِ','by day',[{ar:'الْبَاءُ حَرْفُ جَرٍّ.','en':'Bāʾ is a preposition.'},{ar:'«النَّهَارِ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','en':'Al-nahār is governed by bāʾ, genitive with a visible kasrah.'}])
+ ],'The author quotes this ḥadīth for the dialectal agreement pattern. The footnote parses plural wāw as the subject and malāʾikatun as its substitute, while noting an alternative nominal-sentence analysis.','يَسْتَشْهِدُ الْمُؤَلِّفُ بِهَذَا الْحَدِيثِ عَلَى لُغَةِ إِلْحَاقِ عَلَامَةِ الْجَمْعِ بِالْفِعْلِ، وَتُعْرِبُ الْحَاشِيَةُ وَاوَ الْجَمَاعَةِ فَاعِلًا وَ«مَلَائِكَةٌ» بَدَلًا مِنْهَا، مَعَ ذِكْرِ وَجْهٍ اسْمِيٍّ آخَرَ.'),
+ faailBook('faail-26',101,'قَامَتْ هِنْدٌ','Hind stood.',[
+  answerParts('قَامَتْ','stood',[{ar:'«قَامَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Qāma is a past verb built on fatḥ.'},{ar:'تَاءُ التَّأْنِيثِ السَّاكِنَةُ حَرْفٌ لَا مَحَلَّ لَهُ.','en':'Silent feminine tāʾ is a fixed marker with no syntactic position.'}]),faailDamma('هِنْدٌ','Hind')
+ ],'The author prints this example for obligatory feminine agreement when the subject is genuinely feminine; the footnote parses both elements.','يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمِثَالَ لِوُجُوبِ تَأْنِيثِ الْفِعْلِ مَعَ الْفَاعِلِ الْمُؤَنَّثِ الْحَقِيقِيِّ، وَتُعْرِبُ الْحَاشِيَةُ عُنْصُرَيْهِ.'),
+ faailBook('faail-27',101,'تَقُومُ هِنْدٌ','Hind stands.',[presentVisible('تَقُومُ','stands'),faailDamma('هِنْدٌ','Hind')]),
+ faailBook('faail-28',101,'طَلَعَ الشَّمْسُ','The sun rose.',[faailPast('طَلَعَ','rose'),faailDamma('الشَّمْسُ','the sun')]),
+ faailQuran('faail-29',101,'وَمَا كَانَ صَلَاتُهُمْ عِنْدَ الْبَيْتِ إِلَّا مُكَاءً','Their prayer at the House was nothing but whistling.',[
+  answerParts('وَمَا','and not',[{ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ، وَ«مَا» حَرْفُ نَفْيٍ.','en':'Wāw begins a new statement; mā is a negation particle.'}]),
+  token('كَانَ','was','فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ.','Defective past verb built on fatḥ.'),
+  answerParts('صَلَاتُهُمْ','their prayer',[{ar:'«صَلَاةُ» اسْمُ «كَانَ» مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','en':'Ṣalātu is the subject of kāna, nominative with a visible ḍammah, and the first term of an iḍāfah.'},{ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ، وَالْمِيمُ عَلَامَةُ الْجَمْعِ.','en':'Hāʾ is the attached second term; mīm marks the plural referent.'}]),
+  token('عِنْدَ','at','ظَرْفُ مَكَانٍ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Place adverb, accusative with a visible fatḥah, and the first term of an iḍāfah.'),
+  token('الْبَيْتِ','the House','مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ.','Second term of the iḍāfah, genitive with a visible kasrah.'),
+  token('إِلَّا','except','أَدَاةُ حَصْرٍ مَبْنِيَّةٌ لَا مَحَلَّ لَهَا.','Restriction particle with no syntactic position.'),
+  token('مُكَاءً','whistling','خَبَرُ «كَانَ» مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','Predicate of kāna, accusative with a visible fatḥah.')
+ ],8,35,'الْأَنْفَالِ','The author quotes this excerpt while explaining permissible masculine agreement with a metaphorically feminine subject; the footnote gives the sentence-level parsing.','يَسْتَشْهِدُ الْمُؤَلِّفُ بِهَذَا الْمَقْطَعِ فِي جَوَازِ تَذْكِيرِ الْفِعْلِ مَعَ الْمُؤَنَّثِ الْمَجَازِيِّ، وَتُعْرِبُ الْحَاشِيَةُ الْجُمْلَةَ.'),
+ faailBook('faail-30',101,'قَامَ الزَّيْدَانِ','The two Zayds stood.',[faailPast('قَامَ','stood'),faailDual('الزَّيْدَانِ','the two Zayds')]),
+ faailBook('faail-31',101,'قَامَ الزَّيْدُونَ','The Zayds stood.',[faailPast('قَامَ','stood'),faailSoundPlural('الزَّيْدُونَ','the Zayds')]),
+ faailBook('faail-32',101,'قَامَتِ الْمُسْلِمَتَانِ','The two Muslim women stood.',[
+  answerParts('قَامَتِ','stood',[{ar:'«قَامَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Qāma is a past verb built on fatḥ.'},{ar:'تَاءُ التَّأْنِيثِ السَّاكِنَةُ حَرْفٌ لَا مَحَلَّ لَهُ.','en':'Silent feminine tāʾ is a fixed marker with no syntactic position.'}]),faailDual('الْمُسْلِمَتَانِ','the two Muslim women')
+ ]),
+ faailBook('faail-33',101,'قَامَتِ الْمُسْلِمَاتُ','The Muslim women stood.',[
+  answerParts('قَامَتِ','stood',[{ar:'«قَامَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Qāma is a past verb built on fatḥ.'},{ar:'تَاءُ التَّأْنِيثِ السَّاكِنَةُ حَرْفٌ لَا مَحَلَّ لَهُ.','en':'Silent feminine tāʾ is a fixed marker with no syntactic position.'}]),faailDamma('الْمُسْلِمَاتُ','the Muslim women')
+ ]),
+ faailBook('faail-34',101,'قَامَ الرِّجَالُ','The men stood.',[faailPast('قَامَ','stood'),faailDamma('الرِّجَالُ','the men')]),
+ faailBook('faail-35',101,'قَامَتِ الرِّجَالُ','The men stood.',[
+  answerParts('قَامَتِ','stood',[{ar:'«قَامَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Qāma is a past verb built on fatḥ.'},{ar:'تَاءُ التَّأْنِيثِ السَّاكِنَةُ حَرْفٌ لَا مَحَلَّ لَهُ.','en':'Silent feminine tāʾ is a fixed marker with no syntactic position.'}]),faailDamma('الرِّجَالُ','the men')
+ ],'The author prints both masculine and feminine agreement with a broken-plural subject as permissible forms.','يَطْبَعُ الْمُؤَلِّفُ صِيغَتَيِ التَّذْكِيرِ وَالتَّأْنِيثِ مَعَ فَاعِلٍ جَمْعِ تَكْسِيرٍ عَلَى الْجَوَازِ.'),
+ faailBook('faail-36',101,'قَامَ الْهُنُودُ','The Hind women stood.',[faailPast('قَامَ','stood'),faailDamma('الْهُنُودُ','the Hind women')]),
+ faailBook('faail-37',101,'قَامَتِ الْهُنُودُ','The Hind women stood.',[
+  answerParts('قَامَتِ','stood',[{ar:'«قَامَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Qāma is a past verb built on fatḥ.'},{ar:'تَاءُ التَّأْنِيثِ السَّاكِنَةُ حَرْفٌ لَا مَحَلَّ لَهُ.','en':'Silent feminine tāʾ is a fixed marker with no syntactic position.'}]),faailDamma('الْهُنُودُ','the Hind women')
+ ],'The author prints both masculine and feminine agreement with a broken-plural subject as permissible forms.','يَطْبَعُ الْمُؤَلِّفُ صِيغَتَيِ التَّذْكِيرِ وَالتَّأْنِيثِ مَعَ فَاعِلٍ جَمْعِ تَكْسِيرٍ عَلَى الْجَوَازِ.'),
+ faailQuran('faail-38',102,'وَوَرِثَ سُلَيْمَانُ دَاوُدَ','And Solomon inherited from David.',[
+  answerParts('وَوَرِثَ','and inherited',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«وَرِثَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','en':'Waritha is a past verb built on fatḥ.'}]),
+  faailDamma('سُلَيْمَانُ','Solomon'),
+  token('دَاوُدَ','David','مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','Object, accusative with a visible fatḥah.')
+ ],27,16,'النَّمْلِ'),
+ faailQuran('faail-39',102,'وَلَقَدْ جَاءَ آلَ فِرْعَوْنَ النُّذُرُ','And warnings certainly came to Pharaoh’s people.',[
+  answerParts('وَلَقَدْ','and certainly',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ، وَاللَّامُ جَوَابُ قَسَمٍ مَحْذُوفٍ، وَ«قَدْ» حَرْفُ تَحْقِيقٍ.','en':'Wāw coordinates, lām answers an omitted oath, and qad marks certainty.'}]),
+  faailPast('جَاءَ','came'),
+  token('آلَ','people of','مَفْعُولٌ بِهِ مُقَدَّمٌ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Advanced object, accusative with a visible fatḥah, and the first term of an iḍāfah.'),
+  token('فِرْعَوْنَ','Pharaoh','مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مَمْنُوعٌ مِنَ الصَّرْفِ.','Second term of the iḍāfah, genitive with fatḥah instead of kasrah because it is diptote.'),
+  token('النُّذُرُ','warnings','فَاعِلٌ مُؤَخَّرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Delayed subject of the verb, nominative with a visible ḍammah.')
+ ],54,41,'الْقَمَرِ'),
+ faailQuran('faail-40',102,'وَشَغَلَتْنَا أَمْوَالُنَا','And our possessions occupied us.',[
+  answerParts('وَشَغَلَتْنَا','and occupied us',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ.','en':'Wāw is a conjunction.'},{ar:'«شَغَلَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، وَتَاءُ التَّأْنِيثِ حَرْفٌ لَا مَحَلَّ لَهُ.','en':'Shaghala is a past verb built on fatḥ; feminine tāʾ has no syntactic position.'},{ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ مُقَدَّمٌ.','en':'Nā is the attached advanced object.'}]),
+  answerParts('أَمْوَالُنَا','our possessions',[{ar:'«أَمْوَالُ» فَاعِلٌ مُؤَخَّرٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','en':'Amwālu is the delayed subject, nominative with a visible ḍammah, and the first term of an iḍāfah.'},{ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','en':'Nā is the attached second term.'}])
+ ],48,11,'الْفَتْحِ'),
+ faailQuran('faail-41',102,'وَإِذِ ابْتَلَى إِبْرَاهِيمَ رَبُّهُ','And when his Lord tested Abraham…',[
+  answerParts('وَإِذِ','and when',[{ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ.','en':'Wāw begins a new statement.'},{ar:'«إِذْ» ظَرْفُ زَمَانٍ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ.','en':'Idh is a time adverb fixed on sukūn in the accusative position.'}]),
+  faailPast('ابْتَلَى','tested'),
+  token('إِبْرَاهِيمَ','Abraham','مَفْعُولٌ بِهِ مُقَدَّمٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','Advanced object, accusative with a visible fatḥah.'),
+  answerParts('رَبُّهُ','his Lord',[{ar:'«رَبُّ» فَاعِلٌ مُؤَخَّرٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','en':'Rabbu is the delayed subject, nominative with a visible ḍammah, and the first term of an iḍāfah.'},{ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','en':'Hāʾ is the attached second term.'}])
+ ],2,124,'الْبَقَرَةِ'),
+ faailQuran('faail-42',102,'فَرِيقًا كَذَّبُوا وَفَرِيقًا يَقْتُلُونَ','One group they denied, and another group they kill.',[
+  token('فَرِيقًا','one group','مَفْعُولٌ بِهِ مُقَدَّمٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','Advanced object, accusative with a visible fatḥah.'),
+  answerParts('كَذَّبُوا','they denied',[{ar:'«كَذَّبُوا» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الضَّمِّ لِاتِّصَالِهِ بِوَاوِ الْجَمَاعَةِ.','en':'Kadhdhabū is a past verb built on ḍamm because plural wāw is attached.'},{ar:'وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','en':'Plural wāw is the attached subject.'}]),
+  token('وَفَرِيقًا','and another group','الْوَاوُ حَرْفُ عَطْفٍ، وَ«فَرِيقًا» مَفْعُولٌ بِهِ مُقَدَّمٌ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.','Wāw coordinates; farīqan is an advanced object, accusative with a visible fatḥah.'),
+  answerParts('يَقْتُلُونَ','they kill',[{ar:'«يَقْتُلُونَ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','en':'Yaqtulūna is a present verb, indicative by retention of nūn because it is one of the five forms.'},{ar:'وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','en':'Plural wāw is the attached subject.'}])
+ ],5,70,'الْمَائِدَةِ'),
+ faailQuran('faail-43',103,'فَأَيَّ آيَاتِ اللَّهِ تُنْكِرُونَ','So which of Allah’s signs do you deny?',[
+  answerParts('فَأَيَّ','so which',[{ar:'الْفَاءُ حَرْفُ عَطْفٍ.','en':'Fāʾ is a conjunction.'},{ar:'«أَيَّ» اسْمُ اسْتِفْهَامٍ مَفْعُولٌ بِهِ مُقَدَّمٌ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','en':'Ayy is an interrogative noun serving as an advanced object, accusative with a visible fatḥah, and the first term of an iḍāfah.'}]),
+  token('آيَاتِ','signs','مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Second term of the iḍāfah, genitive with a visible kasrah, and itself the first term of another iḍāfah.'),
+  token('اللَّهِ','Allah','مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ.','Second term of the iḍāfah, genitive with a visible kasrah.'),
+  answerParts('تُنْكِرُونَ','you deny',[{ar:'«تُنْكِرُونَ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','en':'Tunkirūna is a present verb, indicative by retention of nūn because it is one of the five forms.'},{ar:'وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','en':'Plural wāw is the attached subject.'}])
+ ],40,81,'غَافِرٍ','The author quotes this excerpt because the interrogative object must precede its verb. The footnote parses the advanced object and the attached subject pronoun.','يَسْتَشْهِدُ الْمُؤَلِّفُ بِهَذَا الْمَقْطَعِ لِوُجُوبِ تَقْدِيمِ الْمَفْعُولِ الِاسْتِفْهَامِيِّ، وَتُعْرِبُ الْحَاشِيَةُ الْمَفْعُولَ الْمُقَدَّمَ وَضَمِيرَ الْفَاعِلِ الْمُتَّصِلَ.')
+];
+
 // Complex cards still use one compact classroom answer. These overrides keep
 // attached elements and sentence-level positions only when they complete the parse.
-const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns,definitenessIntro,pronounForms,properNames,demonstrativeNouns,relativeNouns,definiteArticle,definiteIdafa];
+const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns,definitenessIntro,pronounForms,properNames,demonstrativeNouns,relativeNouns,definiteArticle,definiteIdafa,faailForms];
 const setConciseAnswer=(exerciseId,word,ar,en)=>{
  const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
  const answer=item&&item.tokens.find(entry=>entry.word===word);
@@ -1664,13 +1834,21 @@ const chapters=[
   help('يَرِدُ التَّرْتِيبُ الْمَطْبُوعُ هَكَذَا: ضَمِيرٌ فِي «غُلَامِي، وَغُلَامُكَ، وَغُلَامُهُ»؛ وَعَلَمٌ فِي «غُلَامُ زَيْدٍ»؛ وَاسْمُ إِشَارَةٍ فِي «غُلَامُ هَذَا»؛ وَاسْمٌ مَوْصُولٌ فِي «غُلَامُ الَّذِي قَامَ أَبُوهُ»؛ وَمُعَرَّفٌ بِالْأَدَاةِ فِي «غُلَامُ الرَّجُلِ».','The printed order is: a pronoun in ghulāmī, ghulāmuka, and ghulāmuhu; a proper name in ghulāmu Zaydin; a demonstrative in ghulāmu hādhā; a relative noun in ghulāmu alladhī qāma abūhu; and a noun defined by the article in ghulāmu al-rajuli.'),
   help('هَذِهِ تَرَاكِيبُ إِضَافَةٍ مُسْتَقِلَّةٌ، فَتُثْبِتُ أَنَّ «غُلَامًا» مُضَافٌ وَأَنَّ مَا بَعْدَهُ مُضَافٌ إِلَيْهِ، وَلَا تُثْبِتُ لِلْمُضَافِ وَظِيفَةَ مُبْتَدَإٍ أَوْ فَاعِلٍ أَوْ مَفْعُولٍ بِهِ مِنْ غَيْرِ جُمْلَةٍ.','These are standalone iḍāfah phrases. They establish the first and second terms, but without a sentence they do not make the first noun a subject, verb-subject, or object. This scope note is supplied by the app.')
  ],helpSourceEn:'Al-Mutammimah, printed page 96. The exact heading, the seven phrases in printed order, and footnote 4’s explanation that ghulām gains definiteness from annexation to one of the five definite classes come from the book. The app supplies the phrase-level parsing, scope note, full vocalization of the answers, concise English, card organization, and visual labels. No item from this section is held from practice.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٩٦. الْعُنْوَانُ وَالتَّرَاكِيبُ السَّبْعَةُ فِي تَرْتِيبِهَا وَبَيَانُ الْحَاشِيَةِ الرَّابِعَةِ أَنَّ «غُلَامًا» يَكْتَسِبُ التَّعْرِيفَ بِإِضَافَتِهِ إِلَى وَاحِدٍ مِنَ الْمَعَارِفِ الْخَمْسَةِ مِنَ الْمُؤَلِّفِ. وَأَمَّا إِعْرَابُ التَّرْكِيبِ وَتَنْبِيهُ حَدِّهِ وَضَبْطُ الْجَوَابِ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ وَتَسْمِيَاتُ الرَّسْمِ فَمِنَ التَّطْبِيقِ. وَلَا شَاهِدَ مَحْجُوبًا مِنْ هَذَا الْفَصْلِ.'}
+ ,{id:'faail',babId:'nominative-nouns',order:1,titleEn:'The subject of the verb',titleAr:'بَابُ الْفَاعِلِ',pages:'97–103',book:faailForms,help:[
+  help('الْمَرْفُوعَاتُ عَشَرَةٌ: الْفَاعِلُ، وَالْمَفْعُولُ الَّذِي لَمْ يُسَمَّ فَاعِلُهُ، وَالْمُبْتَدَأُ، وَخَبَرُهُ، وَاسْمُ كَانَ وَأَخَوَاتِهَا، وَاسْمُ أَفْعَالِ الْمُقَارَبَةِ، وَاسْمُ الْحُرُوفِ الْمُشَبَّهَةِ بِـ«لَيْسَ»، وَخَبَرُ إِنَّ وَأَخَوَاتِهَا، وَخَبَرُ «لَا» الَّتِي لِنَفْيِ الْجِنْسِ، وَالتَّابِعُ لِلْمَرْفُوعِ: النَّعْتُ وَالْعَطْفُ وَالتَّوْكِيدُ وَالْبَدَلُ.','The author opens the bāb with ten nominative categories: the verb’s subject; the subject replacing an unnamed agent; the nominal-sentence subject; its predicate; the noun of kāna and its sisters; the noun of proximity verbs; the noun of particles resembling laysa; the predicate of inna and its sisters; the predicate of lā of absolute negation; and a dependent of a nominative word—adjective, coordination, emphasis, or substitute.'),
+  help('الْفَاعِلُ هُوَ الِاسْمُ الْمَرْفُوعُ الْمَذْكُورُ قَبْلَهُ فِعْلُهُ، أَوْ مَا هُوَ فِي تَأْوِيلِ الْفِعْلِ. وَهُوَ ظَاهِرٌ، نَحْوُ «قَالَ اللَّهُ»؛ أَوْ مُضْمَرٌ، نَحْوُ التَّاءِ فِي «ضَرَبْتُ».','The fāʿil is the nominative noun preceded by its verb, or by an expression equivalent to a verb. It may be overt, as in qāla Allāhu, or pronominal, as with the tāʾ in ḍarabtu.'),
+  help('الْفَاعِلُ عُمْدَةٌ فَلَا يُحْذَفُ. وَإِذَا تَقَدَّمَ الِاسْمُ عَلَى فِعْلِهِ فَهُوَ مُبْتَدَأٌ، وَلِلْفِعْلِ فَاعِلٌ ضَمِيرٌ مُسْتَتِرٌ أَوْ مُتَّصِلٌ، نَحْوُ «زَيْدٌ قَامَ» وَ«الزَّيْدَانِ قَامَا».','The subject is indispensable and is not deleted. When the overt noun comes before the verb, it is a nominal-sentence subject; the verb then has a hidden or attached subject, as in Zaydun qāma and al-Zaydāni qāmā.'),
+  help('إِذَا تَقَدَّمَ الْفِعْلُ عَلَى فَاعِلٍ مُثَنًّى أَوْ مَجْمُوعٍ فَالْفُصْحَى إِفْرَادُ الْفِعْلِ: «قَامَ الزَّيْدَانِ» وَ«قَامَ الزَّيْدُونَ». وَيَذْكُرُ الْمُؤَلِّفُ لُغَةَ «أَكَلُونِي الْبَرَاغِيثُ» الَّتِي تُلْحِقُ بِالْفِعْلِ عَلَامَةَ التَّثْنِيَةِ أَوِ الْجَمْعِ.','When a verb precedes a dual or plural subject, standard agreement keeps the verb singular. The author also records the dialect called “the fleas ate me,” which attaches a dual or plural marker to the verb while retaining the following overt subject.'),
+  help('يَلْحَقُ الْفِعْلَ تَاءُ التَّأْنِيثِ مَعَ الْفَاعِلِ الْمُؤَنَّثِ الْحَقِيقِيِّ، وَيَجُوزُ التَّذْكِيرُ مَعَ الْمُؤَنَّثِ الْمَجَازِيِّ وَجَمْعِ التَّكْسِيرِ عَلَى التَّفْصِيلِ الَّذِي يَذْكُرُهُ الْمُؤَلِّفُ. وَالْأَصْلُ تَرْتِيبُ الْفِعْلِ ثُمَّ الْفَاعِلِ ثُمَّ الْمَفْعُولِ، وَقَدْ يَتَقَدَّمُ الْمَفْعُولُ جَوَازًا أَوْ وُجُوبًا.','The verb takes feminine tāʾ with a genuinely feminine subject; masculine agreement may be allowed with metaphorical feminine nouns and broken plurals under the author’s stated conditions. The normal order is verb, subject, then object, though the object may or must advance in the cases illustrated on pages 102–103.')
+ ],helpSourceEn:'Al-Mutammimah, printed pages 97–103. The bāb heading, ten-category overview, exact fāʿil definition, overt/pronominal division, internal rulings, all forty-three Book Practice examples, nineteen Qurʾānic citations, and the core parses in the footnotes come from the author. The app supplies full answer vocalization, concise recitation order, English, card organization, and the visual labels. Repeated quotations remain separate because the author reuses them under a later rule. No item from this chapter is held from practice.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٩٧–١٠٣. عُنْوَانُ الْبَابِ وَقَائِمَةُ الْمَرْفُوعَاتِ الْعَشَرَةِ وَحَدُّ الْفَاعِلِ وَتَقْسِيمُهُ إِلَى ظَاهِرٍ وَمُضْمَرٍ وَأَحْكَامُهُ الدَّاخِلِيَّةُ وَتَدْرِيبَاتُ الْكِتَابِ الثَّلَاثَةُ وَالْأَرْبَعُونَ وَالشَّوَاهِدُ الْقُرْآنِيَّةُ التِّسْعَةَ عَشَرَ وَأُصُولُ الْإِعْرَابِ فِي الْحَوَاشِي مِنَ الْمُؤَلِّفِ. وَأَمَّا ضَبْطُ الْجَوَابِ وَتَرْتِيبُهُ الْمُوجَزُ وَالتَّرْجَمَةُ وَتَنْظِيمُ الْبِطَاقَاتِ وَتَسْمِيَاتُ الرَّسْمِ فَمِنَ التَّطْبِيقِ. وَأُبْقِيَتِ الشَّوَاهِدُ الْمُعَادَةُ مُسْتَقِلَّةً لِأَنَّ الْمُؤَلِّفَ أَعَادَهَا تَحْتَ حُكْمٍ آخَرَ، وَلَا شَاهِدَ مَحْجُوبًا مِنْ هَذَا الْفَصْلِ.'}
 ];
 
 const babs=[
  {id:'opening',order:1,titleEn:'Opening section: Speech and what it consists of',titleAr:'الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ',pages:'19–24'},
  {id:'iraab-bina',order:2,titleEn:'Bāb al-Iʿrāb wa-l-Bināʾ',titleAr:'بَابُ الْإِعْرَابِ وَالْبِنَاءِ',pages:'25–30'},
  {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–71'},
- {id:'definiteness',order:4,titleEn:'Bāb al-Nakirah wa-l-Maʿrifah',titleAr:'بَابُ النَّكِرَةِ وَالْمَعْرِفَةِ',pages:'72–96'}
+ {id:'definiteness',order:4,titleEn:'Bāb al-Nakirah wa-l-Maʿrifah',titleAr:'بَابُ النَّكِرَةِ وَالْمَعْرِفَةِ',pages:'72–96'},
+ {id:'nominative-nouns',order:5,titleEn:'Bāb al-Marfūʿāt min al-Asmāʾ',titleAr:'بَابُ الْمَرْفُوعَاتِ مِنَ الْأَسْمَاءِ',pages:'97–103'}
 ];
 
 const helpVisuals={
@@ -1808,6 +1986,19 @@ const helpVisuals={
   {labelAr:'اسْمٌ مَوْصُولٌ',labelEn:'Relative noun',exampleAr:'غُلَامُ الَّذِي قَامَ أَبُوهُ',focusAr:'الَّذِي',noteAr:'الَّذِي',noteEn:'the one who',exerciseId:'idafa-definite-06'},
   {labelAr:'مُعَرَّفٌ بِالْأَدَاةِ',labelEn:'Noun with al',exampleAr:'غُلَامُ الرَّجُلِ',focusAr:'الرَّجُلِ',noteAr:'الرَّجُلِ',noteEn:'the man',exerciseId:'idafa-definite-07'}
  ]}
+ ,
+ 'faail':{type:'faail-overview',titleAr:'الْمَرْفُوعَاتُ مِنَ الْأَسْمَاءِ',titleEn:'Nouns in the nominative case',categories:[
+  {labelAr:'الْفَاعِلُ',labelEn:'subject of the verb',current:true},
+  {labelAr:'الْمَفْعُولُ الَّذِي لَمْ يُسَمَّ فَاعِلُهُ',labelEn:'subject replacing an unnamed agent'},
+  {labelAr:'الْمُبْتَدَأُ',labelEn:'nominal-sentence subject'},
+  {labelAr:'خَبَرُ الْمُبْتَدَإِ',labelEn:'predicate of the nominal-sentence subject'},
+  {labelAr:'اسْمُ كَانَ وَأَخَوَاتِهَا',labelEn:'noun of kāna and its sisters'},
+  {labelAr:'اسْمُ أَفْعَالِ الْمُقَارَبَةِ',labelEn:'noun of proximity verbs'},
+  {labelAr:'اسْمُ الْحُرُوفِ الْمُشَبَّهَةِ بِـ«لَيْسَ»',labelEn:'noun of particles resembling laysa'},
+  {labelAr:'خَبَرُ إِنَّ وَأَخَوَاتِهَا',labelEn:'predicate of inna and its sisters'},
+  {labelAr:'خَبَرُ «لَا» النَّافِيَةِ لِلْجِنْسِ',labelEn:'predicate of lā of absolute negation'},
+  {labelAr:'التَّابِعُ لِلْمَرْفُوعِ',labelEn:'dependent of a nominative word'}
+ ],example:{exerciseId:'faail-01',sentenceAr:'قَالَ اللَّهُ',verbAr:'قَالَ',subjectAr:'اللَّهُ',verbLabelAr:'الْفِعْلُ',verbLabelEn:'verb',subjectLabelAr:'الْفَاعِلُ',subjectLabelEn:'subject',referenceAr:'سُورَةُ الْمَائِدَةِ، ١١٥'}}
 };
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});
 

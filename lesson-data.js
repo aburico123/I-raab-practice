@@ -844,7 +844,7 @@ const diptoteNouns=[
    {ar:'اللَّامُ حَرْفُ جَرٍّ.',en:'Lām is a preposition.'},
    {ar:'«الْكَافِرِينَ» اسْمٌ مَجْرُورٌ بِاللَّامِ، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.',en:'Al-kāfirīna is governed by lām, genitive with yāʾ instead of kasrah because it is a sound masculine plural.'}
   ]),
-  token('سَلَاسِلًا','chains','مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ. وَقَدْ صُرِفَ فِي هَذِهِ الْقِرَاءَةِ لِلتَّنَاسُبِ.','Object, accusative with a visible fatḥah. In this cited reading it is fully declined for formal matching.'),
+  token('سَلَاسِلًا','chains','مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ. وَقَدْ صُرِفَ فِي قِرَاءَةِ نَافِعٍ الْمَعْرُوضَةِ لِمُنَاسَبَةِ «أَغْلَالًا».','Object, accusative with a visible fatḥah. The displayed tanwīn is Nāfiʿ’s fully declined reading, cited to match the adjacent aghlālan.'),
   answerParts('وَأَغْلَالًا','and shackles',[
    {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
    {ar:'«أَغْلَالًا» مَعْطُوفٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.',en:'Aghlālan is coordinated and accusative with a visible fatḥah.'}
@@ -853,7 +853,7 @@ const diptoteNouns=[
    {ar:'الْوَاوُ حَرْفُ عَطْفٍ.',en:'Wāw is a conjunction.'},
    {ar:'«سَعِيرًا» مَعْطُوفٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.',en:'Saʿīran is coordinated and accusative with a visible fatḥah.'}
   ])
- ],'Qur’an 76:4. The page cites Nāfiʿ’s fully declined reading of “salāsilan,” and the footnote prints the complete verse and parses that word as the object with visible fatḥah. The other word-by-word details are app-supplied.','سُورَةُ الْإِنْسَانِ، الْآيَةُ ٤. تَسْتَشْهِدُ الصَّفْحَةُ بِقِرَاءَةِ نَافِعٍ بِصَرْفِ «سَلَاسِلًا»، وَتَطْبَعُ الْحَاشِيَةُ الْآيَةَ تَامَّةً وَتُعْرِبُ هَذِهِ الْكَلِمَةَ مَفْعُولًا بِهِ مَنْصُوبًا بِالْفَتْحَةِ الظَّاهِرَةِ. وَإِعْرَابُ بَقِيَّةِ الْكَلِمَاتِ مِنَ التَّطْبِيقِ.'),
+ ],'Qur’an 76:4. The page cites Nāfiʿ’s fully declined reading “salāsilan” with tanwīn for matching the adjacent fully declined word “aghlālan.” The footnote prints the complete verse and parses salāsilan as the object with visible fatḥah. The other word-by-word details are app-supplied.','سُورَةُ الْإِنْسَانِ، الْآيَةُ ٤. تَسْتَشْهِدُ الصَّفْحَةُ بِقِرَاءَةِ نَافِعٍ بِتَنْوِينِ «سَلَاسِلًا» وَصَرْفِهَا لِمُنَاسَبَةِ «أَغْلَالًا» الْمُنَوَّنَةِ، وَتَطْبَعُ الْحَاشِيَةُ الْآيَةَ تَامَّةً وَتُعْرِبُ «سَلَاسِلًا» مَفْعُولًا بِهِ مَنْصُوبًا بِالْفَتْحَةِ الظَّاهِرَةِ. وَإِعْرَابُ بَقِيَّةِ الْكَلِمَاتِ مِنَ التَّطْبِيقِ.'),
  diptoteExercise('diptote-04',71,'قَوَارِيرًا قَوَارِيرًا','Crystal vessels—crystal clear…',[
   token('قَوَارِيرًا','crystal vessels','خَبَرُ «كَانَتْ» مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ. وَقَدْ صُرِفَ فِي هَذِهِ الْقِرَاءَةِ لِلتَّنَاسُبِ.','Predicate of kānat, accusative with a visible fatḥah. In this cited reading it is fully declined for formal matching.'),
   token('قَوَارِيرًا','crystal clear','بَدَلٌ مِنَ الْأُولَى مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ. وَقَدْ صُرِفَ فِي هَذِهِ الْقِرَاءَةِ لِلتَّنَاسُبِ.','Substitute for the first word, accusative with a visible fatḥah. It is likewise fully declined in this reading.')
@@ -861,9 +861,37 @@ const diptoteNouns=[
 ];
 diptoteNouns[3].quranLeadAr='وَ';
 
+const definitenessIntro=[
+ exercise('definiteness-01',72,'مَرَرْتُ بِذِي مَالٍ','I passed by a possessor of wealth.',[
+  answerParts('مَرَرْتُ','I passed',[
+   {ar:'«مَرَرْ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.',en:'Marar is a past verb built on sukūn because subject tāʾ is attached.'},
+   {ar:'التَّاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',en:'The attached tāʾ is in the nominative position as subject.'}
+  ]),
+  answerParts('بِذِي','by a possessor',[
+   {ar:'الْبَاءُ حَرْفُ جَرٍّ.',en:'Bāʾ is a preposition.'},
+   {ar:'«ذِي» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ، وَهُوَ مُضَافٌ.',en:'Dhī is governed by bāʾ, genitive with yāʾ instead of kasrah because it is one of the six nouns. It is the first term of the iḍāfah.'}
+  ]),
+  token('مَالٍ','wealth','مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','The second term of the iḍāfah, genitive with a visible kasrah.')
+ ],'Footnote 2 prints “marartu bi-dhī mālin” and states that dhī means ṣāḥib; it uses the example to show that dhī occupies the place of a word that accepts al. The page does not give a word-by-word parse.','تَطْبَعُ الْحَاشِيَةُ الثَّانِيَةُ «مَرَرْتُ بِذِي مَالٍ»، وَتَنُصُّ عَلَى أَنَّ «ذِي» بِمَعْنَى «صَاحِبٍ»، وَتَسْتَعْمِلُ الْمِثَالَ لِبَيَانِ مَا وَقَعَ مَوْقِعَ مَا يَصْلُحُ دُخُولُ «أَلْ» عَلَيْهِ، وَلَا تَذْكُرُ إِعْرَابًا مُفَصَّلًا.'),
+ exercise('definiteness-02',72,'مَرَرْتُ بِزَيْدٍ صَاحِبِكَ','I passed by Zayd, your companion.',[
+  answerParts('مَرَرْتُ','I passed',[
+   {ar:'«مَرَرْ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.',en:'Marar is a past verb built on sukūn because subject tāʾ is attached.'},
+   {ar:'التَّاءُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.',en:'The attached tāʾ is in the nominative position as subject.'}
+  ]),
+  answerParts('بِزَيْدٍ','by Zayd',[
+   {ar:'الْبَاءُ حَرْفُ جَرٍّ.',en:'Bāʾ is a preposition.'},
+   {ar:'«زَيْدٍ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.',en:'Zayd is governed by bāʾ, genitive with a visible kasrah.'}
+  ]),
+  answerParts('صَاحِبِكَ','your companion',[
+   {ar:'«صَاحِبِ» نَعْتٌ لِـ«زَيْدٍ» مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.',en:'Ṣāḥibi describes Zayd, so it is genitive with a visible kasrah. It is the first term of the iḍāfah.'},
+   {ar:'الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'Kāf is an attached pronoun built on fatḥ in the genitive position as the second term of the iḍāfah.'}
+  ])
+ ],'Footnote 3 prints “marartu bi-Zaydin ṣāḥibika” to show that the descriptive annexed noun does not outrank the proper noun it describes. The page does not give a word-by-word parse.','تَطْبَعُ الْحَاشِيَةُ الثَّالِثَةُ «مَرَرْتُ بِزَيْدٍ صَاحِبِكَ»، لِبَيَانِ أَنَّ الصِّفَةَ الْمُضَافَةَ لَا تَكُونُ أَعْرَفَ مِنَ الْمَوْصُوفِ الْعَلَمِ، وَلَا تَذْكُرُ إِعْرَابًا مُفَصَّلًا.')
+];
+
 // Complex cards still use one compact classroom answer. These overrides keep
 // attached elements and sentence-level positions only when they complete the parse.
-const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns];
+const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns,jazmSigns,summaryRecap,estimatedInflection,diptoteNouns,definitenessIntro];
 const setConciseAnswer=(exerciseId,word,ar,en)=>{
  const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
  const answer=item&&item.tokens.find(entry=>entry.word===word);
@@ -1019,12 +1047,19 @@ const chapters=[
   help('يُرْفَعُ الِاسْمُ الَّذِي لَا يَنْصَرِفُ بِالضَّمَّةِ، وَيُنْصَبُ بِالْفَتْحَةِ، وَيُجَرُّ بِالْفَتْحَةِ نِيَابَةً عَنِ الْكَسْرَةِ إِذَا كَانَ مُجَرَّدًا مِنْ «أَلْ» وَالْإِضَافَةِ. فَإِنْ دَخَلَتْ عَلَيْهِ «أَلْ» أَوْ أُضِيفَ جُرَّ بِالْكَسْرَةِ.','A diptote takes ḍammah in rafʿ and fatḥah in naṣb. In khafḍ it takes fatḥah instead of kasrah while bare; with al or in an iḍāfah, it takes ordinary kasrah.'),
   help('يَسْتَشْهِدُ الْكِتَابُ بِصَرْفِ غَيْرِ الْمُنْصَرِفِ لِلتَّنَاسُبِ فِي قِرَاءَةِ نَافِعٍ: «سَلَاسِلًا» وَ«قَوَارِيرًا قَوَارِيرًا»، وَيَذْكُرُ أَنَّهُ قَدْ يُصْرَفُ لِضَرُورَةِ الشِّعْرِ.','The book cites Nāfiʿ’s fully declined readings salāsilan and qawārīran qawārīran for formal matching, and notes that a diptote may also receive tanwīn for poetic necessity.')
  ],helpSourceEn:'Al-Mutammimah, printed pages 64–71. The exact heading, the one-cause and two-cause groupings, the nine causes, examples, special readings, and the author’s parsing of the four Book Practice items are from the book. The compact English, full answer vocalization, remaining word-by-word parsing, and the three comparison phrases in the visual are app-prepared; the comparison words themselves are verified from the printed examples and the already-published page-47 verse.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٦٤–٧١. الْعُنْوَانُ وَتَقْسِيمُ الْعِلَلِ إِلَى الْوَاحِدَةِ الْقَائِمَةِ مَقَامَ عِلَّتَيْنِ وَالْعِلَّتَيْنِ الْمُجْتَمِعَتَيْنِ وَالْعِلَلُ التِّسْعُ وَالْأَمْثِلَةُ وَالْقِرَاءَاتُ وَإِعْرَابُ تَدْرِيبَاتِ الْكِتَابِ الْأَرْبَعَةِ مِنَ الْمُؤَلِّفِ. وَأَمَّا التَّرْجَمَةُ الْمُوجَزَةُ وَضَبْطُ الْجَوَابِ وَإِعْرَابُ بَقِيَّةِ الْكَلِمَاتِ وَعِبَارَاتُ الْمُقَارَنَةِ الثَّلَاثُ فَمِنَ التَّطْبِيقِ، وَأَلْفَاظُ الْمُقَارَنَةِ مُرَاجَعَةٌ عَلَى أَمْثِلَةِ هَذَا الْفَصْلِ وَآيَةِ ص ٤٧ الْمَنْشُورَةِ سَابِقًا.'}
+ ,{id:'definiteness-intro',babId:'definiteness',order:1,titleEn:'Indefinite and definite nouns',titleAr:'النَّكِرَةُ وَالْمَعْرِفَةُ',pages:'72',book:definitenessIntro,help:[
+  help('الِاسْمُ ضَرْبَانِ: نَكِرَةٌ وَمَعْرِفَةٌ. وَالنَّكِرَةُ هِيَ الْأَصْلُ، وَهِيَ كُلُّ اسْمٍ شَائِعٍ فِي جِنْسِهِ لَا يَخْتَصُّ بِهِ وَاحِدٌ دُونَ آخَرَ، نَحْوَ: «رَجُلٌ» وَ«فَرَسٌ» وَ«كِتَابٌ».','A noun is either indefinite or definite. The indefinite is the default: any noun common to its class and not restricted to one individual, such as rajulun, farasun, and kitābun.'),
+  help('يُقَرَّبُ حَدُّ النَّكِرَةِ بِأَنَّهَا كُلُّ مَا صَلَحَ دُخُولُ «أَلْ» عَلَيْهِ، نَحْوَ: «رَجُلٌ» وَ«امْرَأَةٌ» وَ«ثَوْبٌ»؛ أَوْ مَا وَقَعَ مَوْقِعَ مَا يَصْلُحُ دُخُولُهَا عَلَيْهِ، نَحْوَ «ذِي» بِمَعْنَى «صَاحِبٍ».','A practical test for an indefinite noun is that it accepts al, as rajulun, imraʾatun, and thawbun do, or that it occupies the place of a word that accepts al, as dhī in the meaning ṣāḥib.'),
+  help('الْمَعْرِفَةُ سِتَّةُ أَنْوَاعٍ بِتَرْتِيبِ الْمُؤَلِّفِ: الْمُضْمَرُ، ثُمَّ الْعَلَمُ، ثُمَّ اسْمُ الْإِشَارَةِ، ثُمَّ الْمَوْصُولُ، ثُمَّ الْمُعَرَّفُ بِالْأَدَاةِ، وَالسَّادِسُ مَا أُضِيفَ إِلَى وَاحِدٍ مِنْهَا.','The definite noun has six types in the author’s order: pronoun, proper name, demonstrative, relative noun, noun made definite by the article, and a noun annexed to one of those.'),
+  help('الْمُضْمَرُ أَعْرَفُ الْمَعَارِفِ، وَمَا أُضِيفَ إِلَى وَاحِدٍ مِنَ الْمَعَارِفِ فَهُوَ فِي رُتْبَةِ مَا أُضِيفَ إِلَيْهِ، إِلَّا الْمُضَافَ إِلَى الضَّمِيرِ فَهُوَ فِي رُتْبَةِ الْعَلَمِ. وَاسْمُ اللَّهِ تَعَالَى أَعْرَفُ الْمَعَارِفِ بِالْإِجْمَاعِ.','The pronoun is the most definite category. An annexed noun normally takes the rank of the definite noun to which it is annexed, except one annexed to a pronoun has the rank of a proper name. The name of Allah is, by agreement, the most definite of all.')
+ ],helpSourceEn:'Al-Mutammimah, printed page 72. The bāb heading, both subheadings, definitions, examples, and ordered list of six definite types are the author’s. The two Book Practice sentences come from footnotes 2 and 3; the author explains their role in the definitions but does not parse them word by word. Full sentence vocalization, concise card parsing, English, and the comparison labels are app-prepared.',helpSourceAr:'الْمُتَمِّمَةُ، ص ٧٢. عُنْوَانُ الْبَابِ وَعُنْوَانَا النَّكِرَةِ وَالْمَعْرِفَةِ وَالتَّعْرِيفَاتُ وَالْأَمْثِلَةُ وَتَرْتِيبُ أَنْوَاعِ الْمَعَارِفِ السِّتَّةِ مِنَ الْمُؤَلِّفِ. وَجُمْلَتَا تَدْرِيبَيِ الْكِتَابِ مِنَ الْحَاشِيَتَيْنِ ٢ وَ٣؛ وَيَشْرَحُ الْمُؤَلِّفُ وَظِيفَتَهُمَا فِي التَّعْرِيفَيْنِ مِنْ غَيْرِ إِعْرَابٍ تَفْصِيلِيٍّ. وَأَمَّا الضَّبْطُ التَّامُّ لِلْجُمْلَتَيْنِ وَالْإِعْرَابُ الْمُوجَزُ فِي الْبِطَاقَاتِ وَالتَّرْجَمَةُ وَتَسْمِيَاتُ الْمُقَارَنَةِ فَمِنَ التَّطْبِيقِ.'}
 ];
 
 const babs=[
  {id:'opening',order:1,titleEn:'Opening section: Speech and what it consists of',titleAr:'الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ',pages:'19–24'},
  {id:'iraab-bina',order:2,titleEn:'Bāb al-Iʿrāb wa-l-Bināʾ',titleAr:'بَابُ الْإِعْرَابِ وَالْبِنَاءِ',pages:'25–30'},
- {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–71'}
+ {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–71'},
+ {id:'definiteness',order:4,titleEn:'Bāb al-Nakirah wa-l-Maʿrifah',titleAr:'بَابُ النَّكِرَةِ وَالْمَعْرِفَةِ',pages:'72–96'}
 ];
 
 const helpVisuals={
@@ -1107,6 +1142,10 @@ const helpVisuals={
   {cellsAr:['مَعَ «أَلْ»','مَرَرْتُ بِالْمَسَاجِدِ','الْكَسْرَةُ الظَّاهِرَةُ'],cellsEn:['With al','I passed by the mosques','Visible kasrah — app-prepared comparison using the page-65 example word']},
   {cellsAr:['فِي الْإِضَافَةِ','﴿فِي أَحْسَنِ تَقْوِيمٍ﴾','الْكَسْرَةُ الظَّاهِرَةُ'],cellsEn:['In an iḍāfah','In the finest form','Visible kasrah — the book’s page-47 example'],exerciseId:'khafd-17'},
   {cellsAr:['مَنْصُوبٌ وَمَمْنُوعٌ مِنَ التَّنْوِينِ','جَاءَ الْقَوْمُ أُحَادَ','الْفَتْحَةُ الظَّاهِرَةُ'],cellsEn:['Accusative without tanwīn','The people came one by one','Visible fatḥah; adjectivehood and semantic conversion prevent tanwīn'],exerciseId:'diptote-01'}
+ ]},
+ 'definiteness-intro':{type:'contrast',titleAr:'النَّكِرَةُ وَالْمَعْرِفَةُ',titleEn:'Indefinite and definite compared',examples:[
+  {labelAr:'نَكِرَةٌ',labelEn:'Indefinite',exampleAr:'رَجُلٌ',exampleEn:'a man — common to its class, not one specified individual',focusAr:'رَجُلٌ'},
+  {labelAr:'مَعْرِفَةٌ',labelEn:'Definite',exampleAr:'زَيْدٌ',exampleEn:'Zayd — a proper name identifying one individual',focusAr:'زَيْدٌ',exerciseId:'definiteness-02'}
  ]}
 };
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});

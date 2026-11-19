@@ -1,26 +1,29 @@
 (function(){
 'use strict';
 
-const token=(word,gloss,ar,en,whyAr,whyEn)=>({word,gloss,ar,en,whyAr,whyEn});
-const exercise=(id,page,ar,en,tokens,directEn,directAr,appEn='Miftāḥ al-ʿIlm supplies any sentence-level detail not stated there, together with full answer vocalization, English, and “Why?” explanations.',appAr='وَيُكْمِلُ مِفْتَاحُ الْعِلْمِ مَا لَمْ يُذْكَرْ مِنْ تَفْصِيلِ إِعْرَابِ الْجُمْلَةِ، مَعَ ضَبْطِ الْجَوَابِ وَالتَّرْجَمَةِ وَشَرْحِ «لِمَاذَا؟».')=>({
+// Main answers follow the shortest complete classroom parse. “Why?” is opt-in so
+// future lessons do not repeat a fact already stated in the iʿrāb.
+const token=(word,gloss,ar,en)=>({word,gloss,ar,en,whyAr:'',whyEn:''});
+const whyToken=(word,gloss,ar,en,whyAr,whyEn)=>({word,gloss,ar,en,whyAr,whyEn});
+const exercise=(id,page,ar,en,tokens,directEn,directAr,appEn='Miftāḥ al-ʿIlm supplies any sentence-level detail not stated there, together with full answer vocalization and concise English.',appAr='وَيُكْمِلُ مِفْتَاحُ الْعِلْمِ مَا لَمْ يُذْكَرْ مِنْ تَفْصِيلِ إِعْرَابِ الْجُمْلَةِ، مَعَ ضَبْطِ الْجَوَابِ وَالتَّرْجَمَةِ الْمُوجَزَةِ.')=>({
  id,page,ar,en,tokens,
  sourceEn:`Al-Mutammimah, printed page ${page}. ${directEn} ${appEn}`,
  sourceAr:`الْمُتَمِّمَةُ، الصَّفْحَةُ الْمَطْبُوعَةُ ${String(page).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d])}. ${directAr} ${appAr}`
 });
 const help=(ar,en)=>({ar,en});
 
-const pastVisible=(word,gloss,subjectAr='وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ.',subjectEn='Its subject is an optionally hidden pronoun meaning “he.”')=>token(word,gloss,`فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ عَلَى آخِرِهِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ. ${subjectAr}`,`A past-tense verb built on the visible fatḥ on its final letter, with no syntactic position. ${subjectEn}`,'لِأَنَّ الْفِعْلَ الْمَاضِيَ مَبْنِيٌّ، وَهَذِهِ الصِّيغَةُ لَمْ يَتَّصِلْ بِهَا مَا يُغَيِّرُ بِنَاءَهَا عَلَى الْفَتْحِ.','A past-tense verb has a fixed ending; nothing attached to this form changes its fatḥ-based construction.');
-const hiddenPresent=(word,gloss,ar,en,whyAr,whyEn)=>token(word,gloss,`${ar} وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ.`,`${en} Its subject is an optionally hidden pronoun meaning “he.”`,whyAr,whyEn);
+const pastVisible=(word,gloss,subjectAr='وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.',subjectEn='its subject is a hidden “he”')=>token(word,gloss,`فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ، ${subjectAr}`,`Past verb built on visible fatḥ; ${subjectEn}.`);
+const hiddenPresent=(word,gloss,ar,en)=>token(word,gloss,`${ar} وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.`,`${en}; its subject is a hidden “he”.`);
 
 const speechCore=[
  exercise('speech-01',19,'زَيْدٌ قَائِمٌ','Zayd is standing.',[
-  token('زَيْدٌ','Zayd','مُبْتَدَأٌ مَرْفُوعٌ بِالِابْتِدَاءِ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.','Zayd is the subject of the nominal sentence. It is nominative, marked by the visible ḍammah on its final letter.','لِأَنَّهُ الِاسْمُ الَّذِي ابْتَدَأَتْ بِهِ الْجُمْلَةُ، وَالْحُكْمُ بَعْدَهُ مُسْنَدٌ إِلَيْهِ.','“Zayd” is the person about whom the statement begins, so it is the mubtadaʾ.'),
-  token('قَائِمٌ','standing','خَبَرُ الْمُبْتَدَأِ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.','Standing is the predicate of the subject. It is nominative, marked by the visible ḍammah on its final letter.','لِأَنَّهُ أَخْبَرَ عَنْ زَيْدٍ وَأَتَمَّ الْفَائِدَةَ، فَكَانَ خَبَرًا لَهُ.','“Standing” tells us something about Zayd and completes the statement. That makes it the khabar.')
- ],'The sentence and the author’s core parsing of both words are stated on the page.','نَصُّ الْمِثَالِ وَأَصْلُ إِعْرَابِ الْكَلِمَتَيْنِ مِنَ الْمُؤَلِّفِ.','Full answer vocalization, English, and “Why?” explanations are supplied by Miftāḥ al-ʿIlm.','وَأَمَّا الضَّبْطُ التَّامُّ وَالتَّرْجَمَةُ وَشَرْحُ «لِمَاذَا؟» فَمِنْ إِعْدَادِ مِفْتَاحِ الْعِلْمِ.'),
+  token('زَيْدٌ','Zayd','مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Nominal-sentence subject, nominative with a visible ḍammah.'),
+  whyToken('قَائِمٌ','standing','خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Predicate, nominative with a visible ḍammah.','أَخْبَرَ عَنْ زَيْدٍ وَأَتَمَّ الْفَائِدَةَ، فَكَانَ خَبَرًا لَهُ.','It tells us something about Zayd and completes the statement, so it is the predicate.')
+ ],'The sentence and the author’s core parsing of both words are stated on the page.','نَصُّ الْمِثَالِ وَأَصْلُ إِعْرَابِ الْكَلِمَتَيْنِ مِنَ الْمُؤَلِّفِ.','Full answer vocalization, concise English, and the optional predicate explanation are supplied by Miftāḥ al-ʿIlm.','وَأَمَّا الضَّبْطُ التَّامُّ وَالتَّرْجَمَةُ الْمُوجَزَةُ وَشَرْحُ عَلَاقَةِ الْخَبَرِ فَمِنْ إِعْدَادِ مِفْتَاحِ الْعِلْمِ.'),
  exercise('speech-02',19,'قَامَ زَيْدٌ','Zayd stood.',[
   token('قَامَ','stood','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ عَلَى آخِرِهِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Stood is a past-tense verb built on the visible fatḥ on its final letter. Its ending is fixed, and the verb has no syntactic position.','لِأَنَّهُ دَلَّ عَلَى الْقِيَامِ فِي الزَّمَنِ الْمَاضِي، وَالْفِعْلُ الْمَاضِي مَبْنِيٌّ.','The action is placed in the past. A past-tense verb is indeclinable.'),
   token('زَيْدٌ','Zayd','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ.','Zayd is the doer of the action. It is nominative, marked by the visible ḍammah on its final letter.','لِأَنَّ زَيْدًا هُوَ الَّذِي صَدَرَ مِنْهُ الْقِيَامُ، فَهُوَ فَاعِلُ الْفِعْلِ.','Zayd performed the standing, so he is the fāʿil.')
- ],'The sentence and the author’s parsing of both words are stated on the page.','نَصُّ الْمِثَالِ وَإِعْرَابُ الْكَلِمَتَيْنِ مِنَ الْمُؤَلِّفِ.','Full answer vocalization, the explicit visible-fatḥ detail, English, and “Why?” explanations are supplied by Miftāḥ al-ʿIlm.','وَأَمَّا الضَّبْطُ التَّامُّ وَالتَّنْصِيصُ عَلَى ظُهُورِ الْفَتْحَةِ وَالتَّرْجَمَةُ وَشَرْحُ «لِمَاذَا؟» فَمِنْ إِعْدَادِ مِفْتَاحِ الْعِلْمِ.'),
+ ],'The sentence and the author’s parsing of both words are stated on the page.','نَصُّ الْمِثَالِ وَإِعْرَابُ الْكَلِمَتَيْنِ مِنَ الْمُؤَلِّفِ.','Full answer vocalization, the explicit visible-fatḥ detail, and concise English are supplied by Miftāḥ al-ʿIlm.','وَأَمَّا الضَّبْطُ التَّامُّ وَالتَّنْصِيصُ عَلَى ظُهُورِ الْفَتْحَةِ وَالتَّرْجَمَةُ الْمُوجَزَةُ فَمِنْ إِعْدَادِ مِفْتَاحِ الْعِلْمِ.'),
  exercise('speech-03',19,'إِنْ قَامَ زَيْدٌ','If Zayd stood…',[
   token('إِنْ','if','حَرْفُ شَرْطٍ جَازِمٌ مَبْنِيٌّ عَلَى السُّكُونِ الظَّاهِرِ عَلَى آخِرِهِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','A jussive conditional particle built on the visible sukūn, with no syntactic position.','لِأَنَّهُ رَبَطَ حُصُولَ الْقِيَامِ بِجَوَابٍ لَمْ يُذْكَرْ، فَلَمْ يَتِمَّ الْمَعْنَى.','It introduces a condition whose answer is deliberately absent.'),
   token('قَامَ','stood','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ عَلَى آخِرِهِ فِي مَحَلِّ جَزْمٍ فِعْلُ الشَّرْطِ.','A past-tense verb built on the visible fatḥ, in the syntactic position of the jussive as the condition verb.','بِنَاؤُهُ ثَابِتٌ، وَلَكِنَّهُ وَقَعَ بَعْدَ حَرْفِ الشَّرْطِ الْجَازِمِ.','Its fixed ending does not change, but the whole verb occupies a jussive position after the conditional particle.'),
@@ -204,19 +207,18 @@ const particleForms=[
  ],'The page states that all particles are fixed and its final note lists these examples by fixed ending: sukūn, fatḥ, kasr, and ḍamm. The punctuation and card-by-card functional labels are app-supplied.','تَنُصُّ الصَّفْحَةُ عَلَى أَنَّ الْحُرُوفَ كُلَّهَا مَبْنِيَّةٌ، وَتَسْرُدُ هَذِهِ الْأَمْثِلَةَ بِحَسَبِ بِنَائِهَا عَلَى السُّكُونِ وَالْفَتْحِ وَالْكَسْرِ وَالضَّمِّ. وَالتَّرْقِيمُ وَتَفْصِيلُ الْوَظَائِفِ مِنَ التَّطْبِيقِ.')
 ];
 
+const needsSignReason=signAr=>/نِيَابَةً|الْمُقَدَّرَةُ|ثُبُوتُ|حَذْفُ/.test(signAr);
 const rafToken=(word,gloss,roleAr,roleEn,causeAr,causeEn,signAr,signEn,reasonAr,reasonEn)=>token(
  word,gloss,
- `${roleAr}؛ ${causeAr}، وَعَلَامَةُ رَفْعِهِ ${signAr}؛ ${reasonAr}.`,
- `${roleEn}. It is nominative because ${causeEn}. Its sign is ${signEn} because ${reasonEn}.`,
- `${causeAr}، وَاخْتِيرَتْ هَذِهِ الْعَلَامَةُ ${reasonAr}.`,
- `${causeEn}. ${signEn} applies because ${reasonEn}.`
+ `${roleAr}، وَعَلَامَةُ رَفْعِهِ ${signAr}${needsSignReason(signAr)?`؛ ${reasonAr}`:''}.`,
+ `${roleEn}; ${/verb/i.test(roleEn)?'indicative':'nominative'} with ${signEn}${needsSignReason(signAr)?` because ${reasonEn}`:''}.`
 );
 const rafExercise=(id,page,ar,en,tokens,citationEn,citationAr,targetEn,targetAr,noteEn='',noteAr='')=>exercise(
  id,page,ar,en,tokens,
  `${citationEn} The page prints the example and explicitly identifies ${targetEn}, including its cause of rafʿ and its sign.${noteEn}`,
  `${citationAr} وَتَطْبَعُ الصَّفْحَةُ الْمِثَالَ، وَتَنْصُّ عَلَى إِعْرَابِ ${targetAr} وَسَبَبِ رَفْعِهِ وَعَلَامَتِهِ.${noteAr}`,
- 'Miftāḥ al-ʿIlm reorganizes the page’s analysis into word cards and supplies full answer vocalization, English, and the “Why?” explanations.',
- 'وَيُعِيدُ مِفْتَاحُ الْعِلْمِ تَنْظِيمَ إِعْرَابِ الصَّفْحَةِ فِي بِطَاقَاتٍ، وَيُضِيفُ الضَّبْطَ التَّامَّ وَالتَّرْجَمَةَ وَشَرْحَ «لِمَاذَا؟».'
+ 'Miftāḥ al-ʿIlm reorganizes the page’s analysis into concise word cards and supplies full answer vocalization and English.',
+ 'وَيُعِيدُ مِفْتَاحُ الْعِلْمِ تَنْظِيمَ إِعْرَابِ الصَّفْحَةِ فِي بِطَاقَاتٍ مُوجَزَةٍ، وَيُضِيفُ الضَّبْطَ التَّامَّ وَالتَّرْجَمَةَ.'
 );
 const pastWithExplicitSubject=(word='قَالَ',gloss='said')=>token(
  word,gloss,
@@ -334,7 +336,7 @@ const rafSigns=[
   rafToken('اثْنَتَا','two','فَاعِلٌ وَهُوَ صَدْرُ الْعَدَدِ الْمُرَكَّبِ','Ithnatā is the subject and the first part of the compound number','رَفَعَهُ إِسْنَادُ الِانْفِجَارِ إِلَيْهِ','the bursting is attributed to the twelve springs','الْأَلِفُ نِيَابَةً عَنِ الضَّمَّةِ','alif in place of ḍammah','لِأَنَّهُ مُلْحَقٌ بِالْمُثَنَّى','it is treated like a dual'),
   token('عَشْرَةَ','ten','الْجُزْءُ الثَّانِي مِنَ الْعَدَدِ الْمُرَكَّبِ، مَبْنِيٌّ عَلَى الْفَتْحِ.','The second part of the compound number, built on fatḥ.','أَتَمَّ تَرْكِيبَ الْعَدَدِ «اثْنَتَا عَشْرَةَ».','It completes the compound number twelve.'),
   token('عَيْنًا','springs','تَمْيِيزٌ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','An accusative specification, marked by a visible fatḥah.','بَيَّنَ الشَّيْءَ الْمَعْدُودَ.','It identifies what the number counts.')
- ],'Qur’an 2:60. The page prints the example under the rule that alif marks rafʿ in dual forms. Its printed note parses only fa-nfajarat and the silent feminine tāʾ before stopping.','سُورَةُ الْبَقَرَةِ، الْآيَةُ ٦٠. تَطْبَعُ الصَّفْحَةُ الْمِثَالَ تَحْتَ قَاعِدَةِ نِيَابَةِ الْأَلِفِ عَنِ الضَّمَّةِ فِي الْمُثَنَّى، وَيَقِفُ تَعْلِيقُهَا الْمَطْبُوعُ بَعْدَ إِعْرَابِ «فَانْفَجَرَتْ» وَتَاءِ التَّأْنِيثِ السَّاكِنَةِ.','Miftāḥ al-ʿIlm applies the stated dual rule to ithnatā and supplies the remaining word-by-word analysis, full answer vocalization, English, and “Why?” explanations.','وَيُطَبِّقُ مِفْتَاحُ الْعِلْمِ الْقَاعِدَةَ الْمَذْكُورَةَ عَلَى «اثْنَتَا»، وَيُكْمِلُ مَا بَقِيَ مِنَ الْإِعْرَابِ كَلِمَةً كَلِمَةً، مَعَ الضَّبْطِ وَالتَّرْجَمَةِ وَشَرْحِ «لِمَاذَا؟».'),
+ ],'Qur’an 2:60. The page prints the example under the rule that alif marks rafʿ in dual forms. Its printed note parses only fa-nfajarat and the silent feminine tāʾ before stopping.','سُورَةُ الْبَقَرَةِ، الْآيَةُ ٦٠. تَطْبَعُ الصَّفْحَةُ الْمِثَالَ تَحْتَ قَاعِدَةِ نِيَابَةِ الْأَلِفِ عَنِ الضَّمَّةِ فِي الْمُثَنَّى، وَيَقِفُ تَعْلِيقُهَا الْمَطْبُوعُ بَعْدَ إِعْرَابِ «فَانْفَجَرَتْ» وَتَاءِ التَّأْنِيثِ السَّاكِنَةِ.','Miftāḥ al-ʿIlm applies the stated dual rule to ithnatā and supplies the remaining concise word-by-word analysis, full answer vocalization, and English.','وَيُطَبِّقُ مِفْتَاحُ الْعِلْمِ الْقَاعِدَةَ الْمَذْكُورَةَ عَلَى «اثْنَتَا»، وَيُكْمِلُ مَا بَقِيَ مِنَ الْإِعْرَابِ كَلِمَةً كَلِمَةً، مَعَ الضَّبْطِ وَالتَّرْجَمَةِ الْمُوجَزَةِ.'),
  rafExercise('raf-21',37,'وَالنَّجْمُ وَالشَّجَرُ يَسْجُدَانِ','The stars and the trees prostrate.',[
   rafToken('وَالنَّجْمُ','and the stars','الْوَاوُ حَرْفُ عَطْفٍ، وَ«النَّجْمُ» مُبْتَدَأٌ','The wāw coordinates, and al-najmu is the mubtadaʾ','رَفَعَهُ الِابْتِدَاءُ','it begins the nominal clause','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ','the visible ḍammah','لِأَنَّهُ اسْمٌ مُفْرَدٌ فِي اللَّفْظِ','it is singular in form'),
   rafToken('وَالشَّجَرُ','and the trees','الْوَاوُ حَرْفُ عَطْفٍ، وَ«الشَّجَرُ» مَعْطُوفٌ عَلَى «النَّجْمُ»','The wāw coordinates, and al-shajaru is coordinated with al-najmu','رَفَعَهُ عَطْفُهُ عَلَى الْمُبْتَدَإِ الْمَرْفُوعِ','it is coordinated with the nominative mubtadaʾ','الضَّمَّةُ الظَّاهِرَةُ عَلَى آخِرِهِ','the visible ḍammah','لِأَنَّهُ اسْمٌ مُفْرَدٌ فِي اللَّفْظِ','it is singular in form'),
@@ -355,17 +357,15 @@ const rafSigns=[
 
 const nasbToken=(word,gloss,roleAr,roleEn,causeAr,causeEn,signAr,signEn,reasonAr,reasonEn)=>token(
  word,gloss,
- `${roleAr}؛ ${causeAr}، وَعَلَامَةُ نَصْبِهِ ${signAr}؛ ${reasonAr}.`,
- `${roleEn}. It is accusative because ${causeEn}. Its sign is ${signEn} because ${reasonEn}.`,
- `${causeAr}، وَاخْتِيرَتْ هَذِهِ الْعَلَامَةُ ${reasonAr}.`,
- `${causeEn}. ${signEn} applies because ${reasonEn}.`
+ `${roleAr}، وَعَلَامَةُ نَصْبِهِ ${signAr}${needsSignReason(signAr)?`؛ ${reasonAr}`:''}.`,
+ `${roleEn}; ${/verb/i.test(roleEn)?'subjunctive':'accusative'} with ${signEn}${needsSignReason(signAr)?` because ${reasonEn}`:''}.`
 );
 const nasbExercise=(id,page,ar,en,tokens,citationEn,citationAr,targetEn,targetAr,noteEn='',noteAr='')=>exercise(
  id,page,ar,en,tokens,
  `${citationEn} The page prints the example, and the author’s note gives its word-by-word parsing, explicitly identifying ${targetEn} and its accusative sign.${noteEn}`,
  `${citationAr} وَتَطْبَعُ الصَّفْحَةُ الْمِثَالَ، وَيَذْكُرُ تَعْلِيقُ الْمُؤَلِّفِ إِعْرَابَهُ كَلِمَةً كَلِمَةً، وَيَنْصُّ عَلَى إِعْرَابِ ${targetAr} وَعَلَامَةِ نَصْبِهِ.${noteAr}`,
- 'Miftāḥ al-ʿIlm reorganizes that analysis into cards and supplies full answer vocalization, English, and the expanded “Why?” explanations.',
- 'وَيُعِيدُ مِفْتَاحُ الْعِلْمِ تَنْظِيمَ ذَلِكَ الْإِعْرَابِ فِي بِطَاقَاتٍ، وَيُضِيفُ الضَّبْطَ التَّامَّ وَالتَّرْجَمَةَ وَتَوْسِيعَ شَرْحِ «لِمَاذَا؟».'
+ 'Miftāḥ al-ʿIlm reorganizes that analysis into concise cards and supplies full answer vocalization and English.',
+ 'وَيُعِيدُ مِفْتَاحُ الْعِلْمِ تَنْظِيمَ ذَلِكَ الْإِعْرَابِ فِي بِطَاقَاتٍ مُوجَزَةٍ، وَيُضِيفُ الضَّبْطَ التَّامَّ وَالتَّرْجَمَةَ.'
 );
 
 const nasbSigns=[
@@ -482,17 +482,15 @@ const nasbSigns=[
 
 const khafdToken=(word,gloss,roleAr,roleEn,causeAr,causeEn,signAr,signEn,reasonAr,reasonEn)=>token(
  word,gloss,
- `${roleAr}؛ ${causeAr}، وَعَلَامَةُ خَفْضِهِ ${signAr}؛ ${reasonAr}.`,
- `${roleEn}. It is in khafḍ because ${causeEn}. Its sign is ${signEn} because ${reasonEn}.`,
- `${causeAr}، وَاخْتِيرَتْ هَذِهِ الْعَلَامَةُ ${reasonAr}.`,
- `${causeEn}. ${signEn} applies because ${reasonEn}.`
+ `${roleAr}، وَعَلَامَةُ جَرِّهِ ${signAr}${needsSignReason(signAr)?`؛ ${reasonAr}`:''}.`,
+ `${roleEn}; genitive with ${signEn}${needsSignReason(signAr)?` because ${reasonEn}`:''}.`
 );
 const khafdExercise=(id,page,ar,en,tokens,citationEn,citationAr,targetEn,targetAr,noteEn='',noteAr='')=>exercise(
  id,page,ar,en,tokens,
  `${citationEn} The page prints the example, and the author’s note gives its word-by-word parsing, explicitly identifying ${targetEn}, the relevant governors, and each item’s sign of khafḍ or its fixed form and genitive position.${noteEn}`,
  `${citationAr} وَتَطْبَعُ الصَّفْحَةُ الْمِثَالَ، وَيَذْكُرُ تَعْلِيقُ الْمُؤَلِّفِ إِعْرَابَهُ كَلِمَةً كَلِمَةً، وَيَنْصُّ عَلَى إِعْرَابِ ${targetAr} وَعَوَامِلِ الْخَفْضِ، وَعَلَامَةِ كُلِّ اسْمٍ أَوْ بِنَائِهِ وَمَحَلِّهِ مِنَ الْجَرِّ.${noteAr}`,
- 'Miftāḥ al-ʿIlm reorganizes that analysis into cards and supplies full answer vocalization, English, and the expanded “Why?” explanations.',
- 'وَيُعِيدُ مِفْتَاحُ الْعِلْمِ تَنْظِيمَ ذَلِكَ الْإِعْرَابِ فِي بِطَاقَاتٍ، وَيُضِيفُ الضَّبْطَ التَّامَّ وَالتَّرْجَمَةَ وَتَوْسِيعَ شَرْحِ «لِمَاذَا؟».'
+ 'Miftāḥ al-ʿIlm reorganizes that analysis into concise cards and supplies full answer vocalization and English.',
+ 'وَيُعِيدُ مِفْتَاحُ الْعِلْمِ تَنْظِيمَ ذَلِكَ الْإِعْرَابِ فِي بِطَاقَاتٍ مُوجَزَةٍ، وَيُضِيفُ الضَّبْطَ التَّامَّ وَالتَّرْجَمَةَ.'
 );
 
 const khafdSigns=[
@@ -577,7 +575,7 @@ const khafdSigns=[
  ],'Qur’an 4:86.','سُورَةُ النِّسَاءِ، الْآيَةُ ٨٦.','aḥsana after bāʾ and the attached hā in its genitive position after min','«أَحْسَنَ» بَعْدَ الْبَاءِ وَمَحَلِّ الْهَاءِ الْمُتَّصِلَةِ مِنَ الْجَرِّ بَعْدَ «مِنْ»'),
  khafdExercise('khafd-16',47,'مِنْ مَحَارِيبَ','From sanctuaries…',[
   token('مِنْ','from','حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','A preposition built on sukūn, with no syntactic position.','جَرَّ الِاسْمَ بَعْدَهُ.','It governs the following noun in khafḍ.'),
-  khafdToken('مَحَارِيبَ','sanctuaries','اسْمٌ مَجْرُورٌ بِـ«مِنْ»','A noun after min','جَرَّتْهُ «مِنْ»، وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِحَالٍ مَحْذُوفَةٍ فِي سِيَاقِ الْآيَةِ','min governs it; in the verse’s context, the phrase modifies an omitted circumstantial expression','الْفَتْحَةُ الظَّاهِرَةُ نِيَابَةً عَنِ الْكَسْرَةِ','the visible fatḥah in place of kasrah','لِأَنَّهُ جَمْعُ تَكْسِيرٍ مَمْنُوعٌ مِنَ الصَّرْفِ','it is a diptote broken plural')
+  khafdToken('مَحَارِيبَ','sanctuaries','اسْمٌ مَجْرُورٌ بِـ«مِنْ»','A noun after min','جَرَّتْهُ «مِنْ»','min governs it','الْفَتْحَةُ الظَّاهِرَةُ نِيَابَةً عَنِ الْكَسْرَةِ','the visible fatḥah in place of kasrah','لِأَنَّهُ جَمْعُ تَكْسِيرٍ مَمْنُوعٌ مِنَ الصَّرْفِ','it is a diptote broken plural')
  ],'Qur’an 34:13.','سُورَةُ سَبَإٍ، الْآيَةُ ١٣.','maḥārība after min','«مَحَارِيبَ» بَعْدَ «مِنْ»'),
  khafdExercise('khafd-17',47,'فِي أَحْسَنِ تَقْوِيمٍ','In the best form.',[
   token('فِي','in','حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ الْمُقَدَّرِ عَلَى الْيَاءِ لِلثِّقَلِ، لَا مَحَلَّ لَهُ.','A preposition built on an estimated sukūn on its final yāʾ because pronunciation is heavy, with no syntactic position.','جَرَّ الِاسْمَ بَعْدَهُ.','It governs the following noun in khafḍ.'),
@@ -588,9 +586,58 @@ const khafdSigns=[
   token('وَأَنْتُمْ','while you','الْوَاوُ حَالِيَّةٌ، وَ«أَنْتُمْ» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ؛ «أَنْ» أَصْلُ الضَّمِيرِ، وَالتَّاءُ حَرْفُ خِطَابٍ، وَالْمِيمُ عَلَامَةُ الْجَمْعِ.','The wāw is circumstantial. Antum is a detached pronoun built on sukūn in the nominative position as mubtadaʾ; an is the pronominal base, tāʾ marks address, and mīm marks the plural.','الضَّمِيرُ مَبْنِيٌّ عَلَى السُّكُونِ، وَلَكِنَّهُ يَشْغَلُ مَحَلَّ الرَّفْعِ مُبْتَدَأً.','The pronoun is built on sukūn, while the whole form occupies the nominative position as mubtadaʾ.'),
   token('عَاكِفُونَ','staying','خَبَرُ الْمُبْتَدَإِ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الْوَاوُ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ، وَالنُّونُ عِوَضٌ عَنِ التَّنْوِينِ.','The predicate of the mubtadaʾ, nominative with wāw in place of ḍammah because it is a sound masculine plural; nūn replaces tanwīn.','أَخْبَرَ عَنِ الضَّمِيرِ «أَنْتُمْ» وَأَتَمَّ الْجُمْلَةَ الِاسْمِيَّةَ.','It predicates the state of antum and completes the nominal clause.'),
   token('فِي','in','حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ الْمُقَدَّرِ عَلَى الْيَاءِ لِلثِّقَلِ، لَا مَحَلَّ لَهُ.','A preposition built on an estimated sukūn on its yāʾ because pronunciation is heavy, with no syntactic position.','جَرَّ الِاسْمَ بَعْدَهُ.','It governs the following noun in khafḍ.'),
-  khafdToken('الْمَسَاجِدِ','the mosques','اسْمٌ مَجْرُورٌ بِـ«فِي»، وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«عَاكِفُونَ»، وَالْجُمْلَةُ الِاسْمِيَّةُ فِي مَحَلِّ نَصْبٍ حَالٌ','A noun after fī; the phrase modifies ʿākifūna, and the nominal clause occupies the accusative position as a circumstantial clause','جَرَّتْهُ «فِي»','fī governs it','الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ','the visible kasrah','لِأَنَّ «أَلْ» دَخَلَتْ عَلَى جَمْعِ التَّكْسِيرِ الْمَمْنُوعِ مِنَ الصَّرْفِ فَعَادَ إِلَى الْكَسْرَةِ','the diptote broken plural has the definite article al, which restores the kasrah')
+  khafdToken('الْمَسَاجِدِ','the mosques','اسْمٌ مَجْرُورٌ بِـ«فِي»','A noun after fī','جَرَّتْهُ «فِي»','fī governs it','الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ','the visible kasrah','لِأَنَّ «أَلْ» دَخَلَتْ عَلَى جَمْعِ التَّكْسِيرِ الْمَمْنُوعِ مِنَ الصَّرْفِ فَعَادَ إِلَى الْكَسْرَةِ','the diptote broken plural has the definite article al, which restores the kasrah')
  ],'Qur’an 2:187.','سُورَةُ الْبَقَرَةِ، الْآيَةُ ١٨٧.','al-masājidi after fī','«الْمَسَاجِدِ» بَعْدَ «فِي»',' The author’s parsing continues at the top of printed page 48 and ends before the heading “عَلَامَتَا الْجَزْمِ”.',' وَيَسْتَمِرُّ إِعْرَابُ الْمُؤَلِّفِ فِي أَعْلَى الصَّفْحَةِ الْمَطْبُوعَةِ ٤٨، وَيَنْتَهِي قَبْلَ عُنْوَانِ «عَلَامَتَا الْجَزْمِ».')
 ];
+
+// Complex cards still use one compact classroom answer. These overrides keep
+// attached elements and sentence-level positions only when they complete the parse.
+const publishedExerciseGroups=[speechCore,wordTypes,iraabIntro,nounForms,verbForms,particleForms,rafSigns,nasbSigns,khafdSigns];
+const setConciseAnswer=(exerciseId,word,ar,en)=>{
+ const item=publishedExerciseGroups.flat().find(entry=>entry.id===exerciseId);
+ const answer=item&&item.tokens.find(entry=>entry.word===word);
+ if(!answer)throw new Error(`Missing concise-answer target: ${exerciseId} / ${word}`);
+ answer.ar=ar;answer.en=en;
+};
+
+setConciseAnswer('speech-02','قَامَ','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ، لَا مَحَلَّ لَهُ.','Past verb built on visible fatḥ, with no syntactic position.');
+setConciseAnswer('speech-02','زَيْدٌ','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject of the verb, nominative with a visible ḍammah.');
+setConciseAnswer('speech-03','إِنْ','حَرْفُ شَرْطٍ جَازِمٌ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ.','Jussive conditional particle built on sukūn, with no syntactic position.');
+setConciseAnswer('speech-03','قَامَ','فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَزْمٍ فِعْلُ الشَّرْطِ.','Past verb built on fatḥ, in the jussive position as the condition verb.');
+setConciseAnswer('speech-03','زَيْدٌ','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject of the verb, nominative with a visible ḍammah.');
+setConciseAnswer('verb-17','لَيُسْجَنَنَّ','اللَّامُ لَامُ جَوَابِ قَسَمٍ لَا مَحَلَّ لَهَا، وَ«يُسْجَنَنَّ» فِعْلٌ مُضَارِعٌ مَبْنِيٌّ لِلْمَجْهُولِ مَبْنِيٌّ عَلَى الْفَتْحِ لِاتِّصَالِهِ بِنُونِ التَّوْكِيدِ الثَّقِيلَةِ، وَنُونُ التَّوْكِيدِ حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ، وَنَائِبُ فَاعِلِهِ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Lām answers an oath. Yusjananna is a passive present verb built on fatḥ because heavy emphasis nūn is attached; the nūn has no syntactic position, and the hidden deputy subject is “he.”');
+setConciseAnswer('verb-17','وَلَيَكُونًا','الْوَاوُ حَرْفُ عَطْفٍ، وَاللَّامُ لَامُ جَوَابِ قَسَمٍ، وَ«يَكُونًا» فِعْلٌ مُضَارِعٌ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ لِاتِّصَالِهِ بِنُونِ التَّوْكِيدِ الْخَفِيفَةِ، وَاسْمُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Wāw coordinates and lām answers an oath. Yakūnan is a deficient present verb built on fatḥ because light emphasis nūn is attached; its hidden subject is “he.”');
+setConciseAnswer('noun-08','شُرَكَائِيَ','مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ قَبْلَ يَاءِ الْمُتَكَلِّمِ، مَنَعَ مِنْ ظُهُورِهَا حَرَكَةُ الْمُنَاسَبَةِ، وَالْيَاءُ ضَمِيرٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Delayed subject, nominative with an estimated ḍammah before the speaker’s yāʾ; the yāʾ is an attached pronoun in the genitive position as the second term of the iḍāfah.');
+setConciseAnswer('noun-10','وَامْضُوا','الْوَاوُ حَرْفُ عَطْفٍ، وَ«امْضُوا» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى حَذْفِ النُّونِ، وَوَاوُ الْجَمَاعَةِ ضَمِيرٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْأَلِفُ فَارِقَةٌ.','Wāw coordinates. Imḍū is an imperative built on deletion of nūn; plural wāw is its subject, and the final alif is orthographic.');
+setConciseAnswer('noun-10','تُؤْمَرُونَ','فِعْلٌ مُضَارِعٌ مَبْنِيٌّ لِلْمَجْهُولِ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَوَاوُ الْجَمَاعَةِ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ، وَالْجُمْلَةُ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Passive present verb, indicative with retained nūn because it is one of the five forms; plural wāw is its deputy subject, and the clause is in the genitive position as the second term of the iḍāfah.');
+setConciseAnswer('word-02','وَقَعَدَتْ','الْوَاوُ حَرْفُ عَطْفٍ، وَ«قَعَدَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، وَتَاءُ التَّأْنِيثِ حَرْفٌ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ، وَالْفَاعِلُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هِيَ.','Wāw coordinates. Qaʿada is a past verb built on fatḥ; feminine tāʾ has no syntactic position, and the hidden subject is “she.”');
+setConciseAnswer('word-04','وَاضْرِبِي','الْوَاوُ حَرْفُ عَطْفٍ، وَ«اضْرِبِي» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى حَذْفِ النُّونِ، وَيَاءُ الْمُخَاطَبَةِ ضَمِيرٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Wāw coordinates. Iḍribī is an imperative built on deletion of nūn; feminine-address yāʾ is its subject.');
+setConciseAnswer('iraab-02','يَذْهَبُ','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ، وَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','Present verb, indicative with a visible ḍammah; its subject is a hidden “he,” and the clause is in the nominative position as predicate.');
+setConciseAnswer('iraab-05','يَرْضَى','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِالضَّمَّةِ الْمُقَدَّرَةِ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ، وَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','Present verb, indicative with an estimated ḍammah on the alif; its subject is a hidden “he,” and the clause is in the nominative position as predicate.');
+setConciseAnswer('verb-16','يُرْضِعْنَ','فِعْلٌ مُضَارِعٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنُونِ النِّسْوَةِ، وَنُونُ النِّسْوَةِ ضَمِيرٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','Present verb built on sukūn because feminine-plural nūn is attached; the nūn is its subject, and the clause is in the nominative position as predicate.');
+setConciseAnswer('raf-05','تَرْضَوْنَهَا','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَوَاوُ الْجَمَاعَةِ فَاعِلٌ، وَ«هَا» مَفْعُولٌ بِهِ، وَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ صِفَةٌ.','Present verb, indicative with retained nūn because it is one of the five forms; plural wāw is its subject, hā its object, and the clause is in the nominative position as an adjective.');
+setConciseAnswer('raf-10','يَدْعُو','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِالضَّمَّةِ الْمُقَدَّرَةِ عَلَى الْوَاوِ لِلثِّقَلِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.','Present verb, indicative with an estimated ḍammah on the wāw because pronouncing it is heavy; its subject is a hidden “he.”');
+setConciseAnswer('raf-11','وَيَوْمَئِذٍ','الْوَاوُ حَرْفُ عَطْفٍ، وَ«يَوْمَ» ظَرْفُ زَمَانٍ مَنْصُوبٌ وَهُوَ مُضَافٌ، وَ«إِذْ» ظَرْفُ زَمَانٍ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ، وَالتَّنْوِينُ عِوَضٌ عَنْ جُمْلَةٍ مَحْذُوفَةٍ.','Wāw coordinates. Yawma is an accusative adverb of time and the first term of an iḍāfah; idh is an adverb of time built on sukūn in the genitive position, and tanwīn replaces an omitted clause.');
+setConciseAnswer('raf-13','أَبُوهُمْ','فَاعِلٌ مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ، وَ«هُمْ» فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Subject of the verb, nominative with wāw instead of ḍammah because it is one of the six nouns and is annexed; hum completes the iḍāfah in the genitive position.');
+setConciseAnswer('raf-14','وَأَخُوهُ','الْوَاوُ حَرْفُ عَطْفٍ، وَ«أَخُوهُ» مَعْطُوفٌ مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ، وَالْهَاءُ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Wāw coordinates. Akhūhu is coordinated and nominative with wāw instead of ḍammah because it is one of the six nouns and is annexed; hāʾ completes the iḍāfah in the genitive position.');
+setConciseAnswer('raf-16','وَهَنُوكَ','الْوَاوُ حَرْفُ عَطْفٍ، وَ«هَنُوكَ» مَعْطُوفٌ مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ، وَالْكَافُ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Wāw coordinates. Hanūka is coordinated and nominative with wāw instead of ḍammah because it is one of the six nouns and is annexed; kāf completes the iḍāfah in the genitive position.');
+setConciseAnswer('raf-17','لَذُو','اللَّامُ لَامُ التَّوْكِيدِ الْمُزَحْلَقَةُ، وَ«ذُو» خَبَرُ «إِنَّ» مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ.','Lām is the displaced lām of emphasis. Dhū is the predicate of inna, nominative with wāw instead of ḍammah because it is one of the six nouns and is annexed.');
+setConciseAnswer('raf-21','يَسْجُدَانِ','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَأَلِفُ الِاثْنَيْنِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','Present verb, indicative with retained nūn because it is one of the five forms; dual alif is its subject, and the clause is in the nominative position as predicate.');
+setConciseAnswer('raf-22','يُؤْمِنُونَ','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَوَاوُ الْجَمَاعَةِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْجُمْلَةُ صِلَةُ الْمَوْصُولِ لَا مَحَلَّ لَهَا.','Present verb, indicative with retained nūn because it is one of the five forms; plural wāw is its subject, and the clause is a relative clause with no syntactic position.');
+setConciseAnswer('raf-23','أَتَعْجَبِينَ','الْهَمْزَةُ حَرْفُ اسْتِفْهَامٍ، وَ«تَعْجَبِينَ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ، وَيَاءُ الْمُخَاطَبَةِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','The hamzah is interrogative. Taʿjabīna is a present verb, indicative with retained nūn because it is one of the five forms; feminine-address yāʾ is its subject.');
+setConciseAnswer('khafd-02','هُدًى','اسْمٌ مَجْرُورٌ بِـ«عَلَى»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.','Noun governed by ʿalā, genitive with an estimated kasrah on the alif.');
+setConciseAnswer('khafd-03','لِلرِّجَالِ','اللَّامُ حَرْفُ جَرٍّ، وَ«الرِّجَالِ» اسْمٌ مَجْرُورٌ بِاللَّامِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','Lām is a preposition; al-rijāli is governed by it, genitive with a visible kasrah.');
+setConciseAnswer('khafd-06','أَبِيكُمْ','«أَبِي» اسْمٌ مَجْرُورٌ بِـ«إِلَى»، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ، وَالْكَافُ ضَمِيرٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ، وَالْمِيمُ عَلَامَةُ الْجَمْعِ.','Abī is governed by ilā, genitive with yāʾ instead of kasrah because it is one of the six nouns and is annexed; kāf is in the genitive position as the second term of the iḍāfah, and mīm marks the plural.');
+setConciseAnswer('khafd-07','أَمِنْتُكُمْ','«أَمِنْتُ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَالتَّاءُ ضَمِيرٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْكَافُ ضَمِيرٌ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ، وَالْمِيمُ عَلَامَةُ الْجَمْعِ.','Amintu is a past verb built on sukūn; tāʾ is its subject, kāf its object, and mīm marks the plural.');
+setConciseAnswer('khafd-07','أَخِيهِ','«أَخِي» اسْمٌ مَجْرُورٌ بِـ«عَلَى»، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ، وَالْهَاءُ ضَمِيرٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Akhī is governed by ʿalā, genitive with yāʾ instead of kasrah because it is one of the six nouns and is annexed; hāʾ is in the genitive position as the second term of the iḍāfah.');
+setConciseAnswer('khafd-08','بِحَمِيكَ','الْبَاءُ حَرْفُ جَرٍّ، وَ«حَمِي» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ، وَالْكَافُ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Bāʾ is a preposition; ḥamī is governed by it, genitive with yāʾ instead of kasrah because it is one of the six nouns and is annexed; kāf completes the iḍāfah in the genitive position.');
+setConciseAnswer('khafd-08','وَفِيكَ','الْوَاوُ حَرْفُ عَطْفٍ، وَ«فِي» مَعْطُوفٌ مَجْرُورٌ بِالْيَاءِ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ، وَالْكَافُ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Wāw coordinates. Fī is a coordinated noun, genitive with yāʾ instead of kasrah because it is one of the six nouns and is annexed; kāf completes the iḍāfah in the genitive position.');
+setConciseAnswer('khafd-08','وَهَنِيكَ','الْوَاوُ حَرْفُ عَطْفٍ، وَ«هَنِي» مَعْطُوفٌ مَجْرُورٌ بِالْيَاءِ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ وَهُوَ مُضَافٌ، وَالْكَافُ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Wāw coordinates. Hanī is a coordinated noun, genitive with yāʾ instead of kasrah because it is one of the six nouns and is annexed; kāf completes the iḍāfah in the genitive position.');
+setConciseAnswer('khafd-11','بِاثْنَيْنِ','الْبَاءُ حَرْفُ جَرٍّ، وَ«اثْنَيْنِ» اسْمٌ مَجْرُورٌ بِالْيَاءِ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مُلْحَقٌ بِالْمُثَنَّى، وَالنُّونُ عِوَضٌ عَنِ التَّنْوِينِ.','Bāʾ is a preposition. Ithnayni is genitive with yāʾ instead of kasrah because it is treated like the dual; nūn replaces tanwīn.');
+setConciseAnswer('khafd-11','وَاثْنَيْنِ','الْوَاوُ حَرْفُ عَطْفٍ، وَ«اثْنَيْنِ» مَعْطُوفٌ مَجْرُورٌ بِالْيَاءِ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مُلْحَقٌ بِالْمُثَنَّى، وَالنُّونُ عِوَضٌ عَنِ التَّنْوِينِ.','Wāw coordinates. Ithnayni is coordinated and genitive with yāʾ instead of kasrah because it is treated like the dual; nūn replaces tanwīn.');
+setConciseAnswer('khafd-12','لِلْمُؤْمِنِينَ','اللَّامُ حَرْفُ جَرٍّ، وَ«الْمُؤْمِنِينَ» اسْمٌ مَجْرُورٌ بِاللَّامِ، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ، وَالنُّونُ عِوَضٌ عَنِ التَّنْوِينِ.','Lām is a preposition; al-muʾminīna is governed by it, genitive with yāʾ instead of kasrah because it is a sound masculine plural; nūn replaces tanwīn.');
+setConciseAnswer('khafd-15','بِأَحْسَنَ','الْبَاءُ حَرْفُ جَرٍّ، وَ«أَحْسَنَ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْفَتْحَةُ نِيَابَةً عَنِ الْكَسْرَةِ؛ لِأَنَّهُ مَمْنُوعٌ مِنَ الصَّرْفِ.','Bāʾ is a preposition; aḥsana is governed by it, genitive with fatḥah instead of kasrah because it is diptote.');
+setConciseAnswer('khafd-18','الْمَسَاجِدِ','اسْمٌ مَجْرُورٌ بِـ«فِي»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ؛ لِدُخُولِ «أَلْ» عَلَى الِاسْمِ الْمَمْنُوعِ مِنَ الصَّرْفِ.','Noun governed by fī, genitive with a visible kasrah because the diptote has the definite article al.');
 
 const chapters=[
  {id:'speech-core',babId:'opening',order:1,titleEn:'Speech and what it consists of',titleAr:'الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ',pages:'19',book:speechCore,help:[
@@ -665,14 +712,14 @@ function generatedExercise(index){
  if(index%2===0){
   const predicate=predicates[round%predicates.length];
   return exercise(`generated-${index}`,19,`${subject.ar} ${predicate.ar}`,`${subject.en[0].toUpperCase()+subject.en.slice(1)} is ${predicate.en}.`,[
-   token(subject.ar,subject.en,'مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','The nominal-sentence subject, nominative with a visible ḍammah.','ابْتُدِئَ بِهِ الْكَلَامُ وَأُسْنِدَ إِلَيْهِ الْخَبَرُ.','The sentence begins with this noun and predicates the next word of it.'),
-   token(predicate.ar,predicate.en,'خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','The predicate, nominative with a visible ḍammah.','أَخْبَرَ عَنِ الْمُبْتَدَإِ وَأَتَمَّ الْفَائِدَةَ.','It tells us something about the subject and completes the statement.')
+   token(subject.ar,subject.en,'مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Nominal-sentence subject, nominative with a visible ḍammah.'),
+   whyToken(predicate.ar,predicate.en,'خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Predicate, nominative with a visible ḍammah.','أَخْبَرَ عَنِ الْمُبْتَدَإِ وَأَتَمَّ الْفَائِدَةَ، فَكَانَ خَبَرًا لَهُ.','It tells us something about the subject and completes the statement, so it is the predicate.')
   ],'This is generated practice, not a quotation. The two-noun pattern is checked against the rule and example on page 19.','هَذَا تَدْرِيبٌ مُوَلَّدٌ لَيْسَ نَقْلًا، وَقَدْ رُوجِعَ عَلَى قَاعِدَةِ الِاسْمَيْنِ وَمِثَالِهَا فِي ص ١٩.');
  }
  const verb=pastVerbs[round%pastVerbs.length];
  return exercise(`generated-${index}`,19,`${verb.ar} ${subject.ar}`,`${subject.en[0].toUpperCase()+subject.en.slice(1)} ${verb.en}.`,[
-  token(verb.ar,verb.en,'فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ، لَا مَحَلَّ لَهُ.','A past verb built on visible fatḥ, with no syntactic position.','الْمَاضِي مَبْنِيٌّ، وَهَذِهِ الصِّيغَةُ عَلَى الْفَتْحِ.','The past is fixed, and this form is built on fatḥ.'),
-  token(subject.ar,subject.en,'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','The subject, nominative with a visible ḍammah.','هُوَ الِاسْمُ الَّذِي أُسْنِدَ إِلَيْهِ الْفِعْلُ.','The action is assigned to this noun.')
+  token(verb.ar,verb.en,'فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الظَّاهِرِ، لَا مَحَلَّ لَهُ.','Past verb built on visible fatḥ, with no syntactic position.'),
+  token(subject.ar,subject.en,'فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject of the verb, nominative with a visible ḍammah.')
  ],'This is generated practice, not a quotation. The verb-and-subject pattern is checked against the rule and example on page 19.','هَذَا تَدْرِيبٌ مُوَلَّدٌ لَيْسَ نَقْلًا، وَقَدْ رُوجِعَ عَلَى قَاعِدَةِ الْفِعْلِ وَالْفَاعِلِ وَمِثَالِهَا فِي ص ١٩.');
 }
 

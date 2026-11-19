@@ -242,6 +242,27 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .article-example{direction:rtl;color:var(--text);font-size:19px;line-height:1.95;margin-top:3px}
 .article-example-ref{display:block;color:var(--muted);font-size:13px;line-height:1.55}
 .article-meaning .visual-row-link{margin:14px -18px -18px;border-radius:0 0 12px 12px}
+.idafa-definiteness{border:1px solid var(--sage-line);border-radius:12px;background:var(--sage-fill);padding:18px;overflow:hidden}
+.idafa-hero{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:16px}
+.idafa-phrase{display:flex;direction:rtl;justify-content:center;align-items:baseline;gap:.28em;color:var(--heading);font-size:clamp(34px,5vw,48px);line-height:1.9;white-space:nowrap}
+.idafa-first,.idafa-second{padding:0 .16em;border-radius:6px}
+.idafa-first{background:var(--sage-fill);box-shadow:inset 0 -.09em 0 var(--sage-line)}
+.idafa-second{background:var(--gold-soft);box-shadow:inset 0 -.09em 0 var(--gold)}
+.idafa-term-labels{display:grid;direction:rtl;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px}
+.idafa-term-card{min-width:0;text-align:center}
+.idafa-label-ar{direction:rtl;color:var(--forest);font-size:18px;font-weight:700;line-height:1.7}
+.idafa-label-en{color:var(--muted);font-size:12px;line-height:1.35}
+.idafa-term-note-ar{direction:rtl;color:var(--text);font-size:16px;line-height:1.8;margin-top:4px}
+.idafa-term-note-en{color:var(--muted);font-size:13px;line-height:1.5;margin-top:2px}
+.idafa-types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.idafa-type{min-width:0;border:1px solid var(--line);border-radius:9px;background:var(--card);padding:12px;text-align:center}
+.idafa-type-label-ar{direction:rtl;color:var(--forest);font-size:17px;font-weight:700;line-height:1.7}
+.idafa-type-label-en{color:var(--muted);font-size:12px;line-height:1.35}
+.idafa-type-example{direction:rtl;color:var(--heading);font-size:21px;line-height:2;margin-top:4px;white-space:normal}
+.idafa-definite-focus{background:var(--gold-soft);color:var(--forest);border-radius:4px;box-shadow:0 .08em 0 var(--gold);font-weight:inherit}
+.idafa-type-note-ar{direction:rtl;color:var(--muted);font-size:15px;line-height:1.65}
+.idafa-type-note-en{color:var(--muted);font-size:12px;line-height:1.4}
+.idafa-definiteness .visual-row-link{margin:14px -18px -18px;border-radius:0 0 12px 12px}
 .help-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
 .help-actions button{width:auto;min-width:180px}
 
@@ -371,6 +392,19 @@ html[data-theme="dark"] .relative-silah-focus{text-decoration-color:#d8ae5c}
   .article-example{font-size:18px;overflow-wrap:anywhere}
   .article-meaning .visual-row-link{display:block;margin:12px -13px -13px}
   .article-meaning .visual-open{display:block;margin:8px auto 0}
+  .idafa-definiteness{padding:13px}
+  .idafa-hero{padding:12px 10px}
+  .idafa-phrase{font-size:34px;line-height:2}
+  .idafa-term-labels{gap:6px}
+  .idafa-label-ar{font-size:17px}
+  .idafa-term-note-ar{font-size:15px}
+  .idafa-types{grid-template-columns:1fr}
+  .idafa-type{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:center;column-gap:8px;text-align:right}
+  .idafa-type-label-ar,.idafa-type-label-en{grid-column:1}
+  .idafa-type-example{grid-column:2;grid-row:1/span 2;margin:0;text-align:right;font-size:20px}
+  .idafa-type-note-ar,.idafa-type-note-en{grid-column:1/-1;text-align:center}
+  .idafa-definiteness .visual-row-link{display:block;margin:12px -13px -13px}
+  .idafa-definiteness .visual-open{display:block;margin:8px auto 0}
   .compare-arrow{transform:rotate(90deg);text-align:center}
   .compare-note{grid-column:1}
 }
@@ -534,6 +568,12 @@ function renderHelpVisual(chapter){
   const hero=`<div class="article-hero"><div class="article-word arabic" lang="ar">${word}</div><div class="article-note-ar arabic" lang="ar">${arabicDisplay(visual.noteAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="article-note-en">${escapeHtml(visual.noteEn)}</div>`}</div>`;
   const groups=visual.groups.map(group=>`<section class="article-group"><div class="article-group-title-ar arabic" lang="ar">${arabicDisplay(group.labelAr)}</div>${state.lang==='ar'?'':`<div class="article-group-title-en">${escapeHtml(group.labelEn)}</div>`}${group.items.map(item=>`<article class="article-kind"><div class="article-kind-ar arabic" lang="ar">${arabicDisplay(item.kindAr)}</div>${state.lang==='ar'?'':`<div class="article-kind-en">${escapeHtml(item.kindEn)}</div>`}<div class="article-example arabic" lang="ar">${item.referenceAr?`﴿${escapeHtml(item.exampleAr)}﴾<span class="article-example-ref">(${escapeHtml(item.referenceAr)})</span>`:escapeHtml(item.exampleAr)}</div></article>`).join('')}</section>`).join('');
   $('helpVisual').innerHTML=`${title}<section class="article-meaning">${hero}<div class="article-groups">${groups}</div>${renderVisualExample(visual.exerciseId,'visual-article-example')}</section>`;return
+ }
+ if(visual.type==='idafa-definiteness'){
+  const phrase=`<div class="idafa-phrase arabic" lang="ar"><span class="idafa-first">${escapeHtml(visual.firstAr)}</span><span class="idafa-second">${escapeHtml(visual.secondAr)}</span></div>`;
+  const labels=`<div class="idafa-term-labels"><article class="idafa-term-card"><div class="idafa-label-ar arabic" lang="ar">${arabicDisplay(visual.firstLabelAr)}</div>${state.lang==='ar'?'':`<div class="idafa-label-en">${escapeHtml(visual.firstLabelEn)}</div>`}</article><article class="idafa-term-card"><div class="idafa-label-ar arabic" lang="ar">${arabicDisplay(visual.secondLabelAr)}</div>${state.lang==='ar'?'':`<div class="idafa-label-en">${escapeHtml(visual.secondLabelEn)}</div>`}<div class="idafa-term-note-ar arabic" lang="ar">${arabicDisplay(visual.secondNoteAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="idafa-term-note-en">${escapeHtml(visual.secondNoteEn)}</div>`}</article></div>`;
+  const types=visual.types.map(item=>`<article class="idafa-type"><div class="idafa-type-label-ar arabic" lang="ar">${arabicDisplay(item.labelAr)}</div>${state.lang==='ar'?'':`<div class="idafa-type-label-en">${escapeHtml(item.labelEn)}</div>`}<div class="idafa-type-example arabic" lang="ar">${highlightLast(item.exampleAr,item.focusAr,'idafa-definite-focus')}</div><div class="idafa-type-note-ar arabic" lang="ar">${arabicDisplay(item.noteAr)}</div>${state.lang==='ar'?'':`<div class="idafa-type-note-en">${escapeHtml(item.noteEn)}</div>`}</article>`).join('');
+  $('helpVisual').innerHTML=`${title}<section class="idafa-definiteness"><div class="idafa-hero">${phrase}${labels}</div><div class="idafa-types">${types}</div>${renderVisualExample(visual.exerciseId,'visual-idafa-example')}</section>`;return
  }
  if(visual.type==='table'){const columns=visual.headersAr.length,head=`<div class="visual-row visual-head" style="--visual-cols:${columns}">${visual.headersAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${arabicDisplay(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(visual.headersEn[index])}</div>`}</div>`).join('')}</div>`,rows=visual.rows.map((row,rowIndex)=>`<div class="visual-row" id="visual-row-${rowIndex}" style="--visual-cols:${columns}">${row.cellsAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${escapeHtml(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(row.cellsEn[index])}</div>`}</div>`).join('')}${row.exerciseId?renderVisualExample(row.exerciseId,`visual-row-${rowIndex}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-table">${head}${rows}</div>`;return}
  if(visual.type==='contrast'){const cards=visual.examples.map((example,index)=>{const highlighted=highlightLast(example.exampleAr,example.focusAr,'ending-focus');return `<article class="contrast-card" id="visual-contrast-${index}"><div class="contrast-label-ar arabic" lang="ar">${arabicDisplay(example.labelAr)}</div><div class="contrast-example arabic" lang="ar">${highlighted}</div>${state.lang==='ar'?'':`<div class="contrast-en">${escapeHtml(example.exampleEn)}</div>`}${example.exerciseId?renderVisualExample(example.exerciseId,`visual-contrast-${index}-example`):''}</article>`}).join('');$('helpVisual').innerHTML=`${title}<div class="visual-contrast${visual.examples.length===3?' three':''}">${cards}</div>`;return}

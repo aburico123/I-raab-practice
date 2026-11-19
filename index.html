@@ -225,6 +225,23 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--forest-3);outl
 .relative-return-note{direction:rtl;color:var(--muted);font-size:16px;line-height:1.8}
 .relative-return-note-en{color:var(--muted);font-size:12px;line-height:1.4}
 .relative-anatomy .visual-row-link{margin:14px -18px -18px;border-radius:0 0 12px 12px}
+.article-meaning{border:1px solid var(--sage-line);border-radius:12px;background:var(--sage-fill);padding:18px;overflow:hidden}
+.article-hero{text-align:center;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:16px}
+.article-word{direction:rtl;color:var(--heading);font-size:clamp(34px,5vw,48px);line-height:1.9}
+.article-prefix-focus{background:var(--gold-soft);color:var(--forest);border-radius:4px;box-shadow:0 .08em 0 var(--gold);font-weight:inherit}
+.article-note-ar{direction:rtl;color:var(--forest);font-size:18px;line-height:1.9;margin-top:4px}
+.article-note-en{color:var(--muted);font-size:14px;line-height:1.55;margin-top:3px}
+.article-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.article-group{min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:13px}
+.article-group-title-ar{direction:rtl;color:var(--forest);font-size:20px;font-weight:700;line-height:1.7}
+.article-group-title-en{color:var(--muted);font-size:12px;line-height:1.35}
+.article-kind{padding:10px 0;border-top:1px dashed var(--line)}
+.article-kind:first-of-type{margin-top:5px}
+.article-kind-ar{direction:rtl;color:var(--heading);font-size:17px;font-weight:700;line-height:1.7}
+.article-kind-en{color:var(--muted);font-size:12px;line-height:1.35}
+.article-example{direction:rtl;color:var(--text);font-size:19px;line-height:1.95;margin-top:3px}
+.article-example-ref{display:block;color:var(--muted);font-size:13px;line-height:1.55}
+.article-meaning .visual-row-link{margin:14px -18px -18px;border-radius:0 0 12px 12px}
 .help-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
 .help-actions button{width:auto;min-width:180px}
 
@@ -346,6 +363,14 @@ html[data-theme="dark"] .relative-silah-focus{text-decoration-color:#d8ae5c}
   .relative-return-note-en{grid-column:1/-1;grid-row:4;text-align:center}
   .relative-anatomy .visual-row-link{display:block;margin:12px -13px -13px}
   .relative-anatomy .visual-open{display:block;margin:8px auto 0}
+  .article-meaning{padding:13px}
+  .article-hero{padding:12px 10px}
+  .article-word{font-size:35px;line-height:2}
+  .article-note-ar{font-size:17px}
+  .article-groups{grid-template-columns:1fr}
+  .article-example{font-size:18px;overflow-wrap:anywhere}
+  .article-meaning .visual-row-link{display:block;margin:12px -13px -13px}
+  .article-meaning .visual-open{display:block;margin:8px auto 0}
   .compare-arrow{transform:rotate(90deg);text-align:center}
   .compare-note{grid-column:1}
 }
@@ -475,6 +500,7 @@ const exerciseLocation=id=>{for(const chapter of chapters){const index=chapter.b
 function quranReferenceHtml(exercise){return exercise.quran?`<span class="quran-ref">(${escapeHtml(stripMarks(`سُورَةُ ${exercise.quran.surahAr}`))}، ${escapeHtml(exercise.quran.ayahAr)})</span>`:''}
 function exerciseArabicHtml(exercise){return exercise.quran?`${exercise.quranLeadAr?`<span class="quran-lead">${escapeHtml(exercise.quranLeadAr)}</span>`:''}<span class="quran-quote">﴿${escapeHtml(exercise.ar)}﴾</span>${quranReferenceHtml(exercise)}`:escapeHtml(exercise.ar)}
 function highlightLast(text,target,className){const source=String(text||''),index=target?source.lastIndexOf(target):-1;if(index<0)return escapeHtml(source);const before=source.slice(0,index),match=source.slice(index,index+target.length),after=source.slice(index+target.length),joinsArabic=/[بتثجحخسشصضطظعغفقكلمنهيئ][\u064B-\u065F\u0670\u06D6-\u06ED]*$/u.test(before)&&/^[\u0620-\u063F\u0641-\u064A\u066E\u066F\u0671-\u06D3]/u.test(match),joiner=joinsArabic?'\u200D':'';return `${escapeHtml(before)}${joiner}<span class="${className}">${joiner}${escapeHtml(match)}</span>${escapeHtml(after)}`}
+function highlightPrefix(text,target,className){const source=String(text||''),index=target?source.indexOf(target):-1;if(index<0)return escapeHtml(source);const before=source.slice(0,index),match=source.slice(index,index+target.length),after=source.slice(index+target.length),joinsAfter=/[بتثجحخسشصضطظعغفقكلمنهيئ][\u064B-\u065F\u0670\u06D6-\u06ED]*$/u.test(match)&&/^[\u0620-\u063F\u0641-\u064A\u066E\u066F\u0671-\u06D3]/u.test(after),joiner=joinsAfter?'\u200D':'';return `${escapeHtml(before)}<span class="${className}">${escapeHtml(match)}${joiner}</span>${joiner}${escapeHtml(after)}`}
 function renderVisualFocus(example){if(!example?.exampleAr)return'';const highlighted=example.focusAr?highlightLast(example.exampleAr,example.focusAr,'ending-focus'):escapeHtml(example.exampleAr);return `<div class="contrast-example arabic" lang="ar">${highlighted}</div>${state.lang==='ar'||!example.exampleEn?'':`<div class="contrast-en">${escapeHtml(example.exampleEn)}</div>`}`}
 function renderComparison(compare){if(!compare)return'';const before=compare.deletedAr?highlightLast(compare.beforeAr,compare.deletedAr,'deleted-focus'):escapeHtml(compare.beforeAr);const after=compare.focus?highlightLast(compare.afterAr,compare.focus,'ending-focus'):escapeHtml(compare.afterAr);return `<div class="visual-compare"><div class="compare-side"><div class="compare-ar arabic" lang="ar">${before}</div><div class="compare-en">${escapeHtml(compare.beforeEn||tr('before'))}</div></div><div class="compare-arrow" aria-hidden="true">→</div><div class="compare-side"><div class="compare-ar arabic" lang="ar">${after}</div><div class="compare-en">${escapeHtml(compare.afterEn||tr('after'))}</div></div><div class="compare-note"><div class="visual-panel-ar arabic" lang="ar">${escapeHtml(compare.noteAr||'')}</div>${state.lang==='ar'?'':`<div class="visual-panel-en">${escapeHtml(compare.noteEn||'')}</div>`}</div></div>`}
 function renderVisualExample(exerciseId,anchor=''){const found=exerciseLocation(exerciseId);if(!found)return'';const {exercise}=found;return `<div class="visual-row-link" id="${escapeHtml(anchor)}"><div class="visual-example"><div class="visual-example-ar arabic" lang="ar">${exerciseArabicHtml(exercise)}</div>${state.lang==='ar'?'':`<div class="visual-example-en">${escapeHtml(exercise.en)}</div>`}</div><button class="visual-open" data-open-exercise="${escapeHtml(exercise.id)}" data-help-anchor="${escapeHtml(anchor)}">${tr('openExercise')} · ${state.lang==='ar'?`ص ${localDigits(exercise.page)}`:`pg:${exercise.page}`}</button></div>`}
@@ -502,6 +528,12 @@ function renderHelpVisual(chapter){
   const sentence=`<div class="relative-sentence arabic" lang="ar"><span aria-hidden="true">﴿</span>${escapeHtml(visual.leadAr)} <span class="relative-noun-focus">${escapeHtml(visual.relativeAr)}</span> <span class="relative-silah-focus">${escapeHtml(visual.silahAr)}</span><span aria-hidden="true">﴾</span></div>`;
   const cards=`<div class="relative-key"><article class="relative-key-card">${label(visual.labels.relativeAr,visual.labels.relativeEn)}<div class="relative-sample arabic" lang="ar"><span class="relative-noun-focus">${escapeHtml(visual.relativeAr)}</span></div></article><article class="relative-key-card">${label(visual.labels.silahAr,visual.labels.silahEn)}<div class="relative-sample arabic relative-silah-focus" lang="ar">${escapeHtml(visual.silahAr)}</div></article><article class="relative-key-card">${label(visual.labels.returnAr,visual.labels.returnEn)}<div class="relative-sample relative-return arabic" lang="ar">${escapeHtml(visual.returnAr)}</div><div class="relative-return-note arabic" lang="ar">${arabicDisplay(visual.returnNoteAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="relative-return-note-en">${escapeHtml(visual.returnNoteEn)}</div>`}</article></div>`;
   $('helpVisual').innerHTML=`${title}<section class="relative-anatomy">${sentence}${cards}${renderVisualExample(visual.exerciseId,'visual-relative-example')}</section>`;return
+ }
+ if(visual.type==='article-meaning'){
+  const word=highlightPrefix(visual.wordAr,visual.prefixAr,'article-prefix-focus');
+  const hero=`<div class="article-hero"><div class="article-word arabic" lang="ar">${word}</div><div class="article-note-ar arabic" lang="ar">${arabicDisplay(visual.noteAr,{quotes:true})}</div>${state.lang==='ar'?'':`<div class="article-note-en">${escapeHtml(visual.noteEn)}</div>`}</div>`;
+  const groups=visual.groups.map(group=>`<section class="article-group"><div class="article-group-title-ar arabic" lang="ar">${arabicDisplay(group.labelAr)}</div>${state.lang==='ar'?'':`<div class="article-group-title-en">${escapeHtml(group.labelEn)}</div>`}${group.items.map(item=>`<article class="article-kind"><div class="article-kind-ar arabic" lang="ar">${arabicDisplay(item.kindAr)}</div>${state.lang==='ar'?'':`<div class="article-kind-en">${escapeHtml(item.kindEn)}</div>`}<div class="article-example arabic" lang="ar">${item.referenceAr?`﴿${escapeHtml(item.exampleAr)}﴾<span class="article-example-ref">(${escapeHtml(item.referenceAr)})</span>`:escapeHtml(item.exampleAr)}</div></article>`).join('')}</section>`).join('');
+  $('helpVisual').innerHTML=`${title}<section class="article-meaning">${hero}<div class="article-groups">${groups}</div>${renderVisualExample(visual.exerciseId,'visual-article-example')}</section>`;return
  }
  if(visual.type==='table'){const columns=visual.headersAr.length,head=`<div class="visual-row visual-head" style="--visual-cols:${columns}">${visual.headersAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${arabicDisplay(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(visual.headersEn[index])}</div>`}</div>`).join('')}</div>`,rows=visual.rows.map((row,rowIndex)=>`<div class="visual-row" id="visual-row-${rowIndex}" style="--visual-cols:${columns}">${row.cellsAr.map((cell,index)=>`<div class="visual-cell"><div class="visual-cell-ar arabic" lang="ar">${escapeHtml(cell)}</div>${state.lang==='ar'?'':`<div class="visual-cell-en">${escapeHtml(row.cellsEn[index])}</div>`}</div>`).join('')}${row.exerciseId?renderVisualExample(row.exerciseId,`visual-row-${rowIndex}-example`):''}</div>`).join('');$('helpVisual').innerHTML=`${title}<div class="visual-table">${head}${rows}</div>`;return}
  if(visual.type==='contrast'){const cards=visual.examples.map((example,index)=>{const highlighted=highlightLast(example.exampleAr,example.focusAr,'ending-focus');return `<article class="contrast-card" id="visual-contrast-${index}"><div class="contrast-label-ar arabic" lang="ar">${arabicDisplay(example.labelAr)}</div><div class="contrast-example arabic" lang="ar">${highlighted}</div>${state.lang==='ar'?'':`<div class="contrast-en">${escapeHtml(example.exampleEn)}</div>`}${example.exerciseId?renderVisualExample(example.exerciseId,`visual-contrast-${index}-example`):''}</article>`}).join('');$('helpVisual').innerHTML=`${title}<div class="visual-contrast${visual.examples.length===3?' three':''}">${cards}</div>`;return}

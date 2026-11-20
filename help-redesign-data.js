@@ -540,8 +540,8 @@ const HELP_REDESIGN_BY_CHAPTER = {
       recognitionAr: 'ابْحَثْ عَنْ فِعْلٍ مِنْ أَخَوَاتِ «كَانَ»، ثُمَّ عَيِّنِ الِاسْمَ الْمَرْفُوعَ وَالْخَبَرَ الْمَنْصُوبَ. وَتَحَقَّقْ مِنَ الشَّرْطِ مَعَ «زَالَ» وَأَخَوَاتِهَا وَمَعَ «دَامَ».',
       recognitionEn: 'Find a verb from the kāna family, then identify its nominative ism and accusative khabar. Check the required condition with zāla and its group and with dāma.',
       exampleId: 'kana-01',
-      cautionsAr: 'لَا تَفْتَرِضْ أَنَّ كُلَّ «كَانَ» نَاقِصَةٌ؛ فَقَدْ تَكُونُ تَامَّةً أَوْ زَائِدَةً، وَقَدْ تُحْذَفُ هِيَ وَاسْمُهَا. وَأَمْثِلَةُ حَذْفِ النُّونِ الْمَطْبُوعَةُ فِي ص ١٢٧ خَارِجُ هَذَا النَّشْرِ.',
-      cautionsEn: 'Do not assume every kāna is deficient: it may be complete or extra, and it and its ism may be omitted. The printed nūn-deletion examples on page 127 are outside this release.'
+      cautionsAr: 'لَا تَفْتَرِضْ أَنَّ كُلَّ «كَانَ» نَاقِصَةٌ؛ فَقَدْ تَكُونُ تَامَّةً أَوْ زَائِدَةً، وَقَدْ تُحْذَفُ هِيَ وَاسْمُهَا. وَعِنْدَ حَذْفِ نُونِ الْمُضَارِعِ الْمَجْزُومِ تَبْقَى عَلَامَةُ الْجَزْمِ السُّكُونَ عَلَى النُّونِ الْمَحْذُوفَةِ.',
+      cautionsEn: 'Do not assume every kāna is deficient: it may be complete or extra, and it and its ism may be omitted. When the nūn of its jussive present is deleted, the sign remains sukūn on that deleted nūn.'
     },
     sections: [
       { id: 'kana-sisters-nawasikh-overview', titleAr: 'نَوَاسِخُ الِابْتِدَاءِ', titleEn: 'The nāsikhs of the nominal beginning', group: 'overview', defaultOpen: true },
@@ -549,6 +549,50 @@ const HELP_REDESIGN_BY_CHAPTER = {
       { id: 'kana-sisters-order', titleAr: 'التَّقْدِيمُ وَالتَّأْخِيرُ', titleEn: 'Fronting and delay', group: 'order', defaultOpen: false },
       { id: 'kana-sisters-other-rulings', titleAr: 'بَعْضُ أَحْكَامِ كَانَ وَأَخَوَاتِهَا', titleEn: 'Further rulings for kāna and its sisters', group: 'forms', defaultOpen: false },
       { id: 'kana-sisters-special-properties', titleAr: 'خَصَائِصُ كَانَ', titleEn: 'Special properties of kāna', group: 'caution', defaultOpen: false }
+    ]
+  },
+
+  'laysa-like-particles': {
+    essentials: {
+      coreRuleAr: 'تَرْفَعُ الْحُرُوفُ الْمُشَبَّهَةُ بِـ«لَيْسَ» الِاسْمَ وَتَنْصِبُ الْخَبَرَ إِذَا اسْتَوْفَتْ شُرُوطَهَا.',
+      coreRuleEn: 'Particles resembling laysa raise the ism and make the khabar accusative when their conditions are met.',
+      definitionAr: 'هِيَ أَرْبَعَةٌ: «مَا»، وَ«لَا»، وَ«إِنْ»، وَ«لَاتَ». وَكُلُّهَا حُرُوفُ نَفْيٍ.',
+      definitionEn: 'They are four negative particles: mā, lā, in, and lāta.',
+      effectAr: 'يَبْقَى الِاسْمُ مَرْفُوعًا، وَيَصِيرُ الْخَبَرُ مَنْصُوبًا؛ فَإِذَا اخْتَلَّ شَرْطٌ بَطَلَ الْعَمَلُ وَعَادَ التَّرْكِيبُ مُبْتَدَأً وَخَبَرًا.',
+      effectEn: 'The ism remains nominative and the khabar becomes accusative. If a condition fails, the operation stops and the construction returns to mubtadaʾ and khabar.',
+      recognitionAr: 'عَيِّنْ حَرْفَ النَّفْيِ، ثُمَّ اخْتَبِرِ الشُّرُوطَ، ثُمَّ ابْحَثْ عَنِ الِاسْمِ الْمَرْفُوعِ وَالْخَبَرِ الْمَنْصُوبِ.',
+      recognitionEn: 'Identify the negative particle, test its conditions, then locate the nominative ism and accusative khabar.',
+      exampleId: 'laysa-like-01',
+      cautionsAr: '«لَاتَ» خَاصَّةٌ بِأَلْفَاظِ الزَّمَانِ مَعَ حَذْفِ أَحَدِ الْجُزْأَيْنِ. وَشَاهِدُ ص ١٣١ بِرَفْعِ «حِينُ» مَحْجُوبٌ حَتَّى تُحَرَّرَ نِسْبَةُ قِرَاءَتِهِ.',
+      cautionsEn: 'Lāta is restricted to time expressions with one of the two parts omitted. The page-131 witness with nominative ḥīnu is held until its reading attribution is reconciled.'
+    },
+    sections: [
+      { id: 'laysa-like-particles-overview', titleAr: 'الْحُرُوفُ الْأَرْبَعَةُ وَعَمَلُهَا', titleEn: 'The four particles and their operation', group: 'overview', defaultOpen: true },
+      { id: 'laysa-like-particles-ma-conditions', titleAr: 'شُرُوطُ عَمَلِ «مَا»', titleEn: 'Conditions for operating mā', group: 'conditions', defaultOpen: true },
+      { id: 'laysa-like-particles-la-and-in', titleAr: '«لَا» وَ«إِنْ» الْمُشَبَّهَتَانِ بِـ«لَيْسَ»', titleEn: 'Lā and in resembling laysa', group: 'conditions', defaultOpen: false },
+      { id: 'laysa-like-particles-lata', titleAr: '«لَاتَ» وَأَلْفَاظُ الزَّمَانِ', titleEn: 'Lāta and time expressions', group: 'caution', defaultOpen: false }
+    ]
+  },
+
+  'verbs-of-proximity': {
+    essentials: {
+      coreRuleAr: 'تَعْمَلُ أَفْعَالُ الْمُقَارَبَةِ عَمَلَ «كَانَ»: تَرْفَعُ الِاسْمَ، وَيَكُونُ خَبَرُهَا فِعْلًا مُضَارِعًا فِي مَحَلِّ نَصْبٍ.',
+      coreRuleEn: 'Verbs of proximity operate like kāna: they raise the ism, and their khabar is a present construction in the accusative position.',
+      definitionAr: 'تَنْقَسِمُ إِلَى أَفْعَالِ الْمُقَارَبَةِ، وَأَفْعَالِ الرَّجَاءِ، وَأَفْعَالِ الشُّرُوعِ.',
+      definitionEn: 'They divide into verbs of proximity, hope, and inception.',
+      effectAr: 'تَدُلُّ عَلَى قُرْبِ الْخَبَرِ أَوْ رَجَائِهِ أَوِ الشُّرُوعِ فِيهِ، مَعَ بَقَاءِ الِاسْمِ مَرْفُوعًا وَالْخَبَرِ فِي مَحَلِّ نَصْبٍ.',
+      effectEn: 'They express that the event is near, hoped for, or beginning, while the ism is nominative and the khabar occupies the accusative position.',
+      recognitionAr: 'حَدِّدِ الْقِسْمَ، ثُمَّ عَيِّنِ الِاسْمَ، ثُمَّ تَحَقَّقْ مِنْ حُكْمِ «أَنْ» مَعَ الْفِعْلِ الْمُضَارِعِ.',
+      recognitionEn: 'Identify the division, locate the ism, then check whether an is required, usual, or forbidden before the present khabar.',
+      exampleId: 'muqarabah-01',
+      cautionsAr: 'يَجِبُ اقْتِرَانُ خَبَرِ «حَرَى» وَ«اخْلَوْلَقَ» بِـ«أَنْ»، وَيَجِبُ تَجَرُّدُ خَبَرِ أَفْعَالِ الشُّرُوعِ مِنْهَا.',
+      cautionsEn: 'The khabar of ḥarā and ikhlawlaqa must take an, while the khabar of inception verbs must omit it.'
+    },
+    sections: [
+      { id: 'verbs-of-proximity-three-divisions', titleAr: 'الْأَقْسَامُ الثَّلَاثَةُ', titleEn: 'The three divisions', group: 'overview', defaultOpen: true },
+      { id: 'verbs-of-proximity-operation', titleAr: 'الْعَمَلُ وَشَرْطُ الْخَبَرِ', titleEn: 'Operation and the khabar condition', group: 'definition', defaultOpen: true },
+      { id: 'verbs-of-proximity-an-rule', titleAr: 'وُجُوبُ «أَنْ» أَوْ مَنْعُهَا', titleEn: 'Where an is required or forbidden', group: 'conditions', defaultOpen: false },
+      { id: 'verbs-of-proximity-usual-patterns', titleAr: 'الْأَكْثَرُ فِي بَقِيَّةِ الْأَفْعَالِ', titleEn: 'Usual patterns with the other verbs', group: 'forms', defaultOpen: false }
     ]
   }
 };

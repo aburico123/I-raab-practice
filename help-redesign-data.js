@@ -527,6 +527,29 @@ const HELP_REDESIGN_BY_CHAPTER = {
       { id: 'mubtada-khabar-fronting', titleAr: 'تَعَدُّدُ الْخَبَرِ وَتَقْدِيمُهُ', titleEn: 'Multiple predicates and fronting', group: 'order', defaultOpen: false },
       { id: 'mubtada-khabar-deletion', titleAr: 'حَذْفُ الْمُبْتَدَإِ أَوِ الْخَبَرِ', titleEn: 'Deleting the mubtadaʾ or khabar', group: 'deletion', defaultOpen: false }
     ]
+  },
+
+  'kana-sisters': {
+    essentials: {
+      coreRuleAr: 'تَرْفَعُ «كَانَ وَأَخَوَاتُهَا» الِاسْمَ، وَتَنْصِبُ الْخَبَرَ.',
+      coreRuleEn: 'Kāna and its sisters raise the ism and make the khabar accusative.',
+      definitionAr: 'تَدْخُلُ هَذِهِ الْأَفْعَالُ عَلَى الْجُمْلَةِ الِاسْمِيَّةِ؛ فَيَصِيرُ الْمُبْتَدَأُ اسْمًا لَهَا، وَيَصِيرُ الْخَبَرُ خَبَرًا لَهَا.',
+      definitionEn: 'These verbs enter a nominal sentence: its mubtadaʾ becomes their ism, and its khabar becomes their khabar.',
+      effectAr: 'اسْمُهَا مَرْفُوعٌ، وَخَبَرُهَا مَنْصُوبٌ. وَقَدْ يَتَقَدَّمُ الْخَبَرُ أَوْ تَأْتِي بَعْضُ هَذِهِ الْأَفْعَالِ تَامَّةً فَيَتَغَيَّرُ التَّحْلِيلُ.',
+      effectEn: 'Their ism is nominative and their khabar accusative. The khabar may be fronted, and some of these verbs may be complete, which changes the analysis.',
+      recognitionAr: 'ابْحَثْ عَنْ فِعْلٍ مِنْ أَخَوَاتِ «كَانَ»، ثُمَّ عَيِّنِ الِاسْمَ الْمَرْفُوعَ وَالْخَبَرَ الْمَنْصُوبَ. وَتَحَقَّقْ مِنَ الشَّرْطِ مَعَ «زَالَ» وَأَخَوَاتِهَا وَمَعَ «دَامَ».',
+      recognitionEn: 'Find a verb from the kāna family, then identify its nominative ism and accusative khabar. Check the required condition with zāla and its group and with dāma.',
+      exampleId: 'kana-01',
+      cautionsAr: 'لَا تَفْتَرِضْ أَنَّ كُلَّ «كَانَ» نَاقِصَةٌ؛ فَقَدْ تَكُونُ تَامَّةً أَوْ زَائِدَةً، وَقَدْ تُحْذَفُ هِيَ وَاسْمُهَا. وَأَمْثِلَةُ حَذْفِ النُّونِ الْمَطْبُوعَةُ فِي ص ١٢٧ خَارِجُ هَذَا النَّشْرِ.',
+      cautionsEn: 'Do not assume every kāna is deficient: it may be complete or extra, and it and its ism may be omitted. The printed nūn-deletion examples on page 127 are outside this release.'
+    },
+    sections: [
+      { id: 'kana-sisters-nawasikh-overview', titleAr: 'نَوَاسِخُ الِابْتِدَاءِ', titleEn: 'The nāsikhs of the nominal beginning', group: 'overview', defaultOpen: true },
+      { id: 'kana-sisters-operation-divisions', titleAr: 'عَمَلُ كَانَ وَأَخَوَاتِهَا وَأَقْسَامُهَا', titleEn: 'Operation and divisions of kāna and its sisters', group: 'definition', defaultOpen: true },
+      { id: 'kana-sisters-order', titleAr: 'التَّقْدِيمُ وَالتَّأْخِيرُ', titleEn: 'Fronting and delay', group: 'order', defaultOpen: false },
+      { id: 'kana-sisters-other-rulings', titleAr: 'بَعْضُ أَحْكَامِ كَانَ وَأَخَوَاتِهَا', titleEn: 'Further rulings for kāna and its sisters', group: 'forms', defaultOpen: false },
+      { id: 'kana-sisters-special-properties', titleAr: 'خَصَائِصُ كَانَ', titleEn: 'Special properties of kāna', group: 'caution', defaultOpen: false }
+    ]
   }
 };
 

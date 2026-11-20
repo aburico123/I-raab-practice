@@ -188,12 +188,14 @@ button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{
 .help-visual:empty,.help-visual-region[hidden]{display:none}
 .visual-title{margin:0 0 16px;color:var(--heading);font-size:24px;font-weight:700;line-height:1.9;text-align:right;direction:rtl}
 .visual-title-en{display:block;color:var(--muted);font-family:var(--serif);font-size:17px;font-weight:400;line-height:1.35;direction:ltr;text-align:left}
-.visual-branches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.visual-branches{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.visual-branch-tier{grid-column:1/-1;display:grid;grid-template-columns:repeat(var(--visual-branch-columns,3),minmax(0,1fr));gap:10px}
 .visual-branch{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:13px;text-align:start;min-height:78px}
 .visual-branch.active{border-color:var(--sage-line);background:var(--sage-fill)}
 .visual-branch-ar{display:block;direction:rtl;text-align:right;color:var(--forest);font-size:20px;font-weight:700;line-height:1.9}
 .visual-branch-en{display:block;color:var(--muted);font-size:13px;line-height:1.35;margin-top:2px}
-.visual-subbranches{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-inline:18px;padding-inline-start:18px;border-inline-start:2px solid var(--sage-line)}
+.visual-subbranches{grid-column:1/-1;display:grid;grid-template-columns:repeat(var(--visual-branch-columns,2),minmax(0,1fr));gap:10px;margin-inline:18px;padding-inline-start:18px;border-inline-start:2px solid var(--sage-line)}
+.visual-subbranches.visual-branch-depth-2{margin-inline:36px;padding-inline-start:22px}
 .visual-subbranches .visual-branch{min-height:68px;background:color-mix(in srgb,var(--sage-fill) 45%,var(--card))}
 .visual-panel{grid-column:1/-1;border:1px solid var(--sage-line);border-radius:10px;background:var(--sage-fill);padding:16px}
 .visual-panel-ar,.visual-cell-ar,.compare-ar,.visual-example-ar{direction:rtl;text-align:right;color:var(--forest);font-size:20px;line-height:2}
@@ -442,10 +444,11 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
   .help-disclosure summary{padding:12px 13px}
   .help-disclosure-body{padding:13px}
   .help-chapter-nav{grid-template-columns:1fr}
-  .help-visual,.visual-branches,.visual-subbranches,.visual-panel{min-width:0}
+  .help-visual,.visual-branches,.visual-branch-tier,.visual-subbranches,.visual-panel{min-width:0}
   .visual-branch,.visual-panel-ar,.visual-panel-en{overflow-wrap:anywhere}
   .visual-branches{grid-template-columns:1fr}
-  .visual-subbranches{grid-column:1;grid-template-columns:1fr;margin-inline:10px;padding-inline-start:12px}
+  .visual-branch-tier,.visual-subbranches{grid-column:1;grid-template-columns:1fr}
+  .visual-subbranches,.visual-subbranches.visual-branch-depth-2{margin-inline:10px;padding-inline-start:12px}
   .visual-panel{grid-column:1}
   .visual-row{display:block;border-top:0;border-bottom:1px solid var(--line);padding:8px 0}
   .visual-row:last-child{border-bottom:0}
@@ -541,8 +544,8 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
     </div>
   </main>
 </div>
-<script src="help-redesign-data.js?v=help-redesign-20261120"></script>
-<script src="lesson-data.js?v=help-redesign-20261120"></script>
+<script src="help-redesign-data.js?v=mubtada-khabar-20261120"></script>
+<script src="lesson-data.js?v=mubtada-khabar-20261120"></script>
 <script>
 (function(){
 'use strict';
@@ -579,7 +582,7 @@ function arabicDisplay(text,{words=null,quotes=true}={}){
   return output+plain(source.slice(last));
 }
 const escapeHtml=text=>String(text==null?'':text).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const PARSED_COMPONENTS=['وَاوُ الْجَمَاعَةِ','وَاوُ الْمَعِيَّةِ','تَاءُ التَّأْنِيثِ','تَاءُ الْفَاعِلِ','يَاءُ الْمُخَاطَبَةِ','يَاءُ الْمُتَكَلِّمِ الْمَحْذُوفَةُ','يَاءُ الْمُتَكَلِّمِ','أَلِفُ الِاثْنَيْنِ','نُونُ النِّسْوَةِ','نُونُ التَّوْكِيدِ','هَاءُ الْغَائِبِ','كَافُ الْخِطَابِ','الْهَمْزَةُ','الْوَاوُ','الْفَاءُ','الْبَاءُ','اللَّامُ','التَّاءُ','الْيَاءُ','النُّونُ','الْمِيمُ','الْأَلِفُ','الْهَاءُ','الْكَافُ'];
+const PARSED_COMPONENTS=['وَاوُ الْجَمَاعَةِ','وَاوُ الْمَعِيَّةِ','تَاءُ التَّأْنِيثِ','تَاءُ الْفَاعِلِ','يَاءُ الْمُخَاطَبَةِ','يَاءُ الْمُتَكَلِّمِ الْمَحْذُوفَةُ','يَاءُ الْمُتَكَلِّمِ','أَلِفُ الِاثْنَيْنِ','نُونُ النِّسْوَةِ','نُونُ التَّوْكِيدِ','هَاءُ الْغَائِبِ','لَامُ الْبُعْدِ','كَافُ الْخِطَابِ','الْهَمْزَةُ','الْوَاوُ','الْفَاءُ','الْبَاءُ','اللَّامُ','التَّاءُ','الْيَاءُ','النُّونُ','الْمِيمُ','الْأَلِفُ','الْهَاءُ','الْكَافُ'];
 const COMPONENT_ANALYSIS=/^\s+(?:حَرْف[ٌُ]|ضَمِيرٌ|اسْمٌ|فِعْلٌ|فَاعِلٌ|نَائِبُ|مَفْعُولٌ|مُبْتَدَأٌ|خَبَرٌ|نَعْتٌ|مَعْطُوفٌ|ظَرْفُ|مَبْنِيٌّ|فِي مَحَلٍّ|لِلْوِقَايَةِ|لِلتَّثْنِيَةِ|عَلَامَةُ)/u;
 function emphasizeIraab(text,tokenWord){
  const source=String(text==null?'':text),ranges=[];
@@ -638,13 +641,12 @@ function renderHelpVisual(chapter){
  const title=`<h3 class="visual-title arabic" lang="ar">${helpText(visual.titleAr)}${state.lang==='ar'?'':`<span class="visual-title-en">${escapeHtml(visual.titleEn)}</span>`}</h3>`;
  if(visual.type==='branches'){
   const active=state.helpVisualBranches[chapter.id]||'';
-  const parent=visual.branches.find(branch=>branch.id===active||(branch.children||[]).some(child=>child.id===active));
-  const buttons=visual.branches.map(branch=>{const expanded=branch===parent;return `<button class="visual-branch${expanded?' active':''}" data-visual-branch="${escapeHtml(branch.id)}" aria-expanded="${expanded}"><span class="visual-branch-ar arabic" lang="ar">${helpText(branch.labelAr)}</span>${state.lang==='ar'?'':`<span class="visual-branch-en">${escapeHtml(branch.labelEn)}</span>`}</button>`}).join('');
-  const children=parent?.children||[];
-  const childButtons=children.length?`<div class="visual-subbranches">${children.map(child=>`<button class="visual-branch${child.id===active?' active':''}" data-visual-branch="${escapeHtml(child.id)}" aria-expanded="${child.id===active}"><span class="visual-branch-ar arabic" lang="ar">${helpText(child.labelAr)}</span>${state.lang==='ar'?'':`<span class="visual-branch-en">${escapeHtml(child.labelEn)}</span>`}</button>`).join('')}</div>`:'';
-  const detail=children.find(child=>child.id===active)||parent;
+  const findBranchPath=(branches,id,path=[])=>{for(const branch of branches){const next=[...path,branch];if(branch.id===id)return next;const nested=findBranchPath(branch.children||[],id,next);if(nested.length)return nested}return[]};
+  const activePath=findBranchPath(visual.branches,active),detail=activePath[activePath.length-1];
+  const renderBranchTier=(branches,depth=0)=>{const current=activePath[depth],columns=Math.max(1,Math.min(3,branches.length)),className=depth?'visual-subbranches':'visual-branch-tier',buttons=branches.map(branch=>{const onPath=activePath.includes(branch),selected=branch.id===active,expandable=(branch.children||[]).length>0;return `<button class="visual-branch${onPath?' active':''}" data-visual-branch="${escapeHtml(branch.id)}"${expandable?` aria-expanded="${onPath}"`:''}${selected?' aria-current="true"':''}><span class="visual-branch-ar arabic" lang="ar">${helpText(branch.labelAr)}</span>${state.lang==='ar'?'':`<span class="visual-branch-en">${escapeHtml(branch.labelEn)}</span>`}</button>`}).join(''),tier=`<div class="${className} visual-branch-depth-${depth}" style="--visual-branch-columns:${columns}">${buttons}</div>`,children=current?.children||[];return `${tier}${children.length?renderBranchTier(children,depth+1):''}`};
+  const tiers=renderBranchTier(visual.branches);
   const panel=detail?`<div class="visual-panel" id="visual-${escapeHtml(detail.id)}"><div class="visual-panel-ar arabic" lang="ar">${helpText(detail.descAr)}</div>${state.lang==='ar'?'':`<div class="visual-panel-en">${escapeHtml(detail.descEn)}</div>`}${renderVisualFocus(detail)}${renderComparison(detail.compare,detail.exerciseId)}${detail.exerciseId?renderVisualExample(detail.exerciseId,`visual-${detail.id}-example`):''}</div>`:'';
-  $('helpVisual').innerHTML=`${title}<div class="visual-branches">${buttons}${childButtons}${panel}</div>`;return
+  $('helpVisual').innerHTML=`${title}<div class="visual-branches">${tiers}${panel}</div>`;return
  }
  if(visual.type==='demonstratives'){
   const lines=text=>escapeHtml(text).replace(/\n/g,'<br>');

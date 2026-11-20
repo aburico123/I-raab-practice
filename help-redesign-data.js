@@ -1,6 +1,6 @@
 /*
- * Manual Chapter Help redesign map for the 22 chapters published through
- * printed page 108. This file does not replace the reviewed help prose in
+ * Manual Chapter Help redesign map for the 23 chapters published through
+ * printed page 118. This file does not replace the reviewed help prose in
  * lesson-data.js. For each chapter, sections[n] supplies presentation
  * metadata for chapter.help[n], in the same order.
  *
@@ -501,6 +501,32 @@ const HELP_REDESIGN_BY_CHAPTER = {
       { id: 'deputy-subject-replacements', titleAr: 'مَا يَنُوبُ عَنِ الْفَاعِلِ', titleEn: 'What can replace the agent', group: 'forms', defaultOpen: false },
       { id: 'deputy-subject-page-105-source-boundary', titleAr: 'تَنْبِيهُ ص ١٠٥: «تُعُلِّمَ»', titleEn: 'Page 105 source boundary: tuʿullima', group: 'caution', defaultOpen: false }
     ]
+  },
+
+  'mubtada-khabar': {
+    essentials: {
+      coreRuleAr: 'الْمُبْتَدَأُ وَالْخَبَرُ مَرْفُوعَانِ، وَبِهِمَا تَتِمُّ فَائِدَةُ الْجُمْلَةِ الِاسْمِيَّةِ.',
+      coreRuleEn: 'The mubtadaʾ and khabar are nominative, and together they complete the meaning of the nominal sentence.',
+      definitionAr: 'الْمُبْتَدَأُ اسْمٌ مَرْفُوعٌ مُجَرَّدٌ مِنَ الْعَوَامِلِ اللَّفْظِيَّةِ، وَالْخَبَرُ هُوَ الْجُزْءُ الَّذِي تَتِمُّ بِهِ الْفَائِدَةُ مَعَهُ.',
+      definitionEn: 'The mubtadaʾ is a nominative noun free of overt verbal governors; the khabar is the part that completes the statement with it.',
+      effectAr: 'يُعَيِّنُ الْمُبْتَدَأُ مَا نَتَحَدَّثُ عَنْهُ، وَيُكْمِلُ الْخَبَرُ الْمَعْنَى الَّذِي نُثْبِتُهُ لَهُ.',
+      effectEn: 'The mubtadaʾ identifies what is being discussed, and the khabar completes what is stated about it.',
+      recognitionAr: 'عَيِّنِ الْمُبْتَدَأَ أَوَّلًا، ثُمَّ اسْأَلْ: أَخَبَرُهُ مُفْرَدٌ، أَمْ جُمْلَةٌ، أَمْ شِبْهُ جُمْلَةٍ؟',
+      recognitionEn: 'Find the mubtadaʾ first, then ask whether its khabar is mufrad, a clause, or a shibh jumlah.',
+      exampleId: 'mubtada-01',
+      cautionsAr: 'الْمُرَادُ بِالْخَبَرِ «الْمُفْرَدِ» هُنَا مَا لَيْسَ جُمْلَةً وَلَا شِبْهَ جُمْلَةٍ، وَلَيْسَ الْمُرَادُ أَنَّهُ وَاحِدٌ فِي الْعَدَدِ.',
+      cautionsEn: 'Here a mufrad predicate means one that is not a clause or shibh jumlah; it does not necessarily mean grammatically singular.'
+    },
+    sections: [
+      { id: 'mubtada-khabar-definition', titleAr: 'تَعْرِيفُ الْمُبْتَدَإِ وَصُوَرُهُ', titleEn: 'Definition and forms of the mubtadaʾ', group: 'definition', defaultOpen: true },
+      { id: 'mubtada-khabar-descriptive', titleAr: 'الْمُبْتَدَأُ الْوَصْفِيُّ وَمَرْفُوعُهُ', titleEn: 'The descriptive mubtadaʾ and what it raises', group: 'forms', defaultOpen: false },
+      { id: 'mubtada-khabar-indefinite', titleAr: 'الِابْتِدَاءُ بِالنَّكِرَةِ وَالْمَصْدَرِ الْمُؤَوَّلِ', titleEn: 'Indefinite and infinitival mubtadaʾ forms', group: 'conditions', defaultOpen: false },
+      { id: 'mubtada-khabar-khabar-types', titleAr: 'تَعْرِيفُ الْخَبَرِ وَأَقْسَامُهُ', titleEn: 'Definition and divisions of the khabar', group: 'overview', defaultOpen: false },
+      { id: 'mubtada-khabar-clause-predicates', titleAr: 'الْخَبَرُ الْجُمْلَةُ وَرَابِطُهُ', titleEn: 'Clause predicates and their links', group: 'forms', defaultOpen: false },
+      { id: 'mubtada-khabar-shibh-jumlah', titleAr: 'شِبْهُ الْجُمْلَةِ وَالْمُتَعَلَّقُ الْمَحْذُوفُ', titleEn: 'Shibh jumlah and its omitted attachment', group: 'forms', defaultOpen: false },
+      { id: 'mubtada-khabar-fronting', titleAr: 'تَعَدُّدُ الْخَبَرِ وَتَقْدِيمُهُ', titleEn: 'Multiple predicates and fronting', group: 'order', defaultOpen: false },
+      { id: 'mubtada-khabar-deletion', titleAr: 'حَذْفُ الْمُبْتَدَإِ أَوِ الْخَبَرِ', titleEn: 'Deleting the mubtadaʾ or khabar', group: 'deletion', defaultOpen: false }
+    ]
   }
 };
 
@@ -511,4 +537,3 @@ if (typeof module !== 'undefined' && module.exports) {
 if (typeof window !== 'undefined') {
   window.MIFTAH_HELP_REDESIGN = HELP_REDESIGN_BY_CHAPTER;
 }
-

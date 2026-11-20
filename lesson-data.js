@@ -11,7 +11,7 @@ const exercise=(id,page,ar,en,tokens,directEn,directAr,appEn='Miftāḥ al-ʿIlm
  sourceEn:`Al-Mutammimah, printed page ${page}. ${directEn} ${appEn}`,
  sourceAr:`الْمُتَمِّمَةُ، الصَّفْحَةُ الْمَطْبُوعَةُ ${String(page).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d])}. ${directAr} ${appAr}`
 });
-const help=(ar,en)=>({ar,en});
+const help=(ar,en,meta={})=>({ar,en,...meta});
 
 const trimAnswerEnd=value=>String(value||'').trim().replace(/[.؛،]+$/u,'');
 const pastVisible=(word,gloss,subjectAr='وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ.',subjectEn='its subject is a hidden “he”')=>token(
@@ -1674,7 +1674,7 @@ const naibForms=[
  naibBook('naib-13',105,'قُولَ','It was said.',[passivePast('قُولَ','was said')],'The author records this pure-ḍamm dialectal passive form.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ اللُّغَوِيَّةَ بِالضَّمِّ الْخَالِصِ.'),
  naibBook('naib-14',105,'بُوعَ','It was sold.',[passivePast('بُوعَ','was sold')],'The author records this pure-ḍamm dialectal passive form.','يَذْكُرُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ اللُّغَوِيَّةَ بِالضَّمِّ الْخَالِصِ.'),
  naibQuran('naib-15',106,'وَإِذَا قُرِئَ الْقُرْآنُ','And when the Qurʾān is recited.',[
-  answerParts('وَإِذَا','and when',[{ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Wāw opens the sentence and is built on fatḥ with no syntactic position.'},{ar:'«إِذَا» ظَرْفُ زَمَانٍ لِمَا يُسْتَقْبَلُ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ، وَهُوَ مُضَافٌ.',en:'Idhā is a time adverb for the future, built on sukūn in the accusative position, and the first term of an iḍāfah.'}]),
+  answerParts('وَإِذَا','and when',[{ar:'الْوَاوُ حَرْفُ عَطْفٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Wāw is a conjunction built on fatḥ with no syntactic position.'},{ar:'«إِذَا» ظَرْفُ زَمَانٍ لِمَا يُسْتَقْبَلُ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ، وَهُوَ مُضَافٌ.',en:'Idhā is a time adverb for the future, built on sukūn in the accusative position, and the first term of an iḍāfah.'}]),
   passivePast('قُرِئَ','is recited'),deputyDamma('الْقُرْآنُ','the Qurʾān')
  ],7,204,'الْأَعْرَافِ','The author quotes this opening span as an overt deputy subject example and parses it in the footnote.','يَسْتَشْهِدُ الْمُؤَلِّفُ بِهَذَا الِافْتِتَاحِ لِنَائِبِ الْفَاعِلِ الظَّاهِرِ، وَتُعْرِبُهُ الْحَاشِيَةُ.'),
  naibQuran('naib-16',106,'ضُرِبَ مَثَلٌ','An example has been set forth.',[passivePast('ضُرِبَ','has been set forth'),deputyDamma('مَثَلٌ','an example')],22,73,'الْحَجِّ','The Qurʾānic ornament begins with «ضُرِبَ»; the preceding editorial wāw is outside the quotation. The footnote parses the displayed words.','تَبْدَأُ حِلْيَةُ النَّصِّ الْقُرْآنِيِّ بِـ«ضُرِبَ»، وَالْوَاوُ السَّابِقَةُ مِنْ سِيَاقِ الشَّرْحِ خَارِجَ الِاقْتِبَاسِ، وَتُعْرِبُ الْحَاشِيَةُ الْكَلِمَتَيْنِ.'),
@@ -1685,13 +1685,13 @@ const naibForms=[
   deputySoundPlural('الْمُجْرِمُونَ','the criminals')
  ],55,41,'الرَّحْمَنِ','The Qurʾānic ornament begins with «يُعْرَفُ»; the preceding editorial wāw is outside the quotation. The footnote parses the displayed words.','تَبْدَأُ حِلْيَةُ النَّصِّ الْقُرْآنِيِّ بِـ«يُعْرَفُ»، وَالْوَاوُ السَّابِقَةُ مِنْ سِيَاقِ الشَّرْحِ خَارِجَ الِاقْتِبَاسِ، وَتُعْرِبُ الْحَاشِيَةُ الْكَلِمَتَيْنِ.'),
  naibBook('naib-20',106,'ضُرِبْتُ','I was struck.',[
-  answerParts('ضُرِبْتُ','I was struck',[{ar:'«ضُرِبْ» فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِضَمِيرِ الرَّفْعِ الْمُتَحَرِّكِ.',en:'Ḍuriba is a passive past verb built on sukūn because a moving nominative pronoun is attached.'},{ar:'التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ.',en:'Tāʾ is an attached pronoun fixed on ḍamm in the nominative position as deputy subject.'}])
+  answerParts('ضُرِبْتُ','I was struck',[{ar:'«ضُرِبْ» فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِضَمِيرِ الرَّفْعِ الْمُتَحَرِّكِ.',en:'The passive past verb is built on sukūn because a moving nominative pronoun is attached.'},{ar:'التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ.',en:'Tāʾ is an attached pronoun fixed on ḍamm in the nominative position as deputy subject.'}])
  ],'The author prints this first pronominal deputy-subject form and refers to the earlier pronoun paradigm.','يَطْبَعُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ الْأُولَى لِنَائِبِ الْفَاعِلِ الْمُضْمَرِ، وَيُحِيلُ عَلَى مَا تَقَدَّمَ مِنْ صِيَغِ الضَّمَائِرِ.'),
  naibBook('naib-21',106,'ضُرِبْنَا','We were struck.',[
-  answerParts('ضُرِبْنَا','we were struck',[{ar:'«ضُرِبْ» فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِـ«نَا».',en:'Ḍuriba is a passive past verb built on sukūn because nā is attached.'},{ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ.',en:'Nā is an attached pronoun fixed on sukūn in the nominative position as deputy subject.'}])
+  answerParts('ضُرِبْنَا','we were struck',[{ar:'«ضُرِبْ» فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِـ«نَا».',en:'The passive past verb is built on sukūn because nā is attached.'},{ar:'«نَا» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ.',en:'Nā is an attached pronoun fixed on sukūn in the nominative position as deputy subject.'}])
  ],'The author prints this pronominal deputy-subject form and refers to the earlier pronoun paradigm.','يَطْبَعُ الْمُؤَلِّفُ هَذِهِ الصِّيغَةَ لِنَائِبِ الْفَاعِلِ الْمُضْمَرِ، وَيُحِيلُ عَلَى مَا تَقَدَّمَ مِنْ صِيَغِ الضَّمَائِرِ.'),
  naibBook('naib-22',106,'ضُرِبْتَ','You were struck.',[
-  answerParts('ضُرِبْتَ','you were struck',[{ar:'«ضُرِبْ» فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِضَمِيرِ الرَّفْعِ الْمُتَحَرِّكِ.',en:'Ḍuriba is a passive past verb built on sukūn because a moving nominative pronoun is attached.'},{ar:'التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ.',en:'Tāʾ is an attached pronoun fixed on fatḥ in the nominative position as deputy subject.'}])
+  answerParts('ضُرِبْتَ','you were struck',[{ar:'«ضُرِبْ» فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِضَمِيرِ الرَّفْعِ الْمُتَحَرِّكِ.',en:'The passive past verb is built on sukūn because a moving nominative pronoun is attached.'},{ar:'التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ.',en:'Tāʾ is an attached pronoun fixed on fatḥ in the nominative position as deputy subject.'}])
  ],'The author prints this final explicit pronominal deputy-subject form before referring to the rest of the earlier paradigm.','يَطْبَعُ الْمُؤَلِّفُ هَذِهِ آخِرَ صِيغَةٍ مُصَرَّحٍ بِهَا لِنَائِبِ الْفَاعِلِ الْمُضْمَرِ قَبْلَ الْإِحَالَةِ عَلَى بَقِيَّةِ الصِّيَغِ الْمُتَقَدِّمَةِ.'),
  naibBook('naib-23',107,'جُلِسَ أَمَامُكَ','The place in front of you was sat in.',[
   passivePast('جُلِسَ','was sat'),
@@ -1699,7 +1699,7 @@ const naibForms=[
  ],'The author prints the adverb with a visible ḍammah, «أَمَامُكَ», and the footnote explicitly makes it the nominative deputy subject.','يَطْبَعُ الْمُؤَلِّفُ الظَّرْفَ بِضَمَّةٍ ظَاهِرَةٍ: «أَمَامُكَ»، وَتَجْعَلُهُ الْحَاشِيَةُ نَائِبَ فَاعِلٍ مَرْفُوعًا.'),
  naibBook('naib-24',107,'صِيمَ رَمَضَانُ','Ramadan was fasted.',[passivePast('صِيمَ','was fasted'),token('رَمَضَانُ','Ramadan','ظَرْفُ زَمَانٍ نَائِبُ فَاعِلٍ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Time adverb serving as deputy subject, nominative with a visible ḍammah.')],'The author prints this time-adverb example, and the footnote makes «رَمَضَانُ» the nominative deputy subject.','يَطْبَعُ الْمُؤَلِّفُ هَذَا الْمِثَالَ لِلظَّرْفِ الزَّمَانِيِّ، وَتَجْعَلُ الْحَاشِيَةُ «رَمَضَانُ» نَائِبَ فَاعِلٍ مَرْفُوعًا.'),
  naibQuran('naib-25',107,'وَلَمَّا سُقِطَ فِي أَيْدِيهِمْ','And when regret fell upon them.',[
-  answerParts('وَلَمَّا','and when',[{ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Wāw opens the sentence and is built on fatḥ with no syntactic position.'},{ar:'«لَمَّا» رَابِطَةٌ لِوُجُودِ شَيْءٍ بِوُجُودِ غَيْرِهِ.',en:'Lammā links one event to the occurrence of another.'}]),
+  answerParts('وَلَمَّا','and when',[{ar:'الْوَاوُ حَرْفُ اسْتِئْنَافٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Wāw opens the sentence and is built on fatḥ with no syntactic position.'},{ar:'«لَمَّا» حَرْفُ رَبْطٍ لِوُجُودِ شَيْءٍ بِوُجُودِ غَيْرِهِ، مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Lammā is a linking particle indicating that one event occurs with another; it is built on sukūn with no syntactic position.'}]),
   passivePast('سُقِطَ','fell'),
   token('فِي','upon','حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Preposition built on sukūn with no syntactic position.'),
   answerParts('أَيْدِيهِمْ','their hands',[{ar:'«أَيْدِي» اسْمٌ مَجْرُورٌ بِـ«فِي»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الْمُقَدَّرَةُ عَلَى الْيَاءِ لِلثِّقَلِ، وَهُوَ مُضَافٌ.',en:'Aydī is governed by fī, genitive with a kasrah estimated on yāʾ because it is heavy to pronounce, and the first term of an iḍāfah.'},{ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْكَسْرِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ، وَالْمِيمُ عَلَامَةُ الْجَمْعِ.',en:'Hāʾ is an attached pronoun fixed on kasr in the genitive position as the second term; mīm marks the plural referent.'},{ar:'وَالْجَارُّ وَالْمَجْرُورُ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ.',en:'The prepositional phrase is in the nominative position as deputy subject.'}])
@@ -2242,6 +2242,17 @@ const babs=[
  {id:'definiteness',order:4,titleEn:'Bāb al-Nakirah wa-l-Maʿrifah',titleAr:'بَابُ النَّكِرَةِ وَالْمَعْرِفَةِ',pages:'72–96'},
  {id:'nominative-nouns',order:5,titleEn:'Bāb al-Marfūʿāt min al-Asmāʾ',titleAr:'بَابُ الْمَرْفُوعَاتِ مِنَ الْأَسْمَاءِ',pages:'97–108',continues:true}
 ];
+
+// The concise study summaries and disclosure metadata are app-prepared
+// organization layered over the reviewed Help prose. Keeping this mapping
+// separate lets validators prove that every original explanation survives.
+const helpRedesign=window.MIFTAH_HELP_REDESIGN||{};
+chapters.forEach(chapter=>{
+ const redesign=helpRedesign[chapter.id];
+ if(!redesign)return;
+ chapter.essentials={...redesign.essentials};
+ chapter.help=chapter.help.map((section,index)=>help(section.ar,section.en,redesign.sections[index]||{}));
+});
 
 const helpVisuals={
  'speech-core':{type:'branches',titleAr:'مِنَ اللَّفْظِ إِلَى الْكَلَامِ الْمُفِيدِ',titleEn:'From words to useful speech',branches:[

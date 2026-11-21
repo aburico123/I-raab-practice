@@ -840,6 +840,52 @@ finalManSummary('imperfect-jawazim',[
  ['request','جَوَابُ الطَّلَبِ','The response to a request']
 ]);
 
+finalManSummary('added-ma',[
+ 'لَا تَكُفُّ «مَا» «مِنْ» وَ«عَنْ» وَالْبَاءَ، وَقَدْ تَكُفُّ الْكَافَ وَ«رُبَّ».','Extra mā does not block min, ʿan or bāʾ, but can block kāf or rubba.',
+ 'زِيَادَةُ «مَا» بَعْدَ حَرْفِ جَرٍّ.','Extra mā following a preposition.',
+ 'قَدْ يَبْقَى الْجَرُّ، وَقَدْ يَصِيرُ مَا بَعْدَهَا جُمْلَةً.','Genitive government may remain; if blocked, a clause can follow.',
+ 'انْظُرْ إِلَى مَا بَعْدَ «مَا»: أَهُوَ اسْمٌ مَجْرُورٌ أَمْ جُمْلَةٌ؟','Check whether a governed noun or a whole clause follows.','added-ma-p220-01'
+],[
+ ['keeps','مِنْ وَعَنْ وَالْبَاءُ','Min, ʿan and bāʾ',true],
+ ['blocks','الْكَافُ وَرُبَّ حِينَ تُكَفَّانِ','Blocked kāf and rubba'],
+ ['retains','الْكَافُ وَرُبَّ حِينَ تَعْمَلَانِ','Retained government']
+]);
+finalManSummary('genitive-by-annexation',[
+ 'الْمُضَافُ إِلَيْهِ مَجْرُورٌ، وَيَعْمَلُ فِيهِ الْمُضَافُ عَلَى اخْتِيَارِ الْمُؤَلِّفِ.','The second term is genitive, governed by the first noun in the author’s analysis.',
+ 'إِسْنَادُ اسْمٍ إِلَى اسْمٍ، مِثْلُ «غُلَامُ زَيْدٍ».','A relation between two nouns, as in “Zayd’s servant.”',
+ 'يُحْذَفُ تَنْوِينُ الْأَوَّلِ أَوْ نُونُهُ، وَيُجَرُّ الثَّانِي.','The first loses tanwīn or inflectional nūn; the second is genitive.',
+ 'فَرِّقْ بَيْنَ مَعْنَى الْعَلَاقَةِ وَفَائِدَةِ الْإِضَافَةِ.','Distinguish the semantic relation from the effect of the construction.','idafa-p223-01'
+],[
+ ['form','صُورَةُ الْمُضَافِ وَالْمُضَافِ إِلَيْهِ','Form of the two terms',true],
+ ['sense','أَقْسَامُ الْإِضَافَةِ مِنْ حَيْثُ تَقْدِيرُ حَرْفِ الْجَرِّ','Underlying lām, min and fī'],
+ ['verbal','أَنْوَاعُ الْإِضَافَةِ مِنْ حَيْثُ الْفَائِدَةِ: اللَّفْظِيَّةُ','Effect: verbal annexation'],
+ ['semantic','الْإِضَافَةُ الْمَعْنَوِيَّةُ','Effect: semantic annexation'],
+ ['forward','إِحَالَةُ التَّابِعِ لِلْمَخْفُوضِ','Forward reference to dependents']
+]);
+finalManSummary('verb-inflection-intro',[
+ 'الْأَصْلُ فِي الْمُضَارِعِ الْمُعْرَبِ الرَّفْعُ.','The inflected imperfect is indicative by default.',
+ 'لِلْمُضَارِعِ الْمُعْرَبِ ثَلَاثَةُ أَحْوَالٍ.','The inflected imperfect has three moods.',
+ 'يَنْقُلُهُ النَّاصِبُ إِلَى النَّصْبِ وَالْجَازِمُ إِلَى الْجَزْمِ.','A subjunctive or jussive governor changes its mood.',
+ 'فَرِّقْ بَيْنَ الْفِعْلِ الْمَبْنِيِّ وَالْمُعْرَبِ، ثُمَّ ابْحَثْ عَنِ الْعَامِلِ.','First identify fixed versus inflected form, then look for a governor.','verb-intro-p227-01'
+],[
+ ['classes','أَقْسَامُ الْفِعْلِ وَالْبِنَاءُ','Verb categories and fixed forms',true],
+ ['moods','أَحْوَالُ الْمُضَارِعِ','Moods of the imperfect']
+]);
+finalManSummary('imperfect-nawasib',[
+ 'يُنْصَبُ الْمُضَارِعُ بِنَاصِبٍ مُبَاشِرٍ أَوْ بِـ«أَنْ» مُضْمَرَةٍ.','A direct governor or omitted an makes the imperfect subjunctive.',
+ 'النَّوَاصِبُ أَدَوَاتٌ أَوْ تَرَاكِيبُ تُفْضِي إِلَى نَصْبِ الْمُضَارِعِ.','Subjunctive governors are particles or constructions that give the imperfect naṣb.',
+ 'الْفَتْحَةُ أَوْ حَذْفُ النُّونِ فِي الْأَفْعَالِ الْخَمْسَةِ.','The sign is fatḥah or deletion of nūn in the five verb forms.',
+ 'حَدِّدِ النَّاصِبَ: أَهُوَ مَذْكُورٌ، أَمْ «أَنْ» مُضْمَرَةٌ جَوَازًا أَوْ وُجُوبًا؟','Ask whether the governor is overt, or whether an is optionally or necessarily omitted.','naw-p228-01'
+],[
+ ['overview','الْقِسْمَانِ','Two types of governor',true],
+ ['an','أَنْ بَعْدَ الْعِلْمِ وَالظَّنِّ وَغَيْرِهِمَا','An after certainty, supposition or neither',true],
+ ['lan-kay','لَنْ وَكَيْ','Lan and kay'],
+ ['idhan','شُرُوطُ عَمَلِ إِذَنْ','Conditions for idhan'],
+ ['optional','إِضْمَارُ أَنْ جَوَازًا','Optional omission of an'],
+ ['required','إِضْمَارُ أَنْ وُجُوبًا','Obligatory omission of an'],
+ ['response','فَاءُ السَّبَبِيَّةِ وَوَاوُ الْمَعِيَّةِ','Causal fāʾ and accompaniment wāw']
+]);
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = HELP_REDESIGN_BY_CHAPTER;
 }

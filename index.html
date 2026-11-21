@@ -786,9 +786,10 @@ const jumpListLabels={
  ar:{all:'كُلُّ الْأَمْثِلَةِ',quran:'الْأَمْثِلَةُ الْقُرْآنِيَّةُ',current:'المثال الحالي',page:'ص'}
 };
 const wideExampleLayout=window.matchMedia('(min-width:1100px)');
-let jumpListAvailable=false,jumpListNeedsScroll=false,jumpListReturnOpen=false;
+let jumpListAvailable=false,jumpListNeedsScroll=false,jumpListReturnOpen=false,jumpListOpenedWide=false;
 function setExampleJumpOpen(open) {
  const panel=$('exampleJumpPanel');
+ if(!open||panel.hidden)jumpListOpenedWide=open&&wideExampleLayout.matches;
  if(open&&panel.hidden&&!wideExampleLayout.matches)jumpListNeedsScroll=true;
  if(!open||wideExampleLayout.matches)jumpListNeedsScroll=false;
  $('exampleJumpToggle').setAttribute('aria-expanded',String(open));
@@ -1044,9 +1045,12 @@ mobileLayout.addEventListener('change',()=>setDrawerOpen(false));
 wideExampleLayout.addEventListener('change',()=>{
  if(!jumpListAvailable||$('exampleJumpPanel').hidden)return;
  if(wideExampleLayout.matches){
+  jumpListOpenedWide=true;
   jumpListNeedsScroll=false;
   return;
  }
+ // A narrow activation can precede delivery of the breakpoint's change event.
+ if(!jumpListOpenedWide)return;
  const restoreFocus=$('exampleJumpPanel').contains(document.activeElement);
  setExampleJumpOpen(false);
  if(restoreFocus)focusVisible($('exampleJumpToggle'),'nearest');

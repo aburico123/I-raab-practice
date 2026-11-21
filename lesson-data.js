@@ -4597,8 +4597,9 @@ const starterAnalyses=(()=>{
  const ft=(ar,en)=>fixed(ar,en,'الْفَتْحِ','fatḥ');
  const cs=(ar,en)=>fixed(ar,en,'الْكَسْرِ','kasr');
  const wa=ft('الْوَاوُ حَرْفُ عَطْفٍ','Coordinating wāw'), fa=ft('الْفَاءُ حَرْفُ عَطْفٍ','Coordinating fāʾ');
+ const estimated=(ar,en,ya=false)=>fixed(ar,en,ya?'السُّكُونِ الْمُقَدَّرِ عَلَى الْيَاءِ لِلثِّقَلِ':'السُّكُونِ الْمُقَدَّرِ عَلَى الْأَلِفِ لِلتَّعَذُّرِ',ya?'sukūn estimated on yāʾ because pronunciation is heavy':'sukūn estimated on alif, which cannot bear it');
  const prep=(ar,en)=>fixed(`${ar} حَرْفُ جَرٍّ`,`Preposition ${en}`);
- const min=prep('«مِنْ»','min'), an=prep('«عَنْ»','ʿan'), fi=prep('«فِي»','fī'), ila=prep('«إِلَى»','ilā'), ala=prep('«عَلَى»','ʿalā');
+ const min=prep('«مِنْ»','min'), an=prep('«عَنْ»','ʿan'), fi=estimated('«فِي» حَرْفُ جَرٍّ','Preposition fī',true), ila=estimated('«إِلَى» حَرْفُ جَرٍّ','Preposition ilā'), ala=estimated('«عَلَى» حَرْفُ جَرٍّ','Preposition ʿalā');
  const bi=cs('الْبَاءُ حَرْفُ جَرٍّ','Preposition bāʾ'), li=cs('اللَّامُ حَرْفُ جَرٍّ','Preposition lām'), la=ft('اللَّامُ حَرْفُ جَرٍّ','Preposition lām'), ka=ft('الْكَافُ حَرْفُ جَرٍّ لِلتَّشْبِيهِ','Comparative preposition kāf');
  const pronounName={'الْهَاءُ':'hāʾ','الْكَافُ':'kāf','«هَا»':'hā','التَّاءُ':'tāʾ','وَاوُ الْجَمَاعَةِ':'plural wāw','أَلِفُ الِاثْنَيْنِ':'dual alif','يَاءُ الْمُتَكَلِّمِ':'speaker’s yāʾ','«نَا»':'nā'};
  const ay=(ar,en,mark='السُّكُونِ',markEn='sukūn')=>a(`${ar} ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى ${mark} فِي مَحَلِّ ${en[0]}`,`${pronounName[ar]||en[1]} is an attached pronoun, fixed on ${markEn} in ${en[2]} position`);
@@ -4624,7 +4625,7 @@ const starterAnalyses=(()=>{
  const pastW=a('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الضَّمِّ لِاتِّصَالِهِ بِوَاوِ الْجَمَاعَةِ','Past verb fixed on ḍamm before plural wāw');
  const pp=(ar,en)=>a(`الْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ ${ar}`,`The prepositional phrase attaches to ${en}`);
  const front=pp('بِمَحْذُوفٍ خَبَرٍ مُقَدَّمٍ','an omitted fronted predicate');
- const relFront=a('الْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِمَحْذُوفٍ صِلَةِ الْمَوْصُولِ، لَا مَحَلَّ لَهَا','The phrase depends on the omitted relative link, with no syntactic position');
+ const relFront=a('الْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِمَحْذُوفٍ فِي صِلَةِ الْمَوْصُولِ، وَالصِّلَةُ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ','The prepositional phrase attaches to an omitted element in the relative clause. The relative clause has no syntactic position');
  const rel=a('اسْمٌ مَوْصُولٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ مُؤَخَّرٌ','Relative mā, fixed on sukūn in nominative position as delayed nominal subject');
  const lead=(w,g,p,ar,en)=>t(w,g,p,gen(ar,en));
  const note=(n,ee='',aa='')=>[`Main-text wording. ${n?`Editorial note ${n} supplies the core analysis. `:''}${ee}`,`اللَّفْظُ مِنَ الْمَتْنِ. ${n?`أَصْلُ الْإِعْرَابِ فِي حَاشِيَةِ الْمِثَالِ (${arabicNumber(n)}). `:''}${aa}`];
@@ -4638,7 +4639,7 @@ const starterAnalyses=(()=>{
  const sw=ft('الْوَاوُ حَرْفُ قَسَمٍ وَجَرٍّ','Oath and genitive wāw'), st=ft('التَّاءُ حَرْفُ قَسَمٍ وَجَرٍّ','Oath and genitive tāʾ');
  const amrPl=a('فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى حَذْفِ النُّونِ لِأَنَّ مُضَارِعَهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ','Imperative formed by deleting nūn, since its imperfect is one of the five verbs');
  const rd=(w='رَأَيْتُهُ',gloss='I saw him')=>t(w,gloss,pastT,taa,ha(objPro));
- const negMa=fixed('«مَا» حَرْفُ نَفْيٍ','Negative mā');
+ const negMa=estimated('«مَا» حَرْفُ نَفْيٍ','Negative mā');
  const rub=ft('«رُبَّ» حَرْفُ تَقْلِيلٍ وَجَرٍّ شَبِيهٌ بِالزَّائِدِ','Rubba, a paucity marker and quasi-expletive preposition');
  const rubRole=(ar,en,idan=false,acc=false)=>a(`اسْمٌ مَجْرُورٌ لَفْظًا بِـ«رُبَّ» الْمَحْذُوفَةِ، ${kas}، وَهُوَ ${ar} بِـ${acc?'فَتْحَةٍ':'ضَمَّةٍ'} مُقَدَّرَةٍ مَنَعَ ظُهُورَهَا اشْتِغَالُ الْآخِرِ بِحَرَكَةِ الْجَرِّ${idan?'، وَهُوَ مُضَافٌ':''}`,`Genitive in form after omitted rubba, with visible kasrah; syntactically ${en}, with ${acc?'fatḥah':'ḍammah'} estimated where the genitive ending appears${idan?' and the first term of the annexation':''}`);
  const ret=(w)=>t(w,'your return',n('مُبْتَدَأٌ مُؤَخَّرٌ','Delayed nominal subject',true),kaf(gAnnex,true),mim);
@@ -4653,7 +4654,7 @@ const starterAnalyses=(()=>{
   q('gen-p213-01',213,'إِلَيْهِ مَرْجِعُكُمْ','To Him is your return.',[
    t('إِلَيْهِ','to Him',ila,ha(gPrep,true),front),ret('مَرْجِعُكُمْ')],10,4,'يُونُسَ',1),
   q('gen-p213-02',213,'لَتَرْكَبُنَّ طَبَقًا عَنْ طَبَقٍ','You will surely pass through state after state.',[
-   t('لَتَرْكَبُنَّ','you will surely pass',ft('اللَّامُ وَاقِعَةٌ فِي جَوَابِ قَسَمٍ مَحْذُوفٍ','Lām introduces the answer to an omitted oath'),a('«تَرْكَبُ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ الْمَحْذُوفَةِ لِتَوَالِي الْأَمْثَالِ','Indicative imperfect; its sign is retention of nūn, here deleted to avoid successive like consonants'),a('وَاوُ الْجَمَاعَةِ مَحْذُوفَةٌ لِالْتِقَاءِ السَّاكِنَيْنِ، وَهِيَ فِي مَحَلِّ رَفْعٍ فَاعِلٌ','Plural wāw is the subject in nominative position, deleted to avoid consecutive sākin letters'),ft('النُّونُ نُونُ التَّوْكِيدِ الثَّقِيلَةُ','Heavy emphatic nūn')),
+   t('لَتَرْكَبُنَّ','you will surely pass',ft('اللَّامُ وَاقِعَةٌ فِي جَوَابِ قَسَمٍ مَحْذُوفٍ','Lām introduces the answer to an omitted oath'),a('«تَرْكَبُنَّ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ الْمَحْذُوفَةِ لِتَوَالِي الْأَمْثَالِ','Indicative imperfect; its sign is retention of nūn, here deleted to avoid successive like consonants'),a('وَاوُ الْجَمَاعَةِ مَحْذُوفَةٌ لِالْتِقَاءِ السَّاكِنَيْنِ، وَهِيَ فِي مَحَلِّ رَفْعٍ فَاعِلٌ','Plural wāw is the subject in nominative position, deleted to avoid consecutive sākin letters'),ft('النُّونُ نُونُ التَّوْكِيدِ الثَّقِيلَةُ','Heavy emphatic nūn')),
    t('طَبَقًا','state',ac('مَفْعُولٌ بِهِ','Direct object')),t('عَنْ','after',an),t('طَبَقٍ','state',gen('عَنْ','ʿan'),pp('بِمَحْذُوفٍ صِفَةٍ لِـ«طَبَقًا»','an omitted modifier of the first ṭabaqan'))],84,19,'الِانْشِقَاقِ',3,'The printed plural form with ḍamm on bāʾ matches Ḥafṣ, and 19 is a verse marker.','ضَمُّ الْبَاءِ عَلَى قِرَاءَةٍ تَشْمَلُ حَفْصًا، وَ١٩ رَقْمُ الْآيَةِ.',[{after:4,ayah:19}]),
   q('gen-p213-03',213,'رَضِيَ اللَّهُ عَنْهُمْ وَرَضُوا عَنْهُ','Allah is pleased with them, and they are pleased with Him.',[
    t('رَضِيَ','is pleased',past),t('اللَّهُ','Allah',subject),t('عَنْهُمْ','with them',an,ha(gPrep),mim,pp('بِـ«رَضِيَ»','raḍiya')),
@@ -4679,11 +4680,11 @@ const starterAnalyses=(()=>{
   b('gen-p215-02',215,'وَزَيْدٌ كَالْأَسَدِ','And Zayd is like a lion.',[
    t('وَزَيْدٌ','and Zayd',wa,n('مُبْتَدَأٌ','Nominal subject')),t('كَالْأَسَدِ','like a lion',ka,gen('الْكَافِ','kāf'),pp('بِمَحْذُوفٍ خَبَرٍ','an omitted predicate'))],null,'The app supplies the parse.','الْإِعْرَابُ مِنْ تَطْبِيقِ الْمَوْقِعِ.'),
   q('gen-p215-03',215,'حَتَّى مَطْلَعِ الْفَجْرِ','Until the break of dawn.',[
-   t('حَتَّى','until',fixed('«حَتَّى» حَرْفُ غَايَةٍ وَجَرٍّ','Ḥattā, a limit marker and preposition')),
+   t('حَتَّى','until',estimated('«حَتَّى» حَرْفُ غَايَةٍ وَجَرٍّ','Ḥattā, a limit marker and preposition')),
    t('مَطْلَعِ','the break',gen('حَتَّى','ḥattā',true)),
    t('الْفَجْرِ','of dawn',annex,a('وَتَنْقُلُ الْحَاشِيَةُ تَعَلُّقَ الْجَارِّ وَالْمَجْرُورِ بِـ«تَنَزَّلُ» أَوْ بِـ«سَلَامٌ»','The note reports attachment to tanazzalu or salāmun'))],97,5,'الْقَدْرِ',3),
   b('gen-p215-04',215,'أَكَلْتُ السَّمَكَةَ حَتَّى رَأْسِهَا','I ate the fish, as far as its head.',[
-   t('أَكَلْتُ','I ate',pastT,taa),t('السَّمَكَةَ','the fish',ac('مَفْعُولٌ بِهِ','Direct object')),t('حَتَّى','as far as',fixed('«حَتَّى» حَرْفُ غَايَةٍ وَجَرٍّ','Ḥattā, a limit marker and preposition')),
+   t('أَكَلْتُ','I ate',pastT,taa),t('السَّمَكَةَ','the fish',ac('مَفْعُولٌ بِهِ','Direct object')),t('حَتَّى','as far as',estimated('«حَتَّى» حَرْفُ غَايَةٍ وَجَرٍّ','Ḥattā, a limit marker and preposition')),
    t('رَأْسِهَا','its head',gen('حَتَّى','ḥattā',true),ay('«هَا»',gAnnex))],4),
   b('gen-p215-05',215,'وَاللَّهِ','By Allah!',[oath('وَاللَّهِ','by Allah',sw,'الْوَاوِ','oath wāw')],5),
   b('gen-p215-06',215,'وَالرَّحْمَٰنِ','By the Most Merciful!',[oath('وَالرَّحْمَٰنِ','by the Most Merciful',sw,'الْوَاوِ','oath wāw')],null,'Application of note 5 to the following named oath.','تَطْبِيقُ الْمَوْقِعِ لِإِعْرَابِ الْحَاشِيَةِ الْخَامِسَةِ عَلَى الْقَسَمِ التَّالِي.'),
@@ -4697,7 +4698,7 @@ const starterAnalyses=(()=>{
   b('gen-p216-04',216,'مَا رَأَيْتُهُ مُنْذُ يَوْمِ الْجُمُعَةِ','I have not seen him since Friday.',[
    t('مَا','not',negMa),rd(),t('مُنْذُ','since',fixed('«مُنْذُ» حَرْفُ جَرٍّ لِلزَّمَانِ','Time preposition mundhu','الضَّمِّ','ḍamm')),t('يَوْمِ','the day',gen('مُنْذُ','mundhu',true)),t('الْجُمُعَةِ','of Friday',annex,pp('بِـ«رَأَيْتُ»','“I saw”'))],4),
   b('gen-p216-05',216,'مُذْ يَوْمَيْنِ','For two days.',[
-   t('مُذْ','for',prep('«مُذْ»','mudh')),t('يَوْمَيْنِ','two days',a('اسْمٌ مَجْرُورٌ بِـ«مُذْ»، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ لِأَنَّهُ مُثَنًّى','Noun governed by mudh, with yāʾ instead of kasrah because it is dual'),pp('بِـ«رَأَيْتُ» مِنَ الْمِثَالِ السَّابِقِ','“I saw” from the preceding example'))],5,'After أَوْ the text prints only the alternative phrase, not a second full sentence.','بَعْدَ «أَوْ» يَطْبَعُ الْمَتْنُ الْبَدِيلَ وَحْدَهُ، لَا جُمْلَةً ثَانِيَةً تَامَّةً.'),
+   t('مُذْ','for',prep('«مُذْ»','mudh')),t('يَوْمَيْنِ','two days',a('اسْمٌ مَجْرُورٌ بِـ«مُذْ»، وَعَلَامَةُ جَرِّهِ الْيَاءُ نِيَابَةً عَنِ الْكَسْرَةِ لِأَنَّهُ مُثَنًّى','Noun governed by mudh, genitive with yāʾ instead of kasrah because it is dual'),pp('بِـ«رَأَيْتُ» مِنَ الْمِثَالِ السَّابِقِ','“I saw” from the preceding example'))],5,'After أَوْ the text prints only the alternative phrase, not a second full sentence.','بَعْدَ «أَوْ» يَطْبَعُ الْمَتْنُ الْبَدِيلَ وَحْدَهُ، لَا جُمْلَةً ثَانِيَةً تَامَّةً.'),
   b('gen-p216-06',216,'رُبَّ رَجُلٍ فِي الدَّارِ','Many a man in the house.',[
    t('رُبَّ','many a',rub),t('رَجُلٍ','man',gen('رُبَّ','rubba')),t('فِي','in',fi),t('الدَّارِ','the house',gen('فِي','fī'),pp('بِمَحْذُوفٍ نَعْتٍ لِـ«رَجُلٍ»','an omitted modifier of rajulin'))],7,'The note explicitly labels rubba here a paucity marker.','تُسَمِّي الْحَاشِيَةُ «رُبَّ» هُنَا حَرْفَ تَقْلِيلٍ.'),
   b('gen-p217-01',217,'رُبَّهُ فِتْيَةً','Many a band of young men!',[
@@ -4720,16 +4721,16 @@ const starterAnalyses=(()=>{
    t('وَقَفْتُ','I stood',pastT,taa,a('الْجُمْلَةُ فِي مَحَلِّ جَرٍّ نَعْتٌ لِـ«رَسْمِ»','The clause is in genitive position as a modifier of rasmi')),t('فِي','among',fi),
    t('طَلَلِهِ','its ruins',gen('فِي','fī',true),ha(gAnnex,true),pp('بِـ«وَقَفْتُ»','“I stood”'))],1,'Jamīl ibn Maʿmar. Only the printed first hemistich is in Practice. The predicate belongs to the second hemistich supplied in note 1.','لِجَمِيلِ بْنِ مَعْمَرٍ. التَّدْرِيبُ عَلَى الصَّدْرِ، وَخَبَرُ الْمُبْتَدَإِ فِي الْعَجُزِ الَّذِي تُورِدُهُ الْحَاشِيَةُ الْأُولَى.')
  ];
- return {a,t,fixed,ft,cs,wa,fa,prep,min,an,fi,ila,ala,bi,li,la,ka,ay,gPrep,gAnnex,objPro,subPro,ha,kaf,mim,taa,pl,hidden,hu,gen,annex,n,ac,subject,later,past,pastY,pastT,pastW,pp,front,rel,tBook:b,tQuran:q,amrPl,makh};
+ return {a,t,fixed,estimated,ft,cs,wa,fa,prep,min,an,fi,ila,ala,bi,li,la,ka,ay,gPrep,gAnnex,objPro,subPro,ha,kaf,mim,taa,pl,hidden,hu,gen,annex,n,ac,subject,later,past,pastY,pastT,pastW,pp,front,rel,tBook:b,tQuran:q,amrPl,makh};
 })();
 
 const starterJawazim=(()=>{
- const {a,t,fixed,ft,cs,wa,fa,min,ala,bi,la,ay,gPrep,gAnnex,objPro,subPro,ha,kaf,taa,hidden,hu,gen,annex,n,ac,past,pastT,pp,tBook:b,tQuran:q,amrPl,pl}=starterAnalyses;
+ const {a,t,fixed,estimated,ft,cs,wa,fa,min,ala,bi,la,ay,gPrep,gAnnex,objPro,subPro,ha,kaf,taa,hidden,hu,gen,annex,n,ac,past,pastT,pp,tBook:b,tQuran:q,amrPl,pl}=starterAnalyses;
  const lam=fixed('«لَمْ» حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ','Lam negates, governs the jussive and shifts the sense to the past');
- const lamma=fixed('«لَمَّا» حَرْفُ نَفْيٍ وَجَزْمٍ','Lammā is a negative and jussive particle');
+ const lamma=estimated('«لَمَّا» حَرْفُ نَفْيٍ وَجَزْمٍ','Lammā is a negative and jussive particle');
  const hamza=ft('الْهَمْزَةُ حَرْفُ اسْتِفْهَامٍ','Interrogative hamzah');
- const prohib=fixed('«لَا» حَرْفُ نَهْيٍ وَجَزْمٍ','Prohibitive and jussive lā');
- const dua=fixed('«لَا» حَرْفُ دُعَاءٍ وَجَزْمٍ','Supplicatory and jussive lā');
+ const prohib=estimated('«لَا» حَرْفُ نَهْيٍ وَجَزْمٍ','Prohibitive and jussive lā');
+ const dua=estimated('«لَا» حَرْفُ دُعَاءٍ وَجَزْمٍ','Supplicatory and jussive lā');
  const j=(governor,english,{deleted=null,enLetter='',deficient=false,passive=false}={})=>a(
   `فِعْلٌ مُضَارِعٌ${deficient?' نَاقِصٌ':''}${passive?' مَبْنِيٌّ لِلْمَجْهُولِ':''} مَجْزُومٌ ${governor}، وَعَلَامَةُ جَزْمِهِ ${deleted?'حَذْفُ حَرْفِ الْعِلَّةِ، وَهُوَ '+deleted:'السُّكُونُ'}`,
   `${deficient?'Deficient ':passive?'Passive ':''}imperfect made jussive ${english}; its sign is ${deleted?'deletion of the weak '+enLetter:'sukūn'}`);
@@ -4772,13 +4773,13 @@ const starterJawazim=(()=>{
    t('لَا','do not',dua),t('تُؤَاخِذْنَا','hold us to account',j('بِـ«لَا» الدُّعَائِيَّةِ','by supplicatory lā'),you,attachedNa(objPro))],2,286,'الْبَقَرَةِ',6,'The note’s analysis of the supplication continues on p.242.','تَتِمَّةُ إِعْرَابِ الدُّعَاءِ فِي ص ٢٤٢.'),
   q('jaw-p242-01',242,'تَعَالَوْا أَتْلُ','Come, and I will recite.',[
    t('تَعَالَوْا','come',amrPl,pl),t('أَتْلُ','I will recite',answer('الْوَاوُ','wāw'),i)],6,151,'الْأَنْعَامِ',1,'The longer ornament in note 1 is surrounding context, not part of the main example.','الْحِلْيَةُ الْأَطْوَلُ فِي الْحَاشِيَةِ لِلسِّيَاقِ، لَا مِنْ لَفْظِ الْمِثَالِ فِي الْمَتْنِ.'),
-  b('jaw-p242-02',242,'قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ بِسِقْطِ اللِّوَى بَيْنَ الدَّخُولِ فَحَوْمَلِ','Stop, you two, and let us weep at the memory of a beloved and a dwelling at Siqṭ al-Liwā, between al-Dakhūl and Ḥawmal.',[
-   t('قِفَا','stop, you two',amrPl,ay('أَلِفُ الِاثْنَيْنِ',subPro)),t('نَبْكِ','let us weep',answer('الْيَاءُ','yāʾ'),we),
+  b('jaw-p242-02',242,'قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ بِسِقْطِ اللِّوَى بَيْنَ الدَّخُولِ فَحَوْمَلِ','Stop, you two, and we’ll weep at the memory of a beloved and a dwelling at Siqṭ al-Liwā, between al-Dakhūl and Ḥawmal.',[
+   t('قِفَا','stop, you two',amrPl,ay('أَلِفُ الِاثْنَيْنِ',subPro)),t('نَبْكِ','we’ll weep',answer('الْيَاءُ','yāʾ'),we),
    t('مِنْ','at',min),t('ذِكْرَى','memory',a('اسْمٌ مَجْرُورٌ بِـ«مِنْ» بِكَسْرَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَهُوَ مُضَافٌ','Noun governed by min with a kasrah estimated on alif, which cannot bear it; first term of the annexation'),pp('بِـ«نَبْكِ»','“we weep”')),
    t('حَبِيبٍ','of a beloved',annex),t('وَمَنْزِلِ','and a dwelling',wa,a('مَعْطُوفٌ عَلَى «حَبِيبٍ» مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ','Coordinated with ḥabībin, genitive with visible kasrah')),
    t('بِسِقْطِ','at Siqṭ',bi,gen('الْبَاءِ','bāʾ',true),pp('بِمَحْذُوفٍ نَعْتٍ لِـ«مَنْزِلِ»','an omitted modifier of “dwelling”')),
-   t('اللِّوَى','al-Liwā',a('مُضَافٌ إِلَيْهِ مَجْرُورٌ بِكَسْرَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ','Annex, with kasrah estimated on alif, which cannot bear it')),
-   t('بَيْنَ','between',ac('ظَرْفُ مَكَانٍ','Adverb of place',true),a('وَشِبْهُ الْجُمْلَةِ فِي مَحَلِّ نَصْبٍ حَالٌ مِنْ «سِقْطِ» أَوْ «مَنْزِلِ» عَلَى مَا فِي الْحَاشِيَةِ','In the note the adverbial expression is a circumstantial modifier of Siqṭ or manzil')),
+   t('اللِّوَى','al-Liwā',a('مُضَافٌ إِلَيْهِ مَجْرُورٌ بِكَسْرَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ','Second term of the annexation, genitive with kasrah estimated on alif, which cannot bear it')),
+   t('بَيْنَ','between',ac('ظَرْفُ مَكَانٍ','Adverb of place',true),a('وَشِبْهُ الْجُمْلَةِ فِي مَحَلِّ نَصْبٍ حَالٌ مِنْ «سِقْطِ» أَوْ «مَنْزِلِ» عَلَى مَا فِي الْحَاشِيَةِ','In the note the adverbial expression is in accusative position as a circumstantial modifier of Siqṭ or manzil')),
    t('الدَّخُولِ','al-Dakhūl',annex),t('فَحَوْمَلِ','and Ḥawmal',fa,a('مَعْطُوفٌ عَلَى «الدَّخُولِ» مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ','Coordinated with al-Dakhūli, genitive with visible kasrah'))],2,'Both printed hemistichs of Imruʾ al-Qays form one example. Only the bibliographic continuation of note 2 is carried over onto p.243.','صَدْرُ بَيْتِ امْرِئِ الْقَيْسِ وَعَجُزُهُ مِثَالٌ وَاحِدٌ. وَفِي ص ٢٤٣ تَتِمَّةُ مَرَاجِعِ الْحَاشِيَةِ فَقَطْ.')
  ];
 })();

@@ -722,6 +722,15 @@ HELP_REDESIGN_BY_CHAPTER.vocative={
  ]
 };
 
+HELP_REDESIGN_BY_CHAPTER['absolute-object']={
+ essentials:{coreRuleAr:'الْمَفْعُولُ الْمُطْلَقُ يُؤَكِّدُ الْحَدَثَ أَوْ يُبَيِّنُ نَوْعَهُ أَوْ عَدَدَهُ.',coreRuleEn:'The absolute object emphasizes an event or specifies its type or count.',definitionAr:'مَصْدَرٌ فَضْلَةٌ أَوْ مَا يَنُوبُ عَنْهُ.',definitionEn:'A non-core verbal noun or an expression that stands in for it.',effectAr:'يَنْصِبُهُ عَامِلُهُ، فَيَدُلُّ عَلَى حَدَثِهِ أَوْ مَا يَخُصُّ ذَلِكَ الْحَدَثَ.',effectEn:'Its governor gives it accusative case. It tells you about the action itself.',recognitionAr:'اسْأَلْ: هَلْ أَكَّدَ الْحَدَثَ، أَمْ بَيَّنَ كَيْفَ وَقَعَ، أَمْ كَمْ مَرَّةً وَقَعَ؟',recognitionEn:'Ask whether it reinforces the event, tells how it happened, or counts the occurrences.',exampleId:'abs-p179-01'},
+ sections:[['definition','الْحَدُّ وَالْفَضْلَةُ','Definition and non-core status',true],['functions','التَّوْكِيدُ وَالنَّوْعُ وَالْعَدَدُ','Emphasis, kind and count',true],['matches','اللَّفْظِيُّ وَالْمَعْنَوِيُّ','Lexical and semantic match'],['masdar','الْمَصْدَرُ وَاسْمُ الْمَصْدَرِ','Maṣdar and ism maṣdar'],['substitutes','كُلٌّ وَبَعْضٌ وَالْعَدَدُ','Kull, baʿḍ and number'],['instrument','الْآلَةُ الْمَعْهُودَةُ','Recognized instruments']].map(([key,titleAr,titleEn,expanded])=>({id:'absolute-'+key,titleAr,titleEn,group:'rule',defaultOpen:Boolean(expanded)}))
+};
+HELP_REDESIGN_BY_CHAPTER['adverbial-object']={
+ essentials:{coreRuleAr:'الظَّرْفُ يَدُلُّ عَلَى زَمَانِ الْحَدَثِ أَوْ مَكَانِهِ بِمَعْنَى «فِي».',coreRuleEn:'A ẓarf locates the event in time or place, with fī understood.',definitionAr:'ظَرْفُ زَمَانٍ أَوْ ظَرْفُ مَكَانٍ، وَيُسَمَّى الْمَفْعُولَ فِيهِ.',definitionEn:'An accusative adverbial of time or place, called the adverbial object.',effectAr:'يَنْصِبُ الْعَامِلُ الظَّرْفَ؛ فَإِنْ ظَهَرَ حَرْفُ الْجَرِّ جَرَّ الِاسْمَ.',effectEn:'The governor gives the adverbial accusative case. An overt preposition instead governs its noun in the genitive.',recognitionAr:'اسْأَلْ: مَتَى، أَوْ كَمْ مِنَ الزَّمَانِ، أَوْ فِي أَيِّ مَكَانٍ وَقَعَ الْحَدَثُ؟',recognitionEn:'Ask when, for how long, or where the event occurred.',exampleId:'adv-p185-01'},
+ sections:[['definition','الظَّرْفُ وَمَعْنَى «فِي»','What the adverbial means',true],['other-roles','أَسْمَاءُ الزَّمَانِ فِي غَيْرِ الظَّرْفِيَّةِ','Time words in other roles'],['vocabulary','أَلْفَاظُ الزَّمَانِ وَالْمَكَانِ','The book’s time and place terms'],['time','الْمُخْتَصُّ وَالْمَعْدُودُ وَالْمُبْهَمُ','Three kinds of time',true],['place','مَا يَنْتَصِبُ مِنْ أَسْمَاءِ الْمَكَانِ','Three eligible place classes'],['derived','الْمُشْتَقُّ مِنْ مَصْدَرِ عَامِلِهِ','Place nouns derived from their governor'],['exceptions','الْمَكَانُ الْمُخْتَصُّ وَإِسْقَاطُ الْخَافِضِ','Definite places and omitted preposition']].map(([key,titleAr,titleEn,expanded])=>({id:'adverbial-'+key,titleAr,titleEn,group:'rule',defaultOpen:Boolean(expanded)}))
+};
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = HELP_REDESIGN_BY_CHAPTER;
 }

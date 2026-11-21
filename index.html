@@ -108,6 +108,32 @@ button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{
 .example-filter[hidden]{display:none}
 .filter-btn{border:0;background:transparent;color:#57625d;border-radius:7px;padding:7px 12px;font-size:13px;font-weight:500;white-space:nowrap}
 .filter-btn.active{background:var(--card);color:var(--forest);box-shadow:0 1px 4px #0000001a}
+.example-jump{min-width:0;margin:0 0 14px;text-align:center}
+.example-jump[hidden],.example-jump-panel[hidden],.example-jump-current[hidden]{display:none}
+.example-jump-toggle{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:14px;font-weight:600}
+.example-jump-toggle::after{content:"";width:.48em;height:.48em;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-top:-.25em}
+.example-jump-toggle[aria-expanded="true"]::after{transform:rotate(225deg);margin-top:.25em}
+.example-jump-panel{margin:9px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--card);text-align:start;overflow:hidden}
+.example-jump-items{list-style:none;margin:0;padding:4px;max-height:min(46vh,23rem);overflow:auto;overscroll-behavior-y:contain}
+.example-jump-items li+li{border-top:1px solid var(--line)}
+.example-jump-row{width:100%;display:grid;gap:3px;min-width:0;min-height:44px;border:0;border-inline-start:3px solid transparent;border-radius:5px;background:transparent;padding:6px 10px;color:var(--ink);text-align:start;overflow-wrap:anywhere}
+.example-jump-row:hover,.example-jump-row[aria-current="true"]{background:var(--sage-fill)}
+.example-jump-row[aria-current="true"]{border-inline-start-color:var(--forest-3)}
+.example-jump-row:focus-visible{outline-offset:-3px}
+.example-jump-meta{display:flex;align-items:baseline;gap:5px 9px;flex-wrap:wrap;font-size:12px;color:var(--muted);line-height:1.4}
+.example-jump-current{margin-inline-start:auto;color:var(--ink);font-weight:700}
+.example-jump-prompt{min-width:0;direction:rtl;text-align:right;font-size:clamp(21px,4.5vw,27px);line-height:1.8}
+.example-jump-prompt .quran-ref{font-size:.66em;white-space:normal;max-width:100%}
+@media (min-width:761px){
+  #practiceScreen.has-example-jump .practice-top{gap:6px;margin-bottom:6px}
+  .example-jump{margin-bottom:8px}
+  .example-jump-panel{margin-top:4px}
+  .example-jump-items{max-height:84px;padding:2px}
+  .example-jump-row{grid-template-columns:minmax(9rem,auto) minmax(0,1fr);align-items:center;gap:8px;padding-block:3px}
+  .example-jump-current{margin-inline-start:0}
+  .example-jump-prompt{font-size:22px;line-height:1.65}
+}
+#sentence:focus{scroll-margin-block:90px 24px}
 .filter-empty{border:1px dashed var(--sage-line);border-radius:12px;background:var(--sage-fill);padding:26px;text-align:center;color:var(--ink)}
 .filter-empty p{margin:0 0 14px;line-height:1.6}
 .filter-empty .secondary{min-width:180px}
@@ -540,6 +566,10 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
       <section class="screen" id="nahwScreen"><div class="screen-backbar"><button class="back-link" data-go="home" data-i18n="studyAreas">Back to study areas</button></div><h1 class="screen-heading" data-i18n="nahw">Nahw</h1><p class="screen-sub arabic ui-ar" lang="ar">النحو</p><div class="choice-grid"><button class="choice-card" data-start="book" aria-pressed="false"><span class="card-top"><span class="card-icon tone-sage"><svg class="ico" aria-hidden="true"><use href="#ic-book"/></svg></span><span class="card-radio" aria-hidden="true"></span></span><span class="card-ar arabic ui-ar" lang="ar">تدريبات الكتاب</span><span class="card-title" data-i18n="bookPractice">Book Practice</span><span class="card-desc" data-i18n="bookDesc">Examples verified against the selected edition.</span></button><button class="choice-card" data-start="extra" aria-pressed="false"><span class="card-top"><span class="card-icon tone-tan"><svg class="ico" aria-hidden="true"><use href="#ic-cycle"/></svg></span><span class="card-radio" aria-hidden="true"></span></span><span class="card-ar arabic ui-ar" lang="ar">تدريبات إضافية</span><span class="card-title" data-i18n="extraPractice">Extra Practice</span><span class="card-desc" data-i18n="extraDesc">Checked generated patterns for the opening lesson.</span></button><button class="choice-card" data-help aria-pressed="false"><span class="card-top"><span class="card-icon tone-slate"><svg class="ico" aria-hidden="true"><use href="#ic-help"/></svg></span><span class="card-radio" aria-hidden="true"></span></span><span class="card-ar arabic ui-ar" lang="ar">شرح الباب</span><span class="card-title" data-i18n="chapterHelp">Chapter Help</span><span class="card-desc" data-i18n="helpDesc">Review terms and rules separately.</span></button></div></section>
       <section class="screen" id="practiceScreen">
         <div class="practice-top"><div class="practice-nav"><button class="back-link" id="nahwMenuLink" data-i18n="backNahw">Back to Nahw options</button><div class="practice-nav-tools"><button class="mode-link" id="backHelpLink" data-i18n="backHelp">Back to Chapter Help</button><button class="chapter-essentials-link" id="chapterEssentialsBtn" type="button">Chapter essentials</button></div></div><div class="picker-grid"><label class="picker-field"><span data-i18n="babLabel">Bāb / section</span><select class="chapter-select" id="babSelect" aria-label="Bāb or section" data-a11y="bab" dir="rtl" lang="ar"></select></label><label class="picker-field"><span data-i18n="chapterLabel">Chapter within it</span><select class="chapter-select" id="chapterSelect" aria-label="Chapter within bāb" data-a11y="chapter" dir="rtl" lang="ar"></select></label></div><div class="example-filter" id="exampleFilter" role="group" aria-label="Example filter" data-a11y="exampleFilter"><button class="filter-btn" id="allExamplesBtn" data-filter="all" data-i18n="allExamples">All examples</button><button class="filter-btn" id="quranExamplesBtn" data-filter="quran" data-i18n="quranExamples">Qurʾānic examples</button></div><div class="chapter-meta" id="chapterMeta"></div></div>
+        <div class="example-jump" id="exampleJump" hidden>
+          <button class="example-jump-toggle" id="exampleJumpToggle" type="button" aria-expanded="false" aria-controls="exampleJumpPanel">Jump to an example</button>
+          <div class="example-jump-panel" id="exampleJumpPanel" role="region" aria-labelledby="exampleJumpToggle" hidden><ol class="example-jump-items" id="exampleJumpItems" role="list"></ol></div>
+        </div>
         <div class="filter-empty" id="filterEmpty" hidden><p data-i18n="noQuranExamples">This chapter has no Qurʾānic examples.</p><button class="secondary" id="showAllExamples" data-i18n="showAllExamples">Show all examples</button></div>
         <article class="practice-card" id="practiceCard"><div class="book-page" id="bookPage"></div><div class="sentence arabic" id="sentence" lang="ar" tabindex="-1"></div><div class="translation" id="translation"></div><div class="practice-actions"><button class="secondary" id="previousBtn" data-i18n="previous">Previous</button><button class="primary" id="revealBtn" aria-controls="answerPanel" aria-expanded="false" data-i18n="reveal">Reveal iʿrāb</button><button class="secondary" id="nextBtn" data-i18n="next">Next</button></div><section class="answer-panel" id="answerPanel" aria-live="polite"><h2 class="answer-title" data-i18n="fullIraab">Full iʿrāb</h2><div class="answers" id="answers"></div><div class="source-detail" id="sourceDetail"></div></section></article>
       </section>
@@ -548,8 +578,8 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
     </div>
   </main>
 </div>
-<script src="help-redesign-data.js?v=mansubat-direct-object-167-171"></script>
-<script src="lesson-data.js?v=mansubat-direct-object-167-171"></script>
+<script src="help-redesign-data.js?v=mansubat-vocative-171-178"></script>
+<script src="lesson-data.js?v=mansubat-vocative-171-178"></script>
 <script>
 (function(){
 'use strict';
@@ -726,6 +756,60 @@ function exerciseArabicHtml(exercise) {
  const quotation = spans.map(span => quranQuoteHtml(quranSpanHtml(span,exercise.quran.verseMarkers))).join('<span class="quran-gap"> … </span>');
  return lead + quotation + quranReferenceHtml(exercise);
 }
+// The disclosure is transient UI state. Exercise selection is still stored by
+// the ordinary Practice path; this list has no separate selection or progress.
+const jumpListLabels={
+ en:{toggle:'Jump to an example',current:'Current',page:'p.'},
+ ar:{toggle:'انتقل إلى مثال',current:'المثال الحالي',page:'ص'}
+};
+let jumpListAvailable=false,jumpListNeedsScroll=false;
+function setExampleJumpOpen(open) {
+ const panel=$('exampleJumpPanel');
+ if(open&&panel.hidden)jumpListNeedsScroll=true;
+ if(!open)jumpListNeedsScroll=false;
+ $('exampleJumpToggle').setAttribute('aria-expanded',String(open));
+ panel.hidden=!open;
+}
+function renderExampleJump(chapter,list,exercise) {
+ const section=$('exampleJump'),items=$('exampleJumpItems'),toggle=$('exampleJumpToggle');
+ const labels=jumpListLabels[state.lang]||jumpListLabels.en;
+ toggle.textContent=labels.toggle;
+ section.hidden=!list?.length;
+ $('practiceScreen').classList.toggle('has-example-jump',!section.hidden);
+ const available=!section.hidden&&state.screen==='practice';
+ if(available!==jumpListAvailable){
+  jumpListAvailable=available;
+  setExampleJumpOpen(available&&!mobileLayout.matches);
+ }
+ if(section.hidden){
+  setExampleJumpOpen(false);
+  items.replaceChildren();
+  delete items.dataset.context;
+  return;
+ }
+ if($('exampleJumpPanel').hidden||state.screen!=='practice')return;
+ const context=[chapter.id,state.bookFilter,state.lang].join(':');
+ const oldRow=items.querySelector('[aria-current="true"]');
+ const rebuild=items.dataset.context!==context;
+ if(rebuild){
+  items.dataset.context=context;
+  items.innerHTML=list.map((item,index)=>`<li><button type="button" class="example-jump-row" data-jump-exercise="${escapeHtml(item.id)}"><span class="example-jump-meta"><span>${tr('item')} ${localDigits(index+1)}</span><bdi class="example-jump-page">${labels.page} ${escapeHtml(localDigits(item.page))}</bdi><span class="example-jump-current" hidden>${labels.current}</span></span><span class="example-jump-prompt arabic" lang="ar">${exerciseArabicHtml(item)}</span></button></li>`).join('');
+ }
+ const current=items.querySelector(`[data-jump-exercise="${CSS.escape(exercise.id)}"]`);
+ if(!rebuild&&oldRow&&oldRow!==current){
+  oldRow.removeAttribute('aria-current');
+  oldRow.querySelector('.example-jump-current').hidden=true;
+ }
+ if(rebuild||oldRow!==current){
+  current.setAttribute('aria-current','true');
+  current.querySelector('.example-jump-current').hidden=false;
+ }
+ if(jumpListNeedsScroll||rebuild||oldRow!==current){
+  jumpListNeedsScroll=false;
+  const bounds=items.getBoundingClientRect(),row=current.getBoundingClientRect();
+  if(row.top<bounds.top||row.bottom>bounds.bottom)items.scrollTop+=row.top-bounds.top-(items.clientHeight-row.height)/2;
+ }
+}
 function visualQuranHtml(text, exerciseId, innerHtml = escapeHtml(text)) {
  const exercise = exerciseId ? exerciseLocation(exerciseId)?.exercise : null;
  if (!exercise?.quran || exercise.held) return innerHtml;
@@ -873,11 +957,35 @@ function setDrawerOpen(requested, {restoreFocus = true} = {}) {
  if (restoreFocus && mobileLayout.matches && (wasOpen || drawer.contains(focused))) focusVisible(toggle);
  if (restoreFocus && !mobileLayout.matches && (wasOpen || focused === $('drawerClose'))) focusVisible(drawer.querySelector('.side-brand'));
 }
-function render(){validateSelection();renderLanguage();renderAccessibleNames();renderTheme();renderPickers();renderNav();renderPractice();renderHelp();save()}
+function render(){validateSelection();renderLanguage();renderAccessibleNames();renderTheme();renderPickers();renderNav();renderPractice();renderExampleJump(selectedChapter(),state.mode==='book'?bookExercises():null,state.mode==='book'?currentExercise():null);renderHelp();save()}
 document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('click',()=>setScreen(button.dataset.go)));document.querySelectorAll('[data-start]').forEach(button=>button.addEventListener('click',()=>startPractice(button.dataset.start)));document.querySelectorAll('[data-help]').forEach(button=>button.addEventListener('click',openHelp));document.querySelectorAll('[data-lang]').forEach(button=>button.addEventListener('click',()=>{state.lang=button.dataset.lang;render()}));
 document.querySelectorAll('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>{state.theme=button.dataset.themeChoice;render()}));
 $('nahwMenuLink').addEventListener('click',()=>setScreen('nahw'));$('backHelpLink').addEventListener('click',returnToHelp);$('chapterEssentialsBtn').addEventListener('click',openChapterEssentials);$('helpNahwLink').addEventListener('click',()=>setScreen('nahw'));$('returnPractice').addEventListener('click',restorePracticeState);$('returnNahw').addEventListener('click',()=>setScreen('nahw'));$('helpPreviousChapter').addEventListener('click',()=>navigateHelpChapter(-1));$('helpNextChapter').addEventListener('click',()=>navigateHelpChapter(1));$('helpJumpNav').addEventListener('click',event=>{const button=event.target.closest('[data-help-jump]');if(button)scrollHelpTarget(button.dataset.helpJump)});$('helpEssentials').addEventListener('click',event=>{const open=event.target.closest('[data-open-exercise]');if(open)openVisualExercise(open.dataset.openExercise,open.dataset.helpAnchor)});$('revealBtn').addEventListener('click',()=>{state.revealed=!state.revealed;render()});$('previousBtn').addEventListener('click',()=>{const index=currentIndex();if(index<=0)return;if(state.mode==='book')selectBookExercise(bookExercises()[index-1]);else state.generatedIndex-=1;state.revealed=false;render()});$('nextBtn').addEventListener('click',()=>{if(state.mode==='book'){const list=bookExercises(),index=currentIndex();if(index>=list.length-1)return;selectBookExercise(list[index+1])}else state.generatedIndex+=1;state.revealed=false;render()});
 $('allExamplesBtn').addEventListener('click',()=>setBookFilter('all'));$('quranExamplesBtn').addEventListener('click',()=>setBookFilter('quran'));$('showAllExamples').addEventListener('click',()=>setBookFilter('all'));
+$('exampleJumpToggle').addEventListener('click',()=>{
+ const open=$('exampleJumpPanel').hidden;
+ setExampleJumpOpen(open);
+ if(open)renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
+});
+$('exampleJumpItems').addEventListener('click',event=>{
+ const button=event.target.closest('[data-jump-exercise]');
+ if(!button||state.mode!=='book'||state.screen!=='practice'||$('exampleJumpPanel').hidden)return;
+ const exercise=bookExercises().find(item=>item.id===button.dataset.jumpExercise);
+ if(!exercise)return;
+ if(exercise.id!==currentExercise()?.id){
+  selectBookExercise(exercise);
+  state.revealed=false;
+ }
+ if(mobileLayout.matches)setExampleJumpOpen(false);
+ render();
+ focusVisible($('sentence'),'nearest');
+});
+$('exampleJump').addEventListener('keydown',event=>{
+ if(event.key!=='Escape'||$('exampleJumpPanel').hidden)return;
+ event.preventDefault();
+ setExampleJumpOpen(false);
+ focusVisible($('exampleJumpToggle'),'nearest');
+});
 $('babSelect').addEventListener('change',event=>{state.selectedBabId=event.target.value;state.selectedChapterId=chaptersFor(state.selectedBabId)[0].id;state.revealed=false;render()});
 $('chapterSelect').addEventListener('change',event=>{const chapter=chapterById(event.target.value);state.selectedChapterId=chapter.id;state.selectedBabId=chapter.babId;state.revealed=false;render()});
 $('helpBabSelect').addEventListener('change',event=>{state.helpBabId=event.target.value;state.helpChapterId=chaptersFor(state.helpBabId)[0].id;render()});
@@ -907,6 +1015,13 @@ $('mobileMenu').addEventListener('click',()=>setDrawerOpen($('mobileMenu').getAt
 $('drawerClose').addEventListener('click',()=>setDrawerOpen(false));
 $('drawerBackdrop').addEventListener('click',()=>setDrawerOpen(false));
 mobileLayout.addEventListener('change',()=>setDrawerOpen(false));
+mobileLayout.addEventListener('change',()=>{
+ if(!jumpListAvailable)return;
+ const restoreFocus=mobileLayout.matches&&$('exampleJumpPanel').contains(document.activeElement);
+ setExampleJumpOpen(!mobileLayout.matches);
+ if(!mobileLayout.matches)renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
+ if(restoreFocus)focusVisible($('exampleJumpToggle'),'nearest');
+});
 $('primaryDrawer').addEventListener('keydown', event=>{
  if ($('mobileMenu').getAttribute('aria-expanded') !== 'true') return;
  if (event.key === 'Escape') {

@@ -670,6 +670,30 @@ const HELP_REDESIGN_BY_CHAPTER = {
       {id:'zanna-sisters-samia',titleAr:'وَجْهَا إِعْرَابِ «سَمِعَ»',titleEn:'Two analyses of samiʿa',group:'caution',defaultOpen:false}
     ]
   }
+  ,'direct-object': {
+    essentials: {
+      coreRuleAr:'الْمَفْعُولُ بِهِ هُوَ الِاسْمُ الَّذِي يَقَعُ عَلَيْهِ فِعْلُ الْفَاعِلِ.',
+      coreRuleEn:'The direct object receives the action of the subject.',
+      definitionAr:'يَكُونُ اسْمًا ظَاهِرًا أَوْ ضَمِيرًا مُتَّصِلًا أَوْ مُنْفَصِلًا.',
+      definitionEn:'It can be an overt noun, an attached pronoun, or a detached pronoun.',
+      effectAr:'يَنْصِبُهُ عَامِلُهُ؛ فَيَكُونُ مَنْصُوبًا أَوْ فِي مَحَلِّ نَصْبٍ.',
+      effectEn:'Its governor gives it accusative case or, for a fixed form such as a pronoun, an accusative position.',
+      recognitionAr:'اسْأَلْ: عَلَى مَنْ أَوْ عَلَى مَاذَا وَقَعَ الْفِعْلُ؟ وَانْظُرْ إِلَى الْعَامِلِ، مَذْكُورًا كَانَ أَوْ مَحْذُوفًا.',
+      recognitionEn:'Ask whom or what the action affects, then identify its stated or omitted governor.',
+      cautionsAr:'لَيْسَ كُلُّ مُتَقَدِّمٍ مَنْصُوبًا بِالْفِعْلِ الَّذِي بَعْدَهُ؛ فَفِي الِاشْتِغَالِ يَكُونُ لَهُ عَامِلٌ مَحْذُوفٌ.',
+      cautionsEn:'In ishtighāl, the later verb does not itself govern the fronted object. An omitted governor does.',
+      exampleId:'mafool-p167-01'
+    },
+    sections:[
+      {id:'direct-object-overview',titleAr:'أَقْسَامُ الْمَنْصُوبَاتِ فِي الْكِتَابِ',titleEn:'The book’s overview of accusatives',group:'overview',defaultOpen:false},
+      {id:'direct-object-definition',titleAr:'حَدُّ الْمَفْعُولِ بِهِ وَالِاسْمُ الظَّاهِرُ',titleEn:'The direct object and overt nouns',group:'definition',defaultOpen:true},
+      {id:'direct-object-pronouns',titleAr:'الضَّمِيرُ الْمُتَّصِلُ وَالْمُنْفَصِلُ',titleEn:'Attached and detached pronouns',group:'forms',defaultOpen:true},
+      {id:'direct-object-order',titleAr:'مَوْضِعُ الْمَفْعُولِ وَتَقْدِيمُهُ',titleEn:'Default order and fronting',group:'order',defaultOpen:false},
+      {id:'direct-object-optional',titleAr:'حَذْفُ الْعَامِلِ جَوَازًا',titleEn:'Optional omission of the governor',group:'conditions',defaultOpen:false},
+      {id:'direct-object-ishtighal',titleAr:'الِاشْتِغَالُ وَالْعَامِلُ الْمَحْذُوفُ وُجُوبًا',titleEn:'Ishtighāl and obligatory omission',group:'conditions',defaultOpen:false},
+      {id:'direct-object-estimates',titleAr:'تَقْدِيرَاتُ الْمُؤَلِّفِ',titleEn:'The author’s reconstructions',group:'caution',defaultOpen:false}
+    ]
+  }
 };
 
 if (typeof module !== 'undefined' && module.exports) {

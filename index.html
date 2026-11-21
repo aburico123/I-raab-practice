@@ -126,15 +126,23 @@ button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{
 .example-jump-prompt{min-width:0;direction:rtl;text-align:right;font-size:clamp(21px,4.5vw,27px);line-height:1.8}
 .example-jump-prompt .quran-ref{font-size:.66em;white-space:normal;max-width:100%}
 @media (min-width:1100px){
-  .has-example-jump .practice-workspace{display:grid;direction:ltr;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:clamp(16px,2vw,28px);align-items:start}
+  .has-example-jump .practice-workspace{display:grid;direction:ltr;grid-template-columns:minmax(0,1fr) 44px;gap:10px;align-items:start}
+  .has-example-jump.example-jump-open .practice-workspace{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:clamp(16px,2vw,28px)}
   .rtl .has-example-jump .practice-workspace > *{direction:rtl}
-  .has-example-jump .practice-card{grid-area:1/1;min-width:0;padding-inline:clamp(18px,2.3vw,34px)}
-  .has-example-jump .practice-actions{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(0,1fr);gap:8px}
-  .has-example-jump .practice-actions button{padding-inline:8px}
-  .has-example-jump .sentence{font-size:clamp(40px,4.2vw,58px);overflow-wrap:anywhere}
+  .has-example-jump .practice-card{grid-area:1/1;min-width:0}
+  .example-jump-open .practice-card{padding-inline:clamp(18px,2.3vw,34px)}
+  .example-jump-open .practice-actions{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(0,1fr);gap:8px}
+  .example-jump-open .practice-actions button{padding-inline:8px}
+  .has-example-jump .sentence{overflow-wrap:anywhere}
+  .example-jump-open .sentence{font-size:clamp(40px,4.2vw,58px)}
   .has-example-jump .answer-panel{overflow-wrap:anywhere}
   .example-jump{grid-area:1/2;margin:0;text-align:start;overflow-anchor:none}
   .example-jump-toggle{width:100%;justify-content:space-between;padding-inline:14px}
+  .example-jump-toggle[aria-expanded="false"]{position:relative;display:block;height:174px;padding:0;background:var(--sage-fill);border-color:var(--sage-line)}
+  .example-jump-toggle[aria-expanded="false"]:hover{border-color:var(--forest-3)}
+  /* Rotate the shaped label as one line; vertical typesetting can split Arabic letters. */
+  .example-jump-toggle[aria-expanded="false"] .example-jump-label{position:absolute;top:calc(50% - 8px);left:50%;white-space:nowrap;transform:translate(-50%,-50%) rotate(90deg)}
+  .example-jump-toggle[aria-expanded="false"]::after{position:absolute;bottom:11px;left:50%;margin:0;transform:translateX(-50%) rotate(135deg)}
   .example-jump-panel{overflow:visible}
   .example-jump-items{max-height:none;overflow:visible;overscroll-behavior-y:auto}
   .example-jump-prompt{font-size:23px;line-height:1.65}
@@ -574,7 +582,7 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
         <div class="practice-top"><div class="practice-nav"><button class="back-link" id="nahwMenuLink" data-i18n="backNahw">Back to Nahw options</button><div class="practice-nav-tools"><button class="mode-link" id="backHelpLink" data-i18n="backHelp">Back to Chapter Help</button><button class="chapter-essentials-link" id="chapterEssentialsBtn" type="button">Chapter essentials</button></div></div><div class="picker-grid"><label class="picker-field"><span data-i18n="babLabel">Bāb / section</span><select class="chapter-select" id="babSelect" aria-label="Bāb or section" data-a11y="bab" dir="rtl" lang="ar"></select></label><label class="picker-field"><span data-i18n="chapterLabel">Chapter within it</span><select class="chapter-select" id="chapterSelect" aria-label="Chapter within bāb" data-a11y="chapter" dir="rtl" lang="ar"></select></label></div><div class="example-filter" id="exampleFilter" role="group" aria-label="Example filter" data-a11y="exampleFilter"><button class="filter-btn" id="allExamplesBtn" data-filter="all" data-i18n="allExamples" data-a11y="filterAll" aria-label="All examples">All</button><button class="filter-btn" id="quranExamplesBtn" data-filter="quran" data-i18n="quranExamples" data-a11y="filterQuran" aria-label="Qurʾānic examples">Qurʾānic</button></div><div class="chapter-meta" id="chapterMeta"></div></div>
         <div class="practice-workspace">
         <div class="example-jump" id="exampleJump" hidden>
-          <button class="example-jump-toggle" id="exampleJumpToggle" type="button" aria-expanded="false" aria-controls="exampleJumpPanel">All examples</button>
+          <button class="example-jump-toggle" id="exampleJumpToggle" type="button" aria-expanded="false" aria-controls="exampleJumpPanel"><span class="example-jump-label" id="exampleJumpLabel">All examples</span></button>
           <div class="example-jump-panel" id="exampleJumpPanel" role="region" aria-labelledby="exampleJumpToggle" hidden><ol class="example-jump-items" id="exampleJumpItems" role="list"></ol></div>
         </div>
         <div class="filter-empty" id="filterEmpty" hidden><p data-i18n="noQuranExamples">This chapter has no Qurʾānic examples.</p><button class="secondary" id="showAllExamples" data-i18n="showAllExamples">Show all examples</button></div>
@@ -713,6 +721,7 @@ function setScreen(screen, {target, scrollBlock} = {}) {
 }
 function startPractice(mode){state.mode=mode;state.category=mode;state.helpLaunch=null;if(mode==='extra'){state.selectedBabId='opening';state.selectedChapterId='speech-core'}state.revealed=false;state.resumeAvailable=true;setScreen('practice')}
 function capturePracticeState(openerId = '') {
+ jumpListReturnOpen=state.screen==='practice'&&jumpListAvailable&&!$('exampleJumpPanel').hidden;
  return {selectedBabId:state.selectedBabId, selectedChapterId:state.selectedChapterId, positions:{...state.positions}, mode:state.mode, category:state.mode, bookFilter:state.bookFilter, generatedIndex:state.generatedIndex, revealed:state.revealed, openerId};
 }
 function restorePracticeState() {
@@ -722,7 +731,13 @@ function restorePracticeState() {
   Object.assign(state, {selectedBabId, selectedChapterId, positions:{...state.positions,...positions}, mode, category, bookFilter, generatedIndex, revealed:!!revealed, helpReturn:null});
  }
  state.helpLaunch = null;
+ const reopenJumpList=!!snapshot&&jumpListReturnOpen;
+ jumpListReturnOpen=false;
  setScreen('practice', {target:()=>$(snapshot?.openerId || 'nahwMenuLink'),scrollBlock:'nearest'});
+ if(reopenJumpList&&jumpListAvailable){
+  setExampleJumpOpen(true);
+  renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
+ }
 }
 function openHelp(){if(state.resumeAvailable)state.helpReturn=capturePracticeState();state.category='help';state.helpLaunch=null;if(state.resumeAvailable){state.helpBabId=state.selectedBabId;state.helpChapterId=state.selectedChapterId}setScreen('help')}
 function openChapterEssentials() {
@@ -771,24 +786,26 @@ const jumpListLabels={
  ar:{all:'كُلُّ الْأَمْثِلَةِ',quran:'الْأَمْثِلَةُ الْقُرْآنِيَّةُ',current:'المثال الحالي',page:'ص'}
 };
 const wideExampleLayout=window.matchMedia('(min-width:1100px)');
-let jumpListAvailable=false,jumpListNeedsScroll=false;
+let jumpListAvailable=false,jumpListNeedsScroll=false,jumpListReturnOpen=false,jumpListOpenedWide=false;
 function setExampleJumpOpen(open) {
  const panel=$('exampleJumpPanel');
+ if(!open||panel.hidden)jumpListOpenedWide=open&&wideExampleLayout.matches;
  if(open&&panel.hidden&&!wideExampleLayout.matches)jumpListNeedsScroll=true;
  if(!open||wideExampleLayout.matches)jumpListNeedsScroll=false;
  $('exampleJumpToggle').setAttribute('aria-expanded',String(open));
  panel.hidden=!open;
+ $('practiceScreen').classList.toggle('example-jump-open',open);
 }
 function renderExampleJump(chapter,list,exercise) {
- const section=$('exampleJump'),items=$('exampleJumpItems'),toggle=$('exampleJumpToggle');
+ const section=$('exampleJump'),items=$('exampleJumpItems');
  const labels=jumpListLabels[state.lang]||jumpListLabels.en;
- toggle.textContent=labels[state.bookFilter];
+ $('exampleJumpLabel').textContent=labels[state.bookFilter];
  section.hidden=!list?.length;
  $('practiceScreen').classList.toggle('has-example-jump',!section.hidden);
  const available=!section.hidden&&state.screen==='practice';
  if(available!==jumpListAvailable){
   jumpListAvailable=available;
-  setExampleJumpOpen(available&&wideExampleLayout.matches);
+  setExampleJumpOpen(false);
  }
  if(section.hidden){
   setExampleJumpOpen(false);
@@ -1026,10 +1043,16 @@ $('drawerClose').addEventListener('click',()=>setDrawerOpen(false));
 $('drawerBackdrop').addEventListener('click',()=>setDrawerOpen(false));
 mobileLayout.addEventListener('change',()=>setDrawerOpen(false));
 wideExampleLayout.addEventListener('change',()=>{
- if(!jumpListAvailable)return;
- const restoreFocus=!wideExampleLayout.matches&&$('exampleJumpPanel').contains(document.activeElement);
- setExampleJumpOpen(wideExampleLayout.matches);
- if(wideExampleLayout.matches)renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
+ if(!jumpListAvailable||$('exampleJumpPanel').hidden)return;
+ if(wideExampleLayout.matches){
+  jumpListOpenedWide=true;
+  jumpListNeedsScroll=false;
+  return;
+ }
+ // A narrow activation can precede delivery of the breakpoint's change event.
+ if(!jumpListOpenedWide)return;
+ const restoreFocus=$('exampleJumpPanel').contains(document.activeElement);
+ setExampleJumpOpen(false);
  if(restoreFocus)focusVisible($('exampleJumpToggle'),'nearest');
 });
 $('primaryDrawer').addEventListener('keydown', event=>{

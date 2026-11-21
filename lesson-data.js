@@ -3899,7 +3899,7 @@ const babs=[
  {id:'definiteness',order:4,titleEn:'Bāb al-Nakirah wa-l-Maʿrifah',titleAr:'بَابُ النَّكِرَةِ وَالْمَعْرِفَةِ',pages:'72–96'},
  {id:'nominative-nouns',order:5,titleEn:'Bāb al-Marfūʿāt min al-Asmāʾ',titleAr:'بَابُ الْمَرْفُوعَاتِ مِنَ الْأَسْمَاءِ',pages:'97–166'},
  {id:'mubtada-factors',parentId:'nominative-nouns',order:6,titleEn:'Factors entering on the mubtadaʾ and khabar',titleAr:'بَابُ الْعَوَامِلِ الدَّاخِلَةِ عَلَى الْمُبْتَدَإِ وَالْخَبَرِ',pages:'119–166'},
- {id:'accusative-nouns',order:7,titleEn:'Bāb al-Manṣūbāt min al-Asmāʾ',titleAr:'بَابُ الْمَنْصُوبَاتِ مِنَ الْأَسْمَاءِ',pages:'167–171',continues:true}
+ {id:'accusative-nouns',order:7,titleEn:'Bāb al-Manṣūbāt min al-Asmāʾ',titleAr:'بَابُ الْمَنْصُوبَاتِ مِنَ الْأَسْمَاءِ',pages:'167–178',continues:true}
 ];
 
 chapters.push({
@@ -3915,6 +3915,177 @@ chapters.push({
  ],
  helpSourceAr:'الْمُتَمِّمَةُ، ص ١٦٧–١٧١. الْعُنْوَانُ وَالتَّقْسِيمُ وَأَمْثِلَةُ الْمَتْنِ وَالْحَوَاشِي وَالتَّقْدِيرَاتُ مِنَ الطَّبْعَةِ. وَالتَّرْجَمَةُ وَالتَّرْتِيبُ الدِّرَاسِيُّ وَتَتِمَّةُ الْإِعْرَابِ مِنَ التَّطْبِيقِ. يَنْتَهِي الدَّرْسُ بَعْدَ التَّقْدِيرِ فِي أَعْلَى ص ١٧١.',
  helpSourceEn:'Al-Mutammimah, printed pp.167–171. The classification, main-text and apparatus examples, and reconstructions come from the edition. The app supplies the organization, English, and any parse beyond the stated notes. This lesson stops after the estimates at the top of p.171.'
+});
+
+const vocativeTail=(()=>{
+ const part=(ar,en)=>({ar,en});
+ const one=(word,gloss,p)=>token(word,gloss,p.ar,p.en);
+ const many=(word,gloss,...parts)=>answerParts(word,gloss,parts);
+ const ya=part('حَرْفُ نِدَاءٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Vocative particle built on sukūn, with no syntactic position.');
+ const call=()=>one('يَا','O',ya);
+ const also=part('الْوَاوُ حَرْفُ عَطْفٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Wāw is a coordinating conjunction built on fatḥ, with no syntactic position.');
+ const prohib=()=>token('لَا','do not','حَرْفُ نَهْيٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Prohibitive jussive particle built on sukūn, with no syntactic position.');
+ const subjFem=part('يَاءُ الْمُخَاطَبَةِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','The feminine address yāʾ is an attached pronoun built on sukūn in the nominative position as subject.');
+ const jussFem=part('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا» النَّاهِيَةِ، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','Present verb made jussive by prohibitive lā, with nūn deleted because it belongs to the five forms.');
+ const visibleCall=part('مُنَادًى مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Addressee, accusative with a visible fatḥah and the first term of an annexation.');
+ const estCall=(whereAr,whereEn)=>part(`مُنَادًى مَنْصُوبٌ بِالْفَتْحَةِ الْمُقَدَّرَةِ ${whereAr}، وَهُوَ مُضَافٌ.`,`Addressee, accusative with fatḥah estimated ${whereEn} and the first term of an annexation.`);
+ const yAppropriate='عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ لِاشْتِغَالِهِ بِكَسْرَةِ الْمُنَاسَبَةِ';
+ const yAppropriateEn='before the speaker’s yāʾ because the preceding letter bears the matching kasrah';
+ const yDeleted='عَلَى مَا قَبْلَ الْيَاءِ الْمَحْذُوفَةِ لِبَقَاءِ كَسْرَةِ الْمُنَاسَبَةِ';
+ const yDeletedEn='before the omitted yāʾ because the matching kasrah remains';
+ const my=(open=false)=>part(`يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى ${open?'الْفَتْحِ':'السُّكُونِ'} فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.`,`The speaker’s yāʾ is an attached pronoun built on ${open?'fatḥ':'sukūn'} in the genitive position as the second term.`);
+ const myAbsent=part('يَاءُ الْمُتَكَلِّمِ الْمَحْذُوفَةُ ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','The omitted speaker’s yāʾ is an attached pronoun in the genitive position as second term.');
+ const myAlif=part('يَاءُ الْمُتَكَلِّمِ الْمُنْقَلِبَةُ أَلِفًا ضَمِيرٌ مُتَّصِلٌ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','The speaker’s yāʾ replaced by alif is an attached pronoun in the genitive position as second term.');
+ const genMy=part('مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الْمُقَدَّرَةِ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ لِاشْتِغَالِهِ بِكَسْرَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.','Second term, genitive with kasrah estimated before the speaker’s yāʾ because the preceding letter bears the matching kasrah; itself the first term of an annexation.');
+ const addressingTa=part('تَاءٌ مَكْسُورَةٌ عِوَضٌ عَنْ يَاءِ الْمُتَكَلِّمِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','The tāʾ with kasrah replaces the speaker’s yāʾ and has no syntactic position of its own.');
+ const fatherOrMother=estCall('عَلَى مَا قَبْلَ التَّاءِ الَّتِي حَلَّتْ مَحَلَّ يَاءِ الْمُتَكَلِّمِ','before the tāʾ that replaced the speaker’s yāʾ');
+ const retainedWaw=part('وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','The plural wāw is an attached pronoun built on sukūn in the nominative position as subject.');
+ const shortenedSource=(n)=>[
+  `The ornament contains only the two words shown. Editorial note ${n} quotes a wider context and gives the estimated ending and omitted speaker’s yāʾ. The surrounding citation is not part of this exercise.`,
+  `لَا تَشْمَلُ حِلْيَةُ الْمَتْنِ إِلَّا اللَّفْظَيْنِ الْمَعْرُوضَيْنِ. وَتَذْكُرُ الْحَاشِيَةُ ${n===1?'الْأُولَى':'الثَّانِيَةُ'} سِيَاقًا أَوْسَعَ، وَتُبَيِّنُ الْفَتْحَةَ الْمُقَدَّرَةَ وَيَاءَ الْمُتَكَلِّمِ الْمَحْذُوفَةَ. وَلَيْسَ السِّيَاقُ الْأَوْسَعُ مِنْ نَصِّ التَّمْرِينِ.`
+ ];
+ return [
+  releaseQuran('voc-p174-01',174,'يَا عِبَادِ','O My servants!',[
+   call(),many('عِبَادِ','My servants',estCall(yDeleted,yDeletedEn),myAbsent)
+  ],39,16,'الزُّمَرِ',...shortenedSource(1)),
+  releaseQuran('voc-p174-02',174,'يَا قَوْمِ','O my people!',[
+   call(),many('قَوْمِ','my people',estCall(yDeleted,yDeletedEn),myAbsent)
+  ],2,54,'الْبَقَرَةِ',...shortenedSource(2)),
+  releaseBook('voc-p174-03',174,'يَا عِبَادِي','O my servants!',[
+   call(),many('عِبَادِي','my servants',estCall(yAppropriate,yAppropriateEn),my())
+  ],'Plain grammatical model, not marked as a quotation. Note 3 parses the estimated ending and the retained yāʾ with sukūn.','مِثَالٌ نَحْوِيٌّ غَيْرُ مُحَلًّى بِحِلْيَةِ الِاقْتِبَاسِ. وَتُعْرِبُ الْحَاشِيَةُ الثَّالِثَةُ الْمُنَادَى بِالْفَتْحَةِ الْمُقَدَّرَةِ وَتُبَيِّنُ سُكُونَ الْيَاءِ الثَّابِتَةِ.'),
+  releaseQuran('voc-p174-04',174,'يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا','O My servants who have gone to excess!',[
+   call(),many('عِبَادِيَ','My servants',estCall(yAppropriate,yAppropriateEn),my(true)),
+   token('الَّذِينَ','who','اسْمٌ مَوْصُولٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ نَصْبٍ صِفَةٌ لِـ«عِبَادِيَ».','Relative noun built on fatḥ in the accusative position as a modifier of “My servants.”'),
+   many('أَسْرَفُوا','went to excess',part('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الضَّمِّ لِاتِّصَالِهِ بِوَاوِ الْجَمَاعَةِ.','Past verb built on ḍamm because the plural wāw is attached.'),retainedWaw,
+    part('الْجُمْلَةُ صِلَةُ الْمَوْصُولِ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','The relative clause has no syntactic position.'))
+  ],39,53,'الزُّمَرِ','The main ornament starts with yā and ends at asrafū. Note 4 gives the open yāʾ, the accusative position of the relative modifier and the clause status, quoting wider context separately. The app supplies the verb’s internal parse.','تَبْدَأُ حِلْيَةُ الْمَتْنِ بِـ«يَا» وَتَنْتَهِي بِـ«أَسْرَفُوا». وَتُبَيِّنُ الْحَاشِيَةُ الرَّابِعَةُ فَتْحَ الْيَاءِ وَمَحَلَّ الصِّفَةِ وَحُكْمَ الصِّلَةِ، وَتَقْتَبِسُ سِيَاقًا أَوْسَعَ. وَيُفَصِّلُ التَّطْبِيقُ إِعْرَابَ الْفِعْلِ وَفَاعِلِهِ.'),
+  releaseQuran('voc-p174-05',174,'يَا حَسْرَتَا','Alas for me!',[
+   call(),many('حَسْرَتَا','my regret',estCall('عَلَى التَّاءِ قَبْلَ الْأَلِفِ الَّتِي حَلَّتْ مَحَلَّ الْيَاءِ','on the tāʾ before the alif that replaced yāʾ'),myAlif)
+  ],39,56,'الزُّمَرِ','Only this vocative is in the main ornament. Note 5 quotes the whole verse separately and reconstructs the underlying yā ḥasratī; that reconstruction is not a second Qurʾānic quotation.','حِلْيَةُ الْمَتْنِ لِهَذَا النِّدَاءِ وَحْدَهُ. وَتُورِدُ الْحَاشِيَةُ الْخَامِسَةُ الْآيَةَ كَامِلَةً فِي مَوْضِعٍ آخَرَ، وَتُقَدِّرُ الْأَصْلَ «يَا حَسْرَتِي»؛ فَلَيْسَ التَّقْدِيرُ اقْتِبَاسًا قُرْآنِيًّا ثَانِيًا.'),
+  releaseBook('voc-p175-01',175,'يَا غُلَامَ','O my boy!',[
+   call(),many('غُلَامَ','my boy',estCall('عَلَى مَا قَبْلَ الْيَاءِ الَّتِي قُلِبَتْ أَلِفًا ثُمَّ حُذِفَتْ، وَبَقِيَتْ فَتْحَةُ الْمُنَاسَبَةِ','before the yāʾ that became alif and was then deleted; the matching fatḥah remains'),myAbsent)
+  ],'The fifth form is printed in the main text. Note 1 identifies the estimated accusative and the deleted replacement alif.','هَذَا مِثَالُ اللُّغَةِ الْخَامِسَةِ فِي الْمَتْنِ. وَتُبَيِّنُ الْحَاشِيَةُ الْأُولَى النَّصْبَ الْمُقَدَّرَ وَحَذْفَ الْأَلِفِ الْمُنْقَلِبَةِ عَنِ الْيَاءِ.'),
+  releaseBook('voc-p175-02',175,'يَا أُمُّ لَا تَفْعَلِي','Mother, don’t do it!',[
+   call(),many('أُمُّ','my mother',estCall('عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ الْمَحْذُوفَةِ، وَيَشْغَلُ مَحَلَّهَا الضَّمُّ','before the omitted speaker’s yāʾ, where a ḍammah is pronounced'),myAbsent),
+   prohib(),many('تَفْعَلِي','do',jussFem,subjFem)
+  ],'The main text gives the sixth form. Note 2 attributes the model to Yūnus via al-Taṣrīḥ and parses the possessive vocative, the prohibition and the feminine subject.','هَذَا مِثَالُ اللُّغَةِ السَّادِسَةِ فِي الْمَتْنِ. وَتَنْقُلُهُ الْحَاشِيَةُ الثَّانِيَةُ عَنْ يُونُسَ بِوَاسِطَةِ التَّصْرِيحِ، وَتُعْرِبُ الْمُنَادَى وَالنَّهْيَ وَيَاءَ الْمُخَاطَبَةِ.'),
+  releaseBook('voc-p176-01',176,'يَا أَبَتِ','O my father!',[
+   call(),many('أَبَتِ','my father',fatherOrMother,addressingTa)
+  ],'The first occurrence is a plain model in the main text. Note 1 supplies the estimated ending and the replacement tāʾ. Later on this page a distinct ornament quotes the same words.','هَذَا الْمَوْضِعُ الْأَوَّلُ مِثَالٌ مُجَرَّدٌ فِي الْمَتْنِ. وَتُبَيِّنُ الْحَاشِيَةُ الْأُولَى الْفَتْحَةَ الْمُقَدَّرَةَ وَالتَّاءَ الْمُبْدَلَةَ. وَتَرِدُ الْكَلِمَتَانِ بَعْدَهُ فِي حِلْيَةٍ مُسْتَقِلَّةٍ.'),
+  releaseBook('voc-p176-02',176,'يَا أُمَّتِ','O my mother!',[
+   call(),many('أُمَّتِ','my mother',fatherOrMother,addressingTa)
+  ],'Unornamented model in the main text. Note 2 gives the parallel analysis with a kasr tāʾ replacing the speaker’s yāʾ.','مِثَالٌ مُجَرَّدٌ فِي الْمَتْنِ. وَتُبَيِّنُ الْحَاشِيَةُ الثَّانِيَةُ إِبْدَالَ يَاءِ الْمُتَكَلِّمِ تَاءً مَكْسُورَةً وَتَقْدِيرَ الْفَتْحَةِ.'),
+  releaseQuran('voc-p176-03',176,'يَا أَبَتِ','O my father!',[
+   call(),many('أَبَتِ','my father',fatherOrMother,addressingTa)
+  ],12,4,'يُوسُفَ','The ornament prints kasrah on tāʾ, as in Ḥafṣ. The author contrasts Ibn ʿĀmir’s fatḥ among the Seven; note 4 also names Abū Jaʿfar and al-Aʿraj for fatḥ. In the Ten, the fatḥ readers are Ibn ʿĀmir and Abū Jaʿfar. The app applies the analysis of the immediately preceding model to this occurrence.','تَطْبَعُ الْحِلْيَةُ التَّاءَ مَكْسُورَةً، كَقِرَاءَةِ حَفْصٍ. وَيَذْكُرُ الْمُؤَلِّفُ فَتْحَهَا لِابْنِ عَامِرٍ مِنَ السَّبْعَةِ، وَتَذْكُرُ الْحَاشِيَةُ الرَّابِعَةُ أَبَا جَعْفَرٍ وَالْأَعْرَجَ أَيْضًا. وَمِنَ الْعَشَرَةِ يَفْتَحُهَا ابْنُ عَامِرٍ وَأَبُو جَعْفَرٍ. وَيُطَبِّقُ التَّطْبِيقُ إِعْرَابَ الْمِثَالِ السَّابِقِ عَلَى هَذَا الشَّاهِدِ.'),
+  releaseBook('voc-p176-04',176,'يَا أَبَتِي','O my father!',[
+   call(),many('أَبَتِي','my father',estCall(yAppropriate,yAppropriateEn),part('التَّاءُ زَائِدَةٌ فِي هَذِهِ الصُّورَةِ، وَالْيَاءُ بَاقِيَةٌ.','The tāʾ is extra in this form, and the yāʾ is retained.'),my())
+  ],'The fourth special form prints both tāʾ and yāʾ. Note 5 includes the estimated ending and retained yāʾ; its manuscript remark concerns the explanatory word bi-l-tāʾ, not deletion of the example.','تَجْمَعُ اللُّغَةُ الرَّابِعَةُ بَيْنَ التَّاءِ وَالْيَاءِ. وَتُعْرِبُ الْحَاشِيَةُ الْخَامِسَةُ الْمُنَادَى وَالْيَاءَ الْبَاقِيَةَ، وَالسَّقْطُ فِي تَعْلِيقِهَا يَتَعَلَّقُ بِلَفْظِ «بِالتَّاءِ» لَا بِالْمِثَالِ.'),
+  releaseBook('voc-p176-05',176,'يَا غُلَامَ غُلَامِيَ','O servant of my servant!',[
+   call(),one('غُلَامَ','servant',visibleCall),many('غُلَامِيَ','my servant',genMy,my(true))
+  ],'The text permits open or sākin yāʾ through the intervening annexation. Note 6 explicitly parses the open yāʾ in the printed model.','يُجِيزُ الْمَتْنُ فَتْحَ الْيَاءِ أَوْ إِسْكَانَهَا فِي الْإِضَافَةِ بِوَاسِطَةٍ، وَتُعْرِبُ الْحَاشِيَةُ السَّادِسَةُ الْيَاءَ الْمَفْتُوحَةَ فِي الْمِثَالِ الْمَطْبُوعِ.'),
+  releaseQuran('voc-p177-01',177,'يَا ابْنَ أُمَّ','O son of my mother!',[
+   call(),one('ابْنَ','son',visibleCall),
+   many('أُمَّ','my mother',part('مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الْمُقَدَّرَةِ عَلَى مَا قَبْلَ الْيَاءِ الَّتِي قُلِبَتْ أَلِفًا ثُمَّ حُذِفَتْ، وَهُوَ مُضَافٌ.','Second term, genitive with kasrah estimated before the yāʾ that became alif and was then deleted; itself the first term of an annexation.'),myAbsent)
+  ],20,94,'طَهَ','The ornament is just this address, with fatḥ on the mīm as in Ḥafṣ. The app separates the three words in ordinary spelling. Note 1 reports the kasr readers among the Seven; note 2 parses the displayed fatḥ form.','الْحِلْيَةُ لِهَذَا النِّدَاءِ وَحْدَهُ، وَالْمِيمُ مَفْتُوحَةٌ كَقِرَاءَةِ حَفْصٍ. وَيَفْصِلُ التَّطْبِيقُ الْكَلِمَاتِ الثَّلَاثَ بِالرَّسْمِ الْإِمْلَائِيِّ. وَتَذْكُرُ الْحَاشِيَةُ الْأُولَى مَنْ كَسَرَ مِنَ السَّبْعَةِ، وَتُعْرِبُ الثَّانِيَةُ صُورَةَ الْفَتْحِ الْمَعْرُوضَةَ.'),
+  releaseBook('voc-p177-02',177,'يَا ابْنَ أُمِّي وَيَا شُقَيِّقَ نَفْسِي أَنْتَ خَلَّفْتَنِي لِدَهْرٍ شَدِيدِ','Son of my mother, my dear brother: you left me to face a hard age.',[
+   call(),one('ابْنَ','son',visibleCall),many('أُمِّي','my mother',genMy,my()),many('وَيَا','and O',also,part('«يَا» حَرْفُ نِدَاءٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Yā is a vocative particle built on sukūn with no syntactic position.')),
+   one('شُقَيِّقَ','dear brother',visibleCall),many('نَفْسِي','of my soul',genMy,my()),
+   many('أَنْتَ','you',part('«أَنْ» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','In the note’s analysis, an is a detached pronoun built on sukūn in the nominative position as mubtadaʾ.'),part('التَّاءُ حَرْفُ خِطَابٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','The address tāʾ is built on fatḥ and has no syntactic position.')),
+   many('خَلَّفْتَنِي','you left me',part('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.','Past verb built on sukūn because the subject tāʾ is attached.'),part('التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','The tāʾ is an attached pronoun built on fatḥ in the nominative position as subject.'),part('نُونُ الْوِقَايَةِ حَرْفٌ مَبْنِيٌّ عَلَى الْكَسْرِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Protective nūn, built on kasr, with no syntactic position.'),part('الْيَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ. وَالْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرُ الْمُبْتَدَإِ.','The yāʾ is built on sukūn in the accusative position as object. The clause is in the nominative position as khabar.')),
+   many('لِدَهْرٍ','for an age',part('اللَّامُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْكَسْرِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Lām is a preposition built on kasr, with no syntactic position.'),part('«دَهْرٍ» اسْمٌ مَجْرُورٌ بِاللَّامِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ. وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«خَلَّفْتَنِي».','Dahr is governed by lām, with a visible kasrah. The phrase depends on “you left me.”')),
+   token('شَدِيدِ','hard','نَعْتٌ لِـ«دَهْرٍ» مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ.','Modifier of “age,” genitive with a visible kasrah.')
+  ],'The two hemistichs are one poetic witness, attributed in note 3 to Abū Zubayd al-Ṭāʾī. It illustrates retention of the speaker’s yāʾ. Note 3 gives the lexical explanation and core parsing; the app preserves the printed ending of the line.','الشَّطْرَانِ شَاهِدٌ شِعْرِيٌّ وَاحِدٌ، وَتَنْسُبُهُ الْحَاشِيَةُ الثَّالِثَةُ إِلَى أَبِي زُبَيْدٍ الطَّائِيِّ. وَالشَّاهِدُ إِثْبَاتُ يَاءِ الْمُتَكَلِّمِ. وَتَذْكُرُ الْحَاشِيَةُ شَرْحَ اللَّفْظِ وَأَصْلَ الْإِعْرَابِ، وَيَحْفَظُ التَّطْبِيقُ آخِرَ الْبَيْتِ كَمَا طُبِعَ.'),
+  releaseBook('voc-p178-01',178,'يَا ابْنَةَ عَمَّا لَا تَلُومِي وَاهْجَعِي فَلَيْسَ يَخْلُو عَنْكِ يَوْمًا مَضْجَعِي','Cousin, don’t reproach me; rest, for my bed is never without you for a day.',[
+   call(),one('ابْنَةَ','daughter',visibleCall),
+   many('عَمَّا','of my uncle',part('مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الْمُقَدَّرَةِ عَلَى مَا قَبْلَ الْيَاءِ الْمُنْقَلِبَةِ أَلِفًا، وَهُوَ مُضَافٌ.','Second term, genitive with kasrah estimated before the yāʾ that became alif; itself the first term of an annexation.'),myAlif),
+   prohib(),many('تَلُومِي','reproach',jussFem,subjFem),
+   many('وَاهْجَعِي','and rest',also,part('«اهْجَعِي» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى حَذْفِ النُّونِ لِأَنَّ مُضَارِعَهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','Imperative built on deletion of nūn because the corresponding present is among the five forms.'),subjFem),
+   many('فَلَيْسَ','for it is not',part('الْفَاءُ حَرْفُ تَعْلِيلٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Causal fāʾ built on fatḥ with no syntactic position.'),part('«لَيْسَ» فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ، وَاسْمُهُ ضَمِيرُ الشَّأْنِ الْمَحْذُوفُ تَقْدِيرُهُ هُوَ.','Laysa is a deficient past verb built on fatḥ. Its ism is the omitted pronoun of circumstance, estimated as huwa.')),
+   token('يَخْلُو','is empty','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِالضَّمَّةِ الْمُقَدَّرَةِ عَلَى الْوَاوِ لِلثِّقَلِ.','Present indicative verb with ḍammah estimated on wāw because the vowel there is heavy.'),
+   many('عَنْكِ','without you',part('«عَنْ» حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','ʿAn is a preposition built on sukūn, with no syntactic position.'),part('الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْكَسْرِ فِي مَحَلِّ جَرٍّ. وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«يَخْلُو».','Kāf is attached and built on kasr in the genitive position. The phrase depends on “is empty.”')),
+   token('يَوْمًا','for a day','ظَرْفُ زَمَانٍ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، مُتَعَلِّقٌ بِـ«يَخْلُو».','Time adverb, accusative with a visible fatḥah, attached to “is empty.”'),
+   many('مَضْجَعِي','my bed',part('فَاعِلٌ مَرْفُوعٌ بِالضَّمَّةِ الْمُقَدَّرَةِ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ لِاشْتِغَالِهِ بِكَسْرَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.','Subject, nominative with ḍammah estimated before the speaker’s yāʾ because the preceding letter bears the matching kasrah; first term of an annexation.'),my(),part('جُمْلَةُ «يَخْلُو» مَعَ فَاعِلِهَا فِي مَحَلِّ نَصْبٍ خَبَرُ «لَيْسَ».','The clause headed by yakhlū is in the accusative position as laysa’s khabar.'))
+  ],'The p.178 poem and note are the final in-scope witness. Note 1 attributes the two lines to Abū al-Najm al-ʿIjlī and parses both; its reconstruction yā ibnata ʿammī explains the alif and is not another example.','هَذَا الْبَيْتُ وَحَاشِيَتُهُ آخِرُ شَوَاهِدِ النِّدَاءِ فِي ص ١٧٨. وَتَنْسُبُهُ الْحَاشِيَةُ الْأُولَى إِلَى أَبِي النَّجْمِ الْعِجْلِيِّ وَتُعْرِبُ شَطْرَيْهِ؛ وَتَقْدِيرُ «يَا ابْنَةَ عَمِّي» شَرْحٌ لِلْأَلِفِ وَلَيْسَ مِثَالًا آخَرَ.')
+ ];
+})();
+
+const vocativeForms=[
+...(()=>{
+ const part=(ar,en)=>({ar,en});
+ const ya=()=>token('يَا','O','حَرْفُ نِدَاءٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Vocative particle built on sukūn, with no syntactic position.');
+ const ba=part('الْبَاءُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْكَسْرِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Bāʾ is a preposition built on kasr, with no syntactic position.');
+ const yaAnnex=part('يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','The first-person yāʾ is attached, built on sukūn, and in genitive position as the second term of the annexation.');
+ const dhamma='مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ نَصْبٍ.';
+ const dhammaEn='built on ḍamm in an accusative position.';
+ const bind=(id,word,gloss,leadAr,leadEn,ownerEn,ownerAr,endingAr=dhamma,endingEn=dhammaEn)=>releaseBook(
+  id,172,'يَا '+word,'O '+gloss+'!',[ya(),token(word,gloss,leadAr+' '+endingAr,leadEn+' '+endingEn)],ownerEn,ownerAr
+ );
+ return [
+  releaseBook('voc-p171-01',171,'يَا عَبْدَ اللَّهِ','O servant of Allah!',[
+   ya(),
+   token('عَبْدَ','servant of','مُنَادًى مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Vocative, accusative with visible fatḥah; it is the first term of the annexation.'),
+   token('اللَّهِ','Allah','لَفْظُ الْجَلَالَةِ، مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ.','The divine name, genitive with visible kasrah as the second term of the annexation.')
+  ],'The author gives the example and reconstructs its underlying verb as adʿū. Editorial note 2 parses all three words.','يَذْكُرُ الْمُؤَلِّفُ الْمِثَالَ، وَيُقَدِّرُ الْفِعْلَ «أَدْعُو». وَتُعْرِبُ الْحَاشِيَةُ الثَّانِيَةُ الْكَلِمَاتِ الثَّلَاثَ.'),
+  bind('voc-p172-01','زَيْدُ','Zayd','مُنَادًى مُفْرَدٌ عَلَمٌ','Non-annexed proper-name vocative,','Editorial note 1 parses the vocative particle and the fixed proper-name vocative.','تُعْرِبُ الْحَاشِيَةُ الْأُولَى حَرْفَ النِّدَاءِ وَالْمُنَادَى الْمُفْرَدَ الْعَلَمَ.'),
+  bind('voc-p172-02','رَجُلُ','man','مُنَادًى نَكِرَةٌ مَقْصُودَةٌ','Intended indefinite vocative,','Editorial note 2 gives the particle and intended-indefinite analysis. The author’s conjunction linking the examples is outside the exercise.','تَذْكُرُ الْحَاشِيَةُ الثَّانِيَةُ حَرْفَ النِّدَاءِ وَالنَّكِرَةَ الْمَقْصُودَةَ. وَوَاوُ سَرْدِ الْأَمْثِلَةِ خَارِجَ هَذَا الْمِثَالِ.'),
+  bind('voc-p172-03','زُيُودُ','men named Zayd','مُنَادًى، وَهُوَ جَمْعُ تَكْسِيرٍ،','Broken-plural vocative,','The main text names the broken plural; editorial note 3 parses this first member of the pair specifically.','يَنْصُّ الْمَتْنُ عَلَى جَمْعِ التَّكْسِيرِ، وَتُعْرِبُ الْحَاشِيَةُ الثَّالِثَةُ هَذَا الْمِثَالَ الْأَوَّلَ مِنَ الْمِثَالَيْنِ.'),
+  bind('voc-p172-04','رِجَالُ','men','مُنَادًى نَكِرَةٌ مَقْصُودَةٌ، وَهُوَ جَمْعُ تَكْسِيرٍ،','Intended indefinite vocative in the broken plural,','The author prints this second broken plural after a list wāw. The app applies the rule; note 3 parses only Zuyūd individually.','يَطْبَعُ الْمَتْنُ هَذَا الْمِثَالَ الثَّانِيَ بَعْدَ وَاوِ السَّرْدِ. وَيُطَبِّقُ التَّطْبِيقُ الْقَاعِدَةَ، فَالْحَاشِيَةُ الثَّالِثَةُ تُعْرِبُ «زُيُودُ» دُونَهُ.'),
+  bind('voc-p172-05','مُسْلِمَاتُ','Muslim women','مُنَادًى نَكِرَةٌ مَقْصُودَةٌ، وَهُوَ جَمْعُ مُؤَنَّثٍ سَالِمٌ،','Intended indefinite vocative in the sound feminine plural,','The author gives the sound feminine plural example; editorial note 4 supplies the vocative analysis.','يَذْكُرُ الْمَتْنُ مِثَالَ جَمْعِ الْمُؤَنَّثِ السَّالِمِ، وَتُعْرِبُ الْحَاشِيَةُ الرَّابِعَةُ الْمُنَادَى.'),
+  bind('voc-p172-06','مَعْدِيكَرِبُ','Maʿdīkarib','مُنَادًى مُفْرَدٌ عَلَمٌ، وَهُوَ مُرَكَّبٌ مَزْجِيٌّ،','Non-annexed proper-name vocative, a fused compound,','The main text gives a fused compound; editorial note 5 treats it as a single vocative proper name.','يَذْكُرُ الْمَتْنُ الْمُرَكَّبَ الْمَزْجِيَّ، وَتُعْرِبُهُ الْحَاشِيَةُ الْخَامِسَةُ مُنَادًى مُفْرَدًا عَلَمًا.'),
+  bind('voc-p172-07','زَيْدَانِ','two men named Zayd','مُنَادًى','Vocative,','The author gives the dual rule; editorial note 6 specifies alif in place of ḍammah.','يَذْكُرُ الْمَتْنُ حُكْمَ الْمُثَنَّى، وَتَنُصُّ الْحَاشِيَةُ السَّادِسَةُ عَلَى نِيَابَةِ الْأَلِفِ عَنِ الضَّمَّةِ.',
+   'مَبْنِيٌّ عَلَى الْأَلِفِ نِيَابَةً عَنِ الضَّمَّةِ لِأَنَّهُ مُثَنًّى، فِي مَحَلِّ نَصْبٍ.','built on alif instead of ḍammah because it is dual, in an accusative position.'),
+  bind('voc-p172-07b','رَجُلَانِ','two men','مُنَادًى نَكِرَةٌ مَقْصُودَةٌ','Intended indefinite vocative,','The author gives the dual rule; editorial note 7 parses the intended indefinite on alif. The author’s list conjunction is external.','يَذْكُرُ الْمَتْنُ حُكْمَ الْمُثَنَّى، وَتُعْرِبُ الْحَاشِيَةُ السَّابِعَةُ النَّكِرَةَ الْمَقْصُودَةَ الْمَبْنِيَّةَ عَلَى الْأَلِفِ. وَوَاوُ السَّرْدِ خَارِجَ الْمِثَالِ.',
+   'مَبْنِيٌّ عَلَى الْأَلِفِ نِيَابَةً عَنِ الضَّمَّةِ لِأَنَّهُ مُثَنًّى، فِي مَحَلِّ نَصْبٍ.','built on alif instead of ḍammah because it is dual, in an accusative position.'),
+  bind('voc-p172-08','زَيْدُونَ','men named Zayd','مُنَادًى','Vocative,','The author gives the sound masculine plural model; editorial note 8 specifies building on wāw in the accusative position.','يَذْكُرُ الْمَتْنُ مِثَالَ جَمْعِ الْمُذَكَّرِ السَّالِمِ، وَتَنُصُّ الْحَاشِيَةُ الثَّامِنَةُ عَلَى الْوَاوِ فِي مَحَلِّ نَصْبٍ.',
+   'مَبْنِيٌّ عَلَى الْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ، فِي مَحَلِّ نَصْبٍ.','built on wāw instead of ḍammah because it is a sound masculine plural, in an accusative position.'),
+  releaseBook('voc-p172-09',172,'يَا رَجُلًا خُذْ بِيَدِي','O man, take me by the hand!',[
+   ya(),
+   token('رَجُلًا','man','مُنَادًى نَكِرَةٌ غَيْرُ مَقْصُودَةٍ، مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.','Unintended indefinite vocative, accusative with visible fatḥah.'),
+   token('خُذْ','take','فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.','Imperative built on sukūn; its subject is an obligatorily hidden “you.”'),
+   answerParts('بِيَدِي','by my hand',[ba,
+    part('«يَدِ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الْمُقَدَّرَةُ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.','Yad is genitive after bāʾ, with kasrah estimated before the first-person yāʾ because the vowel fitting yāʾ occupies the slot; it is the first term of the annexation.'),
+    yaAnnex,part('وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِالْفِعْلِ «خُذْ».','The prepositional phrase attaches to “take.”')])
+  ],'The author’s illustration is on p.172. Editorial note 9 specifies that no particular person is intended; note 10 begins the parsing on p.172 and completes it on p.173.','مِثَالُ الْمُؤَلِّفِ فِي ص ١٧٢. وَتُبَيِّنُ الْحَاشِيَةُ التَّاسِعَةُ عَدَمَ قَصْدِ شَخْصٍ بِعَيْنِهِ، وَيَبْدَأُ الْإِعْرَابُ فِي الْحَاشِيَةِ الْعَاشِرَةِ فِي ص ١٧٢، وَيَتِمُّ فِي ص ١٧٣.'),
+  releaseBook('voc-p173-01',173,'يَا حَسَنًا وَجْهُهُ','O you whose face is handsome!',[
+   ya(),
+   token('حَسَنًا','handsome','مُنَادًى شَبِيهٌ بِالْمُضَافِ، مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ صِفَةٌ مُشَبَّهَةٌ تَعْمَلُ عَمَلَ الْفِعْلِ.','Quasi-annexed vocative, accusative with visible fatḥah. It is a ṣifah mushabbahah acting like a verb.'),
+   answerParts('وَجْهُهُ','his face',[
+    part('«وَجْهُ» فَاعِلٌ لِلصِّفَةِ «حَسَنًا»، مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Wajh is the subject raised by the adjective ḥasan, with visible nominative ḍammah; it is the first term of the annexation.'),
+    part('الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','The attached hāʾ is built on ḍamm in genitive position as the second term of the annexation.')])
+  ],'Editorial note 2 specifies how the adjective governs its nominative subject and parses the attached hāʾ.','تَذْكُرُ الْحَاشِيَةُ الثَّانِيَةُ عَمَلَ الصِّفَةِ فِي فَاعِلِهَا الْمَرْفُوعِ، وَتُعْرِبُ الْهَاءَ الْمُتَّصِلَةَ.'),
+  releaseBook('voc-p173-02',173,'يَا طَالِعًا جَبَلًا','O you climbing a mountain!',[
+   ya(),
+   token('طَالِعًا','climbing','مُنَادًى شَبِيهٌ بِالْمُضَافِ، مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ اسْمُ فَاعِلٍ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ.','Quasi-annexed vocative, accusative with visible fatḥah. It is an active participle with an optionally hidden subject “he.”'),
+   token('جَبَلًا','a mountain','مَفْعُولٌ بِهِ لِاسْمِ الْفَاعِلِ «طَالِعًا»، مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.','Direct object of the active participle ṭāliʿ, accusative with visible fatḥah.')
+  ],'Editorial note 3 gives the quasi-annexed vocative, its hidden subject and its object.','تَذْكُرُ الْحَاشِيَةُ الثَّالِثَةُ شِبْهَ الْإِضَافَةِ، وَالْفَاعِلَ الْمُسْتَتِرَ، وَالْمَفْعُولَ بِهِ.'),
+  releaseBook('voc-p173-03',173,'يَا رَحِيمًا بِالْعِبَادِ','O you who are merciful to the servants!',[
+   ya(),
+   token('رَحِيمًا','merciful','مُنَادًى شَبِيهٌ بِالْمُضَافِ، مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ صِفَةٌ مُشَبَّهَةٌ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ.','Quasi-annexed vocative, accusative with visible fatḥah. It is a ṣifah mushabbahah with an optionally hidden subject “he.”'),
+   answerParts('بِالْعِبَادِ','to the servants',[ba,
+    part('«الْعِبَادِ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','Al-ʿibād is genitive after bāʾ, with visible kasrah.'),
+    part('وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِالصِّفَةِ «رَحِيمًا».','The prepositional phrase attaches to the adjective raḥīm.')])
+  ],'Editorial note 4 gives the adjective and its prepositional attachment. The app supplies the hidden subject and expands the phrase into word-level analysis.','تَذْكُرُ الْحَاشِيَةُ الرَّابِعَةُ الصِّفَةَ وَتَعَلُّقَ الْجَارِّ وَالْمَجْرُورِ بِهَا. وَيَذْكُرُ التَّطْبِيقُ الْفَاعِلَ الْمُسْتَتِرَ وَيُفَصِّلُ إِعْرَابَ الْكَلِمَاتِ.')
+ ];
+})(),
+ ...vocativeTail
+];
+
+chapters.push({
+ id:'vocative',babId:'accusative-nouns',order:2,titleEn:'The vocative',titleAr:'الْمُنَادَى',pages:'171–178',book:vocativeForms,
+ help:[
+  help('يُسَمِّي الْمُؤَلِّفُ هَذَا الْمَوْضِعَ «وَمِنْهَا: الْمُنَادَى»؛ فَهُوَ مِنْ مَوَاضِعِ الْمَفْعُولِ بِهِ الَّتِي يَجِبُ فِيهَا حَذْفُ الْعَامِلِ، وَلَيْسَ قِسْمًا سَادِسَ عَشَرَ مِنَ الْمَنْصُوبَاتِ. فِي «يَا عَبْدَ اللَّهِ» قَدَّرَ الْمُؤَلِّفُ «أَدْعُو عَبْدَ اللَّهِ»، فَحُذِفَ الْفِعْلُ وَنَابَتْ عَنْهُ «يَا». وَتَعُدُّ حَاشِيَةُ ص ١٧١ مِنْ أَخَوَاتِهَا الْهَمْزَةَ وَ«أَيْ» وَ«أَيَا».','The author treats the vocative as one of the direct-object constructions whose governor must be omitted, not a sixteenth category of accusatives. For yā ʿabda llāhi he reconstructs “I call ʿAbd Allāh”: the verb is omitted and yā takes its place. The p.171 note also names the hamzah, ay and ayā as calling particles.'),
+  help('أَوَّلُ نَوْعَيْنِ: الْمُفْرَدُ الْعَلَمُ وَالنَّكِرَةُ الْمَقْصُودَةُ. كِلَاهُمَا مَبْنِيٌّ فِي مَحَلِّ نَصْبٍ عَلَى مَا يُرْفَعُ بِهِ لَوْ أُعْرِبَ. فِي ص ١٧٢: الضَّمُّ فِي الْمُفْرَدِ وَجَمْعِ التَّكْسِيرِ وَجَمْعِ الْمُؤَنَّثِ السَّالِمِ وَالْمُرَكَّبِ الْمَزْجِيِّ، وَالْأَلِفُ فِي الْمُثَنَّى، وَالْوَاوُ فِي جَمْعِ الْمُذَكَّرِ السَّالِمِ. وَ«الْمُفْرَدُ» فِي اسْمِ النَّوْعِ مَا لَيْسَ مُضَافًا وَلَا شَبِيهًا بِالْمُضَافِ؛ فَلَا يَعْنِي دَائِمًا أَنَّهُ وَاحِدٌ فِي الْعَدَدِ.','The first two types are the non-annexed proper name and the intended indefinite. Both occupy an accusative position and are built on the sign that would mark rafʿ if they were declinable. P.172 shows ḍamm for the singular, broken plural, sound feminine plural and blended compound; alif for the dual; and wāw for the sound masculine plural. The type label mufrad excludes annexation and quasi-annexation. It does not require singular number.'),
+  help('الثَّلَاثَةُ الْبَاقِيَةُ مَنْصُوبَةٌ إِعْرَابًا: النَّكِرَةُ غَيْرُ الْمَقْصُودَةِ، وَالْمُضَافُ، وَالْمُشَبَّهُ بِالْمُضَافِ. قَارِنْ «يَا رَجُلُ» لِمَنْ قَصَدْتَهُ بِعَيْنِهِ، وَ«يَا رَجُلًا خُذْ بِيَدِي» لِأَيِّ رَجُلٍ يَسْمَعُ. وَالْعِبْرَةُ بِعَدَمِ تَعْيِينِ الْمُنَادَى لَا بِالْعَمَى، كَمَا تُبَيِّنُ حَاشِيَةُ ص ١٧٢. وَفِي «يَا عَبْدَ اللَّهِ» الِاسْمُ الثَّانِي مُضَافٌ إِلَيْهِ، أَمَّا فِي «يَا حَسَنًا وَجْهُهُ» فَـ«وَجْهُهُ» فَاعِلٌ لِلصِّفَةِ. وَمَا يُتِمُّ مَعْنَى الشَّبِيهِ بِالْمُضَافِ قَدْ يَكُونُ مَفْعُولًا أَوْ جَارًّا وَمَجْرُورًا أَيْضًا، كَمَا فِي ص ١٧٣.','The other three take accusative case: the unintended indefinite, the annexed vocative and the quasi-annexed vocative. Compare “O man” addressed to a particular person with “O man, take my hand” addressed to whoever hears. As the p.172 note explains, what matters is the lack of a particular addressee, not blindness. In yā ʿabda llāhi the second noun is genitive by annexation. In yā ḥasanan wajhuhu, wajhuhu is the subject raised by the adjective. The completing element can also be an object or a prepositional phrase, as on p.173.'),
+  help('يَعُدُّ الْمُؤَلِّفُ سِتَّ صُوَرٍ عِنْدَ الْإِضَافَةِ مُبَاشَرَةً إِلَى يَاءِ الْمُتَكَلِّمِ. الْأُولَى: حَذْفُ الْيَاءِ وَالِاكْتِفَاءُ بِالْكَسْرَةِ، وَهِيَ الْأَكْثَرُ. الثَّانِيَةُ: إِثْبَاتُ الْيَاءِ سَاكِنَةً، نَحْوَ «يَا عِبَادِي». الثَّالِثَةُ: إِثْبَاتُهَا مَفْتُوحَةً. الرَّابِعَةُ: قَلْبُ الْكَسْرَةِ فَتْحَةً وَالْيَاءِ أَلِفًا. الْخَامِسَةُ: حَذْفُ تِلْكَ الْأَلِفِ مَعَ إِبْقَاءِ الْفَتْحَةِ، نَحْوَ «يَا غُلَامَ». السَّادِسَةُ: حَذْفُ الْأَلِفِ وَضَمُّ مَا كَانَ مَكْسُورًا، نَحْوَ «يَا أُمُّ لَا تَفْعَلِي».','The author gives six forms when the vocative is annexed directly to first-person yāʾ. (1) Drop yāʾ, keeping kasrah. This is the most frequent. (2) Keep yāʾ with sukūn, as in yā ʿibādī. (3) Keep yāʾ with fatḥah. (4) Change kasrah to fatḥah and yāʾ to alif. (5) Drop that alif but keep fatḥah, as in yā ghulāma. (6) Drop alif and give ḍamm to the letter previously bearing kasrah, as in “Mother, don’t do it.”'),
+  help('تُبَيِّنُ حَوَاشِي ص ١٧٤–١٧٥ أَنَّ نَصْبَ هَذَا الْمُنَادَى بِفَتْحَةٍ مُقَدَّرَةٍ، وَأَنَّ الْيَاءَ ضَمِيرٌ فِي مَحَلِّ جَرٍّ بِالْإِضَافَةِ حَتَّى إِذَا لَمْ تُنْطَقْ. فِي الْوَجْهِ الْأَوَّلِ تَبْقَى كَسْرَةُ الْمُنَاسَبَةِ بَعْدَ حَذْفِ الْيَاءِ. وَفِي «يَا أُمُّ» الضَّمَّةُ الْمَسْمُوعَةُ لَا تَجْعَلُ «أُمُّ» نَكِرَةً مَقْصُودَةً؛ فَالتَّقْدِيرُ أَنَّهَا مُضَافَةٌ إِلَى يَاءِ الْمُتَكَلِّمِ.','The notes on pp.174–175 give the annexed vocative an estimated accusative fatḥah. The possessive yāʾ occupies a genitive position even when not spoken. In the first form the kasrah appropriate to yāʾ remains after its deletion. In yā ummu the audible ḍammah does not make “mother” an intended indefinite. The first-person annexation is understood.'),
+  help('فِي نِدَاءِ الْأَبِ وَالْأُمِّ تُذْكَرُ أَرْبَعُ صُوَرٍ زَائِدَةٍ: تَاءٌ مَكْسُورَةٌ بَدَلًا مِنَ الْيَاءِ، نَحْوَ «يَا أَبَتِ» وَ«يَا أُمَّتِ»؛ وَفَتْحُ التَّاءِ؛ وَالْجَمْعُ بَيْنَ التَّاءِ وَالْأَلِفِ، وَيَذْكُرُ الْمُؤَلِّفُ أَنَّهَا صُورَةٌ قُرِئَ بِهَا شَاذًّا؛ وَالْجَمْعُ بَيْنَ التَّاءِ وَالْيَاءِ نَحْوَ «يَا أَبَتِي». شَاهِدُ سُورَةِ يُوسُفَ، الْآيَةِ ٤، مَطْبُوعٌ بِكَسْرِ التَّاءِ. وَمِمَّنْ قَرَأَ بِالْفَتْحِ ابْنُ عَامِرٍ مِنَ السَّبْعَةِ، وَأَبُو جَعْفَرٍ مِنَ الْعَشَرَةِ؛ وَتَذْكُرُ حَاشِيَةُ ص ١٧٦ الْأَعْرَجَ أَيْضًا.','For addressing one’s father or mother the author adds four forms: replace yāʾ with a tāʾ bearing kasrah, as in yā abati and yā ummati; give the tāʾ fatḥah; combine tāʾ with alif, a form the author reports as an irregular reading; or combine tāʾ with yāʾ, as in yā abatī. The edition prints Q12:4 with kasrah. Ibn ʿĀmir reads with fatḥah among the Seven, and Abū Jaʿfar joins him among the Ten. The p.176 note also names al-Aʿraj.'),
+  help('إِذَا كَانَ الْمُنَادَى مُضَافًا إِلَى اسْمٍ مُضَافٍ إِلَى يَاءِ الْمُتَكَلِّمِ، فَلَا يَجُوزُ إِلَّا إِثْبَاتُ الْيَاءِ سَاكِنَةً أَوْ مَفْتُوحَةً، كَمَا فِي «يَا غُلَامَ غُلَامِيَ». وَاسْتَثْنَى الْمُؤَلِّفُ «ابْنَ عَمٍّ» وَ«ابْنَ أُمٍّ» فَذَكَرَ أَرْبَعَ صُوَرٍ: حَذْفُ الْيَاءِ مَعَ كَسْرِ الْمِيمِ، أَوْ مَعَ فَتْحِهَا، أَوْ إِثْبَاتُ الْيَاءِ، أَوْ قَلْبُهَا أَلِفًا. الْمَطْبُوعُ فِي شَاهِدِ طه، الْآيَةِ ٩٤، بِفَتْحِ الْمِيمِ؛ وَتَنْسُبُ حَاشِيَةُ ص ١٧٧ الْكَسْرَ إِلَى ابْنِ عَامِرٍ وَشُعْبَةَ وَحَمْزَةَ وَالْكِسَائِيِّ مِنَ السَّبْعَةِ. وَيَذْكُرُ ابْنُ الْجَزَرِيِّ خَلَفًا الْعَاشِرَ أَيْضًا.','When the vocative is annexed to a noun that itself carries first-person yāʾ, the yāʾ must be kept, with sukūn or fatḥah. The printed yā ghulāma ghulāmiya shows fatḥah. The author gives four forms for the exceptions ibn ʿamm and ibn umm: drop yāʾ and give mīm kasrah, drop it and give mīm fatḥah, keep yāʾ, or replace it with alif. The Q20:94 witness is printed with fatḥah on mīm. The p.177 note attributes kasrah among the Seven to Ibn ʿĀmir, Shuʿbah, Ḥamzah and al-Kisāʾī. Ibn al-Jazarī also lists Khalaf the Tenth.'),
+  help('فِي بَيْتِ أَبِي زُبَيْدٍ الطَّائِيِّ فِي ص ١٧٧ شَاهِدُ إِثْبَاتِ الْيَاءِ فِي «أُمِّي». وَفِي بَيْتِ أَبِي النَّجْمِ الْعِجْلِيِّ فِي ص ١٧٨ شَاهِدُ قَلْبِهَا أَلِفًا فِي «عَمَّا». وَ«يَا ابْنَةَ عَمِّي» تَقْدِيرُ الْحَاشِيَةِ لِأَصْلِ اللَّفْظِ، لَا شَطْرٌ آخَرُ مِنَ الْبَيْتِ.','Abū Zubayd al-Ṭāʾī’s line on p.177 illustrates retaining yāʾ in ummī. Abū al-Najm al-ʿIjlī’s line on p.178 illustrates changing yāʾ to alif in ʿammā. Yā ibnata ʿammī is the note’s reconstruction of the underlying form, not an additional line of poetry.')
+ ],
+ helpSourceAr:'الْمُتَمِّمَةُ، ص ١٧١–١٧٨: مِنْ «وَمِنْهَا: الْمُنَادَى» إِلَى بَيْتِ أَبِي النَّجْمِ وَحَاشِيَتِهِ. الْأَقْسَامُ وَالشَّوَاهِدُ مِنَ الْمَتْنِ، وَمَا نُسِبَ إِلَى حَاشِيَةٍ مِنْ تَعْلِيقَاتِ الطَّبْعَةِ. الْمُلَخَّصُ وَالتَّرْجَمَةُ وَالْخَرِيطَةُ الدِّرَاسِيَّةُ مِنْ إِعْدَادِ التَّطْبِيقِ.',
+ helpSourceEn:'Al-Mutammimah, printed pp.171–178, from “Among these is the vocative” through Abū al-Najm’s verse and its note. The categories and witnesses come from the main text; material credited to a note is editorial. The study summary, English and learning map are prepared by the app.'
 });
 
 // The concise study summaries and disclosure metadata are app-prepared
@@ -4205,6 +4376,30 @@ helpVisuals['direct-object']={type:'branches',titleAr:'صُورُ الْمَفْ
   {id:'mafool-optional-omission',labelAr:'قَرِينَةُ السِّيَاقِ',labelEn:'Context supplies it',descAr:'السُّؤَالُ يَدُلُّ عَلَى «أَنْزَلَ».',descEn:'The question supplies “sent down”.',exerciseId:'mafool-p169-05'},
   {id:'mafool-ishtighal',labelAr:'الِاشْتِغَالُ',labelEn:'Ishtighāl',descAr:'«اضْرِبْهُ» يَعْمَلُ فِي الْهَاءِ، وَيُفَسِّرُ عَامِلَ «زَيْدًا» الْمَحْذُوفَ.',descEn:'The stated imperative governs its pronoun and explains Zayd’s omitted governor.',exerciseId:'mafool-p170-01'},
   {id:'mafool-ishtighal-verse',labelAr:'مِثَالٌ قُرْآنِيٌّ',labelEn:'Qurʾānic model',descAr:'لِـ«كُلَّ» عَامِلٌ مَحْذُوفٌ غَيْرُ الْفِعْلِ الْمَذْكُورِ.',descEn:'Kull depends on an omitted governor, distinct from the stated verb.',exerciseId:'mafool-p170-04'}
+ ]}
+]};
+helpVisuals.vocative={type:'branches',titleAr:'كَيْفَ تَخْتَارُ حُكْمَ الْمُنَادَى؟',titleEn:'How do you determine the vocative’s ending?',branches:[
+ {id:'voc-fixed',labelAr:'مَبْنِيٌّ فِي مَحَلِّ نَصْبٍ',labelEn:'Fixed, in an accusative position',descAr:'ثُبُوتُ الضَّمِّ أَوِ الْأَلِفِ أَوِ الْوَاوِ لَا يَجْعَلُ الِاسْمَ مَرْفُوعًا.',descEn:'Fixed ḍamm, alif or wāw does not make the noun nominative.',children:[
+  {id:'voc-fixed-intended',labelAr:'نَكِرَةٌ مَقْصُودَةٌ',labelEn:'Intended indefinite',descAr:'فِي «يَا رَجُلُ» قُصِدَ رَجُلٌ مُعَيَّنٌ، فَبُنِيَ عَلَى الضَّمِّ.',descEn:'A particular man is meant, so rajulu is built on ḍamm.',exerciseId:'voc-p172-02'},
+  {id:'voc-fixed-name',labelAr:'عَلَمٌ غَيْرُ مُضَافٍ',labelEn:'Non-annexed proper name',descAr:'«زَيْدُونَ» مَبْنِيٌّ عَلَى الْوَاوِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.',descEn:'Zaydūna is built on wāw because it is a sound masculine plural.',exerciseId:'voc-p172-08'}
+ ]},
+ {id:'voc-declinable',labelAr:'مَنْصُوبٌ إِعْرَابًا',labelEn:'Takes accusative case',descAr:'انْظُرْ إِلَى الْقَصْدِ أَوْ إِلَى مَا يَتْبَعُ الْمُنَادَى فِي التَّرْكِيبِ.',descEn:'Check whether a particular addressee is meant and how the rest of the construction depends on the vocative.',children:[
+  {id:'voc-unintended',labelAr:'نَكِرَةٌ غَيْرُ مَقْصُودَةٍ',labelEn:'Unintended indefinite',descAr:'«رَجُلًا» مَنْصُوبٌ؛ لِأَنَّ الْمُنَادِيَ لَمْ يَقْصِدْ رَجُلًا بِعَيْنِهِ.',descEn:'Rajulan takes accusative case because the caller does not mean anyone in particular.',exerciseId:'voc-p172-09'},
+  {id:'voc-annexed',labelAr:'مُضَافٌ',labelEn:'Annexed',descAr:'«عَبْدَ» مَنْصُوبٌ، وَالِاسْمُ بَعْدَهُ مُضَافٌ إِلَيْهِ مَجْرُورٌ.',descEn:'ʿAbda takes accusative case; its annex is genitive.',exerciseId:'voc-p171-01'},
+  {id:'voc-quasi-annexed',labelAr:'شَبِيهٌ بِالْمُضَافِ',labelEn:'Quasi-annexed',descAr:'«حَسَنًا» مَنْصُوبٌ، وَ«وَجْهُهُ» فَاعِلٌ لِلصِّفَةِ، لَا مُضَافٌ إِلَيْهِ.',descEn:'Ḥasanan takes accusative case; wajhuhu is its adjective’s subject, not a genitive annex.',exerciseId:'voc-p173-01'}
+ ]},
+ {id:'voc-speaker',labelAr:'مَعَ يَاءِ الْمُتَكَلِّمِ',labelEn:'With first-person yāʾ',descAr:'قَدْ تَتَغَيَّرُ صُورَةُ الْيَاءِ أَوْ تُحْذَفُ؛ وَلَا يَزُولُ بِذَلِكَ مَعْنَى الْإِضَافَةِ.',descEn:'The yāʾ may change shape or disappear without losing the possessive relation.',children:[
+  {id:'voc-direct-ya',labelAr:'إِضَافَةٌ مُبَاشِرَةٌ',labelEn:'Direct annexation',descAr:'مِنْ صُوَرِهَا حَذْفُ الْيَاءِ مَعَ بَقَاءِ الْكَسْرَةِ، أَوْ إِثْبَاتُ الْيَاءِ مَعَ الْفَتْحِ، أَوْ غَيْرُ ذَلِكَ مِمَّا فَصَّلَهُ الْمُؤَلِّفُ.',descEn:'The author’s forms include deleting yāʾ with kasrah left behind and retaining yāʾ with fatḥah.',children:[
+   {id:'voc-kasr-trace',labelAr:'يَاءٌ مَحْذُوفَةٌ وَكَسْرَةٌ بَاقِيَةٌ',labelEn:'Yāʾ omitted, kasrah retained',descAr:'الْكَسْرَةُ لِلْمُنَاسَبَةِ، وَالْفَتْحَةُ الْإِعْرَابِيَّةُ مُقَدَّرَةٌ.',descEn:'Kasrah suits the omitted yāʾ; the accusative fatḥah is estimated.',exerciseId:'voc-p174-01'},
+   {id:'voc-open-ya',labelAr:'يَاءٌ مَفْتُوحَةٌ',labelEn:'Retained yāʾ with fatḥah',descAr:'تَذْكُرُ الْحَاشِيَةُ أَنَّ الْيَاءَ مَبْنِيَّةٌ عَلَى الْفَتْحِ فِي مَحَلِّ جَرٍّ بِالْإِضَافَةِ.',descEn:'The note identifies the yāʾ as built on fatḥ, in a genitive position by annexation.',exerciseId:'voc-p174-04'},
+   {id:'voc-damm-trace',labelAr:'ضَمَّةٌ وَإِضَافَةٌ مُقَدَّرَةٌ',labelEn:'Ḍammah with understood annexation',descAr:'«أُمُّ» مُضَافَةٌ إِلَى يَاءٍ غَيْرِ مَلْفُوظٍ بِهَا؛ وَنَصْبُهَا مُقَدَّرٌ.',descEn:'Ummu is annexed to an unspoken yāʾ; its accusative ending is estimated.',exerciseId:'voc-p175-02'}
+  ]},
+  {id:'voc-parent-forms',labelAr:'نِدَاءُ الْأَبِ وَالْأُمِّ',labelEn:'Father and mother',descAr:'هُنَا التَّاءُ الْمَكْسُورَةُ بَدَلٌ مِنْ يَاءِ الْمُتَكَلِّمِ.',descEn:'Here a tāʾ with kasrah replaces first-person yāʾ.',exerciseId:'voc-p176-02'},
+  {id:'voc-mediated-forms',labelAr:'إِضَافَةٌ غَيْرُ مُبَاشِرَةٍ',labelEn:'Indirect annexation',descAr:'تَلْحَقُ الْيَاءُ الِاسْمَ الثَّانِيَ، لَا الْمُنَادَى مُبَاشَرَةً.',descEn:'Yāʾ attaches to the second noun, not directly to the vocative.',exerciseId:'voc-p176-05',children:[
+   {id:'voc-ibn-umm-q',labelAr:'الْحَذْفُ مَعَ فَتْحِ الْمِيمِ',labelEn:'Omission with fatḥah on mīm',descAr:'هَذَا وَجْهُ ضَبْطِ الشَّاهِدِ الْمَطْبُوعِ فِي ص ١٧٧.',descEn:'This is the vocalization printed in the p.177 witness.',exerciseId:'voc-p177-01'},
+   {id:'voc-ibn-umm-retain',labelAr:'إِثْبَاتُ الْيَاءِ فِي الشِّعْرِ',labelEn:'Yāʾ retained in verse',descAr:'الشَّاهِدُ فِي «أُمِّي» فِي بَيْتِ أَبِي زُبَيْدٍ.',descEn:'The witness is ummī in Abū Zubayd’s verse.',exerciseId:'voc-p177-02'},
+   {id:'voc-ibn-amm-alif',labelAr:'قَلْبُ الْيَاءِ أَلِفًا',labelEn:'Yāʾ replaced with alif',descAr:'الشَّاهِدُ فِي «عَمَّا» فِي بَيْتِ أَبِي النَّجْمِ.',descEn:'The witness is ʿammā in Abū al-Najm’s verse.',exerciseId:'voc-p178-01'}
+  ]}
  ]}
 ]};
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});

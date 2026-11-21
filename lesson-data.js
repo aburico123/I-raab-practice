@@ -3009,14 +3009,23 @@ const laAccAdjective=(word,gloss)=>token(
  word,gloss,'نَعْتٌ لِـ«رَجُلَ» مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ بِاعْتِبَارِ مَحَلِّ اسْمِ «لَا».',
  'Adjective of rajula, accusative with visible fatḥah, following the position of the ism of lā.'
 );
+const governingParticiple=(card,referentAr,referentEn)=>({
+ ...card,
+ ar:`${card.ar} وَهُوَ اسْمُ فَاعِلٍ يَعْمَلُ عَمَلَ الْفِعْلِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ هُوَ يَعُودُ إِلَى ${referentAr}.`,
+ en:`${card.en} It is a governing active participle; its hidden subject, huwa, refers to ${referentEn}.`
+});
 const exclusivePart=()=>token('إِلَّا','except','أَدَاةُ حَصْرٍ مَبْنِيَّةٌ عَلَى السُّكُونِ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Restriction particle built on sukūn with no syntactic position.');
-const billahWithKhabar=()=>answerParts('بِاللَّهِ','through Allah',[
+const billahWithKhabar=(khabarAr,khabarEn)=>answerParts('بِاللَّهِ','through Allah',[
  {ar:'الْبَاءُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْكَسْرِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Bāʾ is a preposition built on kasr with no syntactic position.'},
- {ar:'«اللَّهِ» لَفْظُ الْجَلَالَةِ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ. وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِخَبَرٍ مَحْذُوفٍ.',en:'The Divine Name is governed by bāʾ, genitive with visible kasrah. The phrase attaches to an omitted khabar.'}
+ {ar:`«اللَّهِ» لَفْظُ الْجَلَالَةِ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ. وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ ${khabarAr}`,en:`The Divine Name is governed by bāʾ, genitive with visible kasrah. The phrase attaches to ${khabarEn}`}
 ]);
-const laHawqalaVariant=(id,page,secondParticle,quwwa,directEn,directAr)=>releaseBook(
+const laHawqalaVariant=(id,page,secondParticle,quwwa,wawAr,wawEn,khabarAr,khabarEn,directEn,directAr)=>releaseBook(
  id,page,`لَا حَوْلَ وَلَا ${quwwa.word} إِلَّا بِاللَّهِ`,'There is no might or strength except through Allah.',
- [laWord(),laBuilt('حَوْلَ','might'),laWithWaw(secondParticle),quwwa,exclusivePart(),billahWithKhabar()],directEn,directAr
+ [laWord(),laBuilt('حَوْلَ','might'),answerParts('وَلَا','and no',[
+  {ar:`${mkWaw().ar} ${wawAr}`,en:`${mkWaw().en} ${wawEn}`},secondParticle
+ ]),quwwa,exclusivePart(),billahWithKhabar(khabarAr,khabarEn)],
+ `${directEn} The app supplies the predicate analysis and estimates, following al-Sulṭānī’s commentary on Ibn ʿAqīl.`,
+ `${directAr} وَيَسْتَنِدُ التَّطْبِيقُ فِي تَحْلِيلِ الْخَبَرِ وَتَقْدِيرِهِ إِلَى شَرْحِ السُّلْطَانِيِّ عَلَى شَرْحِ ابْنِ عَقِيلٍ.`
 );
 const laListObject=participle=>token('جَبَلًا','a mountain',`مَفْعُولٌ بِهِ لِاسْمِ الْفَاعِلِ «${participle}» مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.`,'Object of the active participle ṭāliʿ, accusative with visible fatḥah.');
 const housePhraseKhabar=(fronted=false)=>token(
@@ -3035,24 +3044,24 @@ const laJinsForms=[
   laKhabar('مَمْقُوتٌ','despised')
  ],'The main text illustrates an annexed ism. Footnote 2 gives the parse and identifies mamqūt as a passive participle from maqt.','يُمَثِّلُ الْمَتْنُ بِالِاسْمِ الْمُضَافِ. وَتُعْرِبُ الْحَاشِيَةُ الثَّانِيَةُ الْمِثَالَ وَتَذْكُرُ أَنَّ «مَمْقُوتٌ» اسْمُ مَفْعُولٍ مِنَ الْمَقْتِ.'),
  releaseBook('la-jins-02',149,'وَلَا طَالِعًا جَبَلًا حَاضِرٌ','And no one climbing a mountain is present.',[
-  laWithWaw(),laAnnexLike('طَالِعًا','one climbing','لِاتِّصَالِهِ بِمَفْعُولِهِ','because its object completes it'),
+  laWithWaw(),governingParticiple(laAnnexLike('طَالِعًا','one climbing','لِاتِّصَالِهِ بِمَفْعُولِهِ','because its object completes it'),'الشَّخْصِ الَّذِي يَطْلُعُ','the person climbing'),
   token('جَبَلًا','a mountain','مَفْعُولٌ بِهِ لِـ«طَالِعًا» مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.','Object of ṭāliʿan, accusative with visible fatḥah.'),laKhabar('حَاضِرٌ','present')
- ],'The main text prints the governing participle and its object. Footnote 3 gives the parse.','يَطْبَعُ الْمَتْنُ اسْمَ الْفَاعِلِ الْعَامِلَ وَمَفْعُولَهُ. وَتُعْرِبُهُمَا الْحَاشِيَةُ الثَّالِثَةُ.'),
+ ],'The main text prints the governing participle and its object. Footnote 3 gives their case and grammatical role. The app supplies the participle’s hidden subject, as in Īḍāḥ masāʾil al-ʿArabiyyah.','يَطْبَعُ الْمَتْنُ اسْمَ الْفَاعِلِ الْعَامِلَ وَمَفْعُولَهُ. وَتَذْكُرُ الْحَاشِيَةُ الثَّالِثَةُ إِعْرَابَهُمَا. وَيُبَيِّنُ التَّطْبِيقُ فَاعِلَهُ الْمُسْتَتِرَ كَمَا فِي «إِيضَاحِ مَسَائِلِ الْعَرَبِيَّةِ».'),
  releaseBook('la-jins-03',149,'لَا قَبِيحًا فِعْلُهُ مَحْمُودٌ','No one whose conduct is ugly is praised.',[
   laWord(),laAnnexLike('قَبِيحًا','one of ugly conduct','لِاتِّصَالِهِ بِفَاعِلِهِ','because its nominative subject completes it'),
   answerParts('فِعْلُهُ','his conduct',[{ar:'«فِعْلُ» فَاعِلٌ لِلصِّفَةِ الْمُشَبَّهَةِ «قَبِيحًا» مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.',en:'Fiʿlu is the subject raised by the adjective qabīḥan, nominative with visible ḍammah, and the first term of an iḍāfah.'},{ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'Hāʾ is an attached pronoun built on ḍamm in the genitive position as the second term of the iḍāfah.'}]),
   laKhabar('مَحْمُودٌ','praised')
  ],'Footnote 4 gives this example of a nominative complement. The app expands the adjective’s government and the attached pronoun.','تُورِدُ الْحَاشِيَةُ الرَّابِعَةُ مِثَالَ الْمَعْمُولِ الْمَرْفُوعِ. وَيُفَصِّلُ التَّطْبِيقُ عَمَلَ الصِّفَةِ وَإِعْرَابَ الضَّمِيرِ.'),
  releaseBook('la-jins-04',149,'لَا طَائِعًا رَبَّهُ نَادِمٌ','No one who obeys his Lord is regretful.',[
-  laWord(),laAnnexLike('طَائِعًا','one obeying','لِاتِّصَالِهِ بِمَفْعُولِهِ','because its object completes it'),
+  laWord(),governingParticiple(laAnnexLike('طَائِعًا','one obeying','لِاتِّصَالِهِ بِمَفْعُولِهِ','because its object completes it'),'الشَّخْصِ الَّذِي يُطِيعُ','the person obeying'),
   answerParts('رَبَّهُ','his Lord',[{ar:'«رَبَّ» مَفْعُولٌ بِهِ لِـ«طَائِعًا» مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.',en:'Rabba is the object of ṭāʾiʿan, accusative with visible fatḥah, and the first term of an iḍāfah.'},{ar:'الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.',en:'Hāʾ is an attached pronoun built on ḍamm in the genitive position as the second term of the iḍāfah.'}]),
   laKhabar('نَادِمٌ','regretful')
- ],'Footnote 4 gives this example of an accusative complement.','تُورِدُ الْحَاشِيَةُ الرَّابِعَةُ مِثَالَ الْمَعْمُولِ الْمَنْصُوبِ.'),
+ ],'Footnote 4 gives this example of an accusative complement. The app identifies the active participle and its hidden subject.','تُورِدُ الْحَاشِيَةُ الرَّابِعَةُ مِثَالَ الْمَعْمُولِ الْمَنْصُوبِ. وَيُبَيِّنُ التَّطْبِيقُ اسْمَ الْفَاعِلِ وَفَاعِلَهُ الْمُسْتَتِرَ.'),
  releaseBook('la-jins-05',149,'لَا عَامِلًا بِالْقُرْآنِ غَافِلٌ','No one who acts by the Qurʾān is heedless.',[
-  laWord(),laAnnexLike('عَامِلًا','one acting','لِاتِّصَالِهِ بِالْجَارِّ وَالْمَجْرُورِ','because a prepositional phrase completes it'),
+  laWord(),governingParticiple(laAnnexLike('عَامِلًا','one acting','لِاتِّصَالِهِ بِالْجَارِّ وَالْمَجْرُورِ','because a prepositional phrase completes it'),'الشَّخْصِ الَّذِي يَعْمَلُ بِالْقُرْآنِ','the person acting by the Qurʾān'),
   answerParts('بِالْقُرْآنِ','by the Qurʾān',[{ar:'الْبَاءُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْكَسْرِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.',en:'Bāʾ is a preposition built on kasr with no syntactic position.'},{ar:'«الْقُرْآنِ» اسْمٌ مَجْرُورٌ بِالْبَاءِ وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ. وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«عَامِلًا».',en:'Al-Qurʾāni is governed by bāʾ, genitive with visible kasrah. The phrase attaches to ʿāmilan.'}]),
   laKhabar('غَافِلٌ','heedless')
- ],'Footnote 4 gives this example of a prepositional complement.','تُورِدُ الْحَاشِيَةُ الرَّابِعَةُ مِثَالَ الْجَارِّ وَالْمَجْرُورِ الْمُتَعَلِّقَيْنِ بِالِاسْمِ.'),
+ ],'Footnote 4 gives this example of a prepositional complement. The app identifies the active participle and its hidden subject.','تُورِدُ الْحَاشِيَةُ الرَّابِعَةُ مِثَالَ الْجَارِّ وَالْمَجْرُورِ الْمُتَعَلِّقَيْنِ بِالِاسْمِ. وَيُبَيِّنُ التَّطْبِيقُ اسْمَ الْفَاعِلِ وَفَاعِلَهُ الْمُسْتَتِرَ.'),
  releaseBook('la-jins-06',149,'لَا رَجُلَ حَاضِرٌ','No man is present.',[
   laWord(),laBuilt('رَجُلَ','man'),laKhabar('حَاضِرٌ','present')
  ],'The main text illustrates the technical mufrad built on fatḥ. Footnote 5 gives the parse. The definition on p.148 uses the same model.','يُمَثِّلُ الْمَتْنُ بِالْمُفْرَدِ الْمَبْنِيِّ عَلَى الْفَتْحِ. وَتُعْرِبُهُ الْحَاشِيَةُ الْخَامِسَةُ. وَقَدْ وَرَدَ نَفْسُ الْمِثَالِ لِلتَّعْرِيفِ فِي ص ١٤٨.'),
@@ -3087,14 +3096,23 @@ const laJinsForms=[
   laWithWaw(),omittedLaKhabar('قُوَّةَ','strength','لَنَا','“for us”')
  ],'The main text gives this short repetition model. The same example recurs on p.153, where footnote 3 supplies both omitted khabars as lanā.','يَذْكُرُ الْمَتْنُ هَذَا الْمِثَالَ الْمُخْتَصَرَ لِلتَّكْرَارِ. وَيَرِدُ بِاللَّفْظِ نَفْسِهِ فِي ص ١٥٣، وَتُقَدِّرُ الْحَاشِيَةُ الثَّالِثَةُ خَبَرَ كُلِّ «لَا» بِـ«لَنَا».'),
  laHawqalaVariant('la-jins-13',150,laJinsPart,laBuilt('قُوَّةَ','strength'),
+  'تَعْطِفُ جُمْلَةَ «لَا» الثَّانِيَةِ عَلَى جُمْلَةِ «لَا» الْأُولَى.','It joins the clause of the second lā to that of the first.',
+  'بِخَبَرِ «لَا» الثَّانِيَةِ الْمَحْذُوفِ، تَقْدِيرُهُ «كَائِنَةٌ». وَخَبَرُ «لَا» الْأُولَى مَحْذُوفٌ تَقْدِيرُهُ «كَائِنٌ»، يَدُلُّ عَلَيْهِ السِّيَاقُ.',
+  'the second lā’s omitted khabar, kāʾinatun (“exists”). The first lā has its own omitted khabar, kāʾinun, recoverable from context.',
   'Footnote 7 prints this grammatical option with both particles operating, so quwwata is built on fatḥ.',
   'تَطْبَعُ الْحَاشِيَةُ السَّابِعَةُ هَذَا الْوَجْهَ بِإِعْمَالِ الْحَرْفَيْنِ، فَتُبْنَى «قُوَّةَ» عَلَى الْفَتْحِ.'),
  laHawqalaVariant('la-jins-14',150,
   {ar:'«لَا» زَائِدَةٌ لِتَوْكِيدِ النَّفْيِ، مَبْنِيَّةٌ عَلَى السُّكُونِ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.',en:'Lā reinforces the negation without governing. It is built on sukūn with no syntactic position.'},
   token('قُوَّةً','strength','مَعْطُوفٌ عَلَى مَحَلِّ اسْمِ «لَا» الْأُولَى، مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.','Coordinated with the position of the first lā’s ism, accusative with visible fatḥah.'),
+  'تَعْطِفُ اسْمًا عَلَى مَحَلِّ اسْمِ «لَا» الْأُولَى.','It coordinates a noun with the position of the first lā’s ism.',
+  'بِخَبَرِ «لَا» الْأُولَى الْمَحْذُوفِ، تَقْدِيرُهُ «كَائِنَانِ». وَهُوَ خَبَرٌ وَاحِدٌ لِلِاسْمَيْنِ.',
+  'the first lā’s single omitted khabar, kāʾināni (“exist”), shared by both coordinated nouns.',
   'Footnote 8 prints this grammatical option and takes quwwatan in coordination with the accusative position of the first ism.',
   'تَطْبَعُ الْحَاشِيَةُ الثَّامِنَةُ هَذَا الْوَجْهَ وَتَعْطِفُ «قُوَّةً» عَلَى مَحَلِّ اسْمِ «لَا» الْأُولَى.'),
  laHawqalaVariant('la-jins-15',151,laIdlePart,mkMubtada('قُوَّةٌ','strength'),
+  'تَعْطِفُ جُمْلَةَ «قُوَّةٌ» الْمُؤَلَّفَةَ مِنْ مُبْتَدَإٍ وَخَبَرٍ عَلَى جُمْلَةِ «لَا» الْأُولَى.','It joins the separate mubtadaʾ–khabar clause of quwwatun to the first lā clause.',
+  'بِخَبَرِ الْمُبْتَدَإِ «قُوَّةٌ» الْمَحْذُوفِ، تَقْدِيرُهُ «كَائِنَةٌ». وَخَبَرُ «لَا» الْأُولَى مَحْذُوفٌ تَقْدِيرُهُ «كَائِنٌ»، يَدُلُّ عَلَيْهِ السِّيَاقُ.',
+  'the omitted khabar of the mubtadaʾ quwwatun, kāʾinatun (“exists”). The first lā has its own omitted khabar, kāʾinun, recoverable from context.',
   'Footnote 1 prints this grammatical option and takes quwwatun as a nominative mubtadaʾ after inoperative lā.',
   'تَطْبَعُ الْحَاشِيَةُ الْأُولَى هَذَا الْوَجْهَ، فَتُهْمِلُ «لَا» الثَّانِيَةَ وَتَرْفَعُ «قُوَّةٌ» عَلَى الِابْتِدَاءِ.'),
  releaseBook('la-jins-16',151,'لَا حَوْلَ وَقُوَّةٌ','There is neither might nor strength.',[
@@ -3121,12 +3139,12 @@ const laJinsForms=[
  releaseBook('la-jins-22',152,'وَلَا رَجُلَ جَالِسٌ ظَرِيفًا','And no witty man is seated.',[
   laWithWaw(),laBuilt('رَجُلَ','man'),laKhabar('جَالِسٌ','seated'),laAccAdjective('ظَرِيفًا','witty')
  ],'Footnote 2 also writes the complete sentence with the separated adjective in the accusative.','وَتَبْسُطُ الْحَاشِيَةُ الثَّانِيَةُ الْجُمْلَةَ بِنَصْبِ النَّعْتِ الْمَفْصُولِ أَيْضًا.'),
- releaseBook('la-jins-23',152,'لَا رَجُلَ طَالِعٌ جَبَلًا حَاضِرٌ','No man climbing a mountain is present.',[
-  laWord(),laBuilt('رَجُلَ','man'),laNomAdjective('طَالِعٌ','climbing'),laListObject('طَالِعٌ'),laKhabar('حَاضِرٌ','present')
- ],'Footnote 3 writes out the nominative option. The participle’s object makes this a non-mufrad adjective.','تَبْسُطُ الْحَاشِيَةُ الثَّالِثَةُ وَجْهَ الرَّفْعِ. وَالنَّعْتُ غَيْرُ مُفْرَدٍ لِاتِّصَالِهِ بِمَفْعُولِهِ.'),
  releaseBook('la-jins-24',152,'لَا رَجُلَ طَالِعًا جَبَلًا حَاضِرٌ','No man climbing a mountain is present.',[
-  laWord(),laBuilt('رَجُلَ','man'),laAccAdjective('طَالِعًا','climbing'),laListObject('طَالِعًا'),laKhabar('حَاضِرٌ','present')
- ],'Footnote 3 writes out the accusative option and supplies the parse.','تَبْسُطُ الْحَاشِيَةُ الثَّالِثَةُ وَجْهَ النَّصْبِ وَتُعْرِبُهُ.'),
+  laWord(),laBuilt('رَجُلَ','man'),governingParticiple(laAccAdjective('طَالِعًا','climbing'),'«رَجُلَ»','rajula (“man”)'),laListObject('طَالِعًا'),laKhabar('حَاضِرٌ','present')
+ ],'Footnote 3 writes and parses the accusative option first. The app identifies the active participle and its hidden subject.','تَبْسُطُ الْحَاشِيَةُ الثَّالِثَةُ وَجْهَ النَّصْبِ أَوَّلًا وَتُعْرِبُهُ. وَيُبَيِّنُ التَّطْبِيقُ اسْمَ الْفَاعِلِ وَفَاعِلَهُ الْمُسْتَتِرَ.'),
+ releaseBook('la-jins-23',152,'لَا رَجُلَ طَالِعٌ جَبَلًا حَاضِرٌ','No man climbing a mountain is present.',[
+  laWord(),laBuilt('رَجُلَ','man'),governingParticiple(laNomAdjective('طَالِعٌ','climbing'),'«رَجُلَ»','rajula (“man”)'),laListObject('طَالِعٌ'),laKhabar('حَاضِرٌ','present')
+ ],'Footnote 3 then writes the nominative option. The participle’s object makes this a non-mufrad adjective. The app identifies the active participle and its hidden subject.','ثُمَّ تَبْسُطُ الْحَاشِيَةُ الثَّالِثَةُ وَجْهَ الرَّفْعِ. وَالنَّعْتُ غَيْرُ مُفْرَدٍ لِاتِّصَالِهِ بِمَفْعُولِهِ. وَيُبَيِّنُ التَّطْبِيقُ اسْمَ الْفَاعِلِ وَفَاعِلَهُ الْمُسْتَتِرَ.'),
  releaseBook('la-jins-25',152,'لَا أَحَدَ أَغْيَرُ مِنَ اللَّهِ','No one has greater protective jealousy than Allah.',[
   laWord(),laBuilt('أَحَدَ','anyone'),laKhabar('أَغْيَرُ','more protective in jealousy'),
   whyToken('مِنَ','than',minPart.ar,minPart.en,'حُرِّكَتِ النُّونُ بِالْفَتْحِ عِنْدَ الْوَصْلِ قَبْلَ لَفْظِ الْجَلَالَةِ.','In connected speech the nūn takes fatḥ before the Divine Name.'),
@@ -3140,7 +3158,7 @@ const laJinsForms=[
   laWord(),omittedLaKhabar('ضَيْرَ','harm','عَلَيْنَا','“for us”')
  ],26,50,'الشُّعَرَاءِ','The exercise shows the short main-text ornament. Footnote 2 quotes the wider verse and estimates ʿalaynā as the omitted khabar.','يَعْرِضُ التَّدْرِيبُ زُخْرُفَ الْمَتْنِ الْمُخْتَصَرَ. وَتَذْكُرُ الْحَاشِيَةُ الثَّانِيَةُ تَمَامَ الْآيَةِ وَتُقَدِّرُ الْخَبَرَ بِـ«عَلَيْنَا».'),
  releaseBook('la-jins-28',153,'لَا إِلَهَ إِلَّا اللَّهُ','There is no deity worthy of worship except Allah.',[
-  laWord(),omittedLaKhabar('إِلَهَ','deity','حَقٌّ','ḥaqqun (“in truth”)'),exclusivePart(),
+  laWord(),omittedLaKhabar('إِلَهَ','deity','حَقٌّ','ḥaqqun (“true” — here, “worthy of worship”)'),exclusivePart(),
   token('اللَّهُ','Allah','لَفْظُ الْجَلَالَةِ بَدَلٌ مَرْفُوعٌ مِنْ مَحَلِّ «لَا» مَعَ اسْمِهَا، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','The Divine Name is a nominative substitute for the position of lā together with its ism, with visible ḍammah.')
  ],'Footnote 4 gives the unornamented formula and reports ḥaqqun as the omitted khabar. The app supplies the substitute analysis of the Divine Name.','تُورِدُ الْحَاشِيَةُ الرَّابِعَةُ الصِّيغَةَ دُونَ زُخْرُفِ الْآيَاتِ، وَتَذْكُرُ تَقْدِيرَ الْخَبَرِ الْمَحْذُوفِ بِـ«حَقٌّ». وَيُعْرِبُ التَّطْبِيقُ لَفْظَ الْجَلَالَةِ بَدَلًا.'),
  releaseBook('la-jins-29',153,'لَا فِي الدَّارِ رَجُلٌ وَلَا امْرَأَةٌ','There is neither a man nor a woman in the house.',[
@@ -3346,10 +3364,10 @@ const chapters=[
   help('تَنْفِي «لَا» النَّافِيَةُ لِلْجِنْسِ حُكْمَ الْخَبَرِ عَنْ كُلِّ فَرْدٍ مِنْ جِنْسِ اسْمِهَا. وَتَعْمَلُ عَمَلَ «إِنَّ»: تَنْصِبُ الِاسْمَ وَتَرْفَعُ الْخَبَرَ، بِشَرْطِ أَنْ يَكُونَا نَكِرَتَيْنِ وَأَنْ يَلِيَهَا اسْمُهَا مِنْ غَيْرِ فَاصِلٍ. وَتُفَرِّقُ حَاشِيَةُ ص ١٤٨ بَيْنَهَا وَبَيْنَ «لَا» الْعَامِلَةِ عَمَلَ «لَيْسَ»: فَيَصِحُّ أَنْ يُقَالَ بَعْدَ نَفْيِ الْوَحْدَةِ «بَلْ رَجُلَانِ»، وَلَا يَصِحُّ ذَلِكَ بَعْدَ نَفْيِ الْجِنْسِ.','Categorical lā denies the predicate of every member of the class named by its ism. It operates like inna: its ism is accusative and its khabar nominative. Both must be indefinite, and the ism must follow lā immediately. The p.148 note contrasts laysa-like lā: “rather, two men” can follow the negation of one, but cannot follow explicit negation of the entire class.'),
   help('إِنْ كَانَ الِاسْمُ مُضَافًا أَوْ شَبِيهًا بِالْمُضَافِ فَهُوَ مُعْرَبٌ مَنْصُوبٌ. وَالشَّبِيهُ بِالْمُضَافِ مَا يَتَّصِلُ بِهِ شَيْءٌ يُتَمِّمُ مَعْنَاهُ، كَفَاعِلٍ أَوْ مَفْعُولٍ بِهِ أَوْ جَارٍّ وَمَجْرُورٍ. وَالْمُفْرَدُ هُنَا مَا لَيْسَ مُضَافًا وَلَا شَبِيهًا بِالْمُضَافِ، وَلَوْ كَانَ مُثَنًّى أَوْ جَمْعًا.','An annexed ism or one resembling an annexed noun takes actual accusative inflection. A subject, object, or prepositional phrase can complete the meaning of the second type. Here mufrad means neither annexed nor annex-like, so it can include a dual or a plural.'),
   help('يُبْنَى الْمُفْرَدُ فِي مَحَلِّ نَصْبٍ عَلَى مَا يُنْصَبُ بِهِ لَوْ كَانَ مُعْرَبًا: عَلَى الْفَتْحِ فِي الْوَاحِدِ وَجَمْعِ التَّكْسِيرِ، وَعَلَى الْيَاءِ فِي الْمُثَنَّى وَجَمْعِ الْمُذَكَّرِ السَّالِمِ، وَعَلَى الْكَسْرِ فِي جَمْعِ الْمُؤَنَّثِ السَّالِمِ. وَيَجُوزُ فِي الْأَخِيرِ الْبِنَاءُ عَلَى الْفَتْحِ، كَمَا رُوِيَ فِي «لَذَّات».','A technical mufrad is built in the accusative position. It takes fixed fatḥ for a singular or broken plural, yāʾ for a dual or sound masculine plural, and kasr for a sound feminine plural. The book also permits fixed fatḥ for the last type, as in the other transmitted form of ladhdhāt in the poem.'),
-  help('إِذَا تَكَرَّرَتْ «لَا»، جَازَ فِي الِاسْمِ الْأَوَّلِ الْفَتْحُ بِنَاءً مَعَ الْإِعْمَالِ، أَوِ الرَّفْعُ عَلَى الِابْتِدَاءِ مَعَ الْإِهْمَالِ. فَإِنْ بُنِيَ الْأَوَّلُ عَلَى الْفَتْحِ جَازَ فِي الثَّانِي الْفَتْحُ بِنَاءً، وَالنَّصْبُ عَطْفًا عَلَى مَحَلِّ الِاسْمِ، وَالرَّفْعُ عَلَى الِابْتِدَاءِ فِي مِثَالِ الْحَاشِيَةِ. وَإِنْ رُفِعَ الْأَوَّلُ جَازَ فِي الثَّانِي الرَّفْعُ وَالْفَتْحُ. وَتَنْقُلُ حَاشِيَةُ ص ١٥١ عَنِ الْآلُوسِيِّ أَنَّ فَتْحَ الِاسْمِ الْأَوَّلِ يَجِبُ إِذَا قُصِدَ نَفْيُ الْجِنْسِ، وَيَمْتَنِعُ إِذَا قُصِدَ نَفْيُ الْوَحْدَةِ.','When lā repeats, the first noun may be built on fatḥ with operating lā or nominative as a mubtadaʾ with non-operating lā. After first-noun fatḥ, the second can be built on fatḥ, accusative by coordination with the ism’s position, or nominative as a mubtadaʾ in the footnote’s example. After a nominative first noun, the second can be nominative or built on fatḥ. The p.151 note quotes al-Ālūsī: the first noun must take fatḥ to negate the entire class and cannot take fatḥ if only one member is meant.'),
+  help('فِي مِثَالِ الْكِتَابِ «لَا حَوْلَ وَلَا قُوَّةَ» خَمْسَةُ أَوْجُهٍ:\nمَعَ بِنَاءِ الْأَوَّلِ عَلَى الْفَتْحِ: «حَوْلَ / قُوَّةَ» بِالْبِنَاءِ، أَوْ «حَوْلَ / قُوَّةً» بِالنَّصْبِ عَطْفًا عَلَى مَحَلِّ الِاسْمِ، أَوْ «حَوْلَ / قُوَّةٌ» بِالرَّفْعِ عَلَى الِابْتِدَاءِ فِي تَحْلِيلِ الْحَاشِيَةِ.\nمَعَ رَفْعِ الْأَوَّلِ عَلَى الِابْتِدَاءِ: «حَوْلٌ / قُوَّةٌ» بِالرَّفْعِ، أَوْ «حَوْلٌ / قُوَّةَ» بِالْبِنَاءِ عَلَى الْفَتْحِ.\nوَفِي هَذَا الْمِثَالِ تَنْقُلُ حَاشِيَةُ ص ١٥١ عَنِ الْآلُوسِيِّ وُجُوبَ فَتْحِ الْأَوَّلِ إِذَا قُصِدَ نَفْيُ الْجِنْسِ، وَامْتِنَاعَهُ إِذَا قُصِدَ نَفْيُ الْوَحْدَةِ.\nوَإِذَا عَمِلَتْ «لَا» فِي غَيْرِ هَذَا النَّمَطِ بَقِيَ لِكُلِّ صِيغَةٍ حُكْمُهَا: النَّصْبُ إِعْرَابًا لِلْمُضَافِ وَشِبْهِهِ، وَالْبِنَاءُ عَلَى مَا يُنْصَبُ بِهِ الْمُفْرَدُ لَوْ كَانَ مُعْرَبًا، كَالْيَاءِ لِلْمُثَنَّى.','The book’s ḥawl / quwwah example has five ending pairs:\nWith fixed fatḥ on the first noun: ḥawla / quwwata (fixed fatḥ), ḥawla / quwwatan (accusative by coordination with the ism’s position), or ḥawla / quwwatun (nominative as a mubtadaʾ in the footnote’s analysis).\nWith a nominative mubtadaʾ first: ḥawlun / quwwatun (nominative) or ḥawlun / quwwata (fixed fatḥ).\nFor this example, the p.151 note cites al-Ālūsī: the first noun takes fatḥ when the whole class is negated, but not when only one member is meant.\nWith operating lā, other forms keep their usual endings: annexed and annex-like isms take accusative inflection, and a built mufrad uses its would-be accusative ending, such as yāʾ for a dual.'),
   help('إِذَا عُطِفَ عَلَى اسْمِ «لَا» مِنْ غَيْرِ تَكْرَارِهَا، بَقِيَ الْأَوَّلُ فِي مِثَالِ الْمَتْنِ مَبْنِيًّا عَلَى الْفَتْحِ. وَيَجُوزُ فِي الْمَعْطُوفِ الرَّفْعُ عَلَى مَحَلِّ «لَا» مَعَ اسْمِهَا، أَوِ النَّصْبُ عَلَى مَحَلِّ اسْمِهَا وَحْدَهُ.','When a noun is coordinated without repeating lā, the first stays built on fatḥ in the printed model. The conjoined noun can be nominative following the position of lā together with its ism, or accusative following the position of the ism alone.'),
   help('إِذَا كَانَ الِاسْمُ وَالنَّعْتُ مُفْرَدَيْنِ هُنَا وَاتَّصَلَ النَّعْتُ بِالْمَنْعُوتِ، جَازَ فِيهِ الْفَتْحُ بِالتَّرْكِيبِ، وَالنَّصْبُ بِحَسَبِ مَحَلِّ اسْمِ «لَا»، وَالرَّفْعُ بِحَسَبِ مَحَلِّ «لَا» مَعَ اسْمِهَا. فَإِنْ فُصِلَ النَّعْتُ أَوْ كَانَ غَيْرَ مُفْرَدٍ، جَازَ الرَّفْعُ وَالنَّصْبُ فَقَطْ.','With an adjacent adjective, when both noun and adjective are technical mufrads, the adjective can be built on fatḥ as part of the compound, accusative following the ism’s position, or nominative following the position of lā with its ism. A separated or non-mufrad adjective takes one of the two inflected cases.'),
-  help('إِذَا جُهِلَ الْخَبَرُ وَجَبَ ذِكْرُهُ. وَإِذَا عُلِمَ مِنَ السِّيَاقِ فَالْأَكْثَرُ حَذْفُهُ. تُقَدِّرُ الْحَاشِيَةُ «لَهُمْ» بَعْدَ «فَوْتَ»، وَ«عَلَيْنَا» بَعْدَ «ضَيْرَ»، وَ«لَنَا» فِي مِثَالِ التَّكْرَارِ. وَتَذْكُرُ حَاشِيَةُ الصِّيغَةِ قَبْلَ «إِلَّا» تَقْدِيرَ «حَقٌّ».','State the khabar when the listener cannot recover it. When context supplies it, omission is usual. The notes estimate lahum after fawta, ʿalaynā after ḍayra, and lanā in the repeated example. The note on the unornamented formula gives ḥaqqun as the estimate before illā.'),
+  help('إِذَا جُهِلَ الْخَبَرُ وَجَبَ ذِكْرُهُ. وَإِذَا عُلِمَ مِنَ السِّيَاقِ فَالْأَكْثَرُ حَذْفُهُ. تُقَدِّرُ الْحَاشِيَةُ «لَهُمْ» بَعْدَ «فَوْتَ»، وَ«عَلَيْنَا» بَعْدَ «ضَيْرَ»، وَ«لَنَا» فِي الْمِثَالِ الْمُخْتَصَرِ «لَا حَوْلَ وَلَا قُوَّةَ». وَتَذْكُرُ حَاشِيَةُ الصِّيغَةِ قَبْلَ «إِلَّا» تَقْدِيرَ «حَقٌّ».','State the khabar when the listener cannot recover it. When context supplies it, omission is usual. The notes estimate lahum after fawta, ʿalaynā after ḍayra, and lanā in the short “lā ḥawla wa-lā quwwata” example. The note on the unornamented formula gives ḥaqqun as the estimate before illā.'),
   help('إِذَا دَخَلَتْ «لَا» عَلَى مَعْرِفَةٍ أَوْ فَصَلَ بَيْنَهَا وَبَيْنَ الِاسْمِ فَاصِلٌ، وَجَبَ إِهْمَالُهَا وَتَكْرَارُهَا فِي مِثَالَيِ الْمَتْنِ. وَيَبْقَى مَا بَعْدَهَا مُبْتَدَأً وَخَبَرًا. وَتَسُوقُ حَاشِيَةُ ص ١٥٣ السَّادِسَةُ الْمِثَالَيْنِ كَامِلَيْنِ لِتُبَيِّنَ مُطَابَقَةَ الْجَوَابِ لِلسُّؤَالِ.','A definite noun or a separator between lā and the noun prevents categorical operation. In the two textbook cases, lā must repeat, and the constructions retain ordinary mubtadaʾ and khabar syntax. Note 6 on p.153 supplies both complete examples to explain how the answer mirrors its question.')
  ],helpSourceEn:'Al-Mutammimah, printed pp.148–153. The chapter rules, examples, and stated parses come from the main text and its footnotes. The two complete inoperative-lā exercises are each credited to p.153 note 6. The p.152 Prophetic ḥadīth and the p.153 unornamented formula are identified separately from the two Qurʾānic ornaments. The app expands the printed options and supplies the remaining parsing, translations, and model links.',helpSourceAr:'الْمُتَمِّمَةُ، ص ١٤٨–١٥٣. الْقَوَاعِدُ وَالْأَمْثِلَةُ وَمَا نُصَّ عَلَيْهِ مِنَ الْإِعْرَابِ مِنَ الْمَتْنِ وَحَوَاشِيهِ. وَمِثَالَا الْإِهْمَالِ الْكَامِلَانِ مِنَ الْحَاشِيَةِ السَّادِسَةِ فِي ص ١٥٣. وَيُمَيَّزُ حَدِيثُ ص ١٥٢ وَصِيغَةُ ص ١٥٣ مِنَ الشَّاهِدَيْنِ الْقُرْآنِيَّيْنِ. وَيَبْسُطُ التَّطْبِيقُ الْوُجُوهَ الْمَطْبُوعَةَ وَيُكْمِلُ الْإِعْرَابَ وَالتَّرْجَمَةَ وَرَوَابِطَ التَّدْرِيبِ.'}
 ];

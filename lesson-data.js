@@ -5525,10 +5525,11 @@ const finalFollowers=(()=>{
    t('أَبُوحُ','I disclose',raf,me),t('بِحُبِّ','my love for',bi,gen('الْبَاءِ','bāʾ',true),pp('بِـ«أَبُوحُ»','abūḥu')),
    t('بَثْنَةَ','Bathnah',marked('مُضَافٌ إِلَيْهِ','Second term of the annexation','gen',diptote)),
    t('إِنَّهَا','indeed she',answerNasb,haFem(['نَصْبٍ اسْمُ «إِنَّ»','hā','accusative as the ism of inna'])),
-   pastCard('أَخَذَتْ','she took',fT,she),t('عَلَيَّ','from me',ala,ay('يَاءُ الْمُتَكَلِّمِ',gPrep,'الْفَتْحِ','fatḥ'),pp('بِـ«أَخَذَتْ»','akhadhat')),
+   pastCard('أَخَذَتْ','she took',fT,she),t('عَلَيَّ','from me',a('«عَلَى» حَرْفُ جَرٍّ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ، انْقَلَبَتْ أَلِفُهُ يَاءً سَاكِنَةً أُدْغِمَتْ فِي يَاءِ الْمُتَكَلِّمِ','Preposition ʿalā with no syntactic position; its alif became a sākin yāʾ merged into the speaker’s yāʾ'),ay('يَاءُ الْمُتَكَلِّمِ',gPrep,'الْفَتْحِ','fatḥ'),pp('بِـ«أَخَذَتْ»','akhadhat')),
    t('مَوَاثِقًا','pledges',obj,a('صُرِفَ لِلضَّرُورَةِ الشِّعْرِيَّةِ','Poetic necessity permits its tanwīn')),
    t('وَعُهُودَا','and promises',wa,co('مَوَاثِقًا','pledges','acc'),a('الْأَلِفُ فِي آخِرِ الْبَيْتِ لِلْإِطْلَاقِ','Final alif extends the rhyme'),a('الْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرُ «إِنَّ»','The verbal clause is the khabar of inna, in nominative position'))
-  ],'الْبَيْتُ كَامِلٌ فِي الْمَتْنِ، وَتَنْسُبُهُ الْحَاشِيَةُ ١ إِلَى جَمِيلِ بُثَيْنَةَ. وَتُعْرِبُ «لَا» الثَّانِيَةَ تَوْكِيدًا وَتَذْكُرُ الضَّرُورَةَ فِي «مَوَاثِقًا».','The full verse is printed. Note 1 attributes it to Jamīl Buthaynah, parses the repeated particle, and notes metrical necessity in mawāthiqan.'),
+  ],'الْبَيْتُ كَامِلٌ فِي الْمَتْنِ، وَتَنْسُبُهُ الْحَاشِيَةُ ١ إِلَى جَمِيلِ بُثَيْنَةَ. وَتُعْرِبُ «لَا» الثَّانِيَةَ تَوْكِيدًا وَتَذْكُرُ الضَّرُورَةَ فِي «مَوَاثِقًا». تَعَلُّقُ «عَلَيَّ» بِالْفِعْلِ مِنَ الْحَاشِيَةِ، وَبَيَانُ انْقِلَابِ الْأَلِفِ وَإِدْغَامِهَا مِنَ التَّطْبِيقِ.',
+    'The full verse is printed. Note 1 attributes it to Jamīl Buthaynah, parses the repeated particle, and notes metrical necessity in mawāthiqan. The note gives the attachment of ʿalayya; the app explains the change and merger of the preposition’s alif.'),
   e('tawkid-p272-02',272,'ضَرَبْتُ زَيْدًا ضَرَبْتُ زَيْدًا','I struck Zayd—I struck Zayd.',[
    t('ضَرَبْتُ','I struck',pastT,taa),object('زَيْدًا','Zayd'),t('ضَرَبْتُ','I struck (repeated)',pastT,taa),
    t('زَيْدًا','Zayd',obj,twice('لِلْجُمْلَةِ الْأُولَى بِجُمْلَةِ «ضَرَبْتُ زَيْدًا» الثَّانِيَةِ','the entire first clause by repeating it'))
@@ -5561,7 +5562,8 @@ const finalFollowers=(()=>{
    'Note 3 parses the accusative emphatic. There is no preceding kull in this ornament.'),
   e('tawkid-p275-04',275,'جَاءَ الْقَوْمُ كُلُّهُمْ أَجْمَعُونَ أَكْتَعُونَ أَبْصَعُونَ أَبْتَعُونَ','The whole group came, absolutely all of them.',[
    pastCard('جَاءَ','came'),sub('الْقَوْمُ','the group'),self('كُلُّهُمْ','all of them','mp'),
-   ...['أَجْمَعُونَ','أَكْتَعُونَ','أَبْصَعُونَ','أَبْتَعُونَ'].map(w=>t(w,'all (intensified)',semantic('','','nom',wawLike)))
+   t('أَجْمَعُونَ','all (intensified)',semantic('','','nom',wawLike)),
+   ...['أَكْتَعُونَ','أَبْصَعُونَ','أَبْتَعُونَ'].map(w=>t(w,'all (intensified)',semantic('تَابِعٌ لِـ«كُلُّهُمْ»','following kulluhum','nom',wawLike)))
   ],'الْحَاشِيَتَانِ ٤ وَ٥: التَّوَابِعُ عَلَى هَذَا التَّرْتِيبِ؛ وَيُبَيِّنُ أَوَّلُ ص ٢٧٦ أَنَّهَا لَا تُعْطَفُ بَعْضُهَا عَلَى بَعْضٍ.',
    'Notes 4–5 give the printed sequence and the inflection. The opening of p.276 explains that the equivalents do not coordinate with one another.')
  ];
@@ -5597,8 +5599,9 @@ const finalFollowers=(()=>{
   ],[3,97],'آلِ عِمْرَانَ','الْحِلْيَةُ تَنْتَهِي عِنْدَ «اسْتَطَاعَ». وَتَقْدِيرُ الْمُؤَلِّفِ «مِنْهُمْ» خَارِجَ الِاقْتِبَاسِ. وَتَذْكُرُ الْحَاشِيَةُ ١ الْخِلَافَ فِي اشْتِرَاطِ الرَّابِطِ، وَتُعْرِبُ الْحَاشِيَةُ ٢ الْمَقْطَعَ.',
    'The ornament ends at istaṭāʿa. The author estimates “of them” outside the quotation. Note 1 reports disagreement on requiring a link; note 2 parses the excerpt. The printed ḥijju agrees with Ḥafṣ.'),
   e('badal-p279-02',279,'أَعْجَبَنِي زَيْدٌ عِلْمُهُ','Zayd impressed me—his knowledge, that is.',[
-   pastCard('أَعْجَبَنِي','impressed me',protective,ya(objPro)),sub('زَيْدٌ','Zayd'),t('عِلْمُهُ','his knowledge',bd('اشْتِمَالٍ','Inclusion','زَيْدٌ','Zayd','nom',null,true),ha(gAnnex))
-  ],'الْحَاشِيَتَانِ ٣ وَ٤ تُبَيِّنَانِ الرَّابِطَ وَالْإِعْرَابَ.','Notes 3–4 define the relation and parse the expression.'),
+   pastCard('أَعْجَبَنِي','impressed me',protective,ya(objPro)),sub('زَيْدٌ','Zayd'),t('عِلْمُهُ','his knowledge',bd('اشْتِمَالٍ','Inclusion','زَيْدٌ','Zayd','nom',null,true),
+    a('الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ؛ يَعُودُ عَلَى «زَيْدٌ» وَيَرْبِطُ الْبَدَلَ بِالْمُبْدَلِ مِنْهُ','Attached hāʾ, fixed on ḍamm in genitive position as the annex complement; it refers back to Zayd and links the badal to him'))
+  ],'يَذْكُرُ الْمُؤَلِّفُ الرَّابِطَ الظَّاهِرَ بَعْدَ الْمِثَالِ؛ وَهُوَ الْهَاءُ الْعَائِدَةُ عَلَى زَيْدٍ. وَتُعْرِبُ الْحَاشِيَةُ ٤ الْمِثَالَ.','The author’s rule after the example identifies the overt link: hāʾ refers back to Zayd. Note 4 gives the parse.'),
   q('badal-p279-03',279,'قُتِلَ أَصْحَابُ الْأُخْدُودِ النَّارِ','Cursed were the people of the trench—the fire.',[
    t('قُتِلَ','cursed were',a('فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ عَلَى الْفَتْحِ','Passive past verb fixed on fatḥ')),
    t('أَصْحَابُ','the people of',n('نَائِبُ فَاعِلٍ','Deputy subject',true)),t('الْأُخْدُودِ','the trench',annex),t('النَّارِ','the fire',bd('اشْتِمَالٍ','Inclusion','الْأُخْدُودِ','the trench','gen'))
@@ -5640,7 +5643,7 @@ chapters.push({
  help:[
   help('الْعَطْفُ نَوْعَانِ: عَطْفُ بَيَانٍ وَعَطْفُ نَسَقٍ. عَطْفُ الْبَيَانِ تَابِعٌ يُوَضِّحُ الْمَعْرِفَةَ كَـ«عُمَرْ» بَعْدَ كُنْيَتِهِ، أَوْ يُخَصِّصُ النَّكِرَةَ كَـ«حَدِيدٌ» بَعْدَ «خَاتَمٌ». وَهُوَ جَامِدٌ لَا يُؤَوَّلُ بِمُشْتَقٍّ، بِخِلَافِ النَّعْتِ.','The author divides ʿaṭf into clarifying apposition and particle-mediated coordination. Clarifying apposition identifies a definite head, as ʿUmar after his kunyah, or narrows an indefinite head, as “iron” after “a ring.” Unlike an adjective, it is not derived or interpreted as derived.'),
   help('يُطَابِقُ مَتْبُوعَهُ فِي وَاحِدٍ مِنْ كُلِّ مَجْمُوعَةٍ: الرَّفْعِ وَالنَّصْبِ وَالْجَرِّ؛ وَالتَّذْكِيرِ وَالتَّأْنِيثِ؛ وَالتَّعْرِيفِ وَالتَّنْكِيرِ؛ وَالْإِفْرَادِ وَالتَّثْنِيَةِ وَالْجَمْعِ. وَسُكُونُ «عُمَرْ» فِي الْبَيْتِ عَارِضٌ لِلشِّعْرِ، لَا يُغَيِّرُ الرَّفْعَ.','It agrees with its head in one member of each set: case, gender, definiteness and number. The rhyme sukūn of ʿUmar does not change its nominative case.'),
-  help('يَجُوزُ فِي عَطْفِ الْبَيَانِ غَالِبًا إِعْرَابُهُ بَدَلَ كُلٍّ مِنْ كُلٍّ. وَتَذْكُرُ حَاشِيَةُ ص ٢٦٤ حَالَتَيْنِ مُمْتَنِعَتَيْنِ: فِي «هِنْدٌ قَامَ زَيْدٌ أَخُوهَا» لَا يُسْتَغْنَى عَنْ رَابِطِ «أَخُوهَا» فِي جُمْلَةِ الْخَبَرِ؛ وَفِي «يَا زَيْدُ الْحَارِثُ» لَا يَصِحُّ إِحْلَالُ «الْحَارِثُ» مَحَلَّ «زَيْدُ» مُبَاشَرَةً بَعْدَ «يَا».','It can usually also be parsed as a whole-for-whole badal. The note on p.264 gives two exceptions: in the Hind example the linked “her brother” is necessary within the predicate clause; and in the vocative example al-Ḥārith cannot simply replace Zayd immediately after yā.')
+  help('يَجُوزُ فِي عَطْفِ الْبَيَانِ غَالِبًا إِعْرَابُهُ بَدَلَ كُلٍّ مِنْ كُلٍّ. وَتَذْكُرُ حَاشِيَةُ ص ٢٦٤ حَالَتَيْنِ مُمْتَنِعَتَيْنِ: فِي «هِنْدٌ قَامَ زَيْدٌ أَخُوهَا» لَوْ كَانَ «أَخُوهَا» بَدَلًا لَكَانَ الْعَامِلُ مُقَدَّرًا مُكَرَّرًا فِي جُمْلَةٍ أُخْرَى، فَتَبْقَى جُمْلَةُ الْخَبَرِ «قَامَ زَيْدٌ» بِلَا رَابِطٍ يَعُودُ عَلَى «هِنْدٌ». وَفِي «يَا زَيْدُ الْحَارِثُ» لَا يَصِحُّ إِحْلَالُ «الْحَارِثُ» مَحَلَّ «زَيْدُ» مُبَاشَرَةً بَعْدَ «يَا».','It can usually also be parsed as a whole-for-whole badal. The note on p.264 gives two exceptions. In the Hind example, treating “her brother” as badal would put its implied repeated governor in a separate clause, leaving the predicate “Zayd stood” with no link back to Hind. In the vocative example, al-Ḥārith cannot simply replace Zayd immediately after yā.')
  ]
 },{
  id:'atf-nasaq',babId:'followers',order:3,titleAr:'عَطْفُ النَّسَقِ',titleEn:'Coordination',pages:'265–270',book:finalFollowers.nas,

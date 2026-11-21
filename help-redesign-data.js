@@ -886,6 +886,32 @@ finalManSummary('imperfect-nawasib',[
  ['response','فَاءُ السَّبَبِيَّةِ وَوَاوُ الْمَعِيَّةِ','Causal fāʾ and accompaniment wāw']
 ]);
 
+finalManSummary('two-verb-jawazim',[
+ 'تَجْزِمُ الْأَدَاةُ فِعْلَ الشَّرْطِ وَفِعْلَ الْجَوَابِ.','The governor gives jussive force to the condition and answer.',
+ 'الْأَوَّلُ شَرْطٌ، وَالثَّانِي جَوَابٌ أَوْ جَزَاءٌ.','The first verb is the condition; the second is the answer or consequence.',
+ 'فَرِّقْ بَيْنَ عَلَامَةِ جَزْمِ الْمُضَارِعِ وَمَحَلِّ الْفِعْلِ الْمَبْنِيِّ أَوِ الْجُمْلَةِ الْمَرْبُوطَةِ.','Distinguish the imperfect’s jussive ending from the syntactic position of a fixed verb or linked clause.',
+ 'حَدِّدِ الْأَدَاةَ، ثُمَّ الشَّرْطَ، ثُمَّ الْجَوَابَ وَرَابِطَهُ إِنْ وُجِدَ.','Find the governor, the condition, then the answer and its link if present.','jaw-two-p243-01'
+],[
+ ['governors','الْأَدَوَاتُ وَعَمَلُهَا','The eleven and their operation',true],
+ ['meanings','الْحُرُوفُ وَالْأَسْمَاءُ وَمَعَانِيهَا','Particles, nouns and meanings'],
+ ['linked','اقْتِرَانُ جَوَابِ الشَّرْطِ بِالْفَاءِ، أَوْ بِإِذَا الْفُجَائِيَّةِ','Answers linked by fāʾ or sudden idhā',true],
+ ['unusual','كَيْفَمَا وَإِذَا فِي الشِّعْرِ','Kayfamā and poetic idhā']
+]);
+finalManSummary('adjective-naat',[
+ 'يَتْبَعُ النَّعْتُ مَنْعُوتَهُ فِي الْإِعْرَابِ وَالتَّعْرِيفِ وَالتَّنْكِيرِ.','The adjective agrees with its head in case and definiteness.',
+ 'تَابِعٌ مُشْتَقٌّ أَوْ مَا يُؤَوَّلُ بِهِ، يُخَالِفُ مَتْبُوعَهُ فِي اللَّفْظِ.','A dependent expression, derived or interpretable as derived, and distinct in wording from its head.',
+ 'الْحَقِيقِيُّ يُطَابِقُ مَنْعُوتَهُ فِي الْجِنْسِ وَالْعَدَدِ أَيْضًا، وَالسَّبَبِيُّ يُرَاعِي جِنْسَ فَاعِلِهِ.','A direct adjective also follows its head in gender and number; a causal adjective takes its own subject’s gender.',
+ 'ابْحَثْ عَنِ الْمَنْعُوتِ لِلْإِعْرَابِ، وَعَنْ فَاعِلِ النَّعْتِ لِلْجِنْسِ.','Find the head for case, and the adjective’s subject for gender.','naat-p257-01'
+],[
+ ['definition','تَعْرِيفُ النَّعْتِ وَالْمُشْتَقُّ','Definition and derived forms',true],
+ ['equivalents','مَا يُؤَوَّلُ بِالْمُشْتَقِّ','What can act like a derived adjective'],
+ ['direct','النَّعْتُ الْحَقِيقِيُّ','The direct adjective',true],
+ ['causal','النَّعْتُ السَّبَبِيُّ','The causal adjective'],
+ ['purposes','أَغْرَاضُ النَّعْتِ وَفَوَائِدُهُ','Purposes of the adjective'],
+ ['cut','جَوَازُ إِتْبَاعِ النَّعْتِ وَقَطْعِهِ','Agreement and cutting off'],
+ ['multiple','تَعَدُّدُ النُّعُوتِ','Several adjectives for one noun']
+]);
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = HELP_REDESIGN_BY_CHAPTER;
 }

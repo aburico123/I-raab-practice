@@ -4810,6 +4810,303 @@ chapters.push({
  ]
 });
 
+const finishInflection=(()=>{
+ const S=starterAnalyses;
+ const {a,t,fixed,estimated,ft,cs,wa,fa,fi,ala,ila,bi,li,min,an,ka,ay,gPrep,gAnnex,objPro,subPro,ha,kaf,mim,taa,pl,hidden,hu,gen,annex,n,ac,subject,past,pastT,pastW,pp}=S;
+ const we=hidden('نَحْنُ','we',true), me=hidden('أَنَا','I',true), you=hidden('أَنْتَ','you',true), she=hidden('هِيَ','she');
+ const ya=role=>ay('يَاءُ الْمُتَكَلِّمِ',role), na=role=>ay('«نَا»',role);
+ const protective=cs('النُّونُ نُونُ الْوِقَايَةِ','Protective nūn');
+ const obj=ac('مَفْعُولٌ بِهِ','Direct object'), mub=n('مُبْتَدَأٌ','Nominal subject'), kh=n('خَبَرٌ','Predicate');
+ const coord=(ar,en)=>fixed(`«${ar}» حَرْفُ عَطْفٍ`,`Coordinating ${en}`);
+ const lam=fixed('«لَمْ» حَرْفُ نَفْيٍ وَجَزْمٍ وَقَلْبٍ','Lam is a negative, jussive, past-shifting particle');
+ const jLam=a('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَمْ» بِالسُّكُونِ','Imperfect made jussive by lam, with sukūn');
+ const raf=a('فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ','Indicative imperfect with a visible ḍammah');
+ const passT=a('فِعْلٌ مَاضٍ مَبْنِيٌّ لِلْمَجْهُولِ عَلَى السُّكُونِ لِاتِّصَالِهِ بِضَمِيرِ الرَّفْعِ','Passive past verb fixed on sukūn before its subject suffix');
+ const negativeLa=estimated('«لَا» حَرْفُ نَفْيٍ','Negative lā');
+ const prohibitive=estimated('«لَا» حَرْفُ نَهْيٍ وَجَزْمٍ','Prohibitive jussive lā');
+ const haveFat=(ar,en)=>a(`${ar} بِفَتْحَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَهُوَ مُضَافٌ`,`${en}, with fatḥah estimated on alif, which cannot bear it; first term of the annexation`);
+ const matchAdj=(ar,en)=>a(`نَعْتٌ لِـ«${ar}» مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ`,`Modifier of ${en}, genitive with a visible kasrah`);
+ const addM=estimated('«مَا» حَرْفٌ زَائِدٌ لِلتَّوْكِيدِ غَيْرُ كَافٍّ','Emphatic extra mā; it does not block government');
+ const stopM=estimated('«مَا» حَرْفٌ كَافٌّ عَنِ الْعَمَلِ','Extra mā blocks government');
+ const rub=ft('«رُبَّ» حَرْفُ تَقْلِيلٍ وَجَرٍّ','Rubba, a preposition indicating paucity');
+ const q=(id,p,ar,en,ts,ref,name,note,ee='',aa='',markers=[])=>({
+  ...releaseQuran(id,p,ar,en,ts,...ref,name,`The main text prints this excerpt. ${note} ${ee}`,`الْمَقْطَعُ مِنَ الْمَتْنِ. ${aa}`),...(markers.length?{verseMarkers:markers}:{})
+ });
+ const b=(id,p,ar,en,ts,note,aa='')=>releaseBook(id,p,ar,en,ts,`The main text prints this example. ${note}`,`الْمِثَالُ مِنَ الْمَتْنِ. ${aa}`);
+ const phr=(ar,en)=>a(`الْمَصْدَرُ الْمُؤَوَّلُ ${ar}`,`The clause construed as a verbal noun ${en}`);
+ const addedMa=[
+  q('added-ma-p220-01',220,'مِمَّا خَطِيئَاتِهِمْ','Because of their sins.',[
+   t('مِمَّا','because of',min,addM),t('خَطِيئَاتِهِمْ','their sins',gen('مِنْ','min',true),ha(gAnnex,true),mim,pp('بِـ«أُغْرِقُوا» فِي سِيَاقِ الْآيَةِ','“they were drowned” in the verse context'))],[71,25],'نُوحٍ','Note 1 gives the parse and separately quotes the full āyah.','','الْحَاشِيَةُ الْأُولَى تُعْرِبُ الْمِثَالَ وَتُورِدُ الْآيَةَ كَامِلَةً فِي حِلْيَةٍ مُسْتَقِلَّةٍ.'),
+  q('added-ma-p220-02',220,'عَمَّا قَلِيلٍ','In a little while.',[
+   t('عَمَّا','in',an,addM),t('قَلِيلٍ','a little while',gen('عَنْ','ʿan'),pp('بِـ«نَادِمِينَ» فِي سِيَاقِ الْآيَةِ','“regretful” in the verse context'))],[23,40],'الْمُؤْمِنُونَ','Note 2 gives the parse and the separate full āyah.','','الْحَاشِيَةُ الثَّانِيَةُ تُعْرِبُ الْمِثَالَ وَتُورِدُ الْآيَةَ كَامِلَةً فِي حِلْيَةٍ مُسْتَقِلَّةٍ.'),
+  q('added-ma-p220-03',220,'فَبِمَا نَقْضِهِمْ','So because of their breaking [the covenant].',[
+   t('فَبِمَا','so because of',fa,bi,addM),t('نَقْضِهِمْ','their breaking',gen('الْبَاءِ','bāʾ',true),ha(gAnnex,true),mim,pp('بِفِعْلٍ مَحْذُوفٍ تَقْدِيرُهُ «لَعَنَّاهُمْ»','an omitted verb, “We cursed them”'))],[4,155],'النِّسَاءِ','Note 3 gives the conjunction, parse and estimated governor.','','الْحَاشِيَةُ الثَّالِثَةُ تَذْكُرُ الْعَطْفَ وَالْإِعْرَابَ وَتُقَدِّرُ الْعَامِلَ الْمَحْذُوفَ.'),
+  b('added-ma-p220-04',220,'رُبَّمَا أَوْفَيْتُ فِي عَلَمٍ تَرْفَعَنْ ثَوْبِي شَمَالَاتُ','Many a time I climbed a peak where north winds lifted my garment.',[
+   t('رُبَّمَا','many a time',ft('«رُبَّ» حَرْفُ تَكْثِيرٍ، وَقِيلَ تَقْلِيلٍ','Rubba indicating frequency, alternatively paucity'),stopM),t('أَوْفَيْتُ','I climbed',pastT,taa),
+   t('فِي','on',fi),t('عَلَمٍ','a peak',gen('فِي','fī'),pp('بِـ«أَوْفَيْتُ»','“I climbed”')),
+   t('تَرْفَعَنْ','lift',a('فِعْلٌ مُضَارِعٌ مَبْنِيٌّ عَلَى الْفَتْحِ لِاتِّصَالِهِ الْمُبَاشِرِ بِنُونِ التَّوْكِيدِ الْخَفِيفَةِ','Imperfect fixed on fatḥ because light emphatic nūn is attached directly'),fixed('النُّونُ نُونُ التَّوْكِيدِ الْخَفِيفَةُ','Light emphatic nūn')),
+   t('ثَوْبِي','my garment',a('مَفْعُولٌ بِهِ مُقَدَّمٌ مَنْصُوبٌ بِفَتْحَةٍ مُقَدَّرَةٍ قَبْلَ الْيَاءِ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ','Fronted object, with fatḥah estimated before yāʾ where its matching vowel appears; first term of the annexation'),ya(gAnnex)),
+   t('شَمَالَاتُ','north winds',subject,a('الْجُمْلَةُ حَالٌ فِي مَحَلِّ نَصْبٍ، أَوْ نَعْتٌ فِي مَحَلِّ جَرٍّ لِـ«عَلَمٍ» وَالْعَائِدُ مَحْذُوفٌ تَقْدِيرُهُ «فِيهِ»','The clause is either a circumstantial clause in accusative position or a modifier of “a peak” in genitive position, with omitted return “in it”'))],
+   'Attributed to Jadhīmah al-Abrash in note 4, whose bibliography continues on p.221. The note reports the two clause analyses and cites Ibn Hishām against taking rubba here as paucity. The printed rhyme ending is retained.',
+   'الْبَيْتُ لِجَذِيمَةَ الْأَبْرَشِ عَلَى نِسْبَةِ الْحَاشِيَةِ الرَّابِعَةِ، وَتَتِمُّ مَرَاجِعُهَا فِي ص ٢٢١. وَتَذْكُرُ الْحَاشِيَةُ وَجْهَيِ الْجُمْلَةِ وَرَدَّ ابْنِ هِشَامٍ لِلتَّقْلِيلِ هُنَا.'),
+  b('added-ma-p221-01',221,'أَخٌ مَاجِدٌ لَمْ يُخْزِنِي يَوْمَ مَشْهَدٍ كَمَا سَيْفُ عَمْرٍو لَمْ تَخُنْهُ مَضَارِبُهْ','A noble brother did not disgrace me on the day of battle, just as the edges of ʿAmr’s sword did not fail him.',[
+   t('أَخٌ','a brother',mub),t('مَاجِدٌ','noble',n('نَعْتٌ لِـ«أَخٌ»','Modifier of akhun')),t('لَمْ','did not',lam),
+   t('يُخْزِنِي','disgrace me',a('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَمْ» بِحَذْفِ الْيَاءِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ','Imperfect made jussive by lam, with final yāʾ deleted; its subject is optionally hidden: “he”'),protective,ya(objPro),a('الْجُمْلَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ','The clause is in nominative position as predicate')),
+   t('يَوْمَ','on the day',ac('ظَرْفُ زَمَانٍ لِـ«يُخْزِ»','Time adverb attached to “disgrace”',true)),t('مَشْهَدٍ','of battle',annex),t('كَمَا','just as',ka,stopM),
+   t('سَيْفُ','the sword',n('مُبْتَدَأٌ','Nominal subject',true)),t('عَمْرٍو','of ʿAmr',annex),t('لَمْ','did not',lam),t('تَخُنْهُ','fail him',jLam,ha(objPro)),
+   t('مَضَارِبُهْ','its striking edges',n('فَاعِلٌ','Subject',true),a('الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ، وَسُكِّنَ فِي الْوَقْفِ','The attached hāʾ is fixed on ḍamm in genitive position as annex, with printed sukūn at the stop'),a('جُمْلَةُ «لَمْ تَخُنْهُ مَضَارِبُهْ» فِي مَحَلِّ رَفْعٍ خَبَرٌ','This verbal clause is in nominative position as predicate'))],
+   'Note 1 attributes the poem to Nahshal ibn Ḥarrī. It also allows akhun as a predicate of omitted huwa, with the negative clause then a second modifier.',
+   'تَنْسِبُهُ الْحَاشِيَةُ الْأُولَى إِلَى نَهْشَلِ بْنِ حَرِّيٍّ، وَتُجِيزُ «أَخٌ» خَبَرًا لِمُبْتَدَإٍ مَحْذُوفٍ، فَتَكُونُ جُمْلَةُ النَّفْيِ نَعْتًا ثَانِيًا.'),
+  b('added-ma-p221-02',221,'رُبَّمَا ضَرْبَةٍ بِسَيْفٍ صَقِيلٍ بَيْنَ بُصْرَى وَطَعْنَةٍ نَجْلَاءِ','Many a blow with a polished sword by Buṣrā, and many a deep thrust.',[
+   t('رُبَّمَا','many a',rub,addM),t('ضَرْبَةٍ','blow',gen('رُبَّ','rubba')),t('بِسَيْفٍ','with a sword',bi,gen('الْبَاءِ','bāʾ'),pp('بِـ«ضَرْبَةٍ»','“blow”')),
+   t('صَقِيلٍ','polished',matchAdj('سَيْفٍ','sayfin')),t('بَيْنَ','by',ac('ظَرْفُ مَكَانٍ مُتَعَلِّقٌ بِـ«ضَرْبَةٍ»','Place adverb attached to “blow”',true)),
+   t('بُصْرَى','Buṣrā',a('مُضَافٌ إِلَيْهِ مَجْرُورٌ بِفَتْحَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، نِيَابَةً عَنِ الْكَسْرَةِ لِأَنَّهُ مَمْنُوعٌ مِنَ الصَّرْفِ','Second term of the annexation, genitive with fatḥah instead of kasrah because it is a diptote; estimated on alif, which cannot bear it')),
+   t('وَطَعْنَةٍ','and a thrust',wa,a('مَعْطُوفٌ عَلَى «ضَرْبَةٍ» مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ','Coordinated with ḍarbatin, genitive with a visible kasrah')),
+   t('نَجْلَاءِ','deep',a('نَعْتٌ لِـ«طَعْنَةٍ» مَجْرُورٌ بِالْكَسْرَةِ لِلضَّرُورَةِ الشِّعْرِيَّةِ','Modifier of ṭaʿnatin, genitive with kasrah by poetic license'))],
+   'Note 2 attributes the verse to ʿAdī ibn al-Raʿlāʾ; its parse continues on p.222. The note explains the exceptional genitive kasrah in the rhyme.',
+   'الْبَيْتُ لِعَدِيِّ بْنِ الرَّعْلَاءِ فِي الْحَاشِيَةِ الثَّانِيَةِ، وَتَتِمُّ فِي ص ٢٢٢. وَتَجْعَلُ الْحَاشِيَةُ كَسْرَةَ الْقَافِيَةِ ضَرُورَةً.'),
+  b('added-ma-p222-01',222,'وَنَنْصُرُ مَوْلَانَا وَنَعْلَمُ أَنَّهُ كَمَا النَّاسِ مَجْرُومٌ عَلَيْهِ وَجَارِمٌ','We stand by our ally, knowing that, like other people, he is both wronged and a wrongdoer.',[
+   t('وَنَنْصُرُ','and we support',wa,raf,we),t('مَوْلَانَا','our ally',haveFat('مَفْعُولٌ بِهِ مَنْصُوبٌ','Direct object, accusative'),na(gAnnex)),
+   t('وَنَعْلَمُ','knowing',ft('الْوَاوُ وَاوُ الْحَالِ، وَقِيلَ حَرْفُ عَطْفٍ','Circumstantial wāw, alternatively coordinating wāw'),raf,we),
+   t('أَنَّهُ','that he',ft('«أَنَّ» حَرْفُ تَوْكِيدٍ يَنْصِبُ الِاسْمَ وَيَرْفَعُ الْخَبَرَ','Emphatic anna makes its ism accusative and its khabar nominative'),ay('الْهَاءُ',['نَصْبٍ اسْمُ «أَنَّ»','hāʾ','the accusative as ism of anna'],'الضَّمِّ','ḍamm')),
+   t('كَمَا','like',ka,addM),t('النَّاسِ','other people',gen('الْكَافِ','kāf'),pp('بِمَحْذُوفٍ خَبَرِ «أَنَّ»','an omitted predicate of anna'),phr('سَدَّ مَسَدَّ مَفْعُولَيْ «نَعْلَمُ»','fills both object slots of “we know”')),
+   t('مَجْرُومٌ','wronged',n('خَبَرٌ ثَانٍ لِـ«أَنَّ»','Second predicate of anna')),
+   t('عَلَيْهِ','against him',ala,ha(gPrep,true),a('عَلَى إِعْرَابِ الْحَاشِيَةِ، الْجَارُّ وَالْمَجْرُورُ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ لِاسْمِ الْمَفْعُولِ «مَجْرُومٌ»','In the note’s analysis, the phrase is in nominative position as deputy subject of the passive participle')),
+   t('وَجَارِمٌ','and a wrongdoer',wa,n('مَعْطُوفٌ عَلَى «مَجْرُومٌ»','Coordinated with majrūmun'))],
+   'Note 1 attributes the verse to ʿAmr ibn Barrāqah and reports al-Baghdādī’s alternative making majrūm the predicate of an omitted huwa. The print leaves the stopping mīm unmarked; app vocalization uses nominative as the note’s coordination requires.',
+   'تَنْسِبُهُ الْحَاشِيَةُ الْأُولَى إِلَى عَمْرِو بْنِ بَرَّاقَةَ، وَتَنْقُلُ عَنِ الْبَغْدَادِيِّ أَنَّ «مَجْرُومٌ» خَبَرٌ لِمُبْتَدَإٍ مَحْذُوفٍ. وَالْمِيمُ الْوَقْفِيَّةُ غَيْرُ مَضْبُوطَةٍ فِي الْمَتْنِ، وَضَبَطَهَا الْمَوْقِعُ عَلَى الرَّفْعِ لِلْعَطْفِ.')
+ ];
+ const nAnn=(ar,en)=>n(ar,en,true);
+ const fragmentN=a('صُورَتُهُ هُنَا الرَّفْعُ بِالضَّمَّةِ الظَّاهِرَةِ، وَلَا جُمْلَةَ تُعَيِّنُ وَظِيفَتَهُ، وَهُوَ مُضَافٌ','It has nominative form here with a visible ḍammah, but no sentence determines its role; it is the first term of the annexation');
+ const assumedKh=(ar,en)=>nAnn(`خَبَرٌ لِمُبْتَدَإٍ مَحْذُوفٍ تَقْدِيرُهُ «${ar}»`,`Predicate of omitted “${en}”`);
+ const exAnn=(id,pg,w,v,wEn,vEn,parse=fragmentN,info='',arInfo='',lead=null,translation=null)=>b(id,pg,`${w} ${v}`,translation||`${wEn} ${vEn}.`,[t(w,wEn,...(lead?[lead]:[]),parse),t(v,vEn,annex)],info,arInfo);
+ const n223=['P.223 note 2 supplies “this is.”','تُقَدِّرُ الْحَاشِيَةُ الثَّانِيَةُ الْمُبْتَدَأَ «هَذَا».'];
+ const iDafa=[
+  exAnn('idafa-p223-01',223,'غُلَامُ','زَيْدٍ','servant','of Zayd',assumedKh('هَذَا','this'),...n223,null,'Zayd’s servant.'),
+  exAnn('idafa-p223-02',223,'غُلَامِ','زَيْدٍ','servant','of Zayd',a('اسْمٌ مَجْرُورٌ بِـ«فِي» فِي سِيَاقِ قَوْلِ الْمُؤَلِّفِ «كَمَا فِي»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ','Noun governed by fī in the author’s surrounding wording “as in,” genitive with a visible kasrah; first term of the annexation'),'The second printed occurrence illustrates loss of tanwīn. The preceding fī is outside the prompt.','هَذَا هُوَ الْمَوْضِعُ الثَّانِي، وَفِيهِ حَذْفُ التَّنْوِينِ؛ وَ«فِي» مِنْ سِيَاقِ الْمَتْنِ.',null,'Zayd’s servant.'),
+  exAnn('idafa-p223-03',223,'غُلَامَا','زَيْدٍ','Two servants of','Zayd',a('خَبَرٌ لِمُبْتَدَإٍ مَحْذُوفٍ تَقْدِيرُهُ «هَذَانِ»، مَرْفُوعٌ بِالْأَلِفِ نِيَابَةً عَنِ الضَّمَّةِ لِأَنَّهُ مُثَنًّى، وَحُذِفَتِ النُّونُ لِلْإِضَافَةِ، وَهُوَ مُضَافٌ','Predicate of omitted “these two,” nominative with alif instead of ḍammah because it is dual; nūn is deleted in annexation, and it is the first term'),'Note 4 gives the omitted subject and nominative sign.','تُقَدِّرُ الْحَاشِيَةُ الرَّابِعَةُ الْمُبْتَدَأَ وَتُعَيِّنُ عَلَامَةَ الرَّفْعِ.'),
+  exAnn('idafa-p223-04',223,'وَكَاتِبُو','عَمْرٍو','And the scribes of','ʿAmr',a('خَبَرٌ لِمُبْتَدَإٍ مَحْذُوفٍ تَقْدِيرُهُ «هَؤُلَاءِ»، مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ، وَحُذِفَتِ النُّونُ لِلْإِضَافَةِ، وَهُوَ مُضَافٌ','Predicate of omitted “these,” nominative with wāw instead of ḍammah because it is a sound masculine plural; nūn is deleted in annexation, and it is the first term'),'Note 5 supplies the subject and nominative sign.','تُقَدِّرُ الْحَاشِيَةُ الْخَامِسَةُ الْمُبْتَدَأَ وَتُعَيِّنُ عَلَامَةَ الرَّفْعِ.',wa),
+  exAnn('idafa-p223-05',223,'غُلَامُ','زَيْدٍ','A servant belonging to','Zayd',fragmentN,'This occurrence illustrates an underlying sense of lām.','هَذَا الْمَوْضِعُ مِثَالٌ لِتَقْدِيرِ اللَّامِ.'),
+  exAnn('idafa-p223-06',223,'وَثَوْبُ','بَكْرٍ','And the garment of','Bakr',fragmentN,'Coordinates the second lām example with the first.','هُوَ الْمِثَالُ الثَّانِي لِتَقْدِيرِ اللَّامِ.',wa),
+  exAnn('idafa-p224-01',224,'ثَوْبُ','خَزٍّ','A garment of','khazz cloth',fragmentN,'The first of the three material examples with an underlying min.','أَوَّلُ الْأَمْثِلَةِ الثَّلَاثَةِ عَلَى تَقْدِيرِ «مِنْ».'),
+  exAnn('idafa-p224-02',224,'وَبَابُ','سَاجٍ','And a door of','teak',fragmentN,'The second material example.','الْمِثَالُ الثَّانِي لِلْمَادَّةِ.',wa),
+  exAnn('idafa-p224-03',224,'وَخَاتَمُ','حَدِيدٍ','And a ring of','iron',fragmentN,'Notes 1–2 discuss the material test and possible non-annexed analyses.','تَذْكُرُ الْحَاشِيَتَانِ الْأُولَى وَالثَّانِيَةُ شَرْطَ الْمَادَّةِ وَوُجُوهًا خَارِجَ الْإِضَافَةِ.',wa),
+  q('idafa-p224-04',224,'بَلْ مَكْرُ اللَّيْلِ','Rather, plotting by night.',[
+   t('بَلْ','rather',fixed('«بَلْ» حَرْفُ إِضْرَابٍ','Bal shifts to a corrective statement')),
+   t('مَكْرُ','plotting',nAnn('فَاعِلٌ لِفِعْلٍ مَحْذُوفٍ تَقْدِيرُهُ «صَدَّنَا»','Subject of omitted “kept us back”')),t('اللَّيْلِ','by night',annex)],[34,33],'سَبَأٍ','Note 4 gives this parse and also allows makru as predicate of an omitted subject or subject with omitted predicate.','','الْحَاشِيَةُ الرَّابِعَةُ تُعْرِبُهُ فَاعِلًا، وَتُجِيزُ «مَكْرُ» خَبَرًا لِمُبْتَدَإٍ مَحْذُوفٍ أَوْ مُبْتَدَأً خَبَرُهُ مَحْذُوفٌ.'),
+  q('idafa-p224-05',224,'يَا صَاحِبَيِ السِّجْنِ','O two fellow prisoners!',[
+   t('يَا','O',estimated('«يَا» حَرْفُ نِدَاءٍ','Vocative yā')),
+   t('صَاحِبَيِ','two companions',a('مُنَادًى مَنْصُوبٌ بِالْيَاءِ نِيَابَةً عَنِ الْفَتْحَةِ لِأَنَّهُ مُثَنًّى، وَحُذِفَتِ النُّونُ لِلْإِضَافَةِ، وَهُوَ مُضَافٌ','Vocative, accusative with yāʾ instead of fatḥah because it is dual; nūn is deleted in annexation, and it is the first term')),
+   t('السِّجْنِ','in prison',annex)],[12,41],'يُوسُفَ','The main source cites Q12:41. Note 5 quotes the separate full Q12:39, which begins with the identical words, and supplies the parse. The introductory conjunction is outside the main ornament.','','يُحِيلُ الْمَتْنُ إِلَى يُوسُفَ ٤١. وَتُورِدُ الْحَاشِيَةُ الْخَامِسَةُ يُوسُفَ ٣٩ بِتَمَامِهَا وَتَذْكُرُ الْإِعْرَابَ. وَالْوَاوُ قَبْلَ حِلْيَةِ الْمَتْنِ.'),
+  exAnn('idafa-p225-01',225,'ضَارِبُ','زَيْدٍ','One striking','Zayd',assumedKh('هَذَا','this'),'Note 4 estimates “this,” and note 3 identifies the annexed noun as the participle’s semantic object.','تُقَدِّرُ الْحَاشِيَةُ الرَّابِعَةُ «هَذَا»، وَتُبَيِّنُ الثَّالِثَةُ أَنَّ الْمُضَافَ إِلَيْهِ مَفْعُولُ الْوَصْفِ فِي الْمَعْنَى.'),
+  exAnn('idafa-p225-02',225,'مَضْرُوبُ','الْعَبْدِ','struck','the servant',assumedKh('هَذَا','this'),'Note 5 estimates “this”; the annexed noun is the passive participle’s semantic deputy subject (note 3).','تُقَدِّرُ الْحَاشِيَةُ الْخَامِسَةُ «هَذَا»، وَالْمُضَافُ إِلَيْهِ نَائِبُ فَاعِلِ الْوَصْفِ فِي الْمَعْنَى.',null,'One whose servant is struck.'),
+  exAnn('idafa-p225-03',225,'حَسَنُ','الْوَجْهِ','Handsome of','face',assumedKh('هَذَا','this'),'Note 6 estimates “this”; face is the adjective’s semantic subject (note 3).','تُقَدِّرُ الْحَاشِيَةُ السَّادِسَةُ «هَذَا»، وَالْمُضَافُ إِلَيْهِ فَاعِلُ الْوَصْفِ فِي الْمَعْنَى.'),
+  exAnn('idafa-p225-04',225,'غُلَامُ','زَيْدٍ','A servant of','Zayd',assumedKh('هَذَا','this'),'Note 8 supplies “this.” Neither condition for a merely verbal annexation is met.','تُقَدِّرُ الْحَاشِيَةُ الثَّامِنَةُ «هَذَا»، وَلَا يَتَحَقَّقُ شَرْطَا الْإِضَافَةِ اللَّفْظِيَّةِ.'),
+  exAnn('idafa-p225-05',225,'إِكْرَامُ','زَيْدٍ','Honoring','Zayd',assumedKh('هَذَا','this'),'Note 9 supplies “this.” The governing first term is a verbal noun, not an adjective.','تُقَدِّرُ الْحَاشِيَةُ التَّاسِعَةُ «هَذَا». وَالْمُضَافُ مَصْدَرٌ لَا صِفَةٌ.'),
+  b('idafa-p226-01',226,'كَاتِبُ الْقَاضِي','The judge’s scribe.',[
+   t('كَاتِبُ','scribe',fragmentN),t('الْقَاضِي','of the judge',a('مُضَافٌ إِلَيْهِ مَجْرُورٌ بِكَسْرَةٍ مُقَدَّرَةٍ عَلَى الْيَاءِ لِلثِّقَلِ','Second term of the annexation, genitive with kasrah estimated on yāʾ because pronunciation is heavy'))],
+   'Note 1 explains the sense “a scribe for the judge,” not “the judge writes.”','تُقَدِّرُ الْحَاشِيَةُ الْأُولَى «كَاتِبٌ لِلْقَاضِي»، لَا «يَكْتُبُ الْقَاضِي».'),
+  exAnn('idafa-p226-02',226,'غُلَامُ','زَيْدٍ','servant','of Zayd',fragmentN,'Here the proper-name annex makes the first noun definite.','هُنَا أَفَادَتِ الْإِضَافَةُ إِلَى الْعَلَمِ التَّعْرِيفَ.',null,'Zayd’s servant.'),
+  exAnn('idafa-p226-03',226,'غُلَامُ','رَجُلٍ','A servant of','a man',fragmentN,'The indefinite annex specifies the first term without making it definite.','تُفِيدُ الْإِضَافَةُ إِلَى النَّكِرَةِ التَّخْصِيصَ دُونَ التَّعْرِيفِ.')
+ ];
+ return {...S, we,me,you,she,ya,na,protective,obj,mub,kh,coord,lam,jLam,raf,passT,negativeLa,prohibitive,haveFat,phr,q,b,addedMa,iDafa};
+})();
+
+const subjunctives=(()=>{
+ const {a,t,fixed,estimated,ft,cs,wa,fa,fi,ala,ila,li,an,ay,gPrep,gAnnex,objPro,subPro,ha,kaf,mim,taa,pl,hu,she,we,me,you,na,ya,protective,obj,kh,n,ac,gen,annex,subject,past,pastT,pastW,passT,raf,pp,phr,coord,negativeLa,prohibitive,haveFat,q,b}=finishInflection;
+ const accPr=p=>t(p,'You alone',a('«إِيَّا» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ مُقَدَّمٌ','Iyyā is a detached pronoun fixed on sukūn in accusative position as fronted object'),ft('الْكَافُ حَرْفُ خِطَابٍ','Address kāf'));
+ const intro=[
+  q('verb-intro-p227-01',227,'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ','You alone we worship, and You alone we ask for help.',[
+   accPr('إِيَّاكَ'),t('نَعْبُدُ','we worship',raf,we),t('وَإِيَّاكَ','and You alone',wa,...accPr('إِيَّاكَ').parts),t('نَسْتَعِينُ','we ask for help',raf,we)],
+   [1,5],'الْفَاتِحَةِ','Note 1 parses both parallel constructions. It identifies iyyā separately from the kāf of address.','','تُعْرِبُ الْحَاشِيَةُ الْأُولَى التَّرْكِيبَيْنِ، وَتَفْصِلُ بَيْنَ «إِيَّا» وَكَافِ الْخِطَابِ.',[{after:4,ayah:5}])
+ ];
+ const ann=fixed('«أَنْ» حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ','An forms a verbal noun, governs the subjunctive and makes the sense future');
+ const anLight=fixed('«أَنْ» مُخَفَّفَةٌ مِنَ الثَّقِيلَةِ، وَاسْمُهَا ضَمِيرُ الشَّأْنِ مَحْذُوفٌ','An is the lightened form of anna; its ism is the omitted pronoun of the matter');
+ const lan=fixed('«لَنْ» حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ','Lan negates a future action and governs the subjunctive');
+ const kay=fixed('«كَيْ» حَرْفُ مَصْدَرٍ وَنَصْبٍ وَاسْتِقْبَالٍ','Kay forms a verbal noun, governs the subjunctive and makes the sense future');
+ const idhan=fixed('«إِذَنْ» حَرْفُ جَوَابٍ وَجَزَاءٍ وَنَصْبٍ','Idhan introduces a response and consequence and governs the subjunctive');
+ const purpose=cs('اللَّامُ لَامُ التَّعْلِيلِ','Lām of purpose');
+ const hatta=estimated('«حَتَّى» حَرْفُ غَايَةٍ وَجَرٍّ','Ḥattā is a limit marker and preposition');
+ const causal=ft('الْفَاءُ فَاءُ السَّبَبِيَّةِ','Causal fāʾ'), accompaniment=ft('الْوَاوُ وَاوُ الْمَعِيَّةِ','Accompaniment wāw');
+ const v=(gov,en,{five=false,idmar='',idmarEn='',deficient=false}={})=>a(
+   `فِعْلٌ مُضَارِعٌ${deficient?' نَاقِصٌ':''} مَنْصُوبٌ بِـ${idmar?`«أَنْ» مُضْمَرَةٍ ${idmar} ${gov}`:gov}، وَعَلَامَةُ نَصْبِهِ ${five?'حَذْفُ النُّونِ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ':'الْفَتْحَةُ الظَّاهِرَةُ'}`,
+   `${deficient?'Deficient i':'I'}mperfect made subjunctive by ${idmar?`an, ${idmarEn} omitted ${en}`:en}; its sign is ${five?'deletion of nūn because it is one of the five verbs':'visible fatḥah'}`);
+ const implies=(ar,en,required=true,five=false)=>v(ar,en,{idmar:required?'وُجُوبًا':'جَوَازًا',idmarEn:required?'necessarily':'optionally',five});
+ const kObj=kaf(objPro), hObj=ha(objPro);
+ const lamAnn=phr('فِي مَحَلِّ جَرٍّ بِاللَّامِ','is in genitive position after lām');
+ const causalAnn=phr('مَعْطُوفٌ عَلَى الْمَصْدَرِ الْمَفْهُومِ مِنَ الْفِعْلِ السَّابِقِ','is coordinated with the verbal noun understood from the previous verb');
+ const jma=a('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا» النَّاهِيَةِ، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ','Imperfect made jussive by prohibitive lā; its sign is deletion of nūn because it is one of the five verbs');
+ const pastKana=a('فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ، يَرْفَعُ الِاسْمَ وَيَنْصِبُ الْخَبَرَ','Deficient past verb fixed on fatḥ, making its ism nominative and its khabar accusative');
+ const kanaT=a('فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الرَّفْعِ، يَرْفَعُ الِاسْمَ وَيَنْصِبُ الْخَبَرَ','Deficient past verb fixed on sukūn before the nominative tāʾ, making its ism nominative and its khabar accusative');
+ const maNeg=estimated('«مَا» حَرْفُ نَفْيٍ','Negative mā');
+ const isa=ay('التَّاءُ',['رَفْعٍ اسْمُ «كَانَ»','tāʾ','the nominative as ism of kāna'],'الضَّمِّ','ḍamm');
+ const naw=[
+  q('naw-p228-01',228,'يُرِيدُ اللَّهُ أَنْ يُخَفِّفَ عَنْكُمْ','Allah wants to lighten your burden.',[
+   t('يُرِيدُ','wants',raf),t('اللَّهُ','Allah',subject),t('أَنْ','to',ann),t('يُخَفِّفَ','lighten',v('«أَنْ»','an'),hu),
+   t('عَنْكُمْ','for you',an,kaf(gPrep,true),mim,pp('بِـ«يُخَفِّفَ»','“lighten”'),phr('فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ لِـ«يُرِيدُ»','is in accusative position as the object of “wants”'))],
+   [4,28],'النِّسَاءِ','Note 1 gives the parse and the reconstruction as a verbal noun.','','الْحَاشِيَةُ الْأُولَى تُعْرِبُ الْمِثَالَ وَتَذْكُرُ الْمَصْدَرَ الْمَنْسَبِكَ.'),
+  q('naw-p228-02',228,'وَأَنْ تَصُومُوا خَيْرٌ لَكُمْ','And fasting is better for you.',[
+   t('وَأَنْ','and to',ft('الْوَاوُ حَرْفُ اسْتِئْنَافٍ','Resumptive wāw'),ann),t('تَصُومُوا','you fast',v('«أَنْ»','an',{five:true}),pl,phr('فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ','is in nominative position as nominal subject')),
+   t('خَيْرٌ','is better',kh),t('لَكُمْ','for you',ft('اللَّامُ حَرْفُ جَرٍّ','Preposition lām'),kaf(gPrep,true),mim,pp('بِـ«خَيْرٌ»','“better”'))],
+   [2,184],'الْبَقَرَةِ','Note 2 refers to the earlier chapter on the signs of naṣb.','','تُحِيلُ الْحَاشِيَةُ الثَّانِيَةُ عَلَى عَلَامَاتِ النَّصْبِ.'),
+  q('naw-p228-03',228,'عَلِمَ أَنْ سَيَكُونُ','He knew that there would be [some who are ill].',[
+   t('عَلِمَ','He knew',past,hu),t('أَنْ','that',anLight),
+   t('سَيَكُونُ','there would be',ft('السِّينُ حَرْفُ اسْتِقْبَالٍ','Future sīn'),a('فِعْلٌ مُضَارِعٌ نَاقِصٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ','Deficient indicative imperfect with a visible ḍammah'),a('جُمْلَةُ الْفِعْلِ وَمَا يَتَعَلَّقُ بِهِ خَبَرُ «أَنْ» فِي مَحَلِّ رَفْعٍ','The verb and its dependents form the khabar of lightened an, in nominative position'),phr('سَدَّ مَسَدَّ مَفْعُولَيْ «عَلِمَ»','fills the two objects of “knew”'))],
+   [73,20],'الْمُزَّمِّلِ','The author gives a certainty example; note 4 refers back to the lightened an section. The predicate and ism of yakūnu lie beyond the excerpt.','','مِثَالٌ لِسَبْقِ «أَنْ» بِعِلْمٍ، وَتُحِيلُ الْحَاشِيَةُ الرَّابِعَةُ عَلَى بَابِ «أَنْ» الْمُخَفَّفَةِ. وَمَعْمُولَا «يَكُونُ» بَعْدَ الْمَقْطَعِ.'),
+  q('naw-p228-04',228,'وَحَسِبُوا أَلَّا تَكُونَ فِتْنَةٌ','And they thought that no trial would occur.',[
+   t('وَحَسِبُوا','and they thought',wa,pastW,pl),t('أَلَّا','that not',ann,negativeLa),t('تَكُونَ','there would occur',v('«أَنْ»','an'),a('«تَكُونَ» تَامَّةٌ بِمَعْنَى «تَحْصُلَ»','This is complete kāna, meaning “occur”')),t('فِتْنَةٌ','a trial',subject,phr('سَدَّ مَسَدَّ مَفْعُولَيْ «حَسِبُوا»','fills the two object slots of “they thought”'))],
+   [5,71],'الْمَائِدَةِ','P.228 note 8 parses the printed naṣb form, which agrees with Ḥafṣ. The p.229 note names Abū ʿAmr, Ḥamzah and al-Kisāʾī for rafʿ among the Seven; in that reading an is lightened and not a subjunctive governor.',
+   'The glosses do not mix the two transmitted readings.',
+   'تُعْرِبُ حَاشِيَةُ ص ٢٢٨ رَقْمُ ٨ قِرَاءَةَ النَّصْبِ الْمَطْبُوعَةَ الْمُوَافِقَةَ لِحَفْصٍ. وَتَذْكُرُ حَاشِيَةُ ص ٢٢٩ الرَّفْعَ لِأَبِي عَمْرٍو وَحَمْزَةَ وَالْكِسَائِيِّ مِنَ السَّبْعَةِ، فَتَكُونُ «أَنْ» مُخَفَّفَةً لَا نَاصِبَةً.'),
+  q('naw-p229-01',229,'لَنْ نَبْرَحَ عَلَيْهِ عَاكِفِينَ','We will not cease to be devoted to it.',[
+   t('لَنْ','will not',lan),t('نَبْرَحَ','we cease',v('«لَنْ»','lan',{deficient:true}),a('اسْمُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ نَحْنُ','Its ism is obligatorily hidden: “we”')),
+   t('عَلَيْهِ','to it',ala,ha(gPrep,true),pp('بِـ«عَاكِفِينَ»','“devoted”')),
+   t('عَاكِفِينَ','devoted',a('خَبَرُ «نَبْرَحَ» مَنْصُوبٌ بِالْيَاءِ نِيَابَةً عَنِ الْفَتْحَةِ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ','Khabar of nabraḥa, accusative with yāʾ instead of fatḥah because it is a sound masculine plural'))],
+   [20,91],'طَهَ','Note 3 points back to kāna and its sisters. The separate p.235 excerpt begins at ḥattā.','','تُحِيلُ الْحَاشِيَةُ الثَّالِثَةُ عَلَى «كَانَ» وَأَخَوَاتِهَا. وَمَقْطَعُ ص ٢٣٥ يَبْدَأُ بِـ«حَتَّى».'),
+  q('naw-p229-02',229,'لِكَيْلَا تَأْسَوْا','So that you may not grieve.',[
+   t('لِكَيْلَا','so that not',purpose,kay,negativeLa),t('تَأْسَوْا','you grieve',v('«كَيْ»','kay',{five:true}),pl,lamAnn)],
+   [57,23],'الْحَدِيدِ','Note 5 gives the three joined particles and the genitive position after overt lām.','','تَذْكُرُ الْحَاشِيَةُ الْخَامِسَةُ الْحُرُوفَ الثَّلَاثَةَ وَمَحَلَّ جَرِّ الْمَصْدَرِ بِاللَّامِ الظَّاهِرَةِ.'),
+  b('naw-p229-03',229,'جِئْتُكَ كَيْ تُكْرِمَنِي','I came to you so that you might honor me.',[
+   t('جِئْتُكَ','I came to you',pastT,taa,kObj),t('كَيْ','so that',kay),
+   t('تُكْرِمَنِي','you honor me',v('«كَيْ»','kay'),you,protective,ya(objPro),phr('فِي مَحَلِّ جَرٍّ بِلَامِ التَّعْلِيلِ الْمُقَدَّرَةِ','is in genitive position after the understood lām of purpose'))],
+   'Note 7 continues on p.230. With an understood lām, kay governs directly. On the author’s alternative without an understood lām, kay is a preposition and obligatorily omitted an governs the verb. Manuscript note 6 omits the attached kāf.',
+   'تَتِمُّ الْحَاشِيَةُ السَّابِعَةُ فِي ص ٢٣٠. مَعَ اللَّامِ الْمُقَدَّرَةِ تَنْصِبُ «كَيْ»؛ وَبِدُونِهَا تَجُرُّ «كَيْ» وَتَنْصِبُ «أَنْ» الْمُضْمَرَةُ وُجُوبًا. وَفِي حَاشِيَةِ النُّسْخَةِ رَقْمُ ٦ «جِئْتُ».'),
+  b('naw-p231-01',231,'إِذَنْ أُكْرِمَكَ','Then I will honor you.',[
+   t('إِذَنْ','then',idhan),t('أُكْرِمَكَ','I will honor you',v('«إِذَنْ»','idhan'),me,kObj)],
+   'Note 1 gives the parse; the author supplies the same preceding utterance for all three examples.',
+   'تُعْرِبُهُ الْحَاشِيَةُ الْأُولَى، وَيَذْكُرُ الْمُؤَلِّفُ قَوْلَ «أَنَا آتِيكَ» سِيَاقًا لِلْأَمْثِلَةِ الثَّلَاثَةِ.'),
+  b('naw-p231-02',231,'وَإِذَنْ وَاللَّهِ أُكْرِمَكَ','And then, by Allah, I will honor you.',[
+   t('وَإِذَنْ','and then',wa,idhan),
+   t('وَاللَّهِ','by Allah',ft('الْوَاوُ حَرْفُ قَسَمٍ وَجَرٍّ','Oath and genitive wāw'),gen('وَاوِ الْقَسَمِ','oath wāw'),pp('بِمَحْذُوفٍ تَقْدِيرُهُ «أُقْسِمُ»','omitted “I swear”')),
+   t('أُكْرِمَكَ','I will honor you',v('«إِذَنْ»','idhan'),me,kObj)],
+   'Note 2 parses the intervening oath. It does not interrupt the operation of idhan.',
+   'تُعْرِبُ الْحَاشِيَةُ الثَّانِيَةُ الْقَسَمَ الْفَاصِلَ، وَلَا يَمْنَعُ عَمَلَ «إِذَنْ».'),
+  b('naw-p231-03',231,'وَإِذَنْ لَا أُخَيِّبَكَ','And then I will not disappoint you.',[
+   t('وَإِذَنْ','and then',wa,idhan),t('لَا','not',negativeLa),t('أُخَيِّبَكَ','I will disappoint you',v('«إِذَنْ»','idhan'),me,kObj)],
+   'Note 3 parses intervening negative lā. Note 4 records the alternative verb “answer you” from al-Kawkab.',
+   'تُعْرِبُ الْحَاشِيَةُ الثَّالِثَةُ «لَا» النَّافِيَةَ الْفَاصِلَةَ، وَتَذْكُرُ الرَّابِعَةُ لَفْظَ «أُجِيبَكَ» فِي الْكَوْكَبِ.'),
+  q('naw-p232-01',232,'وَأُمِرْنَا لِنُسْلِمَ لِرَبِّ الْعَالَمِينَ','And we were commanded to submit to the Lord of all worlds.',[
+   t('وَأُمِرْنَا','and we were commanded',wa,passT,ay('«نَا»',['رَفْعٍ نَائِبُ فَاعِلٍ','nā','the nominative as deputy subject'])),
+   t('لِنُسْلِمَ','to submit',purpose,implies('بَعْدَ لَامِ التَّعْلِيلِ','after lām of purpose',false),we,lamAnn),
+   t('لِرَبِّ','to the Lord',li,gen('اللَّامِ','lām',true)),t('الْعَالَمِينَ','of all worlds',a('مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْيَاءِ نِيَابَةً عَنِ الْكَسْرَةِ لِأَنَّهُ مُلْحَقٌ بِجَمْعِ الْمُذَكَّرِ السَّالِمِ','Second term of the annexation, genitive with yāʾ instead of kasrah because it inflects like a sound masculine plural'),pp('بِـ«نُسْلِمَ»','“we submit”'))],
+   [6,71],'الْأَنْعَامِ','Note 1 gives the construction with optionally omitted an. The rule begins on p.231, but the printed example is here.','','تُعْرِبُ الْحَاشِيَةُ الْأُولَى «أَنْ» مُضْمَرَةً جَوَازًا. وَيَبْدَأُ الْحُكْمُ فِي ص ٢٣١ دُونَ الْمِثَالِ.'),
+  b('naw-p232-02',232,'وَلُبْسُ عَبَاءَةٍ وَتَقَرَّ عَيْنِي','And wearing a cloak, and being content …',[
+   t('وَلُبْسُ','and wearing',wa,n('مُبْتَدَأٌ','Nominal subject',true)),t('عَبَاءَةٍ','a cloak',annex),
+   t('وَتَقَرَّ','and be content',wa,implies('بَعْدَ الْوَاوِ الْعَاطِفَةِ','after coordinating wāw',false)),
+   t('عَيْنِي','my eye',a('فَاعِلٌ مَرْفُوعٌ بِضَمَّةٍ مُقَدَّرَةٍ قَبْلَ الْيَاءِ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ','Subject, nominative with ḍammah estimated before yāʾ, where the matching vowel appears; first term of the annexation'),ya(gAnnex),phr('مَعْطُوفٌ عَلَى «لُبْسُ عَبَاءَةٍ»','is coordinated with “wearing a cloak”'))],
+   'Note 3 attributes the line to Maysūn bint Baḥdal. The second hemistich and the predicate aḥabbu occur only in the note.',
+   'تَنْسِبُ الْحَاشِيَةُ الثَّالِثَةُ الْبَيْتَ إِلَى مَيْسُونَ بِنْتِ بَحْدَلٍ. وَالْعَجُزُ وَالْخَبَرُ «أَحَبُّ» فِي الْحَاشِيَةِ فَقَطْ.'),
+  b('naw-p233-01',233,'لَوْلَا تَوَقُّعُ مُعْتَرٍّ فَأُرْضِيَهُ','Were it not for expecting a petitioner and then satisfying him …',[
+   t('لَوْلَا','were it not for',estimated('«لَوْلَا» حَرْفُ امْتِنَاعٍ لِوُجُودٍ','Lawlā marks the nonoccurrence of one thing because of another')),
+   t('تَوَقُّعُ','expecting',n('مُبْتَدَأٌ خَبَرُهُ مَحْذُوفٌ وُجُوبًا','Nominal subject with an obligatorily omitted predicate',true)),t('مُعْتَرٍّ','a petitioner',annex),
+   t('فَأُرْضِيَهُ','and then satisfy him',fa,implies('بَعْدَ الْفَاءِ الْعَاطِفَةِ','after coordinating fāʾ',false),me,hObj,phr('مَعْطُوفٌ عَلَى «تَوَقُّعُ»','is coordinated with “expecting”'))],
+   'The anonymous poem’s note 1 gives the full line and answer to lawlā; it classifies fāʾ here as coordinating to the bare noun.',
+   'الْبَيْتُ مَجْهُولُ الْقَائِلِ. وَفِي الْحَاشِيَةِ الْأُولَى الْعَجُزُ وَجَوَابُ «لَوْلَا»، وَالْفَاءُ هُنَا عَاطِفَةٌ عَلَى الِاسْمِ الْخَالِصِ.'),
+  b('naw-p233-02',233,'إِنِّي وَقَتْلِي سُلَيْكًا ثُمَّ أَعْقِلَهُ','As for me, my killing Sulayk and then paying his blood money …',[
+   t('إِنِّي','indeed I',ft('«إِنَّ» حَرْفُ تَوْكِيدٍ يَنْصِبُ الِاسْمَ وَيَرْفَعُ الْخَبَرَ','Emphatic inna makes its ism accusative and its khabar nominative'),ay('يَاءُ الْمُتَكَلِّمِ',['نَصْبٍ اسْمُ «إِنَّ»','speaker’s yāʾ','the accusative as ism of inna'])),
+   t('وَقَتْلِي','and my killing',wa,a('مَعْطُوفٌ عَلَى اسْمِ «إِنَّ» مَنْصُوبٌ بِفَتْحَةٍ مُقَدَّرَةٍ قَبْلَ الْيَاءِ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ','Coordinated with the ism of inna, with fatḥah estimated before yāʾ where its matching vowel appears; first term of the annexation'),ya(gAnnex),a('الْيَاءُ فَاعِلُ الْمَصْدَرِ فِي الْمَعْنَى','The yāʾ is the semantic subject of the verbal noun')),
+   t('سُلَيْكًا','Sulayk',ac('مَفْعُولٌ بِهِ لِلْمَصْدَرِ «قَتْلِ»','Object of the verbal noun “killing”')),t('ثُمَّ','then',ft('«ثُمَّ» حَرْفُ عَطْفٍ','Coordinating thumma')),
+   t('أَعْقِلَهُ','pay his blood money',implies('بَعْدَ «ثُمَّ» الْعَاطِفَةِ','after coordinating thumma',false),me,ha(objPro,true),phr('مَعْطُوفٌ عَلَى «قَتْلِي»','is coordinated with “my killing”'))],
+   'Note 2 attributes the poem to Anas ibn Mudrik. The last word’s analysis and the note-only second hemistich continue on p.234.',
+   'تَنْسِبُهُ الْحَاشِيَةُ الثَّانِيَةُ إِلَى أَنَسِ بْنِ مُدْرِكٍ، وَيَتِمُّ إِعْرَابُ آخِرِ الصَّدْرِ وَذِكْرُ الْعَجُزِ فِي ص ٢٣٤.'),
+  q('naw-p234-01',234,'أَوْ يُرْسِلَ رَسُولًا','Or send a messenger.',[
+   t('أَوْ','or',coord('أَوْ','aw')),t('يُرْسِلَ','He sends',implies('بَعْدَ «أَوْ» الْعَاطِفَةِ','after coordinating aw',false),hu),t('رَسُولًا','a messenger',obj,phr('فِي مَحَلِّ نَصْبٍ مَعْطُوفٌ عَلَى «وَحْيًا» فِي سِيَاقِ الْآيَةِ','is in accusative position, coordinated with waḥyan in the verse context'))],
+   [42,51],'الشُّورَىٰ','Note 1 gives the optionally omitted an construction and a separate longer quotation that ends at rasūlan. The shown naṣb is compatible with Ḥafṣ.','','الْحَاشِيَةُ الْأُولَى تَذْكُرُ إِضْمَارَ «أَنْ» جَوَازًا وَتُورِدُ حِلْيَةً أَطْوَلَ تَنْتَهِي بِـ«رَسُولًا». وَالنَّصْبُ الْمَطْبُوعُ يُوَافِقُ حَفْصًا.'),
+  q('naw-p235-01',235,'وَمَا كَانَ اللَّهُ لِيُعَذِّبَهُمْ','And Allah was not going to punish them.',[
+   t('وَمَا','and not',ft('الْوَاوُ حَرْفُ اسْتِئْنَافٍ','Resumptive wāw'),maNeg),t('كَانَ','was',pastKana),t('اللَّهُ','Allah',n('اسْمُ «كَانَ»','Ism of kāna')),
+   t('لِيُعَذِّبَهُمْ','to punish them',cs('اللَّامُ لَامُ الْجُحُودِ','Lām of emphatic denial'),implies('بَعْدَ لَامِ الْجُحُودِ','after lām of denial'),hu,hObj,mim,
+    phr('فِي مَحَلِّ جَرٍّ بِاللَّامِ، وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِخَبَرٍ مَحْذُوفٍ وُجُوبًا لِـ«كَانَ»','is in genitive position after lām; the prepositional phrase attaches to the obligatorily omitted khabar of kāna'))],
+   [8,33],'الْأَنْفَالِ','The rule starts on p.234; the quotation and its note 1 are on p.235.','','الْحُكْمُ فِي ص ٢٣٤، وَالْمَقْطَعُ وَإِعْرَابُهُ فِي حَاشِيَةِ ص ٢٣٥ الْأُولَى.'),
+  q('naw-p235-02',235,'حَتَّى يَرْجِعَ إِلَيْنَا مُوسَى','Until Moses returns to us.',[
+   t('حَتَّى','until',hatta),t('يَرْجِعَ','returns',implies('بَعْدَ «حَتَّى»','after ḥattā')),
+   t('إِلَيْنَا','to us',ila,na(gPrep),pp('بِـ«يَرْجِعَ»','“returns”')),t('مُوسَى','Moses',a('فَاعِلٌ مَرْفُوعٌ بِضَمَّةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ','Subject, nominative with ḍammah estimated on alif, which cannot bear it'),phr('فِي مَحَلِّ جَرٍّ بِـ«حَتَّى»','is in genitive position after ḥattā'))],
+   [20,91],'طَهَ','Note 3 quotes the whole āyah separately. This main ornament starts at ḥattā.','','تَذْكُرُ الْحَاشِيَةُ الثَّالِثَةُ تَمَامَ الْآيَةِ فِي حِلْيَةٍ مُسْتَقِلَّةٍ، وَمَقْطَعُ الْمَتْنِ يَبْدَأُ بِـ«حَتَّى».'),
+  b('naw-p235-03',235,'لَأَسْتَسْهِلَنَّ الصَّعْبَ أَوْ أُدْرِكَ الْمُنَى فَمَا انْقَادَتِ الْآمَالُ إِلَّا لِصَابِرِ','I will surely treat hardship as easy until I reach my hopes; hopes yield only to one who perseveres.',[
+   t('لَأَسْتَسْهِلَنَّ','I will surely treat as easy',ft('اللَّامُ لَامُ جَوَابِ الْقَسَمِ','Lām of the oath response'),a('فِعْلٌ مُضَارِعٌ مَبْنِيٌّ عَلَى الْفَتْحِ لِاتِّصَالِهِ الْمُبَاشِرِ بِنُونِ التَّوْكِيدِ الثَّقِيلَةِ','Imperfect fixed on fatḥ before directly attached heavy emphatic nūn'),ft('النُّونُ نُونُ التَّوْكِيدِ الثَّقِيلَةُ','Heavy emphatic nūn'),me),
+   t('الصَّعْبَ','hardship',obj),t('أَوْ','until',fixed('«أَوْ» حَرْفُ عَطْفٍ بِمَعْنَى «إِلَى»','Coordinating aw meaning “until”')),
+   t('أُدْرِكَ','I reach',implies('بَعْدَ «أَوْ» بِمَعْنَى «إِلَى»','after aw meaning “until”'),me),t('الْمُنَى','my hopes',a('مَفْعُولٌ بِهِ مَنْصُوبٌ بِفَتْحَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ','Direct object, accusative with fatḥah estimated on alif, which cannot bear it'),causalAnn),
+   t('فَمَا','for not',ft('الْفَاءُ فَاءُ التَّعْلِيلِ','Explanatory fāʾ'),maNeg),t('انْقَادَتِ','yielded',past,fixed('التَّاءُ تَاءُ التَّأْنِيثِ','Feminine tāʾ'),a('وَحُرِّكَتِ التَّاءُ بِالْكَسْرِ لِالْتِقَاءِ السَّاكِنَيْنِ','The tāʾ takes kasr in connected speech to avoid two sākin letters')),
+   t('الْآمَالُ','hopes',subject),t('إِلَّا','only',estimated('«إِلَّا» أَدَاةُ حَصْرٍ','Restrictive illā')),t('لِصَابِرِ','to one who perseveres',li,gen('اللَّامِ','lām'),pp('بِـ«انْقَادَتِ»','“yielded”'))],
+   'Anonymous verse, note 4 continued on p.236. The note parses aw as “until”; the printed rhyme ends in kasr.',
+   'بَيْتٌ مَجْهُولُ الْقَائِلِ؛ وَتَتِمُّ الْحَاشِيَةُ الرَّابِعَةُ فِي ص ٢٣٦. وَ«أَوْ» بِمَعْنَى «إِلَى»، وَآخِرُ الْبَيْتِ عَلَى قَافِيَتِهِ.'),
+  b('naw-p236-01',236,'وَكُنْتُ إِذَا غَمَزْتُ قَنَاةَ قَوْمٍ كَسَرْتُ كُعُوبَهَا أَوْ تَسْتَقِيمَا','And when I pressed a people’s spear, I would break its joints unless it straightened.',[
+   t('وَكُنْتُ','and I would',wa,kanaT,isa),t('إِذَا','when',a('ظَرْفُ زَمَانٍ لِمَا يُسْتَقْبَلُ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ، وَهُوَ مُضَافٌ','Future time adverb fixed on sukūn in accusative position; first term of the annexation')),
+   t('غَمَزْتُ','I pressed',pastT,taa),t('قَنَاةَ','the spear',ac('مَفْعُولٌ بِهِ','Direct object',true)),t('قَوْمٍ','of a people',annex,a('جُمْلَةُ «غَمَزْتُ» وَمَعْمُولَاتِهَا فِي مَحَلِّ جَرٍّ بِالْإِضَافَةِ إِلَى «إِذَا»','This clause is in genitive position after idhā')),
+   t('كَسَرْتُ','I broke',pastT,taa,a('جُمْلَةُ الْجَوَابِ لَا مَحَلَّ لَهَا، وَالتَّرْكِيبُ بِجُمْلَتَيْهِ فِي مَحَلِّ نَصْبٍ خَبَرُ «كُنْتُ»','The response clause has no position on its own; the entire two-clause construction is the accusative khabar of kuntu')),
+   t('كُعُوبَهَا','its joints',ac('مَفْعُولٌ بِهِ','Direct object',true),ay('«هَا»',gAnnex)),t('أَوْ','unless',fixed('«أَوْ» حَرْفُ عَطْفٍ بِمَعْنَى «إِلَّا»','Coordinating aw meaning “unless”')),
+   t('تَسْتَقِيمَا','it straightened',implies('بَعْدَ «أَوْ» بِمَعْنَى «إِلَّا»','after aw meaning “unless”'),she,a('الْأَلِفُ لِلْإِطْلَاقِ، لَيْسَتْ ضَمِيرًا','The alif extends the rhyme; it is not a pronoun'),causalAnn)],
+   'Ziyād al-Aʿjam, note 1. The note’s witness line identifies aw as illā; one sentence in its parse says ilā. This exercise follows the witness line and keeps the printed rhyme alif.',
+   'الْبَيْتُ لِزِيَادٍ الْأَعْجَمِ. وَفِي الْحَاشِيَةِ الْأُولَى «إِلَّا» فِي الشَّاهِدِ، وَ«إِلَى» فِي مَوْضِعٍ مِنَ الْإِعْرَابِ؛ وَهُنَا اتَّبَعْنَا بَيَانَ الشَّاهِدِ وَأَبْقَيْنَا أَلِفَ الْإِطْلَاقِ.'),
+  q('naw-p237-01',237,'لَا يُقْضَى عَلَيْهِمْ فَيَمُوتُوا','They are not finished off so that they die.',[
+   t('لَا','not',negativeLa),t('يُقْضَى','a decree is passed',a('فِعْلٌ مُضَارِعٌ مَبْنِيٌّ لِلْمَجْهُولِ مَرْفُوعٌ بِضَمَّةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ','Passive indicative imperfect with ḍammah estimated on alif, which cannot bear it')),
+   t('عَلَيْهِمْ','upon them',ala,ha(gPrep,true),mim,a('شِبْهُ الْجُمْلَةِ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ','The phrase is in nominative position as deputy subject')),
+   t('فَيَمُوتُوا','so that they die',causal,implies('بَعْدَ فَاءِ السَّبَبِيَّةِ','after causal fāʾ',true,true),pl,causalAnn)],
+   [35,36],'فَاطِرٍ','Note 5 gives causal fāʾ after pure negation, the passive attachment and the verbal-noun reconstruction.','','تُعْرِبُ الْحَاشِيَةُ الْخَامِسَةُ فَاءَ السَّبَبِيَّةِ بَعْدَ النَّفْيِ الْمَحْضِ وَنَائِبَ الْفَاعِلِ وَالْمَصْدَرَ الْمُؤَوَّلَ.'),
+  q('naw-p238-01',238,'وَيَعْلَمَ الصَّابِرِينَ','And that He know those who are steadfast.',[
+   t('وَيَعْلَمَ','and He knows',accompaniment,implies('بَعْدَ وَاوِ الْمَعِيَّةِ','after accompaniment wāw'),hu),
+   t('الصَّابِرِينَ','those who are steadfast',a('مَفْعُولٌ بِهِ مَنْصُوبٌ بِالْيَاءِ نِيَابَةً عَنِ الْفَتْحَةِ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ','Direct object, accusative with yāʾ instead of fatḥah because it is a sound masculine plural'),causalAnn)],
+   [3,142],'آلِ عِمْرَانَ','Note 1 gives accompaniment wāw after the earlier lammā negation and separately quotes the complete verse.','','تُعْرِبُ الْحَاشِيَةُ الْأُولَى وَاوَ الْمَعِيَّةِ بَعْدَ النَّفْيِ السَّابِقِ بِـ«لَمَّا»، وَتَذْكُرُ الْآيَةَ كَامِلَةً فِي حِلْيَةٍ مُسْتَقِلَّةٍ.'),
+  q('naw-p238-02',238,'وَلَا تَطْغَوْا فِيهِ فَيَحِلَّ عَلَيْكُمْ غَضَبِي','And do not transgress in it, lest My wrath descend upon you.',[
+   t('وَلَا','and do not',wa,prohibitive),t('تَطْغَوْا','transgress',jma,pl),t('فِيهِ','in it',fi,ha(gPrep,true),pp('بِـ«تَطْغَوْا»','“transgress”')),
+   t('فَيَحِلَّ','lest it descend',causal,implies('بَعْدَ فَاءِ السَّبَبِيَّةِ','after causal fāʾ')),t('عَلَيْكُمْ','upon you',ala,kaf(gPrep,true),mim,pp('بِـ«يَحِلَّ»','“descend”')),
+   t('غَضَبِي','My wrath',a('فَاعِلٌ مَرْفُوعٌ بِضَمَّةٍ مُقَدَّرَةٍ قَبْلَ الْيَاءِ لِاشْتِغَالِ الْمَحَلِّ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ','Subject, nominative with ḍammah estimated before yāʾ where its matching vowel appears; first term of the annexation'),ya(gAnnex),causalAnn)],
+   [20,81],'طَهَ','Note 2 parses the prohibitive jussive followed by the causal subjunctive. The shown ḥill form matches Ḥafṣ.','','تُعْرِبُ الْحَاشِيَةُ الثَّانِيَةُ جَزْمَ النَّهْيِ ثُمَّ النَّصْبَ بَعْدَ فَاءِ السَّبَبِيَّةِ. وَكَسْرُ الْحَاءِ يُوَافِقُ حَفْصًا.'),
+  b('naw-p238-03',238,'لَا تَأْكُلِ السَّمَكَ وَتَشْرَبَ اللَّبَنَ','Do not eat fish and drink milk together.',[
+   t('لَا','do not',prohibitive),t('تَأْكُلِ','eat',a('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا» النَّاهِيَةِ بِالسُّكُونِ، وَحُرِّكَ بِالْكَسْرِ لِالْتِقَاءِ السَّاكِنَيْنِ','Imperfect made jussive by prohibitive lā, with sukūn and a connecting kasr to avoid two sākin letters'),you),
+   t('السَّمَكَ','fish',obj),t('وَتَشْرَبَ','and drink',accompaniment,implies('بَعْدَ وَاوِ الْمَعِيَّةِ','after accompaniment wāw'),you),t('اللَّبَنَ','milk',obj,causalAnn)],
+   'Note 3 states the intended meaning “with drinking milk.” This is the last main example before Jawāzim.',
+   'تُفَسِّرُ الْحَاشِيَةُ الثَّالِثَةُ الْمَعِيَّةَ بِـ«مَعَ شُرْبِ لَبَنٍ». وَهُوَ آخِرُ مِثَالٍ قَبْلَ الْجَوَازِمِ.')
+ ];
+ return {intro,naw};
+})();
+
+Object.assign(babs.find(bab=>bab.id==='genitive-nouns'),{pages:'212–226',continues:false});
+Object.assign(babs.find(bab=>bab.id==='verb-inflection'),{pages:'227–242'});
+const finishJawIndex=chapters.findIndex(chapter=>chapter.id==='imperfect-jawazim');
+chapters[finishJawIndex].order=3;
+const finishSource=(pages,pagesAr)=>({
+ helpSourceEn:`Al-Mutammimah, printed pp.${pages}. The author supplies the rules and main examples. Where cited, the edition’s notes supply the analyses and variants; the app supplies English and unstated details.`,
+ helpSourceAr:`الْمُتَمِّمَةُ، ص ${pagesAr}. الْقَوَاعِدُ وَأَمْثِلَةُ الْمَتْنِ لِلْمُؤَلِّفِ، وَمَا نُسِبَ إِلَى الْحَوَاشِي فَمِنْ شَرْحِ الطَّبْعَةِ؛ وَالتَّرْجَمَةُ وَمَا لَمْ يُذْكَرْ مِنَ التَّفْصِيلِ مِنَ الْمَوْقِعِ.`
+});
+chapters.splice(finishJawIndex,0,{
+ id:'added-ma',babId:'genitive-nouns',order:2,titleAr:'زِيَادَةُ (مَا) بَعْدَ (مِنْ، وَعَنْ، وَالْبَاءِ، وَالْكَافِ، وَرُبَّ)',titleEn:'Added mā after prepositions',pages:'219–222',book:finishInflection.addedMa,
+ ...finishSource('219–222','٢١٩–٢٢٢'),
+ help:[
+  help('تُزَادُ «مَا» بَعْدَ «مِنْ» وَ«عَنْ» وَالْبَاءِ، فَيَبْقَى الِاسْمُ مَجْرُورًا بِالْحَرْفِ. وَتَصِفُهَا الْحَوَاشِي بِالصِّلَةِ وَالتَّوْكِيدِ، لَا بِمَعْنَى النَّفْيِ.','After min, ʿan, or bāʾ, extra mā does not stop the preposition governing the genitive. The notes describe it as emphatic, not negative.'),
+  help('إِذَا زِيدَتْ «مَا» بَعْدَ الْكَافِ وَ«رُبَّ»، فَالْغَالِبُ أَنْ تَكُفَّهُمَا عَنِ الْعَمَلِ فَيَدْخُلَانِ عَلَى جُمْلَةٍ. فِي بَيْتِ ص ٢٢٠ تُفِيدُ «رُبَّمَا» التَّكْثِيرَ فِي التَّحْلِيلِ الَّذِي تَعْرِضُهُ الْحَاشِيَةُ، وَفِي أَوَّلِ بَيْتٍ فِي ص ٢٢١ تَدْخُلُ «كَمَا» عَلَى جُمْلَةٍ اسْمِيَّةٍ.','After comparative kāf and rubba, mā usually blocks government and lets the construction introduce a clause. The p.220 note discusses frequent, rather than few, occasions; the first p.221 line shows kamā preceding a nominal clause.'),
+  help('قَدْ لَا تَكُفُّهُمَا: فَـ«ضَرْبَةٍ» مَجْرُورَةٌ بِـ«رُبَّ» فِي ص ٢٢١، وَ«النَّاسِ» مَجْرُورٌ بِالْكَافِ فِي ص ٢٢٢. تَمْتَدُّ حَاشِيَةُ بَيْتِ «ضَرْبَةٍ» إِلَى ص ٢٢٢، وَمَرَاجِعُ حَاشِيَةِ بَيْتِ ص ٢٢٠ إِلَى ص ٢٢١.','Mā does not always block government: rubba governs “a blow” on p.221, and kāf governs “the people” on p.222. The note to the former continues onto p.222; the p.220 poem’s references continue onto p.221.')
+ ]
+},{
+ id:'genitive-by-annexation',babId:'genitive-nouns',order:3,titleAr:'الْمَخْفُوضُ بِالْإِضَافَةِ',titleEn:'The genitive in annexation',pages:'223–226',book:finishInflection.iDafa,
+ ...finishSource('223–226','٢٢٣–٢٢٦'),
+ help:[
+  help('الْمُضَافُ يَتَجَرَّدُ مِنَ التَّنْوِينِ، وَمِنْ نُونِ التَّثْنِيَةِ أَوْ نُونِ جَمْعِ الْمُذَكَّرِ السَّالِمِ. وَيَرَى الْمُؤَلِّفُ أَنَّ الثَّانِيَ مَجْرُورٌ بِالْمُضَافِ نَفْسِهِ؛ وَتَنْسِبُ الْحَاشِيَةُ ذَلِكَ إِلَى سِيبَوَيْهِ وَالْجُمْهُورِ.','The first noun loses tanwīn or the nūn of the dual or sound masculine plural. The author takes the first noun itself as the governor of the second; the note attributes this to Sībawayh and the majority.'),
+  help('تُقَدَّرُ اللَّامُ، وَهُوَ الْأَكْثَرُ؛ أَوْ «مِنْ» إِذَا كَانَ الْأَوَّلُ بَعْضًا مِنَ الثَّانِي وَصَحَّ الْإِخْبَارُ بِهِ عَنْهُ؛ أَوْ «فِي» إِذَا وَقَعَ الْأَوَّلُ فِي الثَّانِي. وَفِي نَوْعِ «مِنْ» يَذْكُرُ الْمَتْنُ أَيْضًا النَّصْبَ عَلَى التَّمْيِيزِ وَالرَّفْعَ عَلَى التَّبَعِيَّةِ فِي أَمْثِلَتِهِ، لَا مَعَ بَقَاءِ الْإِضَافَةِ.','The underlying relation can be lām (most common), min (the first is a part or instance of the material, which can be predicated of it), or fī (the first occurs within the second). The author also allows the material noun to be accusative as tamyīz or nominative as a dependent in a different construction, not as a genitive annex.'),
+  help('اللَّفْظِيَّةُ تَجْمَعُ شَرْطَيْنِ: أَنْ يَكُونَ الْأَوَّلُ وَصْفًا، وَأَنْ يَكُونَ الثَّانِي مَعْمُولًا لَهُ. وَأَمْثِلَةُ الْوَصْفِ بِتَرْتِيبِ الْمَتْنِ: اسْمُ فَاعِلٍ، وَاسْمُ مَفْعُولٍ، وَصِفَةٌ مُشَبَّهَةٌ. وَفَائِدَتُهَا التَّخْفِيفُ فِي اللَّفْظِ دُونَ التَّعْرِيفِ أَوِ التَّخْصِيصِ.','Verbal (lafẓiyyah) annexation meets two tests: the first term is a descriptive derivative and the second is governed by that derivative. The book illustrates an active participle, a passive participle and an adjective resembling a participle, in that order. This construction lightens the form, without making the first term definite or more specific.'),
+  help('الْمَعْنَوِيَّةُ مَا فَقَدَتِ الشَّرْطَيْنِ أَوْ أَحَدَهُمَا، وَتُسَمَّى مَحْضَةً. تُعَرِّفُ الْأَوَّلَ إِذَا كَانَ الثَّانِي مَعْرِفَةً، وَتُخَصِّصُهُ إِذَا كَانَ نَكِرَةً. «إِكْرَامُ» مَصْدَرٌ لَا وَصْفٌ، وَ«الْقَاضِي» لَيْسَ مَعْمُولَ «كَاتِبُ» فِي الْمِثَالِ، فَمَعْنَاهُ كَاتِبٌ لِلْقَاضِي.','Semantic (maʿnawiyyah) annexation lacks one or both conditions and is called pure. It makes the first noun definite with a definite second noun, and more specific with an indefinite one. Ikrām is a verbal noun, not a descriptive derivative; the judge in “the judge’s scribe” is not governed by the participle as its semantic subject.'),
+  help('يُحِيلُ الْمُؤَلِّفُ فِي خِتَامِ ص ٢٢٦ التَّابِعَ لِلْمَخْفُوضِ إِلَى بَابِ التَّوَابِعِ. هَذِهِ إِحَالَةٌ إِلَى مَا يَأْتِي، لَا مِثَالٌ جَدِيدٌ فِي هَذَا الْبَابِ.','At the end of p.226, the author refers forward to the chapter on dependents for the third category, the dependent of a genitive noun. This is a forward reference, not a new drill or an additional chapter here.')
+ ]
+},{
+ id:'verb-inflection-intro',babId:'verb-inflection',order:1,titleAr:'بَابُ إِعْرَابِ الْأَفْعَالِ',titleEn:'Introduction to verb inflection',pages:'227',book:subjunctives.intro,
+ ...finishSource('227','٢٢٧'),
+ help:[
+  help('الْفِعْلُ مَاضٍ، وَأَمْرٌ، وَمُضَارِعٌ. الْمَاضِي وَالْأَمْرُ مَبْنِيَّانِ، وَيُعْرَبُ الْمُضَارِعُ إِذَا لَمْ تَتَّصِلْ بِهِ نُونُ الْإِنَاثِ أَوْ نُونُ التَّوْكِيدِ الْمُبَاشِرَةُ.','There are past, imperative and imperfect verbs. The past and imperative are fixed; the imperfect inflects unless attached to feminine nūn or directly attached to emphatic nūn.'),
+  help('لِلْمُضَارِعِ الْمُعْرَبِ الرَّفْعُ وَالنَّصْبُ وَالْجَزْمُ. وَالْأَصْلُ الرَّفْعُ عِنْدَ التَّجَرُّدِ مِنَ النَّاصِبِ وَالْجَازِمِ؛ وَشَاهِدُ ص ٢٢٧ فِيهِ فِعْلَانِ مَرْفُوعَانِ.','The inflected imperfect has indicative, subjunctive and jussive moods. Without a subjunctive or jussive governor it is indicative; the p.227 example contains two indicative verbs.')
+ ]
+},{
+ id:'imperfect-nawasib',babId:'verb-inflection',order:2,titleAr:'نَوَاصِبُ الْمُضَارِعِ',titleEn:'Subjunctive governors of the imperfect',pages:'227–238',book:subjunctives.naw,
+ ...finishSource('227–238','٢٢٧–٢٣٨'),
+ help:[
+  help('النَّوَاصِبُ قِسْمَانِ: مَا يَنْصِبُ بِنَفْسِهِ، وَهُوَ «أَنْ» وَ«لَنْ» وَ«كَيْ» الْمَصْدَرِيَّةُ وَ«إِذَنْ»؛ وَمَا يَنْصِبُ الْفِعْلَ بَعْدَهُ بِـ«أَنْ» مُضْمَرَةٍ.','The author distinguishes four direct governors—an, lan, maṣdariyyah kay, and idhan—from constructions where omitted an governs the verb.'),
+  help('«أَنْ» تَنْصِبُ إِذَا لَمْ تُسْبَقْ بِعِلْمٍ وَلَا ظَنٍّ. بَعْدَ الْعِلْمِ هِيَ مُخَفَّفَةٌ مِنَ الثَّقِيلَةِ وَاسْمُهَا ضَمِيرُ الشَّأْنِ الْمَحْذُوفُ. بَعْدَ الظَّنِّ يَجُوزُ الْوَجْهَانِ؛ وَفِي شَاهِدِ الْمَائِدَةِ ٧١ يُعْرِبُ التَّدْرِيبُ النَّصْبَ الْمَطْبُوعَ، وَتَذْكُرُ الْحَاشِيَةُ قِرَاءَةَ الرَّفْعِ.','An is subjunctive after neither certainty nor supposition; after certainty it is the lightened anna with omitted pronoun of the matter. After a verb of supposition two analyses are possible. The exercise for Q5:71 follows the printed subjunctive; the note gives the alternate indicative reading.'),
+  help('«لَنْ» حَرْفُ نَفْيٍ وَنَصْبٍ وَاسْتِقْبَالٍ. وَ«كَيْ» الْمَصْدَرِيَّةُ بَعْدَ لَامٍ ظَاهِرَةٍ أَوْ مُقَدَّرَةٍ. فَإِنْ لَمْ تُقَدَّرِ اللَّامُ فَـ«كَيْ» حَرْفُ جَرٍّ وَالنَّاصِبُ «أَنْ» مُضْمَرَةٌ وُجُوبًا.','Lan negates a future action without itself implying permanence. Subjunctive kay follows an overt or understood purpose lām. If no lām is understood, kay is a preposition and obligatorily omitted an governs.'),
+  help('تَنْصِبُ «إِذَنْ» فِي صَدْرِ الْجَوَابِ إِذَا دَلَّ الْفِعْلُ عَلَى الِاسْتِقْبَالِ، وَكَانَ مُتَّصِلًا بِهَا أَوْ فَصَلَ بَيْنَهُمَا الْقَسَمُ أَوْ «لَا» النَّافِيَةُ. وَتُذْكَرُ فِي الْمَتْنِ جُمْلَةُ «أَنَا آتِيكَ» سِيَاقًا لِلْأَمْثِلَةِ الثَّلَاثَةِ.','Idhan governs at the beginning of a reply with future meaning, if directly followed by the verb or separated only by an oath or negative lā in the author’s rule. “I am coming to you” is the shared context for all three replies.'),
+  help('تُضْمَرُ «أَنْ» جَوَازًا بَعْدَ لَامِ التَّعْلِيلِ، وَبَعْدَ الْوَاوِ وَالْفَاءِ وَ«ثُمَّ» وَ«أَوْ» إِذَا عَطَفَتْ عَلَى اسْمٍ خَالِصٍ لَيْسَ فِي تَأْوِيلِ الْفِعْلِ. فَلَا تُخْلَطُ الْفَاءُ الْعَاطِفَةُ فِي بَيْتِ «لَوْلَا تَوَقُّعُ» بِفَاءِ السَّبَبِيَّةِ.','An can be omitted after purpose lām or after wāw, fāʾ, thumma and aw coordinating with a pure noun—not a noun interpreted as a verb. The fāʾ in the lawlā verse is coordinating, not causal.'),
+  help('تُضْمَرُ «أَنْ» وُجُوبًا بَعْدَ «كَيْ» الْجَارَّةِ، وَلَامِ الْجُحُودِ، وَ«حَتَّى» إِذَا كَانَ الْفِعْلُ بَعْدَهَا مُسْتَقْبَلًا، وَ«أَوْ» بِمَعْنَى «إِلَى» أَوْ «إِلَّا». وَتَقَعُ لَامُ الْجُحُودِ بَعْدَ كَوْنٍ مَنْفِيٍّ، نَحْوَ «مَا كَانَ» أَوْ «لَمْ يَكُنْ».','An must be omitted after prepositional kay, emphatic denial lām, ḥattā with a prospective verb, and aw meaning “until” or “unless.” Denial lām follows a negated kāna, as in mā kāna or lam yakun.'),
+  help('وَتُضْمَرُ وُجُوبًا بَعْدَ فَاءِ السَّبَبِيَّةِ وَوَاوِ الْمَعِيَّةِ بَعْدَ نَفْيٍ مَحْضٍ أَوْ طَلَبٍ. الْفَاءُ تَجْعَلُ مَا بَعْدَهَا نَتِيجَةً، وَالْوَاوُ تَدُلُّ عَلَى الِاجْتِمَاعِ. وَتَعُدُّ حَاشِيَةُ ص ٢٣٧ ثَمَانِيَةَ أَنْوَاعٍ لِلطَّلَبِ: الْأَمْرَ، وَالدُّعَاءَ، وَالنَّهْيَ، وَالِاسْتِفْهَامَ، وَالْعَرْضَ، وَالتَّحْضِيضَ، وَالتَّمَنِّيَ، وَالتَّرَجِّيَ.','After pure negation or a request, an is necessarily omitted after causal fāʾ and accompaniment wāw. Fāʾ marks a result; wāw marks actions taken together. The p.237 note lists eight kinds of request: command, prayer, prohibition, question, offer, urging, wish and hope.')
+ ]
+});
+
 // The concise study summaries and disclosure metadata are app-prepared
 // organization layered over the reviewed Help prose. Keeping this mapping
 // separate lets validators prove that every original explanation survives.
@@ -5216,6 +5513,25 @@ helpVisuals['imperfect-jawazim']={type:'branches',titleAr:'بِمَ جُزِمَ
  fm('jaw-command','طَلَبُ الْفِعْلِ','Requesting an action','اللَّامُ فِي «لِيُنْفِقْ» لِلْأَمْرِ.','The lām in liyunfiq asks for action.','jaw-p241-01'),
  fm('jaw-prohibit','طَلَبُ التَّرْكِ','Requesting abstention','«لَا» تَطْلُبُ تَرْكَ الْحُزْنِ.','Lā asks that the listener not grieve.','jaw-p241-03'),
  fm('jaw-result','جَوَابُ الطَّلَبِ','Result of the request','يَجْزِمُ الطَّلَبُ جَوَابَهُ إِذَا لَمْ تَدْخُلِ الْفَاءُ وَقُصِدَ الْجَزَاءُ.','The request governs a consequential response with no fāʾ.','jaw-p242-01')
+]};
+helpVisuals['added-ma']={type:'branches',titleAr:'هَلْ بَقِيَ الْجَرُّ؟',titleEn:'Does the preposition still govern?',branches:[
+ fm('m-add-min','مِنْ وَعَنْ وَالْبَاءُ','Min, ʿan and bāʾ','بَقِيَ الْجَرُّ فِي «خَطِيئَاتِهِمْ».','The noun “their sins” stays genitive.','added-ma-p220-01'),
+ fm('m-add-stop','كَفُّ الْعَمَلِ','Government blocked','تَدْخُلُ «رُبَّمَا» فِي الشَّاهِدِ عَلَى جُمْلَةٍ.','Rubba followed by mā introduces a clause here.','added-ma-p220-04'),
+ fm('m-add-keep','بَقَاءُ الْعَمَلِ','Government retained','«ضَرْبَةٍ» مَجْرُورَةٌ بِـ«رُبَّ».','Rubba still governs the noun “a blow”.','added-ma-p221-02')
+]};
+helpVisuals['genitive-by-annexation']={type:'branches',titleAr:'مَا مَعْنَى الْإِضَافَةِ؟',titleEn:'What relationship does annexation express?',branches:[
+ fm('idafa-sense-lam','تَقْدِيرُ اللَّامِ','Underlying lām','الْغُلَامُ لِزَيْدٍ فِي الْمَعْنَى.','The servant belongs to Zayd.','idafa-p223-05'),
+ fm('idafa-sense-min','تَقْدِيرُ مِنْ','Underlying min','الْخَاتَمُ مِنْ حَدِيدٍ فِي الْمَعْنَى.','The ring is made of iron.','idafa-p224-03'),
+ fm('idafa-sense-fi','تَقْدِيرُ فِي','Underlying fī','الْمَكْرُ فِي اللَّيْلِ.','The plotting occurs at night.','idafa-p224-04')
+]};
+helpVisuals['verb-inflection-intro']={type:'branches',titleAr:'الْبِنَاءُ وَالْإِعْرَابُ',titleEn:'Fixed or inflected?',branches:[
+ fm('verb-fixed','الْمَبْنِيُّ','Fixed form','الْمَاضِي وَالْأَمْرُ، وَالْمُضَارِعُ مَعَ النُّونِ الْمَذْكُورَةِ فِي الْقَاعِدَةِ.','Past and imperative; also the imperfect with the nūn attachments described in the rule.',null),
+ fm('verb-variable','الْمُعْرَبُ','Inflected form','«نَعْبُدُ» وَ«نَسْتَعِينُ» مَرْفُوعَانِ لِلتَّجَرُّدِ مِنَ النَّاصِبِ وَالْجَازِمِ.','Naʿbudu and nastaʿīnu are indicative because neither governor is present.','verb-intro-p227-01')
+]};
+helpVisuals['imperfect-nawasib']={type:'branches',titleAr:'مَنْ عَمِلَ النَّصْبَ؟',titleEn:'What governs the subjunctive?',branches:[
+ fm('naw-direct','نَاصِبٌ مُبَاشِرٌ','Direct governor','«أَنْ» تَنْصِبُ «يُخَفِّفَ».','An governs yukhaffifa.','naw-p228-01'),
+ fm('naw-implicit-optional','أَنْ مُضْمَرَةٌ جَوَازًا','Optionally omitted an','تُضْمَرُ «أَنْ» بَعْدَ لَامِ التَّعْلِيلِ فِي «لِنُسْلِمَ».','An may be omitted after the purpose lām in linuslima.','naw-p232-01'),
+ fm('naw-implicit-required','أَنْ مُضْمَرَةٌ وُجُوبًا','Necessarily omitted an','تُضْمَرُ «أَنْ» وُجُوبًا بَعْدَ فَاءِ السَّبَبِيَّةِ هُنَا.','An must be omitted after the causal fāʾ in this example.','naw-p238-02')
 ]};
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});
 

@@ -546,8 +546,8 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
     </div>
   </main>
 </div>
-<script src="help-redesign-data.js?v=marfuaat-148-153"></script>
-<script src="lesson-data.js?v=marfuaat-148-153"></script>
+<script src="help-redesign-data.js?v=release4-review-fix-20261121"></script>
+<script src="lesson-data.js?v=release4-review-fix-20261121"></script>
 <script>
 (function(){
 'use strict';
@@ -561,11 +561,27 @@ const accessibleNames = {
  en: {primaryNavigation:'Primary navigation',openMenu:'Open menu',closeMenu:'Close menu',brandHome:'Miftāḥ al-ʿIlm — Home',theme:'Theme',language:'Language',themePreference:'Theme preference',bab:'Bāb or section',chapter:'Chapter within bāb',helpBab:'Help bāb or section',helpChapter:'Help chapter within bāb',exampleFilter:'Example filter',adjacentChapters:'Adjacent chapters'},
  ar: {primaryNavigation:'التنقل الرئيسي',openMenu:'افتح قائمة التنقل',closeMenu:'أغلق قائمة التنقل',brandHome:'مفتاح العلم، الرئيسية',theme:'المظهر',language:'اللغة',themePreference:'تفضيل المظهر',bab:'الباب أو القسم',chapter:'الفصل داخل الباب',helpBab:'باب الشرح أو قسمه',helpChapter:'الفصل داخل باب الشرح',exampleFilter:'تصفية الأمثلة',adjacentChapters:'الفصول المجاورة'}
 };
-const defaults={version:6,lang:'en',theme:'light',screen:'home',mode:'book',category:'book',bookFilter:'all',selectedBabId:'opening',selectedChapterId:'speech-core',helpBabId:'opening',helpChapterId:'speech-core',positions:{'speech-core':0},generatedIndex:0,revealed:false,resumeAvailable:false,helpLaunch:null,helpReturn:null,helpVisualBranches:{},helpOpenDisclosures:{},completed:[],difficult:[]};
+const defaults={version:7,lang:'en',theme:'light',screen:'home',mode:'book',category:'book',bookFilter:'all',selectedBabId:'opening',selectedChapterId:'speech-core',helpBabId:'opening',helpChapterId:'speech-core',positions:{'speech-core':0},generatedIndex:0,revealed:false,resumeAvailable:false,helpLaunch:null,helpReturn:null,helpVisualBranches:{},helpOpenDisclosures:{},completed:[],difficult:[]};
 let stored={};try{stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{}}catch(_){stored={}}
 const migrated={...defaults,...stored,positions:{...defaults.positions,...(stored.positions||{})},helpVisualBranches:{...(stored.helpVisualBranches||{})},helpOpenDisclosures:{...(stored.helpOpenDisclosures||{})},lang:stored.lang||(stored.arabicOnly?'ar':'en')};
 if(!stored.version){migrated.screen='home';migrated.revealed=false}
 if((stored.version||0)<3&&Number.isInteger(stored.bookIndex))migrated.positions['speech-core']=Math.max(0,Math.min(2,stored.bookIndex));
+function migrateLaJinsOrder(saved, book) {
+ if (!(saved.version < 7)) return;
+ // In v6 the nominative and accusative variants were stored at raw slots 22 and 23.
+ const nominative = book?.findIndex(exercise=>exercise.id==='la-jins-23');
+ const accusative = book?.findIndex(exercise=>exercise.id==='la-jins-24');
+ if (!(accusative >= 0 && accusative < nominative)) return;
+ const remap = positions => {
+  const old = positions?.['la-jins'];
+  if (old !== 22 && old !== 23) return positions;
+  return {...positions,'la-jins':old===22?nominative:accusative};
+ };
+ saved.positions = remap(saved.positions);
+ if (saved.helpReturn?.positions) saved.helpReturn={...saved.helpReturn,positions:remap(saved.helpReturn.positions)};
+ saved.version = 7;
+}
+migrateLaJinsOrder(migrated,chapters.find(chapter=>chapter.id==='la-jins')?.book);
 let state=migrated;
 if(!['light','dark'].includes(state.theme))state.theme='light';
 if(!['all','quran'].includes(state.bookFilter))state.bookFilter='all';

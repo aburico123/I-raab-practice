@@ -5116,7 +5116,7 @@ const finishBookBuiltParts=(()=>{
  return {...F,ay:via(F.ay),ha:via(F.ha),kaf:via(F.kaf),ya:via(F.ya),taa:oral(F.taa),pl:oral(F.pl)};
 })();
 const twoVerbConditionals=(()=>{
- const {a,t,q,b,fixed,estimated,ft,wa,fi,ala,bi,min,ay,gPrep,gAnnex,objPro,subPro,ha,kaf,mim,pl,you,me,she,hu,protective,ya,gen,annex,subject,later,past,pp,front,obj,kh,amrPl}=finishBookBuiltParts;
+ const {a,t,q,b,fixed,estimated,ft,wa,fa,fi,ala,bi,min,ay,gPrep,gAnnex,objPro,subPro,ha,kaf,mim,pl,you,me,she,hu,protective,ya,gen,annex,subject,later,past,pp,front,obj,kh,amrPl}=finishBookBuiltParts;
  const startWaw=ft('الْوَاوُ حَرْفُ اسْتِئْنَافٍ','Resumptive wāw');
  const cond=name=>name==='إِنْ'?fixed('«إِنْ» حَرْفُ شَرْطٍ جَازِمٌ','Jussive conditional particle in'):estimated('«إِذْمَا» حَرْفُ شَرْطٍ جَازِمٌ','Jussive conditional particle idhmā');
  const noun=(name,fixedAt,fixedEn,role,roleEn)=>a(`«${name}» اسْمُ شَرْطٍ جَازِمٌ مَبْنِيٌّ عَلَى ${fixedAt} فِي مَحَلِّ ${role}`,`Conditional noun ${roleEn}, fixed on ${fixedEn}`);
@@ -5142,7 +5142,7 @@ const twoVerbConditionals=(()=>{
   jawQ('jaw-two-p243-02',243,'وَمَا تَفْعَلُوا مِنْ خَيْرٍ يَعْلَمْهُ اللَّهُ','Whatever good you do, Allah knows it.',[
    t('وَمَا','and whatever',startWaw,noun('مَا','السُّكُونِ الْمُقَدَّرِ عَلَى الْأَلِفِ لِلتَّعَذُّرِ','sukūn estimated on alif, which cannot bear it','نَصْبٍ مَفْعُولٌ بِهِ مُقَدَّمٌ','in accusative position as fronted object')),
    t('تَفْعَلُوا','you do',jn('مَا','condition'),pl),t('مِنْ','of',min),t('خَيْرٍ','good',gen('مِنْ','min'),pp('بِمَحْذُوفٍ صِفَةٍ لِاسْمِ الشَّرْطِ','an omitted modifier of the conditional noun')),
-   t('يَعْلَمْهُ','knows it',juss('مَا','answer'),ha(objPro)),t('اللَّهُ','Allah',subject)
+   t('يَعْلَمْهُ','knows it',juss('مَا','answer'),ha(['نَصْبٍ مَفْعُولٌ بِهِ مُقَدَّمٌ','hāʾ','accusative as the direct object placed before the subject'])),t('اللَّهُ','Allah',subject)
   ],[2,197],'الْبَقَرَةِ','Note 4 gives fronted object mā and prefers treating the prepositional phrase as an adjective rather than a ḥāl.','الْحَاشِيَةُ ٤ تُعْرِبُ «مَا» مَفْعُولًا مُقَدَّمًا وَتُرَجِّحُ الصِّفَةَ عَلَى الْحَالِ.'),
   jawQ('jaw-two-p244-01',244,'مَنْ يَعْمَلْ سُوءًا يُجْزَ بِهِ','Whoever does wrong will be recompensed for it.',[
    t('مَنْ','whoever',mubCond('مَنْ')),t('يَعْمَلْ','does',juss('مَنْ','condition'),hu),t('سُوءًا','wrong',obj,asPredicate('مَنْ','man')),
@@ -5177,12 +5177,12 @@ const twoVerbConditionals=(()=>{
    t('أَيْنَمَا','wherever',noun('أَيْنَ','الْفَتْحِ','fatḥ',place,placeEn),extra),t('تَكُونُوا','you are',jn('أَيْنَمَا','condition'),a('«تَكُونُوا» مِنْ «كَانَ» التَّامَّةِ','Takūnū is from complete kāna'),pl),
    t('يُدْرِكْكُمُ','will overtake you',juss('أَيْنَمَا','answer'),kaf(objPro,true),a('الْمِيمُ عَلَامَةُ الْجَمْعِ مَبْنِيَّةٌ عَلَى السُّكُونِ، وَضُمَّتْ فِي الْوَصْلِ، لَا مَحَلَّ لَهَا','Plural mīm is fixed on sukūn, pronounced with linking ḍamm; no syntactic position')),t('الْمَوْتُ','death',subject)
   ],[4,78],'النِّسَاءِ','Note 1 identifies complete kāna, nūn deletion, and death as the expressed subject of the answer. The practice spelling shows the verb’s underlying kāf before the object kāf; they assimilate in the Ḥafṣ recitation.','الْحَاشِيَةُ ١ تُعَيِّنُ «كَانَ» التَّامَّةَ وَحَذْفَ النُّونِ وَفَاعِلَ الْجَوَابِ الظَّاهِرَ. وَيُظْهِرُ ضَبْطُ التَّدْرِيبِ كَافَ الْفِعْلِ قَبْلَ كَافِ الْمَفْعُولِ، وَتُدْغَمُ الْكَافَانِ فِي قِرَاءَةِ حَفْصٍ.'),
-  jawB('jaw-two-p247-02',247,'فَأَصْبَحْتَ أَنَّى تَأْتِهَا تَسْتَجِرْ بِهَا تَجِدْ حَطَبًا جَزْلًا وَنَارًا تَأَجَّجَا','So it came to be that wherever you went to it seeking refuge, you found substantial firewood and a blazing fire.',[
-   t('فَأَصْبَحْتَ','so it came to be that you',wa,a('فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِالتَّاءِ','Deficient past verb fixed on sukūn before tāʾ'),ay('التَّاءُ',['رَفْعٍ اسْمُ «أَصْبَحَ»','tāʾ','nominative position as the ism of aṣbaḥa'],'الْفَتْحِ','fatḥ')),
+  jawB('jaw-two-p247-02',247,'فَأَصْبَحْتَ أَنَّى تَأْتِهَا تَسْتَجِرْ بِهَا تَجِدْ حَطَبًا جَزْلًا وَنَارًا تَأَجَّجَا','So it came to be that wherever you went to it seeking refuge, you would find substantial firewood and a fire, both ablaze.',[
+   t('فَأَصْبَحْتَ','so it came to be that you',fa,a('فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِالتَّاءِ','Deficient past verb fixed on sukūn before tāʾ'),ay('التَّاءُ',['رَفْعٍ اسْمُ «أَصْبَحَ»','tāʾ','nominative position as the ism of aṣbaḥa'],'الْفَتْحِ','fatḥ')),
    t('أَنَّى','wherever',noun('أَنَّى','السُّكُونِ الْمُقَدَّرِ عَلَى الْأَلِفِ لِلتَّعَذُّرِ','sukūn estimated on alif, which cannot bear it',place,placeEn)),t('تَأْتِهَا','you go to it',weak('أَنَّى','condition','الْيَاءِ','yāʾ'),you,ay('«هَا»',objPro)),t('تَسْتَجِرْ','you seek refuge',a('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِالسُّكُونِ بَدَلُ اشْتِمَالٍ مِنْ «تَأْتِ»','Imperfect, jussive with sukūn as a badal of inclusion from taʾti'),you),
    t('بِهَا','there',bi,ay('«هَا»',gPrep),pp('بِـ«تَسْتَجِرْ»','tastajir')),t('تَجِدْ','you find',juss('أَنَّى','answer'),you),
    t('حَطَبًا','firewood',a('مَفْعُولٌ بِهِ أَوَّلُ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ','First direct object, accusative with a visible fatḥah')),t('جَزْلًا','substantial',a('نَعْتٌ لِـ«حَطَبًا» مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ','Modifier of “firewood,” accusative with a visible fatḥah')),
-   t('وَنَارًا','and a fire',wa,a('مَعْطُوفٌ عَلَى «حَطَبًا» مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ','Coordinated with “firewood,” accusative with a visible fatḥah')),t('تَأَجَّجَا','they blazed',past,ay('أَلِفُ الِاثْنَيْنِ',subPro),a('جُمْلَةُ «تَأَجَّجَا» فِي مَحَلِّ نَصْبٍ مَفْعُولٌ ثَانٍ لِـ«تَجِدْ»، وَالشَّرْطُ وَجَوَابُهُ فِي مَحَلِّ نَصْبٍ خَبَرُ «أَصْبَحَ»','The “they blazed” clause is the second object of tajid, in accusative position; the condition and answer together are the khabar of aṣbaḥa, in accusative position'))
+   t('وَنَارًا','and a fire',wa,a('مَعْطُوفٌ عَلَى «حَطَبًا» مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ','Coordinated with “firewood,” accusative with a visible fatḥah')),t('تَأَجَّجَا','they both blazed',past,ay('أَلِفُ الِاثْنَيْنِ',subPro),a('جُمْلَةُ «تَأَجَّجَا» فِي مَحَلِّ نَصْبٍ مَفْعُولٌ ثَانٍ لِـ«تَجِدْ»، وَالشَّرْطُ وَجَوَابُهُ فِي مَحَلِّ نَصْبٍ خَبَرُ «أَصْبَحَ»','The “they both blazed” clause is the second object of tajid, in accusative position; the condition and answer together are the khabar of aṣbaḥa, in accusative position'))
   ],'The full verse as printed. Note 2 attributes it to Labīd and gives the parse and a distinct variant wording.','الْبَيْتُ كَامِلًا بِلَفْظِ الْمَتْنِ؛ تَنْسُبُهُ الْحَاشِيَةُ ٢ إِلَى لَبِيدٍ وَتَذْكُرُ إِعْرَابَهُ وَرِوَايَةً أُخْرَى.'),
   jawB('jaw-two-p248-01',248,'حَيْثُمَا تَسْتَقِمْ يُقَدِّرْ لَكَ اللَّهُ نَجَاحًا فِي غَابِرِ الْأَزْمَانِ','Wherever you act uprightly, Allah will grant you success in the times to come.',[
    t('حَيْثُمَا','wherever',noun('حَيْثُ','الضَّمِّ','ḍamm',place,placeEn),estimated('«مَا» حَرْفٌ كَافٌّ','Mā blocks the usual annexation after ḥaythu')),t('تَسْتَقِمْ','you act uprightly',juss('حَيْثُمَا','condition'),you),
@@ -5267,7 +5267,10 @@ const followerAdjectives=(()=>{
  const boys=t('غِلْمَانُهُ','his servants',n('فَاعِلٌ','Subject of the modifier',true),ha(gAnnex));
  const cameTo=(word)=>t(word,word.startsWith('وَ')?'and came to me':'came to me',...(word.startsWith('وَ')?[wa]:[]),past,...(word.includes('جَاءَتْ')?[fv]:[]),protective,ya(objPro));
  const detach=(word,en,mark)=>t(word,en,a(`ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى ${mark} فِي مَحَلِّ رَفْعٍ فَاعِلٌ لِاسْمِ الْفَاعِلِ`,`Detached pronoun fixed on ${en==='they'?'sukūn':'fatḥ'} in nominative position as the participle’s subject`));
- const causePart=(word,en,base,baseEn,pron)=>t(word,en,modify(base,baseEn,'nom','regular','سَبَبِيٌّ',true),pron);
+ const causePart=(word,en,base,baseEn,pron)=>t(word,en,modify(base,baseEn,'nom','regular','سَبَبِيٌّ',true),{
+  ar:pron.ar.replace(/\.$/u,'، وَهُوَ مَفْعُولُ اسْمِ الْفَاعِلِ فِي الْمَعْنَى.'),
+  en:pron.en.replace(/\.$/u,'; it is the object of the participle in meaning.')
+ });
  const sameAdv=a('مَصْدَرٌ نُعِتَ بِهِ، وَلَزِمَ لَفْظَ الْمُفْرَدِ الْمُذَكَّرِ','A verbal noun used attributively; its form remains masculine singular');
  const sourceAdj=(base,en)=>t('عَدْلٍ','just',modify(base,en),sameAdv);
  const naat=[
@@ -5296,7 +5299,7 @@ const followerAdjectives=(()=>{
   naatB('naat-p257-02',257,'وَجَاءَتْ هِنْدٌ الْقَائِمُ أَبُوهَا','And Hind, whose father was standing, came.',[datang('وَجَاءَتْ'),t('هِنْدٌ','Hind',subject),causal('هِنْدٌ','Hind','nom','الْقَائِمُ','standing'),father('أَبُوهَا','her father',ay(subjHā,gAnnex))],'p.257 n.2'),
   naatB('naat-p257-03',257,'مَرَرْتُ بِرَجُلٍ قَائِمَةٍ أُمُّهُ وَبِامْرَأَةٍ قَائِمٍ أَبُوهَا','I passed by a man whose mother was standing and a woman whose father was standing.',[
    mar(),by('بِرَجُلٍ','a man'),causal('رَجُلٍ','the man','gen','قَائِمَةٍ','standing'),mother,by('وَبِامْرَأَةٍ','and a woman','regular',true),causal('امْرَأَةٍ','the woman','gen','قَائِمٍ','standing'),father('أَبُوهَا','her father',ay(subjHā,gAnnex))
-  ],'p.257 n.3; the note’s final kasrah statement for abūhā is inconsistent with its explicit subject status and the clearly printed wāw. The answer applies the same six-noun sign as n.2','تَقُولُ الْحَاشِيَةُ ٣ فَاعِلٌ مَرْفُوعٌ، وَذِكْرُ الْكَسْرَةِ فِيهَا لَا يُوَافِقُ رَسْمَ «أَبُوهَا»؛ فَأُخِذَتْ عَلَامَةُ الْوَاوِ مِنْ حُكْمِ الْأَسْمَاءِ السِّتَّةِ وَنَظِيرِهِ فِي الْحَاشِيَةِ ٢.'),
+  ],'p.257 n.3 calls abūhā a nominative subject and names ḍammah as its sign. The written wāw matches the six-noun rule and the parallel analyses in notes 2 and 4; the app gives wāw in place of ḍammah','تَجْعَلُ الْحَاشِيَةُ ٣ «أَبُوهَا» فَاعِلًا مَرْفُوعًا وَتَذْكُرُ الضَّمَّةَ عَلَامَةً لِرَفْعِهِ. وَيُبَيِّنُ التَّطْبِيقُ أَنَّ الْوَاوَ نَابَتْ عَنِ الضَّمَّةِ وَفْقَ رَسْمِ الْكَلِمَةِ وَحُكْمِ الْأَسْمَاءِ السِّتَّةِ، كَمَا فِي الْحَاشِيَتَيْنِ ٢ وَ٤.'),
   naatB('naat-p257-04',257,'وَمَرَرْتُ بِرَجُلَيْنِ قَائِمٍ أَبُوهُمَا','And I passed by two men whose father was standing.',[mar('وَمَرَرْتُ'),by('بِرَجُلَيْنِ','two men','dual'),causal('رَجُلَيْنِ','the two men','gen','قَائِمٍ','standing'),father('أَبُوهُمَا','their (dual) father',ha(gAnnex),true)],'p.257 n.4'),
   naatB('naat-p257-05',257,'وَمَرَرْتُ بِرِجَالٍ قَائِمٍ آبَاؤُهُمْ','And I passed by men whose fathers were standing.',[mar('وَمَرَرْتُ'),by('بِرِجَالٍ','men'),causal('رِجَالٍ','the men','gen','قَائِمٍ','standing'),fathers],'p.257 n.5'),
   naatB('naat-p258-01',258,'مَرَرْتُ بِرِجَالٍ قِيَامٍ آبَاؤُهُمْ','I passed by men whose fathers were standing.',[mar(),by('بِرِجَالٍ','men'),causal('رِجَالٍ','the men','gen','قِيَامٍ','standing'),fathers],'p.258 n.1–2, with Sībawayh’s broken-plural preference'),
@@ -5312,8 +5315,8 @@ const followerAdjectives=(()=>{
   naatB('naat-p259-04',259,'جَاءَ زَيْدٌ الْعَالِمُ','Zayd the scholar came.',[datang('جَاءَ'),t('زَيْدٌ','Zayd',subject),t('الْعَالِمُ','the scholar',modify('زَيْدٌ','Zayd','nom'),hu)],'p.259 nn.4–5'),
   naatQ('naat-p260-01',260,'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ','In the name of Allah, the All-Merciful, the Ever-Merciful.',[
    t('بِسْمِ','in the name of',
-    a('الْبَاءُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْكَسْرِ','The bāʾ is a preposition fixed with kasrah'),
-    {ar:'«اسْمِ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ، وَهُوَ مُضَافٌ.',en:'The noun is governed by the bāʾ, with a visible final kasrah. It is the first term of the iḍāfah.'},
+    a('الْبَاءُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْكَسْرِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ','The bāʾ is a preposition fixed with kasr, with no syntactic position'),
+    {ar:'«اسْمِ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ عَلَى آخِرِهِ، وَهُوَ مُضَافٌ.',en:'The noun is genitive after bāʾ, marked by a visible final kasrah. It is the first term of the iḍāfah.'},
     pp('بِفِعْلٍ مَحْذُوفٍ','an omitted verb')),t('اللَّهِ','Allah',annex),t('الرَّحْمَٰنِ','the All-Merciful',modify('اللَّهِ','Allah')),t('الرَّحِيمِ','the Ever-Merciful',modify('اللَّهِ','Allah'))
   ],[1,1],'الْفَاتِحَةِ','الْحَاشِيَةُ ١ تُعْرِبُ الْبَسْمَلَةَ وَتَجْعَلُ الْوَصْفَيْنِ نَعْتَيْنِ. وَالتَّرْجَمَةُ وَتَكْمِيلُ الْعَلَامَاتِ مِنَ التَّطْبِيقِ.','Note 1 gives the attachment to an omitted verb and both adjectives. The app supplies translation, endings and any unstated details.'),
   naatB('naat-p260-02',260,'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ','I seek refuge in Allah from Satan, the accursed.',[

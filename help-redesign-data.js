@@ -912,6 +912,52 @@ finalManSummary('adjective-naat',[
  ['multiple','تَعَدُّدُ النُّعُوتِ','Several adjectives for one noun']
 ]);
 
+finalManSummary('atf-bayan',[
+ 'عَطْفُ الْبَيَانِ يُوَضِّحُ مَعْرِفَةً أَوْ يُخَصِّصُ نَكِرَةً.','Clarifying apposition identifies a definite or narrows an indefinite.',
+ 'تَابِعٌ جَامِدٌ يُوَضِّحُ مَتْبُوعَهُ بِغَيْرِ حَرْفِ عَطْفٍ.','A non-derived dependent that clarifies its head without a coordinator.',
+ 'يُوَافِقُ مَتْبُوعَهُ فِي الْإِعْرَابِ وَالْجِنْسِ وَالتَّعْرِيفِ وَالْعَدَدِ.','It agrees with the head in case, gender, definiteness and number.',
+ 'ابْحَثْ عَنِ الِاسْمِ الثَّانِي الَّذِي يُبَيِّنُ الْأَوَّلَ دُونَ حَرْفٍ.','Look for a second noun that makes the first more precise without a conjunction.','bayan-p263-01'
+],[
+ ['purpose','التَّوْضِيحُ وَالتَّخْصِيصُ','Clarifying or narrowing',true],
+ ['agreement','الْمُطَابَقَةُ','Agreement'],
+ ['alternate','مَتَى يَجُوزُ وَجْهُ الْبَدَلِ؟','When is a badal analysis possible?']
+]);
+finalManSummary('atf-nasaq',[
+ 'الْمَعْطُوفُ يَتْبَعُ مَا قَبْلَهُ فِي الْإِعْرَابِ.','A coordinated word follows its head in inflection.',
+ 'تَابِعٌ بَيْنَهُ وَبَيْنَ مَتْبُوعِهِ حَرْفُ عَطْفٍ.','A dependent linked to its head by a coordinator.',
+ 'يَتْبَعُهُ فِي الرَّفْعِ وَالنَّصْبِ وَالْجَرِّ أَوِ الْجَزْمِ.','It shares the nominative, accusative, genitive or jussive.',
+ 'عَيِّنِ الْحَرْفَ وَالْمَعْطُوفَ عَلَيْهِ، ثُمَّ انْظُرْ إِلَى الْعَلَامَةِ وَمَعْنَى الْحَرْفِ.','Find the coordinator and first term, then check the ending and the coordinator’s meaning.','nasaq-p265-01'
+],[
+ ['inventory','الْحُرُوفُ الْعَشَرَةُ','The ten listed coordinators',true],
+ ['rulings','أَوْجُهُ الْإِعْرَابِ الْأَرْبَعَةُ','The four inflection patterns',true],
+ ['sequence','الْوَاوُ وَالْفَاءُ وَثُمَّ وَحَتَّى','Wāw, fāʾ, thumma and ḥattā'],
+ ['options','أَمْ وَأَوْ','Am and aw'],
+ ['turn','إِمَّا وَبَلْ وَلَكِنْ وَلَا','Immā, bal, lākin and lā']
+]);
+finalManSummary('tawkid',[
+ 'التَّوْكِيدُ يَتْبَعُ الْمُؤَكَّدَ فِي إِعْرَابِهِ وَتَعْرِيفِهِ.','Emphasis follows the case and definiteness of what it emphasizes.',
+ 'يَكُونُ بِإِعَادَةِ اللَّفْظِ، أَوْ بِأَلْفَاظٍ مَعْلُومَةٍ لِتَقْوِيَةِ الْمَعْنَى.','Repeat the wording, or use one of the forms that strengthens its meaning.',
+ 'فِي الْمَعْنَوِيِّ يُطَابِقُ الضَّمِيرُ الْمُؤَكَّدَ، وَتَخْتَلِفُ الصُّورَةُ بِاخْتِلَافِ الْعَدَدِ.','In semantic emphasis, the pronoun matches the head and the form depends on its number.',
+ 'مَيِّزْ بَيْنَ تَكْرَارِ اللَّفْظِ وَزِيَادَةِ لَفْظٍ مِثْلِ «نَفْسُهُ» أَوْ «كُلُّهُمْ».','Distinguish repetition from adding a form such as nafsuhu or kulluhum.','tawkid-p271-01'
+],[
+ ['verbal','التَّوْكِيدُ اللَّفْظِيُّ','Repetition',true],
+ ['pronouns','التَّوْكِيدُ الْمَعْنَوِيُّ وَضَمِيرُهُ','Semantic emphasis and its pronoun',true],
+ ['number','الْمُفْرَدُ وَالْمُثَنَّى وَالْجَمْعُ','Singular, dual and plural'],
+ ['stronger','سِلْسِلَةُ أَجْمَعَ وَتَوَابِعُهُ','The ajmaʿ series and its intensifiers'],
+ ['definiteness','الِاتِّبَاعُ وَحُكْمُ النَّكِرَةِ','Agreement and the indefinite']
+]);
+finalManSummary('badal',[
+ 'الْبَدَلُ هُوَ الْمَقْصُودُ بِالْحُكْمِ، وَيَتْبَعُ مَا قَبْلَهُ فِي الْإِعْرَابِ.','Badal is what the assertion is about; it follows the first term in inflection.',
+ 'تَابِعٌ مَقْصُودٌ بِالْحُكْمِ بِلَا وَاسِطَةٍ.','A dependent directly intended by the assertion, without a coordinator.',
+ 'يَتَّبِعُ الِاسْمُ الِاسْمَ وَالْفِعْلُ الْفِعْلَ.','A noun follows a noun and a verb follows a verb.',
+ 'اسْأَلْ: أَهُوَ نَفْسُ الْأَوَّلِ، أَمْ جُزْءٌ مِنْهُ، أَمْ شَيْءٌ مُتَّصِلٌ بِهِ، أَمْ شَيْءٌ آخَرُ؟','Is it the same referent, part of it, associated with it, or something else?','badal-p277-01'
+],[
+ ['whole','حَدُّ الْبَدَلِ وَالْبَدَلُ الْمُطَابِقُ','Definition and whole-for-whole',true],
+ ['linked','الْبَعْضُ وَالِاشْتِمَالُ وَالرَّابِطُ','Part, inclusion and the link'],
+ ['other','الْبَدَلُ الْمُبَايِنُ','Dissimilar substitution'],
+ ['verb','بَدَلُ الْفِعْلِ وَحُكْمُ التَّعْرِيفِ','Verb substitution and definiteness']
+]);
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = HELP_REDESIGN_BY_CHAPTER;
 }

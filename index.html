@@ -594,8 +594,8 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
     </div>
   </main>
 </div>
-<script src="help-redesign-data.js?v=finish-book-243-262"></script>
-<script src="lesson-data.js?v=finish-book-243-262"></script>
+<script src="help-redesign-data.js?v=finish-book-263-281"></script>
+<script src="lesson-data.js?v=finish-book-263-281"></script>
 <script>
 (function(){
 'use strict';
@@ -776,7 +776,7 @@ function exerciseArabicHtml(exercise) {
  if (!exercise.quran) return escapeHtml(exercise.ar);
  const lead = exercise.quranLeadAr ? `<span class="quran-lead">${escapeHtml(exercise.quranLeadAr)}</span>` : '';
  const spans = exercise.quran.spans || [exercise.ar];
- const quotation = spans.map(span => quranQuoteHtml(quranSpanHtml(span,exercise.quran.verseMarkers))).join('<span class="quran-gap"> … </span>');
+ const quotation = spans.map((span,index) => quranQuoteHtml((index===0&&exercise.quran.leadingEllipsis?'<span class="quran-gap quran-leading-ellipsis" aria-hidden="true">… </span>':'')+quranSpanHtml(span,exercise.quran.verseMarkers))).join('<span class="quran-gap"> … </span>');
  return lead + quotation + quranReferenceHtml(exercise);
 }
 // The disclosure is transient UI state. Exercise selection is still stored by

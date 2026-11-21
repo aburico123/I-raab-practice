@@ -3111,7 +3111,7 @@ const laJinsForms=[
   'تَطْبَعُ الْحَاشِيَةُ الثَّامِنَةُ هَذَا الْوَجْهَ وَتَعْطِفُ «قُوَّةً» عَلَى مَحَلِّ اسْمِ «لَا» الْأُولَى.'),
  laHawqalaVariant('la-jins-15',151,laIdlePart,mkMubtada('قُوَّةٌ','strength'),
   'تَعْطِفُ جُمْلَةَ «قُوَّةٌ» الْمُؤَلَّفَةَ مِنْ مُبْتَدَإٍ وَخَبَرٍ عَلَى جُمْلَةِ «لَا» الْأُولَى.','It joins the separate mubtadaʾ–khabar clause of quwwatun to the first lā clause.',
-  'بِخَبَرِ الْمُبْتَدَإِ «قُوَّةٌ» الْمَحْذُوفِ، تَقْدِيرُهُ «كَائِنَةٌ». وَخَبَرُ «لَا» الْأُولَى مَحْذُوفٌ تَقْدِيرُهُ «كَائِنٌ»، يَدُلُّ عَلَيْهِ السِّيَاقُ.',
+  'بِمَحْذُوفٍ تَقْدِيرُهُ «كَائِنَةٌ»، وَهُوَ خَبَرُ الْمُبْتَدَإِ «قُوَّةٌ». وَخَبَرُ «لَا» الْأُولَى مَحْذُوفٌ تَقْدِيرُهُ «كَائِنٌ»، يَدُلُّ عَلَيْهِ السِّيَاقُ.',
   'the omitted khabar of the mubtadaʾ quwwatun, kāʾinatun (“exists”). The first lā has its own omitted khabar, kāʾinun, recoverable from context.',
   'Footnote 1 prints this grammatical option and takes quwwatun as a nominative mubtadaʾ after inoperative lā.',
   'تَطْبَعُ الْحَاشِيَةُ الْأُولَى هَذَا الْوَجْهَ، فَتُهْمِلُ «لَا» الثَّانِيَةَ وَتَرْفَعُ «قُوَّةٌ» عَلَى الِابْتِدَاءِ.'),

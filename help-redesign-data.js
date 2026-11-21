@@ -696,6 +696,32 @@ const HELP_REDESIGN_BY_CHAPTER = {
   }
 };
 
+HELP_REDESIGN_BY_CHAPTER.vocative={
+ essentials:{
+  coreRuleAr:'الْمُنَادَى مَنْصُوبٌ أَوْ مَبْنِيٌّ فِي مَحَلِّ نَصْبٍ؛ وَنَوْعُهُ هُوَ الَّذِي يُحَدِّدُ الْحُكْمَ.',
+  coreRuleEn:'The vocative takes accusative case or a fixed ending in an accusative position. Its type determines which.',
+  definitionAr:'الْمُنَادَى مَنْ يُطْلَبُ إِقْبَالُهُ بِـ«يَا» أَوْ إِحْدَى أَخَوَاتِهَا.',
+  definitionEn:'A vocative names the person or group being called by yā or a sister particle.',
+  effectAr:'يُبْنَى الْعَلَمُ غَيْرُ الْمُضَافِ وَلَا الشَّبِيهِ بِهِ، وَالنَّكِرَةُ الْمَقْصُودَةُ، عَلَى مَا يُرْفَعَانِ بِهِ؛ وَتُنْصَبُ الْأَنْوَاعُ الثَّلَاثَةُ الْبَاقِيَةُ.',
+  effectEn:'A proper name that is neither annexed nor quasi-annexed, and an intended indefinite, are built on their normal signs of rafʿ. The other three types take accusative case.',
+  recognitionAr:'مَنْ قَصَدَ الْمُتَكَلِّمُ بِالنِّدَاءِ؟ وَهَلْ بَعْدَ الِاسْمِ مُضَافٌ إِلَيْهِ أَوْ مَعْمُولٌ يُتِمُّ مَعْنَاهُ؟',
+  recognitionEn:'Who is being called? Is the noun followed by a genitive annex or another element that completes its meaning?',
+  cautionsAr:'الضَّمُّ فِي «يَا رَجُلُ» بِنَاءٌ، لَا رَفْعٌ. وَضَمَّةُ «يَا أُمُّ» لَا تَمْنَعُ تَقْدِيرَ الْإِضَافَةِ إِلَى يَاءِ الْمُتَكَلِّمِ.',
+  cautionsEn:'The ḍamm of yā rajulu is a fixed ending, not nominative case. The audible ḍammah of yā ummu does not remove its understood first-person annexation.',
+  exampleId:'voc-p171-01'
+ },
+ sections:[
+  {id:'vocative-relationship',titleAr:'مَوْضِعُ النِّدَاءِ فِي بَابِ الْمَفْعُولِ بِهِ',titleEn:'Why the book puts this under the direct object',group:'overview',defaultOpen:false},
+  {id:'vocative-fixed',titleAr:'نَوْعَانِ مَبْنِيَّانِ فِي مَحَلِّ نَصْبٍ',titleEn:'Two fixed types in the accusative position',group:'forms',defaultOpen:true},
+  {id:'vocative-accusative',titleAr:'ثَلَاثَةُ أَنْوَاعٍ مَنْصُوبَةٍ إِعْرَابًا',titleEn:'Three types that take accusative case',group:'forms',defaultOpen:true},
+  {id:'vocative-ya-forms',titleAr:'صُوَرُ الْإِضَافَةِ إِلَى يَاءِ الْمُتَكَلِّمِ',titleEn:'Six first-person forms',group:'forms',defaultOpen:false},
+  {id:'vocative-estimated-ending',titleAr:'مَتَى تُقَدَّرُ الْفَتْحَةُ؟',titleEn:'When is fatḥah estimated?',group:'caution',defaultOpen:false},
+  {id:'vocative-parents',titleAr:'صُوَرٌ زَائِدَةٌ لِنِدَاءِ الْأَبِ وَالْأُمِّ',titleEn:'Additional forms for father and mother',group:'forms',defaultOpen:false},
+  {id:'vocative-mediated',titleAr:'الْإِضَافَةُ غَيْرُ الْمُبَاشِرَةِ وَاسْتِثْنَاؤُهَا',titleEn:'Indirect annexation and its exceptions',group:'conditions',defaultOpen:false},
+  {id:'vocative-poetry',titleAr:'شَاهِدَا الشِّعْرِ وَالتَّقْدِيرُ',titleEn:'Two lines of poetry and an estimate',group:'source',defaultOpen:false}
+ ]
+};
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = HELP_REDESIGN_BY_CHAPTER;
 }

@@ -5808,7 +5808,9 @@ const finalBook=(()=>{
   form('verb-noun-p290-04',290,'Keep close to Zayd.',[
    verbNoun('عَلَيْكَ','keep close to','الْزَمْ','Imperative','أَمْرٍ','السُّكُونِ','sukūn',you,true),object('زَيْدًا','Zayd','عَلَيْكَ','the verb-noun')
   ],'n.3','الْحَاشِيَةُ ٣ تَجْعَلُ الْكَافَ لِلْخِطَابِ وَالْفَاعِلَ ضَمِيرًا مُسْتَتِرًا.'),
-  lexical('verb-noun-p290-05','دُونَكَ','Take [it]','خُذْ','Imperative','أَمْرٍ','الْفَتْحِ','fatḥ',you,'n.4 object kept outside'),
+  form('verb-noun-p290-05',290,'Take [it].',[
+   t('دُونَكَ','Take [it]',a('«دُونَ» اسْمُ فِعْلِ أَمْرٍ بِمَعْنَى «خُذْ»، مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ','Imperative verb-noun meaning “take”; fixed on fatḥ, with no syntactic position'),ft('الْكَافُ حَرْفُ خِطَابٍ','Address kāf'),you)
+  ],'n.4 object kept outside','اللَّفْظُ وَمَعْنَاهُ فِي الْمَتْنِ، وَمِثَالُهُ مَعَ الْمَفْعُولِ فِي الْحَاشِيَةِ ٤. تَحْلِيلُ الْكَافِ لِلْخِطَابِ مِنَ التَّطْبِيقِ، قِيَاسًا عَلَى شَرْحِ «عَلَيْكَ» فِي الْحَاشِيَةِ ٣.','The main text gives the form and its meaning; note 4 supplies a separate example with an object. The app treats kāf as an address particle by analogy with note 3 on ʿalayka.'),
   lexical('verb-noun-p290-06','هَيْهَاتَ','Is far away','بَعُدَ','Past','مَاضٍ','الْفَتْحِ','fatḥ',null,'n.5 supplies a separate subject illustration'),
   lexical('verb-noun-p290-07','شَتَّانَ','Are far apart','افْتَرَقَ','Past','مَاضٍ','الْفَتْحِ','fatḥ',null,'n.6 supplies a separate subject illustration'),
   lexical('verb-noun-p290-08','أَوَّهْ','I ache','أَتَوَجَّعُ','Imperfect','مُضَارِعٍ','السُّكُونِ','sukūn',me,'n.7 verse remains editorial'),
@@ -5818,17 +5820,18 @@ const finalBook=(()=>{
  const personalPrayer=a('فِعْلُ دُعَاءٍ عَلَى صِيغَةِ الْأَمْرِ مَبْنِيٌّ عَلَى السُّكُونِ','Supplicatory imperative fixed on sukūn');
  const supplicationStart=t('وَاللَّهُمَّ','and O Allah',wa,a('مُنَادًى مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ نَصْبٍ، حُذِفَ مِنْهُ حَرْفُ النِّدَاءِ','Vocative fixed on ḍamm in accusative position; the vocative particle is omitted'),ft('الْمِيمُ الْمُشَدَّدَةُ عِوَضٌ عَنْ حَرْفِ النِّدَاءِ','Doubled mīm replaces the vocative particle'));
  const sal=t('صَلِّ','send blessings',weakPrayer,you), salam=t('وَسَلِّمْ','and grant peace',wa,personalPrayer,you), barik=t('وَبَارِكْ','and bless',wa,personalPrayer,you);
- const onHim=(ar,en)=>ppPron('عَلَيْهِ','upon him',ala,ha(gPrep,true),`بِـ«${ar}»`,en);
+ const alaWithPronoun=a('عَلَى حَرْفُ جَرٍّ، انْقَلَبَتْ أَلِفُهُ يَاءً سَاكِنَةً عِنْدَ اتِّصَالِهِ بِالضَّمِيرِ، وَلَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ','Preposition ʿalā; its alif becomes a sākin yāʾ when a pronoun is attached. It has no syntactic position');
+ const onHim=(ar,en)=>ppPron('عَلَيْهِ','upon him',alaWithPronoun,ha(gPrep,true),`بِـ«${ar}»`,en);
  const firstYou=(w='ضَرَبَنِي',conj=false)=>t(w,'he struck me',...(conj?[wa]:[]),past,protective,ya(objPro));
  const dualSuffix=a('الْمِيمُ وَالْأَلِفُ لِلتَّثْنِيَةِ، لَا مَحَلَّ لَهُمَا','Mīm and alif mark the dual and have no syntactic position');
  const competition=[
   q('tanazu-p291-01',291,'آتُونِي أُفْرِغْ عَلَيْهِ قِطْرًا','Give me [molten copper], and I will pour molten copper over it.',[
    t('آتُونِي','give me',amrPl,pl,protective,ya(['نَصْبٍ مَفْعُولٌ بِهِ أَوَّلُ','yāʾ','accusative as the first object']),a('الْمَفْعُولُ الثَّانِي مَحْذُوفٌ فِي تَقْدِيرِ الْحَاشِيَةِ «آتُونِيهِ»','The second object is omitted; the note estimates “give it to me”')),
    t('أُفْرِغْ','I will pour',a('فِعْلٌ مُضَارِعٌ مَجْزُومٌ فِي جَوَابِ الطَّلَبِ بِالسُّكُونِ','Imperfect in the response to the command, jussive with sukūn'),me),
-   t('عَلَيْهِ','over it',ala,ha(gPrep,true),a('الْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«أُفْرِغْ» فِي الْحَاشِيَةِ، وَنَقَلَتْ عَنِ الْكَوَاكِبِ تَعَلُّقَهُمَا بِمَحْذُوفٍ حَالٍ مِنَ الضَّمِيرِ','The note attaches the phrase to ufrigh; it also reports al-Kawākib’s attachment to an omitted ḥāl of the pronoun')),
+   t('عَلَيْهِ','over it',alaWithPronoun,ha(gPrep,true),a('الْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«أُفْرِغْ» فِي الْحَاشِيَةِ، وَنَقَلَتْ عَنِ الْكَوَاكِبِ تَعَلُّقَهُمَا بِمَحْذُوفٍ حَالٍ مِنَ الضَّمِيرِ','The note attaches the phrase to ufrigh; it also reports al-Kawākib’s attachment to an omitted ḥāl of the pronoun')),
    object('قِطْرًا','molten copper','أُفْرِغْ','ufrigh')
-  ],[18,96],'الْكَهْفِ','هَذَا الْمَوْضِعُ الثَّانِي مِنَ الْآيَةِ بَعْدَ «قَالَ»، وَالْمَطْبُوعُ «آتُونِي» بِالْمَدِّ بِمَعْنَى «أَعْطُونِي» كَقِرَاءَةِ حَفْصٍ. تَتْبَعُ الْبِطَاقَاتُ الْحَاشِيَةَ ٢.',
-   'This is the second command in Q18:96, after qāla. The printed long-ā reading means “give me,” as in Ḥafṣ. Note 2 supplies both attachment analyses and the omitted object estimate.'),
+  ],[18,96],'الْكَهْفِ','هَذَا الْمَوْضِعُ الثَّانِي مِنَ الْآيَةِ بَعْدَ «قَالَ»، وَالْمَطْبُوعُ «آتُونِي» بِالْمَدِّ بِمَعْنَى «أَعْطُونِي» كَقِرَاءَةِ حَفْصٍ. تَتْبَعُ الْبِطَاقَاتُ الْحَاشِيَةَ ٢. يُوَضِّحُ التَّطْبِيقُ انْقِلَابَ أَلِفِ «عَلَى» يَاءً سَاكِنَةً قَبْلَ الضَّمِيرِ.',
+   'This is the second command in Q18:96, after qāla. The printed long-ā reading means “give me,” as in Ḥafṣ. Note 2 supplies both attachment analyses and the omitted object estimate. The app explains the change from alif to sākin yāʾ before the pronoun.'),
   form('tanazu-p291-02',291,'And Zayd struck me, and I honored him.',[
    t('وَضَرَبَنِي','and he struck me',wa,past,hu,protective,ya(objPro)),pT('وَأَكْرَمْتُ','and I honored',true),object('زَيْدًا','Zayd','أَكْرَمْتُ','akramtu')
   ],'n.3; second governor governs the visible noun','الْحَاشِيَةُ ٣ تَجْعَلُ «زَيْدًا» مَفْعُولًا لِلْعَامِلِ الثَّانِي، وَفَاعِلُ «ضَرَبَ» مُسْتَتِرٌ.'),
@@ -5852,8 +5855,8 @@ const finalBook=(()=>{
   form('tanazu-p292-05',292,'And O Allah, send blessings upon Muḥammad, grant him peace, and bless him.',[
    supplicationStart,sal,salam,onHim('سَلِّمْ','sallim'),barik,onHim('بَارِكْ','bārik'),
    t('عَلَى','upon',ala),t('مُحَمَّدٍ','Muḥammad',gen('عَلَى','ʿalā'),pp('بِـ«صَلِّ»','ṣalli'))
-  ],'n.5; the overt phrase depends on the first verb','تَعَلَّقَ «عَلَى مُحَمَّدٍ» بِـ«صَلِّ»، وَ«عَلَيْهِ» الْأُولَى بِـ«سَلِّمْ» وَالثَّانِيَةُ بِـ«بَارِكْ».',
-   'Both occurrences of “upon him” belong to the printed wording; the final “upon Muḥammad” goes with the first request.'),
+  ],'n.5; the overt phrase depends on the first verb','تَعَلَّقَ «عَلَى مُحَمَّدٍ» بِـ«صَلِّ»، وَ«عَلَيْهِ» الْأُولَى بِـ«سَلِّمْ» وَالثَّانِيَةُ بِـ«بَارِكْ». يُوَضِّحُ التَّطْبِيقُ انْقِلَابَ أَلِفِ «عَلَى» يَاءً سَاكِنَةً قَبْلَ الضَّمِيرِ.',
+   'Both occurrences of “upon him” belong to the printed wording; the final “upon Muḥammad” goes with the first request. The app explains the change from alif to sākin yāʾ before the pronoun.'),
   form('tanazu-p293-01',293,'Your two brothers stood and sat.',[
    pV('قَامَا','both stood',false,aDual),pV('وَقَعَدَ','and sat',true),abrothers('قَعَدَ','qaʿada')
   ],'n.1','أَعْمَلَ صَاحِبُ الْمِثَالِ الثَّانِيَ وَأَثْبَتَ ضَمِيرَ الرَّفْعِ فِي الْأَوَّلِ.'),
@@ -5894,7 +5897,7 @@ const finalBook=(()=>{
  const numbers=[
   form('number-p297-01',297,'Three men.',[numHead('ثَلَاثَةُ','three'),t('رِجَالٍ','men',annex)],'simple number of opposite gender','هَذَا تَرْكِيبُ إِضَافَةٍ لَا جُمْلَةٌ، وَ«رَجُلٌ» مُذَكَّرٌ.'),
   form('number-p297-02',297,'And three women.',[t('وَثَلَاثُ','and three',wa,a('عَدَدٌ مُضَافٌ، وَلَا يَتَعَيَّنُ مَحَلُّهُ دُونَ سِيَاقٍ','Number, first term of the annexation; no clause role is established here')),t('نِسْوَةٍ','women',annex)],'paired feminine counted noun','«نِسْوَةٌ» لِلْمُؤَنَّثِ، فَجَاءَ الْعَدَدُ بِغَيْرِ تَاءٍ.'),
-  q('number-p297-03',297,'سَبْعَ لَيَالٍ وَثَمَانِيَةَ أَيَّامٍ حُسُومًا','Seven nights and eight successive days.',[
+  q('number-p297-03',297,'سَبْعَ لَيَالٍ وَثَمَانِيَةَ أَيَّامٍ حُسُومًا','For seven nights and eight days in unbroken succession.',[
    t('سَبْعَ','seven',ac('ظَرْفُ زَمَانٍ عَامِلُهُ «سَخَّرَ» فِي سِيَاقِ الْآيَةِ','Time adverb governed by sakhkhara in the wider verse',true)),
    t('لَيَالٍ','nights',a('مُضَافٌ إِلَيْهِ مَجْرُورٌ بِفَتْحَةٍ مُقَدَّرَةٍ عَلَى الْيَاءِ الْمَحْذُوفَةِ نِيَابَةً عَنِ الْكَسْرَةِ عَلَى تَرْجِيحِ الْحَاشِيَةِ. التَّنْوِينُ الظَّاهِرُ عِوَضٌ عَنِ الْيَاءِ، وَلَيْسَ عَلَامَةَ الْجَرِّ','Annex complement, genitive with fatḥah estimated on deleted yāʾ in place of kasrah, following the note’s preferred analysis. The visible tanwīn replaces yāʾ; it is not the case sign')),
    t('وَثَمَانِيَةَ','and eight',wa,ac('مَعْطُوفٌ عَلَى «سَبْعَ»','Coordinated with sabʿa',true)),
@@ -6025,8 +6028,8 @@ chapters.push(
  ],'قَوَائِمُ الْأَعْدَادِ الْمُخْتَصَرَةُ لَا تَتَحَوَّلُ إِلَى جُمَلٍ غَيْرِ مَطْبُوعَةٍ.','Printed abbreviations are not expanded into invented drill sentences.'),
  lastChapter('waqf','waqf',1,'بَابُ الْوَقْفِ','Pausing','299–301',finalBook.stopping,[
   help('الْوَقْفُ قَطْعُ النُّطْقِ عِنْدَ آخِرِ الْكَلِمَةِ. فِي الْمُنَوَّنِ الْمَرْفُوعِ وَالْمَجْرُورِ يُحْذَفُ التَّنْوِينُ وَالْحَرَكَةُ، وَفِي الْمَنْصُوبِ يُبْدَلُ التَّنْوِينُ أَلِفًا. فَلَا يَدُلُّ سُكُونُ الْوَقْفِ عَلَى تَغَيُّرِ الْإِعْرَابِ. وَتُلْحَقُ بِأَلِفِ الْوَقْفِ نُونُ «إِذَنْ» وَنُونُ التَّوْكِيدِ الْخَفِيفَةُ عَلَى تَقْرِيرِ ص ٢٩٩.','Pausing stops pronunciation at the end of a word. In the nominative or genitive with tanwīn, the ending and tanwīn are dropped; in the accusative, tanwīn becomes alif. Pausal sukūn does not change case. Page 299 also gives pausal alif for the nūn of idhan and for light emphatic nūn.'),
-  help('فِي الْمَنْقُوصِ الْمُنَوَّنِ تُحْذَفُ الْيَاءُ فِي الرَّفْعِ وَالْجَرِّ، وَيَجُوزُ إِثْبَاتُهَا؛ وَفِي النَّصْبِ يُبْدَلُ التَّنْوِينُ أَلِفًا. وَفِي غَيْرِ الْمُنَوَّنِ الْأَفْصَحُ إِثْبَاتُ الْيَاءِ فِي الرَّفْعِ وَالْجَرِّ، وَالْإِثْبَاتُ وَاجِبٌ فِي النَّصْبِ عَلَى تَقْرِيرِ الْمَتْنِ، بِيَاءٍ سَاكِنَةٍ فِي تَفْسِيرِ الْحَاشِيَةِ ٩.','For a defective noun with tanwīn, nominative and genitive usually drop the yāʾ at pause, though it may be retained. Accusative tanwīn becomes alif. Without tanwīn, retaining yāʾ is preferred in nominative and genitive and required in the accusative; note 9 gives pausal sukūn on that yāʾ.'),
-  help('التَّاءُ السَّاكِنَةُ لَا تَتَغَيَّرُ فِي «قَامَتْ». وَفِي الْجَمْعِ الْأَفْصَحُ تَاءٌ كَمَا فِي «الْمُسْلِمَاتِ»، وَفِي الْمُفْرَدِ الْأَفْصَحُ هَاءٌ كَمَا فِي «رَحْمَهْ» وَ«شَجَرَهْ». وَيُفَصِّلُ شَاهِدُ الْأَعْرَافِ ٥٦ بَيْنَ ضَبْطِ الْوَصْلِ وَصُورَةِ الْوَقْفِ. فِي الْعَشْرِ: وَقَفَ ابْنُ كَثِيرٍ وَأَبُو عَمْرٍو وَيَعْقُوبُ وَالْكِسَائِيُّ بِالْهَاءِ وَالْبَاقُونَ بِالتَّاءِ.','Sākin feminine tāʾ stays tāʾ in qāmat. With a plural, the preferred pause keeps tāʾ; with a singular, it uses hāʾ. Q7:56 distinguishes the connected spelling from actual pause. Among the Ten, Ibn Kathīr, Abū ʿAmr, Yaʿqūb and al-Kisāʾī stop with hāʾ; the others stop with tāʾ.'),
+  help('فِي الْمَنْقُوصِ الْمُنَوَّنِ تُحْذَفُ الْيَاءُ فِي الرَّفْعِ وَالْجَرِّ، وَيَجُوزُ إِثْبَاتُهَا؛ وَفِي النَّصْبِ يُبْدَلُ التَّنْوِينُ أَلِفًا. وَفِي غَيْرِ الْمُنَوَّنِ الْأَفْصَحُ إِثْبَاتُ الْيَاءِ فِي الرَّفْعِ وَالْجَرِّ، وَيَجُوزُ حَذْفُهَا فِيهِمَا، وَالْإِثْبَاتُ وَاجِبٌ فِي النَّصْبِ عَلَى تَقْرِيرِ الْمَتْنِ، بِيَاءٍ سَاكِنَةٍ فِي تَفْسِيرِ الْحَاشِيَةِ ٩.','For a defective noun with tanwīn, nominative and genitive usually drop the yāʾ at pause, though it may be retained. Accusative tanwīn becomes alif. Without tanwīn, retaining yāʾ is preferred in nominative and genitive but deletion is allowed in both. Retention is required in the accusative; note 9 gives pausal sukūn on that yāʾ.'),
+  help('التَّاءُ السَّاكِنَةُ لَا تَتَغَيَّرُ فِي «قَامَتْ». وَإِنْ كَانَتْ مُتَحَرِّكَةً فَالْأَفْصَحُ فِي الْجَمْعِ الْوَقْفُ بِالتَّاءِ كَمَا فِي «الْمُسْلِمَاتِ»، وَبَعْضُهُمْ يَقِفُ بِالْهَاءِ. وَالْأَفْصَحُ فِي الْمُفْرَدِ الْوَقْفُ بِالْهَاءِ كَمَا فِي «رَحْمَهْ» وَ«شَجَرَهْ»، وَبَعْضُهُمْ يَقِفُ بِالتَّاءِ. وَيُفَصِّلُ شَاهِدُ الْأَعْرَافِ ٥٦ بَيْنَ ضَبْطِ الْوَصْلِ وَصُورَةِ الْوَقْفِ. فِي الْعَشْرِ: وَقَفَ ابْنُ كَثِيرٍ وَأَبُو عَمْرٍو وَيَعْقُوبُ وَالْكِسَائِيُّ بِالْهَاءِ وَالْبَاقُونَ بِالتَّاءِ.','Sākin feminine tāʾ stays tāʾ in qāmat. With vowelled feminine tāʾ, the preferred plural pause keeps tāʾ, though some speakers use hāʾ. The preferred singular pause uses hāʾ, though some use tāʾ. Q7:56 distinguishes the connected spelling from actual pause. Among the Ten, Ibn Kathīr, Abū ʿAmr, Yaʿqūb and al-Kisāʾī stop with hāʾ; the others stop with tāʾ.'),
   help('تَخْتِمُ الطَّبْعَةُ ص ٣٠١ بِالصَّلَاةِ وَالسَّلَامِ، وَتَنْسُبُ الْحَاشِيَةُ [٥] هَذِهِ الْخَاتِمَةَ إِلَى زِيَادَةِ النُّسْخَةِ (ف). لَيْسَتْ مِثَالًا جَدِيدًا فِي الْوَقْفِ.','The edition closes p.301 with the blessing and salutation. Note [5] attributes this closing formula to an addition from witness (ف). It is not a further exercise in pausing.')
  ],'يَنْتَهِي النَّصُّ التَّعْلِيمِيُّ فِي ص ٣٠١.','The instructional text ends on p.301.')
 );

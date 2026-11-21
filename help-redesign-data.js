@@ -618,7 +618,32 @@ const HELP_REDESIGN_BY_CHAPTER = {
       { id: 'inna-sisters-both', titleAr: 'مَوَاضِعُ جَوَازِ الْوَجْهَيْنِ', titleEn: 'Where both vowels are allowed', group: 'conditions', defaultOpen: false },
       { id: 'inna-sisters-lam', titleAr: 'مَوَاضِعُ لَامِ الِابْتِدَاءِ', titleEn: 'Placements of the shifted lām', group: 'forms', defaultOpen: false },
       { id: 'inna-sisters-ma', titleAr: '«مَا» الزَّائِدَةُ وَكَفُّ الْعَمَلِ', titleEn: 'Extra mā and blocked operation', group: 'forms', defaultOpen: false },
-      { id: 'inna-sisters-reduction', titleAr: 'تَخْفِيفُ «إِنَّ» وَ«أَنَّ» وَ«كَأَنَّ»', titleEn: 'Reducing inna, anna, and kaʾanna', group: 'caution', defaultOpen: false }
+      { id: 'inna-sisters-reduction', titleAr: 'تَخْفِيفُ «إِنَّ» وَ«أَنَّ» وَ«كَأَنَّ»', titleEn: 'Reducing inna, anna, and kaʾanna', group: 'caution', defaultOpen: false },
+      { id: 'inna-sisters-reduced-lakin', titleAr: 'إِهْمَالُ «لَكِنْ» الْمُخَفَّفَةِ', titleEn: 'The non-operating reduced lākin', group: 'caution', defaultOpen: false }
+    ]
+  },
+
+  'la-jins': {
+    essentials: {
+      coreRuleAr: 'تَنْفِي «لَا» حُكْمَ الْخَبَرِ عَنِ الْجِنْسِ كُلِّهِ، وَتَنْصِبُ الِاسْمَ وَتَرْفَعُ الْخَبَرَ.',
+      coreRuleEn: 'Categorical lā denies the predicate for the entire class. Its ism is accusative and its khabar nominative.',
+      definitionAr: 'فِي «لَا رَجُلَ حَاضِرٌ» يَشْمَلُ النَّفْيُ حُضُورَ كُلِّ رَجُلٍ.',
+      definitionEn: 'In lā rajula ḥāḍirun, the negation denies that any man is present.',
+      effectAr: 'الْمُضَافُ وَشَبِيهُهُ مُعْرَبَانِ مَنْصُوبَانِ، وَمَا عَدَاهُمَا مَبْنِيٌّ فِي مَحَلِّ نَصْبٍ.',
+      effectEn: 'The annexed and annex-like forms take accusative inflection. The remaining forms are built in the accusative position.',
+      recognitionAr: 'تَحَقَّقْ مِنْ تَنْكِيرِ الِاسْمِ وَالْخَبَرِ، وَمِنْ مُلَاصَقَةِ الِاسْمِ لِـ«لَا». ثُمَّ عَيِّنْ نَوْعَ الِاسْمِ وَعَلَامَتَهُ.',
+      recognitionEn: 'Check that the ism and khabar are indefinite and that the ism immediately follows lā. Then identify the type of ism and its ending.',
+      exampleId: 'la-jins-06'
+    },
+    sections: [
+      { id: 'la-jins-conditions', titleAr: 'دَلَالَةُ «لَا» وَشُرُوطُ عَمَلِهَا', titleEn: 'Meaning and conditions', group: 'definition', defaultOpen: true },
+      { id: 'la-jins-ism-types', titleAr: 'أَقْسَامُ الِاسْمِ', titleEn: 'Ism types', group: 'forms', defaultOpen: true },
+      { id: 'la-jins-building', titleAr: 'عَلَامَاتُ الْبِنَاءِ', titleEn: 'Fixed endings', group: 'forms', defaultOpen: false },
+      { id: 'la-jins-repeat', titleAr: 'تَكْرَارُ «لَا»', titleEn: 'When lā repeats', group: 'conditions', defaultOpen: false },
+      { id: 'la-jins-coordinate', titleAr: 'الْعَطْفُ بِلَا تَكْرَارٍ', titleEn: 'Coordination without repetition', group: 'conditions', defaultOpen: false },
+      { id: 'la-jins-attribute', titleAr: 'أَحْكَامُ النَّعْتِ', titleEn: 'Adjective options', group: 'forms', defaultOpen: false },
+      { id: 'la-jins-khabar', titleAr: 'ذِكْرُ الْخَبَرِ وَحَذْفُهُ', titleEn: 'Stated and omitted khabar', group: 'forms', defaultOpen: false },
+      { id: 'la-jins-idle', titleAr: 'إِهْمَالُ «لَا»', titleEn: 'When lā does not govern', group: 'caution', defaultOpen: false }
     ]
   }
 };

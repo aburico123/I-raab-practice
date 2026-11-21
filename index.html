@@ -124,6 +124,15 @@ button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{
 .example-jump-current{margin-inline-start:auto;color:var(--ink);font-weight:700}
 .example-jump-prompt{min-width:0;direction:rtl;text-align:right;font-size:clamp(21px,4.5vw,27px);line-height:1.8}
 .example-jump-prompt .quran-ref{font-size:.66em;white-space:normal;max-width:100%}
+@media (min-width:761px){
+  #practiceScreen.has-example-jump .practice-top{gap:6px;margin-bottom:6px}
+  .example-jump{margin-bottom:8px}
+  .example-jump-panel{margin-top:4px}
+  .example-jump-items{max-height:84px;padding:2px}
+  .example-jump-row{grid-template-columns:minmax(9rem,auto) minmax(0,1fr);align-items:center;gap:8px;padding-block:3px}
+  .example-jump-current{margin-inline-start:0}
+  .example-jump-prompt{font-size:22px;line-height:1.65}
+}
 #sentence:focus{scroll-margin-block:90px 24px}
 .filter-empty{border:1px dashed var(--sage-line);border-radius:12px;background:var(--sage-fill);padding:26px;text-align:center;color:var(--ink)}
 .filter-empty p{margin:0 0 14px;line-height:1.6}
@@ -753,15 +762,25 @@ const jumpListLabels={
  en:{toggle:'Jump to an example',current:'Current',page:'p.'},
  ar:{toggle:'انتقل إلى مثال',current:'المثال الحالي',page:'ص'}
 };
+let jumpListAvailable=false,jumpListNeedsScroll=false;
 function setExampleJumpOpen(open) {
+ const panel=$('exampleJumpPanel');
+ if(open&&panel.hidden)jumpListNeedsScroll=true;
+ if(!open)jumpListNeedsScroll=false;
  $('exampleJumpToggle').setAttribute('aria-expanded',String(open));
- $('exampleJumpPanel').hidden=!open;
+ panel.hidden=!open;
 }
 function renderExampleJump(chapter,list,exercise) {
  const section=$('exampleJump'),items=$('exampleJumpItems'),toggle=$('exampleJumpToggle');
  const labels=jumpListLabels[state.lang]||jumpListLabels.en;
  toggle.textContent=labels.toggle;
  section.hidden=!list?.length;
+ $('practiceScreen').classList.toggle('has-example-jump',!section.hidden);
+ const available=!section.hidden&&state.screen==='practice';
+ if(available!==jumpListAvailable){
+  jumpListAvailable=available;
+  setExampleJumpOpen(available&&!mobileLayout.matches);
+ }
  if(section.hidden){
   setExampleJumpOpen(false);
   items.replaceChildren();
@@ -784,6 +803,9 @@ function renderExampleJump(chapter,list,exercise) {
  if(rebuild||oldRow!==current){
   current.setAttribute('aria-current','true');
   current.querySelector('.example-jump-current').hidden=false;
+ }
+ if(jumpListNeedsScroll||rebuild||oldRow!==current){
+  jumpListNeedsScroll=false;
   const bounds=items.getBoundingClientRect(),row=current.getBoundingClientRect();
   if(row.top<bounds.top||row.bottom>bounds.bottom)items.scrollTop+=row.top-bounds.top-(items.clientHeight-row.height)/2;
  }
@@ -943,11 +965,7 @@ $('allExamplesBtn').addEventListener('click',()=>setBookFilter('all'));$('quranE
 $('exampleJumpToggle').addEventListener('click',()=>{
  const open=$('exampleJumpPanel').hidden;
  setExampleJumpOpen(open);
- if(open){
-  // Recompute the scroll position from the current row on each opening.
-  delete $('exampleJumpItems').dataset.context;
-  renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
- }
+ if(open)renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
 });
 $('exampleJumpItems').addEventListener('click',event=>{
  const button=event.target.closest('[data-jump-exercise]');
@@ -958,7 +976,7 @@ $('exampleJumpItems').addEventListener('click',event=>{
   selectBookExercise(exercise);
   state.revealed=false;
  }
- setExampleJumpOpen(false);
+ if(mobileLayout.matches)setExampleJumpOpen(false);
  render();
  focusVisible($('sentence'),'nearest');
 });
@@ -997,6 +1015,13 @@ $('mobileMenu').addEventListener('click',()=>setDrawerOpen($('mobileMenu').getAt
 $('drawerClose').addEventListener('click',()=>setDrawerOpen(false));
 $('drawerBackdrop').addEventListener('click',()=>setDrawerOpen(false));
 mobileLayout.addEventListener('change',()=>setDrawerOpen(false));
+mobileLayout.addEventListener('change',()=>{
+ if(!jumpListAvailable)return;
+ const restoreFocus=mobileLayout.matches&&$('exampleJumpPanel').contains(document.activeElement);
+ setExampleJumpOpen(!mobileLayout.matches);
+ if(!mobileLayout.matches)renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
+ if(restoreFocus)focusVisible($('exampleJumpToggle'),'nearest');
+});
 $('primaryDrawer').addEventListener('keydown', event=>{
  if ($('mobileMenu').getAttribute('aria-expanded') !== 'true') return;
  if (event.key === 'Escape') {

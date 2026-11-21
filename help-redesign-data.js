@@ -731,6 +731,54 @@ HELP_REDESIGN_BY_CHAPTER['adverbial-object']={
  sections:[['definition','الظَّرْفُ وَمَعْنَى «فِي»','What the adverbial means',true],['other-roles','أَسْمَاءُ الزَّمَانِ فِي غَيْرِ الظَّرْفِيَّةِ','Time words in other roles'],['vocabulary','أَلْفَاظُ الزَّمَانِ وَالْمَكَانِ','The book’s time and place terms'],['time','الْمُخْتَصُّ وَالْمَعْدُودُ وَالْمُبْهَمُ','Three kinds of time',true],['place','مَا يَنْتَصِبُ مِنْ أَسْمَاءِ الْمَكَانِ','Three eligible place classes'],['derived','الْمُشْتَقُّ مِنْ مَصْدَرِ عَامِلِهِ','Place nouns derived from their governor'],['exceptions','الْمَكَانُ الْمُخْتَصُّ وَإِسْقَاطُ الْخَافِضِ','Specified places and omitted preposition']].map(([key,titleAr,titleEn,expanded])=>({id:'adverbial-'+key,titleAr,titleEn,group:'rule',defaultOpen:Boolean(expanded)}))
 };
 
+const stage188Summary=(chapter,values,sections)=>{
+ const [coreRuleAr,coreRuleEn,definitionAr,definitionEn,effectAr,effectEn,recognitionAr,recognitionEn,exampleId]=values;
+ HELP_REDESIGN_BY_CHAPTER[chapter]={essentials:{coreRuleAr,coreRuleEn,definitionAr,definitionEn,effectAr,effectEn,recognitionAr,recognitionEn,exampleId},
+  sections:sections.map(([key,titleAr,titleEn,defaultOpen])=>({id:chapter+'-'+key,titleAr,titleEn,group:'rule',defaultOpen:Boolean(defaultOpen)}))};
+};
+stage188Summary('purpose-object',[
+ 'الْمَفْعُولُ لِأَجْلِهِ يُبَيِّنُ سَبَبَ الْفِعْلِ.','The purpose object tells why the action happens.',
+ 'مَصْدَرٌ مَنْصُوبٌ يَدُلُّ عَلَى السَّبَبِ أَوِ الْغَرَضِ.','An accusative verbal noun giving a cause or purpose.',
+ 'يَنْصِبُ الْعَامِلُ الْمَصْدَرَ إِذَا تَحَقَّقَتِ الشُّرُوطُ الَّتِي يَذْكُرُهَا الْمَتْنُ.','The governor gives the verbal noun accusative case if the book’s conditions are met.',
+ 'اسْأَلْ: لِمَ وَقَعَ الْفِعْلُ؟ وَهَلِ اتَّحَدَ الزَّمَنُ وَالْفَاعِلُ؟','Ask why it happened and whether the time and agent match.','purpose-p188-01'
+],[
+ ['definition','التَّعْرِيفُ وَالْأَسْمَاءُ','Definition and names',true],
+ ['conditions','شُرُوطُ النَّصْبِ','Conditions for the accusative',true],
+ ['contrast','مَتَى نَذْكُرُ اللَّامَ؟','When to use lām'],
+ ['editorial','خِلَافٌ فِي الْحَاشِيَةِ','An editorial note on disagreement']
+]);
+stage188Summary('accompaniment-object',[
+ 'وَاوُ الْمَعِيَّةِ بِمَعْنَى «مَعَ» لَا بِمَعْنَى الْعَطْفِ.','The wāw of accompaniment means “with,” not “and.”',
+ 'اسْمٌ مَنْصُوبٌ بَعْدَ وَاوِ الْمَعِيَّةِ.','An accusative noun after the wāw of accompaniment.',
+ 'يَنْصِبُهُ الْفِعْلُ أَوْ مَا فِيهِ مَعْنَاهُ وَحُرُوفُهُ فِي الْجُمْلَةِ السَّابِقَةِ.','The preceding verb or its equivalent governs the accusative.',
+ 'اسْأَلْ: هَلْ وَقَعَ الْفِعْلُ مِنَ الِاسْمَيْنِ، أَمْ صَاحَبَ الثَّانِي الْحَدَثَ؟','Ask whether both took part in the action or the second only accompanied it.','accompaniment-p190-02'
+],[
+ ['definition','الْوَاوُ وَالْعَامِلُ','Wāw and its preceding governor',true],
+ ['required','وُجُوبُ النَّصْبِ','When accompaniment is required',true],
+ ['preference','تَرَجُّحُ النَّصْبِ أَوِ الْعَطْفِ','When accompaniment or coordination is preferred']
+]);
+stage188Summary('object-like-complement',[
+ 'تَنْصِبُ الصِّفَةُ الْمُشَبَّهَةُ اسْمًا عَلَى التَّشْبِيهِ بِالْمَفْعُولِ بِهِ.','The ṣifah mushabbahah can govern an accusative complement resembling a direct object.',
+ 'مَعْمُولُ صِفَةٍ لَا مَفْعُولٌ بِهِ حَقِيقِيٌّ.','An adjectival complement, not a true direct object.',
+ 'فِي هَذَا الْوَجْهِ «وَجْهَ» مَنْصُوبٌ بِالصِّفَةِ «حَسَنٌ».','In this construction, the adjective ḥasan governs accusative wajha.',
+ 'انْظُرْ إِلَى عَامِلِهِ: أَهُوَ صِفَةٌ مُشَبَّهَةٌ؟','Identify the governor: is it a ṣifah mushabbahah?','object-like-p192-01'
+],[['construction','مِثَالُ النَّصْبِ فِي الْمَتْنِ','The book’s accusative example',true]]);
+stage188Summary('circumstantial-state',[
+ 'الْحَالُ يُبَيِّنُ هَيْئَةَ صَاحِبِهِ وَقْتَ الْفِعْلِ.','A ḥāl describes its owner’s state when the action takes place.',
+ 'اسْمٌ مَنْصُوبٌ، وَقَدْ يَكُونُ شِبْهَ جُمْلَةٍ بِمُتَعَلَّقٍ مَحْذُوفٍ أَوْ جُمْلَةً فِي مَحَلِّ نَصْبٍ.','An accusative noun, a phrase attached to an omitted ḥāl, or a clause in accusative position.',
+ 'يَصِفُ الْفَاعِلَ أَوِ الْمَفْعُولَ بِهِ أَوْ كِلَيْهِمَا فِي أَمْثِلَةِ الْمَتْنِ.','The book illustrates the subject, the object, and both as possible owners.',
+ 'اسْأَلْ: عَلَى أَيِّ هَيْئَةٍ وَقَعَ الْفِعْلُ؟ وَمَنِ الَّذِي وُصِفَ؟','Ask in what state the action took place and who is being described.','hal-p194-01'
+],[
+ ['owner','الْحَالُ وَصَاحِبُهَا','The state and its owner',true],
+ ['conditions','شُرُوطُ الْحَالِ','What can serve as a ḥāl?',true],
+ ['underived','شَوَاهِدُ الْحَالِ الْجَامِدَةِ','Underived states in the editor’s note'],
+ ['indefinite','تَنْكِيرُ صَاحِبِ الْحَالِ','When the owner is indefinite'],
+ ['reading','شَاهِدُ ابْنِ أَبِي عَبْلَةَ','The Ibn Abī ʿAblah witness'],
+ ['phrases','الظَّرْفُ وَالْجَارُّ وَالْمَجْرُورُ','Adverbs and prepositional phrases'],
+ ['clause','رَابِطُ جُمْلَةِ الْحَالِ','What links a ḥāl clause?'],
+ ['appendix','فَائِدَةُ الصَّبَّانِ وَقَيْدُهَا','Al-Ṣabbān’s note and its qualification']
+]);
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = HELP_REDESIGN_BY_CHAPTER;
 }

@@ -3899,7 +3899,7 @@ const babs=[
  {id:'definiteness',order:4,titleEn:'Bāb al-Nakirah wa-l-Maʿrifah',titleAr:'بَابُ النَّكِرَةِ وَالْمَعْرِفَةِ',pages:'72–96'},
  {id:'nominative-nouns',order:5,titleEn:'Bāb al-Marfūʿāt min al-Asmāʾ',titleAr:'بَابُ الْمَرْفُوعَاتِ مِنَ الْأَسْمَاءِ',pages:'97–166'},
  {id:'mubtada-factors',parentId:'nominative-nouns',order:6,titleEn:'Factors entering on the mubtadaʾ and khabar',titleAr:'بَابُ الْعَوَامِلِ الدَّاخِلَةِ عَلَى الْمُبْتَدَإِ وَالْخَبَرِ',pages:'119–166'},
- {id:'accusative-nouns',order:7,titleEn:'Bāb al-Manṣūbāt min al-Asmāʾ',titleAr:'بَابُ الْمَنْصُوبَاتِ مِنَ الْأَسْمَاءِ',pages:'167–187',continues:true}
+ {id:'accusative-nouns',order:7,titleEn:'Bāb al-Manṣūbāt min al-Asmāʾ',titleAr:'بَابُ الْمَنْصُوبَاتِ مِنَ الْأَسْمَاءِ',pages:'167–197',continues:true}
 ];
 
 chapters.push({
@@ -4209,6 +4209,181 @@ chapters.push({
  helpSourceAr:'الْمُتَمِّمَةُ، ص ١٨٣–١٨٧. الْقَوَاعِدُ وَأَمْثِلَةُ الْمَتْنِ مِنَ الْمُؤَلِّفِ، وَالْمُقَارَنَاتُ الْمُسَمَّاةُ مِنَ الْحَوَاشِي. وَالتَّرْجَمَةُ وَالتَّرْتِيبُ وَمَا لَمْ يُذْكَرْ مِنْ تَفْصِيلِ الْإِعْرَابِ مِنَ التَّطْبِيقِ.',
  helpSourceEn:'Al-Mutammimah, printed pp.183–187. Rules and main examples are the author’s. Labeled comparisons come from the editorial notes. Organization, translations and unstated parse detail are supplied by the app.'
 });
+
+// Printed pp.188–197. See the scoped inventory for note-only witnesses.
+const mansubat188 = (()=>{
+ const p=(ar,en)=>({ar,en}), t=(word,gloss,...parts)=>answerParts(word,gloss,parts);
+ const no='لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.';
+ const particle=(ar,en,ending='الْفَتْحِ',endEn='fatḥ')=>p(`${ar} مَبْنِيٌّ عَلَى ${ending}، ${no}`,`${en}, fixed on ${endEn} with no syntactic position.`);
+ const w=particle('الْوَاوُ حَرْفُ عَطْفٍ','Coordinating wāw'), f=particle('الْفَاءُ حَرْفُ عَطْفٍ','Coordinating fāʾ');
+ const wa=particle('الْوَاوُ حَرْفُ مَعِيَّةٍ','Wāw meaning “with”'), wh=particle('الْوَاوُ حَرْفُ حَالٍ','Circumstantial wāw');
+ const prep=(ar,en,ending='الْكَسْرِ',endEn='kasr')=>particle(`${ar} حَرْفُ جَرٍّ`,`${en} is a preposition`,ending,endEn);
+ const la=particle('«لَا» حَرْفُ نَهْيٍ وَجَزْمٍ','Prohibitive and jussive lā','السُّكُونِ','sukūn');
+ const l=prep('اللَّامُ','Lām'), b=prep('الْبَاءُ','Bāʾ');
+ const min=prep('«مِنْ»','Min','السُّكُونِ','sukūn'), fi=prep('«فِي»','Fī','السُّكُونِ','sukūn'), an=prep('«عَنْ»','ʿAn','السُّكُونِ','sukūn'), ala=prep('«عَلَى»','ʿAlā','السُّكُونِ','sukūn');
+ const pron=(ar,en,ending,endEn,pos,posEn)=>p(`${ar} ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى ${ending} فِي مَحَلِّ ${pos}.`,`Attached ${en}, fixed on ${endEn} in ${posEn} position.`);
+ const fa='رَفْعٍ فَاعِلٌ', ob='نَصْبٍ مَفْعُولٌ بِهِ', ge='جَرٍّ مُضَافٌ إِلَيْهِ';
+ const ta=pron('التَّاءُ','subject tāʾ','الضَّمِّ','ḍamm',fa,'nominative subject');
+ const na=pron('«نَا»','subject nā','السُّكُونِ','sukūn',fa,'nominative subject');
+ const group=pron('وَاوُ الْجَمَاعَةِ','plural wāw','السُّكُونِ','sukūn',fa,'nominative subject');
+ const ko=pron('الْكَافُ','object kāf','الْفَتْحِ','fatḥ',ob,'accusative object');
+ const kg=pron('الْكَافُ','annexed kāf','الْفَتْحِ','fatḥ',ge,'genitive annex');
+ const kgp=pron('الْكَافُ','annexed kāf','الضَّمِّ','ḍamm',ge,'genitive annex');
+ const hg=pron('الْهَاءُ','annexed hāʾ','الضَّمِّ','ḍamm',ge,'genitive annex');
+ const hgi=pron('الْهَاءُ','annexed hāʾ','الْكَسْرِ','kasr',ge,'genitive annex');
+ const ho=pron('الْهَاءُ','object hāʾ','الضَّمِّ','ḍamm',ob,'accusative object');
+ const ha=pron('«هَا»','hā','السُّكُونِ','sukūn','جَرٍّ بِحَرْفِ الْجَرِّ','genitive after the preposition');
+ const mm=p('الْمِيمُ عَلَامَةُ جَمْعِ الذُّكُورِ مَبْنِيَّةٌ عَلَى السُّكُونِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Plural mīm, fixed on sukūn with no syntactic position.');
+ const mmu=p('الْمِيمُ عَلَامَةُ جَمْعِ الذُّكُورِ، وَضَمَّتُهَا هُنَا لِلْوَصْلِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Plural mīm, vocalized with ḍamm here in connected reading, with no syntactic position.');
+ const past=p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb fixed on fatḥ.');
+ const pt=p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِضَمِيرِ رَفْعٍ مُتَحَرِّكٍ.','Past verb fixed on sukūn before a vocalized subject pronoun.');
+ const pw=p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الضَّمِّ لِاتِّصَالِهِ بِوَاوِ الْجَمَاعَةِ.','Past verb fixed on ḍamm before plural wāw.');
+ const imp=p('فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى حَذْفِ النُّونِ لِاتِّصَالِهِ بِوَاوِ الْجَمَاعَةِ.','Imperative fixed by deletion of nūn before plural wāw.');
+ const hidden=p('فَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ.','Its subject is optionally hidden: “he.”');
+ const you=p('فَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.','Its subject is obligatorily hidden: “you.”');
+ const subj=p('فَاعِلٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ.','Subject, nominative with a visible ḍammah.');
+ const mub=p('مُبْتَدَأٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ.','Mubtadaʾ, nominative with a visible ḍammah.');
+ const kh=p('خَبَرٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ.','Predicate, nominative with a visible ḍammah.');
+ const naS=(ar,en,i=false)=>p(`${ar} مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ${i?'، وَهُوَ مُضَافٌ':''}.`,`${en}, accusative with a visible fatḥah${i?'; it is the first term of an annexation':''}.`);
+ const obj=(i=false)=>naS('مَفْعُولٌ بِهِ','Direct object',i);
+ const gen=(i=false)=>p(`مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ${i?'، وَهُوَ مُضَافٌ':''}.`,`Second term of the annexation, genitive with a visible kasrah${i?'; it is itself annexed to the next term':''}.`);
+ const g=(ar,en,i=false)=>p(`اسْمٌ مَجْرُورٌ ${ar} بِالْكَسْرَةِ الظَّاهِرَةِ${i?'، وَهُوَ مُضَافٌ':''}.`,`Noun governed by ${en}, genitive with a visible kasrah${i?'; it is the first term of an annexation':''}.`);
+ const link=(ar,en)=>p(`الْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ ${ar}.`,`The prepositional phrase attaches to ${en}.`);
+ const purpose=(ar,en,i=false)=>naS(`مَفْعُولٌ لِأَجْلِهِ لِـ«${ar}»`,`Purpose object of “${en}”`,i);
+ const acc=(ar,en,i=false)=>naS(`مَفْعُولٌ مَعَهُ لِـ«${ar}»`,`Object of accompaniment governed by “${en}”`,i);
+ const hal=(ar,en,i=false)=>naS(`حَالٌ ${ar}`,`Ḥāl ${en}`,i);
+ const cl=(ar,en)=>p(`الْجُمْلَةُ فِي مَحَلِّ نَصْبٍ حَالٌ ${ar}.`,`The clause is in accusative position as ḥāl ${en}.`);
+ const ev=(n,extraEn='',extraAr='')=>[
+  `Printed in the main text.${n?' The editorial parsing is in '+n+'.':''} ${extraEn}`,
+  `الْمِثَالُ مِنَ الْمَتْنِ.${n?' وَمَوْضِعُ إِعْرَابِهِ فِي الْحَوَاشِي: '+n.replace(/\d/g,c=>'٠١٢٣٤٥٦٧٨٩'[+c]).replaceAll('p.','ص ').replaceAll(' nn.',' حاشيتا ').replaceAll(' n.',' حاشية ').replaceAll(', ','، ')+'.':''} ${extraAr}`
+ ];
+ const book=(id,page,ar,en,ts,n,ee,ea)=>releaseBook(id,page,ar,en,ts,...ev(n,ee,ea));
+ const q=(id,page,ar,en,ts,ref,name,n,ee,ea,verseMarkers)=>({
+  ...releaseQuran(id,page,ar,en,ts,...ref,name,...ev(n,ee,ea)),...(verseMarkers?{verseMarkers}:{})
+ });
+ const Z=()=>t('زَيْدٌ','Zayd',subj), came=()=>t('جَاءَ','came',past);
+ const purposeBook=[
+  book('purpose-p188-01',188,'قَامَ زَيْدٌ إِجْلَالًا لِعَمْرٍو','Zayd stood out of respect for ʿAmr.',[
+   t('قَامَ','stood',past),Z(),t('إِجْلَالًا','out of respect',purpose('قَامَ','stood')),t('لِعَمْرٍو','for ʿAmr',l,g('بِاللَّامِ','lām'),link('بِـ«إِجْلَالًا» عَلَى إِعْرَابِ الْأَزْهَرِيِّ فِي الْحَاشِيَةِ الثَّانِيَةِ','“respect” (al-Azharī’s analysis in note 2)'))],'p.188 n.2'),
+  book('purpose-p188-02',188,'قَصَدْتُكَ ابْتِغَاءَ مَعْرُوفِكَ','I sought you out in quest of your kindness.',[
+   t('قَصَدْتُكَ','I sought you out',pt,ta,ko),t('ابْتِغَاءَ','in quest of',purpose('قَصَدْتُ','sought out',true)),t('مَعْرُوفِكَ','your kindness',gen(true),kg)],'p.188 n.3'),
+  q('purpose-p188-03',188,'وَلَا تَقْتُلُوا أَوْلَادَكُمْ خَشْيَةَ إِمْلَاقٍ','And do not kill your children for fear of poverty.',[
+   t('وَلَا','and do not',w,la),t('تَقْتُلُوا','kill',p('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا» النَّاهِيَةِ، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','Present verb made jussive by prohibitive lā, marked by deletion of nūn because it is one of the five forms.'),group),t('أَوْلَادَكُمْ','your children',obj(true),kgp,mm),t('خَشْيَةَ','for fear of',purpose('تَقْتُلُوا','kill',true)),t('إِمْلَاقٍ','poverty',gen())],[17,31],'الْإِسْرَاءِ','p.189 n.1','One printed ornament opens on p.188 and closes on p.189.','تَبْدَأُ الْحِلْيَةُ فِي ص ١٨٨ وَتَنْتَهِي فِي ص ١٨٩.'),
+  q('purpose-p189-01',189,'يُنْفِقُونَ أَمْوَالَهُمُ ابْتِغَاءَ مَرْضَاتِ اللَّهِ','They spend their wealth seeking Allah’s approval.',[
+   t('يُنْفِقُونَ','they spend',p('فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ نِيَابَةً عَنِ الضَّمَّةِ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','Present verb, indicative with retained nūn in place of ḍammah because it is one of the five forms.'),group),
+   t('أَمْوَالَهُمُ','their wealth',obj(true),hg,mmu),t('ابْتِغَاءَ','seeking',purpose('يُنْفِقُونَ','they spend',true)),t('مَرْضَاتِ','approval of',gen(true)),t('اللَّهِ','Allah',gen())],[2,265],'الْبَقَرَةِ','p.189 n.2'),
+  book('purpose-p189-02',189,'تَأَهَّبْتُ لِلسَّفَرِ','I prepared for the journey.',[
+   t('تَأَهَّبْتُ','I prepared',pt,ta),t('لِلسَّفَرِ','for the journey',l,g('بِاللَّامِ','lām'),link('بِـ«تَأَهَّبْتُ»','“I prepared”'))],null,'The main text repairs a prohibited bare form. Note 3 explains the time mismatch; the app supplies the word-level parsing.','يُصَحِّحُ الْمَتْنُ الصِّيغَةَ الْمَمْنُوعَةَ بِاللَّامِ، وَتُبَيِّنُ الْحَاشِيَةُ الثَّالِثَةُ اخْتِلَافَ الزَّمَنِ، وَيُفَصِّلُ التَّطْبِيقُ الْإِعْرَابَ.'),
+  book('purpose-p189-03',189,'جِئْتُكَ لِمَحَبَّتِكَ إِيَّايَ','I came to you because you love me.',[
+   t('جِئْتُكَ','I came to you',pt,ta,ko),t('لِمَحَبَّتِكَ','because you love',l,g('بِاللَّامِ','lām',true),kg,link('بِمَحْذُوفٍ حَالٍ مِنَ التَّاءِ فِي «جِئْتُ»','an omitted ḥāl of the subject tāʾ, on the note’s analysis')),
+   t('إِيَّايَ','me',p('«إِيَّا» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ لِلْمَصْدَرِ «مَحَبَّةِ».','Detached iyyā, fixed on sukūn in accusative position as object of the verbal noun maḥabbah.'),p('الْيَاءُ حَرْفُ تَكَلُّمٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','The yāʾ marks the speaker, fixed on fatḥ with no syntactic position.'))],'p.189 n.5','The editorial note distinguishes iyyā from its first-person marker.','تُفَرِّقُ الْحَاشِيَةُ بَيْنَ «إِيَّا» وَحَرْفِ التَّكَلُّمِ.')
+ ];
+ const accompBook=[
+  book('accompaniment-p190-01',190,'جَاءَ الْأَمِيرُ وَالْجَيْشَ','The emir came with the army.',[came(),t('الْأَمِيرُ','the emir',subj),t('وَالْجَيْشَ','with the army',wa,acc('جَاءَ','came'))],'p.190 n.3','P.191 favors actual coordination here, with al-jayshu nominative; the printed example here is accusative.','يُرَجِّحُ الْمَتْنُ فِي ص ١٩١ الْعَطْفَ بِرَفْعِ «الْجَيْشُ»، وَالْمِثَالُ الْمَطْبُوعُ هُنَا بِالنَّصْبِ.'),
+  book('accompaniment-p190-02',190,'اسْتَوَى الْمَاءُ وَالْخَشَبَةَ','The water rose level with the gauge.',[
+   t('اسْتَوَى','rose level',p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الْمُقَدَّرِ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.','Past verb fixed on fatḥ estimated on alif because it cannot appear.')),t('الْمَاءُ','the water',subj),t('وَالْخَشَبَةَ','with the measuring timber',wa,acc('اسْتَوَى','rose level'))],'p.190 n.4','The list wāw before istawā is outside this standalone example.','وَاوُ السَّرْدِ قَبْلَ «اسْتَوَى» خَارِجَ الْمِثَالِ الْمُسْتَقِلِّ.'),
+  book('accompaniment-p190-03',190,'أَنَا سَائِرٌ وَالنِّيلَ','I am traveling alongside the Nile.',[
+   t('أَنَا','I',p('ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Detached pronoun fixed on sukūn, in nominative position as mubtadaʾ.')),t('سَائِرٌ','traveling',kh,p('اسْمُ فَاعِلٍ بِمَعْنَى «يَسِيرُ»، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ تَقْدِيرُهُ أَنَا.','An active participle with the force of “travel”; its hidden subject is “I.”')),t('وَالنِّيلَ','alongside the Nile',wa,acc('سَائِرٌ','traveling'))],'p.190 n.5','The note gives the participle’s verb force; the app spells out its subject. The list wāw before anā is external.','تُبَيِّنُ الْحَاشِيَةُ مَعْنَى الْفِعْلِ فِي «سَائِرٌ»، وَيَذْكُرُ التَّطْبِيقُ فَاعِلَهُ. وَوَاوُ السَّرْدِ قَبْلَ «أَنَا» خَارِجَ الْمِثَالِ.'),
+  book('accompaniment-p191-01',191,'لَا تَنْهَ عَنِ الْقَبِيحِ وَإِتْيَانَهُ','Do not forbid wrongdoing while doing it yourself.',[
+   t('لَا','do not',la),t('تَنْهَ','forbid',p('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا» النَّاهِيَةِ، وَعَلَامَةُ جَزْمِهِ حَذْفُ حَرْفِ الْعِلَّةِ، وَهُوَ الْأَلِفُ.','Present verb made jussive by prohibitive lā, marked by deletion of the weak final alif.'),you),t('عَنِ','against',p(an.ar+' وَحُرِّكَتِ النُّونُ بِالْكَسْرِ فِي الْوَصْلِ قَبْلَ «أَلْ» لِئَلَّا يَلْتَقِيَ سَاكِنَانِ.',an.en+' In connected speech the nūn takes kasr before the definite article to avoid two consecutive sākin consonants.')),t('الْقَبِيحِ','wrongdoing',g('بِـ«عَنْ»','ʿan'),link('بِـ«تَنْهَ»','“forbid”')),t('وَإِتْيَانَهُ','while doing it',wa,acc('تَنْهَ','forbid',true),hg)],'p.191 n.2'),
+  book('accompaniment-p191-02',191,'مَاتَ زَيْدٌ وَطُلُوعَ الشَّمْسِ','Zayd died as the sun rose.',[t('مَاتَ','died',past),Z(),t('وَطُلُوعَ','at the rising of',wa,acc('مَاتَ','died',true)),t('الشَّمْسِ','the sun',gen())],'p.191 n.3','The preceding list wāw is external.','وَاوُ السَّرْدِ خَارِجَ الْمِثَالِ.'),
+  q('accompaniment-p191-03',191,'فَأَجْمِعُوا أَمْرَكُمْ وَشُرَكَاءَكُمْ','So resolve upon your course together with your partners.',[
+   t('فَأَجْمِعُوا','so resolve',f,imp,group),t('أَمْرَكُمْ','your course',obj(true),kgp,mm),t('وَشُرَكَاءَكُمْ','with your partners',wa,acc('أَجْمِعُوا','resolve',true),kgp,mm)],[10,71],'يُونُسَ','p.191 n.4','The edition analyzes shurakāʾa as accompaniment; the following thumma is outside the ornament.','تُعْرِبُ الْحَاشِيَةُ «شُرَكَاءَ» مَفْعُولًا مَعَهُ، وَ«ثُمَّ» بَعْدَ الْحِلْيَةِ.'),
+  book('accompaniment-p191-04',191,'قُمْتُ وَزَيْدًا','I stood with Zayd.',[t('قُمْتُ','I stood',pt,ta),t('وَزَيْدًا','with Zayd',wa,acc('قُمْتُ','stood'))],'p.191 nn.5–6'),
+  book('accompaniment-p191-05',191,'جَاءَ زَيْدٌ وَعَمْرٌو','Zayd and ʿAmr came.',[came(),Z(),t('وَعَمْرٌو','and ʿAmr',w,p('مَعْطُوفٌ عَلَى «زَيْدٌ»، مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ.','Coordinated with Zayd, nominative with visible ḍammah.'))],'p.191 n.7','Printed contrast with preferred coordination.','مِثَالُ الْمَتْنِ لِرُجْحَانِ الْعَطْفِ.')
+ ];
+ const resemblingBook=[book('object-like-p192-01',192,'زَيْدٌ حَسَنٌ وَجْهَهُ','Zayd is handsome in the face.',[
+  t('زَيْدٌ','Zayd',mub),t('حَسَنٌ','handsome',kh,p('صِفَةٌ مُشَبَّهَةٌ، وَفَاعِلُهَا ضَمِيرٌ مُسْتَتِرٌ يَعُودُ عَلَى زَيْدٍ تَقْدِيرُهُ هُوَ.','A ṣifah mushabbahah with a hidden subject “he,” referring to Zayd.')),
+  t('وَجْهَهُ','his face',p('مَنْصُوبٌ عَلَى التَّشْبِيهِ بِالْمَفْعُولِ بِهِ، عَامِلُهُ «حَسَنٌ»، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','Object-like complement governed by ḥasan, accusative with visible fatḥah; it is the first term of an annexation.'),hg)],'p.192 n.2','The app makes the adjective’s hidden subject explicit; note 1 distinguishes this complement from a true direct object.','يُبَيِّنُ التَّطْبِيقُ فَاعِلَ الصِّفَةِ الْمُسْتَتِرَ. وَتُفَرِّقُ الْحَاشِيَةُ الْأُولَى بَيْنَ هَذَا الْمَعْمُولِ وَالْمَفْعُولِ بِهِ الْحَقِيقِيِّ.')];
+ const halBook=[
+  book('hal-p193-01',193,'جَاءَ زَيْدٌ رَاكِبًا','Zayd came riding.',[
+   came(),Z(),t('رَاكِبًا','riding',hal('مِنْ «زَيْدٌ»','describing Zayd'))],'p.193 n.3'),
+  q('hal-p193-02',193,'فَخَرَجَ مِنْهَا خَائِفًا','So he left it afraid.',[
+   t('فَخَرَجَ','so he left',f,past,hidden),t('مِنْهَا','from it',min,ha,link('بِـ«خَرَجَ»','“left”')),t('خَائِفًا','afraid',hal('مِنَ الْفَاعِلِ الْمُسْتَتِرِ','describing the hidden subject'))],[28,21],'الْقَصَصِ','p.193 n.4'),
+  book('hal-p193-03',193,'رَكِبْتُ الْفَرَسَ مُسْرَجًا','I rode the horse while it was saddled.',[
+   t('رَكِبْتُ','I rode',pt,ta),t('الْفَرَسَ','the horse',obj()),t('مُسْرَجًا','saddled',hal('مِنَ الْمَفْعُولِ بِهِ «الْفَرَسَ»','describing the object, the horse'))],'p.193 n.5'),
+  q('hal-p193-04',193,'وَأَرْسَلْنَاكَ لِلنَّاسِ رَسُولًا','And We sent you to the people as a messenger.',[
+   t('وَأَرْسَلْنَاكَ','and We sent you',w,pt,na,ko),t('لِلنَّاسِ','to the people',l,g('بِاللَّامِ','lām'),link('بِـ«أَرْسَلْنَا»','“We sent”')),t('رَسُولًا','as a messenger',hal('مِنْ كَافِ الْخِطَابِ','describing the object kāf (“you”)'))],[4,79],'النِّسَاءِ','p.193 n.6'),
+  book('hal-p194-01',194,'لَقِيتُ عَبْدَ اللَّهِ رَاكِبَيْنِ','I met ʿAbd Allāh while we were both riding.',[
+   t('لَقِيتُ','I met',pt,ta),t('عَبْدَ','ʿAbd',obj(true)),t('اللَّهِ','Allāh',gen()),t('رَاكِبَيْنِ','both riding',p('حَالٌ مِنْ تَاءِ «لَقِيتُ» وَمِنْ «عَبْدِ اللَّهِ»، مَنْصُوبَةٌ بِالْيَاءِ نِيَابَةً عَنِ الْفَتْحَةِ لِأَنَّهَا مُثَنًّى.','Ḥāl describing both the subject tāʾ and ʿAbd Allāh, accusative with yāʾ instead of fatḥah because it is dual.'))],'p.194 n.1','The note identifies both owners; the app specifies the dual sign.','تُعَيِّنُ الْحَاشِيَةُ صَاحِبَيِ الْحَالِ، وَيَذْكُرُ التَّطْبِيقُ عَلَامَةَ نَصْبِ الْمُثَنَّى.'),
+  book('hal-p194-02',194,'جَاءَ زَيْدٌ وَحْدَهُ','Zayd came alone.',[
+   came(),Z(),t('وَحْدَهُ','alone',hal('مِنْ «زَيْدٌ» بِمَعْنَى «مُنْفَرِدًا»','describing Zayd, with the sense “alone”',true),hg)],'p.194 n.2'),
+  book('hal-p194-03',194,'بَدَتِ الْجَارِيَةُ قَمَرًا','The girl appeared radiant as a moon.',[
+   t('بَدَتِ','appeared',p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الْمُقَدَّرِ عَلَى الْأَلِفِ الْمَحْذُوفَةِ.','Past verb fixed on fatḥ estimated on the omitted alif.'),p('التَّاءُ لِلتَّأْنِيثِ، سَاكِنَةٌ فِي الْأَصْلِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ. وَحُرِّكَتْ بِالْكَسْرِ فِي الْوَصْلِ قَبْلَ «أَلْ» لِئَلَّا يَلْتَقِيَ سَاكِنَانِ.','Feminine tāʾ, originally sākin, with no syntactic position. In connected speech it takes kasr before the definite article to avoid two consecutive sākin consonants.')),t('الْجَارِيَةُ','the girl',subj),t('قَمَرًا','radiant as a moon',hal('مِنَ الْجَارِيَةِ بِمَعْنَى «مُضِيئَةً»','describing the girl, with the sense “radiant”'))],'p.194 n.6','The app distinguishes the estimated ending from the attached feminine marker.','يُفَرِّقُ التَّطْبِيقُ بَيْنَ الْفَتْحِ الْمُقَدَّرِ وَتَاءِ التَّأْنِيثِ.'),
+  book('hal-p194-04',194,'بِعْتُهُ يَدًا بِيَدٍ','I sold it in a hand-to-hand exchange.',[
+   t('بِعْتُهُ','I sold it',pt,ta,ho),t('يَدًا','hand',hal('فِي مَعْنَى التَّقَابُضِ','expressing immediate mutual exchange')),t('بِيَدٍ','to hand',b,g('بِالْبَاءِ','bāʾ'),link('بِنَعْتٍ مَحْذُوفٍ لِـ«يَدًا»','an omitted modifier of the first “hand”'))],'p.194 n.7','The note parses the phrase as a modifier; the main text gives the sense “exchanging on the spot.”','تُعْرِبُ الْحَاشِيَةُ شِبْهَ الْجُمْلَةِ نَعْتًا بِالتَّعَلُّقِ بِمَحْذُوفٍ، وَيُفَسِّرُ الْمَتْنُ الْمَعْنَى بِـ«مُتَقَابِضَيْنِ».'),
+  book('hal-p194-05',194,'ادْخُلُوا رَجُلًا رَجُلًا','Enter one man at a time.',[
+   t('ادْخُلُوا','enter',imp,group),t('رَجُلًا','one man',hal('مَعَ «رَجُلًا» الثَّانِيَةِ مِنْ وَاوِ الْجَمَاعَةِ','together with the second rajulan, describing the plural subject')),t('رَجُلًا','at a time',hal('مَعَ «رَجُلًا» الْأُولَى بِمَعْنَى «مُتَرَتِّبِينَ»','together with the first rajulan, meaning “in sequence”'))],'p.194 n.8','The note attributes this joint analysis to al-Murādī and al-Ṣabbān; its references continue on p.195.','تَنْسِبُ الْحَاشِيَةُ هَذَا الْوَجْهَ إِلَى الْمُرَادِيِّ وَالصَّبَّانِ، وَتَتِمُّ إِحَالَاتُهَا فِي ص ١٩٥.'),
+  q('hal-p195-01',195,'وَلَا تَمْشِ فِي الْأَرْضِ مَرَحًا','And do not walk on the earth arrogantly.',[
+   t('وَلَا','and do not',w,la),t('تَمْشِ','walk',p('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا» النَّاهِيَةِ، وَعَلَامَةُ جَزْمِهِ حَذْفُ حَرْفِ الْعِلَّةِ، وَهُوَ الْيَاءُ.','Present verb made jussive by prohibitive lā, marked by deletion of the weak final yāʾ.'),you),
+   t('فِي','on',fi),t('الْأَرْضِ','the earth',g('بِـ«فِي»','fī'),link('بِـ«تَمْشِ»','“walk”')),t('مَرَحًا','arrogantly',hal('مِنْ فَاعِلِ «تَمْشِ»','describing the subject of “walk”'))],[17,37],'الْإِسْرَاءِ','p.195 n.2'),
+  book('hal-p195-02',195,'فِي الدَّارِ جَالِسًا رَجُلٌ','There is a man sitting in the house.',[
+   t('فِي','in',fi),t('الدَّارِ','the house',g('بِـ«فِي»','fī'),link('بِمَحْذُوفٍ خَبَرٍ مُقَدَّمٍ','an omitted fronted predicate')),t('جَالِسًا','sitting',hal('مُقَدَّمٌ مِنْ «رَجُلٌ»','placed before its owner, “a man”')),t('رَجُلٌ','a man',p('مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ.','Delayed mubtadaʾ, nominative with visible ḍammah.'))],'p.195 n.4'),
+  q('hal-p195-03',195,'فِي أَرْبَعَةِ أَيَّامٍ سَوَاءً','In four days exactly.',[
+   t('فِي','in',fi),t('أَرْبَعَةِ','four',g('بِـ«فِي»','fī',true),link('بِـ«قَدَّرَ» فِي تَمَامِ الْآيَةِ','qaddara in the wider verse')),t('أَيَّامٍ','days',gen()),t('سَوَاءً','exactly',hal('مِنْ «أَرْبَعَةِ»','describing “four”'))],[41,10],'فُصِّلَتْ','p.195 n.5','The note quotes the full verse separately; qaddara is outside the main ornament. The accusative sawāʾan matches Ḥafṣ.','تَسُوقُ الْحَاشِيَةُ تَمَامَ الْآيَةِ فِي حِلْيَةٍ أُخْرَى، وَ«قَدَّرَ» خَارِجَ حِلْيَةِ الْمَتْنِ. وَالنَّصْبُ فِي «سَوَاءً» مُوَافِقٌ لِقِرَاءَةِ حَفْصٍ.'),
+  q('hal-p195-04',195,'وَمَا أَهْلَكْنَا مِنْ قَرْيَةٍ إِلَّا لَهَا مُنْذِرُونَ','And We destroyed no town without it having warners.',[
+   t('وَمَا','and not',w,particle('«مَا» حَرْفُ نَفْيٍ','Negative mā','السُّكُونِ','sukūn')),t('أَهْلَكْنَا','We destroyed',pt,na),
+   t('مِنْ','[emphatic min]',particle('«مِنْ» حَرْفُ جَرٍّ زَائِدٌ لِلتَّوْكِيدِ','Extra preposition min for emphasis','السُّكُونِ','sukūn')),
+   t('قَرْيَةٍ','a town',p('مَفْعُولٌ بِهِ مَنْصُوبٌ بِفَتْحَةٍ مُقَدَّرَةٍ، مَنَعَ مِنْ ظُهُورِهَا اشْتِغَالُ الْمَحَلِّ بِكَسْرَةِ حَرْفِ الْجَرِّ الزَّائِدِ.','Direct object, accusative with an estimated fatḥah because the extra preposition’s kasrah occupies its place.')),
+   t('إِلَّا','except',particle('«إِلَّا» أَدَاةُ حَصْرٍ','Restrictive illā','السُّكُونِ','sukūn')),
+   t('لَهَا','it has',prep('اللَّامُ','Lām','الْفَتْحِ','fatḥ'),ha,link('بِمَحْذُوفٍ خَبَرٍ مُقَدَّمٍ','an omitted fronted predicate')),
+   t('مُنْذِرُونَ','warners',p('مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.','Delayed mubtadaʾ, nominative with wāw instead of ḍammah because it is a sound masculine plural.'),cl('مِنْ «قَرْيَةٍ» فِي سِيَاقِ النَّفْيِ','describing “a town” in the negative context'))],[26,208],'الشُّعَرَاءِ','p.195 n.6 → p.196','End medallion is nonlexical; the parse of the clause continues below the separator on p.196.','رَقْمُ الْآيَةِ لَيْسَ كَلِمَةً، وَيَتِمُّ إِعْرَابُ الْجُمْلَةِ تَحْتَ الْفَاصِلِ فِي ص ١٩٦.',[{after:7,ayah:208}]),
+  book('hal-p196-01',196,'رَأَيْتُ الْهِلَالَ بَيْنَ السَّحَابِ','I saw the crescent between the clouds.',[
+   t('رَأَيْتُ','I saw',pt,ta),t('الْهِلَالَ','the crescent',obj()),t('بَيْنَ','between',naS('ظَرْفُ مَكَانٍ مُتَعَلِّقٌ بِمَحْذُوفٍ حَالٍ مِنَ الْهِلَالِ','Place adverb attached to an omitted ḥāl of the crescent',true)),t('السَّحَابِ','the clouds',gen())],'p.196 nn.3, 5'),
+  q('hal-p196-02',196,'فَخَرَجَ عَلَى قَوْمِهِ فِي زِينَتِهِ','So he went out before his people in his finery.',[
+   t('فَخَرَجَ','so he went out',f,past,hidden),t('عَلَى','before',ala),t('قَوْمِهِ','his people',g('بِـ«عَلَى»','ʿalā',true),hgi,link('بِـ«خَرَجَ»','“went out”')),
+   t('فِي','in',fi),t('زِينَتِهِ','his finery',g('بِـ«فِي»','fī',true),hgi,link('بِمَحْذُوفٍ حَالٍ مِنْ فَاعِلِ «خَرَجَ»، تَقْدِيرُهُ «كَائِنًا»','an omitted ḥāl of the subject of “went out,” supplied as kāʾinan'))],[28,79],'الْقَصَصِ','p.196 nn.4–5','Note 4 glosses the meaning as mutazayyin(an); note 5 identifies the omitted element as the actual ḥāl.','تُفَسِّرُ الْحَاشِيَةُ الرَّابِعَةُ الْمَعْنَى بِـ«مُتَزَيِّنًا»، وَتُعَيِّنُ الْخَامِسَةُ الْمُتَعَلَّقَ الْمَحْذُوفَ حَالًا.'),
+  q('hal-p197-01',197,'خَرَجُوا مِنْ دِيَارِهِمْ وَهُمْ أُلُوفٌ','They left their homes while they numbered in the thousands.',[
+   t('خَرَجُوا','they left',pw,group),t('مِنْ','from',min),t('دِيَارِهِمْ','their homes',g('بِـ«مِنْ»','min',true),hgi,mm,link('بِـ«خَرَجُوا»','“they left”')),
+   t('وَهُمْ','while they',wh,p('«هُمْ» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Detached pronoun hum, fixed on sukūn in nominative position as mubtadaʾ.')),t('أُلُوفٌ','thousands',kh,cl('مِنْ وَاوِ «خَرَجُوا»، وَالرَّابِطُ الْوَاوُ وَ«هُمْ»','describing the subject of “they left,” linked by wāw and hum'))],[2,243],'الْبَقَرَةِ','p.197 n.1','Note 1 separates hāʾ and plural mīm in hum; the app presents the detached form as a unit.','تُفَصِّلُ الْحَاشِيَةُ الْهَاءَ وَالْمِيمَ فِي «هُمْ»، وَيُعْرِبُ التَّطْبِيقُ الضَّمِيرَ الْمُنْفَصِلَ بِجُمْلَتِهِ.'),
+  q('hal-p197-02',197,'اهْبِطُوا بَعْضُكُمْ لِبَعْضٍ عَدُوٌّ','Descend, enemies to one another.',[
+   t('اهْبِطُوا','descend',imp,group),t('بَعْضُكُمْ','some of you',p('مُبْتَدَأٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Mubtadaʾ, nominative with visible ḍammah; it is the first term of an annexation.'),kgp,mm),
+   t('لِبَعْضٍ','to others',l,g('بِاللَّامِ','lām'),link('بِـ«عَدُوٌّ»','“enemy”')),t('عَدُوٌّ','an enemy',kh,cl('مِنْ وَاوِ «اهْبِطُوا»، وَالرَّابِطُ ضَمِيرُ الْخِطَابِ فِي «بَعْضُكُمْ» وَحْدَهُ','describing the subject of “descend,” linked only by the address pronoun in baʿḍukum'))],[2,36],'الْبَقَرَةِ','p.197 n.2'),
+  q('hal-p197-03',197,'لَئِنْ أَكَلَهُ الذِّئْبُ وَنَحْنُ عُصْبَةٌ','If the wolf eats him while we are a band together…',[
+   t('لَئِنْ','if',p('اللَّامُ الْمُوَطِّئَةُ لِلْقَسَمِ، مَبْنِيَّةٌ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Lām introducing the implied oath, fixed on fatḥ, with no syntactic position.'),particle('«إِنْ» حَرْفُ شَرْطٍ جَازِمٌ','Jussive conditional in','السُّكُونِ','sukūn')),
+   t('أَكَلَهُ','eats him',p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَزْمٍ فِعْلُ الشَّرْطِ.','Past verb fixed on fatḥ, in jussive position as the conditional verb.'),ho),t('الذِّئْبُ','the wolf',subj),
+   t('وَنَحْنُ','while we',wh,p('«نَحْنُ» ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Detached pronoun naḥnu, fixed on ḍamm in nominative position as mubtadaʾ.')),t('عُصْبَةٌ','a band',kh,cl('مِنَ «الذِّئْبُ»، وَالرَّابِطُ الْوَاوُ وَحْدَهَا','describing the wolf, linked only by wāw'))],[12,14],'يُوسُفَ','p.197 n.3','The note describes the opening lām using oath-answer wording. The app treats it as introducing the implied oath (cf. Ibn ʿĀshūr); the oath answer comes later, outside the excerpt. The note’s gloss has the wolf acting without being alone; naḥnu refers to the speakers, not the wolf.','تَصِفُ الْحَاشِيَةُ اللَّامَ بِعِبَارَةٍ فِيهَا ذِكْرُ جَوَابِ الْقَسَمِ. وَيُعْرِبُهَا التَّطْبِيقُ لَامًا مُوَطِّئَةً لِلْقَسَمِ، وَجَوَابُهُ بَعْدَ الْحِلْيَةِ. وَتَرْجِعُ «نَحْنُ» إِلَى الْمُتَكَلِّمِينَ لَا إِلَى الذِّئْبِ، وَتَذْكُرُ الْحَاشِيَةُ فِي تَقْدِيرِ الْحَالِ «غَيْرَ مُنْفَرِدٍ».')
+ ];
+ return [purposeBook,accompBook,resemblingBook,halBook];
+})();
+
+const stage188Help = [
+ [
+  help('يُسَمِّيهِ الْمُؤَلِّفُ الْمَفْعُولَ مِنْ أَجْلِهِ وَالْمَفْعُولَ لِأَجْلِهِ وَالْمَفْعُولَ لَهُ. وَهُوَ اسْمٌ مَنْصُوبٌ يُبَيِّنُ سَبَبَ وُقُوعِ الْفِعْلِ. فِي «قَامَ زَيْدٌ إِجْلَالًا لِعَمْرٍو» كَانَ إِجْلَالُ زَيْدٍ لِعَمْرٍو سَبَبَ قِيَامِهِ. وَفِي «قَصَدْتُكَ ابْتِغَاءَ مَعْرُوفِكَ» بَيَّنَ الْمَصْدَرُ غَرَضَ الْقَصْدِ.','The author gives three names for the purpose object. It is the accusative noun that tells why the action occurred. Zayd’s respect for ʿAmr explains why he stood. Seeking kindness explains the visit.'),
+  help('يَشْتَرِطُ الْمَتْنُ أَنْ يَكُونَ مَصْدَرًا، وَأَنْ يَتَّحِدَ مَعَ عَامِلِهِ فِي الزَّمَنِ وَالْفَاعِلِ. وَلَفْظُ «قَلْبِيًّا» بَيْنَ مَعْقُوفَتَيْنِ مِنَ النُّسْخَةِ (ج) بِحَسَبِ حَاشِيَةِ ص ١٨٨ رَقْمِ ٥. وَتُمَثِّلُ حَاشِيَةُ ٤ لِدَوَافِعِ الْقَلْبِ بِالرَّغْبَةِ وَالْخَوْفِ وَالْحُبِّ، وَتُفَرِّقُ بَيْنَهَا وَبَيْنَ أَفْعَالِ الْجَوَارِحِ.','The text requires a verbal noun and the same time and agent as its governor. Note 5 on p.188 credits bracketed “of the heart” to manuscript ج. Editorial note 4 contrasts inner motives such as desire, fear and love with physical acts.'),
+  help('يَرْفُضُ الْمَتْنُ «تَأَهَّبْتُ السَّفَرَ» لِاخْتِلَافِ الزَّمَنِ، وَ«جِئْتُكَ مَحَبَّتَكَ إِيَّايَ» لِاخْتِلَافِ الْفَاعِلِ: أَنَا جِئْتُ، وَأَنْتَ أَحْبَبْتَ. وَيَذْكُرُ التَّصْحِيحَ بِاللَّامِ: «تَأَهَّبْتُ لِلسَّفَرِ»، وَ«جِئْتُكَ لِمَحَبَّتِكَ إِيَّايَ». حَاشِيَةُ ص ١٨٩ رَقْمُ ٥ تَجْعَلُ «إِيَّايَ» مَفْعُولًا لِلْمَصْدَرِ.','The author rejects the bare accusative in “I prepared for traveling” (the preparing precedes travel) and “I came because you love me” (I came; you love). Both printed repairs use lām. In the second repair note 5 makes “me” the object of the verbal noun “love.”'),
+  help('تَبْدَأُ حَاشِيَةُ ص ١٨٩ رَقْمُ ٦ بِذِكْرِ الْأَعْلَمِ الشَّنْتَمَرِيِّ وَالْمُتَأَخِّرِينَ وَمُخَالَفَةِ سِيبَوَيْهِ وَالْمُتَقَدِّمِينَ. وَتَتِمُّ قَبْلَ الْحَاشِيَةِ الْأُولَى فِي ص ١٩٠: احْتَجَّ ابْنُ خَرُوفٍ بِـ﴿هُوَ الَّذِي يُرِيكُمُ الْبَرْقَ خَوْفًا وَطَمَعًا﴾ (سورة الرعد، ١٢). فَالْمُرِي هُوَ اللَّهُ، وَالْخَائِفُونَ وَالطَّامِعُونَ هُمُ الْمُخَاطَبُونَ. وَاسْتَقْوَى الصَّبَّانُ هَذَا الِاسْتِدْلَالَ.','Editorial note 6 (p.189, continued before p.190 note 1) contrasts al-Aʿlam al-Shantamarī and later grammarians with Sībawayh and earlier grammarians. Ibn Kharūf’s differing-agent witness is Q13:12: God shows the lightning; the people addressed fear and hope. Al-Ṣabbān considers the argument strong. This is note evidence, not another main-text exercise.')
+ ],
+ [
+  help('الْمَفْعُولُ مَعَهُ اسْمٌ مَنْصُوبٌ بَعْدَ وَاوٍ بِمَعْنَى «مَعَ». تَسْبِقُهَا جُمْلَةٌ فِيهَا فِعْلٌ أَوِ اسْمٌ فِيهِ مَعْنَى الْفِعْلِ وَحُرُوفُهُ. قَارِنْ «جَاءَ الْأَمِيرُ وَالْجَيْشَ» وَ«أَنَا سَائِرٌ وَالنِّيلَ». وَتُعَرِّفُ حَاشِيَةُ ص ١٩٠ الْخَشَبَةَ بِأَنَّهَا مِقْيَاسٌ لِارْتِفَاعِ الْمَاءِ.','An object of accompaniment is accusative after wāw meaning “with.” The preceding clause contains a verb or a noun with its meaning and letters. Compare “the emir came with the army” and “I am traveling alongside the Nile.” The p.190 note explains that the timber is a water-level gauge.'),
+  help('يَجِبُ النَّصْبُ إِذَا أَفْسَدَ الْعَطْفُ الْمَعْنَى. وَ«الْمِثَالَانِ الْأَخِيرَانِ» هُمَا الْمَاءُ مَعَ الْخَشَبَةِ وَالسَّائِرُ مَعَ النِّيلِ. وَيَزِيدُ الْمَتْنُ النَّهْيَ عَنِ الْقَبِيحِ مَعَ إِتْيَانِهِ، وَمَوْتَ زَيْدٍ مَعَ طُلُوعِ الشَّمْسِ، وَشَاهِدَ يُونُسَ. وَتُعْرِبُ حَاشِيَةُ ص ١٩١ رَقْمُ ٤ «شُرَكَاءَ» مَفْعُولًا مَعَهُ.','Accompaniment is required where coordination spoils the intended meaning. “The last two examples” are water with the gauge and the traveler with the Nile. The text adds forbidding wrongdoing while doing it, Zayd’s death at sunrise and the Yūnus witness; p.191 note 4 parses shurakāʾa as accompaniment.'),
+  help('يُرَجَّحُ النَّصْبُ فِي «قُمْتُ وَزَيْدًا»، وَتُعَلِّلُ حَاشِيَةُ ٦ ذَلِكَ بِضَعْفِ الْعَطْفِ عَلَى ضَمِيرِ الرَّفْعِ الْمُتَّصِلِ بِلَا فَاصِلٍ. وَيَتَرَجَّحُ الْعَطْفُ فِي الْمِثَالِ الْأَوَّلِ، أَيْ مَجِيءِ الْأَمِيرِ وَالْجَيْشِ، وَفِي «جَاءَ زَيْدٌ وَعَمْرٌو». وَ«الْجَيْشُ» بِالرَّفْعِ صِيغَةُ الْعَطْفِ، لَا ضَبْطُ الْمِثَالِ الْمَطْبُوعِ فِي ص ١٩٠.','In “I stood with Zayd,” accompaniment is preferable because, as note 6 explains, direct coordination with the attached subject pronoun is weak without a separator. Coordination is preferred in the first model (the emir and the army) and in “Zayd and ʿAmr came.” Al-jayshu is the coordinated nominative form; the printed p.190 model has accusative al-jaysha.')
+ ],
+ [
+  help('يَنْصُّ الْمَتْنُ عَلَى نَصْبِ «وَجْهَ» فِي «زَيْدٌ حَسَنٌ وَجْهَهُ». وَتَذْكُرُ الْحَاشِيَةُ الْأُولَى أَنَّهُ مَعْمُولُ صِفَةٍ مُشَبَّهَةٍ، لَا مَفْعُولٌ بِهِ حَقِيقِيٌّ؛ لِأَنَّ الصِّفَةَ قَاصِرَةٌ. وَتُعْرِبُ الْحَاشِيَةُ الثَّانِيَةُ «حَسَنٌ» خَبَرًا وَالْهَاءَ مُضَافًا إِلَيْهِ. وَتُحِيلُ الثَّالِثَةُ عَلَى بَابِ الْأَسْمَاءِ الْعَامِلَةِ عَمَلَ الْفِعْلِ.','The main text specifies accusative wajha in “Zayd is handsome in the face.” Note 1 explains that it is governed by a ṣifah mushabbahah, not a true direct object: the adjective is not transitive. Note 2 parses ḥasan as the predicate and the attached hāʾ as the genitive annex. Note 3 points forward to nouns that govern like verbs.')
+ ],
+ [
+  help('الْحَالُ يُبَيِّنُ هَيْئَةَ صَاحِبِهِ عِنْدَ وُقُوعِ الْفِعْلِ. فِي «جَاءَ زَيْدٌ رَاكِبًا» الصَّاحِبُ الْفَاعِلُ، وَفِي «رَكِبْتُ الْفَرَسَ مُسْرَجًا» الْمَفْعُولُ بِهِ. وَفِي «لَقِيتُ عَبْدَ اللَّهِ رَاكِبَيْنِ» تَجْعَلُ حَاشِيَةُ ص ١٩٤ الصَّاحِبَ كِلَا الطَّرَفَيْنِ.','A ḥāl describes an owner’s state when the action takes place. The owner is the subject in “Zayd came riding,” the object in “I rode the horse while it was saddled,” and both in “I met ʿAbd Allāh while we were both riding,” as note 1 on p.194 explains.'),
+  help('الْحَالُ نَكِرَةٌ، وَإِنْ جَاءَ مَعْرِفَةً فِي اللَّفْظِ أُوِّلَ بِنَكِرَةٍ: «وَحْدَهُ» أَيْ «مُنْفَرِدًا». وَالْغَالِبُ أَنْ يَكُونَ مُشْتَقًّا؛ وَقَدْ يَجِيءُ جَامِدًا بِمَعْنَى مُشْتَقٍّ، مِثْلُ «قَمَرًا» بِمَعْنَى «مُضِيئَةً». وَتَخْتَارُ حَاشِيَةُ ٨ نَصْبَ «رَجُلًا رَجُلًا» مَعًا عَلَى الْحَالِ بِمَعْنَى «مُتَرَتِّبِينَ». وَالْحَالُ لَيْسَ رُكْنًا فِي الْإِسْنَادِ، وَإِنْ تَوَقَّفَ عَلَيْهِ الْمَعْنَى الْمُرَادُ كَمَا فِي شَاهِدِ الْإِسْرَاءِ ٣٧.','The ḥāl is indefinite or interpreted as indefinite: waḥdahu (“alone”) is like munfaridan. It is usually derived; an underived noun can convey a derived sense, as “a moon” means “radiant.” Note 8 adopts a joint ḥāl analysis for rajulan rajulan, “in sequence.” The ḥāl is not a core predication constituent, but it can be vital to the meaning, as in Q17:37.'),
+  help('تَذْكُرُ حَاشِيَةُ ص ١٩٤ رَقْمُ ٥ شَوَاهِدَ لِحَالٍ جَامِدَةٍ غَيْرِ مُؤَوَّلَةٍ بِمُشْتَقٍّ:\n﴿فَتَمَثَّلَ لَهَا بَشَرًا سَوِيًّا﴾ (سورة مريم، ١٧)؛ ﴿أَأَسْجُدُ لِمَنْ خَلَقْتَ طِينًا﴾ (سورة الإسراء، ٦١)؛ ﴿يُخْرِجُكُمْ طِفْلًا﴾ (سورة غافر، ٦٧)؛ ﴿هَذِهِ نَاقَةُ اللَّهِ لَكُمْ آيَةً﴾. وَاللَّفْظُ الْأَخِيرُ غَيْرُ مُرَقَّمٍ فِي الْحَاشِيَةِ، وَيَرِدُ فِي الْأَعْرَافِ ٧٣ وَهُودٍ ٦٤.','P.194 note 5 gives underived states without recasting them as derived descriptors: a human (Q19:17), clay (Q17:61), a child (Q40:67), and a sign. The edition does not number the last excerpt, which occurs with the same wording in Q7:73 and Q11:64. These are editorial-note witnesses.'),
+  help('الْأَصْلُ تَعْرِيفُ صَاحِبِ الْحَالِ. وَمِنْ مُسَوِّغَاتِ تَنْكِيرِهِ تَقْدِيمُ الْحَالِ، أَوْ تَخْصِيصُهُ بِإِضَافَةٍ أَوْ وَصْفٍ، أَوْ وُقُوعُهُ فِي سِيَاقِ النَّفْيِ. فِي فُصِّلَتْ ١٠ تُضَافُ «أَرْبَعَةِ» إِلَى «أَيَّامٍ»، وَتَجْعَلُ حَاشِيَةُ ٥ «سَوَاءً» حَالًا مِنْهَا. وَفِي الشُّعَرَاءِ ٢٠٨ «قَرْيَةٍ» فِي سِيَاقِ النَّفْيِ، وَجُمْلَةُ «لَهَا مُنْذِرُونَ» فِي مَحَلِّ نَصْبٍ حَالٌ عَلَى إِعْرَابِ حَاشِيَةِ ٦ الْمُمْتَدَّةِ إِلَى ص ١٩٦.','The owner is normally definite. An indefinite owner is licensed by fronting the ḥāl, specifying the owner (by annexation or description), or a negative context. In Q41:10 “four” is annexed to “days,” and note 5 makes sawāʾan its ḥāl. In Q26:208 “a town” is in a negative context; note 6, continued on p.196, gives the nominal clause accusative position as ḥāl.'),
+  help('شَاهِدٌ بِقِرَاءَةِ ابْنِ أَبِي عَبْلَةَ: ﴿وَلَمَّا جَاءَهُمْ كِتَابٌ مِنْ عِنْدِ اللَّهِ مُصَدِّقًا﴾ (سورة البقرة، ٨٩). تَنْقُلُ حَاشِيَةُ ص ١٩٦ رَقْمُ ١ عَنْ أَبِي حَيَّانَ وَرُودَ النَّصْبِ فِي مُصْحَفِ أُبَيٍّ، وَتَنْسِبُهُ إِلَى ابْنِ أَبِي عَبْلَةَ. وَفِي حَاشِيَةِ ٢ «مُصَدِّقًا» حَالٌ مِنْ «كِتَابٌ» الْمُخَصَّصِ بِالنَّعْتِ «مِنْ عِنْدِ اللَّهِ». وَلَفْظُ حَفْصٍ «مُصَدِّقٌ» بِالرَّفْعِ.','In Ibn Abī ʿAblah’s reading of Q2:89, muṣaddiqan (“confirming”) is accusative as ḥāl of “a book,” an indefinite noun specified by the description “from Allah.” P.196 note 1 cites Abū Ḥayyān for its occurrence in Ubayy’s muṣḥaf and names the reader; note 2 gives the parse. In Ḥafṣ the word is nominative muṣaddiqun.'),
+  help('قَدْ يَقَعُ فِي هَذَا الْبَابِ ظَرْفٌ أَوْ جَارٌّ وَمَجْرُورٌ. يَتَعَلَّقَانِ بِمَحْذُوفٍ وُجُوبًا، وَهُوَ الْحَالُ فِي التَّحْقِيقِ كَمَا فِي حَاشِيَةِ ص ١٩٦ رَقْمِ ٥. فِي شَاهِدِ الْقَصَصِ ٧٩ «عَلَى قَوْمِهِ» مُتَعَلِّقٌ بِالْفِعْلِ، وَ«فِي زِينَتِهِ» بِالْحَالِ الْمَحْذُوفَةِ.','An adverb or prepositional phrase can express the state by relating to a necessarily omitted element. P.196 note 5 identifies that element as the actual ḥāl. In Q28:79 “before his people” attaches to the verb, whereas “in his finery” attaches to the omitted ḥāl.'),
+  help('الْجُمْلَةُ الْخَبَرِيَّةُ فِي مَحَلِّ نَصْبٍ، وَرَابِطُهَا الْوَاوُ وَالضَّمِيرُ فِي الْبَقَرَةِ ٢٤٣، وَالضَّمِيرُ فَقَطْ فِي الْبَقَرَةِ ٣٦، وَالْوَاوُ فَقَطْ فِي يُوسُفَ ١٤. وَتُعَيِّنُ حَاشِيَةُ ص ١٩٧ رَقْمُ ٣ الذِّئْبَ صَاحِبَ الْحَالِ، فَلَا تَرْجِعُ إِلَيْهِ «نَحْنُ». وَاللَّامُ فِي «لَئِنْ» مُوَطِّئَةٌ لِلْقَسَمِ فِي إِعْرَابِ التَّطْبِيقِ، وَجَوَابُ الْقَسَمِ بَعْدَ الْمَقْطَعِ.','A declarative ḥāl clause is in an accusative position. It links by wāw and a pronoun in Q2:243, a pronoun alone in Q2:36, and wāw alone in Q12:14. P.197 note 3 makes the wolf the owner; “we” does not refer to it. The app calls the initial lām in laʾin an oath-introducing particle. The oath’s answer comes after the excerpt.'),
+  help('فِي فَائِدَةِ ص ١٩٧ يَجْعَلُ الصَّبَّانُ الْجُمْلَةَ وَشِبْهَهَا صِفَةً بَعْدَ النَّكِرَةِ الْمَحْضَةِ، وَحَالًا بَعْدَ الْمَعْرِفَةِ الْمَحْضَةِ. وَتَتِمُّ الْفَائِدَةُ تَحْتَ الْفَاصِلِ فِي ص ١٩٨ قَبْلَ الْحَاشِيَةِ الْأُولَى: الْجُمْلَةُ بَعْدَ الْمُبْتَدَإِ خَبَرٌ، وَبَعْدَ الْمَوْصُولِ صِلَةٌ، وَبَعْدَ الْمُنَادَى اسْتِئْنَافِيَّةٌ غَالِبًا.','The p.197 editorial appendix cites al-Ṣabbān: a clause or phrase after a purely indefinite noun is adjectival; after a purely definite noun it is circumstantial. Its continuation below the p.198 separator qualifies this: a clause after a mubtadaʾ is a predicate, after a relative noun a relative clause, and after a vocative usually a fresh clause.')
+ ]
+];
+const stage188Chapters=[
+ ['purpose-object','بَابُ الْمَفْعُولِ مِنْ أَجْلِهِ','The purpose object','188–189','١٨٨–١٨٩'],
+ ['accompaniment-object','بَابُ الْمَفْعُولِ مَعَهُ','The object of accompaniment','190–191','١٩٠–١٩١'],
+ ['object-like-complement','الْمُشَبَّهُ بِالْمَفْعُولِ بِهِ','The object-like noun','192','١٩٢'],
+ ['circumstantial-state','بَابُ الْحَالِ','The circumstantial state','193–197','١٩٣–١٩٧']
+];
+stage188Chapters.forEach(([id,titleAr,titleEn,pages,pageAr],i)=>chapters.push({
+ id,babId:'accusative-nouns',order:i+5,titleAr,titleEn,pages,book:mansubat188[i],help:stage188Help[i],
+ helpSourceAr:`الْمُتَمِّمَةُ، ص ${pageAr}. الْقَوَاعِدُ وَالْأَمْثِلَةُ مِنَ الْمَتْنِ، وَمَا نُسِبَ إِلَى الْحَوَاشِي فَمِنْ تَعْلِيقَاتِ الطَّبْعَةِ. التَّرْجَمَةُ وَمَا لَمْ يُذْكَرْ مِنْ تَفْصِيلِ الْإِعْرَابِ مِنَ التَّطْبِيقِ.`,
+ helpSourceEn:`Al-Mutammimah, printed pp.${pages}. Rules and main examples are the author’s; cited notes are editorial. English and unstated parse details are supplied by the app.`
+}));
 
 // The concise study summaries and disclosure metadata are app-prepared
 // organization layered over the reviewed Help prose. Keeping this mapping
@@ -4547,6 +4722,26 @@ helpVisuals['adverbial-object']={type:'branches',titleAr:'هَلْ يَدُلّ�
  ]},
  {id:'adv-exception',labelAr:'إِسْقَاطُ «فِي» تَوَسُّعًا',labelEn:'Exceptional omission of fī',descAr:'لَيْسَ نَصْبُ «الْمَسْجِدَ» هُنَا قِيَاسَ الظَّرْفِ الْمُخْتَصِّ.',descEn:'Here al-masjida is accusative by omission of fī.',exerciseId:'adv-p187-02'}
 ]};
+const stage188Visual=(titleAr,titleEn,branches)=>({type:'branches',titleAr,titleEn,branches:branches.map(([id,labelAr,labelEn,descAr,descEn,exerciseId])=>({id,labelAr,labelEn,descAr,descEn,exerciseId}))});
+helpVisuals['purpose-object']=stage188Visual('لِمَ وَقَعَ الْفِعْلُ؟','Why did the action happen?',[
+ ['purpose-same','اتِّحَادُ الزَّمَنِ وَالْفَاعِلِ','Same time and agent','زَيْدٌ قَامَ وَهُوَ الْمُجِلُّ.','Zayd both stands and holds the respect that prompts him.','purpose-p188-01'],
+ ['purpose-time','اخْتِلَافُ الزَّمَنِ','Different times','التَّأَهُّبُ قَبْلَ السَّفَرِ؛ فَأَظْهِرِ اللَّامَ.','Preparation precedes travel, so the printed repair uses lām.','purpose-p189-02'],
+ ['purpose-agent','اخْتِلَافُ الْفَاعِلِ','Different agents','الْمُتَكَلِّمُ جَاءَ، وَالْمُخَاطَبُ أَحَبَّ.','One person came; the other is the one who loves.','purpose-p189-03']
+]);
+helpVisuals['accompaniment-object']=stage188Visual('هَلْ هِيَ مَعِيَّةٌ أَمْ عَطْفٌ؟','Does wāw mean “with” or “and”?',[
+ ['accomp-required','مَعِيَّةٌ وَاجِبَةٌ','Accompaniment required','الْمَاءُ وَحْدَهُ يَرْتَفِعُ؛ فَـ«الْخَشَبَةَ» بِالْفَتْحَةِ.','Only the water rises, so the accompanying noun has fatḥah.','accompaniment-p190-02'],
+ ['accomp-favored','النَّصْبُ أَرْجَحُ','Accompaniment preferred','يَضْعُفُ الْعَطْفُ عَلَى تَاءِ «قُمْتُ»، فَيَتَرَجَّحُ «زَيْدًا».','Coordination with subject tāʾ is weak here, so accusative Zaydan is preferred.','accompaniment-p191-04'],
+ ['accomp-conj','الْعَطْفُ أَرْجَحُ','Coordination preferred','«عَمْرٌو» مَرْفُوعٌ مِثْلُ «زَيْدٌ».','ʿAmr and Zayd both came. Both are nominative.','accompaniment-p191-05']
+]);
+helpVisuals['object-like-complement']=stage188Visual('مَا عَامِلُ «وَجْهَهُ»؟','What governs wajhahu?',[
+ ['object-like-adj','الصِّفَةُ «حَسَنٌ»','The adjective ḥasan','«حَسَنٌ» خَبَرٌ وَصِفَةٌ مُشَبَّهَةٌ تَعْمَلُ فِي «وَجْهَ».','Ḥasan is the predicate and the adjective that governs wajha.','object-like-p192-01'],
+ ['object-like-noun','النَّصْبُ عَلَى التَّشْبِيهِ','Accusative by resemblance','«وَجْهَ» لَيْسَ مَفْعُولًا بِهِ حَقِيقِيًّا.','Wajha takes accusative case here without being a true direct object.','object-like-p192-01']
+]);
+helpVisuals['circumstantial-state']=stage188Visual('مَا رَابِطُ جُمْلَةِ الْحَالِ؟','What links the ḥāl clause?',[
+ ['hal-both','الْوَاوُ وَالضَّمِيرُ','Wāw and pronoun','فِي «وَهُمْ أُلُوفٌ» الْوَاوُ وَ«هُمْ» يَرْبِطَانِ الْجُمْلَةَ بِصَاحِبِهَا.','Wāw and hum both link the state clause to its owner.','hal-p197-01'],
+ ['hal-pronoun','الضَّمِيرُ وَحْدَهُ','Pronoun alone','ضَمِيرُ الْخِطَابِ فِي «بَعْضُكُمْ» يَرْجِعُ إِلَى الْمُخَاطَبِينَ.','The pronoun in baʿḍukum refers back to the people told to descend.','hal-p197-02'],
+ ['hal-waw','الْوَاوُ وَحْدَهَا','Wāw alone','«نَحْنُ» لَا تَعُودُ عَلَى الذِّئْبِ؛ الرَّابِطُ هُوَ الْوَاوُ.','“We” does not refer to the wolf; only wāw links the clause.','hal-p197-03']
+]);
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});
 
 const quranEn=/Qur[’']an (\d+):(\d+)(?:[–-](\d+))?\./u;

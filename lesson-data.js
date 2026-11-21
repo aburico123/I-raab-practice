@@ -3213,7 +3213,7 @@ const zannaA=(()=>{
      hObject
     ]),
     obj('بَعِيدًا','far off',2),
-    answerParts('وَنَرَاهُ','but We deem it',[
+    answerParts('وَنَرَاهُ','but We know it to be',[
      mkWaw(),
      part('«نَرَى» فِعْلٌ مُضَارِعٌ لِلْيَقِينِ، مَرْفُوعٌ بِضَمَّةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ نَحْنُ.','Narā conveys certainty. It is a present verb, indicative with an estimated ḍammah on alif, which cannot bear a vowel. Its required implicit subject is “We.”'),
      hObject
@@ -3222,15 +3222,18 @@ const zannaA=(()=>{
    ],70,6,7,'الْمَعَارِجِ','One printed ornament encloses both verses, with the two verse markers outside the grammatical word sequence. Note 2 distinguishes conjecture in yarawnahu from certainty in narāhu and parses both sets of objects.','يَضُمُّ إِطَارُ الِاقْتِبَاسِ الْمَطْبُوعُ الْآيَتَيْنِ. وَعَلَامَتَا الْآيَتَيْنِ خَارِجَ تَسَلْسُلِ الْكَلِمَاتِ الْمُعْرَبَةِ. وَتُفَرِّقُ الْحَاشِيَةُ الثَّانِيَةُ بَيْنَ الظَّنِّ فِي «يَرَوْنَهُ» وَالْيَقِينِ فِي «نَرَاهُ»، وَتُعْرِبُ الْمَفْعُولَيْنِ فِي الْمَوْضِعَيْنِ.'),
    verseMarkers:[{after:3,ayah:6},{after:5,ayah:7}]
   },
-  releaseQuran('zanna-p156-01',156,'إِنْ عَلِمْتُمُوهُنَّ مُؤْمِنَاتٍ','If you know them to be believers…',[
-   token('إِنْ','if','حَرْفُ شَرْطٍ جَازِمٌ يَجْزِمُ فِعْلَيْنِ، مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Conditional particle governing two jussives, built on sukūn with no syntactic position.'),
+  releaseQuran('zanna-p156-01',156,'فَإِنْ عَلِمْتُمُوهُنَّ مُؤْمِنَاتٍ','And if you know them to be believers…',[
+   answerParts('فَإِنْ','and if',[
+    part('الْفَاءُ حَرْفُ عَطْفٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Fāʾ is a coordinating conjunction built on fatḥ with no syntactic position.'),
+    part('«إِنْ» حَرْفُ شَرْطٍ جَازِمٌ يَجْزِمُ فِعْلَيْنِ، مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','In is a conditional particle governing two jussives, built on sukūn with no syntactic position.'),
+   ]),
    answerParts('عَلِمْتُمُوهُنَّ','you know them',[
     part('«عَلِمْ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ، فِي مَحَلِّ جَزْمٍ فِعْلُ الشَّرْطِ.','ʿAlim is a past verb built on sukūn in the jussive position as the condition verb.'),
     part('التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ. وَالْمِيمُ لِلْجَمْعِ وَالْوَاوُ لِلْإِشْبَاعِ، وَلَا مَحَلَّ لَهُمَا.','Attached tāʾ is built on ḍamm in the nominative position as subject. Mīm marks the plural and wāw lengthens the vowel; neither has a syntactic position.'),
     part('الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ أَوَّلٌ، وَالنُّونُ عَلَامَةُ جَمْعِ الْإِنَاثِ لَا مَحَلَّ لَهَا.','Hāʾ is an attached pronoun built on ḍamm in the accusative position as first direct object; nūn marks the feminine plural and has no syntactic position.')
    ]),
    token('مُؤْمِنَاتٍ','believing women','مَفْعُولٌ بِهِ ثَانٍ مَنْصُوبٌ بِالْكَسْرَةِ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ.','Second direct object, accusative with kasrah in place of fatḥah because it is a sound feminine plural.')
-  ],60,10,'الْمُمْتَحَنَةِ','The ornament opens with in, not fa-in. The fāʾ parsed in note 1 belongs to the surrounding verse, outside the printed ornament and the cards. The note identifies the condition verb and both objects. It calls the attached tāʾ fixed on sukūn; the app parses tāʾ here as built on ḍamm. The answer to the condition follows beyond the excerpt.','يَبْدَأُ إِطَارُ الِاقْتِبَاسِ بِـ«إِنْ» دُونَ الْفَاءِ. وَالْفَاءُ الَّتِي تُعْرِبُهَا الْحَاشِيَةُ الْأُولَى مِنْ سِيَاقِ الْآيَةِ خَارِجَ هَذَا الْإِطَارِ وَخَارِجَ الْبِطَاقَاتِ. وَتُعْرِبُ الْحَاشِيَةُ فِعْلَ الشَّرْطِ وَالْمَفْعُولَيْنِ، وَتَذْكُرُ أَنَّ تَاءَ الْفَاعِلِ مَبْنِيَّةٌ عَلَى السُّكُونِ، وَيُعْرِبُهَا التَّطْبِيقُ هُنَا مَبْنِيَّةً عَلَى الضَّمِّ. وَجَوَابُ الشَّرْطِ بَعْدَ الْمَقْطَعِ.'),
+  ],60,10,'الْمُمْتَحَنَةِ','The ornament begins with fa-in and ends at muʾminātin. Note 1 identifies the fāʾ as a conjunction and parses the conditional particle, verb, and both objects. It calls the attached tāʾ fixed on sukūn; the app parses tāʾ here as built on ḍamm. The answer to the condition follows beyond the excerpt.','يَبْدَأُ إِطَارُ الِاقْتِبَاسِ بِـ«فَإِنْ» وَيَنْتَهِي بِـ«مُؤْمِنَاتٍ». وَتَجْعَلُ الْحَاشِيَةُ الْأُولَى الْفَاءَ عَاطِفَةً، وَتُعْرِبُ حَرْفَ الشَّرْطِ وَفِعْلَهُ وَالْمَفْعُولَيْنِ. وَتَذْكُرُ أَنَّ تَاءَ الْفَاعِلِ مَبْنِيَّةٌ عَلَى السُّكُونِ، وَيُعْرِبُهَا التَّطْبِيقُ هُنَا مَبْنِيَّةً عَلَى الضَّمِّ. وَجَوَابُ الشَّرْطِ بَعْدَ الْمَقْطَعِ.'),
   releaseBook('zanna-p156-02',156,'زَعَمَتْنِي شَيْخًا وَلَسْتُ بِشَيْخٍ إِنَّمَا الشَّيْخُ مَنْ يَدِبُّ دَبِيبًا','She claimed I was an old man, but I am not. An old man is only one who shuffles.',[
    answerParts('زَعَمَتْنِي','she claimed that I was',[
     part('«زَعَمَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هِيَ.','Zaʿama is a past verb built on fatḥ. Its optional implicit subject is “she.”'),

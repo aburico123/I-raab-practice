@@ -594,6 +594,32 @@ const HELP_REDESIGN_BY_CHAPTER = {
       { id: 'verbs-of-proximity-an-rule', titleAr: 'وُجُوبُ «أَنْ» أَوْ مَنْعُهَا', titleEn: 'Where an is required or forbidden', group: 'conditions', defaultOpen: false },
       { id: 'verbs-of-proximity-usual-patterns', titleAr: 'الْأَكْثَرُ فِي بَقِيَّةِ الْأَفْعَالِ', titleEn: 'Usual patterns with the other verbs', group: 'forms', defaultOpen: false }
     ]
+  },
+
+  'inna-sisters': {
+    essentials: {
+      coreRuleAr: 'تَنْصِبُ «إِنَّ وَأَخَوَاتُهَا» الِاسْمَ، وَتَرْفَعُ الْخَبَرَ.',
+      coreRuleEn: 'Inna and its sisters make the ism accusative and raise the khabar.',
+      definitionAr: 'هِيَ سِتَّةُ أَحْرُفٍ تَدْخُلُ عَلَى الْجُمْلَةِ الِاسْمِيَّةِ: «إِنَّ، أَنَّ، كَأَنَّ، لَكِنَّ، لَيْتَ، لَعَلَّ».',
+      definitionEn: 'Six particles enter a nominal sentence: inna, anna, kaʾanna, lakinna, layta, and laʿalla.',
+      effectAr: 'يَصِيرُ الْمُبْتَدَأُ اسْمًا مَنْصُوبًا لِلْحَرْفِ، وَيَصِيرُ الْخَبَرُ خَبَرًا مَرْفُوعًا لَهُ.',
+      effectEn: 'The former mubtadaʾ becomes the particle’s accusative ism, and the former khabar becomes its nominative khabar.',
+      recognitionAr: 'حَدِّدِ الْحَرْفَ وَمَعْنَاهُ، ثُمَّ عَيِّنِ الِاسْمَ الْمَنْصُوبَ وَالْخَبَرَ الْمَرْفُوعَ. وَعِنْدَ «إِنَّ/أَنَّ» تَحَقَّقْ مِنْ مَوْضِعِ الْجُمْلَةِ لِتَعْرِفَ حَرَكَةَ الْهَمْزَةِ.',
+      recognitionEn: 'Identify the particle and its meaning, then locate its accusative ism and nominative khabar. With inna/anna, inspect the clause’s position to determine the hamzah vowel.',
+      exampleId: 'inna-01',
+      cautionsAr: 'يَقِفُ هَذَا الدَّرْسُ عِنْدَ آخِرِ الْحُكْمِ الْمَطْبُوعِ فِي نِطَاقِهِ. وَفِي شَاهِدَيِ الطَّارِقِ ٤ وَهُودٍ ١١١ حُفِظَ وَجْهُ الْقِرَاءَةِ الَّذِي يَشْرَحُهُ الْمَصْدَرُ.',
+      cautionsEn: 'This lesson stops at the final rule printed within its range. The Q86:4 and Q11:111 cards preserve the transmitted readings explained by the source.'
+    },
+    sections: [
+      { id: 'inna-sisters-core', titleAr: 'الْحُرُوفُ السِّتَّةُ وَعَمَلُهَا', titleEn: 'The six particles and their operation', group: 'definition', defaultOpen: true },
+      { id: 'inna-sisters-order', titleAr: 'تَرْتِيبُ الِاسْمِ وَالْخَبَرِ', titleEn: 'Ordering the ism and khabar', group: 'order', defaultOpen: true },
+      { id: 'inna-sisters-kasr', titleAr: 'مَوَاضِعُ كَسْرِ هَمْزَةِ «إِنَّ»', titleEn: 'Where the hamzah of inna takes kasrah', group: 'conditions', defaultOpen: false },
+      { id: 'inna-sisters-fath', titleAr: 'مَوَاضِعُ فَتْحِ هَمْزَةِ «أَنَّ»', titleEn: 'Where the hamzah of anna takes fatḥah', group: 'conditions', defaultOpen: false },
+      { id: 'inna-sisters-both', titleAr: 'مَوَاضِعُ جَوَازِ الْوَجْهَيْنِ', titleEn: 'Where both vowels are allowed', group: 'conditions', defaultOpen: false },
+      { id: 'inna-sisters-lam', titleAr: 'مَوَاضِعُ لَامِ الِابْتِدَاءِ', titleEn: 'Placements of the shifted lām', group: 'forms', defaultOpen: false },
+      { id: 'inna-sisters-ma', titleAr: '«مَا» الزَّائِدَةُ وَكَفُّ الْعَمَلِ', titleEn: 'Extra mā and blocked operation', group: 'forms', defaultOpen: false },
+      { id: 'inna-sisters-reduction', titleAr: 'تَخْفِيفُ «إِنَّ» وَ«أَنَّ» وَ«كَأَنَّ»', titleEn: 'Reducing inna, anna, and kaʾanna', group: 'caution', defaultOpen: false }
+    ]
   }
 };
 

@@ -646,6 +646,30 @@ const HELP_REDESIGN_BY_CHAPTER = {
       { id: 'la-jins-idle', titleAr: 'إِهْمَالُ «لَا»', titleEn: 'When lā does not govern', group: 'caution', defaultOpen: false }
     ]
   }
+  ,'zanna-sisters': {
+    essentials: {
+      coreRuleAr: 'تَنْصِبُ «ظَنَّ وَأَخَوَاتُهَا» جُزْأَيِ الْجُمْلَةِ الِاسْمِيَّةِ مَفْعُولَيْنِ فِي الْمَعَانِي الْمَذْكُورَةِ.',
+      coreRuleEn: 'In the senses taught here, ẓanna and its sisters take a mubtadaʾ and khabar as two accusative objects.',
+      definitionAr: 'قِسْمَانِ: أَفْعَالُ الْقُلُوبِ وَأَفْعَالُ التَّصْيِيرِ.',
+      definitionEn: 'The lesson distinguishes heart verbs from transformation verbs.',
+      effectAr: 'يَصِيرُ الْمُبْتَدَأُ مَفْعُولًا أَوَّلَ، وَالْخَبَرُ مَفْعُولًا ثَانِيًا.',
+      effectEn: 'The former mubtadaʾ becomes the first object, and the former khabar the second.',
+      recognitionAr: 'حَدِّدْ مَعْنَى الْفِعْلِ أَوَّلًا، ثُمَّ انْظُرْ: أَعَمِلَ فِي الْجُزْأَيْنِ، أَمْ أُلْغِيَ، أَمْ عُلِّقَ؟',
+      recognitionEn: 'Identify the verb’s meaning first. Then decide whether it operates on both parts, is cancelled, or is suspended.',
+      cautionsAr: 'لَا تَحْكُمْ بِعَدَدِ الْمَفْعُولَاتِ مِنْ لَفْظِ الْفِعْلِ وَحْدَهُ؛ فَقَدْ يَتَغَيَّرُ مَعْنَاهُ، أَوْ يَدُلُّ السِّيَاقُ عَلَى مَحْذُوفٍ.',
+      cautionsEn: 'Do not count objects from the verb alone. Its meaning may change, or context may supply an omitted object.',
+      exampleId: 'zanna-p154-01'
+    },
+    sections: [
+      {id:'zanna-sisters-two-objects',titleAr:'الْعَمَلُ فِي الْمَفْعُولَيْنِ',titleEn:'How the two objects work',group:'definition',defaultOpen:true},
+      {id:'zanna-sisters-heart-verb-senses',titleAr:'أَفْعَالُ الْقُلُوبِ وَمَعَانِيهَا',titleEn:'Heart verbs and their meanings',group:'forms',defaultOpen:true},
+      {id:'zanna-sisters-transformation',titleAr:'أَفْعَالُ التَّصْيِيرِ',titleEn:'Transformation verbs',group:'forms',defaultOpen:false},
+      {id:'zanna-sisters-operation-cancellation',titleAr:'الْإِعْمَالُ وَالْإِلْغَاءُ',titleEn:'Operation and cancellation',group:'order',defaultOpen:false},
+      {id:'zanna-sisters-suspension',titleAr:'التَّعْلِيقُ وَأَدَوَاتُهُ',titleEn:'Suspension and its triggers',group:'conditions',defaultOpen:false},
+      {id:'zanna-sisters-fixed-and-omitted',titleAr:'الْأَفْعَالُ الْجَامِدَةُ وَحَذْفُ الْمَفْعُولِ',titleEn:'Fixed verbs and omitted objects',group:'conditions',defaultOpen:false},
+      {id:'zanna-sisters-samia',titleAr:'وَجْهَا إِعْرَابِ «سَمِعَ»',titleEn:'Two analyses of samiʿa',group:'caution',defaultOpen:false}
+    ]
+  }
 };
 
 if (typeof module !== 'undefined' && module.exports) {

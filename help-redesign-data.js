@@ -563,8 +563,8 @@ const HELP_REDESIGN_BY_CHAPTER = {
       recognitionAr: 'عَيِّنْ حَرْفَ النَّفْيِ، ثُمَّ اخْتَبِرِ الشُّرُوطَ، ثُمَّ ابْحَثْ عَنِ الِاسْمِ الْمَرْفُوعِ وَالْخَبَرِ الْمَنْصُوبِ.',
       recognitionEn: 'Identify the negative particle, test its conditions, then locate the nominative ism and accusative khabar.',
       exampleId: 'laysa-like-01',
-      cautionsAr: '«لَاتَ» خَاصَّةٌ بِأَلْفَاظِ الزَّمَانِ مَعَ حَذْفِ أَحَدِ الْجُزْأَيْنِ. وَشَاهِدُ ص ١٣١ بِرَفْعِ «حِينُ» مَحْجُوبٌ حَتَّى تُحَرَّرَ نِسْبَةُ قِرَاءَتِهِ.',
-      cautionsEn: 'Lāta is restricted to time expressions with one of the two parts omitted. The page-131 witness with nominative ḥīnu is held until its reading attribution is reconciled.'
+      cautionsAr: '«لَاتَ» خَاصَّةٌ بِأَلْفَاظِ الزَّمَانِ مَعَ حَذْفِ أَحَدِ الْجُزْأَيْنِ، وَالْغَالِبُ حَذْفُ الِاسْمِ، كَمَا فِي «وَلَاتَ حِينَ مَنَاصٍ».',
+      cautionsEn: 'Lāta is restricted to time expressions with one of the two parts omitted; usually the ism is omitted, as in wa-lāta ḥīna manāṣin.'
     },
     sections: [
       { id: 'laysa-like-particles-overview', titleAr: 'الْحُرُوفُ الْأَرْبَعَةُ وَعَمَلُهَا', titleEn: 'The four particles and their operation', group: 'overview', defaultOpen: true },

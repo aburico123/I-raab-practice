@@ -746,13 +746,28 @@ function restorePracticeState() {
  state.helpLaunch = null;
  const reopenJumpList=!!snapshot&&(viewport?.open===true||jumpListReturnOpen);
  jumpListReturnOpen=false;
- setScreen('practice', {target:()=>$(priorPilot?'chapterEssentialsBtn':snapshot?.openerId || 'nahwMenuLink'),scrollBlock:'nearest'});
+ setScreen('practice', {target:()=>priorPilot?null:$(snapshot?.openerId || 'nahwMenuLink'),scrollBlock:'nearest'});
  if(reopenJumpList&&jumpListAvailable){
   setExampleJumpOpen(true);
   renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
   if(Number.isFinite(viewport?.list))$('exampleJumpItems').scrollTop=viewport.list;
  }
  if(Number.isFinite(viewport?.x)&&Number.isFinite(viewport?.y))window.scrollTo(viewport.x,viewport.y);
+ if(priorPilot){
+  const controls=$('practiceScreen').querySelectorAll('#revealBtn, #previousBtn, #nextBtn, .why-cue summary, .why-toggle, #exampleJumpToggle, #exampleJumpItems button, #chapterEssentialsBtn');
+  const onscreen=control=>{
+   if(control.disabled||!control.getClientRects().length)return false;
+   const {left,right,top,bottom}=control.getBoundingClientRect();
+   if(left<0||right>innerWidth||top<0||bottom>innerHeight)return false;
+   return control.contains(document.elementFromPoint((left+right)/2,(top+bottom)/2));
+  };
+  const nearby=[$('revealBtn'),...controls].find(onscreen);
+  if(!focusVisible(nearby)){
+   const fallback=$('revealBtn').getClientRects().length?$('revealBtn'):$('chapterEssentialsBtn');
+   fallback.scrollIntoView({block:'center',inline:'nearest'});
+   focusVisible(fallback);
+  }
+ }
 }
 function openHelp(){if(state.resumeAvailable)state.helpReturn=capturePracticeState();state.category='help';state.helpLaunch=null;if(state.resumeAvailable){state.helpBabId=state.selectedBabId;state.helpChapterId=state.selectedChapterId}setScreen('help')}
 function openChapterEssentials() {

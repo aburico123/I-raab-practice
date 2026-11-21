@@ -181,6 +181,15 @@ button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{
 .focus-separator{font-weight:400;color:var(--muted)}
 .iraab-en{border-top:1px solid #e9ece4;padding:12px 16px;color:#515c57;line-height:1.6}
 .answer-part+.answer-part{border-top:1px solid var(--line)}
+.why-cue{margin:0 14px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.why-cue summary{padding:7px 11px;cursor:pointer;color:var(--heading);font-size:.875rem;font-weight:600;line-height:1.45}
+.why-cue summary[lang="ar"]{font-size:1.16rem;line-height:1.65}
+.why-cue-body{padding:9px 11px 11px;border-top:1px solid var(--line)}
+.why-cue:not([open])>.why-cue-body{display:none}
+.why-cue-body p{margin:0;overflow-wrap:anywhere}
+.why-cue-body p[lang="ar"]{font-size:1.22rem;line-height:1.9}
+.why-cue-body p[lang="en"]{margin-top:5px;font-size:.9375rem;line-height:1.55}
+.why-cue-credit{display:block;margin-top:6px;color:var(--muted);font-size:.75rem}
 .why-toggle{border:0;background:transparent;color:#2f6350;font-weight:500;padding:0 16px 13px}
 .why-text{display:none;margin:0 16px 15px;padding:11px 13px;background:#faf6ed;border-inline-start:3px solid var(--gold);color:#4c5752;line-height:1.65}
 .why-text.open{display:block}
@@ -596,6 +605,7 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
 </div>
 <script src="help-redesign-data.js?v=finish-book-282-301"></script>
 <script src="lesson-data.js?v=finish-book-282-301"></script>
+<script src="why-parse-pilot.js"></script>
 <script>
 (function(){
 'use strict';
@@ -726,17 +736,37 @@ function capturePracticeState(openerId = '') {
 }
 function restorePracticeState() {
  const snapshot = state.helpReturn;
+ // A learner may still have linked Help open from the previous local pilot.
+ const priorPilot = snapshot?.openerId === 'pilotRuleButton';
+ const viewport = priorPilot && snapshot.pilotViewport;
  if (snapshot) {
   const {selectedBabId, selectedChapterId, positions, mode, category, bookFilter, generatedIndex, revealed} = snapshot;
   Object.assign(state, {selectedBabId, selectedChapterId, positions:{...state.positions,...positions}, mode, category, bookFilter, generatedIndex, revealed:!!revealed, helpReturn:null});
  }
  state.helpLaunch = null;
- const reopenJumpList=!!snapshot&&jumpListReturnOpen;
+ const reopenJumpList=!!snapshot&&(viewport?.open===true||jumpListReturnOpen);
  jumpListReturnOpen=false;
- setScreen('practice', {target:()=>$(snapshot?.openerId || 'nahwMenuLink'),scrollBlock:'nearest'});
+ setScreen('practice', {target:()=>priorPilot?null:$(snapshot?.openerId || 'nahwMenuLink'),scrollBlock:'nearest'});
  if(reopenJumpList&&jumpListAvailable){
   setExampleJumpOpen(true);
   renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
+  if(Number.isFinite(viewport?.list))$('exampleJumpItems').scrollTop=viewport.list;
+ }
+ if(Number.isFinite(viewport?.x)&&Number.isFinite(viewport?.y))window.scrollTo(viewport.x,viewport.y);
+ if(priorPilot){
+  const controls=$('practiceScreen').querySelectorAll('#revealBtn, #previousBtn, #nextBtn, .why-cue summary, .why-toggle, #exampleJumpToggle, #exampleJumpItems button, #chapterEssentialsBtn');
+  const onscreen=control=>{
+   if(control.disabled||!control.getClientRects().length)return false;
+   const {left,right,top,bottom}=control.getBoundingClientRect();
+   if(left<0||right>innerWidth||top<0||bottom>innerHeight)return false;
+   return control.contains(document.elementFromPoint((left+right)/2,(top+bottom)/2));
+  };
+  const nearby=[$('revealBtn'),...controls].find(onscreen);
+  if(!focusVisible(nearby)){
+   const fallback=$('revealBtn').getClientRects().length?$('revealBtn'):$('chapterEssentialsBtn');
+   fallback.scrollIntoView({block:'center',inline:'nearest'});
+   focusVisible(fallback);
+  }
  }
 }
 function openHelp(){if(state.resumeAvailable)state.helpReturn=capturePracticeState();state.category='help';state.helpLaunch=null;if(state.resumeAvailable){state.helpBabId=state.selectedBabId;state.helpChapterId=state.selectedChapterId}setScreen('help')}
@@ -922,7 +952,15 @@ function returnToHelp() {
   scrollBlock:'center'
  });
 }
-function renderAnswer(exercise){const arabic=state.lang==='ar',words=quotedWords(exercise);$('answers').innerHTML=exercise.tokens.map((token,index)=>{const why=arabic?token.whyAr:token.whyEn,parts=token.parts||[{ar:token.ar,en:token.en}],answer=parts.map(part=>`<div class="answer-part"><div class="iraab-ar arabic" lang="ar">${emphasizeIraab(part.ar,token.word)}</div>${arabic?'':`<div class="iraab-en">${escapeHtml(part.en)}</div>`}</div>`).join('');return `<article class="word-card"><div class="word-head"><span class="word-gloss">${arabic?'':escapeHtml(token.gloss)}</span><span class="word-ar arabic" lang="ar">${escapeHtml(token.word)}</span></div>${answer}${why?`<button class="why-toggle" data-why="${index}" aria-expanded="false">${tr('why')}</button><div class="why-text ${arabic?'why-ar arabic':''}" id="why-${index}">${arabic?arabicDisplay(token.whyAr,{words}):escapeHtml(token.whyEn)}</div>`:''}</article>`}).join('');$('sourceDetail').textContent=arabic?arabicDisplay(exercise.sourceAr,{words}):exercise.sourceEn}
+function renderWhyCue(exercise,card,part){
+ if(!state.revealed||state.mode!=='book'||exercise.held)return '';
+ const pilot=window.MIFTAH_WHY_PILOT;
+ const cue=pilot?.notes[exercise.id]?.find(n=>n.card===card&&n.part===part);
+ if(!cue)return '';
+ const arabicOnly=state.lang==='ar',lang=arabicOnly?'ar':'en',[ar,en]=pilot.questions[cue.question];
+ return `<details class="why-cue" data-why-cue="${card}:${part}"><summary lang="${lang}"${arabicOnly?' class="arabic" dir="rtl"':''}>${escapeHtml(arabicOnly?ar:en)}</summary><div class="why-cue-body"><p class="arabic" lang="ar" dir="rtl">${escapeHtml(cue.ar)}</p>${arabicOnly?'':`<p lang="en" dir="ltr">${escapeHtml(cue.en)}</p>`}<small class="why-cue-credit${arabicOnly?' arabic':''}" lang="${lang}">${arabicOnly?'شَرْحٌ مِنَ التَّطْبِيقِ':'Explanation by Miftāḥ al-ʿIlm'}</small></div></details>`;
+}
+function renderAnswer(exercise){const arabic=state.lang==='ar',words=quotedWords(exercise);$('answers').innerHTML=exercise.tokens.map((token,index)=>{const why=arabic?token.whyAr:token.whyEn,parts=token.parts||[{ar:token.ar,en:token.en}],answer=parts.map((part,partIndex)=>`<div class="answer-part"><div class="iraab-ar arabic" lang="ar">${emphasizeIraab(part.ar,token.word)}</div>${arabic?'':`<div class="iraab-en">${escapeHtml(part.en)}</div>`}${renderWhyCue(exercise,index+1,partIndex+1)}</div>`).join('');return `<article class="word-card"><div class="word-head"><span class="word-gloss">${arabic?'':escapeHtml(token.gloss)}</span><span class="word-ar arabic" lang="ar">${escapeHtml(token.word)}</span></div>${answer}${why?`<button class="why-toggle" data-why="${index}" aria-expanded="false">${tr('why')}</button><div class="why-text ${arabic?'why-ar arabic':''}" id="why-${index}">${arabic?arabicDisplay(token.whyAr,{words}):escapeHtml(token.whyEn)}</div>`:''}</article>`}).join('');$('sourceDetail').textContent=arabic?arabicDisplay(exercise.sourceAr,{words}):exercise.sourceEn}
 function renderPractice(){const chapter=selectedChapter(),arabic=state.lang==='ar',list=state.mode==='book'?bookExercises(chapter):null,exercise=currentExercise(),index=currentIndex(),total=list?.length??null,empty=state.mode==='book'&&!exercise;$('filterEmpty').hidden=!empty;$('practiceCard').hidden=empty;if(empty){state.revealed=false;$('chapterMeta').textContent=`${tr('item')} 0 ${tr('of')} 0`;$('answerPanel').classList.remove('open');$('revealBtn').setAttribute('aria-expanded','false');return}$('sentence').innerHTML=exerciseArabicHtml(exercise);$('translation').textContent=exercise.en;$('translation').style.display=arabic?'none':'block';$('bookPage').textContent=state.mode==='book'?(arabic?`ص ${localDigits(exercise.page)}`:`pg:${exercise.page}`):'';$('bookPage').style.display=state.mode==='book'?'block':'none';$('answerPanel').classList.toggle('open',state.revealed);$('revealBtn').setAttribute('aria-expanded',String(state.revealed));$('previousBtn').textContent=tr('previous');$('revealBtn').textContent=state.revealed?tr('hide'):tr('reveal');$('nextBtn').textContent=tr('next');$('previousBtn').disabled=index===0;$('nextBtn').disabled=state.mode==='book'&&index===total-1;$('chapterMeta').textContent=state.mode==='extra'?tr('generated'):`${tr('item')} ${localDigits(index+1)} ${tr('of')} ${localDigits(total)}`;renderAnswer(exercise)}
 const helpText=value=>escapeHtml(value).replace(/\n/g,'<br>');
 function helpHeadingHtml(key){return `<span class="help-heading-ar arabic" lang="ar">${escapeHtml(copy.ar[key]||key)}</span>${state.lang==='ar'?'':`<span class="help-heading-en">${escapeHtml(copy.en[key]||key)}</span>`}`}

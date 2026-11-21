@@ -170,26 +170,6 @@ button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{
 /* Revealed iʿrāb */
 .answer-panel{display:none;border-top:1px solid var(--line);margin-top:34px;padding-top:30px}
 .answer-panel.open{display:block}
-.pilot-rule-actions{margin:12px auto 0;text-align:center}
-.pilot-rule-link{min-height:36px;padding:5px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--heading);font-size:.875rem;font-weight:600}
-.pilot-rule-link:hover{background:var(--sage-fill)}
-.pilot-rule-link[lang="ar"]{font-size:1.125rem;line-height:1.35}
-.pilot-structure{padding:12px clamp(10px,2vw,18px);margin:0 0 16px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
-.pilot-structure h3{margin:0 0 8px;font-size:1rem;color:var(--heading)}
-.pilot-structure h3 .arabic{font-size:1.3rem;font-weight:700}
-.pilot-structure .pilot-en{display:block;font-size:.875rem;line-height:1.4;direction:ltr;text-align:left;color:var(--ink)}
-.pilot-lane{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
-.pilot-lane+.pilot-lane{margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
-.pilot-piece{min-width:0;max-width:100%;flex:1 1 8rem;padding:6px 9px;border:1px solid var(--line);border-inline-start:3px solid var(--sage-line);border-radius:8px;background:var(--card);overflow-wrap:anywhere}
-.pilot-piece[data-outside="true"]{border-style:dashed;background:transparent}
-.pilot-piece .pilot-words{font-size:1.42rem;line-height:1.65;color:var(--heading)}
-.pilot-piece .pilot-label{font-size:1.08rem;line-height:1.65}
-.pilot-annotation{margin:8px 0 0;padding-top:6px;border-top:1px solid var(--line);font-size:.875rem}
-.pilot-annotation .arabic{font-size:1.06rem;line-height:1.65}
-.pilot-inline-return{margin:0 0 10px}
-.help-disclosure[data-pilot-target]{scroll-margin-top:92px}
-[lang="ar"] .pilot-structure h3{text-align:right}
-@media(max-width:500px){.pilot-piece{flex-basis:8.5rem}.pilot-rule-actions{margin-top:8px}}
 .answer-title{text-align:center;color:var(--heading);font-family:var(--serif);font-weight:400;font-size:26px;margin:0 0 16px}
 .answers{display:grid;gap:12px;max-width:820px;margin:0 auto}
 .word-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
@@ -201,6 +181,15 @@ button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{
 .focus-separator{font-weight:400;color:var(--muted)}
 .iraab-en{border-top:1px solid #e9ece4;padding:12px 16px;color:#515c57;line-height:1.6}
 .answer-part+.answer-part{border-top:1px solid var(--line)}
+.why-cue{margin:0 14px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.why-cue summary{padding:7px 11px;cursor:pointer;color:var(--heading);font-size:.875rem;font-weight:600;line-height:1.45}
+.why-cue summary[lang="ar"]{font-size:1.16rem;line-height:1.65}
+.why-cue-body{padding:9px 11px 11px;border-top:1px solid var(--line)}
+.why-cue:not([open])>.why-cue-body{display:none}
+.why-cue-body p{margin:0;overflow-wrap:anywhere}
+.why-cue-body p[lang="ar"]{font-size:1.22rem;line-height:1.9}
+.why-cue-body p[lang="en"]{margin-top:5px;font-size:.9375rem;line-height:1.55}
+.why-cue-credit{display:block;margin-top:6px;color:var(--muted);font-size:.75rem}
 .why-toggle{border:0;background:transparent;color:#2f6350;font-weight:500;padding:0 16px 13px}
 .why-text{display:none;margin:0 16px 15px;padding:11px 13px;background:#faf6ed;border-inline-start:3px solid var(--gold);color:#4c5752;line-height:1.65}
 .why-text.open{display:block}
@@ -606,7 +595,7 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
           <div class="example-jump-panel" id="exampleJumpPanel" role="region" aria-labelledby="exampleJumpToggle" hidden><ol class="example-jump-items" id="exampleJumpItems" role="list"></ol></div>
         </div>
         <div class="filter-empty" id="filterEmpty" hidden><p data-i18n="noQuranExamples">This chapter has no Qurʾānic examples.</p><button class="secondary" id="showAllExamples" data-i18n="showAllExamples">Show all examples</button></div>
-        <article class="practice-card" id="practiceCard"><div class="book-page" id="bookPage"></div><div class="sentence arabic" id="sentence" lang="ar" tabindex="-1"></div><div class="translation" id="translation"></div><div class="pilot-rule-actions" id="pilotRuleActions" hidden><button class="pilot-rule-link" type="button" id="pilotRuleButton"></button></div><div class="practice-actions"><button class="secondary" id="previousBtn" data-i18n="previous">Previous</button><button class="primary" id="revealBtn" aria-controls="answerPanel" aria-expanded="false" data-i18n="reveal">Reveal iʿrāb</button><button class="secondary" id="nextBtn" data-i18n="next">Next</button></div><section class="answer-panel" id="answerPanel" aria-live="polite"><h2 class="answer-title" data-i18n="fullIraab">Full iʿrāb</h2><section class="pilot-structure" id="pilotStructure" aria-labelledby="pilotStructureTitle" hidden></section><div class="answers" id="answers"></div><div class="source-detail" id="sourceDetail"></div></section></article>
+        <article class="practice-card" id="practiceCard"><div class="book-page" id="bookPage"></div><div class="sentence arabic" id="sentence" lang="ar" tabindex="-1"></div><div class="translation" id="translation"></div><div class="practice-actions"><button class="secondary" id="previousBtn" data-i18n="previous">Previous</button><button class="primary" id="revealBtn" aria-controls="answerPanel" aria-expanded="false" data-i18n="reveal">Reveal iʿrāb</button><button class="secondary" id="nextBtn" data-i18n="next">Next</button></div><section class="answer-panel" id="answerPanel" aria-live="polite"><h2 class="answer-title" data-i18n="fullIraab">Full iʿrāb</h2><div class="answers" id="answers"></div><div class="source-detail" id="sourceDetail"></div></section></article>
         </div>
       </section>
       <section class="screen" id="helpScreen"><div class="screen-backbar"><button class="back-link" id="helpNahwLink" data-i18n="backNahw">Back to Nahw options</button></div><h1 class="screen-heading" data-i18n="chapterHelp">Chapter Help</h1><p class="screen-sub arabic" id="helpChapterName" dir="rtl" lang="ar"></p><div class="help-picker picker-grid"><label class="picker-field"><span data-i18n="babLabel">Bāb / section</span><select class="chapter-select" id="helpBabSelect" aria-label="Help bāb or section" data-a11y="helpBab" dir="rtl" lang="ar"></select></label><label class="picker-field"><span data-i18n="chapterLabel">Chapter within it</span><select class="chapter-select" id="helpChapterSelect" aria-label="Help chapter within bāb" data-a11y="helpChapter" dir="rtl" lang="ar"></select></label></div><article class="help-card"><section class="help-core help-region" id="helpCore" tabindex="-1"></section><nav class="help-jump-nav" id="helpJumpNav" aria-label="Help navigation"></nav><section class="help-region" id="helpEssentials"></section><section class="help-full help-region" id="helpFull" tabindex="-1"><h2 class="help-region-heading" id="helpFullTitle"></h2><div id="helpSections"></div></section><section class="help-visual-region help-region" id="helpVisualSection" tabindex="-1"><h2 class="help-region-heading" id="helpVisualTitle"></h2><div class="help-visual" id="helpVisual"></div></section><section class="help-source-region help-region" id="helpSourceSection" tabindex="-1"><h2 class="help-region-heading" id="helpSourceTitle"></h2><div class="source-detail" id="helpSource"></div></section><nav class="help-chapter-nav" aria-label="Adjacent chapters" data-a11y="adjacentChapters"><button class="secondary" id="helpPreviousChapter" type="button"></button><button class="secondary" id="helpNextChapter" type="button"></button></nav><div class="help-actions"><button class="primary" id="returnPractice" data-i18n="returnPractice">Return to practice</button><button class="secondary" id="returnNahw" data-i18n="returnNahw">Back to Nahw</button></div></article></section>
@@ -616,7 +605,7 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
 </div>
 <script src="help-redesign-data.js?v=finish-book-282-301"></script>
 <script src="lesson-data.js?v=finish-book-282-301"></script>
-<script src="structure-rule-pilot.js"></script>
+<script src="why-parse-pilot.js"></script>
 <script>
 (function(){
 'use strict';
@@ -741,88 +730,29 @@ function setScreen(screen, {target, scrollBlock} = {}) {
  focusVisible(heading);
 }
 function startPractice(mode){state.mode=mode;state.category=mode;state.helpLaunch=null;if(mode==='extra'){state.selectedBabId='opening';state.selectedChapterId='speech-core'}state.revealed=false;state.resumeAvailable=true;setScreen('practice')}
-const pilotData=window.MIFTAH_STRUCTURE_PILOT;
-let pilotReturn=null;
-const pilotCurrent=exercise=>state.mode==='book'&&exercise&&!exercise.held?pilotData.mapping[exercise.id]:null;
-const pilotLabels={ar:{action:'اعرض القاعدة',back:'العودة إلى التدريب',structure:'تَرْكِيبُ الْجُمْلَةِ',outside:'خَارِجَ اللَّفْظِ الْمَعْرُوضِ'},en:{action:'Show the rule',back:'Return to practice',structure:'Sentence structure',outside:'Outside the displayed words'}};
-function pilotReturnMarkup(){
- return `<button type="button" class="pilot-rule-link pilot-inline-return${state.lang==='ar'?' arabic':''}" lang="${state.lang}" data-pilot-return>${pilotLabels[state.lang].back}</button>`;
-}
-function renderPilot(exercise){
- const mapped=pilotCurrent(exercise),button=$('pilotRuleButton'),area=$('pilotStructure');
- $('pilotRuleActions').hidden=!mapped;
- button.textContent=pilotLabels[state.lang].action;
- button.lang=state.lang;button.classList.toggle('arabic',state.lang==='ar');
- area.hidden=!(mapped&&state.revealed);
- area.replaceChildren();
- if(area.hidden)return;
- const bilingual=state.lang==='en',en=value=>bilingual?`<span class="pilot-en" lang="en">${escapeHtml(value)}</span>`:'';
- const labels=pilotLabels;
- const title=`<h3 id="pilotStructureTitle"><span dir="rtl" lang="ar" class="arabic">${labels.ar.structure}</span>${en(labels.en.structure)}</h3>`;
- const lanes=mapped.lanes.map(lane=>`<ul class="pilot-lane" dir="rtl" role="list">${lane.map(({role,start,end})=>{
-  const [ar,label]=pilotData.roles[role];
-  const words=start?exercise.tokens.slice(start-1,end).map(t=>t.word).join(' '):null;
-  return `<li class="pilot-piece" data-role="${role}" data-start="${start}" data-end="${end}" data-outside="${!start}">${words?`<div class="pilot-words arabic" lang="ar">${escapeHtml(words)}</div>`:''}<div class="pilot-label arabic" lang="ar">${escapeHtml(ar)}</div>${en(label)}${!start?`<small lang="${state.lang}" class="${bilingual?'pilot-en':'arabic'}">${labels[state.lang].outside}</small>`:''}</li>`;
- }).join('')}</ul>`).join('');
- const note=mapped.note?`<div class="pilot-annotation"><div class="arabic" lang="ar" dir="rtl">${escapeHtml(mapped.note[0])}</div>${en(mapped.note[1])}</div>`:'';
- area.innerHTML=title+lanes+note;
-}
-function openPilotRule(){
- const exercise=currentExercise(),mapped=pilotCurrent(exercise),chapter=selectedChapter();
- if(!mapped)return;
- const ruleId=chapter.id+'-'+mapped.rule;
- if(!chapter.help.some(s=>s.id===ruleId))return;
- const prior={parent:pilotReturn,helpReturn:state.helpReturn,launch:state.helpLaunch,jumpOpen:jumpListReturnOpen};
- const viewport={x:window.scrollX,y:window.scrollY,list:$('exampleJumpItems').scrollTop};
- const snapshot=capturePracticeState('pilotRuleButton');
- snapshot.ruleId=ruleId;
- snapshot.pilotViewport={...viewport,open:jumpListReturnOpen};
- pilotReturn={snapshot,prior};
- state.helpReturn=snapshot;
- state.helpBabId=state.selectedBabId;state.helpChapterId=chapter.id;
- state.category='help';state.helpLaunch=null;
- setScreen('help',{target:()=>{
-  const target=$('help-section-'+ruleId);
-  if(!target)return $('helpCore');
-  target.dataset.pilotTarget='';target.open=true;
-  rememberHelpDisclosures();save();
-  return target.querySelector('summary');
- }});
- const disclosure=$('help-section-'+ruleId);
- if(disclosure)disclosure.scrollIntoView({block:'start',inline:'nearest'});
-}
 function capturePracticeState(openerId = '') {
  jumpListReturnOpen=state.screen==='practice'&&jumpListAvailable&&!$('exampleJumpPanel').hidden;
  return {selectedBabId:state.selectedBabId, selectedChapterId:state.selectedChapterId, positions:{...state.positions}, mode:state.mode, category:state.mode, bookFilter:state.bookFilter, generatedIndex:state.generatedIndex, revealed:state.revealed, openerId};
 }
 function restorePracticeState() {
  const snapshot = state.helpReturn;
- const pilot=snapshot&&pilotReturn?.snapshot===snapshot?pilotReturn:null;
- const storedViewport=snapshot?.openerId==='pilotRuleButton'?snapshot.pilotViewport:null;
- const viewport=storedViewport&&typeof storedViewport.open==='boolean'&&
-  [storedViewport.x,storedViewport.y,storedViewport.list].every(n=>Number.isFinite(n)&&n>=0)?storedViewport:null;
+ // A learner may still have linked Help open from the previous local pilot.
+ const priorPilot = snapshot?.openerId === 'pilotRuleButton';
+ const viewport = priorPilot && snapshot.pilotViewport;
  if (snapshot) {
   const {selectedBabId, selectedChapterId, positions, mode, category, bookFilter, generatedIndex, revealed} = snapshot;
   Object.assign(state, {selectedBabId, selectedChapterId, positions:{...state.positions,...positions}, mode, category, bookFilter, generatedIndex, revealed:!!revealed, helpReturn:null});
  }
- state.helpLaunch = pilot?.prior.launch || null;
- const reopenJumpList=!!snapshot&&(viewport?.open??jumpListReturnOpen);
+ state.helpLaunch = null;
+ const reopenJumpList=!!snapshot&&(viewport?.open===true||jumpListReturnOpen);
  jumpListReturnOpen=false;
- setScreen('practice', {target:()=>$(snapshot?.openerId || 'nahwMenuLink'),scrollBlock:'nearest'});
+ setScreen('practice', {target:()=>$(priorPilot?'chapterEssentialsBtn':snapshot?.openerId || 'nahwMenuLink'),scrollBlock:'nearest'});
  if(reopenJumpList&&jumpListAvailable){
   setExampleJumpOpen(true);
   renderExampleJump(selectedChapter(),bookExercises(),currentExercise());
+  if(Number.isFinite(viewport?.list))$('exampleJumpItems').scrollTop=viewport.list;
  }
- if(pilot){
-  pilotReturn=pilot.prior.parent;
-  state.helpReturn=pilot.prior.helpReturn;
-  jumpListReturnOpen=pilot.prior.jumpOpen;
-  save();
- }
- if(viewport){
-  $('exampleJumpItems').scrollTop=viewport.list;
-  window.scrollTo(viewport.x,viewport.y);
- }
+ if(Number.isFinite(viewport?.x)&&Number.isFinite(viewport?.y))window.scrollTo(viewport.x,viewport.y);
 }
 function openHelp(){if(state.resumeAvailable)state.helpReturn=capturePracticeState();state.category='help';state.helpLaunch=null;if(state.resumeAvailable){state.helpBabId=state.selectedBabId;state.helpChapterId=state.selectedChapterId}setScreen('help')}
 function openChapterEssentials() {
@@ -1007,7 +937,15 @@ function returnToHelp() {
   scrollBlock:'center'
  });
 }
-function renderAnswer(exercise){const arabic=state.lang==='ar',words=quotedWords(exercise);$('answers').innerHTML=exercise.tokens.map((token,index)=>{const why=arabic?token.whyAr:token.whyEn,parts=token.parts||[{ar:token.ar,en:token.en}],answer=parts.map(part=>`<div class="answer-part"><div class="iraab-ar arabic" lang="ar">${emphasizeIraab(part.ar,token.word)}</div>${arabic?'':`<div class="iraab-en">${escapeHtml(part.en)}</div>`}</div>`).join('');return `<article class="word-card"><div class="word-head"><span class="word-gloss">${arabic?'':escapeHtml(token.gloss)}</span><span class="word-ar arabic" lang="ar">${escapeHtml(token.word)}</span></div>${answer}${why?`<button class="why-toggle" data-why="${index}" aria-expanded="false">${tr('why')}</button><div class="why-text ${arabic?'why-ar arabic':''}" id="why-${index}">${arabic?arabicDisplay(token.whyAr,{words}):escapeHtml(token.whyEn)}</div>`:''}</article>`}).join('');$('sourceDetail').textContent=arabic?arabicDisplay(exercise.sourceAr,{words}):exercise.sourceEn}
+function renderWhyCue(exercise,card,part){
+ if(!state.revealed||state.mode!=='book'||exercise.held)return '';
+ const pilot=window.MIFTAH_WHY_PILOT;
+ const cue=pilot?.notes[exercise.id]?.find(n=>n.card===card&&n.part===part);
+ if(!cue)return '';
+ const arabicOnly=state.lang==='ar',lang=arabicOnly?'ar':'en',[ar,en]=pilot.questions[cue.question];
+ return `<details class="why-cue" data-why-cue="${card}:${part}"><summary lang="${lang}"${arabicOnly?' class="arabic" dir="rtl"':''}>${escapeHtml(arabicOnly?ar:en)}</summary><div class="why-cue-body"><p class="arabic" lang="ar" dir="rtl">${escapeHtml(cue.ar)}</p>${arabicOnly?'':`<p lang="en" dir="ltr">${escapeHtml(cue.en)}</p>`}<small class="why-cue-credit${arabicOnly?' arabic':''}" lang="${lang}">${arabicOnly?'شَرْحٌ مِنَ التَّطْبِيقِ':'Explanation by Miftāḥ al-ʿIlm'}</small></div></details>`;
+}
+function renderAnswer(exercise){const arabic=state.lang==='ar',words=quotedWords(exercise);$('answers').innerHTML=exercise.tokens.map((token,index)=>{const why=arabic?token.whyAr:token.whyEn,parts=token.parts||[{ar:token.ar,en:token.en}],answer=parts.map((part,partIndex)=>`<div class="answer-part"><div class="iraab-ar arabic" lang="ar">${emphasizeIraab(part.ar,token.word)}</div>${arabic?'':`<div class="iraab-en">${escapeHtml(part.en)}</div>`}${renderWhyCue(exercise,index+1,partIndex+1)}</div>`).join('');return `<article class="word-card"><div class="word-head"><span class="word-gloss">${arabic?'':escapeHtml(token.gloss)}</span><span class="word-ar arabic" lang="ar">${escapeHtml(token.word)}</span></div>${answer}${why?`<button class="why-toggle" data-why="${index}" aria-expanded="false">${tr('why')}</button><div class="why-text ${arabic?'why-ar arabic':''}" id="why-${index}">${arabic?arabicDisplay(token.whyAr,{words}):escapeHtml(token.whyEn)}</div>`:''}</article>`}).join('');$('sourceDetail').textContent=arabic?arabicDisplay(exercise.sourceAr,{words}):exercise.sourceEn}
 function renderPractice(){const chapter=selectedChapter(),arabic=state.lang==='ar',list=state.mode==='book'?bookExercises(chapter):null,exercise=currentExercise(),index=currentIndex(),total=list?.length??null,empty=state.mode==='book'&&!exercise;$('filterEmpty').hidden=!empty;$('practiceCard').hidden=empty;if(empty){state.revealed=false;$('chapterMeta').textContent=`${tr('item')} 0 ${tr('of')} 0`;$('answerPanel').classList.remove('open');$('revealBtn').setAttribute('aria-expanded','false');return}$('sentence').innerHTML=exerciseArabicHtml(exercise);$('translation').textContent=exercise.en;$('translation').style.display=arabic?'none':'block';$('bookPage').textContent=state.mode==='book'?(arabic?`ص ${localDigits(exercise.page)}`:`pg:${exercise.page}`):'';$('bookPage').style.display=state.mode==='book'?'block':'none';$('answerPanel').classList.toggle('open',state.revealed);$('revealBtn').setAttribute('aria-expanded',String(state.revealed));$('previousBtn').textContent=tr('previous');$('revealBtn').textContent=state.revealed?tr('hide'):tr('reveal');$('nextBtn').textContent=tr('next');$('previousBtn').disabled=index===0;$('nextBtn').disabled=state.mode==='book'&&index===total-1;$('chapterMeta').textContent=state.mode==='extra'?tr('generated'):`${tr('item')} ${localDigits(index+1)} ${tr('of')} ${localDigits(total)}`;renderAnswer(exercise)}
 const helpText=value=>escapeHtml(value).replace(/\n/g,'<br>');
 function helpHeadingHtml(key){return `<span class="help-heading-ar arabic" lang="ar">${escapeHtml(copy.ar[key]||key)}</span>${state.lang==='ar'?'':`<span class="help-heading-en">${escapeHtml(copy.en[key]||key)}</span>`}`}
@@ -1031,7 +969,7 @@ function renderHelpSections(chapter) {
   const titleAr = section.titleAr || copy.ar.fullExplanation;
   const titleEn = section.titleEn || copy.en.fullExplanation;
   const open = Array.isArray(openIds) ? openIds.includes(stableId) : section.defaultOpen;
-  return `<details class="help-disclosure" id="help-section-${escapeHtml(stableId)}" data-disclosure-id="${escapeHtml(stableId)}" data-help-group="${escapeHtml(section.group||'explanation')}"${open?' open':''}><summary><span><span class="help-disclosure-title-ar arabic" lang="ar">${helpText(titleAr)}</span>${state.lang==='ar'?'':`<span class="help-disclosure-title-en">${helpText(titleEn)}</span>`}</span></summary><div class="help-disclosure-body help-section">${state.helpReturn?.ruleId===stableId?pilotReturnMarkup():''}<div class="help-ar arabic" lang="ar">${helpText(section.ar)}</div>${state.lang==='ar'?'':`<div class="help-en">${helpText(section.en)}</div>`}</div></details>`;
+  return `<details class="help-disclosure" id="help-section-${escapeHtml(stableId)}" data-disclosure-id="${escapeHtml(stableId)}" data-help-group="${escapeHtml(section.group||'explanation')}"${open?' open':''}><summary><span><span class="help-disclosure-title-ar arabic" lang="ar">${helpText(titleAr)}</span>${state.lang==='ar'?'':`<span class="help-disclosure-title-en">${helpText(titleEn)}</span>`}</span></summary><div class="help-disclosure-body help-section"><div class="help-ar arabic" lang="ar">${helpText(section.ar)}</div>${state.lang==='ar'?'':`<div class="help-en">${helpText(section.en)}</div>`}</div></details>`;
  }).join('');
 }
 function helpChapterSequence(){const babOrder=new Map(babs.map((bab,index)=>[bab.id,index]));return [...chapters].sort((a,b)=>(babOrder.get(a.babId)-babOrder.get(b.babId))||(a.order-b.order))}
@@ -1068,9 +1006,7 @@ function setDrawerOpen(requested, {restoreFocus = true} = {}) {
  if (restoreFocus && mobileLayout.matches && (wasOpen || drawer.contains(focused))) focusVisible(toggle);
  if (restoreFocus && !mobileLayout.matches && (wasOpen || focused === $('drawerClose'))) focusVisible(drawer.querySelector('.side-brand'));
 }
-function render(){validateSelection();renderLanguage();renderAccessibleNames();renderTheme();renderPickers();renderNav();renderPractice();renderPilot(currentExercise());renderExampleJump(selectedChapter(),state.mode==='book'?bookExercises():null,state.mode==='book'?currentExercise():null);renderHelp();save()}
-$('pilotRuleButton').addEventListener('click',openPilotRule);
-$('helpSections').addEventListener('click',event=>{if(event.target.closest('[data-pilot-return]'))restorePracticeState()});
+function render(){validateSelection();renderLanguage();renderAccessibleNames();renderTheme();renderPickers();renderNav();renderPractice();renderExampleJump(selectedChapter(),state.mode==='book'?bookExercises():null,state.mode==='book'?currentExercise():null);renderHelp();save()}
 document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('click',()=>setScreen(button.dataset.go)));document.querySelectorAll('[data-start]').forEach(button=>button.addEventListener('click',()=>startPractice(button.dataset.start)));document.querySelectorAll('[data-help]').forEach(button=>button.addEventListener('click',openHelp));document.querySelectorAll('[data-lang]').forEach(button=>button.addEventListener('click',()=>{state.lang=button.dataset.lang;render()}));
 document.querySelectorAll('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>{state.theme=button.dataset.themeChoice;render()}));
 $('nahwMenuLink').addEventListener('click',()=>setScreen('nahw'));$('backHelpLink').addEventListener('click',returnToHelp);$('chapterEssentialsBtn').addEventListener('click',openChapterEssentials);$('helpNahwLink').addEventListener('click',()=>setScreen('nahw'));$('returnPractice').addEventListener('click',restorePracticeState);$('returnNahw').addEventListener('click',()=>setScreen('nahw'));$('helpPreviousChapter').addEventListener('click',()=>navigateHelpChapter(-1));$('helpNextChapter').addEventListener('click',()=>navigateHelpChapter(1));$('helpJumpNav').addEventListener('click',event=>{const button=event.target.closest('[data-help-jump]');if(button)scrollHelpTarget(button.dataset.helpJump)});$('helpEssentials').addEventListener('click',event=>{const open=event.target.closest('[data-open-exercise]');if(open)openVisualExercise(open.dataset.openExercise,open.dataset.helpAnchor)});$('revealBtn').addEventListener('click',()=>{state.revealed=!state.revealed;render()});$('previousBtn').addEventListener('click',()=>{const index=currentIndex();if(index<=0)return;if(state.mode==='book')selectBookExercise(bookExercises()[index-1]);else state.generatedIndex-=1;state.revealed=false;render()});$('nextBtn').addEventListener('click',()=>{if(state.mode==='book'){const list=bookExercises(),index=currentIndex();if(index>=list.length-1)return;selectBookExercise(list[index+1])}else state.generatedIndex+=1;state.revealed=false;render()});

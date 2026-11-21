@@ -813,6 +813,33 @@ finalManSummary('exception',[
  ['closure','إِحَالَاتُ الْخِتَامِ، ص ٢١١','Closing references, p.211']
 ]);
 
+finalManSummary('genitive-by-particle',[
+ 'حَرْفُ الْجَرِّ يَجُرُّ مَا بَعْدَهُ؛ وَتَخْتَلِفُ الْحُرُوفُ فِيمَا تَقْبَلُهُ.','A preposition governs the genitive; prepositions differ in what they can take.',
+ 'الْمَخْفُوضُ بِالْحَرْفِ اسْمٌ ظَاهِرٌ أَوْ ضَمِيرٌ فِي مَحَلِّ جَرٍّ.','The complement is an overt noun or a pronoun in a genitive slot.',
+ 'تَجُرُّ السَّبْعَةُ الْأُولَى الظَّاهِرَ وَالْمُضْمَرَ.','The first seven govern both overt nouns and pronouns.',
+ 'عَيِّنِ الْحَرْفَ، ثُمَّ مَا يَجُرُّهُ، ثُمَّ عَلَامَةَ الْجَرِّ أَوْ مَحَلَّهُ.','Find the preposition, its complement, and the sign or syntactic position.','gen-p212-01'
+],[
+ ['overview','أَقْسَامُ الْمَخْفُوضَاتِ','The three genitive categories',true],
+ ['first','السَّبْعَةُ الْأُولَى','The first seven',true],
+ ['last','السَّبْعَةُ الْأَخِيرَةُ','The last seven'],
+ ['oath','حُرُوفُ الْقَسَمِ هُنَا','Oath prepositions here'],
+ ['time','مُذْ وَمُنْذُ','Time: mudh and mundhu'],
+ ['rubba','رُبَّ وَمَا تَجُرُّهُ','Rubba and its complements'],
+ ['omission','حَذْفُ رُبَّ مَعَ بَقَاءِ عَمَلِهَا','Omitted rubba and retained government']
+]);
+finalManSummary('imperfect-jawazim',[
+ 'تَجْزِمُ هَذِهِ الْأَدَوَاتُ فِعْلًا مُضَارِعًا وَاحِدًا.','These governors make one imperfect verb jussive.',
+ 'هَذِهِ شُعْبَةُ الْفِعْلِ الْوَاحِدِ فِي جَوَازِمِ الْمُضَارِعِ.','This is the one-verb branch of the imperfect’s jussive governors.',
+ 'يَظْهَرُ أَثَرُ الْجَزْمِ فِي آخِرِ الْفِعْلِ، مِثْلَ السُّكُونِ أَوْ حَذْفِ حَرْفِ الْعِلَّةِ.','Look for the mood sign at the verb’s end, such as sukūn or deletion of a weak letter.',
+ 'فَرِّقْ بَيْنَ الْأَدَاةِ وَالْفِعْلِ، وَتَحَقَّقْ مِنْ قَصْدِ الْجَزَاءِ فِي جَوَابِ الطَّلَبِ.','Identify the governor and the verb; for a request, check that the response is meant as its consequence.','jaw-p239-02'
+],[
+ ['overview','الْعَدَدُ وَالسَّبْعَةُ الْأُولَى','The counts and the first seven',true],
+ ['negative','لَمْ وَلَمَّا وَهَمْزَةُ الِاسْتِفْهَامِ','Lam, lammā, and interrogative hamzah',true],
+ ['lam','لَامُ الْأَمْرِ وَالدُّعَاءِ','Command and invocation lām'],
+ ['la','لَا فِي النَّهْيِ وَالدُّعَاءِ','Prohibitive and supplicatory lā'],
+ ['request','جَوَابُ الطَّلَبِ','The response to a request']
+]);
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = HELP_REDESIGN_BY_CHAPTER;
 }

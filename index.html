@@ -773,10 +773,11 @@ function openPilotRule(){
  const ruleId=chapter.id+'-'+mapped.rule;
  if(!chapter.help.some(s=>s.id===ruleId))return;
  const prior={parent:pilotReturn,helpReturn:state.helpReturn,launch:state.helpLaunch,jumpOpen:jumpListReturnOpen};
- const viewport={x:window.scrollX,y:window.scrollY,list:$('exampleJumpItems').scrollTop,focus:document.activeElement};
+ const viewport={x:window.scrollX,y:window.scrollY,list:$('exampleJumpItems').scrollTop};
  const snapshot=capturePracticeState('pilotRuleButton');
  snapshot.ruleId=ruleId;
- pilotReturn={snapshot,prior,viewport};
+ snapshot.pilotViewport={...viewport,open:jumpListReturnOpen};
+ pilotReturn={snapshot,prior};
  state.helpReturn=snapshot;
  state.helpBabId=state.selectedBabId;state.helpChapterId=chapter.id;
  state.category='help';state.helpLaunch=null;
@@ -797,12 +798,15 @@ function capturePracticeState(openerId = '') {
 function restorePracticeState() {
  const snapshot = state.helpReturn;
  const pilot=snapshot&&pilotReturn?.snapshot===snapshot?pilotReturn:null;
+ const storedViewport=snapshot?.openerId==='pilotRuleButton'?snapshot.pilotViewport:null;
+ const viewport=storedViewport&&typeof storedViewport.open==='boolean'&&
+  [storedViewport.x,storedViewport.y,storedViewport.list].every(n=>Number.isFinite(n)&&n>=0)?storedViewport:null;
  if (snapshot) {
   const {selectedBabId, selectedChapterId, positions, mode, category, bookFilter, generatedIndex, revealed} = snapshot;
   Object.assign(state, {selectedBabId, selectedChapterId, positions:{...state.positions,...positions}, mode, category, bookFilter, generatedIndex, revealed:!!revealed, helpReturn:null});
  }
  state.helpLaunch = pilot?.prior.launch || null;
- const reopenJumpList=!!snapshot&&jumpListReturnOpen;
+ const reopenJumpList=!!snapshot&&(viewport?.open??jumpListReturnOpen);
  jumpListReturnOpen=false;
  setScreen('practice', {target:()=>$(snapshot?.openerId || 'nahwMenuLink'),scrollBlock:'nearest'});
  if(reopenJumpList&&jumpListAvailable){
@@ -813,10 +817,11 @@ function restorePracticeState() {
   pilotReturn=pilot.prior.parent;
   state.helpReturn=pilot.prior.helpReturn;
   jumpListReturnOpen=pilot.prior.jumpOpen;
-  focusVisible(pilot.viewport.focus?.isConnected?pilot.viewport.focus:$('pilotRuleButton'));
-  $('exampleJumpItems').scrollTop=pilot.viewport.list;
-  window.scrollTo(pilot.viewport.x,pilot.viewport.y);
   save();
+ }
+ if(viewport){
+  $('exampleJumpItems').scrollTop=viewport.list;
+  window.scrollTo(viewport.x,viewport.y);
  }
 }
 function openHelp(){if(state.resumeAvailable)state.helpReturn=capturePracticeState();state.category='help';state.helpLaunch=null;if(state.resumeAvailable){state.helpBabId=state.selectedBabId;state.helpChapterId=state.selectedChapterId}setScreen('help')}

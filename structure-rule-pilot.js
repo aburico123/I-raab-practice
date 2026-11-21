@@ -54,7 +54,9 @@ const roles={
  pkn:['جُمْلَةٌ اسْمِيَّةٌ فِي مَحَلِّ رَفْعٍ خَبَرُ الْحَرْفِ النَّاسِخِ','Nominal clause · nominative position as the particle’s khabar'],
  pknCo:['جُمْلَةٌ مَعْطُوفَةٌ عَلَى جُمْلَةِ الْخَبَرِ','Clause coordinated with the khabar clause'],
  pkv:['جُمْلَةٌ فِعْلِيَّةٌ فِي مَحَلِّ رَفْعٍ خَبَرُ الْحَرْفِ النَّاسِخِ','Verbal clause · nominative position as the particle’s khabar'],
- pkRel:['«مَا» الْمَوْصُولَةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ','Relative mā · nominative position as khabar'],
+ pkRelLam:['لَامٌ مُزَحْلَقَةٌ وَ«مَا» مَوْصُولَةٌ فِي مَحَلِّ رَفْعٍ خَبَرٌ','Shifted lām + relative mā in nominative position as khabar'],
+ relAnswer:['جَوَابُ قَسَمٍ مَحْذُوفٍ؛ جُزْءٌ مِنْ صِلَةِ الْمَوْصُولِ','Answer to an omitted oath · part of the relative clause'],
+ pkvStart:['بِدَايَةُ جُمْلَةٍ فِعْلِيَّةٍ فِي مَحَلِّ رَفْعٍ خَبَرُ الْحَرْفِ النَّاسِخِ','Begins the verbal clause in nominative position as the particle’s khabar'],
  rel:['صِلَةُ الْمَوْصُولِ لَا مَحَلَّ لَهَا','Relative clause · no syntactic position'],
  sep:['ضَمِيرُ فَصْلٍ لَا مَحَلَّ لَهُ','Separation pronoun · no syntactic position'],
  blocked:['حَرْفٌ كَفَّتْهُ «مَا» عَنِ الْعَمَلِ','Particle blocked by mā'],
@@ -66,7 +68,8 @@ const roles={
  coordinated:['مَعْطُوفٌ عَلَى الْمُبْتَدَإِ مَرْفُوعٌ','Coordinated with the mubtadaʾ · nominative'],
  attr:['جُمْلَةٌ فِي مَحَلِّ نَصْبٍ صِفَةٌ','Clause · accusative position as adjective'],
  widerK:['خَبَرٌ فِي تَتِمَّةِ الْآيَةِ، لَا فِي النَّصِّ الْمَعْرُوضِ','Khabar in the continuation, not in the displayed excerpt'],
- srcB:['مَصْدَرٌ مُؤَوَّلٌ فِي مَحَلِّ جَرٍّ بِالْبَاءِ','Interpreted verbal noun · genitive after bāʾ'],
+ prepAnna:['بَاءُ الْجَرِّ وَ«أَنَّ» النَّاسِخَةُ','Bāʾ of jarr + governing anna'],
+ ppSource:['جَارٌّ وَمَجْرُورٌ: الْبَاءُ وَالْمَصْدَرُ الْمُؤَوَّلُ','Prepositional phrase containing the interpreted verbal noun'],
  srcF:['مَصْدَرٌ مُؤَوَّلٌ فِي مَحَلِّ رَفْعٍ فَاعِلٌ','Interpreted verbal noun · nominative subject'],
  srcN:['مَصْدَرٌ مُؤَوَّلٌ فِي مَحَلِّ رَفْعٍ نَائِبُ فَاعِلٍ','Interpreted verbal noun · nominative deputy subject'],
  srcO:['مَصْدَرٌ مُؤَوَّلٌ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ','Interpreted verbal noun · accusative object'],
@@ -89,7 +92,7 @@ function rows(prefix,definitions){
  });
 }
 const implied=['تُعَلِّقُ الْحَاشِيَةُ شِبْهَ الْجُمْلَةِ بِخَبَرٍ مَحْذُوفٍ، وَمِنْ تَقْدِيرِهِ «كَائِنٌ».','The note attaches the shibh jumlah to an omitted khabar, for example kāʾin (“existing”).'];
-const impliedI=['شِبْهُ الْجُمْلَةِ مُتَعَلِّقٌ بِخَبَرِ الْحَرْفِ الْمَحْذُوفِ فِي الْإِعْرَابِ الْمُعْتَمَدِ.','In the approved parse the phrase attaches to the particle’s omitted khabar.'];
+const impliedI=['شِبْهُ الْجُمْلَةِ مُتَعَلِّقٌ بِخَبَرٍ مَحْذُوفٍ لِلْحَرْفِ النَّاسِخِ فِي الْإِعْرَابِ الْمُعْتَمَدِ.','In the approved parse the phrase attaches to the particle’s omitted khabar.'];
 const genitiveSource=['الْمَصْدَرُ الْمُؤَوَّلُ مِنْ «أَنَّ» وَمَا بَعْدَهَا فِي مَحَلِّ جَرٍّ بِالْبَاءِ؛ وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِخَبَرِ «ذَلِكَ» الْمَحْذُوفِ.','The interpreted verbal noun starts with anna inside بِأَنَّ. Bāʾ governs it, and the prepositional construction attaches to the omitted khabar of the demonstrative.'];
 rows('mubtada',[
  ['definition','m:1 ks:2'],
@@ -142,7 +145,7 @@ rows('mubtada',[
 ]);
 rows('inna',[
  ['core','p:1 i:2 pk:3 pk2:4',['الْفَاءُ لِرَبْطِ الْجَوَابِ، وَالْجُمْلَةُ فِي مَحَلِّ جَزْمٍ فِي تَوْضِيحِ التَّطْبِيقِ.','Fāʾ links the answer; the app identifies the whole clause’s jussive position.']],
- ['core','mp:1 ko:0; p:2 i:3 sep:4 pk:5; srcB:2-5',genitiveSource],
+ ['core','mp:1 ko:0; prepAnna:2 i:3 sep:4 pk:5; ppSource:2-5',genitiveSource],
  ['core','p:1 i:2 pk:3'],
  ['core','m:1 k:2; piH:3 pk:4'],
  ['core','p:1 i:2 pk:3'],
@@ -160,13 +163,13 @@ rows('inna',[
  ['fath','piHa:4 pkv:5-8; srcN:4-8'],
  ['fath','piK:3 pkv:4-5; srcO:3-5'],
  ['fath','kb:1-2 kof:0 mSource:3-6; piK:3 pkv:4-6'],
- ['fath','mp:1 ko:0; p:2 i:3 sep:4 pk:5; srcB:2-5',genitiveSource],
- ['both','mp:1 condition:2-5; piH:6 pk:7 pk2:8',['فِي الْحَاشِيَةِ: مَعَ الْفَتْحِ، الْمَصْدَرُ مُبْتَدَأٌ وَخَبَرُهُ مَحْذُوفٌ أَوْ خَبَرُ مُبْتَدَإٍ مَحْذُوفٍ؛ وَمَعَ الْكَسْرِ تَتِمُّ الْجُمْلَةُ بِنَفْسِهَا. وَيُبَيِّنُ التَّطْبِيقُ أَنَّ جَوَابَ الشَّرْطِ فِي مَحَلِّ جَزْمٍ.','With fatḥ, the note allows an interpreted subject with an omitted khabar, or an interpreted khabar with an omitted subject. With kasr, the clause stands complete. The app identifies the conditional answer’s jussive position.']],
+ ['fath','mp:1 ko:0; prepAnna:2 i:3 sep:4 pk:5; ppSource:2-5',genitiveSource],
+ ['both','mp:1 condition:2-5; piH:6 pk:7 pk2:8',['فِي الْحَاشِيَةِ: مَعَ الْفَتْحِ، الْمَصْدَرُ مُبْتَدَأٌ وَخَبَرُهُ مَحْذُوفٌ أَوْ خَبَرُ مُبْتَدَإٍ مَحْذُوفٍ؛ وَمَعَ الْكَسْرِ تَتِمُّ الْجُمْلَةُ بِنَفْسِهَا. وَيُبَيِّنُ التَّطْبِيقُ أَنَّ جَوَابَ الشَّرْطِ فِي مَحَلِّ جَزْمٍ.','With fatḥ, the interpreted verbal noun is either a mubtadaʾ with an omitted khabar or the khabar of an omitted mubtadaʾ, according to the note. With kasr, the clause stands complete. The app identifies the conditional answer’s jussive position.']],
  ['both','idha:2; p:3 i:4 pk:5',['تُرَجِّحُ الْحَاشِيَةُ الْكَسْرَ الْمَعْرُوضَ، وَتُجِيزُ الْفَتْحَ عَلَى أَنَّ الْمَصْدَرَ مُبْتَدَأٌ خَبَرُهُ مَحْذُوفٌ.','The note prefers the displayed kasr. With fatḥ, the interpreted verbal noun may be a mubtadaʾ with an omitted khabar.']],
  ['both','piH:2 sep:3 pk:4 pk2:5'],
  ['both','p:2 i:3 iCo:4 kb:5 ko:0',['شَاهِدٌ مِنَ التَّلْبِيَةِ؛ «لَكَ» مُتَعَلِّقٌ بِالْخَبَرِ الْمَحْذُوفِ.','A talbiyah witness; laka attaches to an omitted khabar.']],
  ['lam','p:1 i:2 pk:3-4; piH:5 pk:6 pk2:7'],
- ['lam','p:1 kb:2-3 kof:0 iLate:4',['دَخَلَتِ اللَّامُ عَلَى الِاسْمِ الْمُؤَخَّرِ، لَا عَلَى الْخَبَرِ.','The shifted lām enters the delayed ism, not the khabar.']],
+ ['lam','p:1 kb:2-3 kof:0 iLate:4',[impliedI[0]+' دَخَلَتِ اللَّامُ عَلَى الِاسْمِ الْمُؤَخَّرِ، لَا عَلَى الْخَبَرِ.',impliedI[1]+' The shifted lām enters the delayed ism, not the khabar.']],
  ['lam','p:1 ix:2 sep:3 pk:4-5'],
  ['lam','p:1 i:2 obj:3 pk:4'],
  ['ma','blocked:1 m:2 k:3-4'],
@@ -176,8 +179,8 @@ rows('inna',[
  ['ma','blocked:1 m:2 k:3'],
  ['ma','p:1 i:2 pk:3',['الْمَطْبُوعُ بِالنَّصْبِ: «مَا» زَائِدَةٌ لَا تَكُفُّ «لَيْتَ» هُنَا. وَيُجِيزُ الْمُؤَلِّفُ الْإِهْمَالَ مَعَ «زَيْدٌ» مَرْفُوعًا.','The printed accusative shows layta still governing. The author also allows non-operation, with nominative Zaydun.']],
  ['reduction','lite:1 m:2-3 emph:4 kn:5-6; kb:5 kof:0 m2f:6',['فِي الْقِرَاءَةِ الْمُخَفَّفَةِ تُجِيزُ الْحَاشِيَةُ ٩ أَنْ يَكُونَ «حَافِظٌ» خَبَرًا مُبَاشِرًا لِـ«كُلُّ نَفْسٍ» وَ«عَلَيْهَا» مُتَعَلِّقًا بِهِ.','For the light reading, note 9 also allows ḥāfiẓun as the direct khabar of kullu nafsin, with ʿalayhā attached to it.']],
- ['reduction','liteOn:1 i:2 pkRel:3 rel:4',['الْقِرَاءَةُ الْمُخَفَّفَةُ لِنَافِعٍ وَابْنِ كَثِيرٍ. فَاعِلُ «لَيُوَفِّيَنَّهُمْ» هُوَ «رَبُّكَ» بَعْدَ حَدِّ الْمَقْطَعِ.','Light/light reading of Nāfiʿ and Ibn Kathīr. The expressed subject, rabbuka, follows the excerpt.']],
- ['reduction','liteOn:2 iO:0 pkv:3',['الِاسْمُ الْمَحْذُوفُ هَاءُ الشَّأْنِ. وَفِي تَتِمَّةِ النُّسْخَةِ الْمَذْكُورَةِ فِي الْحَاشِيَةِ ١، يَجُوزُ فِي «يَكُونُ» النَّقْصُ أَوِ التَّمَامُ.','The omitted ism is the hāʾ of affair. In the manuscript continuation, note 1 allows deficient yakūnu (fronted khabar and delayed ism) or complete yakūnu (“occur,” with a subject).']],
+ ['reduction','liteOn:1 i:2 pkRelLam:3 relAnswer:4',['الْقِرَاءَةُ الْمُخَفَّفَةُ لِنَافِعٍ وَابْنِ كَثِيرٍ. فَاعِلُ «لَيُوَفِّيَنَّهُمْ» هُوَ «رَبُّكَ» بَعْدَ حَدِّ الْمَقْطَعِ.','Light/light reading of Nāfiʿ and Ibn Kathīr. The expressed subject, rabbuka, follows the excerpt.']],
+ ['reduction','liteOn:2 iO:0 pkvStart:3',['الِاسْمُ الْمَحْذُوفُ هَاءُ الشَّأْنِ. وَفِي تَتِمَّةِ النُّسْخَةِ الْمَذْكُورَةِ فِي الْحَاشِيَةِ ١، يَجُوزُ فِي «يَكُونُ» النَّقْصُ أَوِ التَّمَامُ.','The omitted ism is the hāʾ of affair. In the manuscript continuation, note 1 allows deficient yakūnu (fronted khabar and delayed ism) or complete yakūnu (“occur,” with a subject).']],
  ['reduction','liteOn:1 iO:0 pkv:2-4',['فِي شَاهِدِ الْحَاشِيَةِ ٢، اسْمُ «كَأَنْ» ضَمِيرُ الشَّأْنِ الْمَحْذُوفُ.','In note 2’s witness, the ism is the omitted pronoun of affair.']],
  ['reduction','liteOn:5 i:6 ko:0 attr:7-10',['صَدْرُ الْبَيْتِ مِنَ الْحَاشِيَةِ ٤. وَتُقَدِّرُ الْحَاشِيَةُ الْخَبَرَ «هَذِهِ الْمَرْأَةُ» عَلَى قَلْبِ التَّشْبِيهِ؛ جُمْلَةُ «تَعْطُو» صِفَةٌ لَا خَبَرٌ.','The first hemistich comes from note 4. The note estimates “this woman” as khabar, with the comparison inverted. The taʿṭū clause modifies the gazelle; it is not the khabar.']],
  ['reduced-lakin','lite:1 m:2-5 coordinated:6 kv:7-14',['يَبْقَى مَعْنَى الِاسْتِدْرَاكِ فِي «لَكِنْ»، وَلَا تَعْمَلُ فِي الْجُمْلَةِ بَعْدَهَا. الشَّاهِدُ مِنْ حَاشِيَةِ ص ١٤٨.','Reduced lākin still qualifies what precedes but does not govern the following clause. This witness comes from the p.148 footnote.']]

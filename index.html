@@ -115,6 +115,8 @@ button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{
 .book-page{position:absolute;top:16px;right:18px;z-index:1;border:1px solid #c9d6bf;background:var(--sage-fill);color:#4a6342;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:500;line-height:1.2;direction:ltr}
 .sentence{direction:rtl;text-align:center;font-size:clamp(38px,6.4vw,60px);font-weight:400;line-height:2.3;color:var(--forest);margin:0 auto;padding:.18em 0;max-width:900px;overflow:visible}
 .quran-quote{unicode-bidi:isolate;white-space:normal}
+.quran-verse-end{display:inline-grid;place-items:center;vertical-align:middle;min-width:1.2em;min-height:1.2em;margin-inline:.14em;border:1px solid currentColor;border-radius:50%;font-size:.53em;line-height:1}
+.picker-scope{grid-column:1/-1;margin:0;color:var(--muted);font-size:.82rem;overflow-wrap:anywhere}
 .quran-lead{unicode-bidi:isolate;margin-inline-end:.08em}
 .quran-ref{display:inline-block;margin-inline-start:.5em;direction:rtl;unicode-bidi:isolate;white-space:nowrap;font-family:var(--arabic);font-size:.38em;font-weight:400;line-height:1.9;color:var(--muted);vertical-align:.14em}
 .translation{text-align:center;color:#56655d;font-size:clamp(17px,2.1vw,20px);font-weight:400;line-height:1.6;margin:6px auto 26px;max-width:760px}
@@ -546,8 +548,8 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
     </div>
   </main>
 </div>
-<script src="help-redesign-data.js?v=release4-review-fix-20261121"></script>
-<script src="lesson-data.js?v=release4-khabar-clarification-20261121"></script>
+<script src="help-redesign-data.js?v=marfuaat-154-166-20261121"></script>
+<script src="lesson-data.js?v=marfuaat-154-166-20261121"></script>
 <script>
 (function(){
 'use strict';
@@ -627,6 +629,7 @@ function emphasizeIraab(text,tokenWord){
 }
 const $=id=>document.getElementById(id),save=()=>localStorage.setItem(STORAGE_KEY,JSON.stringify(state)),tr=key=>{const value=copy[state.lang][key]||key;return state.lang==='ar'?stripMarks(value):value},helpUi=key=>copy[state.lang][key]||key;
 const babById=id=>babs.find(b=>b.id===id)||babs[0],chapterById=id=>chapters.find(c=>c.id===id)||chapters[0],chaptersFor=babId=>chapters.filter(c=>c.babId===babId).sort((a,b)=>a.order-b.order);
+const topBabs=babs.filter(bab=>!bab.parentId),babRoot=id=>{const bab=babById(id);return bab.parentId?babById(bab.parentId):bab};
 const arabicDigits=value=>String(value).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const localDigits=value=>state.lang==='ar'?arabicDigits(value):String(value);
 function validateSelection(){if(!babs.some(b=>b.id===state.selectedBabId))state.selectedBabId=babs[0].id;if(!chaptersFor(state.selectedBabId).some(c=>c.id===state.selectedChapterId))state.selectedChapterId=chaptersFor(state.selectedBabId)[0].id;if(!babs.some(b=>b.id===state.helpBabId))state.helpBabId=state.selectedBabId;if(!chaptersFor(state.helpBabId).some(c=>c.id===state.helpChapterId))state.helpChapterId=chaptersFor(state.helpBabId)[0].id;const ch=chapterById(state.selectedChapterId);state.positions[ch.id]=Math.max(0,Math.min(ch.book.length-1,Number(state.positions[ch.id])||0));state.generatedIndex=Math.max(0,Number(state.generatedIndex)||0)}
@@ -637,7 +640,20 @@ function currentIndex(){if(state.mode==='extra')return state.generatedIndex;cons
 function currentExercise(){return state.mode==='extra'?generatedExercise(state.generatedIndex):bookExercises()[currentIndex()]}
 function selectBookExercise(exercise){const chapter=selectedChapter(),rawIndex=chapter.book.findIndex(item=>item.id===exercise?.id);if(rawIndex>=0)state.positions[chapter.id]=rawIndex}
 function optionLabel(item){return `${stripMarks(item.titleAr)} — ص ${arabicDigits(item.pages)}${item.continues?' (المتاح)':''}`}
-function fillSelect(select,items,value){select.dir='rtl';select.lang='ar';select.innerHTML=items.map(item=>`<option value="${escapeHtml(item.id)}" dir="rtl" lang="ar"${item.id===value?' selected':''}>${escapeHtml(optionLabel(item))}</option>`).join('')}
+const optionsHtml=(items,value)=>items.map(item=>`<option value="${escapeHtml(item.id)}" dir="rtl" lang="ar"${item.id===value?' selected':''}>${escapeHtml(optionLabel(item))}</option>`).join('');
+function fillSelect(select,items,value){select.innerHTML=optionsHtml(items,value)}
+function fillChapterPicker(select,babId,chapterId){
+ const root=babRoot(babId),subgroups=babs.filter(bab=>bab.parentId===root.id);
+ select.innerHTML=optionsHtml(chaptersFor(root.id),chapterId)+subgroups.map(group=>`<optgroup label="${escapeHtml(optionLabel(group))}" dir="rtl" lang="ar">${optionsHtml(chaptersFor(group.id),chapterId)}</optgroup>`).join('');
+ const grid=select.closest('.picker-grid'),selected=babById(babId);
+ let scope=grid.querySelector('.picker-scope');
+ if(!scope){scope=document.createElement('p');scope.className='picker-scope';scope.id=`${select.id}Scope`;grid.append(scope)}
+ scope.hidden=!selected.parentId||(select.id==='chapterSelect'&&state.mode!=='book');
+ if(scope.hidden)select.removeAttribute('aria-describedby');else select.setAttribute('aria-describedby',scope.id);
+ scope.lang=state.lang;
+ scope.classList.toggle('arabic',state.lang==='ar');
+ scope.textContent=selected.parentId?(state.lang==='ar'?optionLabel(selected):`${selected.titleEn} · pp. ${selected.pages}`):'';
+}
 function setBookFilter(filter){if(!['all','quran'].includes(filter))return;const chapter=selectedChapter(),current=chapter.book[state.positions[chapter.id]||0];state.bookFilter=filter;const list=bookExercises(chapter);if(list.length&&!list.some(item=>item.id===current?.id))selectBookExercise(list[0]);state.revealed=false;render()}
 function focusVisible(target, scrollBlock) {
  if (!target || target.disabled || !target.getClientRects().length || target.closest('[inert]')) return false;
@@ -690,22 +706,30 @@ function renderAccessibleNames() {
 }
 function renderLanguage(){const arabic=state.lang==='ar';document.documentElement.lang=arabic?'ar':'en';document.documentElement.dir=arabic?'rtl':'ltr';document.body.classList.toggle('rtl',arabic);document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=tr(el.dataset.i18n));document.querySelectorAll('.ui-ar').forEach(el=>{if(el.dataset.arSource===undefined)el.dataset.arSource=el.textContent;el.textContent=stripMarks(el.dataset.arSource)})}
 function renderTheme(){document.documentElement.dataset.theme=state.theme;document.querySelectorAll('[data-theme-choice]').forEach(button=>{const active=button.dataset.themeChoice===state.theme;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active))})}
-function renderPickers(){fillSelect($('babSelect'),babs,state.selectedBabId);fillSelect($('chapterSelect'),chaptersFor(state.selectedBabId),state.selectedChapterId);$('babSelect').disabled=state.mode==='extra';$('chapterSelect').disabled=state.mode==='extra';fillSelect($('helpBabSelect'),babs,state.helpBabId);fillSelect($('helpChapterSelect'),chaptersFor(state.helpBabId),state.helpChapterId);$('exampleFilter').hidden=state.mode!=='book';document.querySelectorAll('[data-filter]').forEach(button=>{const active=button.dataset.filter===state.bookFilter;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active))})}
+function renderPickers(){fillSelect($('babSelect'),topBabs,babRoot(state.selectedBabId).id);fillChapterPicker($('chapterSelect'),state.selectedBabId,state.selectedChapterId);$('babSelect').disabled=state.mode==='extra';$('chapterSelect').disabled=state.mode==='extra';fillSelect($('helpBabSelect'),topBabs,babRoot(state.helpBabId).id);fillChapterPicker($('helpChapterSelect'),state.helpBabId,state.helpChapterId);$('exampleFilter').hidden=state.mode!=='book';document.querySelectorAll('[data-filter]').forEach(button=>{const active=button.dataset.filter===state.bookFilter;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active))})}
 function renderNav(){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===`${state.screen}Screen`));const activeNav=state.screen==='home'?'home':state.screen==='preferences'?'preferences':'nahw';document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.go===activeNav));const crumbKeys={home:'home',nahw:'nahwCrumb',help:'helpCrumb',preferences:'preferencesCrumb',practice:state.mode==='book'?'bookCrumb':'extraCrumb'};$('crumb').textContent=tr(crumbKeys[state.screen]);const category=['book','extra','help'].includes(state.category)?state.category:'book';document.querySelectorAll('.choice-card').forEach(card=>{const selected=(card.dataset.start||'help')===category;card.classList.toggle('selected',selected);card.setAttribute('aria-pressed',String(selected))});$('returnPractice').style.display=state.resumeAvailable?'inline-flex':'none';$('backHelpLink').style.display=state.helpLaunch?'inline-flex':'none';$('chapterEssentialsBtn').hidden=state.mode!=='book';$('chapterEssentialsBtn').textContent=helpUi('chapterEssentials')}
 const exerciseLocation=id=>{for(const chapter of chapters){const index=chapter.book.findIndex(item=>item.id===id);if(index!==-1)return{chapter,index,exercise:chapter.book[index]}}return null};
 function quranReferenceHtml(exercise){return exercise.quran?`<span class="quran-ref">(${escapeHtml(stripMarks(`سُورَةُ ${exercise.quran.surahAr}`))}، ${escapeHtml(exercise.quran.ayahAr)})</span>`:''}
 const quranQuoteHtml = html => `<span class="quran-quote">﴿${html}﴾</span>`;
+function quranSpanHtml(span,markers){
+ if(!markers?.length)return escapeHtml(span);
+ const ends=new Map(markers.map(({after,ayah})=>[after,ayah]));
+ return span.split(' ').map((word,index)=>{
+  const ayah=ends.get(index+1),end=ayah?arabicDigits(ayah):'';
+  return escapeHtml(word)+(end?`<span class="quran-verse-end" role="img" aria-label="${state.lang==='ar'?`نهاية الآية ${end}`:`End of verse ${ayah}`}">${end}</span>`:'');
+ }).join(' ');
+}
 function exerciseArabicHtml(exercise) {
  if (!exercise.quran) return escapeHtml(exercise.ar);
  const lead = exercise.quranLeadAr ? `<span class="quran-lead">${escapeHtml(exercise.quranLeadAr)}</span>` : '';
  const spans = exercise.quran.spans || [exercise.ar];
- const quotation = spans.map(span => quranQuoteHtml(escapeHtml(span))).join('<span class="quran-gap"> … </span>');
+ const quotation = spans.map(span => quranQuoteHtml(quranSpanHtml(span,exercise.quran.verseMarkers))).join('<span class="quran-gap"> … </span>');
  return lead + quotation + quranReferenceHtml(exercise);
 }
 function visualQuranHtml(text, exerciseId, innerHtml = escapeHtml(text)) {
  const exercise = exerciseId ? exerciseLocation(exerciseId)?.exercise : null;
  if (!exercise?.quran || exercise.held) return innerHtml;
- if (exercise.quran.spans && text === exercise.ar) return exerciseArabicHtml(exercise);
+ if ((exercise.quran.spans||exercise.quran.verseMarkers) && text === exercise.ar) return exerciseArabicHtml(exercise);
  const normalized = value => stripMarks(value).replace(/[﴿﴾\s]/gu,'');
  const spans = exercise.quran.spans || [exercise.ar];
  if (!spans.some(span => normalized(span).includes(normalized(text)))) return innerHtml;
@@ -854,7 +878,10 @@ document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('
 document.querySelectorAll('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>{state.theme=button.dataset.themeChoice;render()}));
 $('nahwMenuLink').addEventListener('click',()=>setScreen('nahw'));$('backHelpLink').addEventListener('click',returnToHelp);$('chapterEssentialsBtn').addEventListener('click',openChapterEssentials);$('helpNahwLink').addEventListener('click',()=>setScreen('nahw'));$('returnPractice').addEventListener('click',restorePracticeState);$('returnNahw').addEventListener('click',()=>setScreen('nahw'));$('helpPreviousChapter').addEventListener('click',()=>navigateHelpChapter(-1));$('helpNextChapter').addEventListener('click',()=>navigateHelpChapter(1));$('helpJumpNav').addEventListener('click',event=>{const button=event.target.closest('[data-help-jump]');if(button)scrollHelpTarget(button.dataset.helpJump)});$('helpEssentials').addEventListener('click',event=>{const open=event.target.closest('[data-open-exercise]');if(open)openVisualExercise(open.dataset.openExercise,open.dataset.helpAnchor)});$('revealBtn').addEventListener('click',()=>{state.revealed=!state.revealed;render()});$('previousBtn').addEventListener('click',()=>{const index=currentIndex();if(index<=0)return;if(state.mode==='book')selectBookExercise(bookExercises()[index-1]);else state.generatedIndex-=1;state.revealed=false;render()});$('nextBtn').addEventListener('click',()=>{if(state.mode==='book'){const list=bookExercises(),index=currentIndex();if(index>=list.length-1)return;selectBookExercise(list[index+1])}else state.generatedIndex+=1;state.revealed=false;render()});
 $('allExamplesBtn').addEventListener('click',()=>setBookFilter('all'));$('quranExamplesBtn').addEventListener('click',()=>setBookFilter('quran'));$('showAllExamples').addEventListener('click',()=>setBookFilter('all'));
-$('babSelect').addEventListener('change',event=>{state.selectedBabId=event.target.value;state.selectedChapterId=chaptersFor(state.selectedBabId)[0].id;state.revealed=false;render()});$('chapterSelect').addEventListener('change',event=>{state.selectedChapterId=event.target.value;state.revealed=false;render()});$('helpBabSelect').addEventListener('change',event=>{state.helpBabId=event.target.value;state.helpChapterId=chaptersFor(state.helpBabId)[0].id;render()});$('helpChapterSelect').addEventListener('change',event=>{state.helpChapterId=event.target.value;render()});
+$('babSelect').addEventListener('change',event=>{state.selectedBabId=event.target.value;state.selectedChapterId=chaptersFor(state.selectedBabId)[0].id;state.revealed=false;render()});
+$('chapterSelect').addEventListener('change',event=>{const chapter=chapterById(event.target.value);state.selectedChapterId=chapter.id;state.selectedBabId=chapter.babId;state.revealed=false;render()});
+$('helpBabSelect').addEventListener('change',event=>{state.helpBabId=event.target.value;state.helpChapterId=chaptersFor(state.helpBabId)[0].id;render()});
+$('helpChapterSelect').addEventListener('change',event=>{const chapter=chapterById(event.target.value);state.helpChapterId=chapter.id;state.helpBabId=chapter.babId;render()});
 $('helpSections').addEventListener('toggle',event=>{
  if (state.screen !== 'help' || !event.target.matches('.help-disclosure')) return;
  rememberHelpDisclosures();

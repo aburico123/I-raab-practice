@@ -3172,6 +3172,401 @@ const laJinsForms=[
  ],'This complete witness is from p.153 footnote 6. The main text on the same page gives only its opening. The app applies the rule there for definite names.','هَذَا الشَّاهِدُ الْكَامِلُ مِنَ الْحَاشِيَةِ السَّادِسَةِ فِي ص ١٥٣. وَفِي الْمَتْنِ فِي الصَّفْحَةِ نَفْسِهَا أَوَّلُهُ. وَيُطَبِّقُ التَّطْبِيقُ حُكْمَ إِهْمَالِ «لَا» مَعَ الْمَعْرِفَةِ.'),
 ];
 
+// Source-ordered witnesses from the main text, with explicit note/app attribution.
+
+// Printed pp. 154–158: author witnesses only. Footnote and manuscript
+// continuations have independent rows in inventory-a.tsv.
+const zannaA=(()=>{
+ const part=(ar,en)=>({ar,en});
+ const pastWithTa=part('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.','Past verb built on sukūn because the subject tāʾ is attached.');
+ const subjectTa=part('التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Tāʾ is an attached pronoun built on ḍamm in the nominative position as subject.');
+ const pastI=(word,gloss,waw=false)=>answerParts(word,gloss,[...(waw?[mkWaw()]:[]),pastWithTa,subjectTa]);
+ const obj=(word,gloss,n)=>token(word,gloss,`مَفْعُولٌ بِهِ ${n===1?'أَوَّلٌ':'ثَانٍ'} مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.`,`${n===1?'First':'Second'} direct object, accusative with a visible fatḥah.`);
+ const hObject=part('الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ أَوَّلٌ.','Hāʾ is an attached pronoun built on ḍamm in the accusative position as first direct object.');
+ const silentFemTa=part('التَّاءُ لِلتَّأْنِيثِ، مَبْنِيَّةٌ عَلَى السُّكُونِ وَلَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Tāʾ marks feminine gender, is built on sukūn, and has no syntactic position.');
+ const nGuard=part('النُّونُ لِلْوِقَايَةِ، مَبْنِيَّةٌ عَلَى الْكَسْرِ وَلَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Protective nūn is built on kasr and has no syntactic position.');
+ const yaFirst=part('الْيَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ أَوَّلٌ.','Yāʾ is an attached pronoun built on sukūn in the accusative position as first direct object.');
+ const fi=token('فِي','in','حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Preposition built on sukūn with no syntactic position.');
+ return [
+  releaseBook('zanna-p154-01',154,'ظَنَنْتُ زَيْدًا قَائِمًا','I thought Zayd was standing.',[
+   pastI('ظَنَنْتُ','I thought'),obj('زَيْدًا','Zayd',1),obj('قَائِمًا','standing',2)
+  ],'The author’s first illustration of the verbs of the heart. Note 5 identifies the attached subject and both objects.','أَوَّلُ مِثَالٍ ضَرَبَهُ الْمُؤَلِّفُ لِأَفْعَالِ الْقُلُوبِ. وَتُعَيِّنُ الْحَاشِيَةُ الْخَامِسَةُ الْفَاعِلَ الْمُتَّصِلَ وَالْمَفْعُولَيْنِ.'),
+  releaseBook('zanna-p154-02',154,'حَسِبْتُ التُّقَى وَالْجُودَ خَيْرَ تِجَارَةٍ','I held piety and generosity to be the best trade.',[
+   answerParts('حَسِبْتُ','I held',[part('فِعْلٌ مَاضٍ بِمَعْنَى «أَيْقَنْتُ»، مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.','Past verb meaning “I was certain,” built on sukūn because the subject tāʾ is attached.'),subjectTa]),
+   token('التُّقَى','piety','مَفْعُولٌ بِهِ أَوَّلٌ مَنْصُوبٌ بِفَتْحَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.','First direct object, accusative with an estimated fatḥah on alif, which cannot bear a vowel.'),
+   answerParts('وَالْجُودَ','and generosity',[mkWaw(),part('«الْجُودَ» مَعْطُوفٌ عَلَى «التُّقَى»، مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.','Al-jūda is coordinated with al-tuqā, accusative with a visible fatḥah.')]),
+   token('خَيْرَ','the best','مَفْعُولٌ بِهِ ثَانٍ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Second direct object, accusative with a visible fatḥah, and the first term of an iḍāfah.'),
+   token('تِجَارَةٍ','trade','مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ.','Second term of the iḍāfah, genitive with a visible kasrah.')
+  ],'The author prints this single hemistich. Note 6, printed across pp.154–155, cites a different Dīwān wording and supplies the rest of the verse separately; neither is inserted in the displayed text. Its parse names the first object, the coordinated noun, and the second object.','يَطْبَعُ الْمُؤَلِّفُ هَذَا الشَّطْرَ وَحْدَهُ. وَفِي الْحَاشِيَةِ السَّادِسَةِ الْمُمْتَدَّةِ فِي ص ١٥٤–١٥٥ لَفْظٌ آخَرُ مِنَ الدِّيوَانِ وَعَجُزُ الْبَيْتِ، وَلَيْسَا مِنَ اللَّفْظِ الْمَعْرُوضِ. وَفِيهَا إِعْرَابُ الْمَفْعُولِ الْأَوَّلِ وَالْمَعْطُوفِ وَالْمَفْعُولِ الثَّانِي.'),
+  releaseBook('zanna-p155-01',155,'وَخِلْتُ عَمْرًا شَاخِصًا','And I thought ʿAmr was setting out.',[
+   pastI('وَخِلْتُ','and I thought',true),obj('عَمْرًا','ʿAmr',1),obj('شَاخِصًا','setting out',2)
+  ],'The main text prints the model with khiltu. Note 1 parses the two objects and glosses shākhiṣan as traveling.','يَطْبَعُ الْمَتْنُ الْمِثَالَ بِـ«خِلْتُ». وَتُعْرِبُ الْحَاشِيَةُ الْأُولَى الْمَفْعُولَيْنِ وَتُفَسِّرُ «شَاخِصًا» بِـ«مُسَافِرًا».'),
+  {
+   ...release3QuranRange('zanna-p155-02',155,'إِنَّهُمْ يَرَوْنَهُ بَعِيدًا وَنَرَاهُ قَرِيبًا','Indeed, they deem it far off, but We see it as near.',[
+    answerParts('إِنَّهُمْ','indeed they',[
+     part('«إِنَّ» حَرْفُ تَوْكِيدٍ وَنَصْبٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Inna is an emphatic particle that makes its ism accusative, built on fatḥ with no syntactic position.'),
+     part('الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ نَصْبٍ اسْمُ «إِنَّ»، وَالْمِيمُ عَلَامَةُ الْجَمْعِ مَبْنِيَّةٌ عَلَى السُّكُونِ لَا مَحَلَّ لَهَا.','Hāʾ is attached, built on ḍamm in the accusative position as the ism of inna. The plural mīm is built on sukūn and has no syntactic position.')
+    ]),
+    answerParts('يَرَوْنَهُ','they deem it',[
+     part('«يَرَوْنَ» فِعْلٌ مُضَارِعٌ بِمَعْنَى «يَظُنُّونَ»، مَرْفُوعٌ بِثُبُوتِ النُّونِ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','Yarawna means “they think”; this present verb is indicative with retained nūn as one of the five verbs.'),
+     part('وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ. وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرُ «إِنَّ».','Plural wāw is an attached pronoun built on sukūn in the nominative position as subject. The verbal clause is in the nominative position as the khabar of inna.'),
+     hObject
+    ]),
+    obj('بَعِيدًا','far off',2),
+    answerParts('وَنَرَاهُ','but We deem it',[
+     mkWaw(),
+     part('«نَرَى» فِعْلٌ مُضَارِعٌ لِلْيَقِينِ، مَرْفُوعٌ بِضَمَّةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ نَحْنُ.','Narā conveys certainty. It is a present verb, indicative with an estimated ḍammah on alif, which cannot bear a vowel. Its required implicit subject is “We.”'),
+     hObject
+    ]),
+    obj('قَرِيبًا','near',2)
+   ],70,6,7,'الْمَعَارِجِ','One printed ornament encloses both verses, with the two verse markers outside the grammatical word sequence. Note 2 distinguishes conjecture in yarawnahu from certainty in narāhu and parses both sets of objects.','يَضُمُّ إِطَارُ الِاقْتِبَاسِ الْمَطْبُوعُ الْآيَتَيْنِ. وَعَلَامَتَا الْآيَتَيْنِ خَارِجَ تَسَلْسُلِ الْكَلِمَاتِ الْمُعْرَبَةِ. وَتُفَرِّقُ الْحَاشِيَةُ الثَّانِيَةُ بَيْنَ الظَّنِّ فِي «يَرَوْنَهُ» وَالْيَقِينِ فِي «نَرَاهُ»، وَتُعْرِبُ الْمَفْعُولَيْنِ فِي الْمَوْضِعَيْنِ.'),
+   verseMarkers:[{after:3,ayah:6},{after:5,ayah:7}]
+  },
+  releaseQuran('zanna-p156-01',156,'إِنْ عَلِمْتُمُوهُنَّ مُؤْمِنَاتٍ','If you know them to be believers…',[
+   token('إِنْ','if','حَرْفُ شَرْطٍ جَازِمٌ يَجْزِمُ فِعْلَيْنِ، مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Conditional particle governing two jussives, built on sukūn with no syntactic position.'),
+   answerParts('عَلِمْتُمُوهُنَّ','you know them',[
+    part('«عَلِمْ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ، فِي مَحَلِّ جَزْمٍ فِعْلُ الشَّرْطِ.','ʿAlim is a past verb built on sukūn in the jussive position as the condition verb.'),
+    part('التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ. وَالْمِيمُ لِلْجَمْعِ وَالْوَاوُ لِلْإِشْبَاعِ، وَلَا مَحَلَّ لَهُمَا.','Attached tāʾ is built on ḍamm in the nominative position as subject. Mīm marks the plural and wāw lengthens the vowel; neither has a syntactic position.'),
+    part('الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ أَوَّلٌ، وَالنُّونُ عَلَامَةُ جَمْعِ الْإِنَاثِ لَا مَحَلَّ لَهَا.','Hāʾ is an attached pronoun built on ḍamm in the accusative position as first direct object; nūn marks the feminine plural and has no syntactic position.')
+   ]),
+   token('مُؤْمِنَاتٍ','believing women','مَفْعُولٌ بِهِ ثَانٍ مَنْصُوبٌ بِالْكَسْرَةِ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُؤَنَّثٍ سَالِمٌ.','Second direct object, accusative with kasrah in place of fatḥah because it is a sound feminine plural.')
+  ],60,10,'الْمُمْتَحَنَةِ','The ornament opens with in, not fa-in. The fāʾ parsed in note 1 belongs to the surrounding verse, outside the printed ornament and the cards. The note identifies the condition verb and both objects. It calls the attached tāʾ fixed on sukūn; the app parses tāʾ here as built on ḍamm. The answer to the condition follows beyond the excerpt.','يَبْدَأُ إِطَارُ الِاقْتِبَاسِ بِـ«إِنْ» دُونَ الْفَاءِ. وَالْفَاءُ الَّتِي تُعْرِبُهَا الْحَاشِيَةُ الْأُولَى مِنْ سِيَاقِ الْآيَةِ خَارِجَ هَذَا الْإِطَارِ وَخَارِجَ الْبِطَاقَاتِ. وَتُعْرِبُ الْحَاشِيَةُ فِعْلَ الشَّرْطِ وَالْمَفْعُولَيْنِ، وَتَذْكُرُ أَنَّ تَاءَ الْفَاعِلِ مَبْنِيَّةٌ عَلَى السُّكُونِ، وَيُعْرِبُهَا التَّطْبِيقُ هُنَا مَبْنِيَّةً عَلَى الضَّمِّ. وَجَوَابُ الشَّرْطِ بَعْدَ الْمَقْطَعِ.'),
+  releaseBook('zanna-p156-02',156,'زَعَمَتْنِي شَيْخًا وَلَسْتُ بِشَيْخٍ إِنَّمَا الشَّيْخُ مَنْ يَدِبُّ دَبِيبًا','She claimed I was an old man, but I am not. An old man is only one who shuffles.',[
+   answerParts('زَعَمَتْنِي','she claimed that I was',[
+    part('«زَعَمَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هِيَ.','Zaʿama is a past verb built on fatḥ. Its optional implicit subject is “she.”'),
+    silentFemTa,nGuard,yaFirst
+   ]),
+   obj('شَيْخًا','an old man',2),
+   answerParts('وَلَسْتُ','though I am not',[
+    part('الْوَاوُ حَرْفُ حَالٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Circumstantial wāw is built on fatḥ and has no syntactic position.'),
+    part('«لَيْسَ» فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الرَّفْعِ.','Laysa is a deficient past verb built on sukūn because nominative tāʾ is attached.'),
+    part('التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ اسْمُ «لَيْسَ».','Tāʾ is an attached pronoun built on ḍamm in the nominative position as the ism of laysa.')
+   ]),
+   answerParts('بِشَيْخٍ','an old man',[
+    part('الْبَاءُ حَرْفُ جَرٍّ زَائِدٌ مَبْنِيٌّ عَلَى الْكَسْرِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Bāʾ is an added preposition built on kasr and has no syntactic position.'),
+    part('«شَيْخٍ» خَبَرُ «لَيْسَ» مَنْصُوبٌ بِفَتْحَةٍ مُقَدَّرَةٍ؛ مَنَعَ مِنْ ظُهُورِهَا الْكَسْرَةُ الَّتِي جَلَبَتْهَا الْبَاءُ الزَّائِدَةُ. وَالْجُمْلَةُ فِي مَحَلِّ نَصْبٍ حَالٌ.','Shaykhin is the khabar of laysa, accusative with an estimated fatḥah, which is displaced by the kasrah governed by the added bāʾ. The clause is in the accusative position as a circumstantial clause.')
+   ]),
+   answerParts('إِنَّمَا','only',[
+    part('«إِنَّ» حَرْفُ تَوْكِيدٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ، كَفَّتْهُ «مَا» عَنِ الْعَمَلِ.','Inna is an emphatic particle built on fatḥ with no syntactic position; mā prevents it from governing.'),
+    part('«مَا» حَرْفٌ كَافٌّ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Mā is the blocking particle, built on sukūn with no syntactic position.')
+   ]),
+   token('الشَّيْخُ','an old man','مُبْتَدَأٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ.','Mubtadaʾ, nominative with a visible ḍammah.'),
+   token('مَنْ','one who','اسْمٌ مَوْصُولٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','Relative pronoun built on sukūn in the nominative position as khabar.'),
+   token('يَدِبُّ','shuffles','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ، وَهُوَ الْعَائِدُ عَلَى «مَنْ». وَجُمْلَتُهُ صِلَةُ «مَنْ» لَا مَحَلَّ لَهَا.','Present verb, indicative with a visible ḍammah; its optionally hidden subject “he” refers back to man. The relative clause of man has no syntactic position.'),
+   token('دَبِيبًا','with slow steps','مَفْعُولٌ مُطْلَقٌ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.','Cognate object, accusative with a visible fatḥah.')
+  ],'Both hemistichs occur in the main text. Note 3 attributes the verse to Abū Umayya Aws al-Ḥanafī, parses it and identifies the two objects of zaʿama. The model sentence reported in the manuscript note 2 is separate.','طَبَعَ الْمَتْنُ شَطْرَيِ الْبَيْتِ. وَتَنْسُبُهُ الْحَاشِيَةُ الثَّالِثَةُ إِلَى أَبِي أُمَيَّةَ أَوْسٍ الْحَنَفِيِّ، وَتُعْرِبُهُ وَتُعَيِّنُ مَفْعُولَيْ «زَعَمَ». وَمِثَالُ النُّسْخَةِ فِي الْحَاشِيَةِ الثَّانِيَةِ مُسْتَقِلٌّ.'),
+  releaseQuran('zanna-p156-03',156,'وَجَعَلُوا الْمَلَائِكَةَ الَّذِينَ هُمْ عِبَادُ الرَّحْمَنِ إِنَاثًا','And they regard the angels, who are servants of the Most Merciful, as female.',[
+   answerParts('وَجَعَلُوا','and they regarded',[
+    mkWaw(),
+    part('«جَعَلُوا» فِعْلٌ مَاضٍ بِمَعْنَى «اعْتَقَدُوا»، مَبْنِيٌّ عَلَى الضَّمِّ لِاتِّصَالِهِ بِوَاوِ الْجَمَاعَةِ.','Jaʿalū means “they believed.” This past verb is built on ḍamm because plural wāw is attached.'),
+    part('وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ، وَالْأَلِفُ فَارِقَةٌ.','Plural wāw is an attached pronoun built on sukūn in the nominative position as subject. The alif is orthographic.')
+   ]),
+   obj('الْمَلَائِكَةَ','the angels',1),
+   token('الَّذِينَ','who','اسْمٌ مَوْصُولٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ نَصْبٍ نَعْتٌ لِـ«الْمَلَائِكَةَ».','Relative pronoun built on fatḥ in the accusative position as an adjective of al-malāʾikata.'),
+   token('هُمْ','they','ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ؛ وَالْمِيمُ لِلْجَمْعِ.','Detached pronoun built on sukūn in the nominative position as mubtadaʾ; mīm marks the plural.'),
+   token('عِبَادُ','servants','خَبَرٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Khabar, nominative with a visible ḍammah, and the first term of an iḍāfah.'),
+   token('الرَّحْمَنِ','the Most Merciful','مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ. وَجُمْلَةُ «هُمْ عِبَادُ الرَّحْمَنِ» صِلَةُ الْمَوْصُولِ لَا مَحَلَّ لَهَا، وَالْعَائِدُ «هُمْ».','Second term of the iḍāfah, genitive with a visible kasrah. The relative clause has no syntactic position; hum is the resumptive pronoun.'),
+   obj('إِنَاثًا','female',2)
+  ],43,19,'الزُّخْرُفِ','The printed ornament runs from wa-jaʿalū to ināthan. Note 4 spans pp.156–157, distinguishes believing from transforming, and parses the two objects. The app presents the detached pronoun as a whole; the note calls it built on ḍamm and separately identifies plural mīm. The printed nominative plural ʿibādu agrees with Ḥafṣ from ʿĀṣim, among other readers; ʿinda is a distinct transmitted reading.','يَبْدَأُ الْمَقْطَعُ بِـ«وَجَعَلُوا» وَيَنْتَهِي بِـ«إِنَاثًا». وَتَمْتَدُّ الْحَاشِيَةُ الرَّابِعَةُ فِي ص ١٥٦–١٥٧، فَتُفَرِّقُ بَيْنَ الِاعْتِقَادِ وَالتَّصْيِيرِ وَتُعْرِبُ الْمَفْعُولَيْنِ. وَيُعْرِبُ التَّطْبِيقُ الضَّمِيرَ الْمُنْفَصِلَ كُلَّهُ، وَتَذْكُرُ الْحَاشِيَةُ الْبِنَاءَ عَلَى الضَّمِّ وَتَفْصِلُ مِيمَ الْجَمْعِ. وَالْمَطْبُوعُ «عِبَادُ» بِالرَّفْعِ وَالْجَمْعِ يُوَافِقُ رِوَايَةَ حَفْصٍ عَنْ عَاصِمٍ وَغَيْرَهَا، وَ«عِنْدَ» قِرَاءَةٌ مَنْقُولَةٌ أُخْرَى.'),
+  releaseBook('zanna-p157-01',157,'قَدْ كُنْتُ أَحْجُو أَبَا عَمْرٍو أَخَا ثِقَةٍ','I had deemed Abū ʿAmr a brother worthy of trust.',[
+   token('قَدْ','indeed','حَرْفُ تَحْقِيقٍ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Confirming particle built on sukūn with no syntactic position.'),
+   answerParts('كُنْتُ','I was',[
+    part('«كَانَ» فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الرَّفْعِ.','Kāna is a deficient past verb built on sukūn because nominative tāʾ is attached.'),
+    part('التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ اسْمُ «كَانَ».','Tāʾ is an attached pronoun built on ḍamm in the nominative position as the ism of kāna.')
+   ]),
+   token('أَحْجُو','deem','فِعْلٌ مُضَارِعٌ بِمَعْنَى «أَظُنُّ»، مَرْفُوعٌ بِضَمَّةٍ مُقَدَّرَةٍ عَلَى الْوَاوِ لِلثِّقَلِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنَا. وَجُمْلَتُهُ فِي مَحَلِّ نَصْبٍ خَبَرُ «كَانَ».','Present verb meaning “I deem,” indicative with an estimated ḍammah on wāw to avoid heaviness. Its required implicit subject is “I.” The verbal clause is in the accusative position as the khabar of kāna.'),
+   token('أَبَا','father of','مَفْعُولٌ بِهِ أَوَّلٌ مَنْصُوبٌ بِالْأَلِفِ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ، وَهُوَ مُضَافٌ.','First direct object, accusative with alif in place of fatḥah because it is one of the six nouns, and the first term of an iḍāfah.'),
+   token('عَمْرٍو','ʿAmr','مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ، وَالْوَاوُ زَائِدَةٌ فِي الْخَطِّ.','Second term of the iḍāfah, genitive with a visible kasrah. The wāw is written but silent.'),
+   token('أَخَا','a brother of','مَفْعُولٌ بِهِ ثَانٍ مَنْصُوبٌ بِالْأَلِفِ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ السِّتَّةِ، وَهُوَ مُضَافٌ.','Second direct object, accusative with alif in place of fatḥah because it is one of the six nouns, and the first term of an iḍāfah.'),
+   token('ثِقَةٍ','trustworthiness','مُضَافٌ إِلَيْهِ مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ.','Second term of the iḍāfah, genitive with a visible kasrah.')
+  ],'The unbracketed hemistich demonstrates aḥjū with two objects. Note 1 gives their alif endings and attributes the line to Tamīm ibn Ubayy ibn Muqbil. The second hemistich comes from manuscript kāf, as note [2] states, and stays outside the displayed author witness.','يُبَيِّنُ الشَّطْرُ غَيْرُ الْمَحْصُورِ بَيْنَ الْمَعْقُوفَيْنِ عَمَلَ «أَحْجُو» فِي مَفْعُولَيْنِ. وَتُبَيِّنُ الْحَاشِيَةُ الْأُولَى نَصْبَهُمَا بِالْأَلِفِ وَتَنْسُبُ الْبَيْتَ إِلَى تَمِيمِ بْنِ أُبَيِّ بْنِ مُقْبِلٍ. وَالْعَجُزُ زِيَادَةٌ مِنَ النُّسْخَةِ «ك» بِحَسَبِ التَّنْبِيهِ الثَّانِيِ، وَلَيْسَ فِي الشَّاهِدِ الْمَعْرُوضِ.'),
+  releaseBook('zanna-p158-01',158,'فَلَا تَعْدُدِ الْمَوْلَى شَرِيكَكَ فِي الْغِنَى','So do not count an ally as your companion in wealth.',[
+   answerParts('فَلَا','so do not',[part('الْفَاءُ حَرْفُ عَطْفٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Fāʾ is a conjunction built on fatḥ and has no syntactic position.'),part('«لَا» حَرْفُ نَهْيٍ وَجَزْمٍ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Lā is a prohibitive, jussive particle built on sukūn with no syntactic position.')]),
+   whyToken('تَعْدُدِ','count','فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا»، وَعَلَامَةُ جَزْمِهِ السُّكُونُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.','Present verb made jussive by lā, with sukūn. Its required implicit subject is “you.”','حُرِّكَتِ الدَّالُ بِالْكَسْرِ لِالْتِقَاءِ السَّاكِنَيْنِ، وَهُوَ كَسْرٌ عَارِضٌ لَا يُغَيِّرُ الْجَزْمَ.','The final dāl has a linking kasrah to avoid two sukūns; it does not change the jussive.'),
+   token('الْمَوْلَى','the ally','مَفْعُولٌ بِهِ أَوَّلٌ مَنْصُوبٌ بِفَتْحَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.','First direct object, accusative with an estimated fatḥah on alif, which cannot bear a vowel.'),
+   answerParts('شَرِيكَكَ','your companion',[
+    part('«شَرِيكَ» مَفْعُولٌ بِهِ ثَانٍ مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ، وَهُوَ مُضَافٌ.','Sharīka is the second direct object, accusative with a visible fatḥah, and the first term of an iḍāfah.'),
+    part('الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Kāf is attached, built on fatḥ in the genitive position as the second term of the iḍāfah.')
+   ]),
+   fi,
+   token('الْغِنَى','wealth','اسْمٌ مَجْرُورٌ بِـ«فِي» بِكَسْرَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ. وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«شَرِيكَكَ».','Noun governed by fī, genitive with an estimated kasrah on alif, which cannot bear a vowel. The prepositional phrase attaches to sharīkaka.')
+  ],'The author’s hemistich illustrates ʿadda as a verb of the heart. Note 1 attributes it to al-Nuʿmān ibn Bashīr, identifies the two objects and explains the linking kasrah. The next hemistich is bracketed and identified as a manuscript addition by p.157 note [2].','يَدُلُّ شَطْرُ الْمَتْنِ عَلَى عَمَلِ «عَدَّ» الْقَلْبِيَّةِ. وَتَنْسُبُهُ الْحَاشِيَةُ الْأُولَى إِلَى النُّعْمَانِ بْنِ بَشِيرٍ، وَتُعَيِّنُ الْمَفْعُولَيْنِ وَتَشْرَحُ كَسْرَةَ الْوَصْلِ. وَالْعَجُزُ بَيْنَ مَعْقُوفَيْنِ، وَهُوَ زِيَادَةُ نُسْخَةٍ بِحَسَبِ التَّنْبِيهِ الثَّانِي فِي ص ١٥٧.'),
+  releaseBook('zanna-p158-02',158,'فَهَبْنِي امْرَأً هَالِكًا','Then suppose me a man doomed to perish.',[
+   answerParts('فَهَبْنِي','then suppose me',[
+    part('الْفَاءُ رَابِطَةٌ لِجَوَابِ الشَّرْطِ فِي تَمَامِ الْبَيْتِ، مَبْنِيَّةٌ عَلَى الْفَتْحِ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Fāʾ links the conditional answer in the complete verse; it is built on fatḥ with no syntactic position.'),
+    part('«هَبْ» فِعْلُ أَمْرٍ جَامِدٌ بِمَعْنَى «افْرِضْ»، مَبْنِيٌّ عَلَى السُّكُونِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.','Hab is a fixed imperative meaning “suppose,” built on sukūn, with a required implicit subject, “you.”'),
+    nGuard,yaFirst
+   ]),
+   obj('امْرَأً','a man',2),
+   token('هَالِكًا','doomed to perish','نَعْتٌ لِـ«امْرَأً» مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ.','Adjective of imraʾan, accusative with a visible fatḥah.')
+  ],'Only the unbracketed author witness is displayed. Note 2, carried from p.158 to p.159, parses the first object yāʾ, the second object imraʾan, and the adjective; its discussion of the condition concerns the bracketed manuscript context.','لَا يُعْرَضُ إِلَّا شَاهِدُ الْمَتْنِ غَيْرُ الْمَحْصُورِ بَيْنَ الْمَعْقُوفَيْنِ. وَتُعْرِبُ الْحَاشِيَةُ الثَّانِيَةُ الْمُمْتَدَّةُ فِي ص ١٥٨–١٥٩ الْيَاءَ مَفْعُولًا أَوَّلَ وَ«امْرَأً» مَفْعُولًا ثَانِيًا وَ«هَالِكًا» نَعْتًا. وَكَلَامُهَا عَنِ الشَّرْطِ فِي سِيَاقِ زِيَادَةِ النُّسْخَةِ الْمَحْصُورَةِ بَيْنَ الْمَعْقُوفَيْنِ.')
+ ];
+})();
+
+const z5bPart=(ar,en)=>({ar,en});
+const z5bFirst=(w,g)=>token(w,g,'مَفْعُولٌ بِهِ أَوَّلُ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','First object, accusative with visible fatḥah.');
+const z5bSecond=(w,g)=>token(w,g,'مَفْعُولٌ بِهِ ثَانٍ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','Second object, accusative with visible fatḥah.');
+const z5bSingle=(w,g)=>token(w,g,'مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','Direct object, accusative with visible fatḥah.');
+const z5bIdafa='مُضَافٌ إِلَيْهِ مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ';
+const z5bIdafaEn='Second term of the iḍāfah, genitive with visible kasrah';
+const z5bMim=z5bPart('الْمِيمُ عَلَامَةُ الْجَمْعِ، مَبْنِيَّةٌ عَلَى السُّكُونِ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Mīm marks the plural, fixed with sukūn and with no syntactic position.');
+const z5bFirstTa=z5bPart('التَّاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Attached tāʾ is fixed with ḍamm in the nominative subject position.');
+const z5bPast=(w,base,g,modAr='',modEn='',add=[])=>answerParts(w,g,[z5bPart(`«${base}» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ${modAr}.`,`Past verb, fixed with sukūn because the subject tāʾ is attached${modEn}.`),z5bFirstTa,...add]);
+const z5bWaw=z5bPart('الْوَاوُ حَرْفُ عَطْفٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Wāw is a conjunction, fixed with fatḥ and with no syntactic position.');
+const z5bWawPlural=z5bPart('وَاوُ الْجَمَاعَةِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','The attached plural wāw is fixed with sukūn in the nominative subject position.');
+const z5bDhammHa=(roleAr,roleEn)=>z5bPart(`الْهَاءُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ ${roleAr}.`,`Attached hāʾ is fixed with ḍamm in the ${roleEn} position.`);
+const z5bDhammKaf=(roleAr,roleEn)=>z5bPart(`الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ ${roleAr}.`,`Attached kāf is fixed with ḍamm in the ${roleEn} position.`);
+const z5bZaydNom=token('زَيْدٌ','Zayd','مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Mubtadaʾ, nominative with visible ḍammah.');
+const z5bStandingNom=token('قَائِمٌ','standing','خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Khabar, nominative with visible ḍammah.');
+const zannaB=[
+  releaseQuran('zanna-p159-01',159,'تَجِدُوهُ عِنْدَ اللَّهِ هُوَ خَيْرًا','You will find it better with Allah.',[
+    answerParts('تَجِدُوهُ','you will find it',[
+      z5bPart('«تَجِدُ» فِعْلٌ مُضَارِعٌ مَجْزُومٌ فِي جَوَابِ «مَا» الشَّرْطِيَّةِ السَّابِقَةِ، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','Present verb, jussive as the response to the preceding conditional mā, marked by deletion of nūn because it is one of the five verbs.'),
+      z5bWawPlural,z5bDhammHa('نَصْبٍ مَفْعُولٌ بِهِ أَوَّلُ','accusative first-object'),
+    ]),
+    token('عِنْدَ','with','ظَرْفُ مَكَانٍ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُتَعَلِّقٌ بِـ«تَجِدُوهُ»، وَهُوَ مُضَافٌ.','Adverb of place, accusative with visible fatḥah, attached to tajidūhu. It is the first term of an iḍāfah.'),
+    token('اللَّهِ','Allah',`${z5bIdafa}.`,`${z5bIdafaEn}.`),
+    token('هُوَ','[separating pronoun]','ضَمِيرُ فَصْلٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Separating pronoun, fixed with fatḥ and with no syntactic position.'),
+    z5bSecond('خَيْرًا','better'),
+  ],73,20,'الْمُزَّمِّلِ','The main text encloses these five words. Note 1 quotes the preceding condition and following words as verse context, not part of the exercise, and parses the displayed words. The reading shown agrees with Ḥafṣ.','يُحِيطُ الْمَتْنُ بِهَذِهِ الْكَلِمَاتِ الْخَمْسِ. وَتَذْكُرُ الْحَاشِيَةُ الْأُولَى الشَّرْطَ السَّابِقَ وَبَقِيَّةَ السِّيَاقِ خَارِجَ حَدِّ التَّمْرِينِ، وَتُعْرِبُ الْكَلِمَاتِ الْمَعْرُوضَةَ. وَالضَّبْطُ يُوَافِقُ رِوَايَةَ حَفْصٍ.'),
+  releaseQuran('zanna-p159-02',159,'إِنَّهُمْ أَلْفَوْا آبَاءَهُمْ ضَالِّينَ','Indeed, they found their fathers astray.',[
+    answerParts('إِنَّهُمْ','indeed they',[
+      z5bPart('«إِنَّ» حَرْفُ تَوْكِيدٍ وَنَصْبٍ، يَنْصِبُ الِاسْمَ وَيَرْفَعُ الْخَبَرَ، مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Inna emphasizes, makes its ism accusative and raises its khabar; it is fixed with fatḥ and has no syntactic position.'),
+      z5bDhammHa('نَصْبٍ اسْمُ «إِنَّ»','accusative ism of inna'),z5bMim,
+    ]),
+    answerParts('أَلْفَوْا','found',[
+      z5bPart('«أَلْفَى» فِعْلٌ مَاضٍ يَنْصِبُ مَفْعُولَيْنِ، مَبْنِيٌّ عَلَى الضَّمِّ الْمُقَدَّرِ عَلَى الْأَلِفِ الْمَحْذُوفَةِ.','Past verb taking two objects, fixed with ḍamm estimated on the deleted alif.'),
+      z5bWawPlural,z5bPart('وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرُ «إِنَّ».','The verbal clause is in the nominative position as inna’s khabar.'),
+    ]),
+    answerParts('آبَاءَهُمْ','their fathers',[
+      z5bPart('«آبَاءَ» مَفْعُولٌ بِهِ أَوَّلُ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','First object, accusative with visible fatḥah. It is the first term of an iḍāfah.'),
+      z5bDhammHa('جَرٍّ مُضَافٌ إِلَيْهِ','genitive second-term-of-iḍāfah'),z5bMim,
+    ]),
+    token('ضَالِّينَ','astray','مَفْعُولٌ بِهِ ثَانٍ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْيَاءُ نِيَابَةً عَنِ الْفَتْحَةِ؛ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.','Second object, accusative with yāʾ in place of fatḥah because it is a sound masculine plural.'),
+  ],37,69,'الصَّافَّاتِ','The main text quotes all four words and prints a final verse marker. Note 2 supplies the operation and two objects of alfā. The reading shown agrees with Ḥafṣ.','يُورِدُ الْمَتْنُ الْكَلِمَاتِ الْأَرْبَعَ وَعَلَامَةَ آخِرِ الْآيَةِ. وَتَذْكُرُ الْحَاشِيَةُ الثَّانِيَةُ عَمَلَ «أَلْفَى» وَمَفْعُولَيْهِ. وَالضَّبْطُ يُوَافِقُ رِوَايَةَ حَفْصٍ.'),
+  releaseBook('zanna-p160-01',160,'دَرَيْتُ زَيْدًا قَائِمًا','I knew Zayd to be standing.',[
+    z5bPast('دَرَيْتُ','دَرَيْ','I knew','، وَهُوَ بِمَعْنَى «عَلِمَ» يَنْصِبُ مَفْعُولَيْنِ','; here it means “know” and takes two objects'),z5bFirst('زَيْدًا','Zayd'),z5bSecond('قَائِمًا','standing'),
+  ],'In note 1, the edition takes darā in the sense of ʿalima and parses two objects. The list’s introductory wāw is outside the standalone practice sentence.','تَجْعَلُ الْحَاشِيَةُ الْأُولَى «دَرَى» بِمَعْنَى «عَلِمَ»، وَتُعْرِبُ مَفْعُولَيْهِ. وَوَاوُ سَرْدِ الْأَمْثِلَةِ خَارِجَ جُمْلَةِ التَّمْرِينِ.'),
+  releaseBook('zanna-p160-02',160,'تَعَلَّمْ شِفَاءَ النَّفْسِ قَهْرَ عَدُوِّهَا فَبَالِغْ بِلُطْفٍ فِي التَّحَيُّلِ وَالْمَكْرِ','Know that the soul’s healing lies in overcoming its enemy; so exert yourself with finesse in devising and stratagem.',[
+    answerParts('تَعَلَّمْ','know!',[
+      z5bPart('فِعْلُ أَمْرٍ بِمَعْنَى «اعْلَمْ»، مَبْنِيٌّ عَلَى السُّكُونِ وَيَنْصِبُ مَفْعُولَيْنِ.','Imperative meaning “know,” fixed with sukūn and taking two objects.'),
+      z5bPart('وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.','Its obligatorily hidden subject is “you.”'),
+    ]),
+    token('شِفَاءَ','healing','مَفْعُولٌ بِهِ أَوَّلُ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','First object, accusative with visible fatḥah. It is the first term of an iḍāfah.'),
+    token('النَّفْسِ','of the soul',`${z5bIdafa}.`,`${z5bIdafaEn}.`),
+    token('قَهْرَ','overcoming','مَفْعُولٌ بِهِ ثَانٍ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','Second object, accusative with visible fatḥah. It is the first term of an iḍāfah.'),
+    answerParts('عَدُوِّهَا','its enemy',[
+      z5bPart(`«عَدُوِّ» ${z5bIdafa}، وَهُوَ مُضَافٌ.`,`${z5bIdafaEn}. It is also the first term of another iḍāfah.`),
+      z5bPart('«هَا» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ، يَعُودُ إِلَى «النَّفْسِ».','Attached hā is fixed with sukūn in the genitive position as the second term of the iḍāfah; it refers to “the soul.”'),
+    ]),
+    answerParts('فَبَالِغْ','so exert yourself',[
+      z5bPart('الْفَاءُ حَرْفُ عَطْفٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Fāʾ is a conjunction, fixed with fatḥ and with no syntactic position.'),
+      z5bPart('«بَالِغْ» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى السُّكُونِ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ أَنْتَ.','Imperative, fixed with sukūn; its obligatorily hidden subject is “you.”'),
+    ]),
+    answerParts('بِلُطْفٍ','with finesse',[
+      z5bPart('الْبَاءُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْكَسْرِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Bāʾ is a preposition, fixed with kasr and with no syntactic position.'),
+      z5bPart('«لُطْفٍ» اسْمٌ مَجْرُورٌ بِالْبَاءِ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ، وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«بَالِغْ».','Noun governed by bāʾ, genitive with visible kasrah. The phrase attaches to bāligh.'),
+    ]),
+    token('فِي','in','حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Preposition, fixed with sukūn and with no syntactic position.'),
+    token('التَّحَيُّلِ','devising','اسْمٌ مَجْرُورٌ بِـ«فِي»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ، وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«لُطْفٍ».','Noun governed by fī, genitive with visible kasrah. The phrase attaches to luṭf.'),
+    answerParts('وَالْمَكْرِ','and stratagem',[z5bWaw,z5bPart('«الْمَكْرِ» مَعْطُوفٌ عَلَى «التَّحَيُّلِ» مَجْرُورٌ، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ.','Coordinated with al-taḥayyul, genitive with visible kasrah.')]),
+  ],'The author quotes both hemistichs as one verse. Note 2 attributes it to Ziyād ibn Sayyār al-Jāhilī, glosses taʿallam as iʿlam, gives the two objects and parses the second hemistich.','يُورِدُ الْمُؤَلِّفُ شَطْرَيِ الْبَيْتِ مَعًا. وَتَنْسِبُهُ الْحَاشِيَةُ الثَّانِيَةُ إِلَى زِيَادِ بْنِ سَيَّارٍ الْجَاهِلِيِّ، وَتُفَسِّرُ «تَعَلَّمْ» بِـ«اعْلَمْ»، وَتُبَيِّنُ مَفْعُولَيْهِ وَإِعْرَابَ الشَّطْرِ الثَّانِي.'),
+  releaseBook('zanna-p160-03',160,'ظَنَنْتُ زَيْدًا','I accused Zayd.',[
+    z5bPast('ظَنَنْتُ','ظَنَنْ','I accused','، وَهُوَ بِمَعْنَى «اتَّهَمَ» فَيَتَعَدَّى إِلَى مَفْعُولٍ وَاحِدٍ','; here it means “accuse” and takes one object'),z5bSingle('زَيْدًا','Zayd'),
+  ],'The author explicitly gives the one-object sense “accuse.” The words “meaning I accused him” explain the example and are not part of it. The app supplies the individual parse.','يَذْكُرُ الْمُؤَلِّفُ مَعْنَى «اتَّهَمَ» الْمُتَعَدِّيَ إِلَى مَفْعُولٍ وَاحِدٍ. وَقَوْلُهُ «بِمَعْنَى اتَّهَمْتُهُ» شَرْحٌ خَارِجَ الْمِثَالِ، وَالتَّفْصِيلُ الْإِعْرَابِيُّ مِنَ التَّطْبِيقِ.'),
+  releaseBook('zanna-p160-04',160,'رَأَيْتُ زَيْدًا','I saw Zayd.',[
+    z5bPast('رَأَيْتُ','رَأَيْ','I saw','، وَهُوَ بِمَعْنَى «أَبْصَرَ» فَيَتَعَدَّى إِلَى مَفْعُولٍ وَاحِدٍ','; here it means “see with the eyes” and takes one object'),z5bSingle('زَيْدًا','Zayd'),
+  ],'The author explicitly gives the one-object sense “see with the eyes.” The list’s wāw and the explanation “meaning I saw him” are not part of the standalone example. The app supplies the individual parse.','يَذْكُرُ الْمُؤَلِّفُ مَعْنَى «أَبْصَرَ» الْمُتَعَدِّيَ إِلَى مَفْعُولٍ وَاحِدٍ. وَوَاوُ السَّرْدِ وَقَوْلُهُ «بِمَعْنَى أَبْصَرْتُهُ» خَارِجَ الْمِثَالِ، وَالتَّفْصِيلُ الْإِعْرَابِيُّ مِنَ التَّطْبِيقِ.'),
+  releaseBook('zanna-p160-05',160,'عَلِمْتُ الْمَسْأَلَةَ','I knew the matter.',[
+    z5bPast('عَلِمْتُ','عَلِمْ','I knew','، وَهُوَ بِمَعْنَى «عَرَفَ» فَيَتَعَدَّى إِلَى مَفْعُولٍ وَاحِدٍ','; here it means “be acquainted with” and takes one object'),z5bSingle('الْمَسْأَلَةَ','the matter'),
+  ],'The author explicitly gives the one-object sense “be acquainted with.” The list’s wāw and the explanation “meaning I knew it” are not part of the standalone example. The app supplies the individual parse.','يَذْكُرُ الْمُؤَلِّفُ مَعْنَى «عَرَفَ» الْمُتَعَدِّيَ إِلَى مَفْعُولٍ وَاحِدٍ. وَوَاوُ السَّرْدِ وَقَوْلُهُ «بِمَعْنَى عَرَفْتُهَا» خَارِجَ الْمِثَالِ، وَالتَّفْصِيلُ الْإِعْرَابِيُّ مِنَ التَّطْبِيقِ.'),
+  releaseQuran('zanna-p161-01',161,'فَجَعَلْنَاهُ هَبَاءً مَنْثُورًا','So We made it scattered dust.',[
+    answerParts('فَجَعَلْنَاهُ','so We made it',[
+      z5bPart('الْفَاءُ حَرْفُ عَطْفٍ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Fāʾ is a conjunction, fixed with fatḥ and with no syntactic position.'),
+      z5bPart('«جَعَلْ» فِعْلٌ مَاضٍ لِلتَّصْيِيرِ يَنْصِبُ مَفْعُولَيْنِ، مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنَا الْفَاعِلِينَ.','Past verb of transformation taking two objects, fixed with sukūn because the subject nā is attached.'),
+      z5bPart('«نَا» ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Attached nā is fixed with sukūn in the nominative subject position.'),z5bDhammHa('نَصْبٍ مَفْعُولٌ بِهِ أَوَّلُ','accusative first-object'),
+    ]),z5bSecond('هَبَاءً','dust'),
+    token('مَنْثُورًا','scattered','نَعْتٌ لِـ«هَبَاءً» مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ.','Adjective modifying habāʾan, accusative with visible fatḥah.'),
+  ],25,23,'الْفُرْقَانِ','The main-text ornament begins at fajʿalnāhu. Note 1 parses both objects of jaʿala in its transformation sense and the adjective. The reading shown agrees with Ḥafṣ.','يَبْدَأُ الْمَقْطَعُ فِي الْمَتْنِ بِـ«فَجَعَلْنَاهُ». وَتُعْرِبُ الْحَاشِيَةُ الْأُولَى مَفْعُولَيِ «جَعَلَ» الدَّالَّةِ عَلَى التَّصْيِيرِ وَالنَّعْتَ. وَالضَّبْطُ يُوَافِقُ رِوَايَةَ حَفْصٍ.'),
+  releaseQuran('zanna-p161-02',161,'يَرُدُّونَكُمْ مِنْ بَعْدِ إِيمَانِكُمْ كُفَّارًا','They turn you back into disbelievers after your faith.',[
+    answerParts('يَرُدُّونَكُمْ','they turn you back',[
+      z5bPart('«يَرُدُّ» فِعْلٌ مُضَارِعٌ لِلتَّصْيِيرِ يَنْصِبُ مَفْعُولَيْنِ، مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ ثُبُوتُ النُّونِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','Present verb of transformation taking two objects, indicative with retained nūn because it is one of the five verbs.'),
+      z5bWawPlural,z5bDhammKaf('نَصْبٍ مَفْعُولٌ بِهِ أَوَّلُ','accusative first-object'),z5bMim,
+    ]),
+    token('مِنْ','from','حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى السُّكُونِ لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Preposition, fixed with sukūn and with no syntactic position.'),
+    token('بَعْدِ','after','اسْمٌ مَجْرُورٌ بِـ«مِنْ»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ، وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِمَحْذُوفٍ حَالٍ مِنْ وَاوِ الْجَمَاعَةِ، وَهُوَ مُضَافٌ.','Noun governed by min, genitive with visible kasrah. The phrase attaches to an omitted ḥāl of the subject wāw. It is the first term of an iḍāfah.'),
+    answerParts('إِيمَانِكُمْ','your faith',[
+      z5bPart(`«إِيمَانِ» ${z5bIdafa}، وَهُوَ مُضَافٌ.`,`${z5bIdafaEn}. It is also the first term of another iḍāfah.`),z5bDhammKaf('جَرٍّ مُضَافٌ إِلَيْهِ','genitive second-term-of-iḍāfah'),z5bMim,
+    ]),z5bSecond('كُفَّارًا','disbelievers'),
+  ],2,109,'الْبَقَرَةِ','The ornament starts at yaruddūnakum, not the preceding law. Note 2 treats the prepositional phrase as attached to an omitted ḥāl of the subject wāw. The book shows the connected-recitation mark before min; the app gives its ordinary written form. The reading agrees with Ḥafṣ.','يَبْدَأُ الْمَقْطَعُ بِـ«يَرُدُّونَكُمْ» دُونَ «لَوْ» السَّابِقَةِ. وَتُعَلِّقُ الْحَاشِيَةُ الثَّانِيَةُ الْجَارَّ وَالْمَجْرُورَ بِحَالٍ مَحْذُوفَةٍ مِنْ وَاوِ الْجَمَاعَةِ. وَرَسَمَ الْمَصْدَرُ عَلَامَةَ الْوَصْلِ عَلَى «مِنْ»، وَيَعْرِضُهَا التَّطْبِيقُ بِالرَّسْمِ الْمُعْتَادِ. وَالْقِرَاءَةُ تُوَافِقُ رِوَايَةَ حَفْصٍ.'),
+  releaseQuran('zanna-p161-03',161,'وَاتَّخَذَ اللَّهُ إِبْرَاهِيمَ خَلِيلًا','And Allah took Abraham as a close friend.',[
+    answerParts('وَاتَّخَذَ','and took',[z5bWaw,z5bPart('«اتَّخَذَ» فِعْلٌ مَاضٍ لِلتَّصْيِيرِ يَنْصِبُ مَفْعُولَيْنِ، مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb of transformation taking two objects, fixed with fatḥ.')]),
+    token('اللَّهُ','Allah','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject of the verb, nominative with visible ḍammah.'),z5bFirst('إِبْرَاهِيمَ','Abraham'),z5bSecond('خَلِيلًا','a close friend'),
+  ],4,125,'النِّسَاءِ','The ornament includes the opening wāw and ends at khalīlan. Note 3 parses ittakhadha as a verb of transformation, names its subject, and gives its two objects. The reading shown agrees with Ḥafṣ.','يَشْمَلُ الْمَقْطَعُ وَاوَهُ الْأُولَى وَيَنْتَهِي بِـ«خَلِيلًا». وَتُعْرِبُ الْحَاشِيَةُ الثَّالِثَةُ «اتَّخَذَ» فِعْلَ تَصْيِيرٍ، وَتُعَيِّنُ فَاعِلَهُ وَمَفْعُولَيْهِ. وَالضَّبْطُ يُوَافِقُ رِوَايَةَ حَفْصٍ.'),
+  releaseBook('zanna-p161-04',161,'صَيَّرْتُ الطِّينَ خَزَفًا','I turned the clay into pottery.',[
+    z5bPast('صَيَّرْتُ','صَيَّرْ','I turned','، وَيَنْصِبُ مَفْعُولَيْنِ لِلتَّصْيِيرِ','; it takes two objects in the sense of transformation'),z5bFirst('الطِّينَ','the clay'),z5bSecond('خَزَفًا','pottery'),
+  ],'The author gives this sentence after “and an example is”; note 4 names both objects, defines khazaf, and states their case marks.','يَذْكُرُهُ الْمُؤَلِّفُ بَعْدَ «وَنَحْوُ»، وَتُعَيِّنُ الْحَاشِيَةُ الرَّابِعَةُ الْمَفْعُولَيْنِ وَعَلَامَتَيْ نَصْبِهِمَا وَمَعْنَى «الْخَزَفِ».'),
+  releaseBook('zanna-p161-05',161,'وَهَبَنِي اللَّهُ فِدَاءَكَ','May Allah make me your ransom.',[
+    answerParts('وَهَبَنِي','may He make me',[
+      z5bPart('«وَهَبَ» فِعْلٌ مَاضٍ بِمَعْنَى «صَيَّرَ»، مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb in the sense of ṣayyara, fixed with fatḥ.'),
+      z5bPart('النُّونُ لِلْوِقَايَةِ، مَبْنِيَّةٌ عَلَى الْكَسْرِ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Protective nūn, fixed with kasr and with no syntactic position.'),
+      z5bPart('يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ أَوَّلُ.','Attached first-person yāʾ, fixed with sukūn in the accusative first-object position.'),
+    ]),
+    token('اللَّهُ','Allah','فَاعِلٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject of the verb, nominative with visible ḍammah.'),
+    answerParts('فِدَاءَكَ','your ransom',[
+      z5bPart('«فِدَاءَ» مَفْعُولٌ بِهِ ثَانٍ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','Second object, accusative with visible fatḥah. It is the first term of an iḍāfah.'),
+      z5bPart('الْكَافُ ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Attached kāf is fixed with fatḥ in the genitive position as the second term of the iḍāfah.'),
+    ]),
+  ],'The entire example is on p. 161. Note 5 glosses wahabanī as ṣayyaranī and makes first-person yāʾ the first object. The note gives a visible-fatḥah formula for that pronoun; the app distinguishes its fixed sukūn from its accusative position. The note finishes the rest of the parse at the top of p. 162.','الْمِثَالُ كُلُّهُ فِي ص ١٦١. وَتُفَسِّرُ الْحَاشِيَةُ الْخَامِسَةُ «وَهَبَنِي» بِـ«صَيَّرَنِي»، وَتَجْعَلُ يَاءَ الْمُتَكَلِّمِ مَفْعُولًا بِهِ أَوَّلَ. وَتَذْكُرُ لَهَا الْفَتْحَةَ الظَّاهِرَةَ، وَيُمَيِّزُ التَّطْبِيقُ بَيْنَ بِنَائِهَا عَلَى السُّكُونِ وَمَحَلِّهَا مِنَ النَّصْبِ. وَيَتِمُّ بَاقِي الْإِعْرَابِ فِي الْحَاشِيَةِ فِي أَوَّلِ ص ١٦٢.'),
+  releaseBook('zanna-p162-01',162,'زَيْدٌ – ظَنَنْتُ – قَائِمٌ','Zayd, I thought, was standing.',[
+    z5bZaydNom,
+    z5bPast('ظَنَنْتُ','ظَنَنْ','I thought','، وَهُوَ مُلْغًى فَلَا يَعْمَلُ','; its operation is cancelled, so it does not govern the two nouns',[z5bPart('وَالْجُمْلَةُ اعْتِرَاضِيَّةٌ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','The clause is parenthetical and has no syntactic position.')]),z5bStandingNom,
+  ],'The book sets the medial verb off between dashes. Note 3 parses the clause as parenthetical without syntactic position. The dashes do not become cards.','وَضَعَ الْمَصْدَرُ الْفِعْلَ الْمُتَوَسِّطَ بَيْنَ شَرْطَتَيْنِ، وَذَكَرَتِ الْحَاشِيَةُ الثَّالِثَةُ أَنَّ جُمْلَتَهُ اعْتِرَاضِيَّةٌ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ. وَلَا تُعْرَبُ الشَّرْطَتَانِ.'),
+  releaseBook('zanna-p162-02',162,'زَيْدٌ قَائِمٌ ظَنَنْتُ','Zayd was standing, I thought.',[
+    z5bZaydNom,z5bStandingNom,z5bPast('ظَنَنْتُ','ظَنَنْ','I thought','، وَهُوَ مُلْغًى فَلَا يَعْمَلُ','; its operation is cancelled, so it does not govern the two nouns'),
+  ],'The author’s second cancellation example delays the verb until after the mubtadaʾ and khabar. Note 4 parses both nouns and identifies the verb and its subject. The introductory list wāw is not part of the standalone example.','يُؤَخِّرُ الْمُؤَلِّفُ الْفِعْلَ عَنِ الْمُبْتَدَإِ وَالْخَبَرِ فِي مِثَالِ الْإِلْغَاءِ الثَّانِي. وَتُعْرِبُ الْحَاشِيَةُ الرَّابِعَةُ الِاسْمَيْنِ وَتُعَيِّنُ الْفِعْلَ وَفَاعِلَهُ. وَوَاوُ السَّرْدِ خَارِجَ الْمِثَالِ.'),
+];
+
+const zannaClosingPart=(ar,en)=>({ar,en});
+const zannaClosingSpeaker=(word,gloss,verb,verbEnglish,isNasikh=false)=>answerParts(word,gloss,[
+  zannaClosingPart(`«${verb}» فِعْلٌ مَاضٍ${isNasikh?' نَاسِخٌ':''} مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.`,`${verbEnglish}, a past ${isNasikh?'clause-governing ':''}verb built on sukūn before subject tāʾ.`),
+  zannaClosingPart('التَّاءُ ضَمِيرٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Tāʾ is a pronoun built on ḍamm, in the nominative position as subject.')
+]);
+const zannaClosingZayd=()=>token('زَيْدٌ','Zayd','مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Subject of the nominal clause, nominative with a visible ḍammah.');
+const zannaClosingPredicate=(clause,governor,glossClause,glossGovernor)=>token('قَائِمٌ','standing',
+  `خَبَرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ. وَجُمْلَةُ «${clause}» فِي مَحَلِّ نَصْبٍ سَدَّتْ مَسَدَّ مَفْعُولَيْ «${governor}».`,
+  `Predicate, nominative with a visible ḍammah. The clause “${glossClause}” is in the accusative position and stands in for both objects of ${glossGovernor}.`);
+const zannaClosingAmr=()=>token('عَمْرٌو','ʿAmr',
+  'مَعْطُوفٌ عَلَى «زَيْدٌ» مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ عَلَى الرَّاءِ.',
+  'Coordinated with Zayd, nominative with a visible ḍammah on rāʾ.');
+const zannaClosingPluralMim=()=>zannaClosingPart('الْمِيمُ عَلَامَةُ الْجَمْعِ، مَبْنِيَّةٌ عَلَى السُّكُونِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Mīm marks the plural, is built on sukūn, and has no syntactic position.');
+const zannaClosingPluralWaw=()=>zannaClosingPart('وَاوُ الْجَمَاعَةِ ضَمِيرٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Group wāw is a pronoun built on sukūn, in the nominative position as subject.');
+const zannaC=[
+  releaseBook('zanna-p163-01','163','ظَنَنْتُ لَزَيْدٌ قَائِمٌ','I thought that Zayd was indeed standing.',[
+    zannaClosingSpeaker('ظَنَنْتُ','I thought','ظَنَّ','“Thought”',true),
+    answerParts('لَزَيْدٌ','indeed Zayd',[
+      zannaClosingPart('اللَّامُ لَامُ الِابْتِدَاءِ، مَبْنِيَّةٌ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Lām is the initial emphatic particle, built on fatḥ, with no syntactic position.'),
+      zannaClosingPart('«زَيْدٌ» مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Zayd is the subject of the nominal clause, nominative with a visible ḍammah.')
+    ]),
+    zannaClosingPredicate('لَزَيْدٌ قَائِمٌ','ظَنَنْتُ','Zayd is indeed standing','ẓanantu')
+  ],'The author gives the initial lām as a suspension trigger. Note 1 parses the example and contrasts its surface forms with the accusative position of the whole clause. The app supplies the English and regularizes the oral phrasing.',
+    'يَذْكُرُ الْمُؤَلِّفُ لَامَ الِابْتِدَاءِ فِي أَسْبَابِ التَّعْلِيقِ، وَتُعْرِبُ الْحَاشِيَةُ الْأُولَى الْمِثَالَ وَتُبَيِّنُ مَحَلَّ الْجُمْلَةِ. وَالتَّرْجَمَةُ وَصِيَاغَةُ الْجَوَابِ لِلتَّطْبِيقِ.'),
+  releaseQuran('zanna-p163-02','163','لَقَدْ عَلِمْتَ مَا هَؤُلَاءِ يَنْطِقُونَ','You know full well that these do not speak.',[
+    answerParts('لَقَدْ','certainly',[
+      zannaClosingPart('اللَّامُ لِجَوَابِ قَسَمٍ مُقَدَّرٍ، وَهِيَ مَبْنِيَّةٌ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Lām introduces the answer to an implied oath; it is built on fatḥ, with no syntactic position.'),
+      zannaClosingPart('«قَدْ» حَرْفُ تَحْقِيقٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Qad is a particle of affirmation built on sukūn, with no syntactic position.')
+    ]),
+    answerParts('عَلِمْتَ','you knew',[
+      zannaClosingPart('«عَلِمَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الْفَاعِلِ.','“Knew,” a past verb built on sukūn before subject tāʾ.'),
+      zannaClosingPart('التَّاءُ ضَمِيرٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Tāʾ is a pronoun built on fatḥ, in the nominative position as subject.')
+    ]),
+    token('مَا','not','حَرْفُ نَفْيٍ مُعَلِّقٌ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Suspending negative particle built on sukūn, with no syntactic position.'),
+    answerParts('هَؤُلَاءِ','these',[
+      zannaClosingPart('«هَا» حَرْفُ تَنْبِيهٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Hā is a particle of attention built on sukūn, with no syntactic position.'),
+      zannaClosingPart('«أُولَاءِ» اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى الْكَسْرِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Ulāʾi is a demonstrative built on kasr, in the nominative position as subject of the nominal clause.')
+    ]),
+    answerParts('يَنْطِقُونَ','they speak',[
+      zannaClosingPart('فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','Present verb, indicative with retained nūn instead of ḍammah because it is one of the five verb forms.'),
+      zannaClosingPluralWaw(),
+      zannaClosingPart('وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ، وَالْجُمْلَةُ الْمَنْفِيَّةُ فِي مَحَلِّ نَصْبٍ سَدَّتْ مَسَدَّ مَفْعُولَيْ «عَلِمْتَ».','The verbal clause is in the nominative position as predicate. The negative clause is in the accusative position and stands in for both objects of ʿalimta.')
+    ])
+  ],21,'65','الْأَنْبِيَاءِ','The printed ornament begins at laqad. The author gives the excerpt for suspension by negative mā; note 2 supplies the core parsing. The app supplies translation and presents the attached components separately.',
+    'يَبْدَأُ الْمَقْطَعُ الْمُحَاطُ بِالْعَلَامَتَيْنِ فِي الطَّبْعَةِ بِـ«لَقَدْ». وَالشَّاهِدُ لِلتَّعْلِيقِ بِـ«مَا» النَّافِيَةِ، وَأَصْلُ الْإِعْرَابِ فِي الْحَاشِيَةِ الثَّانِيَةِ. وَالتَّرْجَمَةُ وَتَفْصِيلُ الْمُتَّصِلَاتِ لِلتَّطْبِيقِ.'),
+  releaseBook('zanna-p163-03','163','عَلِمْتُ لَا زَيْدٌ قَائِمٌ وَلَا عَمْرٌو','I knew that neither Zayd nor ʿAmr was standing.',[
+    zannaClosingSpeaker('عَلِمْتُ','I knew','عَلِمَ','“Knew”'),
+    token('لَا','not','حَرْفُ نَفْيٍ مُعَلِّقٌ، مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Suspending negative particle, built on sukūn, with no syntactic position.'),
+    zannaClosingZayd(),zannaClosingPredicate('لَا زَيْدٌ قَائِمٌ','عَلِمْتُ','Zayd is not standing','ʿalimtu'),
+    answerParts('وَلَا','nor',[
+      zannaClosingPart('الْوَاوُ حَرْفُ عَطْفٍ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Wāw is a conjunction built on fatḥ, with no syntactic position.'),
+      zannaClosingPart('«لَا» حَرْفُ نَفْيٍ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Lā is a negative particle built on sukūn, with no syntactic position.')
+    ]),
+    zannaClosingAmr()
+  ],'The author gives negative lā as the trigger. Note 3 parses the negative clause and the nominative coordination of ʿAmr; the app supplies the oral presentation and English.',
+    'يَذْكُرُ الْمُؤَلِّفُ «لَا» النَّافِيَةَ فِي أَسْبَابِ التَّعْلِيقِ، وَتُعْرِبُ الْحَاشِيَةُ الثَّالِثَةُ الْجُمْلَةَ الْمَنْفِيَّةَ وَتَذْكُرُ عَطْفَ «عَمْرٌو» وَرَفْعَهُ. وَصِيَاغَةُ الْجَوَابِ وَالتَّرْجَمَةُ لِلتَّطْبِيقِ.'),
+  releaseBook('zanna-p163-04','163','عَلِمْتُ إِنْ زَيْدٌ قَائِمٌ','I knew that Zayd was not standing.',[
+    zannaClosingSpeaker('عَلِمْتُ','I knew','عَلِمَ','“Knew”'),
+    token('إِنْ','not','حَرْفُ نَفْيٍ مُعَلِّقٌ، مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Suspending negative particle, built on sukūn, with no syntactic position.'),
+    zannaClosingZayd(),zannaClosingPredicate('إِنْ زَيْدٌ قَائِمٌ','عَلِمْتُ','Zayd is not standing','ʿalimtu')
+  ],'The author gives negative in as a suspension trigger. Note 4 gives the word roles and the accusative position of the nominal clause; the app adds fixed endings, visible signs, and English.',
+    'يَذْكُرُ الْمُؤَلِّفُ «إِنْ» النَّافِيَةَ فِي أَسْبَابِ التَّعْلِيقِ، وَتَذْكُرُ الْحَاشِيَةُ الرَّابِعَةُ وَظَائِفَ الْكَلِمَاتِ وَمَحَلَّ نَصْبِ الْجُمْلَةِ الِاسْمِيَّةِ. وَتَفْصِيلُ الْبِنَاءِ وَعَلَامَاتِ الْإِعْرَابِ وَالتَّرْجَمَةُ لِلتَّطْبِيقِ.'),
+  releaseBook('zanna-p163-05','163','عَلِمْتُ أَزَيْدٌ قَائِمٌ أَمْ عَمْرٌو؟','I knew which was standing: Zayd or ʿAmr.',[
+    zannaClosingSpeaker('عَلِمْتُ','I knew','عَلِمَ','“Knew”'),
+    answerParts('أَزَيْدٌ','is it Zayd',[
+      zannaClosingPart('الْهَمْزَةُ حَرْفُ اسْتِفْهَامٍ مُعَلِّقٌ، مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Hamzah is a suspending interrogative particle, built on fatḥ, with no syntactic position.'),
+      zannaClosingPart('«زَيْدٌ» مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ.','Zayd is the subject of the nominal clause, nominative with a visible ḍammah.')
+    ]),
+    zannaClosingPredicate('أَزَيْدٌ قَائِمٌ','عَلِمْتُ','is Zayd standing','ʿalimtu'),
+    token('أَمْ','or','حَرْفُ عَطْفٍ مُتَّصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Connected conjunction built on sukūn, with no syntactic position.'),
+    zannaClosingAmr()
+  ],'The author gives the interrogative particle as a suspension trigger. Note 5 parses the question and coordinates ʿAmr with Zayd. The app supplies oral phrasing and English.',
+    'يَذْكُرُ الْمُؤَلِّفُ حَرْفَ الِاسْتِفْهَامِ فِي أَسْبَابِ التَّعْلِيقِ، وَتُعْرِبُ الْحَاشِيَةُ الْخَامِسَةُ الِاسْتِفْهَامَ وَعَطْفَ «عَمْرٌو» عَلَى «زَيْدٌ». وَصِيَاغَةُ الْجَوَابِ وَالتَّرْجَمَةُ لِلتَّطْبِيقِ.'),
+  releaseBook('zanna-p164-01','164','عَلِمْتُ أَيُّهُمْ أَبُوكَ؟','I knew which of them was your father.',[
+    zannaClosingSpeaker('عَلِمْتُ','I knew','عَلِمَ','“Knew”'),
+    answerParts('أَيُّهُمْ','which of them',[
+      zannaClosingPart('«أَيُّ» اسْمُ اسْتِفْهَامٍ، مُبْتَدَأٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','Ayyu is an interrogative noun and the nominative subject of the nominal clause, with a visible ḍammah. It is the first term of an iḍāfah.'),
+      zannaClosingPart('الْهَاءُ ضَمِيرٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Hāʾ is a pronoun built on ḍamm, in the genitive position as the second term of the iḍāfah.'),
+      zannaClosingPluralMim()
+    ]),
+    answerParts('أَبُوكَ','your father',[
+      zannaClosingPart('«أَبُو» خَبَرٌ مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مِنَ الْأَسْمَاءِ الْخَمْسَةِ، وَهُوَ مُضَافٌ.','Abū is the nominative predicate, marked by wāw instead of ḍammah because it is one of the five nouns. It is the first term of an iḍāfah.'),
+      zannaClosingPart('الْكَافُ ضَمِيرٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','Kāf is a pronoun built on fatḥ, in the genitive position as the second term of the iḍāfah.'),
+      zannaClosingPart('وَجُمْلَةُ الِاسْتِفْهَامِ فِي مَحَلِّ نَصْبٍ سَدَّتْ مَسَدَّ مَفْعُولَيْ «عَلِمْتُ».','The interrogative clause is in the accusative position and stands in for both objects of ʿalimtu.')
+    ])
+  ],'The author gives the interrogative noun as a suspension trigger. Note 1 gives the core parsing and clause position; the app supplies component details and English.',
+    'يَذْكُرُ الْمُؤَلِّفُ اسْمَ الِاسْتِفْهَامِ فِي أَسْبَابِ التَّعْلِيقِ، وَتَذْكُرُ الْحَاشِيَةُ الْأُولَى أَصْلَ الْإِعْرَابِ وَمَحَلَّ الْجُمْلَةِ. وَتَفْصِيلُ الْمُتَّصِلَاتِ وَالتَّرْجَمَةُ لِلتَّطْبِيقِ.'),
+  releaseQuran('zanna-p164-02','164','أَيْنَ شُرَكَائِيَ الَّذِينَ كُنْتُمْ تَزْعُمُونَ','Where are My partners whom you used to claim as such?',[
+    token('أَيْنَ','where','اسْمُ اسْتِفْهَامٍ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ رَفْعٍ خَبَرٌ مُقَدَّمٌ.','Interrogative noun built on fatḥ, in the nominative position as the fronted predicate, following the edition’s note.'),
+    answerParts('شُرَكَائِيَ','My partners',[
+      zannaClosingPart('«شُرَكَاءُ» مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الْمُقَدَّرَةُ عَلَى مَا قَبْلَ يَاءِ الْمُتَكَلِّمِ؛ لِاشْتِغَالِهِ بِحَرَكَةِ الْمُنَاسَبَةِ، وَهُوَ مُضَافٌ.','Shurakāʾ is the delayed nominative subject, with an estimated ḍammah before the first-person yāʾ because that position takes the matching vowel. It is the first term of an iḍāfah.'),
+      zannaClosingPart('يَاءُ الْمُتَكَلِّمِ ضَمِيرٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ جَرٍّ مُضَافٌ إِلَيْهِ.','First-person yāʾ is a pronoun built on fatḥ, in the genitive position as the second term of the iḍāfah.')
+    ]),
+    token('الَّذِينَ','those whom','اسْمٌ مَوْصُولٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ رَفْعٍ نَعْتٌ لِـ«شُرَكَائِيَ».','Relative noun built on fatḥ, in the nominative position as a modifier of “My partners.”'),
+    answerParts('كُنْتُمْ','you were',[
+      zannaClosingPart('«كَانَ» فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِتَاءِ الرَّفْعِ.','Kāna is a deficient past verb built on sukūn before nominative tāʾ.'),
+      zannaClosingPart('التَّاءُ ضَمِيرٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ رَفْعٍ اسْمُ «كَانَ».','Tāʾ is a pronoun built on ḍamm, in the nominative position as the ism of kāna.'),
+      zannaClosingPluralMim()
+    ]),
+    answerParts('تَزْعُمُونَ','you claim',[
+      zannaClosingPart('فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِثُبُوتِ النُّونِ نِيَابَةً عَنِ الضَّمَّةِ؛ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.','Present verb, indicative with retained nūn instead of ḍammah because it is one of the five verb forms.'),
+      zannaClosingPluralWaw(),
+      zannaClosingPart('مَفْعُولَاهُ مَحْذُوفَانِ؛ وَتَقْدِيرُهُمَا «هُمْ» وَ«شُرَكَاءَ»، وَالضَّمِيرُ هُوَ الْعَائِدُ. وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ نَصْبٍ خَبَرُ «كَانَ»، وَجُمْلَةُ «كُنْتُمْ تَزْعُمُونَ» صِلَةٌ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Both objects are omitted, estimated as “them” and “partners”; the pronoun is the relative clause’s return. The verbal clause is in the accusative position as kāna’s predicate, and “you used to claim” is the relative clause with no syntactic position.')
+    ])
+  ],28,'62','الْقَصَصِ','The ornament begins at ayna and ends at tazʿumūna. The edition cites 28:62, not the repeat in 28:74. The author gives the two-object estimate after the ornament. Note 4 (pp. 164–165) confirms the omission and supplies the core parsing. The app supplies the English and makes component and relative-clause positions explicit.',
+    'يَبْدَأُ الْمَقْطَعُ بِـ«أَيْنَ» وَيَنْتَهِي بِـ«تَزْعُمُونَ»، وَتَعْزُوهُ الطَّبْعَةُ إِلَى الْآيَةِ ٦٢ مِنْ سُورَةِ الْقَصَصِ. وَيَذْكُرُ الْمُؤَلِّفُ تَقْدِيرَ الْمَفْعُولَيْنِ بَعْدَ الْمَقْطَعِ. وَتُثْبِتُ الْحَاشِيَةُ الرَّابِعَةُ (ص ١٦٤–١٦٥) الْحَذْفَ وَتَذْكُرُ أَصْلَ الْإِعْرَابِ. وَالتَّرْجَمَةُ وَتَفْصِيلُ الْمُتَّصِلَاتِ وَمَحَلِّ الصِّلَةِ لِلتَّطْبِيقِ.'),
+  releaseBook('zanna-p165-01','165','ظَنَنْتُ زَيْدًا','I thought Zayd [was standing].',[
+    zannaClosingSpeaker('ظَنَنْتُ','I thought','ظَنَّ','“Thought”'),
+    token('زَيْدًا','Zayd','مَفْعُولٌ بِهِ أَوَّلُ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَالْمَفْعُولُ الثَّانِي مَحْذُوفٌ تَقْدِيرُهُ «قَائِمًا».','First object, accusative with a visible fatḥah. The second object is omitted, estimated as “standing.”')
+  ],'The author gives this as an answer whose second object is recoverable from the question. The author’s expanded answer supplies qāʾiman (“standing”). Note 1 confirms why that second object can be omitted. The app supplies the individual role and case sign of Zayd, the English, and the oral phrasing.',
+    'يَذْكُرُ الْمُؤَلِّفُ هَذَا الْمِثَالَ جَوَابًا دَلَّ سُؤَالُهُ عَلَى الْمَفْعُولِ الثَّانِي، وَيَذْكُرُ «قَائِمًا» فِي تَتِمَّةِ الْجَوَابِ. وَتُبَيِّنُ الْحَاشِيَةُ الْأُولَى سَبَبَ حَذْفِ الْمَفْعُولِ الثَّانِي. وَإِعْرَابُ «زَيْدًا» وَالتَّرْجَمَةُ وَصِيَاغَةُ الْجَوَابِ لِلتَّطْبِيقِ.'),
+  releaseBook('zanna-p165-02','165','سَمِعْتُ زَيْدًا يَقُولُ كَذَا','I heard Zayd saying such-and-such.',[
+    zannaClosingSpeaker('سَمِعْتُ','I heard','سَمِعَ','“Heard”'),
+    token('زَيْدًا','Zayd','مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الظَّاهِرَةُ، وَهُوَ الْمَفْعُولُ الْأَوَّلُ عِنْدَ الْأَخْفَشِ.','Object, accusative with a visible fatḥah. In al-Akhfash’s analysis it is the first object.'),
+    token('يَقُولُ','he says','فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ، يَعُودُ عَلَى «زَيْدٍ».','Present verb, indicative with a visible ḍammah. Its optionally hidden subject is “he,” referring to Zayd.'),
+    answerParts('كَذَا','such-and-such',[
+      zannaClosingPart('الْكَافُ حَرْفُ جَرٍّ مَبْنِيٌّ عَلَى الْفَتْحِ، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.','Kāf is a preposition built on fatḥ, with no syntactic position.'),
+      zannaClosingPart('«ذَا» اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ بِالْكَافِ. وَالْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِـ«يَقُولُ».','Dhā is a demonstrative built on sukūn, in the genitive position after kāf. The prepositional phrase attaches to “says.”'),
+      zannaClosingPart('جُمْلَةُ «يَقُولُ كَذَا» فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ ثَانٍ عِنْدَ الْأَخْفَشِ، وَحَالٌ مِنْ «زَيْدٍ» عِنْدَ الْجُمْهُورِ.','The whole “saying such-and-such” clause is in the accusative position: al-Akhfash calls it a second object; the majority call it a circumstantial clause describing Zayd.')
+    ])
+  ],'Printed p. 165 presents al-Akhfash’s two-object analysis and note 6 parses ka-dhā; the author gives the majority’s circumstantial reading for this definite object on p. 166. The app supplies the English and makes the subject reference explicit.',
+    'فِي ص ١٦٥ يَنْقُلُ الْمُؤَلِّفُ قَوْلَ الْأَخْفَشِ بِالْمَفْعُولَيْنِ، وَتُعْرِبُ الْحَاشِيَةُ السَّادِسَةُ «كَذَا». وَفِي ص ١٦٦ يَنْقُلُ قَوْلَ الْجُمْهُورِ بِأَنَّ الْجُمْلَةَ حَالٌ بَعْدَ الْمَعْرِفَةِ فِي هَذَا الْمِثَالِ. وَالتَّرْجَمَةُ وَتَصْرِيحُ مَرْجِعِ الضَّمِيرِ لِلتَّطْبِيقِ.'),
+  releaseQuran('zanna-p165-03','165','سَمِعْنَا فَتًى يَذْكُرُهُمْ','We heard a young man mentioning them.',[
+    answerParts('سَمِعْنَا','we heard',[
+      zannaClosingPart('«سَمِعَ» فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِنَا الْفَاعِلِينَ.','“Heard,” a past verb built on sukūn before subject nā.'),
+      zannaClosingPart('«نَا» ضَمِيرٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ فَاعِلٌ.','Nā is a pronoun built on sukūn, in the nominative position as subject.')
+    ]),
+    token('فَتًى','a young man','مَفْعُولٌ بِهِ مَنْصُوبٌ، وَعَلَامَةُ نَصْبِهِ الْفَتْحَةُ الْمُقَدَّرَةُ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَهُوَ الْمَفْعُولُ الْأَوَّلُ عِنْدَ الْأَخْفَشِ.','Object, accusative with fatḥah estimated on the alif, where it cannot appear. In al-Akhfash’s analysis it is the first object.'),
+    answerParts('يَذْكُرُهُمْ','he mentions them',[
+      zannaClosingPart('«يَذْكُرُ» فِعْلٌ مُضَارِعٌ مَرْفُوعٌ، وَعَلَامَةُ رَفْعِهِ الضَّمَّةُ الظَّاهِرَةُ، وَفَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ جَوَازًا تَقْدِيرُهُ هُوَ، يَعُودُ عَلَى «فَتًى».','“Mentions” is a present verb, indicative with a visible ḍammah. Its optionally hidden subject is “he,” referring to the young man.'),
+      zannaClosingPart('الْهَاءُ ضَمِيرٌ مَبْنِيٌّ عَلَى الضَّمِّ فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ.','Hāʾ is a pronoun built on ḍamm, in the accusative position as object.'),
+      zannaClosingPluralMim(),
+      zannaClosingPart('جُمْلَةُ «يَذْكُرُهُمْ» فِي مَحَلِّ نَصْبٍ مَفْعُولٌ بِهِ ثَانٍ عِنْدَ الْأَخْفَشِ، وَنَعْتٌ لِـ«فَتًى» عِنْدَ الْجُمْهُورِ.','The “he mentions them” clause is in the accusative position: al-Akhfash calls it a second object; the majority call it an adjective clause modifying “a young man.”')
+    ])
+  ],21,'60','الْأَنْبِيَاءِ','The author’s p. 165 ornament starts at samiʿnā and ends at yadhkuruhum. Note 7 (pp. 165–166) gives both grammatical analyses; the author’s concluding p. 166 paragraph identifies the majority’s adjectival analysis after this indefinite object. The app supplies English and adds component details not stated in the note.',
+    'يَبْدَأُ الشَّاهِدُ فِي ص ١٦٥ بِـ«سَمِعْنَا» وَيَنْتَهِي بِـ«يَذْكُرُهُمْ». وَالْإِعْرَابَانِ فِي الْحَاشِيَةِ السَّابِعَةِ (ص ١٦٥–١٦٦)، وَيَنْقُلُ الْمُؤَلِّفُ فِي ص ١٦٦ قَوْلَ الْجُمْهُورِ بِأَنَّ الْجُمْلَةَ نَعْتٌ بَعْدَ النَّكِرَةِ فِي هَذَا الشَّاهِدِ. وَالتَّرْجَمَةُ وَتَفْصِيلُ الضَّمَائِرِ لِلتَّطْبِيقِ.')
+];
+
+const zannaForms=[...zannaA,...zannaB,...zannaC];
+
 const chapters=[
  {id:'speech-core',babId:'opening',order:1,titleEn:'Speech and what it consists of',titleAr:'الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ',pages:'19',book:speechCore,help:[
   help('الْكَلَامُ هُوَ اللَّفْظُ الْمُرَكَّبُ الْمُفِيدُ بِالْوَضْعِ.','Speech is an utterance that is composed, conveys a complete meaning, and follows Arabic usage.'),
@@ -3372,13 +3767,28 @@ const chapters=[
  ],helpSourceEn:'Al-Mutammimah, printed pp.148–153. The chapter rules, examples, and stated parses come from the main text and its footnotes. The two complete inoperative-lā exercises are each credited to p.153 note 6. The p.152 Prophetic ḥadīth and the p.153 unornamented formula are identified separately from the two Qurʾānic ornaments. The app expands the printed options and supplies the remaining parsing, translations, and model links.',helpSourceAr:'الْمُتَمِّمَةُ، ص ١٤٨–١٥٣. الْقَوَاعِدُ وَالْأَمْثِلَةُ وَمَا نُصَّ عَلَيْهِ مِنَ الْإِعْرَابِ مِنَ الْمَتْنِ وَحَوَاشِيهِ. وَمِثَالَا الْإِهْمَالِ الْكَامِلَانِ مِنَ الْحَاشِيَةِ السَّادِسَةِ فِي ص ١٥٣. وَيُمَيَّزُ حَدِيثُ ص ١٥٢ وَصِيغَةُ ص ١٥٣ مِنَ الشَّاهِدَيْنِ الْقُرْآنِيَّيْنِ. وَيَبْسُطُ التَّطْبِيقُ الْوُجُوهَ الْمَطْبُوعَةَ وَيُكْمِلُ الْإِعْرَابَ وَالتَّرْجَمَةَ وَرَوَابِطَ التَّدْرِيبِ.'}
 ];
 
+chapters.push({
+ id:'zanna-sisters',babId:'mubtada-factors',order:6,titleEn:'Ẓanna and its sisters',titleAr:'ظَنَّ وَأَخَوَاتُهَا',pages:'154–166',book:zannaForms,
+ help:[
+  help('تَدْخُلُ هَذِهِ الْأَفْعَالُ عَلَى الْمُبْتَدَإِ وَالْخَبَرِ، فَتَنْصِبُهُمَا مَفْعُولَيْنِ فِي الْمَعَانِي الْمَذْكُورَةِ. فِي «ظَنَنْتُ زَيْدًا قَائِمًا» تَاءُ الْمُتَكَلِّمِ فَاعِلٌ، وَ«زَيْدًا» الْمَفْعُولُ الْأَوَّلُ، وَ«قَائِمًا» الْمَفْعُولُ الثَّانِي.','In the senses taught here, these verbs enter on a mubtadaʾ and khabar and make them two accusative objects. In the opening example, the attached tāʾ is the subject, “Zayd” the first object, and “standing” the second.'),
+  help('أَفْعَالُ الْقُلُوبِ فِي تَرْتِيبِ الْكِتَابِ: «ظَنَّ»، وَ«حَسِبَ»، وَ«خَالَ»، وَ«رَأَى»، وَ«عَلِمَ»، وَ«زَعَمَ»، وَ«جَعَلَ»، وَ«حَجَا»، وَ«عَدَّ»، وَ«هَبْ»، وَ«وَجَدَ»، وَ«أَلْفَى»، وَ«دَرَى»، وَ«تَعَلَّمْ». وَ«تَعَلَّمْ» هُنَا بِمَعْنَى «اعْلَمْ». أَمَّا «ظَنَّ» بِمَعْنَى «اتَّهَمَ»، وَ«رَأَى» بِمَعْنَى «أَبْصَرَ»، وَ«عَلِمَ» بِمَعْنَى «عَرَفَ»، فَتَأْخُذُ مَفْعُولًا وَاحِدًا فِي أَمْثِلَةِ ص ١٦٠.','The heart verbs express judgment or knowledge. The book lists ẓanna, ḥasiba, khāla, raʾā, ʿalima, zaʿama, jaʿala, ḥajā, ʿadda, hab, wajada, alfā, darā, and taʿallam. Here taʿallam means “know.” On p.160, ẓanna meaning “suspect,” raʾā meaning “see with the eyes,” and ʿalima meaning “know/be familiar with” each takes one object.'),
+  help('أَفْعَالُ التَّصْيِيرِ هُنَا: «جَعَلَ»، وَ«رَدَّ»، وَ«اتَّخَذَ»، وَ«صَيَّرَ»، وَ«وَهَبَ». فَـ«جَعَلَ» بِمَعْنَى «اعْتَقَدَ» مِنْ أَفْعَالِ الْقُلُوبِ، وَبِمَعْنَى «صَيَّرَ» مِنْ هَذَا الْقِسْمِ. وَ«وَهَبَ» بِمَعْنَى التَّصْيِيرِ يَلْزَمُ الْمَاضِيَ؛ أَمَّا بِمَعْنَى الْإِعْطَاءِ فَيَتَصَرَّفُ.','The transformation verbs here are jaʿala, radda, ittakhadha, ṣayyara, and wahaba. Jaʿala belongs to the heart verbs when it means “believe,” and to this group when it means “make into.” Wahaba is fixed in the past in its transformation sense, but inflects when it means “give.”'),
+  help('الْإِعْمَالُ نَصْبُ الْجُزْأَيْنِ. وَالْإِلْغَاءُ إِبْطَالُ عَمَلِ الْفِعْلِ لَفْظًا وَمَحَلًّا، فَيَبْقَى الْمُبْتَدَأُ وَالْخَبَرُ عَلَى حُكْمِهِمَا. يَجُوزُ الْإِلْغَاءُ مَعَ تَوَسُّطِ فِعْلِ الْقَلْبِ أَوْ تَأَخُّرِهِ؛ وَالْإِعْمَالُ أَرْجَحُ مَعَ التَّوَسُّطِ، وَالْإِلْغَاءُ أَرْجَحُ مَعَ التَّأَخُّرِ. وَمَعَ تَقَدُّمِ الْفِعْلِ لَا يَجُوزُ الْإِلْغَاءُ عِنْدَ الْمُؤَلِّفِ، خِلَافًا لِلْكُوفِيِّينَ.','With operation, both parts are accusative. Cancellation removes the verb’s effect in both form and position, leaving the mubtadaʾ and khabar as they were. A medial or delayed heart verb may cancel: operation is preferred when medial, cancellation when delayed. The author, unlike the Kufans, does not allow cancellation when the verb comes first.'),
+  help('التَّعْلِيقُ مَنْعُ النَّصْبِ فِي اللَّفْظِ دُونَ الْمَحَلِّ؛ فَالْجُمْلَةُ تَسُدُّ مَسَدَّ الْمَفْعُولَيْنِ. وَيَجِبُ إِذَا وُجِدَ مُعَلِّقٌ. وَالْمُعَلِّقَاتُ فِي تَرْتِيبِ الْكِتَابِ: لَامُ الِابْتِدَاءِ، ثُمَّ «مَا» وَ«لَا» وَ«إِنْ» النَّافِيَاتُ، ثُمَّ هَمْزَةُ الِاسْتِفْهَامِ، ثُمَّ اسْمُ الِاسْتِفْهَامِ فِي أَحَدِ الْجُزْأَيْنِ.','Suspension blocks overt accusative case, not the syntactic relation: the whole clause fills the two object slots. It is obligatory with a trigger. These are, in the book’s order: initial lām, negative mā, lā, and in, interrogative hamzah, and an interrogative noun in one of the two positions.'),
+  help('يَجْرِي الْإِلْغَاءُ وَالتَّعْلِيقُ فِي الْمُتَصَرِّفِ مِنْ أَفْعَالِ الْقُلُوبِ. وَ«هَبْ» وَ«تَعَلَّمْ» يَلْزَمَانِ الْأَمْرَ فِي هَذَا الْبَابِ فَلَا يُلْغَيَانِ وَلَا يُعَلَّقَانِ، وَلَا يَجْرِي الْحُكْمَانِ فِي أَفْعَالِ التَّصْيِيرِ. وَيَجُوزُ أَنْ يُحْذَفَ أَحَدُ الْمَفْعُولَيْنِ أَوْ كِلَاهُمَا إِذَا دَلَّ عَلَيْهِ السِّيَاقُ. فِي شَاهِدِ ص ١٦٤ حُذِفَ الْمَفْعُولَانِ، وَقَدَّرَ الْمُؤَلِّفُ «تَزْعُمُونَهُمْ شُرَكَاءَ».','Cancellation and suspension apply to inflecting heart verbs. The fixed imperatives hab and taʿallam and the transformation verbs are outside those rules. Either or both objects may be omitted when the context supplies them. In the p.164 witness, both are omitted. The author supplies “you claim them to be partners” outside the quotation.'),
+  help('فِي مِثَالَيْ ص ١٦٥ يَجْعَلُ الْأَخْفَشُ جُمْلَةَ الْقَوْلِ أَوِ الذِّكْرِ مَفْعُولًا ثَانِيًا لِـ«سَمِعَ»، وَيَشْتَرِطُ أَنْ يَكُونَ مَضْمُونُ الْجُمْلَةِ مِمَّا يُسْمَعُ. وَعِنْدَ الْجُمْهُورِ فِي ص ١٦٦ يَتَعَدَّى «سَمِعَ» إِلَى مَفْعُولٍ وَاحِدٍ؛ فَجُمْلَةُ «يَقُولُ كَذَا» حَالٌ بَعْدَ الْمَعْرِفَةِ «زَيْدًا»، وَجُمْلَةُ «يَذْكُرُهُمْ» نَعْتٌ بَعْدَ النَّكِرَةِ «فَتًى».','In the two p.165 examples, al-Akhfash treats the clause as a second object of samiʿa, provided it describes something audible. In the majority analysis on p.166, samiʿa takes one object. The clause “saying such-and-such” is circumstantial after definite Zayd; “mentioning them” is adjectival after indefinite “a young man.”')
+ ],
+ helpSourceAr:'الْمُتَمِّمَةُ، ص ١٥٤–١٦٦. الْأَمْثِلَةُ وَالتَّقْسِيمُ وَالْوُجُوهُ الْمَنْسُوبَةُ إِلَى أَصْحَابِهَا مِنَ الْمَتْنِ وَحَوَاشِيهِ. وَتَنْتَهِي أَمْثِلَةُ التَّدْرِيبِ فِي ص ١٦٥، وَتَتِمُّ مُنَاقَشَةُ «سَمِعَ» فِي ص ١٦٦. وَالضَّبْطُ وَالتَّرْجَمَةُ وَمَا زَادَ عَلَى الْإِعْرَابِ الْمَنْصُوصِ عَلَيْهِ مِنَ التَّطْبِيقِ.',
+ helpSourceEn:'Al-Mutammimah, printed pp.154–166. Examples, classifications, and attributed alternatives come from the text and editorial notes. Practice examples end on p.165; p.166 completes the analysis of samiʿa. The app supplies vocalization, translation, and any completion beyond the explicitly printed parsing.'
+});
+
 const babs=[
  {id:'opening',order:1,titleEn:'Opening section: Speech and what it consists of',titleAr:'الْكَلَامُ وَمَا يَتَأَلَّفُ مِنْهُ',pages:'19–24'},
  {id:'iraab-bina',order:2,titleEn:'Bāb al-Iʿrāb wa-l-Bināʾ',titleAr:'بَابُ الْإِعْرَابِ وَالْبِنَاءِ',pages:'25–30'},
  {id:'iraab-signs',order:3,titleEn:'Bāb Maʿrifat ʿAlāmāt al-Iʿrāb',titleAr:'بَابُ مَعْرِفَةِ عَلَامَاتِ الْإِعْرَابِ',pages:'31–71'},
  {id:'definiteness',order:4,titleEn:'Bāb al-Nakirah wa-l-Maʿrifah',titleAr:'بَابُ النَّكِرَةِ وَالْمَعْرِفَةِ',pages:'72–96'},
- {id:'nominative-nouns',order:5,titleEn:'Bāb al-Marfūʿāt min al-Asmāʾ',titleAr:'بَابُ الْمَرْفُوعَاتِ مِنَ الْأَسْمَاءِ',pages:'97–118',continues:true},
- {id:'mubtada-factors',order:6,titleEn:'Factors entering on the mubtadaʾ and khabar',titleAr:'بَابُ الْعَوَامِلِ الدَّاخِلَةِ عَلَى الْمُبْتَدَإِ وَالْخَبَرِ',pages:'119–153',continues:true}
+ {id:'nominative-nouns',order:5,titleEn:'Bāb al-Marfūʿāt min al-Asmāʾ',titleAr:'بَابُ الْمَرْفُوعَاتِ مِنَ الْأَسْمَاءِ',pages:'97–166'},
+ {id:'mubtada-factors',parentId:'nominative-nouns',order:6,titleEn:'Factors entering on the mubtadaʾ and khabar',titleAr:'بَابُ الْعَوَامِلِ الدَّاخِلَةِ عَلَى الْمُبْتَدَإِ وَالْخَبَرِ',pages:'119–166'}
 ];
 
 // The concise study summaries and disclosure metadata are app-prepared
@@ -3643,6 +4053,18 @@ const helpVisuals={
   ]}
  ]}
 };
+helpVisuals['zanna-sisters']={type:'branches',titleAr:'مَاذَا فَعَلَ الْعَامِلُ بِالْجُزْأَيْنِ؟',titleEn:'What happened to the two parts?',branches:[
+ {id:'zanna-operates',labelAr:'الْإِعْمَالُ',labelEn:'Operation',descAr:'«زَيْدًا» وَ«قَائِمًا» مَفْعُولَانِ مَنْصُوبَانِ.',descEn:'Zaydan and qāʾiman are accusative objects.',exerciseId:'zanna-p154-01',children:[
+  {id:'zanna-believe',labelAr:'«جَعَلَ» بِمَعْنَى «اعْتَقَدَ»',labelEn:'Jaʿala meaning “believe”',descAr:'هُنَا مِنْ أَفْعَالِ الْقُلُوبِ.',descEn:'Here it is a heart verb.',exerciseId:'zanna-p156-03'},
+  {id:'zanna-transform',labelAr:'«جَعَلَ» بِمَعْنَى «صَيَّرَ»',labelEn:'Jaʿala meaning “make into”',descAr:'هُنَا مِنْ أَفْعَالِ التَّصْيِيرِ.',descEn:'Here it is a transformation verb.',exerciseId:'zanna-p161-01'}
+ ]},
+ {id:'zanna-cancel',labelAr:'الْإِلْغَاءُ',labelEn:'Cancellation',descAr:'«زَيْدٌ» مُبْتَدَأٌ وَ«قَائِمٌ» خَبَرٌ، وَلَا يَعْمَلُ الْفِعْلُ فِيهِمَا لَفْظًا وَلَا مَحَلًّا.',descEn:'Zaydun and qāʾimun stay mubtadaʾ and khabar; the verb governs neither in form nor in position.',exerciseId:'zanna-p162-01'},
+ {id:'zanna-suspend',labelAr:'التَّعْلِيقُ',labelEn:'Suspension',descAr:'الِاسْتِفْهَامُ يَمْنَعُ النَّصْبَ فِي اللَّفْظِ، وَجُمْلَةُ السُّؤَالِ تَسُدُّ مَسَدَّ الْمَفْعُولَيْنِ.',descEn:'The question blocks overt accusative case, but its whole clause fills both object slots.',exerciseId:'zanna-p164-01'},
+ {id:'zanna-samia-options',labelAr:'وَجْهَا «سَمِعَ»',labelEn:'Two analyses of samiʿa',descAr:'الْخِلَافُ فِي مَوْضِعِ الْجُمْلَةِ بَعْدَ الْمَفْعُولِ.',descEn:'The two analyses differ on the role of the clause after the object.',children:[
+  {id:'zanna-samia-definite',labelAr:'بَعْدَ الْمَعْرِفَةِ',labelEn:'After a definite object',descAr:'مَفْعُولٌ ثَانٍ عِنْدَ الْأَخْفَشِ، وَحَالٌ عِنْدَ الْجُمْهُورِ (ص ١٦٥–١٦٦).',descEn:'Second object for al-Akhfash; circumstantial clause for the majority (pp.165–166).',exerciseId:'zanna-p165-02'},
+  {id:'zanna-samia-indefinite',labelAr:'بَعْدَ النَّكِرَةِ',labelEn:'After an indefinite object',descAr:'مَفْعُولٌ ثَانٍ عِنْدَ الْأَخْفَشِ، وَنَعْتٌ عِنْدَ الْجُمْهُورِ (ص ١٦٥–١٦٦).',descEn:'Second object for al-Akhfash; adjectival clause for the majority (pp.165–166).',exerciseId:'zanna-p165-03'}
+ ]}
+]};
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});
 
 const quranEn=/Qur[’']an (\d+):(\d+)(?:[–-](\d+))?\./u;
@@ -3652,6 +4074,7 @@ chapters.flatMap(chapter=>chapter.book).forEach(item=>{
  if(en&&ar){
   item.quran={surahNumber:Number(en[1]),ayah:Number(en[2]),ayahEnd:en[3]?Number(en[3]):null,surahAr:ar[1],ayahAr:ar[2]};
   if(item.id==='inna-21')item.quran.spans=innaQ654Spans;
+  if(item.verseMarkers)item.quran.verseMarkers=item.verseMarkers;
  }
 });
 

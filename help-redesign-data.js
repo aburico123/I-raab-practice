@@ -779,6 +779,40 @@ stage188Summary('circumstantial-state',[
  ['appendix','فَائِدَةُ الصَّبَّانِ وَقَيْدُهَا','Al-Ṣabbān’s note and its qualification']
 ]);
 
+const finalManSummary=(chapter,values,sections)=>{
+ const [coreRuleAr,coreRuleEn,definitionAr,definitionEn,effectAr,effectEn,recognitionAr,recognitionEn,exampleId]=values;
+ HELP_REDESIGN_BY_CHAPTER[chapter]={essentials:{coreRuleAr,coreRuleEn,definitionAr,definitionEn,effectAr,effectEn,recognitionAr,recognitionEn,exampleId},
+  sections:sections.map(([key,titleAr,titleEn,defaultOpen])=>({id:chapter+'-'+key,titleAr,titleEn,group:'rule',defaultOpen:Boolean(defaultOpen)}))};
+};
+finalManSummary('tamyiz',[
+ 'التَّمْيِيزُ يُزِيلُ إِبْهَامًا فِي ذَاتٍ أَوْ نِسْبَةٍ.','A tamyīz clarifies an ambiguous entity or relation.',
+ 'اسْمٌ مَنْصُوبٌ، نَكِرَةٌ عَلَى قَاعِدَةِ الْمَتْنِ.','An accusative noun, indefinite under the rule given in the main text.',
+ 'يُبَيِّنُ الْمَعْدُودَ وَنَحْوَهُ، أَوْ يَكْشِفُ جِهَةَ الْإِسْنَادِ.','It specifies what is counted or measured, or clarifies an entire predication.',
+ 'اسْأَلْ: أَيُّ شَيْءٍ يُرَادُ بِهَذَا الْعَدَدِ؟ أَوْ مِنْ أَيِّ جِهَةٍ صَحَّ هَذَا الْإِسْنَادُ؟','Ask what is being counted, or in what respect the statement is true.','tamyiz-p198-01'
+],[
+ ['definition','الذَّاتُ وَالنِّسْبَةُ','Entity and relation',true],
+ ['entity','أَنْوَاعُ الذَّاتِ الْأَرْبَعَةُ','Four entity types',true],
+ ['relation','أَنْوَاعُ تَمْيِيزِ النِّسْبَةِ','Four relation categories'],
+ ['indefinite','التَّنْكِيرُ وَالْخِلَافُ','Indefiniteness and the editorial contrast'],
+ ['order','تَمَامُ الْكَلَامِ وَمَوْضِعُ التَّمْيِيزِ','Completed predication, governor and order']
+]);
+finalManSummary('exception',[
+ 'يَخْرُجُ الْمُسْتَثْنَى مِنْ حُكْمِ مَا قَبْلَهُ، وَيَخْتَلِفُ إِعْرَابُهُ بِاخْتِلَافِ التَّرْكِيبِ.','An exception falls outside the preceding statement’s ruling; its case depends on the construction.',
+ 'اسْمٌ يَأْتِي بَعْدَ «إِلَّا» أَوْ مَا يَقُومُ مَقَامَهَا.','A noun after illā or another tool of exception.',
+ 'قَدْ يُنْصَبُ، أَوْ يَتْبَعُ مَا قَبْلَهُ، أَوْ يُعْرَبُ بِحَسَبِ الْعَامِلِ.','The form may be accusative, follow another noun, or take the case its governor assigns.',
+ 'بَعْدَ تَعْيِينِ الْأَدَاةِ انْظُرْ: أَذُكِرَ الْمُسْتَثْنَى مِنْهُ؟ أَمُوجَبٌ هُوَ؟ أَمُتَّصِلٌ أَمْ مُنْقَطِعٌ؟','Identify the tool, then ask whether the excluded-from set is stated, whether the clause is affirmative, and whether the exception belongs to that set.','except-p204-02'
+],[
+ ['tools','أَدَوَاتُ الِاسْتِثْنَاءِ الثَّمَانِي','The eight tools',true],
+ ['affirmative','التَّامُّ الْمُوجَبُ','Complete affirmative',true],
+ ['connected','التَّامُّ غَيْرُ الْمُوجَبِ الْمُتَّصِلُ','Complete non-affirmative connected'],
+ ['disconnected','التَّامُّ غَيْرُ الْمُوجَبِ الْمُنْقَطِعُ','Complete non-affirmative disconnected'],
+ ['deficient','النَّاقِصُ الْمُفَرَّغُ','Deficient exception'],
+ ['nouns','غَيْرٌ وَسِوَى','Ghayr and siwā'],
+ ['laysa','لَيْسَ وَلَا يَكُونُ','Laysa and lā yakūnu'],
+ ['three','خَلَا، عَدَا، حَاشَا','Khalā, ʿadā, ḥāshā'],
+ ['closure','إِحَالَاتُ الْخِتَامِ، ص ٢١١','Closing references, p.211']
+]);
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = HELP_REDESIGN_BY_CHAPTER;
 }

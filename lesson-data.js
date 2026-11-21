@@ -3899,7 +3899,7 @@ const babs=[
  {id:'definiteness',order:4,titleEn:'Bāb al-Nakirah wa-l-Maʿrifah',titleAr:'بَابُ النَّكِرَةِ وَالْمَعْرِفَةِ',pages:'72–96'},
  {id:'nominative-nouns',order:5,titleEn:'Bāb al-Marfūʿāt min al-Asmāʾ',titleAr:'بَابُ الْمَرْفُوعَاتِ مِنَ الْأَسْمَاءِ',pages:'97–166'},
  {id:'mubtada-factors',parentId:'nominative-nouns',order:6,titleEn:'Factors entering on the mubtadaʾ and khabar',titleAr:'بَابُ الْعَوَامِلِ الدَّاخِلَةِ عَلَى الْمُبْتَدَإِ وَالْخَبَرِ',pages:'119–166'},
- {id:'accusative-nouns',order:7,titleEn:'Bāb al-Manṣūbāt min al-Asmāʾ',titleAr:'بَابُ الْمَنْصُوبَاتِ مِنَ الْأَسْمَاءِ',pages:'167–197',continues:true}
+ {id:'accusative-nouns',order:7,titleEn:'Bāb al-Manṣūbāt min al-Asmāʾ',titleAr:'بَابُ الْمَنْصُوبَاتِ مِنَ الْأَسْمَاءِ',pages:'167–211',continues:false}
 ];
 
 chapters.push({
@@ -4385,6 +4385,206 @@ stage188Chapters.forEach(([id,titleAr,titleEn,pages,pageAr],i)=>chapters.push({
  helpSourceEn:`Al-Mutammimah, printed pp.${pages}. Rules and main examples are the author’s; cited notes are editorial. English and unstated parse details are supplied by the app.`
 }));
 
+// Printed pp.198–211; p.211 closes this parent without a new drill.
+const lastMansubat=(()=>{
+ const p=(ar,en)=>({ar,en});
+ const annex=p('وَهُوَ مُضَافٌ.','It is the first term of an annexation.');
+ const counted=(ar,en,ending,sign,i=false)=>p(`${ar} ${ending}${i?'، '+annex.ar.slice(0,-1):''}.`,`${en}, ${sign}${i?'; first term of an annexation':''}.`);
+ const n=(ar,en,i=false)=>counted(ar,en,'مَنْصُوبٌ بِالْفَتْحَةِ الظَّاهِرَةِ','accusative with visible fatḥah',i);
+ const r=(ar,en,i=false)=>counted(ar,en,'مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ','nominative with visible ḍammah',i);
+ const j=(ar,en,i=false)=>counted(ar,en,'مَجْرُورٌ بِالْكَسْرَةِ الظَّاهِرَةِ','genitive with visible kasrah',i);
+ const estimated=(ar,en,k,ending)=>p(`${ar} ${k} بِحَرَكَةٍ مُقَدَّرَةٍ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.`,`${en}, ${ending} estimated on alif because it cannot appear.`);
+ const subject=r('فَاعِلٌ','Subject'), mubt=r('مُبْتَدَأٌ','Mubtadaʾ'), kh=r('خَبَرٌ','Predicate'), obj=n('مَفْعُولٌ بِهِ','Direct object'), gen=j('مُضَافٌ إِلَيْهِ','Second term of an annexation');
+ const tam=(ar,en)=>n(`تَمْيِيزٌ ${ar}`,`Tamyīz ${en}`);
+ const exception=(i=false)=>n('مُسْتَثْنًى','Excepted noun',i);
+ const particle=(ar,en,ending,endEn)=>p(`${ar} مَبْنِيٌّ عَلَى ${ending}، لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.`,`${en}, fixed on ${endEn}, with no syntactic position.`);
+ const ft=(ar,en)=>particle(ar,en,'الْفَتْحِ','fatḥ'), sk=(ar,en)=>particle(ar,en,'السُّكُونِ','sukūn');
+ const wa=ft('الْوَاوُ حَرْفُ عَطْفٍ','Coordinating wāw'), fa=ft('الْفَاءُ حَرْفُ عَطْفٍ','Coordinating fāʾ'), ma=sk('«مَا» حَرْفُ نَفْيٍ','Negative mā');
+ const maS=sk('«مَا» حَرْفٌ مَصْدَرِيٌّ','Mā, a verbal-noun-forming particle');
+ const illa=sk('«إِلَّا» حَرْفُ اسْتِثْنَاءٍ','Exception particle illā'), restrict=sk('«إِلَّا» أَدَاةُ حَصْرٍ','Restrictive illā');
+ const min=sk('«مِنْ» حَرْفُ جَرٍّ','Preposition min'), ala=sk('«عَلَى» حَرْفُ جَرٍّ','Preposition ʿalā');
+ const prep=(ar,en)=>particle(`${ar} حَرْفُ جَرٍّ`,`Preposition ${en}`,'الْكَسْرِ','kasr');
+ const ba=prep('الْبَاءُ','bāʾ'), laPrep=prep('اللَّامُ','lām');
+ const prohib=sk('«لَا» حَرْفُ نَهْيٍ وَجَزْمٍ','Prohibitive and jussive lā'), negLa=sk('«لَا» حَرْفُ نَفْيٍ','Negative lā');
+ const pr=(ar,en,s,es,role,er)=>p(`${ar} ضَمِيرٌ مُتَّصِلٌ مَبْنِيٌّ عَلَى ${s} فِي مَحَلِّ ${role}.`,`Attached ${en}, fixed on ${es} in ${er} position.`);
+ const ta=pr('التَّاءُ','tāʾ','الضَّمِّ','ḍamm','رَفْعٍ فَاعِلٌ','nominative subject');
+ const na=pr('«نَا»','nā','السُّكُونِ','sukūn','رَفْعٍ فَاعِلٌ','nominative subject');
+ const group=pr('وَاوُ الْجَمَاعَةِ','plural wāw','السُّكُونِ','sukūn','رَفْعٍ فَاعِلٌ','nominative subject');
+ const hObj=pr('الْهَاءُ','hāʾ','الضَّمِّ','ḍamm','نَصْبٍ مَفْعُولٌ بِهِ','accusative object');
+ const hGen=pr('الْهَاءُ','hāʾ','الضَّمِّ','ḍamm','جَرٍّ مُضَافٌ إِلَيْهِ','genitive annex');
+ const kGen=pr('الْكَافُ','kāf','الْفَتْحِ','fatḥ','جَرٍّ مُضَافٌ إِلَيْهِ','genitive annex');
+ const haGen=pr('«هَا»','hā','السُّكُونِ','sukūn','جَرٍّ مُضَافٌ إِلَيْهِ','genitive annex');
+ const minI=pr('الْهَاءُ','hāʾ','الْكَسْرِ','kasr','جَرٍّ بِالْبَاءِ','genitive after bāʾ');
+ const hMin=pr('الْهَاءُ','hāʾ','الضَّمِّ','ḍamm','جَرٍّ بِـ«مِنْ»','genitive after min');
+ const mPlural=p('الْمِيمُ عَلَامَةُ الْجَمْعِ مَبْنِيَّةٌ عَلَى السُّكُونِ، لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Plural mīm, fixed on sukūn with no syntactic position.');
+ const hidden=(optional=true)=>p(`فَاعِلُهُ ضَمِيرٌ مُسْتَتِرٌ ${optional?'جَوَازًا':'وُجُوبًا'} تَقْدِيرُهُ هُوَ.`,`The subject is ${optional?'optionally':'obligatorily'} hidden: “he.”`);
+ const past=p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ.','Past verb fixed on fatḥ.');
+ const pt=p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى السُّكُونِ لِاتِّصَالِهِ بِضَمِيرِ رَفْعٍ مُتَحَرِّكٍ.','Past verb fixed on sukūn before the vocalized subject pronoun.');
+ const pw=p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الضَّمِّ لِاتِّصَالِهِ بِوَاوِ الْجَمَاعَةِ.','Past verb fixed on ḍamm before plural wāw.');
+ const pp=(ar,en)=>p(`الْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ ${ar}.`,`The prepositional phrase attaches to ${en}.`);
+ const t=(w,g,...parts)=>answerParts(w,g,parts);
+ const num=(w,g)=>t(w,g,p('مَفْعُولٌ بِهِ مَنْصُوبٌ بِالْيَاءِ نِيَابَةً عَنِ الْفَتْحَةِ لِأَنَّهُ مُلْحَقٌ بِجَمْعِ الْمُذَكَّرِ السَّالِمِ.','Direct object, accusative with yāʾ instead of fatḥah because this decade inflects like a sound masculine plural.'));
+ const noteNums={'1':'الْأُولَى','2':'الثَّانِيَةُ','3':'الثَّالِثَةُ','4':'الرَّابِعَةُ','5':'الْخَامِسَةُ','6':'السَّادِسَةُ','7':'السَّابِعَةُ','8':'الثَّامِنَةُ'};
+ const ev=(num,en='',ar='')=>[`The main text gives this wording.${num?' Editorial note '+num+' supplies the core analysis.':''} ${en}`,`اللَّفْظُ مِنَ الْمَتْنِ.${num?' وَتَذْكُرُ الْحَاشِيَةُ '+noteNums[num]+' أَصْلَ الْإِعْرَابِ.':''} ${ar}`];
+ const b=(id,page,ar,en,ts,note,e,a)=>releaseBook(id,page,ar,en,ts,...ev(note,e,a));
+ const q=(id,page,ar,en,ts,ref,surah,note,e,a)=>releaseQuran(id,page,ar,en,ts,...ref,surah,...ev(note,e,a));
+ const qty=(ar,en)=>tam(`لِـ«${ar}»`,`specifying ${en}`);
+ const rel=(ar,en)=>tam(ar,en);
+ const self=(w,g)=>t(w,g,pt,ta);
+ const mat=x=>tam('يُبَيِّنُ الْمَادَّةَ',`specifying the material: ${x}`);
+ const adjCompar=(w,g,conj=null)=>t(w,g,...(conj?[conj]:[]),kh);
+ const minka=()=>t('مِنْكَ','than you',min,pr('الْكَافُ','kāf','الْفَتْحِ','fatḥ','جَرٍّ بِـ«مِنْ»','genitive after min'),pp('بِاسْمِ التَّفْضِيلِ','the comparative'));
+ const relSubject=(w,g,leader,sense)=>t(w,g,rel(`مُحَوَّلٌ عَنِ الْفَاعِلِ فِي «${leader}»`,`converted from the subject: ${sense}`));
+ const objectN=(word,gloss)=>t(word,gloss,obj);
+ const number=[
+  b('tamyiz-p198-01',198,'اشْتَرَيْتُ عِشْرِينَ غُلَامًا','I bought twenty young servants.',[self('اشْتَرَيْتُ','I bought'),num('عِشْرِينَ','twenty'),t('غُلَامًا','young servants',qty('عِشْرِينَ','twenty'))],5),
+  b('tamyiz-p198-02',198,'وَمَلَكْتُ تِسْعِينَ نَعْجَةً','And I owned ninety ewes.',[t('وَمَلَكْتُ','and I owned',wa,pt,ta),num('تِسْعِينَ','ninety'),t('نَعْجَةً','ewes',qty('تِسْعِينَ','ninety'))],1,'The sentence crosses from p.198 to p.199; note 1 and naʿjatan are on p.199.','بَدْءُ الْمِثَالِ فِي ص ١٩٨، وَ«نَعْجَةً» وَحَاشِيَةُ الْإِعْرَابِ فِي ص ١٩٩.'),
+  b('tamyiz-p199-01',199,'اشْتَرَيْتُ قَفِيزًا بُرًّا، وَمَنًا سَمْنًا، وَشِبْرًا أَرْضًا','I bought a qafīz of wheat, a mann of clarified butter, and a handspan of land.',[
+   self('اشْتَرَيْتُ','I bought'),objectN('قَفِيزًا','a qafīz'),t('بُرًّا','of wheat',qty('قَفِيزًا','the qafīz')),
+   t('وَمَنًا','and a mann',wa,n('مَعْطُوفٌ عَلَى «قَفِيزًا»','Coordinated with qafīzan')),t('سَمْنًا','of clarified butter',qty('مَنًا','the mann')),
+   t('وَشِبْرًا','and a handspan',wa,n('مَعْطُوفٌ عَلَى «قَفِيزًا»','Coordinated with qafīzan')),t('أَرْضًا','of land',qty('شِبْرًا','the handspan'))],3,'One verb governs the coordinated measure nouns.','الْمَقَادِيرُ مَعْطُوفٌ بَعْضُهَا عَلَى بَعْضٍ، وَلِكُلٍّ تَمْيِيزُهُ.'),
+  q('tamyiz-p199-02',199,'مِثْقَالَ ذَرَّةٍ خَيْرًا','An atom’s weight of good.',[
+   t('مِثْقَالَ','weight of',n('مَفْعُولٌ بِهِ لِـ«يَعْمَلْ» فِي تَمَامِ الْآيَةِ','Object of “do” in the full verse',true)),t('ذَرَّةٍ','an atom',gen),t('خَيْرًا','of good',qty('مِثْقَالَ','the weight'))],[99,7],'الزَّلْزَلَةِ',5,'The longer note ornament and the governor are outside this short excerpt. The note’s parsing continues on p.200.','الْحِلْيَةُ الْمُطَوَّلَةُ فِي الْحَاشِيَةِ، وَالْعَامِلُ خَارِجَ هَذَا الْمَقْطَعِ. وَيَتِمُّ إِعْرَابُ الْحَاشِيَةِ فِي ص ٢٠٠.'),
+  b('tamyiz-p200-01',200,'هَذَا خَاتَمٌ حَدِيدًا، وَبَابٌ سَاجًا، وَجُبَّةٌ خَزًّا','This is a ring of iron, and [this is] a door of teak, and [this is] a coat of khazz cloth.',[
+   t('هَذَا','this',p('هَاءُ التَّنْبِيهِ حَرْفٌ مَبْنِيٌّ عَلَى الْفَتْحِ لَا مَحَلَّ لَهُ.','Attention hāʾ, fixed on fatḥ with no syntactic position.'),p('«ذَا» اسْمُ إِشَارَةٍ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Demonstrative dhā, fixed on sukūn in nominative position as mubtadaʾ.')),
+   t('خَاتَمٌ','a ring',kh),t('حَدِيدًا','of iron',mat('iron')),t('وَبَابٌ','and a door',wa,r('خَبَرٌ لِمُبْتَدَإٍ مَحْذُوفٍ','Predicate of an omitted mubtadaʾ')),t('سَاجًا','of teak',mat('teak')),
+   t('وَجُبَّةٌ','and a coat',wa,r('خَبَرٌ لِمُبْتَدَإٍ مَحْذُوفٍ','Predicate of an omitted mubtadaʾ')),t('خَزًّا','of khazz cloth',mat('khazz cloth'))],1,'Note 1 parses the ring. The app supplies the parse and translation’s bracketed estimates for the two abbreviated parallels.','تُعْرِبُ الْحَاشِيَةُ مِثَالَ الْخَاتَمِ، وَيُكْمِلُ التَّطْبِيقُ الْمِثَالَيْنِ الْمُخْتَصَرَيْنِ.'),
+  b('tamyiz-p200-02',200,'تَصَبَّبَ زَيْدٌ عَرَقًا','Zayd poured with sweat.',[t('تَصَبَّبَ','poured',past),t('زَيْدٌ','Zayd',subject),relSubject('عَرَقًا','with sweat','تَصَبَّبَ عَرَقُ زَيْدٍ','Zayd’s sweat poured')],2),
+  b('tamyiz-p200-03',200,'وَتَفَقَّأَ بَكْرٌ شَحْمًا','And Bakr burst with fat.',[t('وَتَفَقَّأَ','and burst',wa,past),t('بَكْرٌ','Bakr',subject),relSubject('شَحْمًا','with fat','تَفَقَّأَ شَحْمُ بَكْرٍ','Bakr’s fat burst')],3),
+  b('tamyiz-p200-04',200,'وَطَابَ مُحَمَّدٌ نَفْسًا','And Muḥammad was content at heart.',[t('وَطَابَ','and was content',wa,past),t('مُحَمَّدٌ','Muḥammad',subject),relSubject('نَفْسًا','at heart','طَابَتْ نَفْسُ مُحَمَّدٍ','Muḥammad’s soul was content')],4),
+  q('tamyiz-p200-05',200,'وَاشْتَعَلَ الرَّأْسُ شَيْبًا','And the head blazed with gray hair.',[t('وَاشْتَعَلَ','and blazed',wa,past),t('الرَّأْسُ','the head',subject),relSubject('شَيْبًا','with gray hair','اشْتَعَلَ شَيْبُ الرَّأْسِ','the head’s gray hair blazed')],[19,4],'مَرْيَمَ',5),
+  q('tamyiz-p201-01',201,'وَفَجَّرْنَا الْأَرْضَ عُيُونًا','And We made the earth gush with springs.',[t('وَفَجَّرْنَا','and We made gush',wa,pt,na),objectN('الْأَرْضَ','the earth'),t('عُيُونًا','with springs',rel('مُحَوَّلٌ عَنِ الْمَفْعُولِ بِهِ فِي «فَجَّرْنَا عُيُونَ الْأَرْضِ»','converted from the object: “We made the springs of the earth gush”'))],[54,12],'الْقَمَرِ',1),
+  q('tamyiz-p201-02',201,'أَنَا أَكْثَرُ مِنْكَ مَالًا','I have more wealth than you.',[
+   t('أَنَا','I',p('ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Detached pronoun fixed on sukūn, in nominative position as mubtadaʾ.')),adjCompar('أَكْثَرُ','have more'),minka(),t('مَالًا','wealth',rel('مُحَوَّلٌ عَنْ غَيْرِ الْفَاعِلِ وَالْمَفْعُولِ؛ وَالْأَصْلُ فِي الْحَاشِيَةِ «مَالِي أَكْثَرُ مِنْكَ»','converted from another term; the note reconstructs “my wealth is greater than yours”'))],[18,34],'الْكَهْفِ',2),
+  b('tamyiz-p201-03',201,'وَزَيْدٌ أَكْرَمُ مِنْكَ أَبًا، وَأَجْمَلُ مِنْكَ وَجْهًا','And Zayd has a nobler father than you and a more beautiful face than you.',[
+   t('وَزَيْدٌ','and Zayd',wa,mubt),adjCompar('أَكْرَمُ','nobler'),minka(),t('أَبًا','in father',p('تَمْيِيزٌ مَنْصُوبٌ. وَتَذْكُرُ الْحَاشِيَةُ أَنَّ عَلَامَةَ نَصْبِهِ الْأَلِفُ. وَفِي الْإِعْرَابِ الْقِيَاسِيِّ عَلَامَتُهُ الْفَتْحَةُ الظَّاهِرَةُ؛ لِأَنَّ «أَبًا» غَيْرُ مُضَافٍ هُنَا.','Accusative tamyīz. The note gives alif as its sign. In the standard analysis its sign is visible fatḥah, since aban is not annexed here.'),p('وَالْأَصْلُ «أَبُو زَيْدٍ أَكْرَمُ مِنْكَ».','The note reconstructs “Zayd’s father is nobler than you.”')),
+   t('وَأَجْمَلُ','and more beautiful',wa,r('مَعْطُوفٌ عَلَى «أَكْرَمُ»','Coordinated with the predicate akramu')),minka(),t('وَجْهًا','in face',rel('مُحَوَّلٌ عَنْ غَيْرِ الْفَاعِلِ وَالْمَفْعُولِ','converted from the compared noun “face”'))],3,'The alif analysis for aban is the footnote’s wording; the app does not generalize it.','الْقَوْلُ بِالْأَلِفِ فِي «أَبًا» مِنْ إِعْرَابِ الْحَاشِيَةِ، وَلَا يُعَمِّمُهُ التَّطْبِيقُ.'),
+  b('tamyiz-p201-04',201,'امْتَلَأَ الْإِنَاءُ مَاءً','The vessel filled with water.',[t('امْتَلَأَ','filled',past),t('الْإِنَاءُ','the vessel',subject),t('مَاءً','with water',rel('غَيْرُ مُحَوَّلٍ','not derived by conversion'))],4),
+  b('tamyiz-p201-05',201,'وَلِلَّهِ دَرُّهُ فَارِسًا','How splendid a horseman he is!',[
+   t('وَلِلَّهِ','and to Allah',wa,laPrep,j('اسْمٌ مَجْرُورٌ بِاللَّامِ، وَهُوَ لَفْظُ الْجَلَالَةِ','The divine name governed by lām'.trim()),pp('بِمَحْذُوفٍ خَبَرٍ مُقَدَّمٍ','an omitted fronted predicate')),
+   t('دَرُّهُ','his excellence',r('مُبْتَدَأٌ مُؤَخَّرٌ','Delayed mubtadaʾ',true),hGen),t('فَارِسًا','as a horseman',rel('غَيْرُ مُحَوَّلٍ','not derived by conversion'))],5)
+ ];
+ const come=()=>t('قَامَ','stood',past);
+ const people=()=>t('الْقَوْمُ','the group',subject);
+ const il=(lim=false,w='إِلَّا')=>t(w,lim?'only':'except',...(w.startsWith('و')?[wa]:[]),lim?restrict:illa);
+ const neg=w=>t(w,'not',...(w.startsWith('و')?[wa]:[]),ma);
+ const bz=()=>t('بِزَيْدٍ','by Zayd',ba,j('اسْمٌ مَجْرُورٌ بِالْبَاءِ','Noun governed by bāʾ'),pp('بِـ«مَرَرْتُ»','“I passed”'));
+ const bad=(ar,en,i=false)=>r(`بَدَلُ بَعْضٍ مِنْ كُلٍّ مِنْ ${ar}`,`Part-for-whole badal of ${en}`,i);
+ const possMin=(word,gloss,attach,attachEn,k=false)=>t(word,gloss,min,pr(k?'الْكَافُ':'الْهَاءُ',k?'kāf':'hāʾ','الضَّمِّ','ḍamm','جَرٍّ بِـ«مِنْ»','genitive after min'),mPlural,pp(attach,attachEn));
+ const fiveJuss=(verb)=>p(`فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا» النَّاهِيَةِ، وَعَلَامَةُ جَزْمِهِ حَذْفُ النُّونِ لِأَنَّهُ مِنَ الْأَفْعَالِ الْخَمْسَةِ.`,'Present verb made jussive by prohibitive lā, marked by deletion of nūn because it is one of the five forms.');
+ const alaGod=()=>t('اللَّهِ','Allah',j('لَفْظُ الْجَلَالَةِ بَعْدَ «عَلَى»','The divine name governed by ʿalā'),pp('بِـ«تَقُولُوا»','“you say”'));
+ const wholeVerb=(w,g)=>t(w,g,pw,group);
+ const allExcept=(id,page,ar,en,pre,word,gloss,num,e,a)=>b(id,page,ar,en,[...pre,il(),t(word,gloss,exception())],num,e,a);
+ const firstAlts=[
+  q('except-p204-01',204,'فَشَرِبُوا مِنْهُ إِلَّا قَلِيلًا','So they drank from it, except a few.',[
+   t('فَشَرِبُوا','so they drank',fa,pw,group),t('مِنْهُ','from it',min,hMin,pp('بِـ«شَرِبُوا»','“they drank”')),il(),t('قَلِيلًا','a few',n('مُسْتَثْنًى مِنْ وَاوِ «شَرِبُوا»','Excepted from the plural subject of “they drank”'))],[2,249],'الْبَقَرَةِ',3),
+  allExcept('except-p204-02',204,'قَامَ الْقَوْمُ إِلَّا زَيْدًا','The group stood except Zayd.',[come(),people()],'زَيْدًا','Zayd',4),
+  allExcept('except-p204-03',204,'وَخَرَجَ النَّاسُ إِلَّا عَمْرًا','And the people went out except ʿAmr.',[t('وَخَرَجَ','and went out',wa,past),t('النَّاسُ','the people',subject)],'عَمْرًا','ʿAmr',5),
+  allExcept('except-p204-04',204,'قَامَ الْقَوْمُ إِلَّا حِمَارًا','The group stood, but not a donkey.',[come(),people()],'حِمَارًا','a donkey',8,'This is a complete affirmative disconnected exception.','هَذَا اسْتِثْنَاءٌ مُنْقَطِعٌ فِي كَلَامٍ تَامٍّ مُوجَبٍ.'),
+  q('except-p205-01',205,'مَا فَعَلُوهُ إِلَّا قَلِيلٌ مِنْهُمْ','They did not do it, except a few of them.',[
+   neg('مَا'),t('فَعَلُوهُ','they did it',pw,group,hObj),il(),t('قَلِيلٌ','a few',bad('وَاوِ «فَعَلُوهُ»','the subject wāw of “they did it”')),possMin('مِنْهُمْ','of them','بِمَحْذُوفٍ نَعْتٍ لِـ«قَلِيلٌ»','an omitted modifier of “a few”')],[4,66],'النِّسَاءِ',1,'The printed nominative matches Ḥafṣ. Note 5 separately credits the accusative qalīlan to Ibn ʿĀmir.','الرَّفْعُ الْمَطْبُوعُ يُوَافِقُ حَفْصًا. وَتَنْسِبُ الْحَاشِيَةُ الْخَامِسَةُ «قَلِيلًا» بِالنَّصْبِ إِلَى ابْنِ عَامِرٍ.'),
+  q('except-p205-02',205,'وَلَا يَلْتَفِتْ مِنْكُمْ أَحَدٌ إِلَّا امْرَأَتُكَ','And let none of you look back except your wife.',[
+   t('وَلَا','and let no',wa,prohib),t('يَلْتَفِتْ','look back',p('فِعْلٌ مُضَارِعٌ مَجْزُومٌ بِـ«لَا» النَّاهِيَةِ، وَعَلَامَةُ جَزْمِهِ السُّكُونُ.','Present verb made jussive by prohibitive lā, marked by sukūn.')),
+   possMin('مِنْكُمْ','of you','بِمَحْذُوفٍ حَالٍ مُقَدَّمَةٍ مِنْ «أَحَدٌ»','an omitted fronted ḥāl of “anyone” (originally a modifier)',true),t('أَحَدٌ','anyone',subject),il(true),t('امْرَأَتُكَ','your wife',bad('«أَحَدٌ»','“anyone”',true),kGen)
+  ],[11,81],'هُودٍ',3,'Nominative reading of Ibn Kathīr and Abū ʿAmr among the Seven (notes 2 and 6). Note 3 parses imraʾatuka as badal of aḥadun. The separate Ḥafṣ form is accusative imraʾataka, not the form analyzed here.','هَذِهِ قِرَاءَةُ ابْنِ كَثِيرٍ وَأَبِي عَمْرٍو بِالرَّفْعِ مِنَ السَّبْعَةِ، كَمَا فِي الْحَاشِيَتَيْنِ الثَّانِيَةِ وَالسَّادِسَةِ. وَتُعْرِبُ الثَّالِثَةُ «امْرَأَتُكَ» بَدَلًا مِنْ «أَحَدٌ». وَ«امْرَأَتَكَ» بِالنَّصْبِ قِرَاءَةُ حَفْصٍ، وَلَيْسَتْ هِيَ الصِّيغَةَ الْمُعْرَبَةَ هُنَا.'),
+  q('except-p205-03',205,'وَمَنْ يَقْنَطُ مِنْ رَحْمَةِ رَبِّهِ إِلَّا الضَّالُّونَ','And who despairs of the mercy of his Lord except those who have gone astray?',[
+   t('وَمَنْ','and who',wa,p('«مَنْ» اسْمُ اسْتِفْهَامٍ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ.','Interrogative man fixed on sukūn, in nominative position as mubtadaʾ.')),
+   t('يَقْنَطُ','despairs',p('فِعْلٌ مُضَارِعٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ.','Present verb, indicative with visible ḍammah.'),hidden(),p('وَالْجُمْلَةُ الْفِعْلِيَّةُ فِي مَحَلِّ رَفْعٍ خَبَرٌ.','The verb clause is in nominative position as predicate.')),
+   t('مِنْ','of',min),t('رَحْمَةِ','mercy of',j('اسْمٌ مَجْرُورٌ بِـ«مِنْ»','Noun governed by min',true),pp('بِـ«يَقْنَطُ»','“despairs”')),
+   t('رَبِّهِ','his Lord',j('مُضَافٌ إِلَيْهِ','Second term of an annexation',true),pr('الْهَاءُ','hāʾ','الْكَسْرِ','kasr','جَرٍّ مُضَافٌ إِلَيْهِ','genitive annex')),il(),
+   t('الضَّالُّونَ','those astray',p('بَدَلُ بَعْضٍ مِنْ كُلٍّ مِنَ الْفَاعِلِ الْمُسْتَتِرِ فِي «يَقْنَطُ»، مَرْفُوعٌ بِالْوَاوِ نِيَابَةً عَنِ الضَّمَّةِ لِأَنَّهُ جَمْعُ مُذَكَّرٍ سَالِمٌ.','Part-for-whole badal of the hidden subject of “despairs,” nominative with wāw instead of ḍammah because it is a sound masculine plural.'))],[15,56],'الْحِجْرِ',4),
+  q('except-p206-01',206,'مَا لَهُمْ بِهِ مِنْ عِلْمٍ إِلَّا اتِّبَاعَ الظَّنِّ','They have no knowledge of it, only the following of conjecture.',[
+   neg('مَا'),t('لَهُمْ','they have',ft('اللَّامُ حَرْفُ جَرٍّ','Preposition lām'),pr('الْهَاءُ','hāʾ','الضَّمِّ','ḍamm','جَرٍّ بِاللَّامِ','genitive after lām'),mPlural,pp('بِمَحْذُوفٍ خَبَرٍ مُقَدَّمٍ','an omitted fronted predicate')),
+   t('بِهِ','about it',ba,minI,pp('بِمَحْذُوفٍ حَالٍ','an omitted ḥāl (note 1)')),t('مِنْ','[emphatic min]',sk('«مِنْ» حَرْفُ جَرٍّ زَائِدٌ لِلتَّوْكِيدِ','Extra preposition min for emphasis')),
+   t('عِلْمٍ','knowledge',p('مُبْتَدَأٌ مُؤَخَّرٌ مَرْفُوعٌ بِضَمَّةٍ مُقَدَّرَةٍ لِاشْتِغَالِ الْمَحَلِّ بِكَسْرَةِ حَرْفِ الْجَرِّ الزَّائِدِ.','Delayed mubtadaʾ, nominative with estimated ḍammah because the extra preposition’s kasrah occupies its place.')),
+   il(),t('اتِّبَاعَ','following',n('مُسْتَثْنًى مُنْقَطِعٌ','Disconnected exception',true)),t('الظَّنِّ','conjecture',gen)],[4,157],'النِّسَاءِ',1,'The text illustrates the Ḥijāzī requirement of accusative in this branch.','يُمَثِّلُ بِهِ الْمَتْنُ لِوُجُوبِ النَّصْبِ عِنْدَ الْحِجَازِيِّينَ.'),
+  b('except-p206-02',206,'مَا قَامَ الْقَوْمُ إِلَّا حِمَارًا، وَإِلَّا حِمَارٌ','The group did not stand, except a donkey (preferred accusative, or nominative).',[
+   neg('مَا'),come(),people(),il(),t('حِمَارًا','a donkey (preferred)',n('مُسْتَثْنًى مُنْقَطِعٌ','Disconnected exception')),il(false,'وَإِلَّا'),
+   t('حِمَارٌ','a donkey (alternative)',r('بَدَلٌ مِنْ «الْقَوْمُ» فِي الْوَجْهِ الْجَائِزِ عِنْدَ تَمِيمٍ','Badal of “the group” in Tamīm’s permitted alternative'))],2,'The second ending is the printed abbreviated alternative, not a second participant.','الثَّانِي وَجْهٌ بَدِيلٌ فِي اللَّفْظِ، لَا اسْتِثْنَاءٌ ثَانٍ.'),
+  b('except-p206-03',206,'مَا قَامَ إِلَّا زَيْدٌ','Only Zayd stood.',[neg('مَا'),come(),il(true),t('زَيْدٌ','Zayd',subject)],4),
+  b('except-p206-04',206,'وَمَا رَأَيْتُ إِلَّا زَيْدًا','And I saw only Zayd.',[neg('وَمَا'),self('رَأَيْتُ','I saw'),il(true),objectN('زَيْدًا','Zayd')],5),
+  b('except-p206-05',206,'وَمَا مَرَرْتُ إِلَّا بِزَيْدٍ','And I passed by only Zayd.',[neg('وَمَا'),self('مَرَرْتُ','I passed'),il(true),bz()],6),
+  q('except-p206-06',206,'وَمَا مُحَمَّدٌ إِلَّا رَسُولٌ','And Muḥammad is only a messenger.',[neg('وَمَا'),t('مُحَمَّدٌ','Muḥammad',mubt),il(true),t('رَسُولٌ','a messenger',kh)],[3,144],'آلِ عِمْرَانَ',1,'One ornament across pp.206–207; the close and note 1 are on p.207.','حِلْيَةٌ وَاحِدَةٌ تَبْدَأُ فِي ص ٢٠٦ وَتَنْتَهِي فِي ص ٢٠٧، وَفِيهَا الْحَاشِيَةُ الْأُولَى.'),
+  q('except-p207-01',207,'وَلَا تَقُولُوا عَلَى اللَّهِ إِلَّا الْحَقَّ','And do not say about Allah anything but the truth.',[
+   t('وَلَا','and do not',wa,prohib),t('تَقُولُوا','say',fiveJuss(),group),t('عَلَى','about',ala),alaGod(),il(true),objectN('الْحَقَّ','the truth')],[4,171],'النِّسَاءِ',2),
+  q('except-p207-02',207,'وَلَا تُجَادِلُوا أَهْلَ الْكِتَابِ إِلَّا بِالَّتِي هِيَ أَحْسَنُ','And do not argue with the People of the Book except in the best manner.',[
+   t('وَلَا','and do not',wa,prohib),t('تُجَادِلُوا','argue',fiveJuss(),group),t('أَهْلَ','people of',n('مَفْعُولٌ بِهِ','Direct object',true)),t('الْكِتَابِ','the Book',gen),il(true),
+   t('بِالَّتِي','in the way which',ba,p('«الَّتِي» اسْمٌ مَوْصُولٌ مَبْنِيٌّ عَلَى السُّكُونِ فِي مَحَلِّ جَرٍّ بِالْبَاءِ.','Relative pronoun allātī, fixed on sukūn in genitive position after bāʾ.'),pp('بِـ«تُجَادِلُوا»','“argue”')),
+   t('هِيَ','it',p('ضَمِيرٌ مُنْفَصِلٌ مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ رَفْعٍ مُبْتَدَأٌ، وَهُوَ الْعَائِدُ عَلَى الِاسْمِ الْمَوْصُولِ.','Detached pronoun fixed on fatḥ, in nominative position as mubtadaʾ; it returns to the relative pronoun.')),
+   t('أَحْسَنُ','is best',kh,p('جُمْلَةُ «هِيَ أَحْسَنُ» صِلَةُ الْمَوْصُولِ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','Hiya aḥsanu is the relative clause, with no syntactic position.'))],[29,46],'الْعَنْكَبُوتِ',3)
+ ];
+ const altWaw=ft('الْوَاوُ حَرْفُ عَطْفٍ يَصِلُ هُنَا بَيْنَ وَجْهَيْنِ فِي التَّمْثِيلِ','Coordinating wāw linking alternative forms of the example');
+ const or=sk('«أَوْ» حَرْفُ عَطْفٍ لِلتَّخْيِيرِ','Coordinating aw giving a choice');
+ const zgen=()=>t('زَيْدٍ','Zayd',gen);
+ const ghayr=(word,gloss,role,extra=null)=>t(word,gloss,...(extra?[extra]:[]),role);
+ const siwa=(word,g,ar,en,ending,sign,conj=false)=>t(word,g,...(conj?[altWaw]:[]),p(`${ar} فِي الْوَجْهِ الْمُوَازِي، وَعَلَامَتُهُ ${ending} مُقَدَّرَةٌ عَلَى الْأَلِفِ لِلتَّعَذُّرِ، وَهُوَ مُضَافٌ.`,`${en} in the parallel construction, with ${sign} estimated on alif because it cannot appear; first term of an annexation.`));
+ const sAcc=(w='سِوَى',conj=false)=>siwa(w,'except','اسْمٌ مَنْصُوبٌ عَلَى الِاسْتِثْنَاءِ','Accusative exception noun','فَتْحَةٌ','fatḥah',conj);
+ const sBad=()=>siwa('سِوَى','except','بَدَلٌ مَرْفُوعٌ مِنْ وَاوِ «قَامُوا»','Nominative badal of the subject wāw in qāmū','ضَمَّةٌ','ḍammah');
+ const sSub=()=>siwa('وَسِوَى','or except','فَاعِلٌ مَرْفُوعٌ','Nominative subject','ضَمَّةٌ','ḍammah',true);
+ const sObj=()=>siwa('وَسِوَى','or except','مَفْعُولٌ بِهِ مَنْصُوبٌ','Accusative direct object','فَتْحَةٌ','fatḥah',true);
+ const sGen=()=>siwa('وَسِوَى','or except','اسْمٌ مَجْرُورٌ بِالْبَاءِ فِي صِيغَةِ الْحَاشِيَةِ «بِسِوَى»','Noun governed by bāʾ in the note’s corresponding wording bi-siwā','كَسْرَةٌ','kasrah',true);
+ const hiddenLaysa=p('اسْمُهُ ضَمِيرٌ مُسْتَتِرٌ وُجُوبًا تَقْدِيرُهُ هُوَ، يَعُودُ عَلَى الْقَائِمِ أَوِ الْبَعْضِ الْمَفْهُومِ مِنَ الْكُلِّ.','Its ism is an obligatorily hidden “he,” referring to the understood one who stood or a member of the group.');
+ const exceptVerb=(word,gloss,conj=null)=>t(word,gloss,...(conj?[conj]:[]),p('فِعْلٌ مَاضٍ مَبْنِيٌّ عَلَى الْفَتْحِ الْمُقَدَّرِ عَلَى الْأَلِفِ لِلتَّعَذُّرِ.','Past verb fixed on fatḥ estimated on alif because it cannot appear.'),hidden(false));
+ const exceptPrep=(word,gloss,ar,en)=>t(word,gloss,altWaw,sk(ar+' حَرْفُ جَرٍّ','Preposition '+en));
+ const pairs=[
+  b('except-p207-03',207,'قَامُوا غَيْرَ زَيْدٍ أَوْ سِوَى زَيْدٍ','They stood except Zayd, with ghayr or siwā.',[
+   wholeVerb('قَامُوا','they stood'),ghayr('غَيْرَ','except',exception(true)),zgen(),t('أَوْ','or',or),sAcc(),zgen()],5,'Note 4 identifies the complete affirmative branch; note 5 parses ghayra and cites the corresponding siwā form.','تُعَيِّنُ الْحَاشِيَةُ الرَّابِعَةُ الْكَلَامَ التَّامَّ الْمُوجَبَ، وَتُعْرِبُ الْخَامِسَةُ «غَيْرَ» وَتَذْكُرُ نَظِيرَهَا بِـ«سِوَى».'),
+  b('except-p207-04',207,'مَا قَامُوا غَيْرُ زَيْدٍ أَوْ سِوَى زَيْدٍ','They did not stand, except Zayd, with ghayr or siwā.',[
+   neg('مَا'),wholeVerb('قَامُوا','they stood'),ghayr('غَيْرُ','except',r('بَدَلٌ مِنْ وَاوِ «قَامُوا»','Badal of the subject wāw in qāmū',true)),zgen(),t('أَوْ','or',or),sBad(),zgen()],null,'One example crosses pp.207–208. P.208 note 1 also permits accusative ghayra.','يَمْتَدُّ الْمِثَالُ إِلَى ص ٢٠٨، وَتُجِيزُ حَاشِيَتُهَا الْأُولَى نَصْبَ «غَيْرَ» أَيْضًا.'),
+  b('except-p208-01',208,'مَا قَامَ غَيْرُ زَيْدٍ وَسِوَى زَيْدٍ','Only Zayd stood (with ghayr or siwā).',[
+   neg('مَا'),come(),ghayr('غَيْرُ','except',r('فَاعِلٌ','Subject',true)),zgen(),sSub(),zgen()],3,'The note restates the siwā construction as a parallel sentence.','تَسْتَأْنِفُ الْحَاشِيَةُ مِثَالَ «سِوَى» فِي صِيغَةٍ مُوَازِيَةٍ.'),
+  b('except-p208-02',208,'وَمَا رَأَيْتُ غَيْرَ زَيْدٍ وَسِوَى زَيْدٍ','And I saw only Zayd (with ghayr or siwā).',[
+   neg('وَمَا'),self('رَأَيْتُ','I saw'),ghayr('غَيْرَ','except',n('مَفْعُولٌ بِهِ','Direct object',true)),zgen(),sObj(),zgen()],4,'The note restates the siwā construction as a parallel sentence.','تَذْكُرُ الْحَاشِيَةُ الصِّيغَةَ الْمُوَازِيَةَ بِـ«سِوَى».'),
+  b('except-p208-03',208,'وَمَا مَرَرْتُ بِغَيْرِ زَيْدٍ وَسِوَى زَيْدٍ','And I passed by only Zayd (with ghayr or siwā).',[
+   neg('وَمَا'),self('مَرَرْتُ','I passed'),t('بِغَيْرِ','by anyone other than',ba,j('اسْمٌ مَجْرُورٌ بِالْبَاءِ','Noun governed by bāʾ',true),pp('بِـ«مَرَرْتُ»','“I passed”')),zgen(),sGen(),zgen()],5,'The main line has one written bāʾ. The note gives bi-siwā in the fully restated alternate sentence.','فِي الْمَتْنِ بَاءٌ وَاحِدَةٌ، وَتُصَرِّحُ الْحَاشِيَةُ بِـ«بِسِوَى» فِي صِيغَةِ الْبَدِيلِ.'),
+  b('except-p208-04',208,'قَامَ الْقَوْمُ لَيْسَ زَيْدًا، وَلَا يَكُونُ زَيْدًا','The group stood except Zayd, using either laysa or lā yakūnu.',[
+   come(),people(),t('لَيْسَ','except (laysa)',p('فِعْلٌ مَاضٍ نَاقِصٌ مَبْنِيٌّ عَلَى الْفَتْحِ، يَرْفَعُ الِاسْمَ وَيَنْصِبُ الْخَبَرَ.','Deficient past verb fixed on fatḥ, raising its ism and making its predicate accusative.'),hiddenLaysa),
+   t('زَيْدًا','Zayd',n('خَبَرُ «لَيْسَ»','Predicate of laysa')),t('وَلَا','or not',altWaw,negLa),t('يَكُونُ','be',p('فِعْلٌ مُضَارِعٌ نَاقِصٌ مَرْفُوعٌ بِالضَّمَّةِ الظَّاهِرَةِ، يَرْفَعُ الِاسْمَ وَيَنْصِبُ الْخَبَرَ.','Deficient present verb, indicative with visible ḍammah, raising its ism and making its predicate accusative.'),hiddenLaysa),t('زَيْدًا','Zayd',n('خَبَرُ «يَكُونُ»','Predicate of yakūnu'))],null,'One paired item: p.208 note 8 parses laysa; p.209 note 1 parses lā yakūnu. The page’s leader dots are layout, not part of the wording.','تُعْرِبُ حَاشِيَةُ ص ٢٠٨ الثَّامِنَةُ «لَيْسَ»، وَتُعْرِبُ حَاشِيَةُ ص ٢٠٩ الْأُولَى «لَا يَكُونُ».'),
+  b('except-p209-01',209,'قَامَ الْقَوْمُ خَلَا زَيْدًا، وَخَلَا زَيْدٍ','The group stood except Zayd, with either the verb or the preposition khalā.',[
+   come(),people(),exceptVerb('خَلَا','except (verb)'),objectN('زَيْدًا','Zayd'),exceptPrep('وَخَلَا','or except (preposition)','«خَلَا»','khalā'),t('زَيْدٍ','Zayd',j('اسْمٌ مَجْرُورٌ بِـ«خَلَا»','Noun governed by khalā'))],2,'The printed bil-jarr is a metalinguistic gloss, not part of the example.','«بِالْجَرِّ» تَعْلِيقٌ عَلَى الضَّبْطِ، لَا مِنْ أَلْفَاظِ الْمِثَالِ.'),
+  b('except-p209-02',209,'وَعَدَا زَيْدًا، وَعَدَا زَيْدٍ','And except Zayd, with either the verb or the preposition ʿadā.',[
+   exceptVerb('وَعَدَا','and except (verb)',altWaw),objectN('زَيْدًا','Zayd'),exceptPrep('وَعَدَا','or except (preposition)','«عَدَا»','ʿadā'),t('زَيْدٍ','Zayd',j('اسْمٌ مَجْرُورٌ بِـ«عَدَا»','Noun governed by ʿadā'))],3,'A printed abbreviation under qāma l-qawmu. Note 3 gives both full sentences.','اخْتَصَرَ الْمَتْنُ هَذَا الْمِثَالَ بَعْدَ «قَامَ الْقَوْمُ»، وَتَذْكُرُ الْحَاشِيَةُ الصِّيغَتَيْنِ تَامَّتَيْنِ.'),
+  b('except-p209-03',209,'وَحَاشَى زَيْدًا، وَحَاشَا زَيْدٍ','And except Zayd, with either the verb or the preposition ḥāshā.',[
+   exceptVerb('وَحَاشَى','and except (verb)',altWaw),objectN('زَيْدًا','Zayd'),exceptPrep('وَحَاشَا','or except (preposition)','«حَاشَا»','ḥāshā'),t('زَيْدٍ','Zayd',j('اسْمٌ مَجْرُورٌ بِـ«حَاشَا»','Noun governed by ḥāshā'))],4,'The author prints the two spellings and endings. Note 4 restates the full alternatives, and p.210 records Sībawayh’s qualification.','يَخْتَلِفُ الرَّسْمُ وَالْإِعْرَابُ فِي الْمَتْنِ؛ وَتُتِمُّ الْحَاشِيَةُ الصِّيغَتَيْنِ، وَفِي ص ٢١٠ قَيْدُ سِيبَوَيْهِ.'),
+  b('except-p210-01',210,'قَامَ الْقَوْمُ مَا عَدَا زَيْدًا','The group stood except Zayd, with mā ʿadā.',[
+   come(),people(),t('مَا','[verbal-noun particle]',maS),exceptVerb('عَدَا','except (verb)'),objectN('زَيْدًا','Zayd')],2,'Note 1 identifies mā as maṣdariyyah. The author requires the verbal analysis with this particle.','تُسَمِّي الْحَاشِيَةُ الْأُولَى «مَا» مَصْدَرِيَّةً، وَيُوجِبُ الْمَتْنُ النَّصْبَ مَعَهَا.'),
+  b('except-p210-02',210,'أَلَا كُلُّ شَيْءٍ مَا خَلَا اللَّهَ بَاطِلٌ [وَكُلُّ نَعِيمٍ لَا مَحَالَةَ زَائِلُ]','Behold, everything except Allah is fleeting [and every delight will inevitably pass away].',[
+   t('أَلَا','behold',sk('حَرْفُ اسْتِفْتَاحٍ وَتَنْبِيهٍ','Opening particle of attention')),t('كُلُّ','every',r('مُبْتَدَأٌ','Mubtadaʾ',true)),t('شَيْءٍ','thing',gen),t('مَا','[verbal-noun particle]',maS),exceptVerb('خَلَا','except (verb)'),t('اللَّهَ','Allah',n('لَفْظُ الْجَلَالَةِ، مَفْعُولٌ بِهِ لِـ«خَلَا»','The divine name, direct object of khalā in the app’s analysis'),p('وَفِي الْحَاشِيَةِ: «مَنْصُوبٌ عَلَى التَّعْظِيمِ».','The editorial note describes the accusative as “in reverence.”')),t('بَاطِلٌ','is fleeting',kh),
+   t('وَكُلُّ','and every',wa,r('مُبْتَدَأٌ','Mubtadaʾ',true)),t('نَعِيمٍ','delight',gen),t('لَا','no',sk('«لَا» نَافِيَةٌ لِلْجِنْسِ','Lā of categorical negation')),t('مَحَالَةَ','escape',p('اسْمُ «لَا» مَبْنِيٌّ عَلَى الْفَتْحِ فِي مَحَلِّ نَصْبٍ، وَخَبَرُهَا مَحْذُوفٌ تَقْدِيرُهُ «لَنَا».','Ism of lā, fixed on fatḥ in accusative position. The omitted predicate is estimated as lanā (“for us”).')),t('زَائِلُ','will pass away',kh)
+  ],3,'One poem by Labīd; the edition brackets the second hemistich. Note 3 calls the accusative of Allāh “in reverence”; its direct-object identification is the app’s analysis.','بَيْتٌ لِلَبِيدٍ؛ الشَّطْرُ الثَّانِي بَيْنَ مَعْقُوفَتَيْنِ فِي الطَّبْعَةِ. وَفِي الْحَاشِيَةِ «مَنْصُوبٌ عَلَى التَّعْظِيمِ»، وَتَعْيِينُ الْمَفْعُولِ بِهِ مِنَ التَّطْبِيقِ.')
+ ];
+ return [number,[...firstAlts,...pairs]];
+})();
+
+const finalManHelp = [
+ [
+  help('التَّمْيِيزُ اسْمٌ مَنْصُوبٌ يُفَسِّرُ إِبْهَامًا فِي ذَاتٍ أَوْ نِسْبَةٍ. فِي «اشْتَرَيْتُ عِشْرِينَ غُلَامًا» يُفَسِّرُ «غُلَامًا» الْعَدَدَ، وَفِي «تَصَبَّبَ زَيْدٌ عَرَقًا» يُفَسِّرُ «عَرَقًا» نِسْبَةَ التَّصَبُّبِ إِلَى زَيْدٍ.','A tamyīz specifies an otherwise ambiguous entity or relation. In “I bought twenty young servants,” the final noun tells what was counted. In “Zayd poured with sweat,” the last word explains what flowed.'),
+  help('يُرَتِّبُ الْمَتْنُ تَمْيِيزَ الذَّاتِ هَكَذَا: عَدَدٌ، وَمِقْدَارٌ، وَشِبْهُ مِقْدَارٍ، وَمَا كَانَ فَرْعًا لِلتَّمْيِيزِ. مِثَالُ الرَّابِعِ «هَذَا خَاتَمٌ حَدِيدًا». وَتَذْكُرُ حَاشِيَةُ ص ١٩٨ رَقْمُ ٤ أَنَّ مَا بَعْدَ «مِائَةَ» يُجَرُّ بِالْإِضَافَةِ فِي ﴿فَأَمَاتَهُ اللَّهُ مِائَةَ عَامٍ﴾ (سورة البقرة، ٢٥٩). وَتَسُوقُ حَاشِيَةُ ص ١٩٩ رَقْمُ ٥ آيَةَ الزَّلْزَلَةِ كَامِلَةً؛ أَمَّا حِلْيَةُ الْمَتْنِ فَتَبْدَأُ بِـ«مِثْقَالَ».','The book’s four entity types are number, measure, near-measure, and a thing specified by the material from which it is made. A ring specified as iron illustrates the last. P.198 note 4 contrasts the genitive annex after “a hundred” in Q2:259. P.199 note 5 separately quotes all of Q99:7; the main excerpt begins at mithqāla.'),
+  help('تَمْيِيزُ النِّسْبَةِ مُحَوَّلٌ عَنِ الْفَاعِلِ كَـ«عَرَقًا»، أَوْ عَنِ الْمَفْعُولِ كَـ«عُيُونًا»، أَوْ عَنْ غَيْرِهِمَا كَـ«مَالًا»، أَوْ غَيْرُ مُحَوَّلٍ كَـ«مَاءً». وَتُعِيدُ حَاشِيَةُ ص ٢٠١ «مَالًا» إِلَى «مَالِي أَكْثَرُ مِنْكَ». تَمْيِيزُ النِّسْبَةِ يُوَضِّحُ الْمَعْنَى بَعْدَ إِسْنَادٍ تَامٍّ، لَا مُجَرَّدَ مِقْدَارٍ أَوْ عَدَدٍ.','A relation specification may be converted from a subject (sweat), an object (springs), another element (wealth), or not converted at all (water). The p.201 note reconstructs the “wealth” example as “my wealth is greater than yours.” A relation specification clarifies a predication rather than simply specifying a measure or number.'),
+  help('يَشْتَرِطُ الْمُؤَلِّفُ التَّنْكِيرَ؛ وَتَنْسِبُ حَاشِيَةُ ص ٢٠١ رَقْمُ ٦ هَذَا إِلَى الْبَصْرِيِّينَ. وَتَذْكُرُ لِلْكُوفِيِّينَ إِعْرَابَ الْمَعْرِفَةِ تَمْيِيزًا فِي ﴿إِلَّا مَنْ سَفِهَ نَفْسَهُ﴾ (سورة البقرة، ١٣٠) وَ﴿بَطِرَتْ مَعِيشَتَهَا﴾ (سورة القصص، ٥٨). هَذَا خِلَافٌ فِي الْحَاشِيَةِ، لَا قَاعِدَةُ الْمَتْنِ. وَتَتِمُّ إِحَالَتُهَا فِي ص ٢٠٢ قَبْلَ الْحَاشِيَةِ الْأُولَى.','The author requires indefiniteness. P.201 note 6 attributes that to the Basrans and cites Q2:130 and Q28:58 for the Kufan analysis that allows a definite tamyīz. This is an editorial contrast, not the main rule. The citation ends above p.202 note 1.'),
+  help('يَكُونُ التَّمْيِيزُ بَعْدَ تَمَامِ الْكَلَامِ، وَلَا يَتَقَدَّمُ عَلَى عَامِلِهِ عِنْدَ الْمُؤَلِّفِ. عَامِلُ تَمْيِيزِ الذَّاتِ هُوَ الذَّاتُ الْمُبْهَمَةُ، وَعَامِلُ تَمْيِيزِ النِّسْبَةِ الْفِعْلُ الْمُسْنَدُ. تُقَابِلُ حَوَاشِي ص ٢٠٢ «عِنْدِي شِبْرٌ أَرْضًا» وَ«طَابَ مُحَمَّدٌ نَفْسًا» بِالصِّيغَتَيْنِ الْمَرْفُوضَتَيْنِ «عِنْدِي أَرْضًا شِبْرٌ» وَ«نَفْسًا طَابَ مُحَمَّدٌ».','The author places the tamyīz after the completed predication, not before its governor. An ambiguous entity itself governs entity tamyīz; the predicated verb governs relation tamyīz. The p.202 notes contrast “I have a handspan of land” and “Muḥammad was content at heart” with the explicitly rejected reordered forms.')
+ ],
+ [
+  help('أَدَوَاتُ الِاسْتِثْنَاءِ ثَمَانٍ فِي ص ٢٠٣: «إِلَّا» حَرْفٌ، وَ«غَيْر» وَ«سِوَى» اسْمَانِ، وَ«لَيْسَ» وَ«لَا يَكُونُ» فِعْلَانِ، وَ«خَلَا» وَ«عَدَا» وَ«حَاشَا» تَجِيءُ أَفْعَالًا أَوْ حُرُوفًا. وَيَذْكُرُ الْمَتْنُ «سِوَى» كَرِضًا، وَ«سُوَى» كَهُدًى، وَ«سَوَاء» كَسَمَاءٍ، وَ«سِوَاء» كَبِنَاءٍ، وَيَذْكُرُ «حَاشَ» وَ«حَشَا» أَيْضًا. تَجْعَلُ الْحَاشِيَةُ «سِوَى» أَفْصَحَ وَ«سِوَاء» نَادِرَةً.','P.203 gives eight tools: the particle illā; the nouns ghayr and siwā; the verbs laysa and lā yakūnu; and khalā, ʿadā and ḥāshā, which can be verbs or prepositions. The printed variants are siwā, suwā, sawāʾ and siwāʾ, and ḥāsha and ḥashā. The notes favor short siwā and describe the final extended kasr form as rare.'),
+  help('التَّامُّ مَا ذُكِرَ فِيهِ الْمُسْتَثْنَى مِنْهُ. إِذَا كَانَ الْكَلَامُ تَامًّا مُوجَبًا وَجَبَ النَّصْبُ بَعْدَ «إِلَّا»، سَوَاءٌ أَكَانَ الِاسْتِثْنَاءُ مُتَّصِلًا كَزَيْدٍ مِنَ الْقَوْمِ أَمْ مُنْقَطِعًا كَالْحِمَارِ مِنْهُمْ.','A complete exception names the excluded-from set. In an affirmative complete clause the exception is accusative, both if connected (a member such as Zayd) and if disconnected (a donkey, outside the group).'),
+  help('إِذَا كَانَ تَامًّا غَيْرَ مُوجَبٍ وَمُتَّصِلًا جَازَ النَّصْبُ وَالْبَدَلُ، وَالْبَدَلُ أَرْجَحُ. يُمَثِّلُ الْمَتْنُ لِلنَّفْيِ فِي النِّسَاءِ ٦٦، وَلِلنَّهْيِ فِي هُودٍ ٨١، وَلِلِاسْتِفْهَامِ فِي الْحِجْرِ ٥٦. فِي هُودٍ يَقْرَأُ ابْنُ كَثِيرٍ وَأَبُو عَمْرٍو «امْرَأَتُكَ» بِالرَّفْعِ؛ وَعَلَيْهِ الْبَدَلُ مِنْ «أَحَدٌ» فِي الْحَاشِيَةِ الثَّالِثَةِ. وَحَفْصٌ يَقْرَأُ «امْرَأَتَكَ». وَفِي النِّسَاءِ ٦٦ يُوَافِقُ رَفْعُ «قَلِيلٌ» حَفْصًا، وَتَنْسِبُ الْحَاشِيَةُ الْخَامِسَةُ النَّصْبَ إِلَى ابْنِ عَامِرٍ.','A complete non-affirmative connected exception allows accusative or badal, with badal preferred. The book illustrates negation with Q4:66, prohibition with Q11:81, and interrogation with Q15:56. The printed nominative imraʾatuka is the reading of Ibn Kathīr and Abū ʿAmr; the edition makes it a badal of aḥadun. Ḥafṣ reads accusative imraʾataka. The printed nominative qalīlun of Q4:66 matches Ḥafṣ; note 5 credits the separate accusative to Ibn ʿĀmir.'),
+  help('فِي التَّامِّ غَيْرِ الْمُوجَبِ الْمُنْقَطِعِ يُوجِبُ الْحِجَازِيُّونَ النَّصْبَ، كَمَا فِي شَاهِدِ النِّسَاءِ ١٥٧. وَيُرَجِّحُ بَنُو تَمِيمٍ النَّصْبَ وَيُجِيزُونَ الْإِتْبَاعَ: «مَا قَامَ الْقَوْمُ إِلَّا حِمَارًا» أَوْ «إِلَّا حِمَارٌ».','For a complete non-affirmative disconnected exception, the Ḥijāzīs require accusative, as in Q4:157. Tamīm prefers accusative but also allows the exception to follow the case of the excluded-from set. The paired donkey example gives the two endings.'),
+  help('النَّاقِصُ، أَوِ الْمُفَرَّغُ، مَا لَمْ يُذْكَرْ فِيهِ الْمُسْتَثْنَى مِنْهُ، وَشَرْطُهُ أَلَّا يَكُونَ مُوجَبًا. يَعْمَلُ مَا قَبْلَ «إِلَّا» فِيمَا بَعْدَهَا: فَاعِلٌ، أَوْ مَفْعُولٌ، أَوِ اسْمٌ مَجْرُورٌ، أَوْ خَبَرٌ. وَيَدْخُلُ النَّهْيُ فِي شَاهِدَيِ النِّسَاءِ ١٧١ وَالْعَنْكَبُوتِ ٤٦.','A deficient or emptied construction omits the excluded-from set and must be non-affirmative. The following expression takes its ordinary role: subject, object, noun governed by a preposition, predicate, or other complement. Q4:171 and Q29:46 illustrate the prohibitive construction.'),
+  help('«غَيْر» وَ«سِوَى» يَأْخُذَانِ إِعْرَابَ مَا بَعْدَ «إِلَّا»، وَمَا بَعْدَهُمَا مُضَافٌ إِلَيْهِ. فِي الْمِثَالِ الْمُمْتَدِّ مِنْ ص ٢٠٧ إِلَى ص ٢٠٨ «غَيْرُ» بَدَلٌ عَلَى الضَّبْطِ الْمَطْبُوعِ، وَتُجِيزُ الْحَاشِيَةُ النَّصْبَ. وَإِعْرَابُ «سِوَى» الْمَقْصُورَةِ مُقَدَّرٌ عَلَى الْأَلِفِ، وَإِعْرَابُ لُغَتِهَا الْمَمْدُودَةِ ظَاهِرٌ.','Ghayr and siwā receive the case that would follow illā. The following noun is genitive by annexation. In the example spanning pp.207–208, printed ghayru is nominative as badal; the note also allows accusative. Case is estimated on the short form’s alif and visible on the extended form.'),
+  help('الِاسْمُ بَعْدَ «لَيْسَ» أَوْ «لَا يَكُونُ» مَنْصُوبٌ لِأَنَّهُ خَبَرٌ. حَاشِيَةُ ص ٢٠٨ رَقْمُ ٨ وَحَاشِيَةُ ص ٢٠٩ رَقْمُ ١ تُقَدِّرَانِ الِاسْمَ «هُوَ» ضَمِيرًا مُسْتَتِرًا وُجُوبًا. وَ«لَا» نَافِيَةٌ فِي هَذَا الْمِثَالِ، فَـ«يَكُونُ» مَرْفُوعٌ.','After laysa or lā yakūnu the noun is accusative as predicate. The notes on the two sides of the page turn give an obligatorily hidden “he” as ism. Lā is negative, not prohibitive, so yakūnu is indicative.'),
+  help('بَعْدَ «خَلَا» وَ«عَدَا» وَ«حَاشَا» يَدُلُّ النَّصْبُ عَلَى الْفِعْلِيَّةِ وَالْجَرُّ عَلَى الْحَرْفِيَّةِ. وَيَنْقُلُ الْمُؤَلِّفُ أَنَّ سِيبَوَيْهِ لَمْ يَسْمَعْ بَعْدَ «حَاشَا» إِلَّا الْجَرَّ. وَمَعَ «مَا» الْمَصْدَرِيَّةِ يَتَعَيَّنُ النَّصْبُ بَعْدَ «عَدَا» وَ«خَلَا»، وَلَا يُلْحِقُ الْمُؤَلِّفُ «مَا» بِـ«حَاشَا». بَيْتُ لَبِيدٍ فِي ص ٢١٠ شَاهِدُ «مَا خَلَا»، وَالشَّطْرُ الثَّانِي بَيْنَ مَعْقُوفَتَيْنِ فِي الطَّبْعَةِ.','After khalā, ʿadā and ḥāshā, accusative marks the verbal construction and genitive marks prepositional use. The author reports that Sībawayh heard only genitive after ḥāshā. Maṣdariyyah mā with ʿadā or khalā requires accusative; the author excludes it with ḥāshā. The p.210 Labīd example illustrates mā khalā; the edition brackets the second hemistich.'),
+  help('فِي ص ٢١١ يُحِيلُ الْمُؤَلِّفُ إِلَى مَا سَبَقَ فِي الْمَرْفُوعَاتِ: خَبَرُ «كَانَ» وَأَخَوَاتِهَا، وَخَبَرُ الْحُرُوفِ الْمُشَبَّهَةِ بِـ«لَيْسَ»، وَخَبَرُ أَفْعَالِ الْمُقَارَبَةِ، وَاسْمُ «إِنَّ» وَأَخَوَاتِهَا، وَاسْمُ «لَا» النَّافِيَةِ لِلْجِنْسِ. ثُمَّ يُشِيرُ إِلَى التَّوَابِعِ فِيمَا يَأْتِي؛ لَا مِثَالَ مُسْتَقِلًّا فِي هَذِهِ الصَّفْحَةِ.','On p.211 the author refers back to five Marfūʿāt topics: the predicates of kāna and its sisters, laysa-like particles, and verbs of approximation; then the ism of inna and its sisters, and of categorical lā. He refers forward to the followers (tawābiʿ). There is no new standalone example on that page.')
+ ]
+];
+[
+ ['tamyiz','بَابُ التَّمْيِيزِ','Specification (tamyīz)','198–202','١٩٨–٢٠٢'],
+ ['exception','بَابُ الْمُسْتَثْنَى','Exception','203–211','٢٠٣–٢١١']
+].forEach(([id,titleAr,titleEn,pages,arPage],i)=>chapters.push({
+ id,titleAr,titleEn,pages,order:9+i,babId:'accusative-nouns',book:lastMansubat[i],help:finalManHelp[i],
+ helpSourceAr:`الْمُتَمِّمَةُ، ص ${arPage}. اللَّفْظُ وَأُصُولُ الْقَوَاعِدِ مِنَ الْمَتْنِ، وَمَا سُمِّيَ مِنَ الْحَوَاشِي فَمِنْ تَعْلِيقَاتِ الطَّبْعَةِ. وَالتَّرْجَمَةُ وَتَفْصِيلُ مَا لَمْ يُذْكَرْ مِنَ التَّطْبِيقِ.`,
+ helpSourceEn:`Al-Mutammimah, printed pp.${pages}. The wording and core rules are from the author; named notes are editorial. English and unstated parsing are supplied by the app.`
+}));
+
 // The concise study summaries and disclosure metadata are app-prepared
 // organization layered over the reviewed Help prose. Keeping this mapping
 // separate lets validators prove that every original explanation survives.
@@ -4742,6 +4942,43 @@ helpVisuals['circumstantial-state']=stage188Visual('مَا رَابِطُ جُم
  ['hal-pronoun','الضَّمِيرُ وَحْدَهُ','Pronoun alone','ضَمِيرُ الْخِطَابِ فِي «بَعْضُكُمْ» يَرْجِعُ إِلَى الْمُخَاطَبِينَ.','The pronoun in baʿḍukum refers back to the people told to descend.','hal-p197-02'],
  ['hal-waw','الْوَاوُ وَحْدَهَا','Wāw alone','«نَحْنُ» لَا تَعُودُ عَلَى الذِّئْبِ؛ الرَّابِطُ هُوَ الْوَاوُ.','“We” does not refer to the wolf; only wāw links the clause.','hal-p197-03']
 ]);
+const finalManBranch=(id,labelAr,labelEn,descAr,descEn,exerciseId,children)=>({id,labelAr,labelEn,descAr,descEn,...(exerciseId?{exerciseId}:{}),...(children?{children}:{})});
+const fm=finalManBranch;
+helpVisuals.tamyiz={type:'branches',titleAr:'مَا الَّذِي يُوَضِّحُهُ التَّمْيِيزُ؟',titleEn:'What does the tamyīz clarify?',branches:[
+ fm('tamyiz-entity','الذَّاتُ','Entity','يُبَيِّنُ مَا أُبْهِمَ فِي اسْمٍ.','Specifies what an ambiguous noun denotes.',null,[
+  fm('tamyiz-number','الْعَدَدُ','Number','«غُلَامًا» يُبَيِّنُ الْمَعْدُودَ.','Ghulāman tells you what was counted.','tamyiz-p198-01'),
+  fm('tamyiz-measure','الْمِقْدَارُ','Measure','لِكُلِّ مِقْدَارٍ تَمْيِيزُهُ.','Each measure has its own specification.','tamyiz-p199-01'),
+  fm('tamyiz-near','شِبْهُ الْمِقْدَارِ','Near-measure','«خَيْرًا» يُبَيِّنُ مَا يُوزَنُ.','Khayran tells you what is being weighed.','tamyiz-p199-02'),
+  fm('tamyiz-material','الْمَادَّةُ','Material','الْخَاتَمُ مَصْنُوعٌ مِنَ الْحَدِيدِ.','The ring is made of iron.','tamyiz-p200-01')
+ ]),
+ fm('tamyiz-relation','النِّسْبَةُ','Relation','يَزُولُ إِبْهَامُ الْإِسْنَادِ.','Clarifies the relation expressed by the clause.',null,[
+  fm('tamyiz-subject','عَنِ الْفَاعِلِ','From a subject','الْمُتَصَبِّبُ فِي الْأَصْلِ عَرَقُ زَيْدٍ.','What originally flowed was Zayd’s sweat.','tamyiz-p200-02'),
+  fm('tamyiz-object','عَنِ الْمَفْعُولِ','From an object','الْمُفَجَّرُ فِي التَّقْدِيرِ عُيُونُ الْأَرْضِ.','In the reconstruction, the springs are what were made to gush.','tamyiz-p201-01'),
+  fm('tamyiz-other','عَنْ غَيْرِهِمَا','From another term','مِنْ «مَالِي أَكْثَرُ مِنْكَ».','From “my wealth is greater than yours.”','tamyiz-p201-02'),
+  fm('tamyiz-nonconverted','غَيْرُ مُحَوَّلٍ','Not converted','«مَاءً» يَرْفَعُ إِبْهَامَ الِامْتِلَاءِ.','“Water” specifies what filled the vessel.','tamyiz-p201-04')
+ ])
+]};
+helpVisuals.exception={type:'branches',titleAr:'مَتَى يَتَغَيَّرُ إِعْرَابُ الْمُسْتَثْنَى؟',titleEn:'What determines the case of the exception?',branches:[
+ fm('except-illa','إِلَّا','Illā','ابْحَثْ عَنِ الْمُسْتَثْنَى مِنْهُ أَوَّلًا.','First check whether the excluded-from set is expressed.',null,[
+  fm('except-positive','تَامٌّ مُوجَبٌ','Complete affirmative','النَّصْبُ وَاجِبٌ.','Accusative is required.','except-p204-02'),
+  fm('except-connected','تَامٌّ غَيْرُ مُوجَبٍ مُتَّصِلٌ','Complete non-affirmative connected','الْبَدَلُ أَرْجَحُ، وَالنَّصْبُ جَائِزٌ.','Badal is preferred; accusative is permitted.','except-p205-02'),
+  fm('except-disconnected','تَامٌّ غَيْرُ مُوجَبٍ مُنْقَطِعٌ','Complete non-affirmative disconnected','النَّصْبُ وَاجِبٌ عِنْدَ الْحِجَازِيِّينَ وَأَرْجَحُ عِنْدَ تَمِيمٍ.','Ḥijāz requires accusative; Tamīm prefers it.','except-p206-02'),
+  fm('except-deficient','نَاقِصٌ مُفَرَّغٌ','Deficient (emptied)','الْعَامِلُ السَّابِقُ يُحَدِّدُ الْإِعْرَابَ.','The ordinary governor determines the case.','except-p206-03')
+ ]),
+ fm('except-tools','بَقِيَّةُ الْأَدَوَاتِ','Other tools','لِكُلِّ مَجْمُوعَةٍ عَمَلُهَا.','Each group has its own construction.',null,[
+  fm('except-nouns','غَيْرٌ وَسِوَى','Ghayr and siwā','مَا بَعْدَهُمَا مُضَافٌ إِلَيْهِ.','The following noun is genitive by annexation.','except-p207-03'),
+  fm('except-laysa','لَيْسَ وَلَا يَكُونُ','Laysa and lā yakūnu','مَا بَعْدَهُمَا خَبَرٌ مَنْصُوبٌ.','The following noun is an accusative predicate.','except-p208-04'),
+  fm('except-khala','خَلَا، عَدَا، حَاشَا','Khalā, ʿadā, ḥāshā','النَّصْبُ مَعَ الْفِعْلِ وَالْجَرُّ مَعَ الْحَرْفِ.','Accusative with the verb, genitive with the preposition.','except-p209-01'),
+  fm('except-masdar','مَا الْمَصْدَرِيَّةُ','Maṣdariyyah mā','يَتَعَيَّنُ النَّصْبُ مَعَ «مَا عَدَا» وَ«مَا خَلَا».','Mā ʿadā and mā khalā require accusative.','except-p210-01')
+ ]),
+ fm('except-closure','خِتَامُ الْمَنْصُوبَاتِ، ص ٢١١','Closing references, p.211','إِحَالَاتٌ إِلَى أَمْثِلَةٍ سَبَقَ دَرْسُهَا.','Return to examples from the five earlier topics cited by the book.',null,[
+  fm('closure-kana','خَبَرُ كَانَ','Predicate of kāna','«غَفُورًا» خَبَرُ «كَانَ».','Ghafūran is the khabar of kāna.','kana-01'),
+  fm('closure-laysa','خَبَرُ الْمُشَبَّهَةِ بِلَيْسَ','Predicate of laysa-like particles','«ذَاهِبًا» خَبَرُ «مَا».','Dhāhiban is the khabar of mā.','laysa-like-01'),
+  fm('closure-proximity','خَبَرُ أَفْعَالِ الْمُقَارَبَةِ','Predicate of proximity verbs','جُمْلَةُ «يَقُومُ» فِي مَحَلِّ نَصْبٍ خَبَرُ «كَادَ».','The yaqūmu clause is the accusative-position khabar of kāda.','muqarabah-01'),
+  fm('closure-inna','اسْمُ إِنَّ','Ism of inna','لَفْظُ الْجَلَالَةِ اسْمُ «إِنَّ».','The divine name is the ism of inna.','inna-01'),
+  fm('closure-la','اسْمُ لَا النَّافِيَةِ لِلْجِنْسِ','Ism of categorical lā','«صَاحِبَ» اسْمُ «لَا».','Ṣāḥiba is the ism of lā.','la-jins-01')
+ ])
+]};
 chapters.forEach(chapter=>{chapter.visual=helpVisuals[chapter.id]});
 
 const quranEn=/Qur[’']an (\d+):(\d+)(?:[–-](\d+))?\./u;

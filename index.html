@@ -675,7 +675,7 @@ html[data-theme=dark] .grammar-dialog{background:#202a25;color:#f6f0e3}
 <script src="help-redesign-data.js?v=ishtighal-chapter"></script>
 <script src="lesson-data.js?v=ishtighal-chapter"></script>
 <script src="why-parse-pilot.js?v=why-rollout-282-301"></script>
-<script src="study-tools.js?v=study-preview-1"></script>
+<script src="study-tools.js?v=study-preview-2"></script>
 <script>
 (function(){
 'use strict';
@@ -1170,7 +1170,7 @@ function setDrawerOpen(requested, {restoreFocus = true} = {}) {
 const studyFilterLabels={all:'testAll',quran:'testQuran',ordinary:'testOrdinary'};
 const studyScopeLabels={whole:'wholeBook',babs:'chooseBabs',chapters:'chooseChapters',saved:'reviewLater'};
 const testEntry=()=>{const s=state.study.session;return s?study.active.get(s.queue[s.index]):null;};
-let reviewOrigin='nahw',grammarOpener=null;
+let grammarOpener=null;
 function mountPracticeCard(){
  const mount=state.screen==='testRun'?$('testMount'):$('practiceScreen').querySelector('.practice-workspace');
  if($('practiceCard').parentElement!==mount)mount.append($('practiceCard'));
@@ -1222,6 +1222,7 @@ function advanceTest(){
 }
 function reviewPage(){
  const entries=state.study.saved.map(id=>study.active.get(id)).filter(Boolean);
+ const {reviewOrigin}=state.study;
  $('reviewBack').textContent=tr(reviewOrigin==='practice'?'backToBook':reviewOrigin==='testRun'?'backToTest':'backNahw');
  $('reviewStatus').textContent=entries.length?`${tr('reviewLater')} · ${localDigits(entries.length)}`:tr('reviewEmpty');
  $('testSaved').disabled=!entries.length;
@@ -1310,10 +1311,10 @@ function dismissGrammar(){
 }
 populateStudyChoices();
 document.querySelectorAll('[data-study]').forEach(button=>button.addEventListener('click',()=>{
- if(button.dataset.study==='review'){reviewOrigin=state.screen;setScreen('review');}
+ if(button.dataset.study==='review'){state.study.reviewOrigin=study.reviewOrigin(state.screen);setScreen('review');}
  else setScreen('testSetup');
 }));
-$('reviewBack').addEventListener('click',()=>setScreen(reviewOrigin));
+$('reviewBack').addEventListener('click',()=>setScreen(state.study.reviewOrigin));
 $('saveReview').addEventListener('click',()=>{
  const exercise=state.screen==='testRun'?testEntry()?.exercise:state.mode==='book'?currentExercise():null;
  toggleReview(exercise?.id);renderReviewControls(exercise);save();

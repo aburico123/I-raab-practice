@@ -3,6 +3,7 @@
  'use strict';
  const unique=(values,test)=>Array.isArray(values)?[...new Set(values.filter(test))]:[];
  const scopes=['whole','babs','chapters','saved'],filters=['all','quran','ordinary'];
+ const reviewOrigin=value=>['nahw','practice','testRun'].includes(value)?value:'nahw';
  const matchFilter=(exercise,filter)=>filter==='all'||(filter==='quran'?!!exercise.quran:!exercise.quran);
  function create(babs,chapters){
   const active=new Map(chapters.flatMap(chapter=>chapter.book.flatMap((exercise,index)=>
@@ -25,7 +26,7 @@
     const cursor=unique(old.queue.slice(0,index),eligible).length;
     session={queue,index:cursor,revealed:queue[cursor]===old.queue[index]&&cursor<queue.length&&old.revealed===true};
    }
-   return {config,saved,session};
+   return {config,saved,session,reviewOrigin:reviewOrigin(raw.reviewOrigin)};
   }
   function pool(config,saved){
    const {scope,filter}=config,selectedBabs=new Set(config.babs),selectedChapters=new Set(config.chapters);
@@ -40,7 +41,7 @@
    for(let i=queue.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]];}
    return {queue,index:0,revealed:false};
   }
-  return {active,normalize,pool,start};
+  return {active,normalize,pool,start,reviewOrigin};
  }
  const terms={
   rafSlot:{ar:'فِي مَحَلِّ رَفْعٍ',en:'In a nominative position',
@@ -55,8 +56,8 @@
    exampleAr:'زَيْدٌ قَائِمٌ — «زَيْدٌ» مُبْتَدَأٌ.',exampleEn:'Zaydun qāʾimun: Zayd is who the sentence is about.'},
   khabar:{ar:'خَبَرٌ',en:'Khabar · predicate',
    aliasesAr:['خبر','الخبر'],aliasesEn:['khabar','predicate'],
-   meaningAr:'الْجُزْءُ الَّذِي يُخْبِرُ عَنِ الْمُبْتَدَإِ وَيُتِمُّ الْمَعْنَى.',
-   meaningEn:'The part that tells us something about the mubtadaʾ and completes the statement.',
+   meaningAr:'الْجُزْءُ الَّذِي يُخْبِرُ عَنِ الْمُبْتَدَإِ، أَوْ عَنِ اسْمِ «كَانَ» أَوْ «إِنَّ» وَنَحْوِهِمَا، وَيُتِمُّ الْمَعْنَى.',
+   meaningEn:'The part that says something about the mubtadaʾ or the ism of kāna, inna, or a similar governor, and completes the statement.',
    exampleAr:'زَيْدٌ قَائِمٌ — «قَائِمٌ» خَبَرٌ.',exampleEn:'Zaydun qāʾimun: qāʾimun tells us that Zayd is standing.'},
   shibh:{ar:'شِبْهُ جُمْلَةٍ',en:'Shibh jumlah · prepositional or adverbial phrase',
    aliasesAr:['شبه جملة','شبه الجملة'],aliasesEn:['shibh jumlah','quasi-sentence','prepositional or adverbial phrase'],

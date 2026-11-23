@@ -680,8 +680,6 @@ const HELP_REDESIGN_BY_CHAPTER = {
       effectEn:'Its governor gives it accusative case or, for a fixed form such as a pronoun, an accusative position.',
       recognitionAr:'اسْأَلْ: عَلَى مَنْ أَوْ عَلَى مَاذَا وَقَعَ الْفِعْلُ؟ وَانْظُرْ إِلَى الْعَامِلِ، مَذْكُورًا كَانَ أَوْ مَحْذُوفًا.',
       recognitionEn:'Ask whom or what the action affects, then identify its stated or omitted governor.',
-      cautionsAr:'لَيْسَ كُلُّ مُتَقَدِّمٍ مَنْصُوبًا بِالْفِعْلِ الَّذِي بَعْدَهُ؛ فَفِي الِاشْتِغَالِ يَكُونُ لَهُ عَامِلٌ مَحْذُوفٌ.',
-      cautionsEn:'In ishtighāl, the later verb does not itself govern the fronted object. An omitted governor does.',
       exampleId:'mafool-p167-01'
     },
     sections:[
@@ -689,7 +687,20 @@ const HELP_REDESIGN_BY_CHAPTER = {
       {id:'direct-object-definition',titleAr:'حَدُّ الْمَفْعُولِ بِهِ وَالِاسْمُ الظَّاهِرُ',titleEn:'The direct object and overt nouns',group:'definition',defaultOpen:true},
       {id:'direct-object-pronouns',titleAr:'الضَّمِيرُ الْمُتَّصِلُ وَالْمُنْفَصِلُ',titleEn:'Attached and detached pronouns',group:'forms',defaultOpen:true},
       {id:'direct-object-order',titleAr:'مَوْضِعُ الْمَفْعُولِ وَتَقْدِيمُهُ',titleEn:'Default order and fronting',group:'order',defaultOpen:false},
-      {id:'direct-object-optional',titleAr:'حَذْفُ الْعَامِلِ جَوَازًا',titleEn:'Optional omission of the governor',group:'conditions',defaultOpen:false},
+      {id:'direct-object-optional',titleAr:'حَذْفُ الْعَامِلِ جَوَازًا',titleEn:'Optional omission of the governor',group:'conditions',defaultOpen:false}
+    ]
+  },
+  'ishtighal': {
+    essentials: {
+      coreRuleAr:'فِي أَمْثِلَةِ الِاشْتِغَالِ هُنَا يَنْصِبُ الِاسْمَ السَّابِقَ عَامِلٌ مَحْذُوفٌ وُجُوبًا يُفَسِّرُهُ الْعَامِلُ الْمَذْكُورُ.',
+      coreRuleEn:'In these ishtighāl examples, an obligatorily omitted governor makes the first noun accusative. The stated governor explains the omitted one.',
+      effectAr:'الْجُمْلَةُ الْمُفَسِّرَةُ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.',
+      effectEn:'The explanatory clause has no syntactic position of its own.',
+      recognitionAr:'يَأْتِي الِاسْمُ أَوَّلًا، ثُمَّ عَامِلٌ يَعْمَلُ فِي ضَمِيرٍ يَعُودُ عَلَيْهِ أَوْ فِي اسْمٍ فِيهِ ذَلِكَ الضَّمِيرُ.',
+      recognitionEn:'Look for a noun followed by a governor already acting on a pronoun that refers back to it, or on a noun containing that pronoun.',
+      exampleId:'mafool-p170-01'
+    },
+    sections:[
       {id:'direct-object-ishtighal',titleAr:'الِاشْتِغَالُ وَالْعَامِلُ الْمَحْذُوفُ وُجُوبًا',titleEn:'Ishtighāl and obligatory omission',group:'conditions',defaultOpen:false},
       {id:'direct-object-estimates',titleAr:'تَقْدِيرَاتُ الْمُؤَلِّفِ',titleEn:'The author’s reconstructions',group:'caution',defaultOpen:false}
     ]

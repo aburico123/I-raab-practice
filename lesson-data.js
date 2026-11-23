@@ -3785,7 +3785,7 @@ chapters.push({
  helpSourceEn:'Al-Mutammimah, printed pp.154–166. Examples, classifications, and attributed alternatives come from the text and editorial notes. Practice examples end on p.165; p.166 completes the analysis of samiʿa. The app supplies vocalization, translation, and any completion beyond the explicitly printed parsing.'
 });
 
-const directObjectForms=(()=>{
+const {directObjectForms,ishtighalForms}=(()=>{
  const part=(ar,en)=>({ar,en});
  const single=(word,gloss,p)=>token(word,gloss,p.ar,p.en);
  const absent='لَا مَحَلَّ لَهُ مِنَ الْإِعْرَابِ.';
@@ -3808,7 +3808,7 @@ const directObjectForms=(()=>{
  const explaining=part('الْجُمْلَةُ مُفَسِّرَةٌ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','The explanatory clause has no syntactic position.');
  const attachedClause=part('جُمْلَةُ «أَنَا ضَارِبُهُ» مُفَسِّرَةٌ لَا مَحَلَّ لَهَا مِنَ الْإِعْرَابِ.','The clause “I am striking him” explains the omitted governor and has no syntactic position.');
  const compound=(word,gloss,...parts)=>answerParts(word,gloss,parts);
- return [
+ return {directObjectForms:[
   releaseBook('mafool-p167-01',167,'ضَرَبْتُ زَيْدًا','I struck Zayd.',[
    compound('ضَرَبْتُ','I struck',pastClosed,subjTa),single('زَيْدًا','Zayd',direct)
   ],'The main text gives this model; note 2 identifies the past verb, subject tāʾ, and accusative direct object.','هَذَا مِثَالُ الْمَتْنِ، وَتُعْرِبُ الْحَاشِيَةُ الثَّانِيَةُ الْفِعْلَ وَتَاءَ الْفَاعِلِ وَالْمَفْعُولَ بِهِ.'),
@@ -3863,6 +3863,7 @@ const directObjectForms=(()=>{
   releaseBook('mafool-p169-06',169,'مَكَّةَ','[Do you want to go to] Mecca?',[
    single('مَكَّةَ','Mecca',omitted('تُرِيدُ','you want','فِعْلٍ','verb',false))
   ],'In note 5, the situation is speaking to someone known to intend travel. Only Makkata is uttered; aturīdu Makkata is the note’s explanation, not the printed utterance.','تَضْرِبُ الْحَاشِيَةُ الْخَامِسَةُ مِثَالَ مَنْ عُلِمَ أَنَّهُ يُرِيدُ السَّفَرَ. وَالْمَلْفُوظُ «مَكَّةَ»، وَ«أَتُرِيدُ مَكَّةَ» تَفْسِيرُهُ فِي الْحَاشِيَةِ.'),
+ ],ishtighalForms:[
   releaseBook('mafool-p170-01',170,'زَيْدًا اضْرِبْهُ','As for Zayd, strike him.',[
    single('زَيْدًا','Zayd',omitted('اضْرِبْ','strike')),
    compound('اضْرِبْهُ','strike him',part('«اضْرِبْ» فِعْلُ أَمْرٍ مَبْنِيٌّ عَلَى السُّكُونِ.','Iḍrib is an imperative built on sukūn.'),subjYou,attachedObject(),explaining)
@@ -3889,7 +3890,7 @@ const directObjectForms=(()=>{
    compound('عُنُقِهِ','his neck',part('«عُنُقِ» اسْمٌ مَجْرُورٌ بِـ«فِي»، وَعَلَامَةُ جَرِّهِ الْكَسْرَةُ الظَّاهِرَةُ، وَهُوَ مُضَافٌ.','ʿUnuqi is governed by fī, genitive with a visible kasrah, and is the first term of the annexation.'),possessiveHa('kasr'),
     part('الْجَارُّ وَالْمَجْرُورُ مُتَعَلِّقَانِ بِمَحْذُوفٍ حَالٍ.','The prepositional phrase depends on an omitted circumstantial expression.'),explaining)
   ],17,13,'الْإِسْرَاءِ','The p.170 ornament includes the initial wāw and stops at ʿunuqihi. Note 5 supplies the omitted verb, both objects of the stated verb, and the circumstantial attachment. The reconstruction on p.171 is the author’s analysis and is not part of the verse.','تَبْدَأُ حِلْيَةُ ص ١٧٠ بِالْوَاوِ وَتَنْتَهِي بِـ«عُنُقِهِ». وَتُعْرِبُ الْحَاشِيَةُ الْخَامِسَةُ الْعَامِلَ الْمَحْذُوفَ وَمَفْعُولَيِ الْفِعْلِ الْمَذْكُورِ وَتَعَلُّقَ الْجَارِّ وَالْمَجْرُورِ بِحَالٍ. وَتَقْدِيرُ ص ١٧١ مِنْ شَرْحِ الْمُؤَلِّفِ وَلَيْسَ مِنْ لَفْظِ الْآيَةِ.')
- ];
+ ]};
 })();
 
 const babs=[
@@ -3903,18 +3904,24 @@ const babs=[
 ];
 
 chapters.push({
- id:'direct-object',babId:'accusative-nouns',order:1,titleEn:'The direct object',titleAr:'بَابُ الْمَفْعُولِ بِهِ',pages:'167–171',book:directObjectForms,
+ id:'direct-object',babId:'accusative-nouns',order:1,titleEn:'The direct object',titleAr:'بَابُ الْمَفْعُولِ بِهِ',pages:'167–169',book:directObjectForms,
  help:[
   help('يَعُدُّ الْمُؤَلِّفُ خَمْسَةَ عَشَرَ نَوْعًا مِنَ الْمَنْصُوبَاتِ: الْمَفْعُولَ بِهِ، وَالْمَفْعُولَ الْمُطْلَقَ، وَالْمَفْعُولَ فِيهِ (ظَرْفَيِ الزَّمَانِ وَالْمَكَانِ)، وَالْمَفْعُولَ مِنْ أَجْلِهِ، وَالْمَفْعُولَ مَعَهُ، وَالْمُشَبَّهَ بِالْمَفْعُولِ بِهِ، وَالْحَالَ، وَالتَّمْيِيزَ، وَالْمُسْتَثْنَى، وَخَبَرَ «كَانَ» وَأَخَوَاتِهَا، وَخَبَرَ الْحُرُوفِ الْمُشَبَّهَةِ بِـ«لَيْسَ»، وَخَبَرَ أَفْعَالِ الْمُقَارَبَةِ، وَاسْمَ «إِنَّ» وَأَخَوَاتِهَا، وَاسْمَ «لَا» النَّافِيَةِ لِلْجِنْسِ، وَالتَّابِعَ لِلْمَنْصُوبِ. هَذَا الدَّرْسُ لِأَوَّلِهَا.','The author enumerates fifteen categories: the direct object, the cognate accusative, the adverbial accusative of time or place, the accusative of reason, the object of accompaniment, the direct-object analogue, the circumstantial expression, the specification, the exception, the khabar of kāna and its sisters, the khabar of laysa-like particles, the khabar of verbs of proximity, the ism of inna and its sisters, the ism of categorical lā, and the dependent of an accusative. This installment teaches the first.'),
   help('الْمَفْعُولُ بِهِ اسْمٌ يَقَعُ عَلَيْهِ فِعْلُ الْفَاعِلِ. فَفِي «ضَرَبْتُ زَيْدًا» وَقَعَ الضَّرْبُ عَلَى زَيْدٍ؛ لَيْسَ هُوَ نَفْسَ الضَّرْبِ، وَلَا زَمَانَهُ، وَلَا مَكَانَهُ. وَقَدْ يَكُونُ اسْمًا ظَاهِرًا؛ فَيَظْهَرُ نَصْبُهُ أَوْ يُقَدَّرُ.','The direct object is the noun on which the subject’s action falls. In “I struck Zayd”, the action falls on Zayd. Zayd is neither the striking itself nor its time or place. An overt noun can show the accusative or have an estimated ending.'),
   help('قَدْ يَكُونُ الْمَفْعُولُ بِهِ ضَمِيرًا فِي مَحَلِّ نَصْبٍ: مُتَّصِلًا، كَيَاءِ «أَكْرَمَنِي»، أَوْ مُنْفَصِلًا، كَـ«إِيَّايَ» فِي «إِيَّايَ أَكْرَمَ». وَتُرَجِّحُ حَاشِيَةُ ص ١٦٨ أَنَّ «إِيَّا» هِيَ الضَّمِيرُ، وَمَا يَلْحَقُهَا يَدُلُّ عَلَى التَّكَلُّمِ أَوِ الْخِطَابِ أَوِ الْغَيْبَةِ.','A pronoun occupies the accusative position. It can be attached, like the yāʾ in akramanī, or detached, like iyyāya in “It was me that he honored.” The p.168 note prefers analyzing iyyā as the pronoun and what follows as person markers.'),
   help('الْأَصْلُ أَنْ يَأْتِيَ الْمَفْعُولُ بَعْدَ الْفَاعِلِ. وَقَدْ يَتَقَدَّمُ عَلَى الْفَاعِلِ جَوَازًا، أَوْ وُجُوبًا، كَمَا إِذَا عَادَ عَلَيْهِ ضَمِيرُ الْفَاعِلِ فِي «زَانَ الشَّجَرَ نَوْرُهُ». وَقَدْ يَتَقَدَّمُ عَلَى الْفِعْلِ وَالْفَاعِلِ جَوَازًا فِي شَاهِدِ الْأَعْرَافِ، أَوْ وُجُوبًا لِصَدَارَةِ اسْمِ الشَّرْطِ فِي شَاهِدِ الْإِسْرَاءِ.','The object normally follows the subject. Moving it before the subject may be optional, or required when a pronoun in the subject refers back to it, as in the tree-and-blossoms example. Moving it before both verb and subject is optional in Q7:30 and required for the conditional noun in Q17:110, which must stand at the front.'),
   help('يُحْذَفُ عَامِلُ الْمَفْعُولِ جَوَازًا إِذَا دَلَّ عَلَيْهِ السِّيَاقُ. فِي شَاهِدِ النَّحْلِ يَدُلُّ السُّؤَالُ السَّابِقُ عَلَى «أَنْزَلَ»، وَتَدُلُّ حَالُ مَنْ عُلِمَ أَنَّهُ يُرِيدُ السَّفَرَ عَلَى «تُرِيدُ» فِي مِثَالِ «مَكَّةَ» فِي الْحَاشِيَةِ.','The object’s governor may be omitted when context supplies it. The preceding question supplies “sent down” in Q16:30. Knowing the addressee means to travel supplies “you want” in the note’s Mecca example.'),
+ ],
+ helpSourceAr:'الْمُتَمِّمَةُ، ص ١٦٧–١٦٩، إِلَى مَا قَبْلَ «مِنْهَا بَابُ الِاشْتِغَالِ». الْعُنْوَانُ وَالتَّقْسِيمُ وَأَمْثِلَةُ الْمَتْنِ وَالْحَوَاشِي مِنَ الطَّبْعَةِ. وَالتَّرْجَمَةُ وَالتَّرْتِيبُ الدِّرَاسِيُّ وَتَتِمَّةُ الْإِعْرَابِ مِنَ التَّطْبِيقِ.',
+ helpSourceEn:'Al-Mutammimah, printed pp.167–169, before “Among these is the chapter on Ishtighāl”. The classification and main-text and apparatus examples come from the edition. The app supplies the organization, English, and any parse beyond the stated notes.'
+},{
+ id:'ishtighal',babId:'accusative-nouns',order:2,titleEn:'Ishtighāl',titleAr:'بَابُ الِاشْتِغَالِ',pages:'169–171',book:ishtighalForms,
+ help:[
   help('فِي الِاشْتِغَالِ يَتَقَدَّمُ اسْمٌ وَيَتَأَخَّرُ عَنْهُ عَامِلٌ عَمِلَ فِي ضَمِيرِهِ أَوْ فِي اسْمٍ مُلَابِسٍ لَهُ فِيهِ ضَمِيرُهُ. وَفِي الْأَمْثِلَةِ الْمَنْصُوبَةِ هُنَا عَامِلُ الِاسْمِ السَّابِقِ مَحْذُوفٌ وُجُوبًا، يُفَسِّرُهُ الْمَذْكُورُ. وَالْمُفَسِّرُ فِعْلٌ أَوْ وَصْفٌ؛ وَتُعَدِّدُ حَاشِيَةُ ص ١٦٩ اسْمَ الْفَاعِلِ وَاسْمَ الْمَفْعُولِ وَأَمْثِلَةَ الْمُبَالَغَةِ.','In ishtighāl, a noun comes first; the later governor is occupied by a pronoun referring to it, or by a related noun that contains that pronoun. In the accusative examples here, an obligatorily omitted governor governs the initial noun. The stated verb or description explains it. The p.169 note lists active participles, passive participles, and intensive forms among the descriptions.'),
   help('قَدَّرَ الْمُؤَلِّفُ فِي ص ١٧١: «اضْرِبْ زَيْدًا اضْرِبْهُ»، وَ«أَنَا ضَارِبٌ زَيْدًا أَنَا ضَارِبُهُ»، وَ«أَهَنْتُ زَيْدًا ضَرَبْتُ غُلَامَهُ»، وَ«أَلْزَمْنَا كُلَّ إِنْسَانٍ أَلْزَمْنَاهُ». هَذِهِ تَقْدِيرَاتٌ لِلْعَامِلِ، وَلَيْسَ الْأَخِيرُ نَصَّ الْآيَةِ.','On p.171 the author reconstructs the hidden governors: “strike” for Zayd, “I am striking” for the participle model, “I dishonored” when the stated action is striking his servant, and “We fastened” for kull. The last reconstruction is grammar, not Qurʾānic text.')
  ],
- helpSourceAr:'الْمُتَمِّمَةُ، ص ١٦٧–١٧١. الْعُنْوَانُ وَالتَّقْسِيمُ وَأَمْثِلَةُ الْمَتْنِ وَالْحَوَاشِي وَالتَّقْدِيرَاتُ مِنَ الطَّبْعَةِ. وَالتَّرْجَمَةُ وَالتَّرْتِيبُ الدِّرَاسِيُّ وَتَتِمَّةُ الْإِعْرَابِ مِنَ التَّطْبِيقِ. يَنْتَهِي الدَّرْسُ بَعْدَ التَّقْدِيرِ فِي أَعْلَى ص ١٧١.',
- helpSourceEn:'Al-Mutammimah, printed pp.167–171. The classification, main-text and apparatus examples, and reconstructions come from the edition. The app supplies the organization, English, and any parse beyond the stated notes. This lesson stops after the estimates at the top of p.171.'
+ helpSourceAr:'الْمُتَمِّمَةُ، ص ١٦٩–١٧١، مِنْ «مِنْهَا بَابُ الِاشْتِغَالِ» إِلَى مَا قَبْلَ «وَمِنْهَا: الْمُنَادَى». الْعُنْوَانُ وَأَمْثِلَةُ الْمَتْنِ وَالْحَوَاشِي وَتَقْدِيرَاتُ الْمُؤَلِّفِ مِنَ الطَّبْعَةِ. وَالتَّرْجَمَةُ وَالتَّرْتِيبُ الدِّرَاسِيُّ وَتَتِمَّةُ الْإِعْرَابِ مِنَ التَّطْبِيقِ.',
+ helpSourceEn:'Al-Mutammimah, printed pp.169–171, from “Among these is the chapter on Ishtighāl” to just before “Among these is the vocative”. The heading, main-text examples, notes, and author’s reconstructions come from the edition. The app supplies the organization, English, and any parse beyond the stated notes.'
 });
 
 const vocativeTail=(()=>{
@@ -4073,7 +4080,7 @@ const vocativeForms=[
 ];
 
 chapters.push({
- id:'vocative',babId:'accusative-nouns',order:2,titleEn:'The vocative',titleAr:'الْمُنَادَى',pages:'171–178',book:vocativeForms,
+ id:'vocative',babId:'accusative-nouns',order:3,titleEn:'The vocative',titleAr:'الْمُنَادَى',pages:'171–178',book:vocativeForms,
  help:[
   help('يُسَمِّي الْمُؤَلِّفُ هَذَا الْمَوْضِعَ «وَمِنْهَا: الْمُنَادَى»؛ فَهُوَ مِنْ مَوَاضِعِ الْمَفْعُولِ بِهِ الَّتِي يَجِبُ فِيهَا حَذْفُ الْعَامِلِ، وَلَيْسَ قِسْمًا سَادِسَ عَشَرَ مِنَ الْمَنْصُوبَاتِ. فِي «يَا عَبْدَ اللَّهِ» قَدَّرَ الْمُؤَلِّفُ «أَدْعُو عَبْدَ اللَّهِ»، فَحُذِفَ الْفِعْلُ وَنَابَتْ عَنْهُ «يَا». وَتَعُدُّ حَاشِيَةُ ص ١٧١ مِنْ أَخَوَاتِهَا الْهَمْزَةَ وَ«أَيْ» وَ«أَيَا».','The author treats the vocative as one of the direct-object constructions whose governor must be omitted, not a sixteenth category of accusatives. For yā ʿabda llāhi he reconstructs “I call ʿAbd Allāh”: the verb is omitted and yā takes its place. The p.171 note also names the hamzah, ay and ayā as calling particles.'),
   help('أَوَّلُ نَوْعَيْنِ: الْمُفْرَدُ الْعَلَمُ وَالنَّكِرَةُ الْمَقْصُودَةُ. كِلَاهُمَا مَبْنِيٌّ فِي مَحَلِّ نَصْبٍ عَلَى مَا يُرْفَعُ بِهِ لَوْ أُعْرِبَ. فِي ص ١٧٢: الضَّمُّ فِي الْمُفْرَدِ وَجَمْعِ التَّكْسِيرِ وَجَمْعِ الْمُؤَنَّثِ السَّالِمِ وَالْمُرَكَّبِ الْمَزْجِيِّ، وَالْأَلِفُ فِي الْمُثَنَّى، وَالْوَاوُ فِي جَمْعِ الْمُذَكَّرِ السَّالِمِ. وَ«الْمُفْرَدُ» فِي اسْمِ النَّوْعِ مَا لَيْسَ مُضَافًا وَلَا شَبِيهًا بِالْمُضَافِ؛ فَلَا يَعْنِي دَائِمًا أَنَّهُ وَاحِدٌ فِي الْعَدَدِ.','The first two types are the non-annexed proper name and the intended indefinite. Both occupy an accusative position and are built on the sign that would mark rafʿ if they were declinable. P.172 shows ḍamm for the singular, broken plural, sound feminine plural and blended compound; alif for the dual; and wāw for the sound masculine plural. The type label mufrad excludes annexation and quasi-annexation. It does not require singular number.'),
@@ -4184,7 +4191,7 @@ const [absoluteObjectForms,adverbialObjectForms]=(()=>{
 })();
 
 chapters.push({
- id:'absolute-object',babId:'accusative-nouns',order:3,titleAr:'بَابُ الْمَفْعُولِ الْمُطْلَقِ',titleEn:'The absolute object',pages:'179–182',book:absoluteObjectForms,
+ id:'absolute-object',babId:'accusative-nouns',order:4,titleAr:'بَابُ الْمَفْعُولِ الْمُطْلَقِ',titleEn:'The absolute object',pages:'179–182',book:absoluteObjectForms,
  help:[
   help('الْمَفْعُولُ الْمُطْلَقُ مَصْدَرٌ فَضْلَةٌ: يُؤَكِّدُ عَامِلَهُ، أَوْ يُبَيِّنُ نَوْعَ حَدَثِهِ، أَوْ يُبَيِّنُ عَدَدَ مَرَّاتِهِ. وَتُخْرِجُ حَاشِيَةُ ص ١٧٩ «رُكُوعُكَ رُكُوعٌ حَسَنٌ»؛ فَـ«رُكُوعٌ» الثَّانِي خَبَرٌ، وَلَيْسَ فَضْلَةً، وَإِنْ بَيَّنَ النَّوْعَ.','The absolute object is a non-core verbal noun. It emphasizes the event, specifies its kind, or counts how many times it occurred. The p.179 note excludes “Your bowing is a fine bowing”: the second verbal noun specifies kind but is a predicate, not a non-core accusative.'),
   help('فِي «ضَرَبْتُ ضَرْبًا» لَا يَزِيدُ الْمَصْدَرُ عَلَى تَوْكِيدِ الْحَدَثِ. وَفِي «ضَرَبْتُ زَيْدًا ضَرْبَ الْأَمِيرِ» تُبَيِّنُ الْإِضَافَةُ كَيْفِيَّةَ الضَّرْبِ. وَفِي «ضَرَبْتُ زَيْدًا ضَرْبَتَيْنِ» تُبَيِّنُ التَّثْنِيَةُ عَدَدَ الضَّرَبَاتِ؛ وَلَا يُعْرَبُ «زَيْدًا» مَفْعُولًا مُطْلَقًا.','In “I did strike,” the verbal noun adds emphasis only. In “I struck Zayd as the emir would strike,” annexation specifies the type. In “I struck Zayd twice,” the dual verbal noun counts blows. Zayd is still the direct object.'),
@@ -4196,7 +4203,7 @@ chapters.push({
  helpSourceAr:'الْمُتَمِّمَةُ، ص ١٧٩–١٨٢. التَّقْسِيمُ وَالشَّوَاهِدُ مِنَ الْمَتْنِ، وَالْإِعْرَابُ الْمَنْقُولُ مِنَ الْحَوَاشِي. يَسْتَكْمِلُ التَّطْبِيقُ مَا لَمْ تَذْكُرْهُ وَيُرَتِّبُهُ لِلتَّعَلُّمِ. وَتَتِمُّ حَاشِيَةُ ص ١٧٩ الثَّامِنَةُ فِي ص ١٨٠.',
  helpSourceEn:'Al-Mutammimah, printed pp.179–182. The classification and witnesses are the author’s; the footnotes provide the stated core parses. The app fills in missing detail and organizes the material. P.179 note 8 continues on p.180.'
 },{
- id:'adverbial-object',babId:'accusative-nouns',order:4,titleAr:'بَابُ الْمَفْعُولِ فِيهِ',titleEn:'The adverbial object: time and place',pages:'183–187',book:adverbialObjectForms,
+ id:'adverbial-object',babId:'accusative-nouns',order:5,titleAr:'بَابُ الْمَفْعُولِ فِيهِ',titleEn:'The adverbial object: time and place',pages:'183–187',book:adverbialObjectForms,
  help:[
   help('الْمَفْعُولُ فِيهِ ظَرْفُ زَمَانٍ أَوْ مَكَانٍ. وَهُوَ اسْمٌ مَنْصُوبٌ عَلَى تَقْدِيرِ «فِي» فِي مَعْنَاهُ؛ فَفِي «صُمْتُ يَوْمَ الْخَمِيسِ» وَقَعَ الصِّيَامُ فِي ذَلِكَ الْيَوْمِ. فَإِذَا صُرِّحَ بِحَرْفِ الْجَرِّ جُرَّ الِاسْمُ.','The adverbial object names a time or place in which the event occurs, with the meaning of fī understood. In “I fasted on Thursday,” the fast occurred on that day. If a preposition is actually stated, the noun after it is genitive.'),
   help('تُبَيِّنُ حَاشِيَةُ ص ١٨٣ الْأُولَى أَنَّ لَفْظَ الزَّمَانِ قَدْ يَكُونُ مُبْتَدَأً: «يَوْمُنَا سَعِيدٌ»، أَوْ خَبَرًا: «هَذَا يَوْمُ الْعِيدِ»، أَوْ فَاعِلًا: «جَاءَ شَهْرُ الصَّوْمِ»، أَوْ مَفْعُولًا بِهِ كَمَا تُعْرِبُهُ فِي شَاهِدِ غَافِرٍ ١٨. وَتُمَثِّلُ لِلْجَرِّ بِحَرْفٍ مَذْكُورٍ فِي الْمَعَارِجِ ٤ وَالنَّحْلِ ٥٠.','The first note on p.183 shows time nouns as subject of a nominal sentence (“Our day is happy”), predicate (“This is the day of the feast”), or verbal subject (“The fasting month came”). It takes “the day” in Q40:18 as a direct object here. Its Q70:4 and Q16:50 examples have explicitly governed genitives. These are editorial contrasts, not the author’s practice sentences.'),
@@ -4380,7 +4387,7 @@ const stage188Chapters=[
  ['circumstantial-state','بَابُ الْحَالِ','The circumstantial state','193–197','١٩٣–١٩٧']
 ];
 stage188Chapters.forEach(([id,titleAr,titleEn,pages,pageAr],i)=>chapters.push({
- id,babId:'accusative-nouns',order:i+5,titleAr,titleEn,pages,book:mansubat188[i],help:stage188Help[i],
+ id,babId:'accusative-nouns',order:i+6,titleAr,titleEn,pages,book:mansubat188[i],help:stage188Help[i],
  helpSourceAr:`الْمُتَمِّمَةُ، ص ${pageAr}. الْقَوَاعِدُ وَالْأَمْثِلَةُ مِنَ الْمَتْنِ، وَمَا نُسِبَ إِلَى الْحَوَاشِي فَمِنْ تَعْلِيقَاتِ الطَّبْعَةِ. التَّرْجَمَةُ وَمَا لَمْ يُذْكَرْ مِنْ تَفْصِيلِ الْإِعْرَابِ مِنَ التَّطْبِيقِ.`,
  helpSourceEn:`Al-Mutammimah, printed pp.${pages}. Rules and main examples are the author’s; cited notes are editorial. English and unstated parse details are supplied by the app.`
 }));
@@ -4580,7 +4587,7 @@ const finalManHelp = [
  ['tamyiz','بَابُ التَّمْيِيزِ','Specification (tamyīz)','198–202','١٩٨–٢٠٢'],
  ['exception','بَابُ الْمُسْتَثْنَى','Exception','203–211','٢٠٣–٢١١']
 ].forEach(([id,titleAr,titleEn,pages,arPage],i)=>chapters.push({
- id,titleAr,titleEn,pages,order:9+i,babId:'accusative-nouns',book:lastMansubat[i],help:finalManHelp[i],
+ id,titleAr,titleEn,pages,order:10+i,babId:'accusative-nouns',book:lastMansubat[i],help:finalManHelp[i],
  helpSourceAr:`الْمُتَمِّمَةُ، ص ${arPage}. اللَّفْظُ وَأُصُولُ الْقَوَاعِدِ مِنَ الْمَتْنِ، وَمَا سُمِّيَ مِنَ الْحَوَاشِي فَمِنْ تَعْلِيقَاتِ الطَّبْعَةِ. وَالتَّرْجَمَةُ وَتَفْصِيلُ مَا لَمْ يُذْكَرْ مِنَ التَّطْبِيقِ.`,
  helpSourceEn:`Al-Mutammimah, printed pp.${pages}. The wording and core rules are from the author; named notes are editorial. English and unstated parsing are supplied by the app.`
 }));
@@ -6318,11 +6325,13 @@ helpVisuals['direct-object']={type:'branches',titleAr:'صُورُ الْمَفْ
   {id:'mafool-optional-front',labelAr:'جَائِزٌ',labelEn:'Optional',descAr:'تُوَرِدُ الْحَاشِيَةُ شَاهِدَ الْأَعْرَافِ لِلْجَوَازِ.',descEn:'The note cites Q7:30 for optional fronting.',exerciseId:'mafool-p169-03'},
   {id:'mafool-required-front',labelAr:'وَاجِبٌ',labelEn:'Required',descAr:'اسْمُ الشَّرْطِ لَهُ صَدْرُ الْكَلَامِ.',descEn:'The conditional noun must come first.',exerciseId:'mafool-p169-04'}
  ]},
- {id:'mafool-omission',labelAr:'حَذْفُ الْعَامِلِ',labelEn:'Omission of the governor',descAr:'يَحْذِفُهُ الْمُتَكَلِّمُ لِقَرِينَةٍ، أَوْ يَجِبُ حَذْفُهُ فِي أَمْثِلَةِ الِاشْتِغَالِ الْمَنْصُوبَةِ هُنَا.',descEn:'Context may license omission; in the accusative ishtighāl examples here it is required.',children:[
-  {id:'mafool-optional-omission',labelAr:'قَرِينَةُ السِّيَاقِ',labelEn:'Context supplies it',descAr:'السُّؤَالُ يَدُلُّ عَلَى «أَنْزَلَ».',descEn:'The question supplies “sent down”.',exerciseId:'mafool-p169-05'},
+ {id:'mafool-omission',labelAr:'حَذْفُ الْعَامِلِ',labelEn:'Omission of the governor',descAr:'يَجُوزُ حَذْفُهُ إِذَا دَلَّ عَلَيْهِ السِّيَاقُ.',descEn:'The governor may be omitted when the context supplies it.',children:[
+  {id:'mafool-optional-omission',labelAr:'قَرِينَةُ السِّيَاقِ',labelEn:'Context supplies it',descAr:'السُّؤَالُ يَدُلُّ عَلَى «أَنْزَلَ».',descEn:'The question supplies “sent down”.',exerciseId:'mafool-p169-05'}
+ ]}
+]};
+helpVisuals.ishtighal={type:'branches',titleAr:'أَمْثِلَةُ الِاشْتِغَالِ',titleEn:'Ishtighāl examples',branches:[
   {id:'mafool-ishtighal',labelAr:'الِاشْتِغَالُ',labelEn:'Ishtighāl',descAr:'«اضْرِبْهُ» يَعْمَلُ فِي الْهَاءِ، وَيُفَسِّرُ عَامِلَ «زَيْدًا» الْمَحْذُوفَ.',descEn:'The stated imperative governs its pronoun and explains Zayd’s omitted governor.',exerciseId:'mafool-p170-01'},
   {id:'mafool-ishtighal-verse',labelAr:'مِثَالٌ قُرْآنِيٌّ',labelEn:'Qurʾānic model',descAr:'لِـ«كُلَّ» عَامِلٌ مَحْذُوفٌ غَيْرُ الْفِعْلِ الْمَذْكُورِ.',descEn:'Kull depends on an omitted governor, distinct from the stated verb.',exerciseId:'mafool-p170-04'}
- ]}
 ]};
 helpVisuals.vocative={type:'branches',titleAr:'كَيْفَ تَخْتَارُ حُكْمَ الْمُنَادَى؟',titleEn:'How do you determine the vocative’s ending?',branches:[
  {id:'voc-fixed',labelAr:'مَبْنِيٌّ فِي مَحَلِّ نَصْبٍ',labelEn:'Fixed, in an accusative position',descAr:'ثُبُوتُ الضَّمِّ أَوِ الْأَلِفِ أَوِ الْوَاوِ لَا يَجْعَلُ الِاسْمَ مَرْفُوعًا.',descEn:'Fixed ḍamm, alif or wāw does not make the noun nominative.',children:[

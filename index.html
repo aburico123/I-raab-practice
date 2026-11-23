@@ -603,8 +603,8 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
     </div>
   </main>
 </div>
-<script src="help-redesign-data.js?v=finish-book-282-301"></script>
-<script src="lesson-data.js?v=finish-book-282-301"></script>
+<script src="help-redesign-data.js?v=ishtighal-chapter"></script>
+<script src="lesson-data.js?v=ishtighal-chapter"></script>
 <script src="why-parse-pilot.js?v=why-rollout-282-301"></script>
 <script>
 (function(){
@@ -619,7 +619,7 @@ const accessibleNames = {
  en: {primaryNavigation:'Primary navigation',openMenu:'Open menu',closeMenu:'Close menu',brandHome:'Miftāḥ al-ʿIlm — Home',theme:'Theme',language:'Language',themePreference:'Theme preference',bab:'Bāb or section',chapter:'Chapter within bāb',helpBab:'Help bāb or section',helpChapter:'Help chapter within bāb',exampleFilter:'Example filter',filterAll:'All examples',filterQuran:'Qurʾānic examples',adjacentChapters:'Adjacent chapters'},
  ar: {primaryNavigation:'التنقل الرئيسي',openMenu:'افتح قائمة التنقل',closeMenu:'أغلق قائمة التنقل',brandHome:'مفتاح العلم، الرئيسية',theme:'المظهر',language:'اللغة',themePreference:'تفضيل المظهر',bab:'الباب أو القسم',chapter:'الفصل داخل الباب',helpBab:'باب الشرح أو قسمه',helpChapter:'الفصل داخل باب الشرح',exampleFilter:'تصفية الأمثلة',filterAll:'كل الأمثلة',filterQuran:'الأمثلة القرآنية',adjacentChapters:'الفصول المجاورة'}
 };
-const defaults={version:7,lang:'en',theme:'light',screen:'home',mode:'book',category:'book',bookFilter:'all',selectedBabId:'opening',selectedChapterId:'speech-core',helpBabId:'opening',helpChapterId:'speech-core',positions:{'speech-core':0},generatedIndex:0,revealed:false,resumeAvailable:false,helpLaunch:null,helpReturn:null,helpVisualBranches:{},helpOpenDisclosures:{},completed:[],difficult:[]};
+const defaults={version:8,lang:'en',theme:'light',screen:'home',mode:'book',category:'book',bookFilter:'all',selectedBabId:'opening',selectedChapterId:'speech-core',helpBabId:'opening',helpChapterId:'speech-core',positions:{'speech-core':0},generatedIndex:0,revealed:false,resumeAvailable:false,helpLaunch:null,helpReturn:null,helpVisualBranches:{},helpOpenDisclosures:{},completed:[],difficult:[]};
 let stored={};try{stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{}}catch(_){stored={}}
 const migrated={...defaults,...stored,positions:{...defaults.positions,...(stored.positions||{})},helpVisualBranches:{...(stored.helpVisualBranches||{})},helpOpenDisclosures:{...(stored.helpOpenDisclosures||{})},lang:stored.lang||(stored.arabicOnly?'ar':'en')};
 if(!stored.version){migrated.screen='home';migrated.revealed=false}
@@ -640,6 +640,51 @@ function migrateLaJinsOrder(saved, book) {
  saved.version = 7;
 }
 migrateLaJinsOrder(migrated,chapters.find(chapter=>chapter.id==='la-jins')?.book);
+function migrateIshtighal(saved, book) {
+ if (!(saved.version < 8)) return;
+ const from='direct-object', to='ishtighal', bab='accusative-nouns';
+ // v7 stored an unfiltered book index, even when the Qurʾānic filter was active.
+ const oldSlots=['mafool-p170-01','mafool-p170-02','mafool-p170-03','mafool-p170-04'];
+ const newSlots=oldSlots.map(id=>book?.findIndex(exercise=>exercise.id===id));
+ if (!newSlots.every(index=>index>=0)) return;
+ const remap=selection=>{
+  const old=selection?.positions?.[from];
+  if(!Number.isInteger(old)||old<13||old>16)return false;
+  const positions={...selection.positions,[to]:newSlots[old-13]};
+  delete positions[from];
+  selection.positions=positions;
+  if(selection.mode!=='book'||selection.selectedChapterId!==from)return false;
+  selection.selectedChapterId=to;
+  selection.selectedBabId=bab;
+  return true;
+ };
+ remap(saved);
+ const linkedHelp=remap(saved.helpReturn)&&saved.helpReturn.openerId==='chapterEssentialsBtn';
+ if (saved.screen==='help'&&linkedHelp&&saved.helpChapterId===from) {
+  saved.helpChapterId=to;
+  saved.helpBabId=bab;
+ }
+ const branchIds=['mafool-ishtighal','mafool-ishtighal-verse'];
+ const branches=saved.helpVisualBranches;
+ if(branchIds.includes(branches[from])){
+  branches[to]=branches[from];
+  delete branches[from];
+ }
+ const launch=saved.helpLaunch;
+ const launchBranch=branchIds.find(id=>launch?.anchor===`visual-${id}-example`);
+ if(launch?.chapterId===from&&launchBranch){
+  saved.helpLaunch={...launch,babId:bab,chapterId:to};
+  branches[to]=launchBranch;
+ }
+ const disclosures=saved.helpOpenDisclosures;
+ const splitIds=['direct-object-ishtighal','direct-object-estimates'];
+ if(Array.isArray(disclosures[from])){
+  disclosures[to]=disclosures[from].filter(id=>splitIds.includes(id));
+  disclosures[from]=disclosures[from].filter(id=>!splitIds.includes(id));
+ }
+ saved.version=8;
+}
+migrateIshtighal(migrated,chapters.find(chapter=>chapter.id==='ishtighal')?.book);
 let state=migrated;
 if(!['light','dark'].includes(state.theme))state.theme='light';
 if(!['all','quran'].includes(state.bookFilter))state.bookFilter='all';

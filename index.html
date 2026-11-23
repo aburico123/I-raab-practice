@@ -640,34 +640,45 @@ function migrateLaJinsOrder(saved, book) {
  saved.version = 7;
 }
 migrateLaJinsOrder(migrated,chapters.find(chapter=>chapter.id==='la-jins')?.book);
-function migrateIshtighal(saved, book) {
+function migrateIshtighal(saved, directBook, book) {
  if (!(saved.version < 8)) return;
  const from='direct-object', to='ishtighal', bab='accusative-nouns';
  // v7 stored an unfiltered book index, even when the Qurʾānic filter was active.
  const oldSlots=['mafool-p170-01','mafool-p170-02','mafool-p170-03','mafool-p170-04'];
  const newSlots=oldSlots.map(id=>book?.findIndex(exercise=>exercise.id===id));
- if (!newSlots.every(index=>index>=0)) return;
+ if (directBook?.length!==13||!newSlots.every(index=>index>=0)) return;
+ const legacyBook=[...directBook,...newSlots.map(index=>book[index])];
  const remap=selection=>{
   const old=selection?.positions?.[from];
   if(!Number.isInteger(old)||old<13||old>16)return false;
+  const active=selection.mode==='book'&&selection.selectedChapterId===from;
+  // Match v7's filtered display: an out-of-filter raw cursor renders the first eligible row.
+  const eligible=active?legacyBook.filter(e=>!e.held&&(selection.bookFilter!=='quran'||e.quran)):[];
+  const visible=eligible.includes(legacyBook[old])?legacyBook[old]:eligible[0];
   const positions={...selection.positions,[to]:newSlots[old-13]};
   delete positions[from];
   selection.positions=positions;
-  if(selection.mode!=='book'||selection.selectedChapterId!==from)return false;
+  if(!active)return false;
+  const directIndex=directBook.indexOf(visible);
+  if(directIndex>=0){positions[from]=directIndex;return false;}
   selection.selectedChapterId=to;
   selection.selectedBabId=bab;
   return true;
  };
  remap(saved);
  const linkedHelp=remap(saved.helpReturn)&&saved.helpReturn.openerId==='chapterEssentialsBtn';
- if (saved.screen==='help'&&linkedHelp&&saved.helpChapterId===from) {
+ const branchIds=['mafool-ishtighal','mafool-ishtighal-verse'];
+ const branches=saved.helpVisualBranches, legacyBranch=branches[from];
+ const movedBranch=branchIds.includes(legacyBranch);
+ const disclosures=saved.helpOpenDisclosures;
+ const standaloneHelp=!saved.helpReturn&&!saved.helpLaunch&&(movedBranch
+  ||(!legacyBranch&&Array.isArray(disclosures[from])&&disclosures[from].includes('direct-object-estimates')));
+ if (saved.screen==='help'&&(linkedHelp||standaloneHelp)&&saved.helpChapterId===from) {
   saved.helpChapterId=to;
   saved.helpBabId=bab;
  }
- const branchIds=['mafool-ishtighal','mafool-ishtighal-verse'];
- const branches=saved.helpVisualBranches;
- if(branchIds.includes(branches[from])){
-  branches[to]=branches[from];
+ if(movedBranch){
+  branches[to]=legacyBranch;
   delete branches[from];
  }
  const launch=saved.helpLaunch;
@@ -676,7 +687,6 @@ function migrateIshtighal(saved, book) {
   saved.helpLaunch={...launch,babId:bab,chapterId:to};
   branches[to]=launchBranch;
  }
- const disclosures=saved.helpOpenDisclosures;
  const splitIds=['direct-object-ishtighal','direct-object-estimates'];
  if(Array.isArray(disclosures[from])){
   disclosures[to]=disclosures[from].filter(id=>splitIds.includes(id));
@@ -684,7 +694,7 @@ function migrateIshtighal(saved, book) {
  }
  saved.version=8;
 }
-migrateIshtighal(migrated,chapters.find(chapter=>chapter.id==='ishtighal')?.book);
+migrateIshtighal(migrated,chapters.find(chapter=>chapter.id==='direct-object')?.book,chapters.find(chapter=>chapter.id==='ishtighal')?.book);
 let state=migrated;
 if(!['light','dark'].includes(state.theme))state.theme='light';
 if(!['all','quran'].includes(state.bookFilter))state.bookFilter='all';

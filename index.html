@@ -563,6 +563,32 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
   .preferences-theme{align-self:flex-start}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.study-panel{display:grid;gap:16px;min-width:0}
+.study-panel h2,.study-panel p{margin:0}
+.study-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.study-actions button{min-height:44px}
+#reviewControls{margin-block-start:12px;justify-content:center}
+.study-choices{border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.study-choices label{display:inline-flex;align-items:center;gap:8px;min-height:40px;margin-inline-end:14px;max-width:100%}
+.study-choices details{margin-block:4px;padding:6px;min-width:0}
+.study-choices summary{cursor:pointer;min-height:30px}
+.study-option-en{display:block;font-size:.8rem;color:var(--muted)}
+html[lang=ar] .study-option-en{display:none}
+.study-selection{overflow-wrap:anywhere}
+.review-list{display:grid;gap:8px;list-style:none;margin:0;padding:0}
+.review-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.review-open{flex:1 1 230px;text-align:start;min-width:0;white-space:normal}
+.review-open small{display:block;font-weight:400}
+.test-source{font-size:.92rem;line-height:1.7;margin:8px 0}
+.grammar-term{display:inline;background:none;border:0;padding:0;color:inherit;font:inherit;letter-spacing:inherit;text-decoration:underline dotted;text-underline-offset:.19em;cursor:pointer;white-space:normal}
+.grammar-dialog{width:min(470px,calc(100% - 32px));max-height:85vh;overflow:auto;border-radius:18px;padding:20px;color:var(--ink);background:var(--card);border:1px solid var(--line)}
+.grammar-dialog::backdrop{background:#14241db0}
+.grammar-dialog h2{margin:0 0 8px}
+.grammar-dialog p{margin:8px 0}
+.grammar-dialog .arabic{line-height:1.85}
+.grammar-dialog button{margin-block-start:10px}
+html[data-theme=dark] .grammar-dialog{background:#202a25;color:#f6f0e3}
+.study-panel[hidden],.study-actions[hidden],.study-choices[hidden],.test-source[hidden],#previousBtn[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -586,7 +612,50 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
     <header class="topbar"><button class="mobile-menu" id="mobileMenu" type="button" aria-label="Open menu" aria-controls="primaryDrawer" aria-expanded="false">☰</button><button class="mobile-brand" data-go="home" aria-label="Miftāḥ al-ʿIlm — Home" data-a11y="brandHome"><svg class="brand-key ico" aria-hidden="true"><use href="#keyMark"/></svg><span class="brand-text"><span class="brand-en">Miftāḥ al-ʿIlm</span><span class="brand-ar arabic ui-ar" lang="ar">مفتاح العلم</span></span></button><div class="crumb" id="crumb">Home</div><div class="header-controls"><div class="theme-switch" aria-label="Theme" data-a11y="theme"><button class="theme-btn" data-theme-choice="light" data-i18n="light">Light</button><button class="theme-btn" data-theme-choice="dark" data-i18n="dark">Dark</button></div><div class="language-switch" aria-label="Language" data-a11y="language"><button class="lang-btn" data-lang="ar">العربية</button><button class="lang-btn" data-lang="en">English</button></div></div></header>
     <div class="content">
       <section class="screen" id="homeScreen"><h1 class="screen-heading" data-i18n="appName">Miftāḥ al-ʿIlm</h1><p class="screen-sub arabic ui-ar" lang="ar">مفتاح العلم</p><div class="subject-grid"><button class="subject-card" data-go="nahw"><span class="subject-icon tone-sage arabic" aria-hidden="true">ن</span><span class="card-ar arabic ui-ar" lang="ar">النحو</span><span class="card-title" data-i18n="nahw">Nahw</span><span class="card-desc" data-i18n="nahwDesc">Practice complete iʿrāb from al-Mutammimah.</span></button></div></section>
-      <section class="screen" id="nahwScreen"><div class="screen-backbar"><button class="back-link" data-go="home" data-i18n="studyAreas">Back to study areas</button></div><h1 class="screen-heading" data-i18n="nahw">Nahw</h1><p class="screen-sub arabic ui-ar" lang="ar">النحو</p><div class="choice-grid"><button class="choice-card" data-start="book" aria-pressed="false"><span class="card-top"><span class="card-icon tone-sage"><svg class="ico" aria-hidden="true"><use href="#ic-book"/></svg></span><span class="card-radio" aria-hidden="true"></span></span><span class="card-ar arabic ui-ar" lang="ar">تدريبات الكتاب</span><span class="card-title" data-i18n="bookPractice">Book Practice</span><span class="card-desc" data-i18n="bookDesc">Examples verified against the selected edition.</span></button><button class="choice-card" data-start="extra" aria-pressed="false"><span class="card-top"><span class="card-icon tone-tan"><svg class="ico" aria-hidden="true"><use href="#ic-cycle"/></svg></span><span class="card-radio" aria-hidden="true"></span></span><span class="card-ar arabic ui-ar" lang="ar">تدريبات إضافية</span><span class="card-title" data-i18n="extraPractice">Extra Practice</span><span class="card-desc" data-i18n="extraDesc">Checked generated patterns for the opening lesson.</span></button><button class="choice-card" data-help aria-pressed="false"><span class="card-top"><span class="card-icon tone-slate"><svg class="ico" aria-hidden="true"><use href="#ic-help"/></svg></span><span class="card-radio" aria-hidden="true"></span></span><span class="card-ar arabic ui-ar" lang="ar">شرح الباب</span><span class="card-title" data-i18n="chapterHelp">Chapter Help</span><span class="card-desc" data-i18n="helpDesc">Review terms and rules separately.</span></button></div></section>
+      <section class="screen" id="nahwScreen"><div class="screen-backbar"><button class="back-link" data-go="home" data-i18n="studyAreas">Back to study areas</button></div><h1 class="screen-heading" data-i18n="nahw">Nahw</h1><p class="screen-sub arabic ui-ar" lang="ar">النحو</p><div class="choice-grid"><button class="choice-card" data-start="book" aria-pressed="false"><span class="card-top"><span class="card-icon tone-sage"><svg class="ico" aria-hidden="true"><use href="#ic-book"/></svg></span><span class="card-radio" aria-hidden="true"></span></span><span class="card-ar arabic ui-ar" lang="ar">تدريبات الكتاب</span><span class="card-title" data-i18n="bookPractice">Book Practice</span><span class="card-desc" data-i18n="bookDesc">Examples verified against the selected edition.</span></button><button class="choice-card" data-study="testSetup"><span class="card-icon tone-tan" aria-hidden="true">?</span><span class="card-ar arabic" lang="ar">اِخْتَبِرْنِي</span><span class="card-title" data-i18n="testMe">Test me</span><span class="card-desc" data-i18n="testDesc"></span></button><button class="choice-card" data-start="extra" aria-pressed="false"><span class="card-top"><span class="card-icon tone-tan"><svg class="ico" aria-hidden="true"><use href="#ic-cycle"/></svg></span><span class="card-radio" aria-hidden="true"></span></span><span class="card-ar arabic ui-ar" lang="ar">تدريبات إضافية</span><span class="card-title" data-i18n="extraPractice">Extra Practice</span><span class="card-desc" data-i18n="extraDesc">Checked generated patterns for the opening lesson.</span></button><button class="choice-card" data-help aria-pressed="false"><span class="card-top"><span class="card-icon tone-slate"><svg class="ico" aria-hidden="true"><use href="#ic-help"/></svg></span><span class="card-radio" aria-hidden="true"></span></span><span class="card-ar arabic ui-ar" lang="ar">شرح الباب</span><span class="card-title" data-i18n="chapterHelp">Chapter Help</span><span class="card-desc" data-i18n="helpDesc">Review terms and rules separately.</span></button><button class="choice-card" data-study="review"><span class="card-ar arabic" lang="ar">رَاجِعْ لَاحِقًا</span><span class="card-title" data-i18n="reviewLater">Review later</span><span class="card-desc" data-i18n="reviewDesc"></span></button></div></section>
+      <section class="screen" id="testSetupScreen">
+        <div class="screen-backbar"><button class="back-link" data-go="nahw" data-i18n="backNahw"></button></div>
+        <h1 class="screen-heading" data-i18n="testMe">Test me</h1>
+        <div class="help-card study-panel">
+          <fieldset class="study-choices" id="testScopes"><legend data-i18n="testPool"></legend>
+            <label><input type="radio" name="test-scope" value="whole"><span data-i18n="wholeBook"></span></label>
+            <label><input type="radio" name="test-scope" value="babs"><span data-i18n="chooseBabs"></span></label>
+            <label><input type="radio" name="test-scope" value="chapters"><span data-i18n="chooseChapters"></span></label>
+            <label><input type="radio" name="test-scope" value="saved"><span data-i18n="reviewLater"></span></label>
+          </fieldset>
+          <fieldset class="study-choices" id="testBabChoices" hidden><legend data-i18n="chooseBabs"></legend><div id="testBabOptions"></div></fieldset>
+          <fieldset class="study-choices" id="testChapterChoices" hidden><legend data-i18n="chooseChapters"></legend><div id="testChapterOptions"></div></fieldset>
+          <fieldset class="study-choices" id="testFilters"><legend data-i18n="contentFilter"></legend>
+            <label><input type="radio" name="test-filter" value="all"><span data-i18n="testAll"></span></label>
+            <label><input type="radio" name="test-filter" value="quran"><span data-i18n="testQuran"></span></label>
+            <label><input type="radio" name="test-filter" value="ordinary"><span data-i18n="testOrdinary"></span></label>
+          </fieldset>
+          <p class="study-selection" id="testSelection" role="status"></p>
+          <p id="testPoolNote"></p>
+          <div class="study-actions"><button class="primary" id="startTest" data-i18n="startTest"></button><button class="secondary" id="resumeTest" data-i18n="resumeTest" hidden></button></div>
+        </div>
+      </section>
+      <section class="screen" id="testRunScreen">
+        <div class="screen-backbar"><button class="back-link" data-go="testSetup" data-i18n="testSetup"></button></div>
+        <h1 class="screen-heading" data-i18n="testMe">Test me</h1>
+        <p class="screen-sub" id="testProgress" role="status"></p>
+        <div id="testMount"></div>
+        <div class="help-card study-panel" id="testFinished" hidden><p id="testFinishText"></p>
+          <div class="study-actions"><button class="primary" data-go="testSetup" data-i18n="testSetup"></button><button class="secondary" data-study="review" data-i18n="reviewLater"></button></div>
+        </div>
+      </section>
+      <section class="screen" id="reviewScreen">
+        <div class="screen-backbar"><button class="back-link" id="reviewBack" data-i18n="backNahw"></button></div>
+        <h1 class="screen-heading" data-i18n="reviewLater">Review later</h1>
+        <div class="help-card study-panel"><div class="study-actions"><button class="primary" id="testSaved" data-i18n="testSaved"></button></div>
+          <p id="reviewStatus" role="status"></p><ul class="review-list" id="reviewList"></ul>
+        </div>
+      </section>
+      <dialog class="grammar-dialog" id="grammarDialog" aria-labelledby="grammarTitle">
+        <h2 id="grammarTitle"></h2><p id="grammarMeaning"></p><p id="grammarMeaningEn"></p>
+        <p id="grammarExample"></p><p id="grammarExampleEn"></p><small id="grammarCredit"></small>
+        <form method="dialog"><button class="secondary" id="closeGrammar" autofocus data-i18n="closeGrammar"></button></form>
+      </dialog>
       <section class="screen" id="practiceScreen">
         <div class="practice-top"><div class="practice-nav"><button class="back-link" id="nahwMenuLink" data-i18n="backNahw">Back to Nahw options</button><div class="practice-nav-tools"><button class="mode-link" id="backHelpLink" data-i18n="backHelp">Back to Chapter Help</button><button class="chapter-essentials-link" id="chapterEssentialsBtn" type="button">Chapter essentials</button></div></div><div class="picker-grid"><label class="picker-field"><span data-i18n="babLabel">Bāb / section</span><select class="chapter-select" id="babSelect" aria-label="Bāb or section" data-a11y="bab" dir="rtl" lang="ar"></select></label><label class="picker-field"><span data-i18n="chapterLabel">Chapter within it</span><select class="chapter-select" id="chapterSelect" aria-label="Chapter within bāb" data-a11y="chapter" dir="rtl" lang="ar"></select></label></div><div class="example-filter" id="exampleFilter" role="group" aria-label="Example filter" data-a11y="exampleFilter"><button class="filter-btn" id="allExamplesBtn" data-filter="all" data-i18n="allExamples" data-a11y="filterAll" aria-label="All examples">All</button><button class="filter-btn" id="quranExamplesBtn" data-filter="quran" data-i18n="quranExamples" data-a11y="filterQuran" aria-label="Qurʾānic examples">Qurʾānic</button></div><div class="chapter-meta" id="chapterMeta"></div></div>
         <div class="practice-workspace">
@@ -595,7 +664,7 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
           <div class="example-jump-panel" id="exampleJumpPanel" role="region" aria-labelledby="exampleJumpToggle" hidden><ol class="example-jump-items" id="exampleJumpItems" role="list"></ol></div>
         </div>
         <div class="filter-empty" id="filterEmpty" hidden><p data-i18n="noQuranExamples">This chapter has no Qurʾānic examples.</p><button class="secondary" id="showAllExamples" data-i18n="showAllExamples">Show all examples</button></div>
-        <article class="practice-card" id="practiceCard"><div class="book-page" id="bookPage"></div><div class="sentence arabic" id="sentence" lang="ar" tabindex="-1"></div><div class="translation" id="translation"></div><div class="practice-actions"><button class="secondary" id="previousBtn" data-i18n="previous">Previous</button><button class="primary" id="revealBtn" aria-controls="answerPanel" aria-expanded="false" data-i18n="reveal">Reveal iʿrāb</button><button class="secondary" id="nextBtn" data-i18n="next">Next</button></div><section class="answer-panel" id="answerPanel" aria-live="polite"><h2 class="answer-title" data-i18n="fullIraab">Full iʿrāb</h2><div class="answers" id="answers"></div><div class="source-detail" id="sourceDetail"></div></section></article>
+        <article class="practice-card" id="practiceCard"><div class="book-page" id="bookPage"></div><div class="sentence arabic" id="sentence" lang="ar" tabindex="-1"></div><div class="translation" id="translation"></div><p class="test-source" id="testSource" hidden></p><div class="practice-actions"><button class="secondary" id="previousBtn" data-i18n="previous">Previous</button><button class="primary" id="revealBtn" aria-controls="answerPanel" aria-expanded="false" data-i18n="reveal">Reveal iʿrāb</button><button class="secondary" id="nextBtn" data-i18n="next">Next</button></div><div class="study-actions" id="reviewControls" hidden><button class="secondary" type="button" id="saveReview" aria-pressed="false"></button><button class="secondary" type="button" data-study="review" data-i18n="openReview"></button></div><section class="answer-panel" id="answerPanel" aria-live="polite"><h2 class="answer-title" data-i18n="fullIraab">Full iʿrāb</h2><div class="answers" id="answers"></div><div class="source-detail" id="sourceDetail"></div></section></article>
         </div>
       </section>
       <section class="screen" id="helpScreen"><div class="screen-backbar"><button class="back-link" id="helpNahwLink" data-i18n="backNahw">Back to Nahw options</button></div><h1 class="screen-heading" data-i18n="chapterHelp">Chapter Help</h1><p class="screen-sub arabic" id="helpChapterName" dir="rtl" lang="ar"></p><div class="help-picker picker-grid"><label class="picker-field"><span data-i18n="babLabel">Bāb / section</span><select class="chapter-select" id="helpBabSelect" aria-label="Help bāb or section" data-a11y="helpBab" dir="rtl" lang="ar"></select></label><label class="picker-field"><span data-i18n="chapterLabel">Chapter within it</span><select class="chapter-select" id="helpChapterSelect" aria-label="Help chapter within bāb" data-a11y="helpChapter" dir="rtl" lang="ar"></select></label></div><article class="help-card"><section class="help-core help-region" id="helpCore" tabindex="-1"></section><nav class="help-jump-nav" id="helpJumpNav" aria-label="Help navigation"></nav><section class="help-region" id="helpEssentials"></section><section class="help-full help-region" id="helpFull" tabindex="-1"><h2 class="help-region-heading" id="helpFullTitle"></h2><div id="helpSections"></div></section><section class="help-visual-region help-region" id="helpVisualSection" tabindex="-1"><h2 class="help-region-heading" id="helpVisualTitle"></h2><div class="help-visual" id="helpVisual"></div></section><section class="help-source-region help-region" id="helpSourceSection" tabindex="-1"><h2 class="help-region-heading" id="helpSourceTitle"></h2><div class="source-detail" id="helpSource"></div></section><nav class="help-chapter-nav" aria-label="Adjacent chapters" data-a11y="adjacentChapters"><button class="secondary" id="helpPreviousChapter" type="button"></button><button class="secondary" id="helpNextChapter" type="button"></button></nav><div class="help-actions"><button class="primary" id="returnPractice" data-i18n="returnPractice">Return to practice</button><button class="secondary" id="returnNahw" data-i18n="returnNahw">Back to Nahw</button></div></article></section>
@@ -606,6 +675,7 @@ html[data-theme="dark"] .help-disclosure[open] summary{background:#24372f}
 <script src="help-redesign-data.js?v=ishtighal-chapter"></script>
 <script src="lesson-data.js?v=ishtighal-chapter"></script>
 <script src="why-parse-pilot.js?v=why-rollout-282-301"></script>
+<script src="study-tools.js?v=study-preview-1"></script>
 <script>
 (function(){
 'use strict';
@@ -619,6 +689,24 @@ const accessibleNames = {
  en: {primaryNavigation:'Primary navigation',openMenu:'Open menu',closeMenu:'Close menu',brandHome:'Miftāḥ al-ʿIlm — Home',theme:'Theme',language:'Language',themePreference:'Theme preference',bab:'Bāb or section',chapter:'Chapter within bāb',helpBab:'Help bāb or section',helpChapter:'Help chapter within bāb',exampleFilter:'Example filter',filterAll:'All examples',filterQuran:'Qurʾānic examples',adjacentChapters:'Adjacent chapters'},
  ar: {primaryNavigation:'التنقل الرئيسي',openMenu:'افتح قائمة التنقل',closeMenu:'أغلق قائمة التنقل',brandHome:'مفتاح العلم، الرئيسية',theme:'المظهر',language:'اللغة',themePreference:'تفضيل المظهر',bab:'الباب أو القسم',chapter:'الفصل داخل الباب',helpBab:'باب الشرح أو قسمه',helpChapter:'الفصل داخل باب الشرح',exampleFilter:'تصفية الأمثلة',filterAll:'كل الأمثلة',filterQuran:'الأمثلة القرآنية',adjacentChapters:'الفصول المجاورة'}
 };
+Object.assign(copy.en,{
+ testMe:'Test me',testDesc:'Draw an unseen example from a pool you choose.',testPool:'Choose a pool',wholeBook:'Whole book',chooseBabs:'Selected bābs',chooseChapters:'Selected chapters',
+ contentFilter:'Content',testAll:'All examples',testQuran:'Qurʾānic only',testOrdinary:'Non-Qurʾānic only',pickScope:'Choose at least one section or chapter.',
+ poolEmpty:'No examples match this pool and filter.',poolFixed:'A test keeps its starting pool until you start a new one.',poolChanges:'Changing the pool or content filter resets the current test.',
+ startTest:'Start a new test',resumeTest:'Resume test',testSetup:'Test setup',nextRandom:'Next random',finishTest:'Finish test',
+ testDone:'You’ve reached the end of this test. Start a new one to draw again.',testUnavailable:'Choose a pool in Test setup to begin.',
+ reviewLater:'Review later',openReview:'Open review list',reviewDesc:'Keep exercises to revisit or use as a test pool.',reviewSaved:'Saved for later',reviewEmpty:'No saved exercises yet.',testSaved:'Test my saved exercises',removeSaved:'Remove',
+ closeGrammar:'Close',grammarCredit:'Grammar note and example from the app',backToBook:'Back to Book Practice',backToTest:'Back to test'
+});
+Object.assign(copy.ar,{
+ testMe:'اِخْتَبِرْنِي',testDesc:'اختر مجموعة لتتدرب على أمثلة عشوائية.',testPool:'اختر مجموعة الاختبار',wholeBook:'الكتاب كله',chooseBabs:'أبواب مختارة',chooseChapters:'فصول مختارة',
+ contentFilter:'نوع الأمثلة',testAll:'كل الأمثلة',testQuran:'الأمثلة القرآنية فقط',testOrdinary:'الأمثلة غير القرآنية فقط',pickScope:'اختر بابا أو فصلا واحدا على الأقل.',
+ poolEmpty:'لا توجد أمثلة تطابق المجموعة وهذا النوع.',poolFixed:'تبقى مجموعة الاختبار كما بدأت حتى تبدأ اختبارا جديدا.',poolChanges:'تغيير المجموعة أو نوع الأمثلة يعيد ضبط الاختبار الحالي.',
+ startTest:'ابدأ اختبارا جديدا',resumeTest:'تابع الاختبار',testSetup:'إعداد الاختبار',nextRandom:'مثال عشوائي تال',finishTest:'أنه الاختبار',
+ testDone:'انتهى الاختبار. ابدأ اختبارا جديدا لاختيار أمثلة من جديد.',testUnavailable:'اختر مجموعة في إعداد الاختبار أولا.',
+ reviewLater:'راجع لاحقا',openReview:'افتح قائمة المراجعة',reviewDesc:'احفظ أمثلة لمراجعتها لاحقا أو لاختبار نفسك فيها.',reviewSaved:'محفوظ للمراجعة',reviewEmpty:'لا توجد أمثلة محفوظة بعد.',testSaved:'اختبرني في الأمثلة المحفوظة',removeSaved:'أزل',
+ closeGrammar:'أغلق',grammarCredit:'شرح نحوي ومثال من التطبيق',backToBook:'العودة إلى تدريبات الكتاب',backToTest:'العودة إلى الاختبار'
+});
 const defaults={version:8,lang:'en',theme:'light',screen:'home',mode:'book',category:'book',bookFilter:'all',selectedBabId:'opening',selectedChapterId:'speech-core',helpBabId:'opening',helpChapterId:'speech-core',positions:{'speech-core':0},generatedIndex:0,revealed:false,resumeAvailable:false,helpLaunch:null,helpReturn:null,helpVisualBranches:{},helpOpenDisclosures:{},completed:[],difficult:[]};
 let stored={};try{stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{}}catch(_){stored={}}
 const migrated={...defaults,...stored,positions:{...defaults.positions,...(stored.positions||{})},helpVisualBranches:{...(stored.helpVisualBranches||{})},helpOpenDisclosures:{...(stored.helpOpenDisclosures||{})},lang:stored.lang||(stored.arabicOnly?'ar':'en')};
@@ -697,6 +785,8 @@ function migrateIshtighal(saved, directBook, book) {
 }
 migrateIshtighal(migrated,chapters.find(chapter=>chapter.id==='direct-object')?.book,chapters.find(chapter=>chapter.id==='ishtighal')?.book);
 let state=migrated;
+const study=window.MIFTAH_STUDY.create(babs,chapters);
+state.study=study.normalize(state.study);
 if(!['light','dark'].includes(state.theme))state.theme='light';
 if(!['all','quran'].includes(state.bookFilter))state.bookFilter='all';
 /* Arabic display rules. Applied only when text is rendered; stored lesson content is never changed.
@@ -846,7 +936,7 @@ function renderAccessibleNames() {
 function renderLanguage(){const arabic=state.lang==='ar';document.documentElement.lang=arabic?'ar':'en';document.documentElement.dir=arabic?'rtl':'ltr';document.body.classList.toggle('rtl',arabic);document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=tr(el.dataset.i18n));document.querySelectorAll('.ui-ar').forEach(el=>{if(el.dataset.arSource===undefined)el.dataset.arSource=el.textContent;el.textContent=stripMarks(el.dataset.arSource)})}
 function renderTheme(){document.documentElement.dataset.theme=state.theme;document.querySelectorAll('[data-theme-choice]').forEach(button=>{const active=button.dataset.themeChoice===state.theme;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active))})}
 function renderPickers(){fillSelect($('babSelect'),topBabs,babRoot(state.selectedBabId).id);fillChapterPicker($('chapterSelect'),state.selectedBabId,state.selectedChapterId);$('babSelect').disabled=state.mode==='extra';$('chapterSelect').disabled=state.mode==='extra';fillSelect($('helpBabSelect'),topBabs,babRoot(state.helpBabId).id);fillChapterPicker($('helpChapterSelect'),state.helpBabId,state.helpChapterId);$('exampleFilter').hidden=state.mode!=='book';document.querySelectorAll('[data-filter]').forEach(button=>{const active=button.dataset.filter===state.bookFilter;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active))})}
-function renderNav(){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===`${state.screen}Screen`));const activeNav=state.screen==='home'?'home':state.screen==='preferences'?'preferences':'nahw';document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.go===activeNav));const crumbKeys={home:'home',nahw:'nahwCrumb',help:'helpCrumb',preferences:'preferencesCrumb',practice:state.mode==='book'?'bookCrumb':'extraCrumb'};$('crumb').textContent=tr(crumbKeys[state.screen]);const category=['book','extra','help'].includes(state.category)?state.category:'book';document.querySelectorAll('.choice-card').forEach(card=>{const selected=(card.dataset.start||'help')===category;card.classList.toggle('selected',selected);card.setAttribute('aria-pressed',String(selected))});$('returnPractice').style.display=state.resumeAvailable?'inline-flex':'none';$('backHelpLink').style.display=state.helpLaunch?'inline-flex':'none';$('chapterEssentialsBtn').hidden=state.mode!=='book';$('chapterEssentialsBtn').textContent=helpUi('chapterEssentials')}
+function renderNav(){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===`${state.screen}Screen`));const activeNav=state.screen==='home'?'home':state.screen==='preferences'?'preferences':'nahw';document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.go===activeNav));const crumbKeys={home:'home',nahw:'nahwCrumb',help:'helpCrumb',preferences:'preferencesCrumb',testSetup:'testMe',testRun:'testMe',review:'reviewLater',practice:state.mode==='book'?'bookCrumb':'extraCrumb'};$('crumb').textContent=tr(crumbKeys[state.screen]);const category=['book','extra','help'].includes(state.category)?state.category:'book';document.querySelectorAll('.choice-card').forEach(card=>{if(card.dataset.study)return;const selected=(card.dataset.start||'help')===category;card.classList.toggle('selected',selected);card.setAttribute('aria-pressed',String(selected))});$('returnPractice').style.display=state.resumeAvailable?'inline-flex':'none';$('backHelpLink').style.display=state.helpLaunch?'inline-flex':'none';$('chapterEssentialsBtn').hidden=state.mode!=='book';$('chapterEssentialsBtn').textContent=helpUi('chapterEssentials')}
 const exerciseLocation=id=>{for(const chapter of chapters){const index=chapter.book.findIndex(item=>item.id===id);if(index!==-1)return{chapter,index,exercise:chapter.book[index]}}return null};
 function quranReferenceHtml(exercise){return exercise.quran?`<span class="quran-ref">(${escapeHtml(stripMarks(`سُورَةُ ${exercise.quran.surahAr}`))}، ${escapeHtml(exercise.quran.ayahAr)})</span>`:''}
 const quranQuoteHtml = html => `<span class="quran-quote">﴿${html}﴾</span>`;
@@ -1008,16 +1098,16 @@ function returnToHelp() {
   scrollBlock:'center'
  });
 }
-function renderWhyCue(exercise,card,part){
- if(!state.revealed||state.mode!=='book'||exercise.held)return '';
+function renderWhyCue(exercise,card,part,revealed,book){
+ if(!revealed||!book||exercise.held)return '';
  const pilot=window.MIFTAH_WHY_PILOT;
  const cue=pilot?.notes[exercise.id]?.find(n=>n.card===card&&n.part===part);
  if(!cue)return '';
  const arabicOnly=state.lang==='ar',lang=arabicOnly?'ar':'en',[ar,en]=pilot.questions[cue.question];
  return `<details class="why-cue" data-why-cue="${card}:${part}"><summary lang="${lang}"${arabicOnly?' class="arabic" dir="rtl"':''}>${escapeHtml(arabicOnly?ar:en)}</summary><div class="why-cue-body"><p class="arabic" lang="ar" dir="rtl">${escapeHtml(cue.ar)}</p>${arabicOnly?'':`<p lang="en" dir="ltr">${escapeHtml(cue.en)}</p>`}<small class="why-cue-credit${arabicOnly?' arabic':''}" lang="${lang}">${arabicOnly?'شَرْحٌ مِنَ التَّطْبِيقِ':'Explanation by Miftāḥ al-ʿIlm'}</small></div></details>`;
 }
-function renderAnswer(exercise){const arabic=state.lang==='ar',words=quotedWords(exercise);$('answers').innerHTML=exercise.tokens.map((token,index)=>{const why=arabic?token.whyAr:token.whyEn,parts=token.parts||[{ar:token.ar,en:token.en}],answer=parts.map((part,partIndex)=>`<div class="answer-part"><div class="iraab-ar arabic" lang="ar">${emphasizeIraab(part.ar,token.word)}</div>${arabic?'':`<div class="iraab-en">${escapeHtml(part.en)}</div>`}${renderWhyCue(exercise,index+1,partIndex+1)}</div>`).join('');return `<article class="word-card"><div class="word-head"><span class="word-gloss">${arabic?'':escapeHtml(token.gloss)}</span><span class="word-ar arabic" lang="ar">${escapeHtml(token.word)}</span></div>${answer}${why?`<button class="why-toggle" data-why="${index}" aria-expanded="false">${tr('why')}</button><div class="why-text ${arabic?'why-ar arabic':''}" id="why-${index}">${arabic?arabicDisplay(token.whyAr,{words}):escapeHtml(token.whyEn)}</div>`:''}</article>`}).join('');$('sourceDetail').textContent=arabic?arabicDisplay(exercise.sourceAr,{words}):exercise.sourceEn}
-function renderPractice(){const chapter=selectedChapter(),arabic=state.lang==='ar',list=state.mode==='book'?bookExercises(chapter):null,exercise=currentExercise(),index=currentIndex(),total=list?.length??null,empty=state.mode==='book'&&!exercise;$('filterEmpty').hidden=!empty;$('practiceCard').hidden=empty;if(empty){state.revealed=false;$('chapterMeta').textContent=`${tr('item')} 0 ${tr('of')} 0`;$('answerPanel').classList.remove('open');$('revealBtn').setAttribute('aria-expanded','false');return}$('sentence').innerHTML=exerciseArabicHtml(exercise);$('translation').textContent=exercise.en;$('translation').style.display=arabic?'none':'block';$('bookPage').textContent=state.mode==='book'?(arabic?`ص ${localDigits(exercise.page)}`:`pg:${exercise.page}`):'';$('bookPage').style.display=state.mode==='book'?'block':'none';$('answerPanel').classList.toggle('open',state.revealed);$('revealBtn').setAttribute('aria-expanded',String(state.revealed));$('previousBtn').textContent=tr('previous');$('revealBtn').textContent=state.revealed?tr('hide'):tr('reveal');$('nextBtn').textContent=tr('next');$('previousBtn').disabled=index===0;$('nextBtn').disabled=state.mode==='book'&&index===total-1;$('chapterMeta').textContent=state.mode==='extra'?tr('generated'):`${tr('item')} ${localDigits(index+1)} ${tr('of')} ${localDigits(total)}`;renderAnswer(exercise)}
+function renderAnswer(exercise,{revealed=state.revealed,book=state.mode==='book'}={}){const arabic=state.lang==='ar',words=quotedWords(exercise);$('answers').innerHTML=exercise.tokens.map((token,index)=>{const why=arabic?token.whyAr:token.whyEn,parts=token.parts||[{ar:token.ar,en:token.en}],answer=parts.map((part,partIndex)=>`<div class="answer-part"><div class="iraab-ar arabic" lang="ar">${emphasizeIraab(part.ar,token.word)}</div>${arabic?'':`<div class="iraab-en">${escapeHtml(part.en)}</div>`}${renderWhyCue(exercise,index+1,partIndex+1,revealed,book)}</div>`).join('');return `<article class="word-card"><div class="word-head"><span class="word-gloss">${arabic?'':escapeHtml(token.gloss)}</span><span class="word-ar arabic" lang="ar">${escapeHtml(token.word)}</span></div>${answer}${why?`<button class="why-toggle" data-why="${index}" aria-expanded="false">${tr('why')}</button><div class="why-text ${arabic?'why-ar arabic':''}" id="why-${index}">${arabic?arabicDisplay(token.whyAr,{words}):escapeHtml(token.whyEn)}</div>`:''}</article>`}).join('');$('sourceDetail').textContent=arabic?arabicDisplay(exercise.sourceAr,{words}):exercise.sourceEn;if(revealed)decorateAnswerTerms()}
+function renderPractice(){mountPracticeCard();if(state.screen==='testRun'){renderTestRun();return;} $('previousBtn').hidden=false;$('translation').hidden=false;$('testSource').hidden=true;$('testSource').textContent='';const chapter=selectedChapter(),arabic=state.lang==='ar',list=state.mode==='book'?bookExercises(chapter):null,exercise=currentExercise(),index=currentIndex(),total=list?.length??null,empty=state.mode==='book'&&!exercise;renderReviewControls(state.mode==='book'?exercise:null);$('filterEmpty').hidden=!empty;$('practiceCard').hidden=empty;if(empty){state.revealed=false;$('chapterMeta').textContent=`${tr('item')} 0 ${tr('of')} 0`;$('answerPanel').classList.remove('open');$('revealBtn').setAttribute('aria-expanded','false');return}$('sentence').innerHTML=exerciseArabicHtml(exercise);$('translation').textContent=exercise.en;$('translation').style.display=arabic?'none':'block';$('bookPage').textContent=state.mode==='book'?(arabic?`ص ${localDigits(exercise.page)}`:`pg:${exercise.page}`):'';$('bookPage').style.display=state.mode==='book'?'block':'none';$('answerPanel').classList.toggle('open',state.revealed);$('revealBtn').setAttribute('aria-expanded',String(state.revealed));$('previousBtn').textContent=tr('previous');$('revealBtn').textContent=state.revealed?tr('hide'):tr('reveal');$('nextBtn').textContent=tr('next');$('previousBtn').disabled=index===0;$('nextBtn').disabled=state.mode==='book'&&index===total-1;$('chapterMeta').textContent=state.mode==='extra'?tr('generated'):`${tr('item')} ${localDigits(index+1)} ${tr('of')} ${localDigits(total)}`;renderAnswer(exercise)}
 const helpText=value=>escapeHtml(value).replace(/\n/g,'<br>');
 function helpHeadingHtml(key){return `<span class="help-heading-ar arabic" lang="ar">${escapeHtml(copy.ar[key]||key)}</span>${state.lang==='ar'?'':`<span class="help-heading-en">${escapeHtml(copy.en[key]||key)}</span>`}`}
 function helpLabelHtml(key){return `<div class="help-essential-label arabic" lang="ar">${escapeHtml(copy.ar[key]||key)}${state.lang==='ar'?'':`<span class="help-essential-label-en">${escapeHtml(copy.en[key]||key)}</span>`}</div>`}
@@ -1077,10 +1167,206 @@ function setDrawerOpen(requested, {restoreFocus = true} = {}) {
  if (restoreFocus && mobileLayout.matches && (wasOpen || drawer.contains(focused))) focusVisible(toggle);
  if (restoreFocus && !mobileLayout.matches && (wasOpen || focused === $('drawerClose'))) focusVisible(drawer.querySelector('.side-brand'));
 }
-function render(){validateSelection();renderLanguage();renderAccessibleNames();renderTheme();renderPickers();renderNav();renderPractice();renderExampleJump(selectedChapter(),state.mode==='book'?bookExercises():null,state.mode==='book'?currentExercise():null);renderHelp();save()}
+const studyFilterLabels={all:'testAll',quran:'testQuran',ordinary:'testOrdinary'};
+const studyScopeLabels={whole:'wholeBook',babs:'chooseBabs',chapters:'chooseChapters',saved:'reviewLater'};
+const testEntry=()=>{const s=state.study.session;return s?study.active.get(s.queue[s.index]):null;};
+let reviewOrigin='nahw',grammarOpener=null;
+function mountPracticeCard(){
+ const mount=state.screen==='testRun'?$('testMount'):$('practiceScreen').querySelector('.practice-workspace');
+ if($('practiceCard').parentElement!==mount)mount.append($('practiceCard'));
+}
+function renderReviewControls(exercise){
+ const valid=study.active.has(exercise?.id),button=$('saveReview');
+ $('reviewControls').hidden=!valid;
+ if(!valid)return;
+ const saved=state.study.saved.includes(exercise.id);
+ button.textContent=tr(saved?'reviewSaved':'reviewLater');
+ button.setAttribute('aria-label',tr('reviewLater'));
+ button.setAttribute('aria-pressed',String(saved));
+}
+function toggleReview(id){
+ if(!study.active.has(id))return;
+ const {saved}=state.study;
+ state.study.saved=saved.includes(id)?saved.filter(value=>value!==id):[...saved,id];
+}
+function renderTestRun(){
+ const s=state.study.session,entry=testEntry(),visible=!!entry&&s.revealed,arabic=state.lang==='ar';
+ $('testFinished').hidden=!!entry;
+ $('practiceCard').hidden=!entry;
+ $('previousBtn').hidden=true;
+ $('testProgress').textContent=s?.queue.length?`${tr('item')} ${localDigits(Math.min(s.index+1,s.queue.length))} ${tr('of')} ${localDigits(s.queue.length)}`:'';
+ $('testFinishText').textContent=tr(s?.queue.length?'testDone':'testUnavailable');
+ $('answerPanel').classList.toggle('open',visible);
+ $('revealBtn').setAttribute('aria-expanded',String(visible));
+ $('revealBtn').textContent=tr(visible?'hide':'reveal');
+ $('nextBtn').textContent=tr(s&&s.index===s.queue.length-1?'finishTest':'nextRandom');
+ $('nextBtn').disabled=!entry;
+ $('translation').hidden=!visible||arabic;
+ $('translation').style.display=visible&&!arabic?'block':'none';
+ $('bookPage').style.display=visible?'block':'none';
+ $('testSource').hidden=!visible;
+ $('bookPage').textContent=visible?(arabic?`ص ${localDigits(entry.exercise.page)}`:`pg:${entry.exercise.page}`):'';
+ $('testSource').textContent=visible?(arabic?stripMarks(entry.chapter.titleAr):entry.chapter.titleEn):'';
+ $('translation').textContent=visible&&!arabic?entry.exercise.en:'';
+ $('sentence').innerHTML=entry?exerciseArabicHtml(entry.exercise):'';
+ renderReviewControls(entry?.exercise);
+ if(visible){renderAnswer(entry.exercise,{revealed:true,book:true});}
+ else{$('answers').replaceChildren();$('sourceDetail').textContent='';}
+}
+function advanceTest(){
+ const s=state.study.session;
+ if(!s||!testEntry())return;
+ s.index++;s.revealed=false;
+ render();
+ focusVisible(testEntry()?$('sentence'):$('testFinished').querySelector('button'),'nearest');
+}
+function reviewPage(){
+ const entries=state.study.saved.map(id=>study.active.get(id)).filter(Boolean);
+ $('reviewBack').textContent=tr(reviewOrigin==='practice'?'backToBook':reviewOrigin==='testRun'?'backToTest':'backNahw');
+ $('reviewStatus').textContent=entries.length?`${tr('reviewLater')} · ${localDigits(entries.length)}`:tr('reviewEmpty');
+ $('testSaved').disabled=!entries.length;
+ $('reviewList').innerHTML=entries.map(({exercise:e,chapter})=>{
+  const caption=state.lang==='ar'?`${stripMarks(chapter.titleAr)} · ص ${localDigits(e.page)}`:`${chapter.titleEn} · p. ${e.page}`;
+  return `<li class="review-row"><button class="secondary review-open" data-review-open="${escapeHtml(e.id)}"><span class="arabic" lang="ar">${exerciseArabicHtml(e)}</span><small>${escapeHtml(caption)}</small></button><button class="secondary" data-review-remove="${escapeHtml(e.id)}" aria-label="${escapeHtml(tr('removeSaved')+' · '+e.ar)}">${escapeHtml(tr('removeSaved'))}</button></li>`;
+ }).join('');
+}
+function studyOption(item,name){
+ return `<label><input type="checkbox" name="${name}" value="${escapeHtml(item.id)}"><span><span class="arabic" lang="ar" dir="rtl">${escapeHtml(optionLabel(item))}</span><span class="study-option-en" lang="en">${escapeHtml(item.titleEn)}</span></span></label>`;
+}
+function populateStudyChoices(){
+ $('testBabOptions').innerHTML=babs.map(b=>studyOption(b,'test-bab')).join('');
+ $('testChapterOptions').innerHTML=babs.map(b=>{
+  const items=chaptersFor(b.id);
+  return items.length?`<details><summary><span class="arabic" lang="ar">${escapeHtml(stripMarks(b.titleAr))}</span><span class="study-option-en" lang="en">${escapeHtml(b.titleEn)}</span></summary>${items.map(c=>studyOption(c,'test-chapter')).join('')}</details>`:'';
+ }).join('');
+}
+function renderStudyScreens(){
+ if(state.screen==='review'){reviewPage();return;}
+ if(state.screen!=='testSetup')return;
+ const {config,saved,session}=state.study;
+ const missing=config.scope==='babs'&&!config.babs.length||config.scope==='chapters'&&!config.chapters.length;
+ const count=study.pool(config,saved).length;
+ const selected=config.scope==='babs'?babs.filter(b=>config.babs.includes(b.id)):config.scope==='chapters'?chapters.filter(c=>config.chapters.includes(c.id)):[];
+ const names=selected.map(item=>state.lang==='ar'?stripMarks(item.titleAr):item.titleEn);
+ $('testSelection').textContent=[tr(studyScopeLabels[config.scope]),...names,tr(studyFilterLabels[config.filter]),`${tr('item')} · ${localDigits(count)}`].join(' · ');
+ $('testPoolNote').textContent=missing?tr('pickScope'):!count&&!(session&&session.index<session.queue.length)?tr('poolEmpty'):`${tr('poolFixed')} ${tr('poolChanges')}`;
+ $('testBabChoices').hidden=config.scope!=='babs';$('testChapterChoices').hidden=config.scope!=='chapters';
+ for(const input of $('testSetupScreen').querySelectorAll('input')){
+  input.checked=input.name==='test-scope'?input.value===config.scope:input.name==='test-filter'?input.value===config.filter:
+   (input.name==='test-bab'?config.babs:config.chapters).includes(input.value);
+ }
+ $('startTest').disabled=!count;
+ $('resumeTest').hidden=!(session&&session.index<session.queue.length);
+}
+function decorateAnswerTerms(){
+ for(const box of $('answers').querySelectorAll('.iraab-ar,.iraab-en')){
+  const lang=box.classList.contains('iraab-ar')?'ar':'en';
+  const ranges=window.MIFTAH_STUDY.termRanges(box.textContent,lang);
+  if(!ranges.length)continue;
+  const walker=document.createTreeWalker(box,NodeFilter.SHOW_TEXT),nodes=[];
+  let offset=0;
+  while(walker.nextNode()){
+   const node=walker.currentNode;
+   nodes.push({node,offset});offset+=node.length;
+  }
+  for(const {node,offset:start} of nodes){
+   // Parsed component highlights and synthetic heading prefixes stay unmodified.
+   if(node.parentElement.closest('.parsed-focus,.focus-separator'))continue;
+   const end=start+node.length,inside=ranges.filter(r=>r.start>=start&&r.end<=end);
+   if(!inside.length)continue;
+   const fragment=document.createDocumentFragment();let at=0;
+   for(const range of inside){
+    fragment.append(node.data.slice(at,range.start-start));
+    const button=document.createElement('button');
+    button.type='button';button.className='grammar-term';button.dataset.grammar=range.id;
+    button.lang=lang;button.setAttribute('aria-haspopup','dialog');
+    button.textContent=node.data.slice(range.start-start,range.end-start);
+    fragment.append(button);at=range.end-start;
+   }
+   fragment.append(node.data.slice(at));node.replaceWith(fragment);
+  }
+ }
+}
+function openGrammar(button){
+ const term=window.MIFTAH_STUDY.terms[button.dataset.grammar];
+ if(!term||$('grammarDialog').open)return;
+ grammarOpener=button;
+ const title=$('grammarTitle');
+ title.textContent=term.ar;title.lang='ar';title.dir='rtl';title.className='arabic';
+ for(const [slot,ar,en] of [['Meaning',term.meaningAr,term.meaningEn],['Example',term.exampleAr,term.exampleEn]]){
+  const primary=$('grammar'+slot),secondary=$('grammar'+slot+'En');
+  primary.textContent=ar;primary.lang='ar';primary.dir='rtl';primary.className='arabic';
+  secondary.textContent=en;secondary.lang='en';secondary.dir='ltr';secondary.hidden=state.lang==='ar';
+ }
+ $('grammarMeaningEn').textContent=`${term.en}: ${term.meaningEn}`;
+ $('grammarCredit').textContent=tr('grammarCredit');
+ $('grammarDialog').showModal();
+}
+function dismissGrammar(){
+ const opener=grammarOpener;
+ grammarOpener=null;
+ $('grammarDialog').close();
+ focusVisible(opener);
+}
+populateStudyChoices();
+document.querySelectorAll('[data-study]').forEach(button=>button.addEventListener('click',()=>{
+ if(button.dataset.study==='review'){reviewOrigin=state.screen;setScreen('review');}
+ else setScreen('testSetup');
+}));
+$('reviewBack').addEventListener('click',()=>setScreen(reviewOrigin));
+$('saveReview').addEventListener('click',()=>{
+ const exercise=state.screen==='testRun'?testEntry()?.exercise:state.mode==='book'?currentExercise():null;
+ toggleReview(exercise?.id);renderReviewControls(exercise);save();
+});
+$('reviewList').addEventListener('click',event=>{
+ const remove=event.target.closest('[data-review-remove]');
+ if(remove){
+  const index=state.study.saved.indexOf(remove.dataset.reviewRemove);
+  if(index<0)return;
+  toggleReview(remove.dataset.reviewRemove);reviewPage();save();
+  const buttons=$('reviewList').querySelectorAll('[data-review-remove]');
+  if(!focusVisible(buttons[Math.min(index,buttons.length-1)]))focusVisible($('reviewBack'));
+  return;
+ }
+ const entry=study.active.get(event.target.closest('[data-review-open]')?.dataset.reviewOpen);
+ if(!entry)return;
+ state.mode='book';state.category='book';state.bookFilter='all';state.helpLaunch=null;state.resumeAvailable=true;state.revealed=false;
+ state.selectedBabId=entry.chapter.babId;state.selectedChapterId=entry.chapter.id;
+ state.positions[entry.chapter.id]=entry.index;
+ setScreen('practice',{target:()=>$('sentence'),scrollBlock:'nearest'});
+});
+$('testSaved').addEventListener('click',()=>{
+ if(state.study.config.scope!=='saved'){state.study.config.scope='saved';state.study.session=null;}
+ setScreen('testSetup');
+});
+$('testSetupScreen').addEventListener('change',({target:input})=>{
+ const config=state.study.config;
+ if(input.name==='test-scope')config.scope=input.value;
+ else if(input.name==='test-filter')config.filter=input.value;
+ else if(input.name==='test-bab'||input.name==='test-chapter'){
+  const key=input.name==='test-bab'?'babs':'chapters';
+  config[key]=input.checked?[...new Set([...config[key],input.value])]:config[key].filter(id=>id!==input.value);
+ }else return;
+ state.study.session=null;renderStudyScreens();save();
+});
+$('startTest').addEventListener('click',()=>{
+ const next=study.start(state.study.config,state.study.saved);
+ if(!next.queue.length)return;
+ state.study.session=next;setScreen('testRun',{target:()=>$('sentence'),scrollBlock:'nearest'});
+});
+$('resumeTest').addEventListener('click',()=>{if(testEntry())setScreen('testRun',{target:()=>$('sentence'),scrollBlock:'nearest'});});
+$('answers').addEventListener('click',event=>{const term=event.target.closest('[data-grammar]');if(term)openGrammar(term);});
+$('grammarDialog').addEventListener('cancel',event=>{event.preventDefault();dismissGrammar();});
+$('grammarDialog').addEventListener('submit',event=>{event.preventDefault();dismissGrammar();});
+$('grammarDialog').addEventListener('click',event=>{
+ if(event.target!==$('grammarDialog'))return;
+ const rect=event.target.getBoundingClientRect();
+ if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)dismissGrammar();
+});
+function render(){validateSelection();renderLanguage();renderAccessibleNames();renderTheme();renderPickers();renderNav();renderPractice();renderExampleJump(selectedChapter(),state.mode==='book'?bookExercises():null,state.mode==='book'?currentExercise():null);renderHelp();renderStudyScreens();save()}
 document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('click',()=>setScreen(button.dataset.go)));document.querySelectorAll('[data-start]').forEach(button=>button.addEventListener('click',()=>startPractice(button.dataset.start)));document.querySelectorAll('[data-help]').forEach(button=>button.addEventListener('click',openHelp));document.querySelectorAll('[data-lang]').forEach(button=>button.addEventListener('click',()=>{state.lang=button.dataset.lang;render()}));
 document.querySelectorAll('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>{state.theme=button.dataset.themeChoice;render()}));
-$('nahwMenuLink').addEventListener('click',()=>setScreen('nahw'));$('backHelpLink').addEventListener('click',returnToHelp);$('chapterEssentialsBtn').addEventListener('click',openChapterEssentials);$('helpNahwLink').addEventListener('click',()=>setScreen('nahw'));$('returnPractice').addEventListener('click',restorePracticeState);$('returnNahw').addEventListener('click',()=>setScreen('nahw'));$('helpPreviousChapter').addEventListener('click',()=>navigateHelpChapter(-1));$('helpNextChapter').addEventListener('click',()=>navigateHelpChapter(1));$('helpJumpNav').addEventListener('click',event=>{const button=event.target.closest('[data-help-jump]');if(button)scrollHelpTarget(button.dataset.helpJump)});$('helpEssentials').addEventListener('click',event=>{const open=event.target.closest('[data-open-exercise]');if(open)openVisualExercise(open.dataset.openExercise,open.dataset.helpAnchor)});$('revealBtn').addEventListener('click',()=>{state.revealed=!state.revealed;render()});$('previousBtn').addEventListener('click',()=>{const index=currentIndex();if(index<=0)return;if(state.mode==='book')selectBookExercise(bookExercises()[index-1]);else state.generatedIndex-=1;state.revealed=false;render()});$('nextBtn').addEventListener('click',()=>{if(state.mode==='book'){const list=bookExercises(),index=currentIndex();if(index>=list.length-1)return;selectBookExercise(list[index+1])}else state.generatedIndex+=1;state.revealed=false;render()});
+$('nahwMenuLink').addEventListener('click',()=>setScreen('nahw'));$('backHelpLink').addEventListener('click',returnToHelp);$('chapterEssentialsBtn').addEventListener('click',openChapterEssentials);$('helpNahwLink').addEventListener('click',()=>setScreen('nahw'));$('returnPractice').addEventListener('click',restorePracticeState);$('returnNahw').addEventListener('click',()=>setScreen('nahw'));$('helpPreviousChapter').addEventListener('click',()=>navigateHelpChapter(-1));$('helpNextChapter').addEventListener('click',()=>navigateHelpChapter(1));$('helpJumpNav').addEventListener('click',event=>{const button=event.target.closest('[data-help-jump]');if(button)scrollHelpTarget(button.dataset.helpJump)});$('helpEssentials').addEventListener('click',event=>{const open=event.target.closest('[data-open-exercise]');if(open)openVisualExercise(open.dataset.openExercise,open.dataset.helpAnchor)});$('revealBtn').addEventListener('click',()=>{if(state.screen==='testRun'){const s=state.study.session;if(!s||!study.active.has(s.queue[s.index]))return;s.revealed=!s.revealed;}else state.revealed=!state.revealed;render()});$('previousBtn').addEventListener('click',()=>{const index=currentIndex();if(index<=0)return;if(state.mode==='book')selectBookExercise(bookExercises()[index-1]);else state.generatedIndex-=1;state.revealed=false;render()});$('nextBtn').addEventListener('click',()=>{if(state.screen==='testRun'){advanceTest();return;}if(state.mode==='book'){const list=bookExercises(),index=currentIndex();if(index>=list.length-1)return;selectBookExercise(list[index+1])}else state.generatedIndex+=1;state.revealed=false;render()});
 $('allExamplesBtn').addEventListener('click',()=>setBookFilter('all'));$('quranExamplesBtn').addEventListener('click',()=>setBookFilter('quran'));$('showAllExamples').addEventListener('click',()=>setBookFilter('all'));
 $('exampleJumpToggle').addEventListener('click',()=>{
  const open=$('exampleJumpPanel').hidden;

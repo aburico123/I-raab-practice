@@ -671,9 +671,11 @@ function migrateIshtighal(saved, directBook, book) {
  const branches=saved.helpVisualBranches, legacyBranch=branches[from];
  const movedBranch=branchIds.includes(legacyBranch);
  const disclosures=saved.helpOpenDisclosures;
- const standaloneHelp=!saved.helpReturn&&!saved.helpLaunch&&(movedBranch
-  ||(!legacyBranch&&Array.isArray(disclosures[from])&&disclosures[from].includes('direct-object-estimates')));
- if (saved.screen==='help'&&(linkedHelp||standaloneHelp)&&saved.helpChapterId===from) {
+ const splitIds=['direct-object-ishtighal','direct-object-estimates'];
+ const movedDisclosureOpen=Array.isArray(disclosures[from])&&disclosures[from].some(id=>splitIds.includes(id));
+ // An explicitly selected visual identifies the Help topic, independently of the Practice return.
+ const movedHelp=movedBranch||(!legacyBranch&&(movedDisclosureOpen||linkedHelp));
+ if (saved.screen==='help'&&movedHelp&&saved.helpChapterId===from) {
   saved.helpChapterId=to;
   saved.helpBabId=bab;
  }
@@ -687,7 +689,6 @@ function migrateIshtighal(saved, directBook, book) {
   saved.helpLaunch={...launch,babId:bab,chapterId:to};
   branches[to]=launchBranch;
  }
- const splitIds=['direct-object-ishtighal','direct-object-estimates'];
  if(Array.isArray(disclosures[from])){
   disclosures[to]=disclosures[from].filter(id=>splitIds.includes(id));
   disclosures[from]=disclosures[from].filter(id=>!splitIds.includes(id));
